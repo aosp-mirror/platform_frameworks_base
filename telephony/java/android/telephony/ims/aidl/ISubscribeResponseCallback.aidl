@@ -30,6 +30,7 @@ import java.util.Map;
 oneway interface ISubscribeResponseCallback {
     void onCommandError(int code);
     void onNetworkResponse(int code, in String reason);
+    void onNetworkRespHeader(int code, String reasonPhrase, int reasonHeaderCause, String reasonHeaderText);
     void onNotifyCapabilitiesUpdate(in List<String> pidfXmls);
     void onResourceTerminated(in List<RcsContactTerminatedReason> uriTerminatedReason);
     void onTerminated(in String reason, long retryAfterMilliseconds);
