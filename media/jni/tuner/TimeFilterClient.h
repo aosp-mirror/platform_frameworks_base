@@ -17,12 +17,13 @@
 #ifndef _ANDROID_MEDIA_TV_TIME_FILTER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_TIME_FILTER_CLIENT_H_
 
-//#include <aidl/android/media/tv/tuner/ITunerTimeFilter.h>
+#include <aidl/android/media/tv/tuner/ITunerTimeFilter.h>
 #include <android/hardware/tv/tuner/1.0/ITimeFilter.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
-//using ::aidl::android::media::tv::tuner::ITunerTimeFilter;
+using ::aidl::android::media::tv::tuner::ITunerTimeFilter;
 
+using Status = ::ndk::ScopedAStatus;
 using ::android::hardware::Return;
 using ::android::hardware::Void;
 using ::android::hardware::hidl_vec;
@@ -36,8 +37,7 @@ namespace android {
 struct TimeFilterClient : public RefBase {
 
 public:
-    // TODO: add TunerTimeFilter as parameter.
-    TimeFilterClient();
+    TimeFilterClient(shared_ptr<ITunerTimeFilter> tunerTimeFilter);
     ~TimeFilterClient();
 
     // TODO: remove after migration to Tuner Service is done.
@@ -73,8 +73,7 @@ private:
      * An AIDL Tuner TimeFilter Singleton assigned at the first time the Tuner Client
      * opens an TimeFilter. Default null when time filter is not opened.
      */
-    // TODO: pending on aidl interface
-    //shared_ptr<ITunerTimeFilter> mTunerTimeFilter;
+    shared_ptr<ITunerTimeFilter> mTunerTimeFilter;
 
     /**
      * A TimeFilter HAL interface that is ready before migrating to the TunerTimeFilter.
