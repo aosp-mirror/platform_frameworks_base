@@ -134,11 +134,11 @@ public final class CachedAppOptimizerTest {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
         ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
-        app.pid = pid;
+        app.setPid(pid);
         app.info.uid = packageUid;
         // Exact value does not mater, it can be any state for which compaction is allowed.
-        app.setProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-        app.setAdj = 905;
+        app.mState.setSetProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+        app.mState.setSetAdj(905);
         return app;
     }
 
@@ -875,7 +875,8 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBefore2);
         mProcessDependencies.setRssAfterCompaction(rssAfter2);
         // This is to avoid throttle of compacting too soon.
-        processRecord.lastCompactTime = processRecord.lastCompactTime - 10_000;
+        processRecord.mOptRecord.setLastCompactTime(
+                processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction.
         mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
         waitForHandler();
@@ -890,7 +891,8 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBefore3);
         mProcessDependencies.setRssAfterCompaction(rssAfter3);
         // This is to avoid throttle of compacting too soon.
-        processRecord.lastCompactTime = processRecord.lastCompactTime - 10_000;
+        processRecord.mOptRecord.setLastCompactTime(
+                processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction
         mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
         waitForHandler();

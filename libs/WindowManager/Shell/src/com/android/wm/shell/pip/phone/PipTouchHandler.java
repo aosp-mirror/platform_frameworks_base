@@ -51,6 +51,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
 
 import java.io.PrintWriter;
@@ -156,6 +157,7 @@ public class PipTouchHandler {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionController pipTransitionController,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
             ShellExecutor mainExecutor) {
@@ -168,7 +170,7 @@ public class PipTouchHandler {
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
-                mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(),
+                mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(), pipTransitionController,
                 floatingContentCoordinator, mainExecutor);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,

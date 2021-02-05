@@ -83,7 +83,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager
+                dumpManager,
+                false
         )
 
         controller.init()

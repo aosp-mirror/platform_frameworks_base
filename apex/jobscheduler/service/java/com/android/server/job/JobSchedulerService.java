@@ -1426,8 +1426,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // Create the "runners".
                 for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
                     mActiveServices.add(
-                            new JobServiceContext(this, mBatteryStats, mJobPackageTracker,
-                                    getContext().getMainLooper()));
+                            new JobServiceContext(this, mConcurrencyManager, mBatteryStats,
+                                    mJobPackageTracker, getContext().getMainLooper()));
                 }
                 // Attach jobs to their controllers.
                 mJobs.forEachJob((job) -> {
@@ -1710,9 +1710,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
-            // We still want to check for jobs to execute, because this job may have
-            // scheduled a new job under the same job id, and now we can run it.
-            mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
             return;
         }
 
@@ -1734,7 +1731,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         jobStatus.unprepareLocked();
         reportActiveLocked();
-        mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
     }
 
     // StateChangedListener implementations.

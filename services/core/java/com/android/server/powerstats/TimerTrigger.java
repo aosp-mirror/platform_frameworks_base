@@ -29,18 +29,30 @@ public final class TimerTrigger extends PowerStatsLogTrigger {
     private static final String TAG = TimerTrigger.class.getSimpleName();
     private static final boolean DEBUG = false;
     // TODO(b/166689029): Make configurable through global settings.
-    private static final long LOG_PERIOD_MS = 120 * 1000;
+    private static final long LOG_PERIOD_MS_LOW_FREQUENCY = 60 * 60 * 1000; // 1 hour
+    private static final long LOG_PERIOD_MS_HIGH_FREQUENCY = 2 * 60 * 1000; // 2 minutes
 
     private final Handler mHandler;
 
-    private Runnable mLogData = new Runnable() {
+    private Runnable mLogDataLowFrequency = new Runnable() {
         @Override
         public void run() {
             // Do not wake the device for these messages.  Opportunistically log rail data every
-            // LOG_PERIOD_MS.
-            mHandler.postDelayed(mLogData, LOG_PERIOD_MS);
-            if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data");
-            logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_TIMER);
+            // LOG_PERIOD_MS_LOW_FREQUENCY.
+            mHandler.postDelayed(mLogDataLowFrequency, LOG_PERIOD_MS_LOW_FREQUENCY);
+            if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data low frequency");
+            logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY);
+        }
+    };
+
+    private Runnable mLogDataHighFrequency = new Runnable() {
+        @Override
+        public void run() {
+            // Do not wake the device for these messages.  Opportunistically log rail data every
+            // LOG_PERIOD_MS_HIGH_FREQUENCY.
+            mHandler.postDelayed(mLogDataHighFrequency, LOG_PERIOD_MS_HIGH_FREQUENCY);
+            if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data high frequency");
+            logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY);
         }
     };
 
@@ -50,7 +62,8 @@ public final class TimerTrigger extends PowerStatsLogTrigger {
         mHandler = mContext.getMainThreadHandler();
 
         if (triggerEnabled) {
-            mLogData.run();
+            mLogDataLowFrequency.run();
+            mLogDataHighFrequency.run();
         }
     }
 }

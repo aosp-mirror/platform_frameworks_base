@@ -65,6 +65,23 @@ public final class BrightnessChangeEvent implements Parcelable {
     /** If night mode color filter is active this will be the temperature in kelvin */
     public final int colorTemperature;
 
+    /** Whether the bright color reduction color transform is active */
+    public final boolean reduceBrightColors;
+
+    /** How strong the bright color reduction color transform is set (only applicable if active),
+     *  specified as an integer from 0 - 100, inclusive. This value (scaled to 0-1, inclusive) is
+     *  then used in Ynew = (a * scaledStrength^2 + b * scaledStrength + c) * Ycurrent, where a, b,
+     *  and c are coefficients provided in the bright color reduction coefficient matrix, and
+     *  Ycurrent is the current hardware brightness in nits.
+     */
+    public final int reduceBrightColorsStrength;
+
+    /** Applied offset for the bright color reduction color transform (only applicable if active).
+     *  The offset is computed by summing the coefficients a, b, and c, from the coefficient matrix
+     *  and multiplying by the current brightness.
+     */
+    public final float reduceBrightColorsOffset;
+
     /** Brightness level before slider adjustment */
     public final float lastBrightness;
 
@@ -105,8 +122,9 @@ public final class BrightnessChangeEvent implements Parcelable {
     private BrightnessChangeEvent(float brightness, long timeStamp, String packageName,
             int userId, float[] luxValues, long[] luxTimestamps, float batteryLevel,
             float powerBrightnessFactor, boolean nightMode, int colorTemperature,
-            float lastBrightness, boolean isDefaultBrightnessConfig, boolean isUserSetBrightness,
-            long[] colorValueBuckets, long colorSampleDuration) {
+            boolean reduceBrightColors, int reduceBrightColorsStrength,
+            float reduceBrightColorsOffset, float lastBrightness, boolean isDefaultBrightnessConfig,
+            boolean isUserSetBrightness, long[] colorValueBuckets, long colorSampleDuration) {
         this.brightness = brightness;
         this.timeStamp = timeStamp;
         this.packageName = packageName;
@@ -117,6 +135,9 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.powerBrightnessFactor = powerBrightnessFactor;
         this.nightMode = nightMode;
         this.colorTemperature = colorTemperature;
+        this.reduceBrightColors = reduceBrightColors;
+        this.reduceBrightColorsStrength = reduceBrightColorsStrength;
+        this.reduceBrightColorsOffset = reduceBrightColorsOffset;
         this.lastBrightness = lastBrightness;
         this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
         this.isUserSetBrightness = isUserSetBrightness;
@@ -136,6 +157,9 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.powerBrightnessFactor = other.powerBrightnessFactor;
         this.nightMode = other.nightMode;
         this.colorTemperature = other.colorTemperature;
+        this.reduceBrightColors = other.reduceBrightColors;
+        this.reduceBrightColorsStrength = other.reduceBrightColorsStrength;
+        this.reduceBrightColorsOffset = other.reduceBrightColorsOffset;
         this.lastBrightness = other.lastBrightness;
         this.isDefaultBrightnessConfig = other.isDefaultBrightnessConfig;
         this.isUserSetBrightness = other.isUserSetBrightness;
@@ -154,6 +178,9 @@ public final class BrightnessChangeEvent implements Parcelable {
         powerBrightnessFactor = source.readFloat();
         nightMode = source.readBoolean();
         colorTemperature = source.readInt();
+        reduceBrightColors = source.readBoolean();
+        reduceBrightColorsStrength = source.readInt();
+        reduceBrightColorsOffset = source.readFloat();
         lastBrightness = source.readFloat();
         isDefaultBrightnessConfig = source.readBoolean();
         isUserSetBrightness = source.readBoolean();
@@ -188,6 +215,9 @@ public final class BrightnessChangeEvent implements Parcelable {
         dest.writeFloat(powerBrightnessFactor);
         dest.writeBoolean(nightMode);
         dest.writeInt(colorTemperature);
+        dest.writeBoolean(reduceBrightColors);
+        dest.writeInt(reduceBrightColorsStrength);
+        dest.writeFloat(reduceBrightColorsOffset);
         dest.writeFloat(lastBrightness);
         dest.writeBoolean(isDefaultBrightnessConfig);
         dest.writeBoolean(isUserSetBrightness);
@@ -207,6 +237,9 @@ public final class BrightnessChangeEvent implements Parcelable {
         private float mPowerBrightnessFactor;
         private boolean mNightMode;
         private int mColorTemperature;
+        private boolean mReduceBrightColors;
+        private int mReduceBrightColorsStrength;
+        private float mReduceBrightColorsOffset;
         private float mLastBrightness;
         private boolean mIsDefaultBrightnessConfig;
         private boolean mIsUserSetBrightness;
@@ -273,6 +306,24 @@ public final class BrightnessChangeEvent implements Parcelable {
             return this;
         }
 
+        /** {@see BrightnessChangeEvent#reduceBrightColors} */
+        public Builder setReduceBrightColors(boolean reduceBrightColors) {
+            mReduceBrightColors = reduceBrightColors;
+            return this;
+        }
+
+        /** {@see BrightnessChangeEvent#reduceBrightColorsStrength} */
+        public Builder setReduceBrightColorsStrength(int strength) {
+            mReduceBrightColorsStrength = strength;
+            return this;
+        }
+
+        /** {@see BrightnessChangeEvent#reduceBrightColorsOffset} */
+        public Builder setReduceBrightColorsOffset(float offset) {
+            mReduceBrightColorsOffset = offset;
+            return this;
+        }
+
         /** {@see BrightnessChangeEvent#lastBrightness} */
         public Builder setLastBrightness(float lastBrightness) {
             mLastBrightness = lastBrightness;
@@ -304,7 +355,8 @@ public final class BrightnessChangeEvent implements Parcelable {
         public BrightnessChangeEvent build() {
             return new BrightnessChangeEvent(mBrightness, mTimeStamp,
                     mPackageName, mUserId, mLuxValues, mLuxTimestamps, mBatteryLevel,
-                    mPowerBrightnessFactor, mNightMode, mColorTemperature, mLastBrightness,
+                    mPowerBrightnessFactor, mNightMode, mColorTemperature, mReduceBrightColors,
+                    mReduceBrightColorsStrength, mReduceBrightColorsOffset, mLastBrightness,
                     mIsDefaultBrightnessConfig, mIsUserSetBrightness, mColorValueBuckets,
                     mColorSampleDuration);
         }

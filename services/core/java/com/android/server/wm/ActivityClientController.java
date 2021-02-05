@@ -54,6 +54,7 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -97,6 +98,17 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     void onSystemReady() {
         mAssistUtils = new AssistUtils(mContext);
+    }
+
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            throw ActivityTaskManagerService.logAndRethrowRuntimeExceptionOnTransact(
+                    "ActivityClientController", e);
+        }
     }
 
     @Override

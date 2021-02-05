@@ -31,7 +31,9 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 
@@ -71,14 +73,20 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         IRemoteTransition pendingRemote = mPendingRemotes.remove(transition);
         if (pendingRemote == null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s doesn't have "
+                    + "explicit remote, search filters for match for %s", transition, info);
             // If no explicit remote, search filters until one matches
             for (int i = mFilters.size() - 1; i >= 0; --i) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Checking filter %s",
+                        mFilters.get(i));
                 if (mFilters.get(i).first.matches(info)) {
                     pendingRemote = mFilters.get(i).second;
                     break;
                 }
             }
         }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for %s to %s",
+                transition, pendingRemote);
 
         if (pendingRemote == null) return false;
 
@@ -121,6 +129,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         IRemoteTransition remote = request.getRemoteTransition();
         if (remote == null) return null;
         mPendingRemotes.put(transition, remote);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
+                + " for %s: %s", transition, remote);
         return new WindowContainerTransaction();
     }
 }

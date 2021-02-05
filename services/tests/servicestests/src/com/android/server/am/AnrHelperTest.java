@@ -33,6 +33,8 @@ import com.android.server.wm.WindowProcessController;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,7 +50,26 @@ public class AnrHelperTest {
 
     @Before
     public void setUp() {
-        runWithDexmakerShareClassLoader(() -> mAnrApp = mock(ProcessRecord.class));
+        runWithDexmakerShareClassLoader(() -> {
+            mAnrApp = mock(ProcessRecord.class);
+            final ActivityManagerService service = mock(ActivityManagerService.class);
+            final ProcessErrorStateRecord errorState = mock(ProcessErrorStateRecord.class);
+            setFieldValue(ProcessErrorStateRecord.class, errorState, "mProcLock",
+                    new ActivityManagerProcLock());
+            setFieldValue(ProcessRecord.class, mAnrApp, "mErrorState", errorState);
+        });
+    }
+
+    private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Field mfield = Field.class.getDeclaredField("accessFlags");
+            mfield.setAccessible(true);
+            mfield.setInt(field, mfield.getInt(field) & ~(Modifier.FINAL | Modifier.PRIVATE));
+            field.set(obj, val);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+        }
     }
 
     @Test
@@ -62,7 +83,7 @@ public class AnrHelperTest {
         mAnrHelper.appNotResponding(mAnrApp, activityShortComponentName, appInfo,
                 parentShortComponentName, parentProcess, aboveSystem, annotation);
 
-        verify(mAnrApp, timeout(TimeUnit.SECONDS.toMillis(5))).appNotResponding(
+        verify(mAnrApp.mErrorState, timeout(TimeUnit.SECONDS.toMillis(5))).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
                 eq(parentProcess), eq(aboveSystem), eq(annotation), eq(false) /* onlyDumpSelf */);
     }

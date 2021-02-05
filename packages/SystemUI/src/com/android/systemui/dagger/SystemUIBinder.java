@@ -18,7 +18,6 @@ package com.android.systemui.dagger;
 
 import com.android.systemui.LatencyTester;
 import com.android.systemui.ScreenDecorations;
-import com.android.systemui.SizeCompatModeActivityController;
 import com.android.systemui.SliceBroadcastRelayHandler;
 import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.SystemActions;
@@ -112,13 +111,6 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(ShortcutKeyDispatcher.class)
     public abstract SystemUI bindsShortcutKeyDispatcher(ShortcutKeyDispatcher sysui);
-
-    /** Inject into SizeCompatModeActivityController. */
-    @Binds
-    @IntoMap
-    @ClassKey(SizeCompatModeActivityController.class)
-    public abstract SystemUI bindsSizeCompatModeActivityController(
-            SizeCompatModeActivityController sysui);
 
     /** Inject into SliceBroadcastRelayHandler. */
     @Binds

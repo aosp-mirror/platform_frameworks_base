@@ -40,10 +40,11 @@ public class RcsSubscribeResponseAidlWrapper implements SubscribeResponseCallbac
     }
 
     @Override
-    public void onCommandError(int code) {
+    public void onCommandError(int code) throws ImsException {
         try {
             mResponseBinder.onCommandError(code);
         } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -52,6 +53,18 @@ public class RcsSubscribeResponseAidlWrapper implements SubscribeResponseCallbac
         try {
             mResponseBinder.onNetworkResponse(code, reason);
         } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    @Override
+    public void onNetworkResponse(int code, String reasonPhrase, int reasonHeaderCause,
+            String reasonHeaderText) throws ImsException {
+        try {
+            mResponseBinder.onNetworkRespHeader(code, reasonPhrase, reasonHeaderCause,
+                    reasonHeaderText);
+        } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -60,6 +73,7 @@ public class RcsSubscribeResponseAidlWrapper implements SubscribeResponseCallbac
         try {
             mResponseBinder.onNotifyCapabilitiesUpdate(pidfXmls);
         } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -69,6 +83,7 @@ public class RcsSubscribeResponseAidlWrapper implements SubscribeResponseCallbac
         try {
             mResponseBinder.onResourceTerminated(getTerminatedReasonList(uriTerminatedReason));
         } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -90,6 +105,7 @@ public class RcsSubscribeResponseAidlWrapper implements SubscribeResponseCallbac
         try {
             mResponseBinder.onTerminated(reason, retryAfterMilliseconds);
         } catch (RemoteException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 }

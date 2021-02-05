@@ -19,7 +19,6 @@ package com.android.systemui.shared.system;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
-import android.os.IBinder;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
@@ -80,7 +79,6 @@ public abstract class TaskStackChangeListener {
     public void onTaskDescriptionChanged(RunningTaskInfo taskInfo) { }
 
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
-    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) { }
 
     public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) { }
 

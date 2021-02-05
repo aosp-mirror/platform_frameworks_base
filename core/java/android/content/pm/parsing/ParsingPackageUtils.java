@@ -1984,6 +1984,11 @@ public class ParsingPackageUtils {
             }
 
             pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
+            pkg.setMemtagMode(sa.getInt(R.styleable.AndroidManifestApplication_memtagMode, -1));
+            if (sa.hasValue(R.styleable.AndroidManifestApplication_nativeHeapZeroInit)) {
+                pkg.setNativeHeapZeroInit(sa.getBoolean(
+                        R.styleable.AndroidManifestApplication_nativeHeapZeroInit, false));
+            }
         } finally {
             sa.recycle();
         }
@@ -2493,6 +2498,10 @@ public class ParsingPackageUtils {
 
     /**
      * Check if one of the IntentFilter as both actions DEFAULT / VIEW and a HTTP/HTTPS data URI
+     *
+     * This is distinct from any of the functionality of app links domain verification, and cannot
+     * be converted to remain backwards compatible. It's possible the presence of this flag does
+     * not indicate a valid package for domain verification.
      */
     private static boolean hasDomainURLs(ParsingPackage pkg) {
         final List<ParsedActivity> activities = pkg.getActivities();

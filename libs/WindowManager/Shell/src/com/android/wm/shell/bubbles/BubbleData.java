@@ -542,7 +542,8 @@ public class BubbleData {
     void overflowBubble(@DismissReason int reason, Bubble bubble) {
         if (bubble.getPendingIntentCanceled()
                 || !(reason == Bubbles.DISMISS_AGED
-                || reason == Bubbles.DISMISS_USER_GESTURE)) {
+                    || reason == Bubbles.DISMISS_USER_GESTURE
+                    || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)) {
             return;
         }
         if (DEBUG_BUBBLE_DATA) {

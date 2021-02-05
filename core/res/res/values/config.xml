@@ -831,28 +831,21 @@
         <!-- B y-intercept --> <item>-0.198650895</item>
     </string-array>
 
-    <string-array name="config_reduceBrightColorsCoefficientsNative">
-        <!-- R a-coefficient --> <item>-0.691218457</item>
-        <!-- R b-coefficient --> <item>0.050135153</item>
-        <!-- R y-intercept --> <item>0.917684143</item>
-        <!-- G a-coefficient --> <item>-0.691218457</item>
-        <!-- G b-coefficient --> <item>0.050135153</item>
-        <!-- G y-intercept --> <item>0.917684143</item>
-        <!-- B a-coefficient --> <item>-0.691218457</item>
-        <!-- B b-coefficient --> <item>0.050135153</item>
-        <!-- B y-intercept --> <item>0.917684143</item>
+    <!-- Control whether bright color reduction is available. This should only be enabled on devices
+         that have a HWC implementation that can apply the matrix passed to setColorTransform
+         without impacting power, performance, and app compatibility (e.g. protected content). -->
+    <bool name="config_reduceBrightColorsAvailable">@bool/config_setColorTransformAccelerated</bool>
+
+    <string-array name="config_reduceBrightColorsCoefficientsNonlinear">
+        <!-- a-coefficient --> <item>-0.4429953456</item>
+        <!-- b-coefficient --> <item>-0.2434077725</item>
+        <!-- y-intercept --> <item>0.9809063061</item>
     </string-array>
 
     <string-array name="config_reduceBrightColorsCoefficients">
-        <!-- R a-coefficient --> <item>0.00000000000000154</item>
-        <!-- R b-coefficient --> <item>-1.0</item>
-        <!-- R y-intercept --> <item>1.045977011</item>
-        <!-- G a-coefficient --> <item>0.00000000000000224</item>
-        <!-- G b-coefficient --> <item>-1.0</item>
-        <!-- G y-intercept --> <item>1.045977011</item>
-        <!-- B a-coefficient --> <item>0.0000000000000022</item>
-        <!-- B b-coefficient --> <item>-1.0</item>
-        <!-- B y-intercept --> <item>1.045977011</item>
+        <!-- a-coefficient --> <item>-0.000000000000001</item>
+        <!-- b-coefficient --> <item>-0.955555555555554</item>
+        <!-- y-intercept --> <item>1.000000000000000</item>
     </string-array>
 
     <!-- Boolean indicating whether display white balance is supported. -->

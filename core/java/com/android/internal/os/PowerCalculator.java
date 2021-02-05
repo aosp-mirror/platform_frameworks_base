@@ -102,7 +102,7 @@ public abstract class PowerCalculator {
 
         // TODO(b/175156498): Temporary code during the transition from BatterySippers to
         //  BatteryConsumers.
-        UidBatteryConsumer.Builder builder = new UidBatteryConsumer.Builder(0, 0, false, u);
+        UidBatteryConsumer.Builder builder = new UidBatteryConsumer.Builder(0, 0, u);
         calculateApp(builder, u, rawRealtimeUs, rawUptimeUs, BatteryUsageStatsQuery.DEFAULT);
         final UidBatteryConsumer uidBatteryConsumer = builder.build();
         app.cpuPowerMah = uidBatteryConsumer.getConsumedPower(

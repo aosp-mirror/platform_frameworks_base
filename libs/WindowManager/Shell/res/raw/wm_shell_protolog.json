@@ -13,6 +13,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "-1671119352": {
+      "message": " Delegate animation for %s to %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/RemoteTransitionHandler.java"
+    },
     "-1501874464": {
       "message": "Fullscreen Task Appeared: #%d",
       "level": "VERBOSE",
@@ -48,6 +54,24 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "-1308483871": {
+      "message": " try handler %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
+    },
+    "-1297259344": {
+      "message": " animated by %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
+    },
+    "-1269886472": {
+      "message": "Transition %s doesn't have explicit remote, search filters for match for %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/RemoteTransitionHandler.java"
     },
     "-1006733970": {
       "message": "Display added: %d",
@@ -91,11 +115,23 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/apppairs\/AppPairsController.java"
     },
+    "138343607": {
+      "message": " try firstHandler %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
+    },
     "157713005": {
       "message": "Task info changed taskId=%d",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "214412327": {
+      "message": "RemoteTransition directly requested for %s: %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/RemoteTransitionHandler.java"
     },
     "274140888": {
       "message": "Animate alpha: from=%d to=%d",
@@ -114,6 +150,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
+    },
+    "410592459": {
+      "message": "Invalid root leash (%s): %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
     },
     "473543554": {
       "message": "%s onTaskAppeared Supported",
@@ -139,6 +181,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "707170340": {
+      "message": " animated by firstHandler",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
+    },
     "900599280": {
       "message": "Can't pair unresizeable tasks task1.isResizeable=%b task1.isResizeable=%b",
       "level": "ERROR",
@@ -162,6 +210,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/legacysplitscreen\/LegacySplitScreenTaskListener.java"
+    },
+    "990371881": {
+      "message": " Checking filter %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/RemoteTransitionHandler.java"
     },
     "1070270131": {
       "message": "onTransitionReady %s: %s",

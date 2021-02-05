@@ -28,6 +28,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import androidx.annotation.DimenRes;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -42,7 +43,7 @@ import java.util.Comparator;
 /**
  * The container with notification stack scroller and quick settings inside.
  */
-public class NotificationsQuickSettingsContainer extends FrameLayout
+public class NotificationsQuickSettingsContainer extends ConstraintLayout
         implements OnInflateListener, FragmentListener,
         AboveShelfObserver.HasViewAboveShelfChangedListener {
 
@@ -68,11 +69,11 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mQsFrame = (FrameLayout) findViewById(R.id.qs_frame);
+        mQsFrame = findViewById(R.id.qs_frame);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
-        ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
+        ViewStub userSwitcher = findViewById(R.id.keyguard_user_switcher);
         userSwitcher.setOnInflateListener(this);
         mUserSwitcher = userSwitcher;
     }

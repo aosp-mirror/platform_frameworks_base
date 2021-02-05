@@ -37,6 +37,7 @@ import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
+import static android.view.ViewRootImpl.computeWindowBounds;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -128,7 +129,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -142,8 +142,6 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.WindowInsets.Side;
-import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
@@ -1395,29 +1393,15 @@ public class DisplayPolicy {
      *
      * @param attrs The LayoutParams of the window.
      * @param windowToken The token of the window.
-     * @param outFrame The frame of the window.
      * @param outInsetsState The insets state of this display from the client's perspective.
      * @param localClient Whether the client is from the our process.
      * @return Whether to always consume the system bars.
      *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
      */
-    boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, Rect outFrame,
-            InsetsState outInsetsState, boolean localClient) {
-        final boolean isFixedRotationTransforming =
-                windowToken != null && windowToken.isFixedRotationTransforming();
-        final ActivityRecord activity = windowToken != null ? windowToken.asActivityRecord() : null;
-        final Task task = activity != null ? activity.getTask() : null;
-        final Rect taskBounds = isFixedRotationTransforming
-                // Use token (activity) bounds if it is rotated because its task is not rotated.
-                ? windowToken.getBounds()
-                : (task != null ? task.getBounds() : null);
+    boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, InsetsState outInsetsState,
+            boolean localClient) {
         final InsetsState state =
                 mDisplayContent.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-        computeWindowBounds(attrs, state, windowToken, outFrame);
-        if (taskBounds != null) {
-            outFrame.intersect(taskBounds);
-        }
-
         final boolean inSizeCompatMode = WindowState.inSizeCompatMode(attrs, windowToken);
         outInsetsState.set(state, inSizeCompatMode || localClient);
         if (inSizeCompatMode) {
@@ -1558,28 +1542,6 @@ public class DisplayPolicy {
         return !notFocusableForIm;
     }
 
-    private void computeWindowBounds(WindowManager.LayoutParams attrs, InsetsState state,
-            @Nullable WindowToken windowToken, Rect outBounds) {
-        final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
-        final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
-        final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
-        final Rect df = windowToken != null ? windowToken.getBounds() : state.getDisplayFrame();
-        Insets insets = Insets.of(0, 0, 0, 0);
-        for (int i = types.size() - 1; i >= 0; i--) {
-            final InsetsSource source = state.peekSource(types.valueAt(i));
-            if (source == null) {
-                continue;
-            }
-            insets = Insets.max(insets, source.calculateInsets(
-                    df, attrs.isFitInsetsIgnoringVisibility()));
-        }
-        final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
-        final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;
-        final int right = (sidesToFit & Side.RIGHT) != 0 ? insets.right : 0;
-        final int bottom = (sidesToFit & Side.BOTTOM) != 0 ? insets.bottom : 0;
-        outBounds.set(df.left + left, df.top + top, df.right - right, df.bottom - bottom);
-    }
-
     /**
      * Called for each window attached to the window manager as layout is proceeding. The
      * implementation of this function must take care of setting the window's frame, either here or
@@ -1620,7 +1582,7 @@ public class DisplayPolicy {
         final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
 
         final InsetsState state = win.getInsetsState();
-        computeWindowBounds(attrs, state, win.mToken, df);
+        computeWindowBounds(attrs, state, win.mToken.getBounds(), df);
         if (attached == null) {
             pf.set(df);
             if ((pfl & PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME) != 0) {

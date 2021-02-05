@@ -22,7 +22,6 @@ import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Trace;
 import android.util.Log;
@@ -54,13 +53,12 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     private static final int ON_TASK_MOVED_TO_FRONT = 12;
     private static final int ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE = 13;
     private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 14;
-    private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 15;
-    private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 16;
-    private static final int ON_TASK_DISPLAY_CHANGED = 17;
-    private static final int ON_TASK_LIST_UPDATED = 18;
-    private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 19;
-    private static final int ON_TASK_DESCRIPTION_CHANGED = 20;
-    private static final int ON_ACTIVITY_ROTATION = 21;
+    private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 15;
+    private static final int ON_TASK_DISPLAY_CHANGED = 16;
+    private static final int ON_TASK_LIST_UPDATED = 17;
+    private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 18;
+    private static final int ON_TASK_DESCRIPTION_CHANGED = 19;
+    private static final int ON_ACTIVITY_ROTATION = 20;
 
     /**
      * List of {@link TaskStackListenerCallback} registered from {@link #addListener}.
@@ -264,13 +262,6 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     }
 
     @Override
-    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
-        mMainHandler.obtainMessage(ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED, displayId,
-                0 /* unused */,
-                activityToken).sendToTarget();
-    }
-
-    @Override
     public boolean handleMessage(Message msg) {
         synchronized (mTaskStackListeners) {
             switch (msg.what) {
@@ -380,13 +371,6 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i)
                                 .onActivityRequestedOrientationChanged(msg.arg1, msg.arg2);
-                    }
-                    break;
-                }
-                case ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED: {
-                    for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onSizeCompatModeActivityChanged(
-                                msg.arg1, (IBinder) msg.obj);
                     }
                     break;
                 }

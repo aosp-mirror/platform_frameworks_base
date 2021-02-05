@@ -777,10 +777,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         updatePadding();
     }
 
-    boolean useSideLabels() {
-        return mSideLabels;
-    }
-
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
