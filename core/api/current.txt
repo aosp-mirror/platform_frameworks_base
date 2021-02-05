@@ -53349,7 +53349,7 @@ package android.widget {
     method public void onSelectedDayChange(@NonNull android.widget.CalendarView, int, int, int);
   }
 
-  public class CheckBox extends android.widget.CompoundButton {
+  @android.widget.RemoteViews.RemoteView public class CheckBox extends android.widget.CompoundButton {
     ctor public CheckBox(android.content.Context);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet);
     ctor public CheckBox(android.content.Context, android.util.AttributeSet, int);
@@ -53415,6 +53415,7 @@ package android.widget {
     method public boolean isChecked();
     method public void setButtonDrawable(@DrawableRes int);
     method public void setButtonDrawable(@Nullable android.graphics.drawable.Drawable);
+    method public void setButtonIcon(@Nullable android.graphics.drawable.Icon);
     method public void setButtonTintBlendMode(@Nullable android.graphics.BlendMode);
     method public void setButtonTintList(@Nullable android.content.res.ColorStateList);
     method public void setButtonTintMode(@Nullable android.graphics.PorterDuff.Mode);
@@ -54455,14 +54456,14 @@ package android.widget {
     field protected String[] mExcludeMimes;
   }
 
-  public class RadioButton extends android.widget.CompoundButton {
+  @android.widget.RemoteViews.RemoteView public class RadioButton extends android.widget.CompoundButton {
     ctor public RadioButton(android.content.Context);
     ctor public RadioButton(android.content.Context, android.util.AttributeSet);
     ctor public RadioButton(android.content.Context, android.util.AttributeSet, int);
     ctor public RadioButton(android.content.Context, android.util.AttributeSet, int, int);
   }
 
-  public class RadioGroup extends android.widget.LinearLayout {
+  @android.widget.RemoteViews.RemoteView public class RadioGroup extends android.widget.LinearLayout {
     ctor public RadioGroup(android.content.Context);
     ctor public RadioGroup(android.content.Context, android.util.AttributeSet);
     method public void check(@IdRes int);
@@ -54584,6 +54585,7 @@ package android.widget {
     method public void setChronometerCountDown(@IdRes int, boolean);
     method public void setColor(@IdRes int, @NonNull String, @ColorRes int);
     method public void setColorStateList(@IdRes int, @NonNull String, @ColorRes int);
+    method public void setCompoundButtonChecked(@IdRes int, boolean);
     method public void setContentDescription(@IdRes int, CharSequence);
     method public void setDisplayedChild(@IdRes int, int);
     method public void setDouble(@IdRes int, String, double);
@@ -54608,6 +54610,7 @@ package android.widget {
     method public void setOnClickResponse(@IdRes int, @NonNull android.widget.RemoteViews.RemoteResponse);
     method public void setPendingIntentTemplate(@IdRes int, android.app.PendingIntent);
     method public void setProgressBar(@IdRes int, int, int, boolean);
+    method public void setRadioGroupChecked(@IdRes int, @IdRes int);
     method public void setRelativeScrollPosition(@IdRes int, int);
     method @Deprecated public void setRemoteAdapter(int, @IdRes int, android.content.Intent);
     method public void setRemoteAdapter(@IdRes int, android.content.Intent);
@@ -54974,7 +54977,7 @@ package android.widget {
     ctor public StackView(android.content.Context, android.util.AttributeSet, int, int);
   }
 
-  public class Switch extends android.widget.CompoundButton {
+  @android.widget.RemoteViews.RemoteView public class Switch extends android.widget.CompoundButton {
     ctor public Switch(android.content.Context);
     ctor public Switch(android.content.Context, android.util.AttributeSet);
     ctor public Switch(android.content.Context, android.util.AttributeSet, int);
@@ -55005,12 +55008,14 @@ package android.widget {
     method public void setTextOff(CharSequence);
     method public void setTextOn(CharSequence);
     method public void setThumbDrawable(android.graphics.drawable.Drawable);
+    method public void setThumbIcon(@Nullable android.graphics.drawable.Icon);
     method public void setThumbResource(@DrawableRes int);
     method public void setThumbTextPadding(int);
     method public void setThumbTintBlendMode(@Nullable android.graphics.BlendMode);
     method public void setThumbTintList(@Nullable android.content.res.ColorStateList);
     method public void setThumbTintMode(@Nullable android.graphics.PorterDuff.Mode);
     method public void setTrackDrawable(android.graphics.drawable.Drawable);
+    method public void setTrackIcon(@Nullable android.graphics.drawable.Icon);
     method public void setTrackResource(@DrawableRes int);
     method public void setTrackTintBlendMode(@Nullable android.graphics.BlendMode);
     method public void setTrackTintList(@Nullable android.content.res.ColorStateList);
