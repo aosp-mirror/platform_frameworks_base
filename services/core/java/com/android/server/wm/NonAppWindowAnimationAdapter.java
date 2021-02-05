@@ -77,7 +77,7 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
             final boolean shouldAttachNavBarToApp =
                     displayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                             && service.getRecentsAnimationController() == null
-                            && displayContent.getFixedRotationAnimationController() == null;
+                            && displayContent.getFadeRotationAnimationController() == null;
             if (shouldAttachNavBarToApp) {
                 startNavigationBarWindowAnimation(
                         displayContent, durationHint, statusBarTransitionDelay, targets,
