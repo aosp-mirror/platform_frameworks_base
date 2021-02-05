@@ -340,7 +340,7 @@ public class Letterbox {
         }
 
         public void applySurfaceChanges(SurfaceControl.Transaction t) {
-            if (mSurfaceFrameRelative.equals(mLayoutFrameRelative)) {
+            if (!needsApplySurfaceChanges()) {
                 // Nothing changed.
                 return;
             }
