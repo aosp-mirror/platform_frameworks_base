@@ -133,7 +133,9 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1_dark,
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
-                .setDefaultRestrictions(null);
+                .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
+                .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
+                .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter());
     }
 
     /**
@@ -256,12 +258,35 @@ public final class UserTypeFactory {
         return restrictions;
     }
 
+    private static Bundle getDefaultManagedProfileRestrictions() {
+        final Bundle restrictions = new Bundle();
+        restrictions.putBoolean(UserManager.DISALLOW_WALLPAPER, true);
+        return restrictions;
+    }
+
+    private static Bundle getDefaultManagedProfileSecureSettings() {
+        // Only add String values to the bundle, settings are written as Strings eventually
+        final Bundle settings = new Bundle();
+        settings.putString(
+                android.provider.Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH, "1");
+        settings.putString(
+                android.provider.Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED, "1");
+        return settings;
+    }
+
+    private static List<DefaultCrossProfileIntentFilter>
+            getDefaultManagedCrossProfileIntentFilter() {
+        return DefaultCrossProfileIntentFiltersUtils.getDefaultManagedProfileFilters();
+    }
+
     /**
      * Reads the given xml parser to obtain device user-type customization, and updates the given
      * map of {@link UserTypeDetails.Builder}s accordingly.
      * <p>
      * The xml file can specify the attributes according to the set... methods below.
      */
+    // TODO(b/176973369): Add parsing logic to support custom settings/filters
+    //  in config_user_types.xml
     @VisibleForTesting
     static void customizeBuilders(ArrayMap<String, UserTypeDetails.Builder> builders,
             XmlResourceParser parser) {

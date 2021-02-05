@@ -1730,8 +1730,12 @@ public class DevicePolicyManager {
      * Broadcast action to notify ManagedProvisioning that
      * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has changed.
      * @hide
+     * @deprecated No longer needed as ManagedProvisioning no longer handles
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction changing.
      */
+    // TODO(b/177221010): Remove when Managed Provisioning no longer depend on it.
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_DATA_SHARING_RESTRICTION_CHANGED =
             "android.app.action.DATA_SHARING_RESTRICTION_CHANGED";
 
@@ -13263,6 +13267,25 @@ public class DevicePolicyManager {
                 mService.provisionFullyManagedDevice(provisioningParams, mContext.getPackageName());
             } catch (ServiceSpecificException e) {
                 throw new ProvisioningException(e, e.errorCode);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Resets the default cross profile intent filters that were set during
+     * {@link #createAndProvisionManagedProfile} between {@code userId} and all it's managed
+     * profiles if any.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void resetDefaultCrossProfileIntentFilters(@UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                mService.resetDefaultCrossProfileIntentFilters(userId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
