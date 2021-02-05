@@ -44,8 +44,12 @@ public class ImsEcbmImplBase {
         @Override
         public void setListener(IImsEcbmListener listener) {
             synchronized (mLock) {
-                if (mImsEcbm != null && listener != null && Objects.equals(
-                        mImsEcbm.asBinder(), listener.asBinder())) {
+                if (mListener != null && !mListener.asBinder().isBinderAlive()) {
+                    Log.w(TAG, "setListener: discarding dead Binder");
+                    mListener = null;
+                }
+                if (mListener != null && listener != null && Objects.equals(
+                        mListener.asBinder(), listener.asBinder())) {
                     return;
                 }
                 if (listener == null) {
