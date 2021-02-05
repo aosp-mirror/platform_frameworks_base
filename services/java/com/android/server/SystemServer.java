@@ -147,6 +147,7 @@ import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
 import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
+import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.people.PeopleService;
 import com.android.server.pm.BackgroundDexOptService;
@@ -1263,6 +1264,11 @@ public final class SystemServer implements Dumpable {
         // Manages apk rollbacks.
         t.traceBegin("StartRollbackManagerService");
         mSystemServiceManager.startService(ROLLBACK_MANAGER_SERVICE_CLASS);
+        t.traceEnd();
+
+        // Tracks native tombstones.
+        t.traceBegin("StartNativeTombstoneManagerService");
+        mSystemServiceManager.startService(NativeTombstoneManagerService.class);
         t.traceEnd();
 
         // Service to capture bugreports.
