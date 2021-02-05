@@ -351,4 +351,8 @@ interface ITelecomService {
      */
     void setTestDefaultDialer(in String packageName);
 
+    /**
+     * @see TelecomServiceImpl#setTestCallDiagnosticService
+     */
+    void setTestCallDiagnosticService(in String packageName);
 }
