@@ -187,7 +187,7 @@ public class ScreenMediaRecorder {
      * @param refreshRate Desired refresh rate
      * @return array with supported width, height, and refresh rate
      */
-    private int[] getSupportedSize(int screenWidth, int screenHeight, int refreshRate) {
+    private int[] getSupportedSize(final int screenWidth, final int screenHeight, int refreshRate) {
         double maxScale = 0;
 
         MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
@@ -207,25 +207,33 @@ public class ScreenMediaRecorder {
                     int width = vc.getSupportedWidths().getUpper();
                     int height = vc.getSupportedHeights().getUpper();
 
-                    if (width >= screenWidth && height >= screenHeight
-                            && vc.isSizeSupported(screenWidth, screenHeight)) {
+                    int screenWidthAligned = screenWidth;
+                    if (screenWidthAligned % vc.getWidthAlignment() != 0) {
+                        screenWidthAligned -= (screenWidthAligned % vc.getWidthAlignment());
+                    }
+                    int screenHeightAligned = screenHeight;
+                    if (screenHeightAligned % vc.getHeightAlignment() != 0) {
+                        screenHeightAligned -= (screenHeightAligned % vc.getHeightAlignment());
+                    }
 
+                    if (width >= screenWidthAligned && height >= screenHeightAligned
+                            && vc.isSizeSupported(screenWidthAligned, screenHeightAligned)) {
                         // Desired size is supported, now get the rate
-                        int maxRate = vc.getSupportedFrameRatesFor(screenWidth, screenHeight)
-                                .getUpper().intValue();
+                        int maxRate = vc.getSupportedFrameRatesFor(screenWidthAligned,
+                                screenHeightAligned).getUpper().intValue();
 
                         if (maxRate < refreshRate) {
                             refreshRate = maxRate;
                         }
                         Log.d(TAG, "Screen size supported at rate " + refreshRate);
-                        return new int[]{screenWidth, screenHeight, refreshRate};
+                        return new int[]{screenWidthAligned, screenHeightAligned, refreshRate};
                     }
 
                     // Otherwise, continue searching
                     double scale = Math.min(((double) width / screenWidth),
                             ((double) height / screenHeight));
                     if (scale > maxScale) {
-                        maxScale = scale;
+                        maxScale = Math.min(1, scale);
                         maxInfo = vc;
                     }
                 }
