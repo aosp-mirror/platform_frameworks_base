@@ -1262,22 +1262,28 @@ public class ConnectivityServiceTest {
         }
     }
 
-    private void updateUidNetworkingBlocked() {
-        doAnswer(i -> NetworkPolicyManagerInternal.isUidNetworkingBlocked(
-                i.getArgument(0) /* uid */, mUidRules, i.getArgument(1) /* metered */,
-                mRestrictBackground)
+    private void mockUidNetworkingBlocked() {
+        doAnswer(i -> mContext.getSystemService(NetworkPolicyManager.class)
+                .checkUidNetworkingBlocked(i.getArgument(0) /* uid */, mUidRules,
+                        i.getArgument(1) /* metered */, mRestrictBackground)
         ).when(mNetworkPolicyManager).isUidNetworkingBlocked(anyInt(), anyBoolean());
+
+        doAnswer(inv -> mContext.getSystemService(NetworkPolicyManager.class)
+                .checkUidNetworkingBlocked(inv.getArgument(0) /* uid */,
+                        inv.getArgument(1) /* uidRules */,
+                        inv.getArgument(2) /* isNetworkMetered */,
+                        inv.getArgument(3) /* isBackgroundRestricted */)
+        ).when(mNetworkPolicyManager).checkUidNetworkingBlocked(
+                anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     private void setUidRulesChanged(int uidRules) throws RemoteException {
         mUidRules = uidRules;
-        updateUidNetworkingBlocked();
         mPolicyListener.onUidRulesChanged(Process.myUid(), mUidRules);
     }
 
     private void setRestrictBackgroundChanged(boolean restrictBackground) throws RemoteException {
         mRestrictBackground = restrictBackground;
-        updateUidNetworkingBlocked();
         mPolicyListener.onRestrictBackgroundChanged(mRestrictBackground);
     }
 
@@ -6809,6 +6815,7 @@ public class ConnectivityServiceTest {
                 .addTransportType(TRANSPORT_CELLULAR)
                 .build();
         mCm.registerNetworkCallback(cellRequest, cellNetworkCallback);
+        mockUidNetworkingBlocked();
 
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(true);
@@ -6891,6 +6898,7 @@ public class ConnectivityServiceTest {
     public void testNetworkBlockedStatusBeforeAndAfterConnect() throws Exception {
         final TestNetworkCallback defaultCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultCallback);
+        mockUidNetworkingBlocked();
 
         // No Networkcallbacks invoked before any network is active.
         setUidRulesChanged(RULE_REJECT_ALL);
