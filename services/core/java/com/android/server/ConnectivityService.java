@@ -2030,7 +2030,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_PRIVATE_DNS_VALIDATION_UPDATE,
                         new PrivateDnsValidationUpdate(netId,
-                                InetAddress.parseNumericAddress(ipAddress),
+                                InetAddresses.parseNumericAddress(ipAddress),
                                 hostname, validated)));
             } catch (IllegalArgumentException e) {
                 loge("Error parsing ip address in validation event");
