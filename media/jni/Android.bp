@@ -31,8 +31,8 @@ cc_library_shared {
     ],
 
     shared_libs: [
-        "audioclient-types-aidl-unstable-cpp",
-        "av-types-aidl-unstable-cpp",
+        "audioclient-types-aidl-cpp",
+        "av-types-aidl-cpp",
         "libandroid_runtime",
         "libaudioclient",
         "libnativehelper",
