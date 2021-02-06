@@ -65,6 +65,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -244,6 +245,8 @@ public class Tuner implements AutoCloseable  {
     private static final int MSG_ON_FILTER_EVENT = 2;
     private static final int MSG_ON_FILTER_STATUS = 3;
     private static final int MSG_ON_LNB_EVENT = 4;
+
+    private static final int FILTER_CLEANUP_THRESHOLD = 256;
 
     /** @hide */
     @IntDef(prefix = "DVR_TYPE_", value = {DVR_TYPE_RECORD, DVR_TYPE_PLAYBACK})
@@ -1208,6 +1211,15 @@ public class Tuner implements AutoCloseable  {
             synchronized (mFilters) {
                 WeakReference<Filter> weakFilter = new WeakReference<Filter>(filter);
                 mFilters.add(weakFilter);
+                if (mFilters.size() > FILTER_CLEANUP_THRESHOLD) {
+                    Iterator<WeakReference<Filter>> iterator = mFilters.iterator();
+                    while (iterator.hasNext()) {
+                        WeakReference<Filter> wFilter = iterator.next();
+                        if (wFilter.get() == null) {
+                            iterator.remove();
+                        }
+                    }
+                }
             }
         }
         return filter;
