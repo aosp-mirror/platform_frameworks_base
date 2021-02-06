@@ -662,6 +662,19 @@
       <item name="android:windowExitAnimation">@anim/bottomsheet_out</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.Control.LockScreen" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+      <item name="android:windowAnimationStyle">@style/Animation.Fade</item>
+      <item name="android:windowFullscreen">true</item>
+      <item name="android:windowIsFloating">false</item>
+      <item name="android:windowBackground">@color/controls_lockscreen_scrim</item>
+      <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
+    <style name="Animation.Fade">
+      <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+      <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
     <style name="Control" />
 
     <style name="Control.MenuItem">
