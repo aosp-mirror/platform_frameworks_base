@@ -164,7 +164,7 @@ public class WindowAnimator {
 
                 dc.checkAppWindowsReadyToShow();
                 if (accessibilityController != null) {
-                    accessibilityController.drawMagnifiedRegionBorderIfNeededLocked(displayId,
+                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId,
                             mTransaction);
                 }
             }

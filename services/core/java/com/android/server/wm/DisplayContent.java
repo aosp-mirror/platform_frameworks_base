@@ -1226,7 +1226,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         if (mWmService.mAccessibilityController != null) {
             final int prevDisplayId = prevDc != null ? prevDc.getDisplayId() : INVALID_DISPLAY;
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(prevDisplayId,
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(prevDisplayId,
                     getDisplayId());
         }
     }
@@ -1850,7 +1850,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         if (mWmService.mAccessibilityController != null) {
-            mWmService.mAccessibilityController.onRotationChangedLocked(this);
+            mWmService.mAccessibilityController.onRotationChanged(this);
         }
     }
 
@@ -3400,7 +3400,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateAccessibilityOnWindowFocusChanged(AccessibilityController accessibilityController) {
-        accessibilityController.onWindowFocusChangedNotLocked(getDisplayId());
+        accessibilityController.onWindowFocusChangedNot(getDisplayId());
     }
 
     private static void onWindowFocusChanged(WindowState oldFocus, WindowState newFocus) {
@@ -4963,7 +4963,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!mLocationInParentWindow.equals(x, y)) {
             mLocationInParentWindow.set(x, y);
             if (mWmService.mAccessibilityController != null) {
-                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(mDisplayId);
+                mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(mDisplayId);
             }
             notifyLocationInParentDisplayChanged();
         }

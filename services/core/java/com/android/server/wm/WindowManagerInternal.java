@@ -48,6 +48,41 @@ import java.util.List;
 public abstract class WindowManagerInternal {
 
     /**
+     * Interface for accessibility features implemented by AccessibilityController inside
+     * WindowManager.
+     */
+    public interface AccessibilityControllerInternal {
+        /**
+         * Enable the accessibility trace logging.
+         */
+        void startTrace();
+
+        /**
+         * Disable the accessibility trace logging.
+         */
+        void stopTrace();
+
+        /**
+         * Is trace enabled or not.
+         */
+        boolean isEnabled();
+
+        /**
+         * Add an accessibility trace entry.
+         *
+         * @param where A string to identify this log entry, which can be used to filter/search
+         *        through the tracing file.
+         * @param callingParams The parameters for the method to be logged.
+         * @param a11yDump The proto byte array for a11y state when the entry is generated.
+         * @param callingUid The calling uid.
+         * @param stackTrace The stack trace, null if not needed.
+         */
+        void logTrace(
+                String where, String callingParams, byte[] a11yDump, int callingUid,
+                StackTraceElement[] stackTrace);
+    }
+
+    /**
      * Interface to receive a callback when the windows reported for
      * accessibility changed.
      */
@@ -222,6 +257,11 @@ public abstract class WindowManagerInternal {
          */
         default void postCancelDragAndDrop() {}
     }
+
+    /**
+     * Request the interface to access features implemented by AccessibilityController.
+     */
+    public abstract AccessibilityControllerInternal getAccessibilityController();
 
     /**
      * Request that the window manager call
