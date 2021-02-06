@@ -304,20 +304,16 @@ public final class IncrementalManager {
     }
 
     /**
-     * Called when a callback wants to stop listen to the loading progress of an installed package.
-     * Decrease the count of the callbacks on the associated to the corresponding storage.
-     * If the count becomes zero, unregister the storage listener.
+     * Called to stop all listeners from listening to loading progress of an installed package.
      * @param codePath Path of the installed package
-     * @return True if the package name and associated storage id are valid. False otherwise.
      */
-    public boolean unregisterLoadingProgressCallback(@NonNull String codePath,
-            @NonNull IPackageLoadingProgressCallback callback) {
+    public void unregisterLoadingProgressCallbacks(@NonNull String codePath) {
         final IncrementalStorage storage = openStorage(codePath);
         if (storage == null) {
             // storage does not exist, package not installed
-            return false;
+            return;
         }
-        return mLoadingProgressCallbacks.unregisterCallback(storage, callback);
+        mLoadingProgressCallbacks.cleanUpCallbacks(storage);
     }
 
     private static class LoadingProgressCallbacks extends IStorageLoadingProgressListener.Stub {
@@ -325,7 +321,6 @@ public final class IncrementalManager {
         private final SparseArray<RemoteCallbackList<IPackageLoadingProgressCallback>> mCallbacks =
                 new SparseArray<>();
 
-        // TODO(b/165841827): disable callbacks when app state changes to fully loaded
         public void cleanUpCallbacks(@NonNull IncrementalStorage storage) {
             final int storageId = storage.getId();
             final RemoteCallbackList<IPackageLoadingProgressCallback> callbacksForStorage;

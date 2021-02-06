@@ -24,7 +24,6 @@ import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
-import static android.content.Intent.CATEGORY_BROWSABLE;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
@@ -68,11 +67,7 @@ import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_APEX;
@@ -378,11 +373,6 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
-import com.android.server.pm.verify.domain.DomainVerificationService;
-import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
-import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
-import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
@@ -396,6 +386,11 @@ import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationService;
+import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
+import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
+import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -405,7 +400,6 @@ import com.android.server.utils.Watchable;
 import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedSparseBooleanArray;
-import com.android.server.utils.WatchedSparseIntArray;
 import com.android.server.utils.Watcher;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -467,7 +461,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -19170,6 +19163,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     extras, 0 /*flags*/,
                     null /*targetPackage*/, null /*finishedReceiver*/,
                     mInstalledUserIds, null /* instantUserIds */, newBroadcastAllowList, null);
+            // Unregister progress listener
+            mIncrementalManager.unregisterLoadingProgressCallbacks(codePath);
             // Unregister health listener as it will always be healthy from now
             mIncrementalManager.unregisterHealthListener(codePath);
         }
@@ -27044,47 +27039,6 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
             return PackageManagerService.this.isSuspendingAnyPackages(suspendingPackage, userId);
-        }
-
-        @Override
-        public boolean registerInstalledLoadingProgressCallback(String packageName,
-                PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
-            final PackageSetting ps = getPackageSettingForUser(packageName, Binder.getCallingUid(),
-                    userId);
-            if (ps == null) {
-                return false;
-            }
-            if (!ps.isPackageLoading()) {
-                Slog.w(TAG,
-                        "Failed registering loading progress callback. Package is fully loaded.");
-                return false;
-            }
-            if (mIncrementalManager == null) {
-                Slog.w(TAG,
-                        "Failed registering loading progress callback. Incremental is not enabled");
-                return false;
-            }
-            return mIncrementalManager.registerLoadingProgressCallback(ps.getPathString(),
-                    (IPackageLoadingProgressCallback) callback.getBinder());
-        }
-
-        @Override
-        public boolean unregisterInstalledLoadingProgressCallback(String packageName,
-                PackageManagerInternal.InstalledLoadingProgressCallback callback) {
-            final PackageSetting ps;
-            synchronized (mLock) {
-                ps = mSettings.getPackageLPr(packageName);
-                if (ps == null) {
-                    Slog.w(TAG, "Failed unregistering loading progress callback. Package "
-                            + packageName + " is not installed");
-                    return false;
-                }
-            }
-            if (mIncrementalManager == null) {
-                return false;
-            }
-            return mIncrementalManager.unregisterLoadingProgressCallback(ps.getPathString(),
-                    (IPackageLoadingProgressCallback) callback.getBinder());
         }
 
         @Override

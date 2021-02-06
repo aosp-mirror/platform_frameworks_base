@@ -249,24 +249,6 @@ public final class IncrementalStates {
     }
 
     /**
-     * @return the current startable state.
-     */
-    public boolean isStartable() {
-        synchronized (mLock) {
-            return mStartableState.isStartable();
-        }
-    }
-
-    /**
-     * @return Whether the package is still being loaded or has been fully loaded.
-     */
-    public boolean isLoading() {
-        synchronized (mLock) {
-            return mLoadingState.isLoading();
-        }
-    }
-
-    /**
      * @return all current states in a Parcelable.
      */
     public IncrementalStatesInfo getIncrementalStatesInfo() {
