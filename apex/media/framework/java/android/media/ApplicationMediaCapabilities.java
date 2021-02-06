@@ -36,30 +36,46 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * ApplicationMediaCapabilities is an immutable class that encapsulates an application's
- * capabilities for handling newer video codec format and media features.
- *
- * The ApplicationMediaCapabilities class is used by the platform to represent an application's
- * media capabilities as defined in their manifest(TODO: Add link) in order to determine
- * whether modern media files need to be transcoded for that application (TODO: Add link).
- *
- * ApplicationMediaCapabilities objects can also be built by applications at runtime for use with
- * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)} to provide more
- * control over the transcoding that is built into the platform. ApplicationMediaCapabilities
- * provided by applications at runtime like this override the default manifest capabilities for that
- * media access.
- *
- * <h3> Video Codec Support</h3>
- * Newer video codes include HEVC, VP9 and AV1. Application only needs to indicate their support
- * for newer format with this class as they are assumed to support older format like h.264.
- *
- * <h4>Capability of handling HDR(high dynamic range) video</h4>
- * There are four types of HDR video(Dolby-Vision, HDR10, HDR10+, HLG) supported by the platform,
- * application will only need to specify individual types they supported.
+ ApplicationMediaCapabilities is an immutable class that encapsulates an application's capabilities
+ for handling newer video codec format and media features.
+
+ <p>
+ Android 12 introduces seamless media transcoding feature. By default, Android assumes apps can
+ support playback of all media formats. Apps that would like to request that media be transcoded
+ into a more compatible format should declare their media capabilities in a media_capabilities
+ .xml resource file and add it as a property tag in the AndroidManifest.xml file. Here is a example:
+ <pre>
+ {@code
+ <media-capabilities xmlns:android="http://schemas.android.com/apk/res/android">
+     <format android:name="HEVC" supported="true"/>
+     <format android:name="HDR10" supported="false"/>
+     <format android:name="HDR10Plus" supported="false"/>
+ </media-capabilities>
+ }
+ </pre>
+ The ApplicationMediaCapabilities class is generated from this xml and used by the platform to
+ represent an application's media capabilities in order to determine whether modern media files need
+ to be transcoded for that application.
+ </p>
+
+ <p>
+ ApplicationMediaCapabilities objects can also be built by applications at runtime for use with
+ {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)} to provide more
+ control over the transcoding that is built into the platform. ApplicationMediaCapabilities
+ provided by applications at runtime like this override the default manifest capabilities for that
+ media access.The object could be build either through {@link #createFromXml(XmlPullParser)} or
+ through the builder class {@link ApplicationMediaCapabilities.Builder}
+
+ <h3> Video Codec Support</h3>
+ <p>
+ Newer video codes include HEVC, VP9 and AV1. Application only needs to indicate their support
+ for newer format with this class as they are assumed to support older format like h.264.
+
+ <h3>Capability of handling HDR(high dynamic range) video</h3>
+ <p>
+ There are four types of HDR video(Dolby-Vision, HDR10, HDR10+, HLG) supported by the platform,
+ application will only need to specify individual types they supported.
  */
-// TODO(huang): Correct openTypedAssetFileDescriptor with the new API after it is added.
-// TODO(hkuang): Add a link to seamless transcoding detail when it is published
-// TODO(hkuang): Add code sample on how to build a capability object with MediaCodecList
 public final class ApplicationMediaCapabilities implements Parcelable {
     private static final String TAG = "ApplicationMediaCapabilities";
 
@@ -105,9 +121,9 @@ public final class ApplicationMediaCapabilities implements Parcelable {
      */
     public boolean isVideoMimeTypeSupported(
             @NonNull String videoMime) throws FormatNotFoundException {
-        if (mUnsupportedVideoMimeTypes.contains(videoMime)) {
+        if (mUnsupportedVideoMimeTypes.contains(videoMime.toLowerCase())) {
             return false;
-        } else if (mSupportedVideoMimeTypes.contains(videoMime)) {
+        } else if (mSupportedVideoMimeTypes.contains(videoMime.toLowerCase())) {
             return true;
         } else {
             throw new FormatNotFoundException(videoMime);
@@ -262,11 +278,27 @@ public final class ApplicationMediaCapabilities implements Parcelable {
 
     /**
      * Creates {@link ApplicationMediaCapabilities} from an xml.
+     *
+     * The xml's syntax is the same as the media_capabilities.xml used by the AndroidManifest.xml.
+     * <p> Here is an example:
+     *
+     * <pre>
+     * {@code
+     * <media-capabilities xmlns:android="http://schemas.android.com/apk/res/android">
+     *     <format android:name="HEVC" supported="true"/>
+     *     <format android:name="HDR10" supported="false"/>
+     *     <format android:name="HDR10Plus" supported="false"/>
+     * </media-capabilities>
+     * }
+     * </pre>
+     * <p>
+     *
      * @param xmlParser The underlying {@link XmlPullParser} that will read the xml.
      * @return An ApplicationMediaCapabilities object.
      * @throws UnsupportedOperationException if the capabilities in xml config are invalid or
      * incompatible.
      */
+    // TODO: Add developer.android.com link for the format of the xml.
     @NonNull
     public static ApplicationMediaCapabilities createFromXml(@NonNull XmlPullParser xmlParser) {
         ApplicationMediaCapabilities.Builder builder = new ApplicationMediaCapabilities.Builder();
@@ -430,7 +462,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
                         mIsSlowMotionSupported = isSupported;
                         break;
                     default:
-                        throw new UnsupportedOperationException("Invalid format name " + name);
+                        Log.w(TAG, "Invalid format name " + name);
                 }
                 // Save the name and isSupported into the map for validate later.
                 mFormatSupportedMap.put(name, isSupported);
