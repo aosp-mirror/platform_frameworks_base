@@ -156,9 +156,6 @@ interface IConnectivityManager
 
     boolean requestBandwidthUpdate(in Network network);
 
-    int registerNetworkFactory(in Messenger messenger, in String name);
-    void unregisterNetworkFactory(in Messenger messenger);
-
     int registerNetworkProvider(in Messenger messenger, in String name);
     void unregisterNetworkProvider(in Messenger messenger);
 

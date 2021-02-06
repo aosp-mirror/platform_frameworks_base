@@ -26,7 +26,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase
+import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.animation.PhysicsAnimator.EndListener
 import com.android.wm.shell.animation.PhysicsAnimator.UpdateListener
 import com.android.wm.shell.animation.PhysicsAnimatorTestUtils.clearAnimationUpdateFrames
@@ -54,8 +54,7 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-@Ignore("Blocking presubmits - investigating in b/158697054")
-class PhysicsAnimatorTest : SysuiTestCase() {
+class PhysicsAnimatorTest : ShellTestCase() {
     private lateinit var viewGroup: ViewGroup
     private lateinit var testView: View
     private lateinit var testView2: View

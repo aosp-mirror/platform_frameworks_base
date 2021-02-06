@@ -117,7 +117,7 @@ interface IWindowManager
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void setEventDispatching(boolean enabled);
 
-    /** @return {@code true} if this binder is a registered window token. */
+    /** Returns {@code true} if this binder is a registered window token. */
     boolean isWindowToken(in IBinder binder);
     /**
      * Adds window token for a given type.

@@ -75,6 +75,7 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.autofill.AutofillManager.AutofillClient;
@@ -6110,18 +6111,19 @@ public abstract class Context {
      *
      * // WindowManager.LayoutParams initialization
      * ...
+     * // The types used in addView and createWindowContext must match.
      * mParams.type = TYPE_APPLICATION_OVERLAY;
      * ...
      *
-     * mWindowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
+     * windowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
      * </pre>
      *
      * <p>
-     * This context's configuration and resources are adjusted to a display area where the windows
-     * with provided type will be added. <b>Note that all windows associated with the same context
-     * will have an affinity and can only be moved together between different displays or areas on a
-     * display.</b> If there is a need to add different window types, or non-associated windows,
-     * separate Contexts should be used.
+     * This context's configuration and resources are adjusted to an area of the display where
+     * the windows with provided type will be added. <b>Note that all windows associated with the
+     * same context will have an affinity and can only be moved together between different displays
+     * or areas on a display.</b> If there is a need to add different window types, or
+     * non-associated windows, separate Contexts should be used.
      * </p>
      * <p>
      * Creating a window context is an expensive operation. Misuse of this API may lead to a huge
@@ -6129,7 +6131,43 @@ public abstract class Context {
      * An approach is to create one window context with specific window type and display and
      * use it everywhere it's needed.
      * </p>
+     * <p>
+     * After {@link Build.VERSION_CODES#S}, window context provides the capability to receive
+     * configuration changes for existing token by overriding the
+     * {@link android.view.WindowManager.LayoutParams#token token} of the
+     * {@link android.view.WindowManager.LayoutParams} passed in
+     * {@link WindowManager#addView(View, LayoutParams)}. This is useful when an application needs
+     * to attach its window to an existing activity for window token sharing use-case.
+     * </p>
+     * <p>
+     * Note that the window context in {@link Build.VERSION_CODES#R} didn't have this
+     * capability. This is a no-op for the window context in {@link Build.VERSION_CODES#R}.
+     * </p>
+     * Below is sample code to <b>attach an existing token to a window context:</b>
+     * <pre class="prettyprint">
+     * final DisplayManager dm = anyContext.getSystemService(DisplayManager.class);
+     * final Display primaryDisplay = dm.getDisplay(DEFAULT_DISPLAY);
+     * final Context windowContext = anyContext.createWindowContext(primaryDisplay,
+     *         TYPE_APPLICATION, null);
      *
+     * // Get an existing token.
+     * final IBinder existingToken = activity.getWindow().getAttributes().token;
+     *
+     * // The types used in addView() and createWindowContext() must match.
+     * final WindowManager.LayoutParams params = new WindowManager.LayoutParams(TYPE_APPLICATION);
+     * params.token = existingToken;
+     *
+     * // After WindowManager#addView(), the server side will extract the provided token from
+     * // LayoutParams#token (existingToken in the sample code), and switch to propagate
+     * // configuration changes from the node associated with the provided token.
+     * windowContext.getSystemService(WindowManager.class).addView(overlayView, mParams);
+     * </pre>
+     * <p>
+     * Note that using {@link android.app.Application} or {@link android.app.Service} context for
+     * UI-related queries may result in layout or continuity issues on devices with variable screen
+     * sizes (e.g. foldables) or in multi-window modes, since these non-UI contexts may not reflect
+     * the {@link Configuration} changes for the visual container.
+     * </p>
      * @param type Window type in {@link WindowManager.LayoutParams}
      * @param options A bundle used to pass window-related options
      * @return A {@link Context} that can be used to create
@@ -6141,9 +6179,7 @@ public abstract class Context {
      * @see #LAYOUT_INFLATER_SERVICE
      * @see #WALLPAPER_SERVICE
      * @throws UnsupportedOperationException if this {@link Context} does not attach to a display,
-     * such as {@link android.app.Application Application} or {@link android.app.Service Service},
-     * or the current number of window contexts without adding any view by
-     * {@link WindowManager#addView} <b>exceeds five</b>.
+     * such as {@link android.app.Application Application} or {@link android.app.Service Service}.
      */
     @UiContext
     @NonNull

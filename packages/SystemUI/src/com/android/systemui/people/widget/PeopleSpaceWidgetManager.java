@@ -16,8 +16,8 @@
 
 package com.android.systemui.people.widget;
 
-import android.app.INotificationManager;
 import android.app.NotificationChannel;
+import android.app.people.IPeopleManager;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +29,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -37,7 +38,8 @@ import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -51,7 +53,7 @@ public class PeopleSpaceWidgetManager {
     private final Context mContext;
     private IAppWidgetService mAppWidgetService;
     private AppWidgetManager mAppWidgetManager;
-    private INotificationManager mNotificationManager;
+    private IPeopleManager mPeopleManager;
 
     @Inject
     public PeopleSpaceWidgetManager(Context context, IAppWidgetService appWidgetService) {
@@ -59,11 +61,13 @@ public class PeopleSpaceWidgetManager {
         mContext = context;
         mAppWidgetService = appWidgetService;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
-        mNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mPeopleManager = IPeopleManager.Stub.asInterface(
+                ServiceManager.getService(Context.PEOPLE_SERVICE));
     }
 
-    /** Constructor used for testing. */
+    /**
+     * Constructor used for testing.
+     */
     @VisibleForTesting
     protected PeopleSpaceWidgetManager(Context context) {
         if (DEBUG) Log.d(TAG, "constructor");
@@ -72,16 +76,20 @@ public class PeopleSpaceWidgetManager {
                 ServiceManager.getService(Context.APPWIDGET_SERVICE));
     }
 
-    /** AppWidgetManager setter used for testing. */
+    /**
+     * AppWidgetManager setter used for testing.
+     */
     @VisibleForTesting
     protected void setAppWidgetManager(IAppWidgetService appWidgetService,
-            AppWidgetManager appWidgetManager, INotificationManager notificationManager) {
+            AppWidgetManager appWidgetManager, IPeopleManager peopleManager) {
         mAppWidgetService = appWidgetService;
         mAppWidgetManager = appWidgetManager;
-        mNotificationManager = notificationManager;
+        mPeopleManager = peopleManager;
     }
 
-    /** Updates People Space widgets. */
+    /**
+     * Updates People Space widgets.
+     */
     public void updateWidgets() {
         try {
             if (DEBUG) Log.d(TAG, "updateWidgets called");
@@ -99,7 +107,7 @@ public class PeopleSpaceWidgetManager {
 
             if (showSingleConversation) {
                 PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds,
-                        mAppWidgetManager, mNotificationManager);
+                        mAppWidgetManager, mPeopleManager);
             } else {
                 mAppWidgetService
                         .notifyAppWidgetViewDataChanged(mContext.getOpPackageName(), widgetIds,
@@ -114,30 +122,38 @@ public class PeopleSpaceWidgetManager {
      * Check if any existing People tiles match the incoming notification change, and store the
      * change in the tile if so.
      */
-    public void storeNotificationChange(StatusBarNotification sbn,
+    public void updateWidgetWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
-        if (DEBUG) Log.d(TAG, "storeNotificationChange called");
+        RemoteViews views = new RemoteViews(
+                mContext.getPackageName(), R.layout.people_space_small_avatar_tile);
+        if (DEBUG) Log.d(TAG, "updateWidgetWithNotificationChanged called");
         boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
         if (!showSingleConversation) {
             return;
         }
         try {
+            String sbnShortcutId = sbn.getShortcutId();
+            if (sbnShortcutId == null) {
+                return;
+            }
             int[] widgetIds = mAppWidgetService.getAppWidgetIds(
                     new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
             );
             if (widgetIds.length == 0) {
                 return;
             }
-
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-            for (int widgetId : widgetIds) {
-                String shortcutId = sp.getString(String.valueOf(widgetId), null);
-                if (!Objects.equals(sbn.getShortcutId(), shortcutId)) {
-                    continue;
-                }
+            int userId = UserHandle.getUserHandleForUid(sbn.getUid()).getIdentifier();
+            String key = PeopleSpaceUtils.getKey(sbnShortcutId, sbn.getPackageName(), userId);
+            Set<String> storedWidgetIds = new HashSet<>(sp.getStringSet(key, new HashSet<>()));
+            if (storedWidgetIds.isEmpty()) {
+                return;
+            }
+            for (String widgetIdString : storedWidgetIds) {
+                int widgetId = Integer.parseInt(widgetIdString);
                 if (DEBUG) Log.d(TAG, "Storing notification change, key:" + sbn.getKey());
-                PeopleSpaceUtils.storeNotificationChange(
+                PeopleSpaceUtils.updateWidgetWithNotificationChanged(mPeopleManager, mContext,
                         sbn, notificationAction, mAppWidgetManager, widgetId);
             }
         } catch (Exception e) {
@@ -159,8 +175,7 @@ public class PeopleSpaceWidgetManager {
         public void onNotificationPosted(
                 StatusBarNotification sbn, NotificationListenerService.RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationPosted");
-            storeNotificationChange(sbn, PeopleSpaceUtils.NotificationAction.POSTED);
-            updateWidgets();
+            updateWidgetWithNotificationChanged(sbn, PeopleSpaceUtils.NotificationAction.POSTED);
         }
 
         @Override
@@ -169,8 +184,7 @@ public class PeopleSpaceWidgetManager {
                 NotificationListenerService.RankingMap rankingMap
         ) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved");
-            storeNotificationChange(sbn, PeopleSpaceUtils.NotificationAction.REMOVED);
-            updateWidgets();
+            updateWidgetWithNotificationChanged(sbn, PeopleSpaceUtils.NotificationAction.REMOVED);
         }
 
         @Override
@@ -179,8 +193,7 @@ public class PeopleSpaceWidgetManager {
                 NotificationListenerService.RankingMap rankingMap,
                 int reason) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved with reason " + reason);
-            storeNotificationChange(sbn, PeopleSpaceUtils.NotificationAction.REMOVED);
-            updateWidgets();
+            updateWidgetWithNotificationChanged(sbn, PeopleSpaceUtils.NotificationAction.REMOVED);
         }
 
         @Override

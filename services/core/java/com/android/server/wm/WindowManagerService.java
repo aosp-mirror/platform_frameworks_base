@@ -83,7 +83,6 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
-import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
@@ -405,6 +404,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
+    static final int LOGTAG_INPUT_FOCUS = 62001;
+
     /**
      * Restrict ability of activities overriding transition animation in a way such that
      * an activity can do it only when the transition happens within a same task.
@@ -413,13 +414,25 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
             "persist.wm.disable_custom_task_animation";
-    static final int LOGTAG_INPUT_FOCUS = 62001;
 
     /**
      * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
      */
     static boolean sDisableCustomTaskAnimationProperty =
             SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
+
+    /**
+     * Run Keyguard animation as remote animation in System UI instead of local animation in
+     * the server process.
+     */
+    private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
+            "persist.wm.enable_remote_keyguard_animation";
+
+    /**
+     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
+     */
+    public static boolean sEnableRemoteKeyguardAnimation =
+            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
@@ -626,13 +639,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mDestroySurface = new ArrayList<>();
 
     /**
-     * Windows with a preserved surface waiting to be destroyed. These windows
-     * are going through a surface change. We keep the old surface around until
-     * the first frame on the new surface finishes drawing.
-     */
-    final ArrayList<WindowState> mDestroyPreservedSurface = new ArrayList<>();
-
-    /**
      * This is set when we have run out of memory, and will either be an empty
      * list or contain windows that need to be force removed.
      */
@@ -770,7 +776,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final AnrController mAnrController;
 
     private final ScreenshotHashController mScreenshotHashController;
-    private final WindowContextListenerController mWindowContextListenerController =
+    @VisibleForTesting
+    final WindowContextListenerController mWindowContextListenerController =
             new WindowContextListenerController();
 
     @VisibleForTesting
@@ -2328,7 +2335,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (DEBUG_LAYOUT) Slog.v(TAG_WM, "Relayout " + win + ": viewVisibility=" + viewVisibility
                     + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
-            winAnimator.mSurfaceDestroyDeferred = (flags & RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 winAnimator.mAlpha = attrs.alpha;
             }
@@ -2794,6 +2800,17 @@ public class WindowManagerService extends IWindowManager.Stub
         return WindowManagerGlobal.ADD_OKAY;
     }
 
+    /**
+     * Registers a listener for a {@link android.app.WindowContext} to subscribe to configuration
+     * changes of a {@link DisplayArea}.
+     *
+     * @param clientToken the window context's token
+     * @param type Window type of the window context
+     * @param displayId The display associated with the window context
+     * @param options A bundle used to pass window-related options and choose the right DisplayArea
+     *
+     * @return {@code true} if the listener was registered successfully.
+     */
     @Override
     public boolean registerWindowContextListener(IBinder clientToken, int type, int displayId,
             Bundle options) {
@@ -2849,6 +2866,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** Returns {@code true} if this binder is a registered window token. */
     @Override
     public boolean isWindowToken(IBinder binder) {
         synchronized (mGlobalLock) {
@@ -5491,14 +5509,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void destroyPreservedSurfaceLocked() {
-        for (int i = mDestroyPreservedSurface.size() - 1; i >= 0 ; i--) {
-            final WindowState w = mDestroyPreservedSurface.get(i);
-            w.mWinAnimator.destroyPreservedSurfaceLocked(w.getSyncTransaction());
-        }
-        mDestroyPreservedSurface.clear();
-    }
-
     // -------------------------------------------------------------
     // IWindowManager API
     // -------------------------------------------------------------
@@ -7746,6 +7756,15 @@ public class WindowManagerService extends IWindowManager.Stub
         public void registerAppTransitionListener(AppTransitionListener listener) {
             synchronized (mGlobalLock) {
                 getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
+            }
+        }
+
+        @Override
+        public void registerKeyguardExitAnimationStartListener(
+                KeyguardExitAnimationStartListener listener) {
+            synchronized (mGlobalLock) {
+                getDefaultDisplayContentLocked().mAppTransition
+                        .registerKeygaurdExitAnimationStartListener(listener);
             }
         }
 

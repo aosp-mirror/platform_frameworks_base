@@ -1478,6 +1478,9 @@ public class BubbleStackView extends FrameLayout
      * Update bubble order and pointer position.
      */
     public void updateBubbleOrder(List<Bubble> bubbles) {
+        if (isExpansionAnimating()) {
+            return;
+        }
         final Runnable reorder = () -> {
             for (int i = 0; i < bubbles.size(); i++) {
                 Bubble bubble = bubbles.get(i);
@@ -1662,6 +1665,7 @@ public class BubbleStackView extends FrameLayout
         }
         beforeExpandedViewAnimation();
 
+        updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
         updateOverflowVisibility();
         updatePointerPosition();
@@ -1875,7 +1879,7 @@ public class BubbleStackView extends FrameLayout
                                 mExpandedBubble));
                     }
                     updateOverflowVisibility();
-
+                    updateBadgesAndZOrder(true /* setBadgeForCollapsedStack */);
                     afterExpandedViewAnimation();
                     if (previouslySelected != null) {
                         previouslySelected.setContentVisibility(false);
@@ -2623,7 +2627,6 @@ public class BubbleStackView extends FrameLayout
         }
 
         mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
     }
 
     /**

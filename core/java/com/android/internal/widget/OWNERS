@@ -11,6 +11,7 @@ per-file *Notification* = file:/services/core/java/com/android/server/notificati
 per-file *Messaging* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file *Message* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file *Conversation* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *People* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file *ImageResolver* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file CallLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
 per-file CachingIconView.java = file:/services/core/java/com/android/server/notification/OWNERS

@@ -36,6 +36,7 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -70,8 +71,10 @@ public class AppChangeTransitionTests extends WindowTestsBase {
 
     class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
         @Override
-        public void onAnimationStart(RemoteAnimationTarget[] apps,
+        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                RemoteAnimationTarget[] apps,
                 RemoteAnimationTarget[] wallpapers,
+                RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback) {
             for (RemoteAnimationTarget target : apps) {
                 assertNotNull(target.startBounds);

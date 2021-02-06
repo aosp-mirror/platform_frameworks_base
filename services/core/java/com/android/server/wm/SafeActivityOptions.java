@@ -253,6 +253,20 @@ public class SafeActivityOptions {
             throw new SecurityException(msg);
         }
 
+        // Check if the caller is allowed to override any app transition animation.
+        final boolean overrideTaskTransition = options.getOverrideTaskTransition();
+        if (aInfo != null && overrideTaskTransition) {
+            final int startTasksFromRecentsPerm = ActivityTaskManagerService.checkPermission(
+                    START_TASKS_FROM_RECENTS, callingPid, callingUid);
+            if (startTasksFromRecentsPerm != PERMISSION_GRANTED) {
+                final String msg = "Permission Denial: starting " + getIntentString(intent)
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with overrideTaskTransition=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        }
+
         // Check permission for remote animations
         final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
         if (adapter != null && supervisor.mService.checkPermission(

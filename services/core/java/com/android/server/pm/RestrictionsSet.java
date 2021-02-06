@@ -26,6 +26,7 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.BundleUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -78,7 +79,7 @@ public class RestrictionsSet {
         if (!changed) {
             return false;
         }
-        if (!UserRestrictionsUtils.isEmpty(restrictions)) {
+        if (!BundleUtils.isEmpty(restrictions)) {
             mUserRestrictions.put(userId, restrictions);
         } else {
             mUserRestrictions.delete(userId);

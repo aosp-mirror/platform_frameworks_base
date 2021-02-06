@@ -28,6 +28,7 @@ package android {
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
+    field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_BIOMETRIC = "android.permission.TEST_BIOMETRIC";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
@@ -119,6 +120,7 @@ package android.app {
 
   public class ActivityOptions {
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
     method public void setLaunchTaskId(int);
@@ -390,11 +392,10 @@ package android.app.admin {
     method public boolean isFactoryResetProtectionPolicySupported();
     method @NonNull public static String operationToString(int);
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
+    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void resetDefaultCrossProfileIntentFilters(int);
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, int);
     method @NonNull public static String unsafeOperationReasonToString(int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
-    field public static final String ACTION_MANAGED_PROFILE_CREATED = "android.app.action.MANAGED_PROFILE_CREATED";
-    field public static final String ACTION_PROVISIONED_MANAGED_DEVICE = "android.app.action.PROVISIONED_MANAGED_DEVICE";
     field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
     field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
     field public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
