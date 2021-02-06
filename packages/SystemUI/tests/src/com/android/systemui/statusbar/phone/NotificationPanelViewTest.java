@@ -61,8 +61,10 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -207,6 +209,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlags;
     @Mock
+    private ControlsComponent mControlsComponent;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     @Mock
     private AmbientState mAmbientState;
@@ -300,7 +306,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mScrimController,
                 mMediaDataManager,
                 mAmbientState,
-                mFeatureFlags);
+                mFeatureFlags,
+                mControlsComponent,
+                mBroadcastDispatcher);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

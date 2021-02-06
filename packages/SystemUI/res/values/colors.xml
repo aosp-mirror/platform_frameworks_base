@@ -264,6 +264,7 @@
     <color name="control_enabled_cool_foreground">@color/GM2_blue_300</color>
     <color name="control_thumbnail_tint">#33000000</color>
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
+    <color name="controls_lockscreen_scrim">#AA000000</color>
 
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>
