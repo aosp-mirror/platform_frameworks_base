@@ -29,6 +29,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.OemNetworkPreferences;
 import android.net.ProxyInfo;
 import android.net.UidRange;
 import android.net.QosSocketInfo;
@@ -240,4 +241,6 @@ interface IConnectivityManager
 
     void registerQosSocketCallback(in QosSocketInfo socketInfo, in IQosCallback callback);
     void unregisterQosCallback(in IQosCallback callback);
+
+    void setOemNetworkPreference(in OemNetworkPreferences preference);
 }

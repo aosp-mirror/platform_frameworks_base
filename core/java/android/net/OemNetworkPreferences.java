@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.SparseArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /** @hide */
@@ -60,16 +60,16 @@ public final class OemNetworkPreferences implements Parcelable {
     public static final int OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY = 4;
 
     @NonNull
-    private final SparseArray<List<String>> mNetworkMappings;
+    private final Bundle mNetworkMappings;
 
     @NonNull
-    public SparseArray<List<String>> getNetworkPreferences() {
-        return mNetworkMappings.clone();
+    public Map<String, Integer> getNetworkPreferences() {
+        return convertToUnmodifiableMap(mNetworkMappings);
     }
 
-    private OemNetworkPreferences(@NonNull SparseArray<List<String>> networkMappings) {
+    private OemNetworkPreferences(@NonNull final Bundle networkMappings) {
         Objects.requireNonNull(networkMappings);
-        mNetworkMappings = networkMappings.clone();
+        mNetworkMappings = (Bundle) networkMappings.clone();
     }
 
     @Override
@@ -99,26 +99,45 @@ public final class OemNetworkPreferences implements Parcelable {
      * @hide
      */
     public static final class Builder {
-        private final SparseArray<List<String>> mNetworkMappings;
+        private final Bundle mNetworkMappings;
 
         public Builder() {
-            mNetworkMappings = new SparseArray<>();
+            mNetworkMappings = new Bundle();
+        }
+
+        public Builder(@NonNull final OemNetworkPreferences preferences) {
+            Objects.requireNonNull(preferences);
+            mNetworkMappings = (Bundle) preferences.mNetworkMappings.clone();
         }
 
         /**
-         * Add a network preference for a list of packages.
+         * Add a network preference for a given package. Previously stored values for the given
+         * package will be overwritten.
          *
-         * @param preference the desired network preference to use
-         * @param packages   full package names (e.g.: "com.google.apps.contacts") for apps to use
-         *                   the given preference
+         * @param packageName full package name (e.g.: "com.google.apps.contacts") of the app
+         *                    to use the given preference
+         * @param preference  the desired network preference to use
          * @return The builder to facilitate chaining.
          */
         @NonNull
-        public Builder addNetworkPreference(@OemNetworkPreference final int preference,
-                @NonNull List<String> packages) {
-            Objects.requireNonNull(packages);
-            mNetworkMappings.put(preference,
-                    Collections.unmodifiableList(new ArrayList<>(packages)));
+        public Builder addNetworkPreference(@NonNull final String packageName,
+                @OemNetworkPreference final int preference) {
+            Objects.requireNonNull(packageName);
+            mNetworkMappings.putInt(packageName, preference);
+            return this;
+        }
+
+        /**
+         * Remove a network preference for a given package.
+         *
+         * @param packageName full package name (e.g.: "com.google.apps.contacts") of the app to
+         *                    remove a preference for.
+         * @return The builder to facilitate chaining.
+         */
+        @NonNull
+        public Builder removeNetworkPreference(@NonNull final String packageName) {
+            Objects.requireNonNull(packageName);
+            mNetworkMappings.remove(packageName);
             return this;
         }
 
@@ -129,6 +148,14 @@ public final class OemNetworkPreferences implements Parcelable {
         public OemNetworkPreferences build() {
             return new OemNetworkPreferences(mNetworkMappings);
         }
+    }
+
+    private static Map<String, Integer> convertToUnmodifiableMap(@NonNull final Bundle bundle) {
+        final Map<String, Integer> networkPreferences = new HashMap<>();
+        for (final String key : bundle.keySet()) {
+            networkPreferences.put(key, bundle.getInt(key));
+        }
+        return Collections.unmodifiableMap(networkPreferences);
     }
 
     /** @hide */
@@ -168,7 +195,7 @@ public final class OemNetworkPreferences implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
-        dest.writeSparseArray(mNetworkMappings);
+        dest.writeBundle(mNetworkMappings);
     }
 
     @Override
@@ -187,7 +214,7 @@ public final class OemNetworkPreferences implements Parcelable {
                 @Override
                 public OemNetworkPreferences createFromParcel(@NonNull android.os.Parcel in) {
                     return new OemNetworkPreferences(
-                            in.readSparseArray(getClass().getClassLoader()));
+                            in.readBundle(getClass().getClassLoader()));
                 }
             };
 }
