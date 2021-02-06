@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManagerInternal;
 import android.app.admin.SystemUpdateInfo;
@@ -57,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -432,6 +434,23 @@ class Owners {
             return mProfileOwners.keySet();
         }
     }
+
+    List<OwnerDto> listAllOwners() {
+        List<OwnerDto> owners = new ArrayList<>();
+        synchronized (mLock) {
+            if (mDeviceOwner != null) {
+                owners.add(new OwnerDto(mDeviceOwnerUserId, mDeviceOwner.admin,
+                        /* isDeviceOwner= */ true));
+            }
+            for (int i = 0; i < mProfileOwners.size(); i++) {
+                int userId = mProfileOwners.keyAt(i);
+                OwnerInfo info = mProfileOwners.valueAt(i);
+                owners.add(new OwnerDto(userId, info.admin, /* isDeviceOwner= */ false));
+            }
+        }
+        return owners;
+    }
+
 
     SystemUpdatePolicy getSystemUpdatePolicy() {
         synchronized (mLock) {
@@ -1073,6 +1092,24 @@ class Owners {
             pw.println("name=" + name);
             pw.println("package=" + packageName);
             pw.println("isOrganizationOwnedDevice=" + isOrganizationOwnedDevice);
+        }
+    }
+
+    /**
+     * Data-transfer object used by {@link DevicePolicyManagerServiceShellCommand}.
+     */
+    static final class OwnerDto {
+        public final @UserIdInt int userId;
+        public final ComponentName admin;
+        public final boolean isDeviceOwner;
+        public final boolean isProfileOwner;
+        public boolean isAffiliated;
+
+        private OwnerDto(@UserIdInt int userId, ComponentName admin, boolean isDeviceOwner) {
+            this.userId = userId;
+            this.admin = Objects.requireNonNull(admin, "admin must not be null");
+            this.isDeviceOwner = isDeviceOwner;
+            this.isProfileOwner = !isDeviceOwner;
         }
     }
 
