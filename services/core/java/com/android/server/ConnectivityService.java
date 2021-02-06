@@ -120,6 +120,7 @@ import android.net.NetworkState;
 import android.net.NetworkTestResultParcelable;
 import android.net.NetworkUtils;
 import android.net.NetworkWatchlistManager;
+import android.net.OemNetworkPreferences;
 import android.net.PrivateDnsConfigParcel;
 import android.net.ProxyInfo;
 import android.net.QosCallbackException;
@@ -9100,6 +9101,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     }
+
     /**
      * Registers {@link QosSocketFilter} with {@link IQosCallback}.
      *
@@ -9148,5 +9150,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void unregisterQosCallback(@NonNull final IQosCallback callback) {
         mQosCallbackTracker.unregisterCallback(callback);
+    }
+
+    @Override
+    public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference) {
+        // TODO http://b/176495594 track multiple default networks with networkPreferences
+        if (DBG) log("setOemNetworkPreference() called with: " + preference.toString());
     }
 }
