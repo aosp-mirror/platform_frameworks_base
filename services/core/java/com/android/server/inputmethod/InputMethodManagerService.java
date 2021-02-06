@@ -5227,6 +5227,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
         boolean asProto = false;
         for (int argIndex = 0; argIndex < args.length; argIndex++) {
             if (args[argIndex].equals(PROTO_ARG)) {
@@ -5249,8 +5251,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-
         if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
