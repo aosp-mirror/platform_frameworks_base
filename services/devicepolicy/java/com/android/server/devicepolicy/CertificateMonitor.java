@@ -177,7 +177,7 @@ public class CertificateMonitor {
 
         int parentUserId = userHandle.getIdentifier();
 
-        if (mService.getProfileOwnerAsUser(userHandle.getIdentifier()) != null) {
+        if (mService.getProfileOwner(userHandle.getIdentifier()) != null) {
             contentText = resources.getString(R.string.ssl_ca_cert_noti_managed,
                     mService.getProfileOwnerName(userHandle.getIdentifier()));
             smallIconId = R.drawable.stat_sys_certificate_info;
