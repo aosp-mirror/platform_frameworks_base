@@ -514,8 +514,8 @@ public final class DisplayManagerService extends SystemService {
 
             DeviceStateManager deviceStateManager =
                     mContext.getSystemService(DeviceStateManager.class);
-            deviceStateManager.registerDeviceStateListener(new DeviceStateListener(),
-                    new HandlerExecutor(mHandler));
+            deviceStateManager.addDeviceStateListener(new HandlerExecutor(mHandler),
+                    new DeviceStateListener());
 
             scheduleTraversalLocked(false);
         }
