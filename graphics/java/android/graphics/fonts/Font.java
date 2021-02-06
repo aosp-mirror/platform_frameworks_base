@@ -486,7 +486,8 @@ public final class Font {
             long ptr;
             int fontIdentifier;
             if (mFont == null) {
-                ptr = nBuild(builderPtr, readonlyBuffer, filePath, mWeight, italic, mTtcIndex);
+                ptr = nBuild(builderPtr, readonlyBuffer, filePath, mLocaleList, mWeight, italic,
+                        mTtcIndex);
                 long fontBufferPtr = nGetFontBufferAddress(ptr);
                 synchronized (SOURCE_ID_LOCK) {
                     long id = FONT_SOURCE_ID_MAP.get(fontBufferPtr, -1);
@@ -513,8 +514,8 @@ public final class Font {
         @CriticalNative
         private static native void nAddAxis(long builderPtr, int tag, float value);
         private static native long nBuild(
-                long builderPtr, @NonNull ByteBuffer buffer, @NonNull String filePath, int weight,
-                boolean italic, int ttcIndex);
+                long builderPtr, @NonNull ByteBuffer buffer, @NonNull String filePath,
+                @NonNull String localeList, int weight, boolean italic, int ttcIndex);
         @CriticalNative
         private static native long nGetReleaseNativeFont();
 

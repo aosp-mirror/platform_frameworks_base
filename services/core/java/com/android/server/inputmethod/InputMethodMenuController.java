@@ -220,7 +220,8 @@ public class InputMethodMenuController {
      */
     @VisibleForTesting
     public Context getSettingsContext(int displayId) {
-        if (mSettingsContext == null) {
+        // TODO(b/178462039): Cover the case when IME is moved to another ImeContainer.
+        if (mSettingsContext == null || mSettingsContext.getDisplayId() != displayId) {
             final Context systemUiContext = ActivityThread.currentActivityThread()
                     .createSystemUiContext(displayId);
             final Context windowContext = systemUiContext.createWindowContext(
@@ -228,11 +229,6 @@ public class InputMethodMenuController {
             mSettingsContext = new ContextThemeWrapper(
                     windowContext, com.android.internal.R.style.Theme_DeviceDefault_Settings);
             mSwitchingDialogToken = mSettingsContext.getWindowContextToken();
-        }
-        // TODO(b/159767464): register the listener to another display again if window token is not
-        // yet created.
-        if (mSettingsContext.getDisplayId() != displayId) {
-            mWindowManagerInternal.moveWindowTokenToDisplay(mSwitchingDialogToken, displayId);
         }
         return mSettingsContext;
     }

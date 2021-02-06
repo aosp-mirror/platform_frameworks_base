@@ -20,15 +20,16 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.FontConfig;
+import android.util.SparseIntArray;
 
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * A font family class can be used for creating Typeface.
@@ -68,7 +69,9 @@ public final class FontFamily {
                     nGetReleaseNativeFamily());
 
         private final ArrayList<Font> mFonts = new ArrayList<>();
-        private final HashSet<Integer> mStyleHashSet = new HashSet<>();
+        // Most FontFamily only has  regular, bold, italic, bold-italic. Thus 4 should be good for
+        // initial capacity.
+        private final SparseIntArray mStyles = new SparseIntArray(4);
 
         /**
          * Constructs a builder.
@@ -77,7 +80,7 @@ public final class FontFamily {
          */
         public Builder(@NonNull Font font) {
             Preconditions.checkNotNull(font, "font can not be null");
-            mStyleHashSet.add(makeStyleIdentifier(font));
+            mStyles.append(makeStyleIdentifier(font), 0);
             mFonts.add(font);
         }
 
@@ -97,9 +100,11 @@ public final class FontFamily {
          */
         public @NonNull Builder addFont(@NonNull Font font) {
             Preconditions.checkNotNull(font, "font can not be null");
-            if (!mStyleHashSet.add(makeStyleIdentifier(font))) {
+            int key = makeStyleIdentifier(font);
+            if (mStyles.indexOfKey(key) >= 0) {
                 throw new IllegalArgumentException(font + " has already been added");
             }
+            mStyles.append(key, 0);
             mFonts.add(font);
             return this;
         }
@@ -120,7 +125,7 @@ public final class FontFamily {
                 nAddFont(builderPtr, mFonts.get(i).getNativePtr());
             }
             final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback);
-            final FontFamily family = new FontFamily(mFonts, langTags, variant, ptr);
+            final FontFamily family = new FontFamily(mFonts, ptr);
             sFamilyRegistory.registerNativeAllocation(family, ptr);
             return family;
         }
@@ -139,15 +144,11 @@ public final class FontFamily {
     }
 
     private final ArrayList<Font> mFonts;
-    private final String mLangTags;
-    private final int mVariant;
     private final long mNativePtr;
 
     // Use Builder instead.
-    private FontFamily(@NonNull ArrayList<Font> fonts, String langTags, int variant, long ptr) {
+    private FontFamily(@NonNull ArrayList<Font> fonts, long ptr) {
         mFonts = fonts;
-        mLangTags = langTags;
-        mVariant = variant;
         mNativePtr = ptr;
     }
 
@@ -157,7 +158,7 @@ public final class FontFamily {
      * @return a BCP-47 compliant language tag.
      */
     public @Nullable String getLangTags() {
-        return mLangTags;
+        return nGetLangTags(mNativePtr);
     }
 
     /**
@@ -165,7 +166,7 @@ public final class FontFamily {
      * @return a family variant
      */
     public int getVariant() {
-        return mVariant;
+        return nGetVariant(mNativePtr);
     }
 
     /**
@@ -191,4 +192,10 @@ public final class FontFamily {
     public long getNativePtr() {
         return mNativePtr;
     }
+
+    @FastNative
+    private static native String nGetLangTags(long family);
+
+    @CriticalNative
+    private static native int nGetVariant(long family);
 }

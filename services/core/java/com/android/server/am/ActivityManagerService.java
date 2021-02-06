@@ -5632,7 +5632,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int modeFlags, int userId) {
         enforceNotIsolatedCaller("grantUriPermission");
         GrantUri grantUri = new GrantUri(userId, uri, modeFlags);
-        synchronized (mProcLock) {
+        synchronized (this) {
             final ProcessRecord r = getRecordForAppLOSP(caller);
             if (r == null) {
                 throw new SecurityException("Unable to find app for caller "
@@ -5666,7 +5666,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void revokeUriPermission(IApplicationThread caller, String targetPackage, Uri uri,
             final int modeFlags, int userId) {
         enforceNotIsolatedCaller("revokeUriPermission");
-        synchronized (mProcLock) {
+        synchronized (this) {
             final ProcessRecord r = getRecordForAppLOSP(caller);
             if (r == null) {
                 throw new SecurityException("Unable to find app for caller "

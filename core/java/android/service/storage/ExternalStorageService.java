@@ -158,7 +158,7 @@ public abstract class ExternalStorageService extends Service {
      * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed
      * @param bytes number of bytes which need to be freed
      */
-    public void onFreeCacheRequested(@NonNull UUID volumeUuid, @BytesLong long bytes) {
+    public void onFreeCache(@NonNull UUID volumeUuid, @BytesLong long bytes) throws IOException {
         throw new UnsupportedOperationException("onFreeCacheRequested not implemented");
     }
 
@@ -202,7 +202,7 @@ public abstract class ExternalStorageService extends Service {
                 RemoteCallback callback) {
             mHandler.post(() -> {
                 try {
-                    onFreeCacheRequested(StorageManager.convert(volumeUuid), bytes);
+                    onFreeCache(StorageManager.convert(volumeUuid), bytes);
                     sendResult(sessionId, null /* throwable */, callback);
                 } catch (Throwable t) {
                     sendResult(sessionId, t, callback);

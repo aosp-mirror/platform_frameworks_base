@@ -27,6 +27,8 @@ import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
+import android.hardware.face.FaceDataFrame;
+import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.NativeHandle;
@@ -108,6 +110,17 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
             shouldSend = !Utils.listContains(mEnrollIgnoreList, acquireInfo);
         }
         onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
+    }
+
+    /**
+     * Called each time a new frame is received during face enrollment.
+     *
+     * @param frame Information about the current frame.
+     */
+    public void onEnrollmentFrame(@NonNull FaceEnrollFrame frame) {
+        // TODO(b/178414967): Send additional frame data to the client callback.
+        final FaceDataFrame data = frame.getData();
+        onAcquired(data.getAcquiredInfo(), data.getVendorCode());
     }
 
     @Override

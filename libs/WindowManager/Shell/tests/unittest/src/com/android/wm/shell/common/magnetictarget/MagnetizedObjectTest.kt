@@ -21,8 +21,8 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.animation.PhysicsAnimatorTestUtils
+import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.animation.PhysicsAnimatorTestUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -43,7 +43,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-class MagnetizedObjectTest : SysuiTestCase() {
+class MagnetizedObjectTest : ShellTestCase() {
     /** Incrementing value for fake MotionEvent timestamps. */
     private var time = 0L
 

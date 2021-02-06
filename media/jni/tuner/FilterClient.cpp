@@ -18,6 +18,7 @@
 
 #include <aidlcommonsupport/NativeHandle.h>
 #include <android-base/logging.h>
+#include <fmq/ConvertMQDescriptors.h>
 #include <utils/Log.h>
 
 #include "FilterClient.h"
@@ -34,7 +35,7 @@ using ::aidl::android::media::tv::tuner::TunerFilterSectionTableInfo;
 using ::aidl::android::media::tv::tuner::TunerFilterSharedHandleInfo;
 using ::aidl::android::media::tv::tuner::TunerFilterTlvConfiguration;
 using ::aidl::android::media::tv::tuner::TunerFilterTsConfiguration;
-
+using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
@@ -68,18 +69,12 @@ void FilterClient::setHidlFilter(sp<IFilter> filter) {
     mFilter_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(mFilter);
 }
 
-int FilterClient::read(uint8_t* buffer, int size) {
-    // TODO: pending aidl interface
-
-    if (mFilter != NULL) {
-        Result res = getFilterMq();
-        if (res != Result::SUCCESS) {
-            return -1;
-        }
-        return copyData(buffer, size);
+int FilterClient::read(int8_t* buffer, int size) {
+    Result res = getFilterMq();
+    if (res != Result::SUCCESS) {
+        return -1;
     }
-
-    return -1;
+    return copyData(buffer, size);
 }
 
 SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
@@ -106,7 +101,10 @@ Result FilterClient::configure(DemuxFilterSettings configure) {
 }
 
 Result FilterClient::configureMonitorEvent(int monitorEventType) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->configureMonitorEvent(monitorEventType);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         return mFilter_1_1->configureMonitorEvent(monitorEventType);
@@ -116,7 +114,10 @@ Result FilterClient::configureMonitorEvent(int monitorEventType) {
 }
 
 Result FilterClient::configureIpFilterContextId(int cid) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->configureIpFilterContextId(cid);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         return mFilter_1_1->configureIpCid(cid);
@@ -126,7 +127,19 @@ Result FilterClient::configureIpFilterContextId(int cid) {
 }
 
 Result FilterClient::configureAvStreamType(AvStreamType avStreamType) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        int type;
+        switch (avStreamType.getDiscriminator()) {
+            case AvStreamType::hidl_discriminator::audio:
+                type = (int)avStreamType.audio();
+                break;
+            case AvStreamType::hidl_discriminator::video:
+                type = (int)avStreamType.video();
+                break;
+        }
+        Status s = mTunerFilter->configureAvStreamType(type);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         return mFilter_1_1->configureAvStreamType(avStreamType);
@@ -228,7 +241,10 @@ Result FilterClient::releaseAvHandle(native_handle_t* handle, uint64_t avDataId)
 }
 
 Result FilterClient::setDataSource(sp<FilterClient> filterClient){
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->setDataSource(filterClient->getAidlFilter());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         sp<IFilter> sourceFilter = filterClient->getHalFilter();
@@ -687,10 +703,10 @@ void TunerFilterCallback::getHidlFilterEvent(const vector<TunerFilterEvent>& fil
 
 void TunerFilterCallback::getHidlMediaEvent(
         const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         hidl_handle handle = hidl_handle(makeFromAidl(filterEvents[i]
                 .get<TunerFilterEvent::media>().avMemory));
-        event.events.resize(i + 1);
         event.events[i].media({
             .avMemory = handle,
             .streamId = static_cast<DemuxStreamId>(filterEvents[i]
@@ -736,9 +752,9 @@ void TunerFilterCallback::getHidlMediaEvent(
 
 void TunerFilterCallback::getHidlSectionEvent(
         const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto section = filterEvents[i].get<TunerFilterEvent::section>();
-        event.events.resize(i + 1);
         event.events[i].section({
             .tableId = static_cast<uint16_t>(section.tableId),
             .version = static_cast<uint16_t>(section.version),
@@ -750,9 +766,9 @@ void TunerFilterCallback::getHidlSectionEvent(
 
 void TunerFilterCallback::getHidlPesEvent(
         const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto pes = filterEvents[i].get<TunerFilterEvent::pes>();
-        event.events.resize(i + 1);
         event.events[i].pes({
             .streamId = static_cast<DemuxStreamId>(pes.streamId),
             .dataLength = static_cast<uint16_t>(pes.dataLength),
@@ -763,9 +779,10 @@ void TunerFilterCallback::getHidlPesEvent(
 
 void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
+    event.events.resize(filterEvents.size());
+    eventExt.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto ts = filterEvents[i].get<TunerFilterEvent::tsRecord>();
-        event.events.resize(i + 1);
         event.events[i].tsRecord({
             .tsIndexMask = static_cast<uint32_t>(ts.tsIndexMask),
             .byteNumber = static_cast<uint64_t>(ts.byteNumber),
@@ -787,7 +804,6 @@ void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& f
                 break;
         }
 
-        eventExt.events.resize(i + 1);
         if (ts.isExtended) {
             eventExt.events[i].tsRecord({
                 .pts = static_cast<uint64_t>(ts.pts),
@@ -801,15 +817,15 @@ void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& f
 
 void TunerFilterCallback::getHidlMmtpRecordEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
+    event.events.resize(filterEvents.size());
+    eventExt.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto mmtp = filterEvents[i].get<TunerFilterEvent::mmtpRecord>();
-        event.events.resize(i + 1);
         event.events[i].mmtpRecord({
             .scHevcIndexMask = static_cast<uint32_t>(mmtp.scHevcIndexMask),
             .byteNumber = static_cast<uint64_t>(mmtp.byteNumber),
         });
 
-        eventExt.events.resize(i + 1);
         if (mmtp.isExtended) {
             eventExt.events[i].mmtpRecord({
                 .pts = static_cast<uint64_t>(mmtp.pts),
@@ -825,9 +841,9 @@ void TunerFilterCallback::getHidlMmtpRecordEvent(const vector<TunerFilterEvent>&
 
 void TunerFilterCallback::getHidlDownloadEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto download = filterEvents[i].get<TunerFilterEvent::download>();
-        event.events.resize(i + 1);
         event.events[i].download({
             .itemId = static_cast<uint32_t>(download.itemId),
             .mpuSequenceNumber = static_cast<uint32_t>(download.mpuSequenceNumber),
@@ -840,9 +856,9 @@ void TunerFilterCallback::getHidlDownloadEvent(const vector<TunerFilterEvent>& f
 
 void TunerFilterCallback::getHidlIpPayloadEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto ip = filterEvents[i].get<TunerFilterEvent::ipPayload>();
-        event.events.resize(i + 1);
         event.events[i].ipPayload({
             .dataLength = static_cast<uint16_t>(ip.dataLength),
         });
@@ -851,15 +867,15 @@ void TunerFilterCallback::getHidlIpPayloadEvent(const vector<TunerFilterEvent>& 
 
 void TunerFilterCallback::getHidlTemiEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto temi = filterEvents[i].get<TunerFilterEvent::temi>();
-        event.events.resize(i + 1);
         event.events[i].temi({
             .pts = static_cast<uint64_t>(temi.pts),
             .descrTag = static_cast<uint8_t>(temi.descrTag),
         });
-        vector<uint8_t> descrData(temi.descrData.size());
-        copy(temi.descrData.begin(), temi.descrData.end(), descrData.begin());
+        hidl_vec<uint8_t> descrData(temi.descrData.begin(), temi.descrData.end());
+        event.events[i].temi().descrData = descrData;
     }
 }
 
@@ -891,29 +907,43 @@ void TunerFilterCallback::getHidlRestartEvent(const vector<TunerFilterEvent>& fi
 }
 
 Result FilterClient::getFilterMq() {
-    if (mFilter == NULL) {
-        return Result::INVALID_STATE;
-    }
-
     if (mFilterMQ != NULL) {
         return Result::SUCCESS;
     }
 
-    Result getQueueDescResult = Result::UNKNOWN_ERROR;
-    MQDescriptorSync<uint8_t> filterMQDesc;
-    mFilter->getQueueDesc(
-            [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
-                filterMQDesc = desc;
-                getQueueDescResult = r;
-            });
-    if (getQueueDescResult == Result::SUCCESS) {
-        mFilterMQ = std::make_unique<MQ>(filterMQDesc, true);
-        EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
+    AidlMQDesc aidlMqDesc;
+    Result res = Result::UNAVAILABLE;
+
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->getQueueDesc(&aidlMqDesc);
+        res = ClientHelper::getServiceSpecificErrorCode(s);
+        if (res == Result::SUCCESS) {
+            mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc);
+            EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
+        }
+        return res;
     }
-    return getQueueDescResult;
+
+    if (mFilter != NULL) {
+        MQDescriptorSync<uint8_t> filterMQDesc;
+        mFilter->getQueueDesc(
+                [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
+                    filterMQDesc = desc;
+                    res = r;
+                });
+        if (res == Result::SUCCESS) {
+            AidlMQDesc aidlMQDesc;
+            unsafeHidlToAidlMQDescriptor<uint8_t, int8_t, SynchronizedReadWrite>(
+                    filterMQDesc,  &aidlMQDesc);
+            mFilterMQ = new (nothrow) AidlMessageQueue(aidlMQDesc);
+            EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
+        }
+    }
+
+    return res;
 }
 
-int FilterClient::copyData(uint8_t* buffer, int size) {
+int FilterClient::copyData(int8_t* buffer, int size) {
     if (mFilter == NULL || mFilterMQ == NULL || mFilterMQEventFlag == NULL) {
         return -1;
     }

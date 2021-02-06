@@ -64,6 +64,7 @@ public class PipResizeGestureHandler {
     private static final String TAG = "PipResizeGestureHandler";
     private static final int PINCH_RESIZE_SNAP_DURATION = 250;
     private static final int PINCH_RESIZE_MAX_ANGLE_ROTATION = 45;
+    private static final float PINCH_RESIZE_AUTO_MAX_RATIO = 0.9f;
 
     private final Context mContext;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
@@ -539,6 +540,11 @@ public class PipResizeGestureHandler {
             // position correctly. Drag-resize does not need to move, so just finalize resize.
             if (mUsingPinchToZoom) {
                 final Rect startBounds = new Rect(mLastResizeBounds);
+                // If user resize is pretty close to max size, just auto resize to max.
+                if (mLastResizeBounds.width() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.x
+                        || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
+                    mLastResizeBounds.set(0, 0, mMaxSize.x, mMaxSize.y);
+                }
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds,
                         mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds()));
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
