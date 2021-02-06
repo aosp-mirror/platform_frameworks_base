@@ -311,6 +311,10 @@
         <flag name="recents" value="0x2000000" />
         <!-- Additional flag from base permission type: this permission is managed by role. -->
         <flag name="role" value="0x4000000" />
+        <!-- Additional flag from base permission type: this permission can also be granted if the
+             requesting application is signed by, or has in its signing lineage, any of the
+             certificate digests declared in {@link android.R.attr#knownCerts}. -->
+        <flag name="knownSigner" value="0x8000000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -363,6 +367,15 @@
          with.  The group must have been defined with the
          {@link android.R.styleable#AndroidManifestPermissionGroup permission-group} tag. -->
     <attr name="permissionGroup" format="string" />
+
+    <!-- A reference to an array resource containing the signing certificate digests to be granted
+         this permission when using the {@code knownSigner} protection flag. The digest should
+         be computed over the DER encoding of the trusted certificate using the SHA-256 digest
+         algorithm.
+         <p>
+         If only a single signer is declared this can also be a string resource, or the digest
+         can be declared inline as the value for this attribute. -->
+    <attr name="knownCerts" format="reference|string" />
 
     <!-- Specify the name of a user ID that will be shared between multiple
          packages.  By default, each package gets its own unique user-id.
@@ -1935,6 +1948,7 @@
         <attr name="request" />
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
+        <attr name="knownCerts" />
     </declare-styleable>
 
     <!-- The <code>permission-group</code> tag declares a logical grouping of

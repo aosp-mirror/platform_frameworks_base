@@ -26,6 +26,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
+import java.util.Set;
+
 /** @hide */
 public class ParsedPermission extends ParsedComponent {
 
@@ -39,6 +41,8 @@ public class ParsedPermission extends ParsedComponent {
     boolean tree;
     @Nullable
     private ParsedPermissionGroup parsedPermissionGroup;
+    @Nullable
+    Set<String> knownCerts;
 
     @VisibleForTesting
     public ParsedPermission() {
@@ -79,6 +83,10 @@ public class ParsedPermission extends ParsedComponent {
 
     public int getProtectionFlags() {
         return protectionLevel & ~PermissionInfo.PROTECTION_MASK_BASE;
+    }
+
+    public @Nullable Set<String> getKnownCerts() {
+        return knownCerts;
     }
 
     public int calculateFootprint() {
