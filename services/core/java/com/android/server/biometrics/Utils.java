@@ -399,15 +399,48 @@ public class Utils {
         }
     }
 
-    public static boolean isKeyguard(Context context, String clientPackage) {
-        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
-                == PackageManager.PERMISSION_GRANTED;
-
+    /**
+     * Checks if a client package matches Keyguard and can perform internal biometric operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against Keyguard.
+     * @return Whether the given package matches Keyguard.
+     */
+    public static boolean isKeyguard(@NonNull Context context, @Nullable String clientPackage) {
+        final boolean hasPermission = hasInternalPermission(context);
         final ComponentName keyguardComponent = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.config_keyguardComponent));
         final String keyguardPackage = keyguardComponent != null
                 ? keyguardComponent.getPackageName() : null;
         return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
+    }
+
+    /**
+     * Checks if a client package matches the Android system and can perform internal biometric
+     * operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against the Android system.
+     * @return Whether the given package matches the Android system.
+     */
+    public static boolean isSystem(@NonNull Context context, @Nullable String clientPackage) {
+        return hasInternalPermission(context) && "android".equals(clientPackage);
+    }
+
+    /**
+     * Checks if a client package matches Settings and can perform internal biometric operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against Settings.
+     * @return Whether the given package matches Settings.
+     */
+    public static boolean isSettings(@NonNull Context context, @Nullable String clientPackage) {
+        return hasInternalPermission(context) && "com.android.settings".equals(clientPackage);
+    }
+
+    private static boolean hasInternalPermission(@NonNull Context context) {
+        return context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     public static String getClientName(@Nullable BaseClientMonitor client) {
