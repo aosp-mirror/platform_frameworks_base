@@ -119,9 +119,14 @@ public class CamcorderProfile
      */
     public static final int QUALITY_2K = 12;
 
+    /**
+     * Quality level corresponding to 8K UHD (7680 x 4320) resolution
+     */
+    public static final int QUALITY_8KUHD = 13;
+
     // Start and end of quality list
     private static final int QUALITY_LIST_START = QUALITY_LOW;
-    private static final int QUALITY_LIST_END = QUALITY_2K;
+    private static final int QUALITY_LIST_END = QUALITY_8KUHD;
 
     /**
      * Time lapse quality level corresponding to the lowest available resolution.
@@ -188,10 +193,14 @@ public class CamcorderProfile
      */
     public static final int QUALITY_TIME_LAPSE_2K = 1012;
 
+    /**
+     * Time lapse quality level corresponding to the 8K UHD (7680 x 4320) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_8KUHD = 1013;
 
     // Start and end of timelapse quality list
     private static final int QUALITY_TIME_LAPSE_LIST_START = QUALITY_TIME_LAPSE_LOW;
-    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_2K;
+    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_8KUHD;
 
     /**
      * High speed ( >= 100fps) quality level corresponding to the lowest available resolution.

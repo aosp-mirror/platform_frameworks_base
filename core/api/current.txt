@@ -20475,6 +20475,7 @@ package android.media {
     field public static final int QUALITY_480P = 4; // 0x4
     field public static final int QUALITY_4KDCI = 10; // 0xa
     field public static final int QUALITY_720P = 5; // 0x5
+    field public static final int QUALITY_8KUHD = 13; // 0xd
     field public static final int QUALITY_CIF = 3; // 0x3
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_HIGH_SPEED_1080P = 2004; // 0x7d4
@@ -20496,6 +20497,7 @@ package android.media {
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_4KDCI = 1010; // 0x3f2
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
+    field public static final int QUALITY_TIME_LAPSE_8KUHD = 1013; // 0x3f5
     field public static final int QUALITY_TIME_LAPSE_CIF = 1003; // 0x3eb
     field public static final int QUALITY_TIME_LAPSE_HIGH = 1001; // 0x3e9
     field public static final int QUALITY_TIME_LAPSE_LOW = 1000; // 0x3e8
