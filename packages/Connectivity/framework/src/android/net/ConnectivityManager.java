@@ -4845,9 +4845,13 @@ public class ConnectivityManager {
         }
     }
 
-    private void setOemNetworkPreference(@NonNull OemNetworkPreferences preference) {
-        Log.d(TAG, "setOemNetworkPreference called with preference: "
-                + preference.toString());
+    private void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference) {
+        try {
+            mService.setOemNetworkPreference(preference);
+        } catch (RemoteException e) {
+            Log.e(TAG, "setOemNetworkPreference() failed for preference: " + preference.toString());
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @NonNull
