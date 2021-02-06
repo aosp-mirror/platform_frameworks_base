@@ -1581,6 +1581,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         destroyInternal();
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, detailMessage, null);
+        // TODO(b/173194203): clean up staged session in destroyInternal() call instead
+        if (isStaged() && stageDir != null) {
+            cleanStageDir();
+        }
     }
 
     private void onStorageUnhealthy() {
