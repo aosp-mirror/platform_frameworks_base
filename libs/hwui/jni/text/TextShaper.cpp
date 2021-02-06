@@ -23,13 +23,14 @@
 #include <set>
 #include <algorithm>
 
-#include "SkPaint.h"
-#include "SkTypeface.h"
 #include <hwui/MinikinSkia.h>
 #include <hwui/MinikinUtils.h>
 #include <hwui/Paint.h>
-#include <minikin/MinikinPaint.h>
 #include <minikin/MinikinFont.h>
+#include <minikin/MinikinPaint.h>
+#include "FontUtils.h"
+#include "SkPaint.h"
+#include "SkTypeface.h"
 
 namespace android {
 
@@ -149,7 +150,8 @@ static jfloat TextShaper_Result_getY(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i
 // CriticalNative
 static jlong TextShaper_Result_getFont(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    return reinterpret_cast<jlong>(layout->layout.getFont(i));
+    std::shared_ptr<minikin::Font> fontRef = layout->layout.getFontRef(i);
+    return reinterpret_cast<jlong>(new FontWrapper(std::move(fontRef)));
 }
 
 // CriticalNative

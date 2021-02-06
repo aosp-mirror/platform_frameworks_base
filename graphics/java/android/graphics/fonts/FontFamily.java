@@ -143,12 +143,10 @@ public final class FontFamily {
         private static native long nGetReleaseNativeFamily();
     }
 
-    private final ArrayList<Font> mFonts;
     private final long mNativePtr;
 
     // Use Builder instead.
     private FontFamily(@NonNull ArrayList<Font> fonts, long ptr) {
-        mFonts = fonts;
         mNativePtr = ptr;
     }
 
@@ -176,7 +174,10 @@ public final class FontFamily {
      * @return a registered font
      */
     public @NonNull Font getFont(@IntRange(from = 0) int index) {
-        return mFonts.get(index);
+        if (index < 0 || getSize() <= index) {
+            throw new IndexOutOfBoundsException();
+        }
+        return new Font(nGetFont(mNativePtr, index));
     }
 
     /**
@@ -185,13 +186,19 @@ public final class FontFamily {
      * @return the number of fonts registered in this family.
      */
     public @IntRange(from = 1) int getSize() {
-        return mFonts.size();
+        return nGetFontSize(mNativePtr);
     }
 
     /** @hide */
     public long getNativePtr() {
         return mNativePtr;
     }
+
+    @CriticalNative
+    private static native int nGetFontSize(long family);
+
+    @CriticalNative
+    private static native long nGetFont(long family, int i);
 
     @FastNative
     private static native String nGetLangTags(long family);

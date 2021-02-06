@@ -335,7 +335,6 @@ cc_defaults {
         "jni/YuvToJpegEncoder.cpp",
         "jni/fonts/Font.cpp",
         "jni/fonts/FontFamily.cpp",
-        "jni/fonts/NativeFont.cpp",
         "jni/text/LineBreaker.cpp",
         "jni/text/MeasuredText.cpp",
         "jni/text/TextShaper.cpp",

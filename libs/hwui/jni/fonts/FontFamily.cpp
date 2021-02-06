@@ -100,17 +100,31 @@ static jint FontFamily_getVariant(jlong familyPtr) {
     return static_cast<jint>(family->family->variant());
 }
 
+// CriticalNative
+static jint FontFamily_getFontSize(jlong familyPtr) {
+    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
+    return family->family->getNumFonts();
+}
+
+// CriticalNative
+static jlong FontFamily_getFont(jlong familyPtr, jint index) {
+    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
+    std::shared_ptr<minikin::Font> font = family->family->getFontRef(index);
+    return reinterpret_cast<jlong>(new FontWrapper(std::move(font)));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyBuilderMethods[] = {
     { "nInitBuilder", "()J", (void*) FontFamily_Builder_initBuilder },
     { "nAddFont", "(JJ)V", (void*) FontFamily_Builder_addFont },
     { "nBuild", "(JLjava/lang/String;IZ)J", (void*) FontFamily_Builder_build },
-
     { "nGetReleaseNativeFamily", "()J", (void*) FontFamily_Builder_GetReleaseFunc },
 };
 
 static const JNINativeMethod gFontFamilyMethods[] = {
+        {"nGetFontSize", "(J)I", (void*)FontFamily_getFontSize},
+        {"nGetFont", "(JI)J", (void*)FontFamily_getFont},
         {"nGetLangTags", "(J)Ljava/lang/String;", (void*)FontFamily_getLangTags},
         {"nGetVariant", "(J)I", (void*)FontFamily_getVariant},
 };
