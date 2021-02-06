@@ -260,15 +260,17 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         // Transform dimensions if the device is in landscape mode.
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
-                mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius;
-                mCoreLayoutParams.y =
-                        p.y - mSensorProps.sensorLocationX - mSensorProps.sensorRadius;
+                mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
+                        - paddingX;
+                mCoreLayoutParams.y = p.y - mSensorProps.sensorLocationX - mSensorProps.sensorRadius
+                        - paddingY;
                 break;
 
             case Surface.ROTATION_270:
-                mCoreLayoutParams.x =
-                        p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius;
-                mCoreLayoutParams.y = mSensorProps.sensorLocationX - mSensorProps.sensorRadius;
+                mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
+                        - paddingX;
+                mCoreLayoutParams.y = mSensorProps.sensorLocationX - mSensorProps.sensorRadius
+                        - paddingY;
                 break;
 
             default:

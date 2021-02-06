@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,36 @@
  * limitations under the License.
  */
 
-package androidx.window.sidecar;
+package androidx.window.util;
 
-import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.IBinder;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-class SidecarHelper {
+/**
+ * Util class for both Sidecar and Extensions.
+ */
+public final class ExtensionHelper {
+
+    private ExtensionHelper() {
+        // Util class, no instances should be created.
+    }
+
     /**
-     * Rotate the input rectangle specified in default display orientation to the current display
+     * Rotates the input rectangle specified in default display orientation to the current display
      * rotation.
      */
-    static void rotateRectToDisplayRotation(Rect inOutRect, int displayId) {
+    public static void rotateRectToDisplayRotation(int displayId, Rect inOutRect) {
         DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
         DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
         int rotation = displayInfo.rotation;
@@ -52,7 +58,7 @@ class SidecarHelper {
     }
 
     /**
-     * Rotate the input rectangle within parent bounds for a given delta.
+     * Rotates the input rectangle within parent bounds for a given delta.
      */
     private static void rotateBounds(Rect inOutRect, int parentWidth, int parentHeight,
             @Surface.Rotation int delta) {
@@ -79,9 +85,9 @@ class SidecarHelper {
         }
     }
 
-    /** Transform rectangle from absolute coordinate space to the window coordinate space. */
-    static void transformToWindowSpaceRect(Rect inOutRect, IBinder windowToken) {
-        Rect windowRect = getWindowBounds(windowToken);
+    /** Transforms rectangle from absolute coordinate space to the window coordinate space. */
+    public static void transformToWindowSpaceRect(Activity activity, Rect inOutRect) {
+        Rect windowRect = getWindowBounds(activity);
         if (windowRect == null) {
             inOutRect.setEmpty();
             return;
@@ -95,32 +101,17 @@ class SidecarHelper {
     }
 
     /**
-     * Get the current window bounds in absolute coordinates.
-     * NOTE: Only works with Activity windows.
+     * Gets the current window bounds in absolute coordinates.
      */
     @Nullable
-    private static Rect getWindowBounds(IBinder windowToken) {
-        Activity activity = ActivityThread.currentActivityThread().getActivity(windowToken);
-        return activity != null
-                ? activity.getWindowManager().getCurrentWindowMetrics().getBounds()
-                : null;
+    private static Rect getWindowBounds(@NonNull Activity activity) {
+        return activity.getWindowManager().getCurrentWindowMetrics().getBounds();
     }
 
     /**
-     * Check if this window is an Activity window that is in multi-window mode.
+     * Checks if both dimensions of the given rect are zero at the same time.
      */
-    static boolean isInMultiWindow(IBinder windowToken) {
-        Activity activity = ActivityThread.currentActivityThread().getActivity(windowToken);
-        return activity != null && activity.isInMultiWindowMode();
-    }
-
-    /**
-     * Get the id of the parent display for the window.
-     * NOTE: Only works with Activity windows.
-     */
-    static int getWindowDisplay(IBinder windowToken) {
-        Activity activity = ActivityThread.currentActivityThread().getActivity(windowToken);
-        return activity != null
-                ? activity.getWindowManager().getDefaultDisplay().getDisplayId() : INVALID_DISPLAY;
+    public static boolean isZero(@NonNull Rect rect) {
+        return rect.height() == 0 && rect.width() == 0;
     }
 }

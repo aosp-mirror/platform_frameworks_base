@@ -678,6 +678,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mRequestForceTransition;
 
     boolean mEnteringAnimation;
+    boolean mOverrideTaskTransition;
 
     boolean mAppStopped;
     // A hint to override the window specified rotation animation, or -1 to use the window specified
@@ -1361,7 +1362,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final boolean surfaceReady = w.isDrawn()  // Regular case
-                || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
         final boolean needsLetterbox = surfaceReady && isLetterboxed(w);
         updateRoundedCorners(w);
@@ -1623,6 +1623,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (rotationAnimation >= 0) {
                 mRotationAnimationHint = rotationAnimation;
             }
+
+            mOverrideTaskTransition = options.getOverrideTaskTransition();
         }
 
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
@@ -3993,7 +3995,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getCustomEnterResId(),
                         pendingOptions.getCustomExitResId(),
                         pendingOptions.getAnimationStartedListener(),
-                        pendingOptions.getAnimationFinishedListener());
+                        pendingOptions.getAnimationFinishedListener(),
+                        pendingOptions.getOverrideTaskTransition());
                 break;
             case ANIM_CLIP_REVEAL:
                 displayContent.mAppTransition.overridePendingAppTransitionClipReveal(

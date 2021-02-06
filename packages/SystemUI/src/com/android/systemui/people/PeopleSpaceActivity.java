@@ -24,10 +24,8 @@ import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -36,12 +34,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import androidx.preference.PreferenceManager;
-
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
-import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
 import java.util.List;
 
@@ -128,26 +123,17 @@ public class PeopleSpaceActivity extends Activity {
 
     /** Stores the user selected configuration for {@code mAppWidgetId}. */
     private void storeWidgetConfiguration(PeopleSpaceTile tile) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = sp.edit();
         if (PeopleSpaceUtils.DEBUG) {
             Log.d(TAG, "Put " + tile.getUserName() + "'s shortcut ID: "
                     + tile.getId() + " for widget ID: "
                     + mAppWidgetId);
         }
-        // Ensure updates to app widget can be retrieved from both appWidget Id and tile ID.
-        editor.putString(String.valueOf(mAppWidgetId), tile.getId());
-        editor.putInt(tile.getId(), mAppWidgetId);
-        editor.apply();
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
-        Bundle options = new Bundle();
-        options.putParcelable(PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE, tile);
-        appWidgetManager.updateAppWidgetOptions(mAppWidgetId, options);
-        int[] widgetIds = appWidgetManager.getAppWidgetIds(
-                new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
+
+        PeopleSpaceUtils.setStorageForTile(mContext, tile, mAppWidgetId);
+        int[] widgetIds = new int[mAppWidgetId];
         // TODO: Populate new widget with existing conversation notification, if there is any.
         PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds, mAppWidgetManager,
-                mNotificationManager);
+                mPeopleManager);
         finishActivity();
     }
 

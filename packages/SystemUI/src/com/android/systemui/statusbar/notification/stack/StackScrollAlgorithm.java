@@ -286,8 +286,7 @@ public class StackScrollAlgorithm {
         float currentYPosition = -algorithmState.scrollY;
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
-            currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
-                    false /* reverse */);
+            currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition);
         }
     }
 
@@ -301,10 +300,6 @@ public class StackScrollAlgorithm {
      * @param currentYPosition The Y position of the current pass of the algorithm.  For a forward
      *                         pass, this should be the top of the child; for a reverse pass, the
      *                         bottom of the child.
-     * @param reverse          Whether we're laying out children in the reverse direction (Y
-     *                         positions
-     *                         decreasing) instead of the forward direction (Y positions
-     *                         increasing).
      * @return The Y position after laying out the child.  This will be the {@code currentYPosition}
      * for the next call to this method, after adjusting for any gaps between children.
      */
@@ -312,8 +307,7 @@ public class StackScrollAlgorithm {
             int i,
             StackScrollAlgorithmState algorithmState,
             AmbientState ambientState,
-            float currentYPosition,
-            boolean reverse) {
+            float currentYPosition) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
         ExpandableView previousChild = i > 0 ? algorithmState.visibleChildren.get(i - 1) : null;
         final boolean applyGapHeight =
@@ -323,20 +317,12 @@ public class StackScrollAlgorithm {
         ExpandableViewState childViewState = child.getViewState();
         childViewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
-        if (applyGapHeight && !reverse) {
+        if (applyGapHeight) {
             currentYPosition += mGapHeight;
         }
-
         int childHeight = getMaxAllowedChildHeight(child);
-        if (reverse) {
-            childViewState.yTranslation = currentYPosition
-                    - (childHeight + mPaddingBetweenElements);
-            if (currentYPosition <= 0) {
-                childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
-            }
-        } else {
-            childViewState.yTranslation = currentYPosition;
-        }
+        childViewState.yTranslation = currentYPosition;
+
         boolean isFooterView = child instanceof FooterView;
         boolean isEmptyShadeView = child instanceof EmptyShadeView;
 
@@ -362,16 +348,9 @@ public class StackScrollAlgorithm {
             clampPositionToShelf(child, childViewState, ambientState);
         }
 
-        if (reverse) {
-            currentYPosition = childViewState.yTranslation;
-            if (applyGapHeight) {
-                currentYPosition -= mGapHeight;
-            }
-        } else {
-            currentYPosition = childViewState.yTranslation + childHeight + mPaddingBetweenElements;
-            if (currentYPosition <= 0) {
-                childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
-            }
+        currentYPosition = childViewState.yTranslation + childHeight + mPaddingBetweenElements;
+        if (currentYPosition <= 0) {
+            childViewState.location = ExpandableViewState.LOCATION_HIDDEN_TOP;
         }
         if (childViewState.location == ExpandableViewState.LOCATION_UNKNOWN) {
             Log.wtf(LOG_TAG, "Failed to assign location for child " + i);

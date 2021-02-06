@@ -919,10 +919,8 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        if (isLeafTask()) {
-            // This task is going away, so save the last state if necessary.
-            saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
-        }
+        // This task is going away, so save the last state if necessary.
+        saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
 
         // TODO: VI what about activity?
         final boolean isVoiceSession = voiceSession != null;
@@ -2457,14 +2455,16 @@ class Task extends WindowContainer<WindowContainer> {
 
     /**
      * Saves launching state if necessary so that we can launch the activity to its latest state.
-     * It only saves state if this task has been shown to user and it's in fullscreen or freeform
-     * mode on freeform displays.
      */
     private void saveLaunchingStateIfNeeded() {
         saveLaunchingStateIfNeeded(getDisplayContent());
     }
 
     private void saveLaunchingStateIfNeeded(DisplayContent display) {
+        if (!isLeafTask()) {
+            return;
+        }
+
         if (!getHasBeenVisible()) {
             // Not ever visible to user.
             return;
