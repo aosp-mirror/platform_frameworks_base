@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -38,6 +39,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.ICallScreeningAdapter;
 import com.android.internal.telecom.ICallScreeningService;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -176,19 +179,23 @@ public abstract class CallScreeningService extends Service {
         private final boolean mShouldSkipNotification;
         private final boolean mShouldScreenCallViaAudioProcessing;
 
+        private final int mCallComposerAttachmentsToShow;
+
         private ParcelableCallResponse(
-                 boolean shouldDisallowCall,
-                 boolean shouldRejectCall,
-                 boolean shouldSilenceCall,
-                 boolean shouldSkipCallLog,
-                 boolean shouldSkipNotification,
-                 boolean shouldScreenCallViaAudioProcessing) {
+                boolean shouldDisallowCall,
+                boolean shouldRejectCall,
+                boolean shouldSilenceCall,
+                boolean shouldSkipCallLog,
+                boolean shouldSkipNotification,
+                boolean shouldScreenCallViaAudioProcessing,
+                int callComposerAttachmentsToShow) {
             mShouldDisallowCall = shouldDisallowCall;
             mShouldRejectCall = shouldRejectCall;
             mShouldSilenceCall = shouldSilenceCall;
             mShouldSkipCallLog = shouldSkipCallLog;
             mShouldSkipNotification = shouldSkipNotification;
             mShouldScreenCallViaAudioProcessing = shouldScreenCallViaAudioProcessing;
+            mCallComposerAttachmentsToShow = callComposerAttachmentsToShow;
         }
 
         protected ParcelableCallResponse(Parcel in) {
@@ -198,6 +205,7 @@ public abstract class CallScreeningService extends Service {
             mShouldSkipCallLog = in.readBoolean();
             mShouldSkipNotification = in.readBoolean();
             mShouldScreenCallViaAudioProcessing = in.readBoolean();
+            mCallComposerAttachmentsToShow = in.readInt();
         }
 
         public CallResponse toCallResponse() {
@@ -208,6 +216,7 @@ public abstract class CallScreeningService extends Service {
                     .setSkipCallLog(mShouldSkipCallLog)
                     .setSkipNotification(mShouldSkipNotification)
                     .setShouldScreenCallViaAudioProcessing(mShouldScreenCallViaAudioProcessing)
+                    .setCallComposerAttachmentsToShow(mCallComposerAttachmentsToShow)
                     .build();
         }
 
@@ -233,6 +242,10 @@ public abstract class CallScreeningService extends Service {
 
         public boolean shouldScreenCallViaAudioProcessing() {
             return mShouldScreenCallViaAudioProcessing;
+        }
+
+        public int getCallComposerAttachmentsToShow() {
+            return mCallComposerAttachmentsToShow;
         }
 
         public static final Creator<ParcelableCallResponse> CREATOR =
@@ -261,19 +274,64 @@ public abstract class CallScreeningService extends Service {
             dest.writeBoolean(mShouldSkipCallLog);
             dest.writeBoolean(mShouldSkipNotification);
             dest.writeBoolean(mShouldScreenCallViaAudioProcessing);
+            dest.writeInt(mCallComposerAttachmentsToShow);
         }
     }
 
-    /*
-     * Information about how to respond to an incoming call.
+    /**
+     * Information about how to respond to an incoming call. Call screening apps can construct an
+     * instance of this class using {@link CallResponse.Builder}.
      */
     public static class CallResponse {
+        /**
+         * Bit flag indicating whether to show the picture attachment for call composer.
+         *
+         * Used with {@link Builder#setCallComposerAttachmentsToShow(int)}.
+         */
+        public static final int CALL_COMPOSER_ATTACHMENT_PICTURE = 1;
+
+        /**
+         * Bit flag indicating whether to show the location attachment for call composer.
+         *
+         * Used with {@link Builder#setCallComposerAttachmentsToShow(int)}.
+         */
+        public static final int CALL_COMPOSER_ATTACHMENT_LOCATION = 1 << 1;
+
+        /**
+         * Bit flag indicating whether to show the subject attachment for call composer.
+         *
+         * Used with {@link Builder#setCallComposerAttachmentsToShow(int)}.
+         */
+        public static final int CALL_COMPOSER_ATTACHMENT_SUBJECT = 1 << 2;
+
+        /**
+         * Bit flag indicating whether to show the priority attachment for call composer.
+         *
+         * Used with {@link Builder#setCallComposerAttachmentsToShow(int)}.
+         */
+        public static final int CALL_COMPOSER_ATTACHMENT_PRIORITY = 1 << 3;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = "CALL_COMPOSER_ATTACHMENT_", flag = true,
+                value = {
+                        CALL_COMPOSER_ATTACHMENT_PICTURE,
+                        CALL_COMPOSER_ATTACHMENT_LOCATION,
+                        CALL_COMPOSER_ATTACHMENT_SUBJECT,
+                        CALL_COMPOSER_ATTACHMENT_PRIORITY
+                }
+        )
+        public @interface CallComposerAttachmentType {}
+
+        private static final int NUM_CALL_COMPOSER_ATTACHMENT_TYPES = 4;
+
         private final boolean mShouldDisallowCall;
         private final boolean mShouldRejectCall;
         private final boolean mShouldSilenceCall;
         private final boolean mShouldSkipCallLog;
         private final boolean mShouldSkipNotification;
         private final boolean mShouldScreenCallViaAudioProcessing;
+        private final int mCallComposerAttachmentsToShow;
 
         private CallResponse(
                 boolean shouldDisallowCall,
@@ -281,7 +339,8 @@ public abstract class CallScreeningService extends Service {
                 boolean shouldSilenceCall,
                 boolean shouldSkipCallLog,
                 boolean shouldSkipNotification,
-                boolean shouldScreenCallViaAudioProcessing) {
+                boolean shouldScreenCallViaAudioProcessing,
+                int callComposerAttachmentsToShow) {
             if (!shouldDisallowCall
                     && (shouldRejectCall || shouldSkipCallLog || shouldSkipNotification)) {
                 throw new IllegalStateException("Invalid response state for allowed call.");
@@ -297,6 +356,7 @@ public abstract class CallScreeningService extends Service {
             mShouldSkipNotification = shouldSkipNotification;
             mShouldSilenceCall = shouldSilenceCall;
             mShouldScreenCallViaAudioProcessing = shouldScreenCallViaAudioProcessing;
+            mCallComposerAttachmentsToShow = callComposerAttachmentsToShow;
         }
 
         /*
@@ -344,6 +404,13 @@ public abstract class CallScreeningService extends Service {
             return mShouldScreenCallViaAudioProcessing;
         }
 
+        /**
+         * @return A bitmask of call composer attachments that should be shown to the user.
+         */
+        public @CallComposerAttachmentType int getCallComposerAttachmentsToShow() {
+            return mCallComposerAttachmentsToShow;
+        }
+
         /** @hide */
         public ParcelableCallResponse toParcelable() {
             return new ParcelableCallResponse(
@@ -352,7 +419,8 @@ public abstract class CallScreeningService extends Service {
                     mShouldSilenceCall,
                     mShouldSkipCallLog,
                     mShouldSkipNotification,
-                    mShouldScreenCallViaAudioProcessing
+                    mShouldScreenCallViaAudioProcessing,
+                    mCallComposerAttachmentsToShow
             );
         }
 
@@ -366,14 +434,17 @@ public abstract class CallScreeningService extends Service {
                     mShouldSilenceCall == that.mShouldSilenceCall &&
                     mShouldSkipCallLog == that.mShouldSkipCallLog &&
                     mShouldSkipNotification == that.mShouldSkipNotification &&
-                    mShouldScreenCallViaAudioProcessing == that.mShouldScreenCallViaAudioProcessing;
+                    mShouldScreenCallViaAudioProcessing
+                            == that.mShouldScreenCallViaAudioProcessing &&
+                    mCallComposerAttachmentsToShow == that.mCallComposerAttachmentsToShow;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(mShouldDisallowCall, mShouldRejectCall, mShouldSilenceCall,
                     mShouldSkipCallLog, mShouldSkipNotification,
-                    mShouldScreenCallViaAudioProcessing);
+                    mShouldScreenCallViaAudioProcessing,
+                    mCallComposerAttachmentsToShow);
         }
 
         public static class Builder {
@@ -383,6 +454,7 @@ public abstract class CallScreeningService extends Service {
             private boolean mShouldSkipCallLog;
             private boolean mShouldSkipNotification;
             private boolean mShouldScreenCallViaAudioProcessing;
+            private int mCallComposerAttachmentsToShow = -1;
 
             /**
              * Sets whether the incoming call should be blocked.
@@ -468,6 +540,38 @@ public abstract class CallScreeningService extends Service {
                 return this;
             }
 
+            /**
+             * Sets the call composer attachments that should be shown to the user.
+             *
+             * Attachments that are not shown will not be passed to the in-call UI responsible for
+             * displaying the call to the user.
+             *
+             * If this method is not called on a {@link Builder}, all attachments will be shown,
+             * except pictures, which will only be shown to users if the call is from a contact.
+             *
+             * Setting attachments to show will have no effect if the call screening service does
+             * not belong to the same package as the system dialer (as returned by
+             * {@link TelecomManager#getSystemDialerPackage()}).
+             *
+             * @param callComposerAttachmentsToShow A bitmask of call composer attachments to show.
+             */
+            public @NonNull Builder setCallComposerAttachmentsToShow(
+                    @CallComposerAttachmentType int callComposerAttachmentsToShow) {
+                // If the argument is less than zero (meaning unset), no-op since the conversion
+                // to/from the parcelable version may call with that value.
+                if (callComposerAttachmentsToShow < 0) {
+                    return this;
+                }
+
+                if ((callComposerAttachmentsToShow
+                        & (1 << NUM_CALL_COMPOSER_ATTACHMENT_TYPES)) != 0) {
+                    throw new IllegalArgumentException("Attachment types must match the ones"
+                            + " defined in CallResponse");
+                }
+                mCallComposerAttachmentsToShow = callComposerAttachmentsToShow;
+                return this;
+            }
+
             public CallResponse build() {
                 return new CallResponse(
                         mShouldDisallowCall,
@@ -475,7 +579,8 @@ public abstract class CallScreeningService extends Service {
                         mShouldSilenceCall,
                         mShouldSkipCallLog,
                         mShouldSkipNotification,
-                        mShouldScreenCallViaAudioProcessing);
+                        mShouldScreenCallViaAudioProcessing,
+                        mCallComposerAttachmentsToShow);
             }
        }
     }
