@@ -1100,6 +1100,7 @@ package android {
     field public static final int presentationTheme = 16843712; // 0x10103c0
     field public static final int preserveLegacyExternalStorage = 16844308; // 0x1010614
     field public static final int previewImage = 16843482; // 0x10102da
+    field public static final int previewLayout = 16844327; // 0x1010627
     field public static final int primaryContentAlpha = 16844114; // 0x1010552
     field public static final int priority = 16842780; // 0x101001c
     field public static final int privateImeOptions = 16843299; // 0x1010223
@@ -8386,6 +8387,7 @@ package android.appwidget {
     field public int minResizeWidth;
     field public int minWidth;
     field public int previewImage;
+    field @IdRes public int previewLayout;
     field public android.content.ComponentName provider;
     field public int resizeMode;
     field public int updatePeriodMillis;
