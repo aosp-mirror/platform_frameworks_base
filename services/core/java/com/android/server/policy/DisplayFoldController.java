@@ -74,8 +74,8 @@ class DisplayFoldController {
         mHandler = handler;
 
         DeviceStateManager deviceStateManager = context.getSystemService(DeviceStateManager.class);
-        deviceStateManager.registerDeviceStateListener(new DeviceStateListener(context),
-                new HandlerExecutor(handler));
+        deviceStateManager.addDeviceStateListener(new HandlerExecutor(handler),
+                new DeviceStateListener(context));
     }
 
     void finishedGoingToSleep() {
