@@ -49,6 +49,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
@@ -113,7 +114,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull private final HalResultController mHalResultController;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
-    private boolean mIsUdfps = false;
+    private final boolean mIsUdfps;
     private final int mSensorId;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
@@ -335,23 +336,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             Slog.e(TAG, "Unable to register user switch observer");
         }
 
-        final IBiometricsFingerprint daemon = getDaemon();
-        mIsUdfps = false;
-        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
-                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
-                        daemon);
-        if (extension != null) {
-            try {
-                mIsUdfps = extension.isUdfps(sensorId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception while quering udfps", e);
-                mIsUdfps = false;
-            }
-        }
+        // TODO(b/179175438): Remove this code block after transition to AIDL.
+        // The existence of config_udfps_sensor_props indicates that the sensor is UDFPS.
+        mIsUdfps = !ArrayUtils.isEmpty(
+                mContext.getResources().getIntArray(R.array.config_udfps_sensor_props));
 
         final @FingerprintSensorProperties.SensorType int sensorType =
                 mIsUdfps ? FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
-                         : FingerprintSensorProperties.TYPE_REAR;
+                        : FingerprintSensorProperties.TYPE_REAR;
         // resetLockout is controlled by the framework, so hardwareAuthToken is not required
         final boolean resetLockoutRequiresHardwareAuthToken = false;
         final int maxEnrollmentsPerUser = mContext.getResources()
@@ -415,7 +407,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         Slog.d(TAG, "Daemon was null, reconnecting, current operation: "
                 + mScheduler.getCurrentClient());
         try {
-            mDaemon = IBiometricsFingerprint.getService(true /* retry */);
+            mDaemon = IBiometricsFingerprint.getService();
         } catch (java.util.NoSuchElementException e) {
             // Service doesn't exist or cannot be opened.
             Slog.w(TAG, "NoSuchElementException", e);
