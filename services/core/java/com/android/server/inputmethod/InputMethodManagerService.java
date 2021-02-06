@@ -5246,12 +5246,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     imeTracing.startTrace(null);
                 });
             }
-        }
-        doDump(fd, pw, args, asProto);
-    }
 
-    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
-        if (useProto) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
             dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
             proto.flush();
