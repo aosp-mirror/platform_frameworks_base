@@ -3786,7 +3786,7 @@ static jint android_media_tv_Tuner_read_filter_fmq(
         jniThrowRuntimeException(env, "Failed to GetByteArrayElements");
         return -1;
     }
-    int realReadSize = filterClient->read(reinterpret_cast<uint8_t*>(dst) + offset, size);
+    int realReadSize = filterClient->read(reinterpret_cast<int8_t*>(dst) + offset, size);
     env->ReleaseByteArrayElements(buffer, dst, 0);
     return (jint) realReadSize;
 }

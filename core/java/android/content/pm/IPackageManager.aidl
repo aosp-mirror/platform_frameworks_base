@@ -27,6 +27,7 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.InstallSourceInfo;
+import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -754,7 +755,7 @@ interface IPackageManager {
 
     void notifyPackagesReplacedReceived(in String[] packages);
 
-    void requestChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IntentSender statusReceiver, int userId);
+    void requestChecksums(in String packageName, boolean includeSplits, int optional, int required, in List trustedInstallers, in IOnChecksumsReadyListener onChecksumsReadyListener, int userId);
 
     //------------------------------------------------------------------------
     //

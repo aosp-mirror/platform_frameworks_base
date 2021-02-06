@@ -80,6 +80,7 @@ import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
 import android.os.UserManager.QuietModeFlag;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -108,6 +109,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.BundleUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
@@ -1960,11 +1962,11 @@ public class UserManagerService extends IUserManager.Stub {
         final Bundle global = mDevicePolicyGlobalUserRestrictions.mergeAll();
         final RestrictionsSet local = getDevicePolicyLocalRestrictionsForTargetUserLR(userId);
 
-        if (UserRestrictionsUtils.isEmpty(global) && local.isEmpty()) {
+        if (BundleUtils.isEmpty(global) && local.isEmpty()) {
             // Common case first.
             return baseRestrictions;
         }
-        final Bundle effective = UserRestrictionsUtils.clone(baseRestrictions);
+        final Bundle effective = BundleUtils.clone(baseRestrictions);
         UserRestrictionsUtils.merge(effective, global);
         UserRestrictionsUtils.merge(effective, local.mergeAll());
 
@@ -2105,7 +2107,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public Bundle getUserRestrictions(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserRestrictions");
-        return UserRestrictionsUtils.clone(getEffectiveUserRestrictions(userId));
+        return BundleUtils.clone(getEffectiveUserRestrictions(userId));
     }
 
     @Override
@@ -2129,7 +2131,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
             // a copy.
-            final Bundle newRestrictions = UserRestrictionsUtils.clone(
+            final Bundle newRestrictions = BundleUtils.clone(
                     mBaseUserRestrictions.getRestrictions(userId));
             newRestrictions.putBoolean(key, value);
 
@@ -2727,7 +2729,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (userVersion < 7) {
             // Previously only one user could enforce global restrictions, now it is per-user.
             synchronized (mRestrictionsLock) {
-                if (!UserRestrictionsUtils.isEmpty(oldGlobalUserRestrictions)
+                if (!BundleUtils.isEmpty(oldGlobalUserRestrictions)
                         && mDeviceOwnerUserId != UserHandle.USER_NULL) {
                     mDevicePolicyGlobalUserRestrictions.updateRestrictions(
                             mDeviceOwnerUserId, oldGlobalUserRestrictions);
@@ -3562,6 +3564,9 @@ public class UserManagerService extends IUserManager.Stub {
             t.traceBegin("PM.onNewUserCreated-" + userId);
             mPm.onNewUserCreated(userId, /* convertedFromPreCreated= */ false);
             t.traceEnd();
+            applyDefaultUserSettings(userTypeDetails, userId);
+            setDefaultCrossProfileIntentFilters(userId, userTypeDetails, restrictions, parentId);
+
             if (preCreate) {
                 // Must start user (which will be stopped right away, through
                 // UserController.finishUserUnlockedCompleted) so services can properly
@@ -3595,6 +3600,78 @@ public class UserManagerService extends IUserManager.Stub {
         // "real" max exceeds the max here.
 
         return userInfo;
+    }
+
+    private void applyDefaultUserSettings(UserTypeDetails userTypeDetails, @UserIdInt int userId) {
+        final Bundle systemSettings = userTypeDetails.getDefaultSystemSettings();
+        final Bundle secureSettings = userTypeDetails.getDefaultSecureSettings();
+        if (systemSettings.isEmpty() && secureSettings.isEmpty()) {
+            return;
+        }
+
+        final int systemSettingsSize = systemSettings.size();
+        final String[] systemSettingsArray = systemSettings.keySet().toArray(
+                new String[systemSettingsSize]);
+        for (int i = 0; i < systemSettingsSize; i++) {
+            final String setting = systemSettingsArray[i];
+            if (!Settings.System.putStringForUser(
+                    mContext.getContentResolver(), setting, systemSettings.getString(setting),
+                    userId)) {
+                Slog.e(LOG_TAG, "Failed to insert default system setting: " + setting);
+            }
+        }
+
+        final int secureSettingsSize = secureSettings.size();
+        final String[] secureSettingsArray = secureSettings.keySet().toArray(
+                new String[secureSettingsSize]);
+        for (int i = 0; i < secureSettingsSize; i++) {
+            final String setting = secureSettingsArray[i];
+            if (!Settings.Secure.putStringForUser(
+                    mContext.getContentResolver(), setting, secureSettings.getString(setting),
+                    userId)) {
+                Slog.e(LOG_TAG, "Failed to insert default secure setting: " + setting);
+            }
+        }
+    }
+
+    /**
+     * Sets all default cross profile intent filters between {@code parentUserId} and
+     * {@code profileUserId}, does nothing if {@code userType} is not a profile.
+     */
+    private void setDefaultCrossProfileIntentFilters(
+            @UserIdInt int profileUserId, UserTypeDetails profileDetails,
+            Bundle profileRestrictions, @UserIdInt int parentUserId) {
+        if (profileDetails == null || !profileDetails.isProfile()) {
+            return;
+        }
+        final List<DefaultCrossProfileIntentFilter> filters =
+                profileDetails.getDefaultCrossProfileIntentFilters();
+        if (filters.isEmpty()) {
+            return;
+        }
+
+        // Skip filters that allow data to be shared into the profile, if admin has disabled it.
+        final boolean disallowSharingIntoProfile =
+                profileRestrictions.getBoolean(
+                        UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
+                        /* defaultValue = */ false);
+        final int size = profileDetails.getDefaultCrossProfileIntentFilters().size();
+        for (int i = 0; i < size; i++) {
+            final DefaultCrossProfileIntentFilter filter =
+                    profileDetails.getDefaultCrossProfileIntentFilters().get(i);
+            if (disallowSharingIntoProfile && filter.letsPersonalDataIntoProfile) {
+                continue;
+            }
+            if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PARENT) {
+                mPm.addCrossProfileIntentFilter(
+                        filter.filter, mContext.getOpPackageName(), profileUserId, parentUserId,
+                        filter.flags);
+            } else {
+                mPm.addCrossProfileIntentFilter(
+                        filter.filter, mContext.getOpPackageName(), parentUserId, profileUserId,
+                        filter.flags);
+            }
+        }
     }
 
     /**
@@ -5462,6 +5539,15 @@ public class UserManagerService extends IUserManager.Stub {
                 return allInfos;
             }
         }
+
+        @Override
+        public void setDefaultCrossProfileIntentFilters(
+                @UserIdInt int parentUserId, @UserIdInt int profileUserId) {
+            final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(profileUserId);
+            final Bundle restrictions = getEffectiveUserRestrictions(profileUserId);
+            UserManagerService.this.setDefaultCrossProfileIntentFilters(
+                    profileUserId, userTypeDetails, restrictions, parentUserId);
+        }
     }
 
     /**
@@ -5726,8 +5812,8 @@ public class UserManagerService extends IUserManager.Stub {
 
         // merge existing base restrictions with the new type's default restrictions
         synchronized (mRestrictionsLock) {
-            if (!UserRestrictionsUtils.isEmpty(newUserType.getDefaultRestrictions())) {
-                final Bundle newRestrictions = UserRestrictionsUtils.clone(
+            if (!BundleUtils.isEmpty(newUserType.getDefaultRestrictions())) {
+                final Bundle newRestrictions = BundleUtils.clone(
                         mBaseUserRestrictions.getRestrictions(userInfo.id));
                 UserRestrictionsUtils.merge(newRestrictions,
                         newUserType.getDefaultRestrictions());

@@ -690,10 +690,6 @@
     <!-- Made protected in S (was added in R) -->
     <protected-broadcast android:name="com.android.internal.intent.action.BUGREPORT_REQUESTED" />
 
-    <!-- Added in S -->
-    <protected-broadcast android:name="android.app.action.MANAGED_PROFILE_CREATED" />
-    <protected-broadcast android:name="android.app.action.PROVISIONED_MANAGED_DEVICE" />
-
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -2539,7 +2535,7 @@
     <permission android:name="android.permission.REAL_GET_TASKS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to start a task from a ActivityManager#RecentTaskInfo.
+    <!-- @TestApi Allows an application to start a task from a ActivityManager#RecentTaskInfo.
          @hide -->
     <permission android:name="android.permission.START_TASKS_FROM_RECENTS"
         android:protectionLevel="signature|privileged|recents" />

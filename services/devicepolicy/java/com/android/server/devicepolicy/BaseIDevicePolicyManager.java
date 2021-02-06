@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.IDevicePolicyManager;
@@ -126,5 +127,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public void provisionFullyManagedDevice(
             FullyManagedDeviceProvisioningParams provisioningParams, String callerPackage) {
+    }
+
+    public void resetDefaultCrossProfileIntentFilters(@UserIdInt int userId) {
     }
 }

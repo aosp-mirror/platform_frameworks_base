@@ -19,6 +19,7 @@
 #include <android-base/logging.h>
 #include <utils/Log.h>
 
+#include "ClientHelper.h"
 #include "TimeFilterClient.h"
 
 using ::android::hardware::tv::tuner::V1_0::Result;
@@ -28,13 +29,12 @@ namespace android {
 
 /////////////// TimeFilterClient ///////////////////////
 
-// TODO: pending aidl interface
-TimeFilterClient::TimeFilterClient() {
-    //mTunerTimeFilter = tunerTimeFilter;
+TimeFilterClient::TimeFilterClient(shared_ptr<ITunerTimeFilter> tunerTimeFilter) {
+    mTunerTimeFilter = tunerTimeFilter;
 }
 
 TimeFilterClient::~TimeFilterClient() {
-    //mTunerTimeFilter = NULL;
+    mTunerTimeFilter = NULL;
     mTimeFilter = NULL;
 }
 
@@ -44,7 +44,10 @@ void TimeFilterClient::setHidlTimeFilter(sp<ITimeFilter> timeFilter) {
 }
 
 Result TimeFilterClient::setTimeStamp(long timeStamp) {
-    // TODO: pending aidl interface
+    if (mTunerTimeFilter != NULL) {
+        Status s = mTunerTimeFilter->setTimeStamp(timeStamp);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mTimeFilter != NULL) {
         return mTimeFilter->setTimeStamp(timeStamp);
@@ -54,7 +57,10 @@ Result TimeFilterClient::setTimeStamp(long timeStamp) {
 }
 
 Result TimeFilterClient::clearTimeStamp() {
-    // TODO: pending aidl interface
+    if (mTunerTimeFilter != NULL) {
+        Status s = mTunerTimeFilter->clearTimeStamp();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mTimeFilter != NULL) {
         return mTimeFilter->clearTimeStamp();
@@ -64,7 +70,14 @@ Result TimeFilterClient::clearTimeStamp() {
 }
 
 long TimeFilterClient::getTimeStamp() {
-    // TODO: pending aidl interface
+    if (mTunerTimeFilter != NULL) {
+        int64_t timeStamp;
+        Status s = mTunerTimeFilter->getTimeStamp(&timeStamp);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
+        }
+        return timeStamp;
+    }
 
     if (mTimeFilter != NULL) {
         Result res;
@@ -84,27 +97,37 @@ long TimeFilterClient::getTimeStamp() {
 }
 
 long TimeFilterClient::getSourceTime() {
-    // TODO: pending aidl interface
+    if (mTunerTimeFilter != NULL) {
+        int64_t sourceTime;
+        Status s = mTunerTimeFilter->getTimeStamp(&sourceTime);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
+        }
+        return sourceTime;
+    }
 
     if (mTimeFilter != NULL) {
         Result res;
-        long timestamp;
+        long sourceTime;
         mTimeFilter->getSourceTime(
                 [&](Result r, uint64_t t) {
                     res = r;
-                    timestamp = t;
+                    sourceTime = t;
                 });
         if (res != Result::SUCCESS) {
             return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
         }
-        return timestamp;
+        return sourceTime;
     }
 
     return (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP;
 }
 
 Result TimeFilterClient::close() {
-    // TODO: pending aidl interface
+    if (mTunerTimeFilter != NULL) {
+        Status s = mTunerTimeFilter->close();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mTimeFilter != NULL) {
         return mTimeFilter->close();

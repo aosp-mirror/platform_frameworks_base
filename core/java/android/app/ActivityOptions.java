@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -310,6 +311,9 @@ public class ActivityOptions {
     private static final String KEY_REMOTE_TRANSITION =
             "android:activity.remoteTransition";
 
+    private static final String KEY_OVERRIDE_TASK_TRANSITION =
+            "android:activity.overrideTaskTransition";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -393,6 +397,7 @@ public class ActivityOptions {
     private RemoteAnimationAdapter mRemoteAnimationAdapter;
     private IBinder mLaunchCookie;
     private IRemoteTransition mRemoteTransition;
+    private boolean mOverrideTaskTransition;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -472,6 +477,40 @@ public class ActivityOptions {
         ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
                 startedListener);
         opts.setOnAnimationFinishedListener(handler, finishedListener);
+        return opts;
+    }
+
+    /**
+     * Create an ActivityOptions specifying a custom animation to run when the activity in the
+     * different task is displayed.
+     *
+     * @param context Who is defining this.  This is the application that the
+     * animation resources will be loaded from.
+     * @param enterResId A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitResId A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
+     * @param startedListener Optional OnAnimationStartedListener to find out when the
+     * requested animation has started running.  If for some reason the animation
+     * is not executed, the callback will happen immediately.
+     * @param finishedListener Optional OnAnimationFinishedListener when the animation
+     * has finished running.
+     *
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     * @hide
+     */
+    @RequiresPermission(START_TASKS_FROM_RECENTS)
+    @TestApi
+    public static @NonNull ActivityOptions makeCustomTaskAnimation(@NonNull Context context,
+            int enterResId, int exitResId, @Nullable Handler handler,
+            @Nullable OnAnimationStartedListener startedListener,
+            @Nullable OnAnimationFinishedListener finishedListener) {
+        ActivityOptions opts = makeCustomAnimation(context, enterResId, exitResId, handler,
+                startedListener, finishedListener);
+        opts.mOverrideTaskTransition = true;
         return opts;
     }
 
@@ -1107,6 +1146,7 @@ public class ActivityOptions {
         mLaunchCookie = opts.getBinder(KEY_LAUNCH_COOKIE);
         mRemoteTransition = IRemoteTransition.Stub.asInterface(opts.getBinder(
                 KEY_REMOTE_TRANSITION));
+        mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
     }
 
     /**
@@ -1561,6 +1601,12 @@ public class ActivityOptions {
         return mLaunchCookie;
     }
 
+
+    /** @hide */
+    public boolean getOverrideTaskTransition() {
+        return mOverrideTaskTransition;
+    }
+
     /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
@@ -1788,6 +1834,9 @@ public class ActivityOptions {
         }
         if (mRemoteTransition != null) {
             b.putBinder(KEY_REMOTE_TRANSITION, mRemoteTransition.asBinder());
+        }
+        if (mOverrideTaskTransition) {
+            b.putBoolean(KEY_OVERRIDE_TASK_TRANSITION, mOverrideTaskTransition);
         }
         return b;
     }

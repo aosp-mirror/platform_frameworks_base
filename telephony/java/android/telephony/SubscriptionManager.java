@@ -47,6 +47,7 @@ import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -149,6 +150,22 @@ public class SubscriptionManager {
     /** @hide */
     public static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
             "cache_key.telephony.get_slot_index";
+
+    /** @hide */
+    public static final String GET_SIM_SPECIFIC_SETTINGS_METHOD_NAME = "getSimSpecificSettings";
+
+    /** @hide */
+    public static final String RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME =
+            "restoreSimSpecificSettings";
+
+    /**
+     * Key to the backup & restore data byte array in the Bundle that is returned by {@link
+     * #getAllSimSpecificSettingsForBackup()} or to be pass in to {@link
+     * #restoreAllSimSpecificSettings()}.
+     *
+     * @hide
+     */
+    public static final String KEY_SIM_SPECIFIC_SETTINGS_DATA = "KEY_SIM_SPECIFIC_SETTINGS_DATA";
 
     private static final int MAX_CACHE_SIZE = 4;
 
@@ -371,6 +388,28 @@ public class SubscriptionManager {
     @SystemApi
     public static final Uri WFC_ROAMING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_enabled");
+
+
+    /**
+     * A content {@link uri} used to call the appropriate backup or restore method for sim-specific
+     * settings
+     * <p>
+     * See {@link #GET_SIM_SPECIFIC_SETTINGS_METHOD_NAME} and {@link
+     * #RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME} for information on what method to call.
+     * @hide
+     */
+    @NonNull
+    public static final Uri SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI = Uri.withAppendedPath(
+            CONTENT_URI, "backup_and_restore");
+
+    /**
+     * A content {@link uri} used to notify contentobservers listening to siminfo restore during
+     * SuW.
+     * @hide
+     */
+    @NonNull
+    public static final Uri SIM_INFO_SUW_RESTORE_CONTENT_URI = Uri.withAppendedPath(
+            SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI, "suw_restore");
 
     /**
      * A content {@link Uri} used to receive updates on cross sim enabled user setting.
@@ -3454,5 +3493,72 @@ public class SubscriptionManager {
         sDefaultSmsSubIdCache.clear();
         sSlotIndexCache.clear();
         sPhoneIdCache.clear();
+    }
+
+    /**
+     * Called to retrieve SIM-specific settings data to be backed up.
+     *
+     * @return data in byte[] to be backed up.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public byte[] getAllSimSpecificSettingsForBackup() {
+        Bundle bundle =  mContext.getContentResolver().call(
+                SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI,
+                GET_SIM_SPECIFIC_SETTINGS_METHOD_NAME, null, null);
+        return bundle.getByteArray(SubscriptionManager.KEY_SIM_SPECIFIC_SETTINGS_DATA);
+    }
+
+    /**
+     * Called to attempt to restore the backed up sim-specific configs to device for specific sim.
+     * This will try to restore the data that was stored internally when {@link
+     * #restoreAllSimSpecificSettingsFromBackup(byte[] data)} was called during setup wizard.
+     * End result is SimInfoDB is modified to match any backed up configs for the requested
+     * inserted sim.
+     *
+     * <p>
+     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any SimInfoDB
+     * entry is updated as the result of this method call.
+     *
+     * @param iccId of the sim that a restore is requested for.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void restoreSimSpecificSettingsForIccIdFromBackup(@NonNull String iccId) {
+        mContext.getContentResolver().call(
+                SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI,
+                RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME,
+                iccId, null);
+    }
+
+    /**
+     * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
+     * configs to device for all existing SIMs in SimInfoDB. Internally, it will store the backup
+     * data in an internal file. This file will persist on device for device's lifetime and will be
+     * used later on when a SIM is inserted to restore that specific SIM's settings by calling
+     * {@link #restoreSimSpecificSettingsForIccIdFromBackup(String iccId)}. End result is
+     * SimInfoDB is modified to match any backed up configs for the appropriate inserted SIMs.
+     *
+     * <p>
+     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any SimInfoDB
+     * entry is updated as the result of this method call.
+     *
+     * @param data with the sim specific configs to be backed up.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void restoreAllSimSpecificSettingsFromBackup(@NonNull byte[] data) {
+        Bundle bundle = new Bundle();
+        bundle.putByteArray(KEY_SIM_SPECIFIC_SETTINGS_DATA, data);
+        mContext.getContentResolver().call(
+                SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI,
+                RESTORE_SIM_SPECIFIC_SETTINGS_METHOD_NAME,
+                null, bundle);
     }
 }

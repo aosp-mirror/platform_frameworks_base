@@ -88,12 +88,19 @@ sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
 }
 
 sp<TimeFilterClient> DemuxClient::openTimeFilter() {
-    // TODO: pending aidl interface
+    if (mTunerDemux != NULL) {
+        shared_ptr<ITunerTimeFilter> tunerTimeFilter;
+        Status s = mTunerDemux->openTimeFilter(&tunerTimeFilter);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        return new TimeFilterClient(tunerTimeFilter);
+    }
 
     if (mDemux != NULL) {
         sp<ITimeFilter> hidlTimeFilter = openHidlTimeFilter();
         if (hidlTimeFilter != NULL) {
-            sp<TimeFilterClient> timeFilterClient = new TimeFilterClient();
+            sp<TimeFilterClient> timeFilterClient = new TimeFilterClient(NULL);
             timeFilterClient->setHidlTimeFilter(hidlTimeFilter);
             return timeFilterClient;
         }
@@ -103,7 +110,14 @@ sp<TimeFilterClient> DemuxClient::openTimeFilter() {
 }
 
 int DemuxClient::getAvSyncHwId(sp<FilterClient> filterClient) {
-    // pending aidl interface
+    if (mTunerDemux != NULL) {
+        int hwId;
+        Status s = mTunerDemux->getAvSyncHwId(filterClient->getAidlFilter(), &hwId);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return INVALID_AV_SYNC_HW_ID;
+        }
+        return hwId;
+    }
 
     if (mDemux != NULL) {
         uint32_t avSyncHwId;
@@ -119,11 +133,18 @@ int DemuxClient::getAvSyncHwId(sp<FilterClient> filterClient) {
         }
     }
 
-    return -1;
+    return INVALID_AV_SYNC_HW_ID;
 }
 
 long DemuxClient::getAvSyncTime(int avSyncHwId) {
-    // pending aidl interface
+    if (mTunerDemux != NULL) {
+        int64_t time;
+        Status s = mTunerDemux->getAvSyncTime(avSyncHwId, &time);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return INVALID_AV_SYNC_TIME;
+        }
+        return time;
+    }
 
     if (mDemux != NULL) {
         uint64_t time;
@@ -138,7 +159,7 @@ long DemuxClient::getAvSyncTime(int avSyncHwId) {
         }
     }
 
-    return -1;
+    return INVALID_AV_SYNC_TIME;
 }
 
 sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int bufferSize, sp<DvrClientCallback> cb) {
@@ -167,7 +188,10 @@ sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int bufferSize, sp<DvrClient
 }
 
 Result DemuxClient::connectCiCam(int ciCamId) {
-    // pending aidl interface
+    if (mTunerDemux != NULL) {
+        Status s = mTunerDemux->connectCiCam(ciCamId);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDemux != NULL) {
         return mDemux->connectCiCam(static_cast<uint32_t>(ciCamId));
@@ -177,7 +201,10 @@ Result DemuxClient::connectCiCam(int ciCamId) {
 }
 
 Result DemuxClient::disconnectCiCam() {
-    // pending aidl interface
+    if (mTunerDemux != NULL) {
+        Status s = mTunerDemux->disconnectCiCam();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDemux != NULL) {
         return mDemux->disconnectCiCam();

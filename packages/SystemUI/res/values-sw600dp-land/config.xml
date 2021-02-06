@@ -19,4 +19,7 @@
 
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">2</integer>
+
+    <!-- Whether to use the split 2-column notification shade -->
+    <bool name="config_use_split_notification_shade">true</bool>
 </resources>
