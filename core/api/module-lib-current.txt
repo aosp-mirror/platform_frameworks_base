@@ -59,6 +59,7 @@ package android.net {
     method @NonNull public android.net.TestNetworkInterface createTunInterface(@NonNull java.util.Collection<android.net.LinkAddress>);
     method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
     method public void teardownTestNetwork(@NonNull android.net.Network);
+    field public static final String TEST_TAP_PREFIX = "testtap";
   }
 
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
