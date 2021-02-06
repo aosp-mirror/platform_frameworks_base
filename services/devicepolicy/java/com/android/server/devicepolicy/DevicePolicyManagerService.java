@@ -910,12 +910,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     };
 
     protected static class RestrictionsListener implements UserRestrictionsListener {
-        private Context mContext;
+        private final Context mContext;
+        private final UserManagerInternal mUserManagerInternal;
+        private final DevicePolicyManagerService mDpms;
 
-        public RestrictionsListener(Context context) {
+        public RestrictionsListener(
+                Context context,
+                UserManagerInternal userManagerInternal,
+                DevicePolicyManagerService dpms) {
             mContext = context;
+            mUserManagerInternal = userManagerInternal;
+            mDpms = dpms;
         }
 
+        @Override
         public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
                 Bundle prevRestrictions) {
             final boolean newlyDisallowed =
@@ -925,13 +933,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final boolean restrictionChanged = (newlyDisallowed != previouslyDisallowed);
 
             if (restrictionChanged) {
-                // Notify ManagedProvisioning to update the built-in cross profile intent filters.
-                Intent intent = new Intent(
-                        DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_CHANGED);
-                intent.setPackage(getManagedProvisioningPackage(mContext));
-                intent.putExtra(Intent.EXTRA_USER_ID, userId);
-                intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+                final int parentId = mUserManagerInternal.getProfileParentId(userId);
+                if (parentId == userId) {
+                    return;
+                }
+
+                // Always reset filters on the parent user, which handles cross profile intent
+                // filters between the parent and its profiles.
+                Slog.i(LOG_TAG, "Resetting cross-profile intent filters on restriction "
+                        + "change");
+                mDpms.resetDefaultCrossProfileIntentFilters(parentId);
+                mContext.sendBroadcastAsUser(new Intent(
+                                DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_APPLIED),
+                        UserHandle.of(userId));
             }
         }
     }
@@ -1621,7 +1635,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mSetupContentObserver = new SetupContentObserver(mHandler);
 
-        mUserManagerInternal.addUserRestrictionsListener(new RestrictionsListener(mContext));
+        mUserManagerInternal.addUserRestrictionsListener(
+                new RestrictionsListener(mContext, mUserManagerInternal, this));
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         loadOwners();
@@ -16011,18 +16026,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     provisioningParams.isKeepAccountMigrated(), callerPackage);
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
-                markIsProfileOwnerOnOrganizationOwnedDevice(admin, userInfo.id);
-                restrictRemovalOfManagedProfile(admin, userInfo.id);
+                setProfileOwnerOnOrgOwnedDeviceState(admin, userInfo.id, caller.getUserId());
             }
-
-            final Intent intent = new Intent(DevicePolicyManager.ACTION_MANAGED_PROFILE_CREATED)
-                    .putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id)
-                    .putExtra(
-                            DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
-                            provisioningParams.isLeaveAllSystemAppsEnabled())
-                    .setPackage(getManagedProvisioningPackage(mContext))
-                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
 
             return userInfo.getUserHandle();
         } catch (Exception e) {
@@ -16253,21 +16258,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void markIsProfileOwnerOnOrganizationOwnedDevice(
-            ComponentName admin, @UserIdInt int profileId) {
-        getDpmForProfile(profileId).markProfileOwnerOnOrganizationOwnedDevice(admin);
+    private void setProfileOwnerOnOrgOwnedDeviceState(
+            ComponentName admin, @UserIdInt int profileId, @UserIdInt int parentUserId) {
+        synchronized (getLockObject()) {
+            markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, profileId);
+        }
+        restrictRemovalOfManagedProfile(parentUserId);
     }
 
-    private void restrictRemovalOfManagedProfile(
-            ComponentName admin, @UserIdInt int profileId) {
-        getDpmForProfile(profileId).addUserRestriction(
-                admin, UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
-    }
-
-    private DevicePolicyManager getDpmForProfile(@UserIdInt int profileId) {
-        final Context profileContext = mContext.createContextAsUser(
-                UserHandle.of(profileId), /* flags= */ 0);
-        return profileContext.getSystemService(DevicePolicyManager.class);
+    private void restrictRemovalOfManagedProfile(@UserIdInt int parentUserId) {
+        final UserHandle parentUserHandle = UserHandle.of(parentUserId);
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                /* value= */ true,
+                parentUserHandle);
     }
 
     @Override
@@ -16316,15 +16320,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             disallowAddUser();
-
-            final Intent intent = new Intent(DevicePolicyManager.ACTION_PROVISIONED_MANAGED_DEVICE)
-                    .putExtra(Intent.EXTRA_USER_HANDLE, caller.getUserId())
-                    .putExtra(
-                            DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
-                            provisioningParams.isLeaveAllSystemAppsEnabled())
-                    .setPackage(getManagedProvisioningPackage(mContext))
-                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
         } catch (Exception e) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)
@@ -16422,5 +16417,46 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setTimePeriod(duration)
                 .setStrings(callerPackage)
                 .write();
+    }
+
+    @Override
+    public void resetDefaultCrossProfileIntentFilters(@UserIdInt int userId) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                final List<UserInfo> profiles = mUserManager.getProfiles(userId);
+                final int numOfProfiles = profiles.size();
+                if (numOfProfiles <= 1) {
+                    return;
+                }
+
+                final String managedProvisioningPackageName = getManagedProvisioningPackage(
+                        mContext);
+                // Removes cross profile intent filters from the parent to all the profiles.
+                mIPackageManager.clearCrossProfileIntentFilters(
+                        userId, mContext.getOpPackageName());
+                // Setting and resetting default cross profile intent filters was previously handled
+                // by Managed Provisioning. For backwards compatibility, clear any intent filters
+                // that were set by ManagedProvisioning.
+                mIPackageManager.clearCrossProfileIntentFilters(
+                        userId, managedProvisioningPackageName);
+
+                // For each profile reset cross profile intent filters
+                for (int i = 0; i < numOfProfiles; i++) {
+                    UserInfo profile = profiles.get(i);
+                    mIPackageManager.clearCrossProfileIntentFilters(
+                            profile.id, mContext.getOpPackageName());
+                    // Clear any intent filters that were set by ManagedProvisioning.
+                    mIPackageManager.clearCrossProfileIntentFilters(
+                            profile.id, managedProvisioningPackageName);
+
+                    mUserManagerInternal.setDefaultCrossProfileIntentFilters(userId, profile.id);
+                }
+            } catch (RemoteException e) {
+                // Shouldn't happen.
+            }
+        });
     }
 }

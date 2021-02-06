@@ -77,7 +77,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
@@ -145,7 +144,6 @@ import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.TASK;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -921,10 +919,8 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        if (isLeafTask()) {
-            // This task is going away, so save the last state if necessary.
-            saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
-        }
+        // This task is going away, so save the last state if necessary.
+        saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
 
         // TODO: VI what about activity?
         final boolean isVoiceSession = voiceSession != null;
@@ -2459,14 +2455,16 @@ class Task extends WindowContainer<WindowContainer> {
 
     /**
      * Saves launching state if necessary so that we can launch the activity to its latest state.
-     * It only saves state if this task has been shown to user and it's in fullscreen or freeform
-     * mode on freeform displays.
      */
     private void saveLaunchingStateIfNeeded() {
         saveLaunchingStateIfNeeded(getDisplayContent());
     }
 
     private void saveLaunchingStateIfNeeded(DisplayContent display) {
+        if (!isLeafTask()) {
+            return;
+        }
+
         if (!getHasBeenVisible()) {
             // Not ever visible to user.
             return;
@@ -2867,16 +2865,6 @@ class Task extends WindowContainer<WindowContainer> {
         // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent".
         outBounds.setEmpty();
         computeLetterboxBounds(outBounds, newParentConfig);
-        // Since the task is letterboxed due to mismatched orientation against its parent,
-        // sandbox max bounds to the app bounds.
-        if (!outBounds.isEmpty()) {
-            if (DEBUG_CONFIGURATION) {
-                ProtoLog.d(WM_DEBUG_CONFIGURATION, "Sandbox max bounds due to mismatched "
-                                + "orientation with parent, to %s vs DisplayArea %s", outBounds,
-                        getDisplayArea() != null ? getDisplayArea().getBounds() : "null");
-            }
-            getResolvedOverrideConfiguration().windowConfiguration.setMaxBounds(outBounds);
-        }
     }
 
     /** Computes bounds for {@link WindowConfiguration#WINDOWING_MODE_FREEFORM}. */

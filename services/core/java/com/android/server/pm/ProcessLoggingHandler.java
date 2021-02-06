@@ -16,22 +16,16 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
-
 import android.app.admin.SecurityLog;
 import android.content.Context;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
-import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
+import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-import android.os.IBinder;
-import android.os.Parcelable;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -39,7 +33,6 @@ import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -109,26 +102,23 @@ public final class ProcessLoggingHandler extends Handler {
         // Capturing local loggingInfo to still log even if hash was invalidated.
         try {
             pmi.requestChecksums(packageName, false, 0, CHECKSUM_TYPE, null,
-                    new IntentSender((IIntentSender) new IIntentSender.Stub() {
+                    new IOnChecksumsReadyListener.Stub() {
                         @Override
-                        public void send(int code, Intent intent, String resolvedType,
-                                IBinder allowlistToken, IIntentReceiver finishedReceiver,
-                                String requiredPermission, Bundle options) {
-                            processChecksums(loggingInfo, intent);
+                        public void onChecksumsReady(List<ApkChecksum> checksums)
+                                throws RemoteException {
+                            processChecksums(loggingInfo, checksums);
                         }
-                    }), context.getUserId(), mExecutor, this);
+                    }, context.getUserId(),
+                    mExecutor, this);
         } catch (Throwable t) {
             Slog.e(TAG, "requestChecksums() failed", t);
             enqueueProcessChecksum(loggingInfo, null);
         }
     }
 
-    void processChecksums(final LoggingInfo loggingInfo, Intent intent) {
-        Parcelable[] parcelables = intent.getParcelableArrayExtra(EXTRA_CHECKSUMS);
-        ApkChecksum[] checksums = Arrays.copyOf(parcelables, parcelables.length,
-                ApkChecksum[].class);
-
-        for (ApkChecksum checksum : checksums) {
+    void processChecksums(final LoggingInfo loggingInfo, List<ApkChecksum> checksums) {
+        for (int i = 0, size = checksums.size(); i < size; ++i) {
+            ApkChecksum checksum = checksums.get(i);
             if (checksum.getType() == CHECKSUM_TYPE) {
                 processChecksum(loggingInfo, checksum.getValue());
                 return;

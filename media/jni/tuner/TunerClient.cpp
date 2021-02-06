@@ -200,7 +200,14 @@ sp<DemuxClient> TunerClient::openDemux(int demuxHandle) {
 }
 
 shared_ptr<DemuxCapabilities> TunerClient::getDemuxCaps() {
-    // pending aidl interface
+    if (mTunerService != NULL) {
+        TunerDemuxCapabilities aidlCaps;
+        Status s = mTunerService->getDemuxCaps(&aidlCaps);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        return make_shared<DemuxCapabilities>(getHidlDemuxCaps(aidlCaps));
+    }
 
     if (mTuner != NULL) {
         Result res;
@@ -457,6 +464,26 @@ sp<IDescrambler> TunerClient::openHidlDescrambler() {
     }
 
     return descrambler;
+}
+
+DemuxCapabilities TunerClient::getHidlDemuxCaps(TunerDemuxCapabilities& aidlCaps) {
+    DemuxCapabilities caps{
+        .numDemux = (uint32_t)aidlCaps.numDemux,
+        .numRecord = (uint32_t)aidlCaps.numRecord,
+        .numPlayback = (uint32_t)aidlCaps.numPlayback,
+        .numTsFilter = (uint32_t)aidlCaps.numTsFilter,
+        .numSectionFilter = (uint32_t)aidlCaps.numSectionFilter,
+        .numAudioFilter = (uint32_t)aidlCaps.numAudioFilter,
+        .numVideoFilter = (uint32_t)aidlCaps.numVideoFilter,
+        .numPesFilter = (uint32_t)aidlCaps.numPesFilter,
+        .numPcrFilter = (uint32_t)aidlCaps.numPcrFilter,
+        .numBytesInSectionFilter = (uint32_t)aidlCaps.numBytesInSectionFilter,
+        .filterCaps = (uint32_t)aidlCaps.filterCaps,
+        .bTimeFilter = aidlCaps.bTimeFilter,
+    };
+    caps.linkCaps.resize(aidlCaps.linkCaps.size());
+    copy(aidlCaps.linkCaps.begin(), aidlCaps.linkCaps.end(), caps.linkCaps.begin());
+    return caps;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo) {

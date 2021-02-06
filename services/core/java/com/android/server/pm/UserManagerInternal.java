@@ -298,4 +298,11 @@ public abstract class UserManagerInternal {
      * Gets all {@link UserInfo UserInfos}.
      */
     public abstract @NonNull UserInfo[] getUserInfos();
+
+    /**
+     * Sets all default cross profile intent filters between {@code parentUserId} and
+     * {@code profileUserId}.
+     */
+    public abstract void setDefaultCrossProfileIntentFilters(
+            @UserIdInt int parentUserId, @UserIdInt int profileUserId);
 }

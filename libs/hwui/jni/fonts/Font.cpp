@@ -79,7 +79,8 @@ static void Font_Builder_addAxis(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jin
 
 // Regular JNI
 static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jobject buffer,
-        jstring filePath, jint weight, jboolean italic, jint ttcIndex) {
+                                jstring filePath, jstring langTags, jint weight, jboolean italic,
+                                jint ttcIndex) {
     NPE_CHECK_RETURN_ZERO(env, buffer);
     std::unique_ptr<NativeFontBuilder> builder(toBuilder(builderPtr));
     const void* fontPtr = env->GetDirectBufferAddress(buffer);
@@ -94,6 +95,7 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
         return 0;
     }
     ScopedUtfChars fontPath(env, filePath);
+    ScopedUtfChars langTagStr(env, langTags);
     jobject fontRef = MakeGlobalRefOrDie(env, buffer);
     sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
@@ -105,8 +107,13 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
                           "Failed to create internal object. maybe invalid font data.");
         return 0;
     }
-    std::shared_ptr<minikin::Font> font = minikin::Font::Builder(minikinFont).setWeight(weight)
-                    .setSlant(static_cast<minikin::FontStyle::Slant>(italic)).build();
+    uint32_t localeListId = minikin::registerLocaleList(langTagStr.c_str());
+    std::shared_ptr<minikin::Font> font =
+            minikin::Font::Builder(minikinFont)
+                    .setWeight(weight)
+                    .setSlant(static_cast<minikin::FontStyle::Slant>(italic))
+                    .setLocaleListId(localeListId)
+                    .build();
     return reinterpret_cast<jlong>(new FontWrapper(std::move(font)));
 }
 
@@ -302,11 +309,12 @@ static jint FontFileUtil_isPostScriptType1Font(JNIEnv* env, jobject, jobject buf
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontBuilderMethods[] = {
-    { "nInitBuilder", "()J", (void*) Font_Builder_initBuilder },
-    { "nAddAxis", "(JIF)V", (void*) Font_Builder_addAxis },
-    { "nBuild", "(JLjava/nio/ByteBuffer;Ljava/lang/String;IZI)J", (void*) Font_Builder_build },
-    { "nClone", "(JJIZI)J", (void*) Font_Builder_clone },
-    { "nGetReleaseNativeFont", "()J", (void*) Font_Builder_getReleaseNativeFont },
+        {"nInitBuilder", "()J", (void*)Font_Builder_initBuilder},
+        {"nAddAxis", "(JIF)V", (void*)Font_Builder_addAxis},
+        {"nBuild", "(JLjava/nio/ByteBuffer;Ljava/lang/String;Ljava/lang/String;IZI)J",
+         (void*)Font_Builder_build},
+        {"nClone", "(JJIZI)J", (void*)Font_Builder_clone},
+        {"nGetReleaseNativeFont", "()J", (void*)Font_Builder_getReleaseNativeFont},
 };
 
 static const JNINativeMethod gFontMethods[] = {

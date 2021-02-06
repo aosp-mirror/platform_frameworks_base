@@ -55,8 +55,6 @@ class WindowSurfaceController {
     private boolean mSurfaceShown = false;
     private float mSurfaceX = 0;
     private float mSurfaceY = 0;
-    private int mSurfaceW = 0;
-    private int mSurfaceH = 0;
 
     // Initialize to the identity matrix.
     private float mLastDsdx = 1;
@@ -82,9 +80,6 @@ class WindowSurfaceController {
             int flags, WindowStateAnimator animator, int windowType) {
         mAnimator = animator;
 
-        mSurfaceW = w;
-        mSurfaceH = h;
-
         title = name;
 
         mService = animator.mService;
@@ -104,8 +99,8 @@ class WindowSurfaceController {
                 .setMetadata(METADATA_OWNER_PID, mWindowSession.mPid)
                 .setCallsite("WindowSurfaceController");
 
-        final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags &
-                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
+        final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags
+                & WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
 
         if (useBLAST) {
             b.setBLASTLayer();
@@ -119,7 +114,6 @@ class WindowSurfaceController {
     void hide(SurfaceControl.Transaction transaction, String reason) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE HIDE ( %s ): %s", reason, title);
 
-        mAnimator.destroyPreservedSurfaceLocked(transaction);
         if (mSurfaceShown) {
             hideSurface(transaction);
         }
@@ -335,9 +329,7 @@ class WindowSurfaceController {
         pw.print(" layer="); pw.print(mSurfaceLayer);
         pw.print(" alpha="); pw.print(mSurfaceAlpha);
         pw.print(" rect=("); pw.print(mSurfaceX);
-        pw.print(","); pw.print(mSurfaceY);
-        pw.print(") "); pw.print(mSurfaceW);
-        pw.print(" x "); pw.print(mSurfaceH);
+        pw.print(","); pw.print(mSurfaceY); pw.print(") ");
         pw.print(" transform=("); pw.print(mLastDsdx); pw.print(", ");
         pw.print(mLastDtdx); pw.print(", "); pw.print(mLastDsdy);
         pw.print(", "); pw.print(mLastDtdy); pw.println(")");

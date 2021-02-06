@@ -41,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -460,24 +461,40 @@ public class FullBackup {
                                                    Set<PathWithRequiredFlags> excludes,
                                                    Map<String, Set<PathWithRequiredFlags>> includes)
                 throws IOException, XmlPullParserException {
+            verifyTopLevelTag(parser, "full-backup-content");
+
+            parseRules(parser, excludes, includes, Optional.empty());
+
+            logParsingResults(excludes, includes);
+        }
+
+        private void verifyTopLevelTag(XmlPullParser parser, String tag)
+                throws XmlPullParserException, IOException {
             int event = parser.getEventType(); // START_DOCUMENT
             while (event != XmlPullParser.START_TAG) {
                 event = parser.next();
             }
 
-            if (!"full-backup-content".equals(parser.getName())) {
+            if (!tag.equals(parser.getName())) {
                 throw new XmlPullParserException("Xml file didn't start with correct tag" +
-                        " (<full-backup-content>). Found \"" + parser.getName() + "\"");
+                        " (" + tag + " ). Found \"" + parser.getName() + "\"");
             }
 
             if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(TAG_XML_PARSER, "\n");
                 Log.v(TAG_XML_PARSER, "====================================================");
-                Log.v(TAG_XML_PARSER, "Found valid fullBackupContent; parsing xml resource.");
+                Log.v(TAG_XML_PARSER, "Found valid " + tag + "; parsing xml resource.");
                 Log.v(TAG_XML_PARSER, "====================================================");
                 Log.v(TAG_XML_PARSER, "");
             }
+        }
 
+        private void parseRules(XmlPullParser parser,
+                Set<PathWithRequiredFlags> excludes,
+                Map<String, Set<PathWithRequiredFlags>> includes,
+                Optional<Integer> maybeRequiredFlags)
+                throws IOException, XmlPullParserException {
+            int event;
             while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 switch (event) {
                     case XmlPullParser.START_TAG:
@@ -498,13 +515,7 @@ public class FullBackup {
                             break;
                         }
 
-                        int requiredFlags = 0; // no transport flags are required by default
-                        if (TAG_INCLUDE.equals(parser.getName())) {
-                            // requiredFlags are only supported for <include /> tag, for <exclude />
-                            // we should always leave them as the default = 0
-                            requiredFlags = getRequiredFlagsFromString(
-                                    parser.getAttributeValue(null, "requireFlags"));
-                        }
+                        int requiredFlags = getRequiredFlagsForRule(parser, maybeRequiredFlags);
 
                         // retrieve the include/exclude set we'll be adding this rule to
                         Set<PathWithRequiredFlags> activeSet = parseCurrentTagForDomain(
@@ -542,7 +553,7 @@ public class FullBackup {
 
                         // Special case for sharedpref files (not dirs) also add ".xml" suffix file.
                         if ("sharedpref".equals(domainFromXml) && !canonicalFile.isDirectory() &&
-                            !canonicalFile.getCanonicalPath().endsWith(".xml")) {
+                                !canonicalFile.getCanonicalPath().endsWith(".xml")) {
                             final String canonicalXmlPath =
                                     canonicalFile.getCanonicalPath() + ".xml";
                             activeSet.add(new PathWithRequiredFlags(canonicalXmlPath,
@@ -554,6 +565,10 @@ public class FullBackup {
                         }
                 }
             }
+        }
+
+        private void logParsingResults(Set<PathWithRequiredFlags> excludes,
+                Map<String, Set<PathWithRequiredFlags>> includes) {
             if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(TAG_XML_PARSER, "\n");
                 Log.v(TAG_XML_PARSER, "Xml resource parsing complete.");
@@ -611,6 +626,24 @@ public class FullBackup {
                 }
             }
             return flags;
+        }
+
+        private int getRequiredFlagsForRule(XmlPullParser parser,
+                Optional<Integer> maybeRequiredFlags) {
+            if (maybeRequiredFlags.isPresent()) {
+                // This is the new config format where required flags are specified for the whole
+                // section, not per rule.
+                return maybeRequiredFlags.get();
+            }
+
+            if (TAG_INCLUDE.equals(parser.getName())) {
+                // In the legacy config, requiredFlags are only supported for <include /> tag,
+                // for <exclude /> we should always leave them as the default = 0.
+                return getRequiredFlagsFromString(
+                        parser.getAttributeValue(null, "requireFlags"));
+            }
+
+            return 0;
         }
 
         private Set<PathWithRequiredFlags> parseCurrentTagForDomain(XmlPullParser parser,

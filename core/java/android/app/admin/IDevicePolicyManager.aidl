@@ -498,4 +498,6 @@ interface IDevicePolicyManager {
 
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
+
+    void resetDefaultCrossProfileIntentFilters(int userId);
 }

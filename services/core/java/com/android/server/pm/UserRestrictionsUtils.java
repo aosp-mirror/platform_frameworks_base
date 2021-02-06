@@ -44,6 +44,7 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.server.BundleUtils;
 import com.android.server.LocalServices;
 
 import com.google.android.collect.Sets;
@@ -384,27 +385,12 @@ public class UserRestrictionsUtils {
         return in != null ? in : new Bundle();
     }
 
-    public static boolean isEmpty(@Nullable Bundle in) {
-        return (in == null) || (in.size() == 0);
-    }
-
     /**
      * Returns {@code true} if given bundle is not null and contains {@code true} for a given
      * restriction.
      */
     public static boolean contains(@Nullable Bundle in, String restriction) {
         return in != null && in.getBoolean(restriction);
-    }
-
-    /**
-     * Creates a copy of the {@code in} Bundle.  If {@code in} is null, it'll return an empty
-     * bundle.
-     *
-     * <p>The resulting {@link Bundle} is always writable. (i.e. it won't return
-     * {@link Bundle#EMPTY})
-     */
-    public static @NonNull Bundle clone(@Nullable Bundle in) {
-        return (in != null) ? new Bundle(in) : new Bundle();
     }
 
     public static void merge(@NonNull Bundle dest, @Nullable Bundle in) {
@@ -483,10 +469,10 @@ public class UserRestrictionsUtils {
         if (a == b) {
             return true;
         }
-        if (isEmpty(a)) {
-            return isEmpty(b);
+        if (BundleUtils.isEmpty(a)) {
+            return BundleUtils.isEmpty(b);
         }
-        if (isEmpty(b)) {
+        if (BundleUtils.isEmpty(b)) {
             return false;
         }
         for (String key : a.keySet()) {

@@ -1730,8 +1730,12 @@ public class DevicePolicyManager {
      * Broadcast action to notify ManagedProvisioning that
      * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has changed.
      * @hide
+     * @deprecated No longer needed as ManagedProvisioning no longer handles
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction changing.
      */
+    // TODO(b/177221010): Remove when Managed Provisioning no longer depend on it.
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_DATA_SHARING_RESTRICTION_CHANGED =
             "android.app.action.DATA_SHARING_RESTRICTION_CHANGED";
 
@@ -5467,26 +5471,6 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
             "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
-
-    /**
-     * Broadcast action: notify managed provisioning that the device has been provisioned.
-     *
-     * @hide
-     */
-    @TestApi
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PROVISIONED_MANAGED_DEVICE =
-            "android.app.action.PROVISIONED_MANAGED_DEVICE";
-
-    /**
-     * Broadcast action: notify managed provisioning that a new managed profile is created.
-     *
-     * @hide
-     */
-    @TestApi
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_MANAGED_PROFILE_CREATED =
-            "android.app.action.MANAGED_PROFILE_CREATED";
 
     /**
      * Widgets are enabled in keyguard
@@ -13263,6 +13247,25 @@ public class DevicePolicyManager {
                 mService.provisionFullyManagedDevice(provisioningParams, mContext.getPackageName());
             } catch (ServiceSpecificException e) {
                 throw new ProvisioningException(e, e.errorCode);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Resets the default cross profile intent filters that were set during
+     * {@link #createAndProvisionManagedProfile} between {@code userId} and all it's managed
+     * profiles if any.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void resetDefaultCrossProfileIntentFilters(@UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                mService.resetDefaultCrossProfileIntentFilters(userId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

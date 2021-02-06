@@ -18,6 +18,7 @@ package android.service.voice;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
@@ -44,6 +45,7 @@ public class VoiceInteractionServiceInfo {
     private ServiceInfo mServiceInfo;
     private String mSessionService;
     private String mRecognitionService;
+    private String mHotwordDetectionService;
     private String mSettingsActivity;
     private boolean mSupportsAssist;
     private boolean mSupportsLaunchFromKeyguard;
@@ -133,6 +135,8 @@ public class VoiceInteractionServiceInfo {
                     false);
             mSupportsLocalInteraction = array.getBoolean(com.android.internal.
                     R.styleable.VoiceInteractionService_supportsLocalInteraction, false);
+            mHotwordDetectionService = array.getString(com.android.internal.R.styleable
+                    .VoiceInteractionService_hotwordDetectionService);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
@@ -180,5 +184,10 @@ public class VoiceInteractionServiceInfo {
 
     public boolean getSupportsLocalInteraction() {
         return mSupportsLocalInteraction;
+    }
+
+    @Nullable
+    public String getHotwordDetectionService() {
+        return mHotwordDetectionService;
     }
 }
