@@ -42,6 +42,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
     private final long mLocalTime;
     @SuppressLint("UseIcu")
     @Nullable private final Locale mLocale;
+    private final boolean mDeviceOwnerCanGrantSensorsPermissions;
 
     private FullyManagedDeviceProvisioningParams(
             @NonNull ComponentName deviceAdminComponentName,
@@ -49,13 +50,16 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
             boolean leaveAllSystemAppsEnabled,
             @Nullable String timeZone,
             long localTime,
-            @Nullable @SuppressLint("UseIcu") Locale locale) {
+            @Nullable @SuppressLint("UseIcu") Locale locale,
+            boolean deviceOwnerCanGrantSensorsPermissions) {
         this.mDeviceAdminComponentName = requireNonNull(deviceAdminComponentName);
         this.mOwnerName = requireNonNull(ownerName);
         this.mLeaveAllSystemAppsEnabled = leaveAllSystemAppsEnabled;
         this.mTimeZone = timeZone;
         this.mLocalTime = localTime;
         this.mLocale = locale;
+        this.mDeviceOwnerCanGrantSensorsPermissions =
+                deviceOwnerCanGrantSensorsPermissions;
     }
 
     private FullyManagedDeviceProvisioningParams(
@@ -64,13 +68,15 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
             boolean leaveAllSystemAppsEnabled,
             @Nullable String timeZone,
             long localTime,
-            @Nullable String localeStr) {
+            @Nullable String localeStr,
+            boolean deviceOwnerCanGrantSensorsPermissions) {
         this(deviceAdminComponentName,
                 ownerName,
                 leaveAllSystemAppsEnabled,
                 timeZone,
                 localTime,
-                getLocale(localeStr));
+                getLocale(localeStr),
+                deviceOwnerCanGrantSensorsPermissions);
     }
 
     @Nullable
@@ -107,6 +113,14 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
     }
 
     /**
+     * @return true if the device owner can control sensor-related permission grants, false
+     * if the device owner has opted out of it.
+     */
+    public boolean canDeviceOwnerGrantSensorsPermissions() {
+        return mDeviceOwnerCanGrantSensorsPermissions;
+    }
+
+    /**
      * Builder class for {@link FullyManagedDeviceProvisioningParams} objects.
      */
     public static final class Builder {
@@ -117,6 +131,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         private long mLocalTime;
         @SuppressLint("UseIcu")
         @Nullable private Locale mLocale;
+        // Default to allowing control over sensor permission grants.
+        boolean mDeviceOwnerCanGrantSensorsPermissions = true;
 
         /**
          * Initialize a new {@link Builder} to construct a
@@ -181,6 +197,17 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         }
 
         /**
+         * Marks that the Device Owner may grant permissions related to device sensors.
+         * See {@link DevicePolicyManager#EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT}.
+         */
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setDeviceOwnerCanGrantSensorsPermissions(boolean mayGrant) {
+            mDeviceOwnerCanGrantSensorsPermissions = mayGrant;
+            return this;
+        }
+
+        /**
          * Combines all of the attributes that have been set on this {@code Builder}
          *
          * @return a new {@link FullyManagedDeviceProvisioningParams} object.
@@ -193,7 +220,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                     mLeaveAllSystemAppsEnabled,
                     mTimeZone,
                     mLocalTime,
-                    mLocale);
+                    mLocale,
+                    mDeviceOwnerCanGrantSensorsPermissions);
         }
     }
 
@@ -211,6 +239,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                 + ", mTimeZone=" + (mTimeZone == null ? "null" : mTimeZone)
                 + ", mLocalTime=" + mLocalTime
                 + ", mLocale=" + (mLocale == null ? "null" : mLocale)
+                + ", mDeviceOwnerCanGrantSensorsPermissions="
+                + mDeviceOwnerCanGrantSensorsPermissions
                 + '}';
     }
 
@@ -222,6 +252,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
         dest.writeString(mTimeZone);
         dest.writeLong(mLocalTime);
         dest.writeString(mLocale == null ? null : mLocale.toLanguageTag());
+        dest.writeBoolean(mDeviceOwnerCanGrantSensorsPermissions);
     }
 
     @NonNull
@@ -235,6 +266,7 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                     String timeZone = in.readString();
                     long localtime = in.readLong();
                     String locale = in.readString();
+                    boolean deviceOwnerCanGrantSensorsPermissions = in.readBoolean();
 
                     return new FullyManagedDeviceProvisioningParams(
                             componentName,
@@ -242,7 +274,8 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
                             leaveAllSystemAppsEnabled,
                             timeZone,
                             localtime,
-                            locale);
+                            locale,
+                            deviceOwnerCanGrantSensorsPermissions);
                 }
 
                 @Override
