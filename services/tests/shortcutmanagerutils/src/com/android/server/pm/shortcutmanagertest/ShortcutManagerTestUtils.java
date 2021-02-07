@@ -136,6 +136,20 @@ public class ShortcutManagerTestUtils {
         return sb.toString();
     }
 
+    public static List<String> extractShortcutIds(List<String> result) {
+        final String prefix = "ShortcutInfo {id=";
+        final String postfix = ", ";
+
+        List<String> ids = new ArrayList<>();
+        for (String line : result) {
+            if (line.contains(prefix)) {
+                ids.add(line.substring(
+                        line.indexOf(prefix) + prefix.length(), line.indexOf(postfix)));
+            }
+        }
+        return ids;
+    }
+
     public static boolean resultContains(List<String> result, String expected) {
         for (String line : result) {
             if (line.contains(expected)) {
@@ -157,6 +171,16 @@ public class ShortcutManagerTestUtils {
             fail("Didn't contain expected string=" + expected
                     + "\nActual:\n" + concatResult(result));
         }
+        return result;
+    }
+
+    public static List<String> assertHaveIds(List<String> result, String... expectedIds) {
+        assertSuccess(result);
+
+        final SortedSet<String> expected = new TreeSet<>(list(expectedIds));
+        final SortedSet<String> actual = new TreeSet<>(extractShortcutIds(result));
+        assertEquals(expected, actual);
+
         return result;
     }
 
