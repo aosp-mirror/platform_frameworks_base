@@ -286,7 +286,7 @@
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wenn dieser Modus aktiviert ist, kann sich die MAC-Adresse dieses Geräts bei jeder Verbindung mit einem Netzwerk ändern, bei dem die MAC-Adressen randomisiert werden."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
-    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Kostenlos"</string>
+    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ohne Datenlimit"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-Puffergrößen"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Größe pro Protokollpuffer wählen"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Speicher der dauerhaften Protokollierung löschen?"</string>
