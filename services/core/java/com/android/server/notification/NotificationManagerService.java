@@ -3041,7 +3041,8 @@ public class NotificationManagerService extends SystemService {
                         }
 
                         Binder windowToken = new Binder();
-                        mWindowManagerInternal.addWindowToken(windowToken, TYPE_TOAST, displayId);
+                        mWindowManagerInternal.addWindowToken(windowToken, TYPE_TOAST, displayId,
+                                null /* options */);
                         record = getToastRecord(callingUid, callingPid, pkg, isSystemToast, token,
                                 text, callback, duration, windowToken, displayId, textCallback);
                         mToastQueue.add(record);
