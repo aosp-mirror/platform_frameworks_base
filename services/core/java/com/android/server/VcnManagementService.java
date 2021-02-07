@@ -22,6 +22,7 @@ import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubsc
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -55,6 +56,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.LocationPermissionChecker;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
@@ -148,6 +150,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final TelephonySubscriptionTrackerCallback mTelephonySubscriptionTrackerCb;
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
     @NonNull private final VcnContext mVcnContext;
+
+    /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
+    @Nullable private LocationPermissionChecker mLocationPermissionChecker;
 
     @GuardedBy("mLock")
     @NonNull
@@ -308,6 +313,11 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             // TODO(b/178501049): use the subId indicated by WifiInfo#getSubscriptionId
             return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
+
+        /** Creates a new LocationPermissionChecker for the provided Context. */
+        public LocationPermissionChecker newLocationPermissionChecker(@NonNull Context context) {
+            return new LocationPermissionChecker(context);
+        }
     }
 
     /** Notifies the VcnManagementService that external dependencies can be set up. */
@@ -315,6 +325,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkProvider(mNetworkProvider);
         mTelephonySubscriptionTracker.register();
+        mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
 
     private void enforcePrimaryUser() {
@@ -796,6 +807,27 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 }
 
                 notifyAllPolicyListenersLocked();
+
+                // Notify all registered StatusCallbacks for this subGroup
+                for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
+                    if (!mSubGroup.equals(cbInfo.mSubGroup)) {
+                        continue;
+                    }
+                    if (!mLastSnapshot.packageHasPermissionsForSubscriptionGroup(
+                            mSubGroup, cbInfo.mPkgName)) {
+                        continue;
+                    }
+
+                    if (!mLocationPermissionChecker.checkLocationPermission(
+                            cbInfo.mPkgName,
+                            "VcnStatusCallback" /* featureId */,
+                            cbInfo.mUid,
+                            null /* message */)) {
+                        continue;
+                    }
+
+                    Binder.withCleanCallingIdentity(() -> cbInfo.mCallback.onEnteredSafeMode());
+                }
             }
         }
     }
