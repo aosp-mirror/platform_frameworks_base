@@ -79,7 +79,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_CLOSE_CONNECTION = 150;
     private static final int DO_COMMIT_CONTENT = 160;
     private static final int DO_GET_SURROUNDING_TEXT = 41;
-    private static final int DO_SET_IME_TEMPORARILY_CONSUMES_INPUT = 170;
+    private static final int DO_SET_IME_CONSUMES_INPUT = 170;
 
 
     @GuardedBy("mLock")
@@ -268,13 +268,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     /**
-     * Dispatches the request for setting ime temporarily consumes input.
+     * Dispatches the request for setting ime consumes input.
      *
-     * <p>See {@link InputConnection#setImeTemporarilyConsumesInput(boolean)}.
+     * <p>See {@link InputConnection#setImeConsumesInput(boolean)}.
      */
-    public void setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
-        dispatchMessage(obtainMessageB(DO_SET_IME_TEMPORARILY_CONSUMES_INPUT,
-                imeTemporarilyConsumesInput));
+    public void setImeConsumesInput(boolean imeConsumesInput) {
+        dispatchMessage(obtainMessageB(DO_SET_IME_CONSUMES_INPUT, imeConsumesInput));
     }
 
     void dispatchMessage(Message msg) {
@@ -822,17 +821,17 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
-            case DO_SET_IME_TEMPORARILY_CONSUMES_INPUT: {
+            case DO_SET_IME_CONSUMES_INPUT: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT,
-                        "InputConnection#setImeTemporarilyConsumesInput");
+                        "InputConnection#setImeConsumesInput");
                 try {
                     InputConnection ic = getInputConnection();
                     if (ic == null || !isActive()) {
                         Log.w(TAG,
-                                "setImeTemporarilyConsumesInput on inactive InputConnection");
+                                "setImeConsumesInput on inactive InputConnection");
                         return;
                     }
-                    ic.setImeTemporarilyConsumesInput(msg.arg1 == 1);
+                    ic.setImeConsumesInput(msg.arg1 == 1);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }
