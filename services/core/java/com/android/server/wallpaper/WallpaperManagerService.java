@@ -1094,7 +1094,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Adding window token: " + mToken);
-                mWindowManagerInternal.addWindowToken(mToken, TYPE_WALLPAPER, mDisplayId);
+                mWindowManagerInternal.addWindowToken(mToken, TYPE_WALLPAPER, mDisplayId,
+                        null /* options */);
                 final DisplayData wpdData = getDisplayDataOrCreate(mDisplayId);
                 try {
                     connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,

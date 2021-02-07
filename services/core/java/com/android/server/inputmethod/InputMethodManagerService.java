@@ -2546,7 +2546,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + mCurTokenDisplayId);
                 }
                 mIWindowManager.addWindowToken(mCurToken, LayoutParams.TYPE_INPUT_METHOD,
-                        mCurTokenDisplayId);
+                        mCurTokenDisplayId, null /* options */);
             } catch (RemoteException e) {
             }
             return new InputBindResult(

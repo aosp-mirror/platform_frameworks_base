@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.IInputFilter;
@@ -408,8 +409,10 @@ public abstract class WindowManagerInternal {
      * @param token The token to add.
      * @param type The window type.
      * @param displayId The display to add the token to.
+     * @param options A bundle used to pass window-related options.
      */
-    public abstract void addWindowToken(android.os.IBinder token, int type, int displayId);
+    public abstract void addWindowToken(@NonNull android.os.IBinder token, int type, int displayId,
+            @Nullable Bundle options);
 
     /**
      * Removes a window token.
