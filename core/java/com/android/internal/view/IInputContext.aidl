@@ -86,5 +86,5 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
     void getSurroundingText(int beforeLength, int afterLength, int flags,
             ISurroundingTextResultCallback callback);
 
-    void setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput);
+    void setImeConsumesInput(boolean imeConsumesInput);
 }
