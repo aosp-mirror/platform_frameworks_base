@@ -1309,7 +1309,8 @@ public final class MultiClientInputMethodManagerService {
                 final Binder token = new Binder();
                 Binder.withCleanCallingIdentity(
                         PooledLambda.obtainRunnable(WindowManagerInternal::addWindowToken,
-                                mIWindowManagerInternal, token, TYPE_INPUT_METHOD, displayId));
+                                mIWindowManagerInternal, token, TYPE_INPUT_METHOD, displayId,
+                                null /* options */));
                 mPerUserData.mDisplayIdToImeWindowTokenMap.add(new TokenInfo(token, displayId));
                 return token;
             }

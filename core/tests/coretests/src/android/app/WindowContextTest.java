@@ -184,7 +184,8 @@ public class WindowContextTest {
         final IBinder token = windowContext.getWindowContextToken();
 
         final IBinder existingToken = new Binder();
-        mWms.addWindowToken(existingToken, TYPE_INPUT_METHOD, windowContext.getDisplayId());
+        mWms.addWindowToken(existingToken, TYPE_INPUT_METHOD, windowContext.getDisplayId(),
+                null /* options */);
 
         final WindowManager.LayoutParams params =
                 new WindowManager.LayoutParams(TYPE_INPUT_METHOD);

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -201,7 +200,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
         token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
                 true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
-                INVALID_UID, true /* roundedCornerOverlay */, true /* fromClientToken */);
+                true /* roundedCornerOverlay */, true /* fromClientToken */, null /* options */);
         assertTrue(token.mRoundedCornerOverlay);
         assertTrue(token.isFromClient());
     }
@@ -215,8 +214,8 @@ public class WindowTokenTests extends WindowTestsBase {
     public void testSurfaceCreatedForWindowToken() {
         final WindowToken fromClientToken = new WindowToken(mDisplayContent.mWmService,
                 mock(IBinder.class), TYPE_APPLICATION_OVERLAY, true /* persistOnEmpty */,
-                mDisplayContent, true /* ownerCanManageAppTokens */, INVALID_UID,
-                true /* roundedCornerOverlay */, true /* fromClientToken */);
+                mDisplayContent, true /* ownerCanManageAppTokens */,
+                true /* roundedCornerOverlay */, true /* fromClientToken */, null /* options */);
         assertNull(fromClientToken.mSurfaceControl);
 
         createWindow(null, TYPE_APPLICATION_OVERLAY, fromClientToken, "window");
@@ -224,8 +223,8 @@ public class WindowTokenTests extends WindowTestsBase {
 
         final WindowToken nonClientToken = new WindowToken(mDisplayContent.mWmService,
                 mock(IBinder.class), TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
-                false /* fromClientToken */);
+                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
+                false /* fromClientToken */, null /* options */);
         assertNotNull(nonClientToken.mSurfaceControl);
     }
 
@@ -238,7 +237,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
         final WindowToken token1 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
                 false /* fromClientToken */, null /* options */);
 
         verify(selectFunc).apply(token1.windowType, null);
@@ -246,7 +245,7 @@ public class WindowTokenTests extends WindowTestsBase {
         final Bundle options = new Bundle();
         final WindowToken token2 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
                 false /* fromClientToken */, options /* options */);
 
         verify(selectFunc).apply(token2.windowType, options);
