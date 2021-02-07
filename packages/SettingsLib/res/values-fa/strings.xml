@@ -37,7 +37,7 @@
     <string name="wifi_no_internet" msgid="1774198889176926299">"دسترسی به اینترنت ندارد"</string>
     <string name="saved_network" msgid="7143698034077223645">"ذخیره‌شده توسط <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏اتصال خودکار ازطریق %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"اتصال خودکار ازطریق ارائه‌دهنده رتبه‌بندی شبکه"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"اتصال خودکار ازطریق ارائه‌دهنده رده‌بندی شبکه"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"‏متصل از طریق %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"متصل شده ازطریق <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"‏در دسترس از طریق %1$s"</string>
@@ -263,8 +263,8 @@
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"‏انتخاب نسخه MAP بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"کدک بلوتوث صوتی"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"راه‌اندازی کدک صوتی بلوتوثی\nانتخاب"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"سرعت نمونه بلوتوث صوتی"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"راه‌اندازی کدک صوتی بلوتوثی\nانتخاب: سرعت نمونه"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"بسامد نمونه صوتی بلوتوث"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"راه‌اندازی کدک صوتی بلوتوثی\nانتخاب: بسامد نمونه"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"«خاکستری» به این معناست که تلفن یا هدست از آن پشتیبانی نمی‌کند"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"بیت‌های بلوتوث صوتی در هر نمونه"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"راه‌اندازی کدک صوتی بلوتوثی\nانتخاب: تعداد بیت در نمونه"</string>

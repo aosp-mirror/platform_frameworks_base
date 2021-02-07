@@ -311,7 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Adsız Bluetooth cihazları (yalnız MAC ünvanları) göstəriləcək"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Uzaqdan idarə olunan cihazlarda dözülməz yüksək səs həcmi və ya nəzarət çatışmazlığı kimi səs problemləri olduqda Bluetooth mütləq səs həcmi xüsusiyyətini deaktiv edir."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche funksiyasını aktiv edir."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Təkmilləşdirilmiş Bağlantı funksiyasını aktiv edir."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Qabaqcıl məlumat mübadiləsini aktiv edir."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Yerli terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Yerli örtük girişini təklif edən terminal tətbiqi aktiv edin"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP yoxlanılır"</string>
