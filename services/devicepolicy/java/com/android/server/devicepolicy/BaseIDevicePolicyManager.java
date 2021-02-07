@@ -129,6 +129,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
             FullyManagedDeviceProvisioningParams provisioningParams, String callerPackage) {
     }
 
-    public void resetDefaultCrossProfileIntentFilters(@UserIdInt int userId) {
+    public void resetDefaultCrossProfileIntentFilters(@UserIdInt int userId) {}
+
+    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
+        return false;
     }
 }

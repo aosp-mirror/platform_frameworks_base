@@ -136,6 +136,8 @@ class ActiveAdmin {
     private static final String TAG_PASSWORD_COMPLEXITY = "password-complexity";
     private static final String TAG_ORGANIZATION_ID = "organization-id";
     private static final String TAG_ENROLLMENT_SPECIFIC_ID = "enrollment-specific-id";
+    private static final String TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS =
+            "admin-can-grant-sensors-permissions";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
@@ -277,6 +279,7 @@ class ActiveAdmin {
     boolean mCommonCriteriaMode;
     public String mOrganizationId;
     public String mEnrollmentSpecificId;
+    public boolean mAdminCanGrantSensorsPermissions;
 
     ActiveAdmin(DeviceAdminInfo info, boolean isParent) {
         this.info = info;
@@ -543,6 +546,8 @@ class ActiveAdmin {
         if (!TextUtils.isEmpty(mEnrollmentSpecificId)) {
             writeTextToXml(out, TAG_ENROLLMENT_SPECIFIC_ID, mEnrollmentSpecificId);
         }
+        writeAttributeValueToXml(out, TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS,
+                mAdminCanGrantSensorsPermissions);
     }
 
     void writeTextToXml(TypedXmlSerializer out, String tag, String text) throws IOException {
@@ -792,6 +797,9 @@ class ActiveAdmin {
                     Log.w(DevicePolicyManagerService.LOG_TAG,
                             "Missing Enrollment-specific ID.");
                 }
+            } else if (TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS.equals(tag)) {
+                mAdminCanGrantSensorsPermissions = parser.getAttributeBoolean(null, ATTR_VALUE,
+                        false);
             } else {
                 Slog.w(DevicePolicyManagerService.LOG_TAG, "Unknown admin tag: " + tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1143,5 +1151,8 @@ class ActiveAdmin {
             pw.print("mEnrollmentSpecificId=");
             pw.println(mEnrollmentSpecificId);
         }
+
+        pw.print("mAdminCanGrantSensorsPermissions");
+        pw.println(mAdminCanGrantSensorsPermissions);
     }
 }
