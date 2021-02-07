@@ -21923,6 +21923,14 @@ package android.media {
     field public static final String KEY_TILE_HEIGHT = "tile-height";
     field public static final String KEY_TILE_WIDTH = "tile-width";
     field public static final String KEY_TRACK_ID = "track-id";
+    field public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
+    field public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
+    field public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
+    field public static final String KEY_VIDEO_QP_I_MIN = "video-qp-i-min";
+    field public static final String KEY_VIDEO_QP_MAX = "video-qp-max";
+    field public static final String KEY_VIDEO_QP_MIN = "video-qp-min";
+    field public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
+    field public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
     field public static final String KEY_WIDTH = "width";
     field public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     field public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
