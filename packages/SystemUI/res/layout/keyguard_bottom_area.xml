@@ -81,6 +81,17 @@
         android:contentDescription="@string/accessibility_phone_button"
         android:tint="?attr/wallpaperTextColor" />
 
+    <ImageView
+        android:id="@+id/alt_left_button"
+        android:layout_height="@dimen/keyguard_affordance_height"
+        android:layout_width="@dimen/keyguard_affordance_width"
+        android:layout_gravity="bottom|start"
+        android:scaleType="center"
+        android:tint="?attr/wallpaperTextColor"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="48dp"
+        android:visibility="gone" />
+
     <FrameLayout
         android:id="@+id/overlay_container"
         android:layout_width="match_parent"

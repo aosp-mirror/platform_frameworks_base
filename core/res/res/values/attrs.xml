@@ -8500,6 +8500,9 @@
              interaction requests from an Activity. This flag is new in
              {@link android.os.Build.VERSION_CODES#N} and not used in previous versions. -->
         <attr name="supportsLocalInteraction" format="boolean" />
+        <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
+             @hide @SystemApi -->
+        <attr name="hotwordDetectionService" format="string" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>

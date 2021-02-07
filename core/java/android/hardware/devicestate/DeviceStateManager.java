@@ -16,8 +16,12 @@
 
 package android.hardware.devicestate;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 
 import java.util.concurrent.Executor;
@@ -28,13 +32,19 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@TestApi
 @SystemService(Context.DEVICE_STATE_SERVICE)
 public final class DeviceStateManager {
-    /** Invalid device state. */
+    /**
+     * Invalid device state.
+     *
+     * @hide
+     */
     public static final int INVALID_DEVICE_STATE = -1;
 
-    private DeviceStateManagerGlobal mGlobal;
+    private final DeviceStateManagerGlobal mGlobal;
 
+    /** @hide */
     public DeviceStateManager() {
         DeviceStateManagerGlobal global = DeviceStateManagerGlobal.getInstance();
         if (global == null) {
@@ -45,23 +55,73 @@ public final class DeviceStateManager {
     }
 
     /**
+     * Returns the list of device states that are supported and can be requested with
+     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
+     */
+    @NonNull
+    public int[] getSupportedStates() {
+        return mGlobal.getSupportedStates();
+    }
+
+    /**
+     * Submits a {@link DeviceStateRequest request} to modify the device state.
+     * <p>
+     * By default, the request is kept active until a call to
+     * {@link #cancelRequest(DeviceStateRequest)} or until one of the following occurs:
+     * <ul>
+     *     <li>Another processes submits a request succeeding this request in which case the request
+     *     will be suspended until the interrupting request is canceled.
+     *     <li>The requested state has become unsupported.
+     *     <li>The process submitting the request dies.
+     * </ul>
+     * However, this behavior can be changed by setting flags on the {@link DeviceStateRequest}.
+     *
+     * @throws IllegalArgumentException if the requested state is unsupported.
+     * @throws SecurityException if the {@link android.Manifest.permission#CONTROL_DEVICE_STATE}
+     * permission is not held.
+     *
+     * @see DeviceStateRequest
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
+    public void requestState(@NonNull DeviceStateRequest request,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable DeviceStateRequest.Callback callback) {
+        mGlobal.requestState(request, callback, executor);
+    }
+
+    /**
+     * Cancels a {@link DeviceStateRequest request} previously submitted with a call to
+     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
+     * <p>
+     * This method is noop if the {@code request} has not been submitted with a call to
+     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
+     *
+     * @throws SecurityException if the {@link android.Manifest.permission#CONTROL_DEVICE_STATE}
+     * permission is not held.
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
+    public void cancelRequest(@NonNull DeviceStateRequest request) {
+        mGlobal.cancelRequest(request);
+    }
+
+    /**
      * Registers a listener to receive notifications about changes in device state.
      *
-     * @param listener the listener to register.
      * @param executor the executor to process notifications.
+     * @param listener the listener to register.
      *
      * @see DeviceStateListener
      */
-    public void registerDeviceStateListener(@NonNull DeviceStateListener listener,
-            @NonNull Executor executor) {
+    public void addDeviceStateListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull DeviceStateListener listener) {
         mGlobal.registerDeviceStateListener(listener, executor);
     }
 
     /**
      * Unregisters a listener previously registered with
-     * {@link #registerDeviceStateListener(DeviceStateListener, Executor)}.
+     * {@link #addDeviceStateListener(Executor, DeviceStateListener)}.
      */
-    public void unregisterDeviceStateListener(@NonNull DeviceStateListener listener) {
+    public void removeDeviceStateListener(@NonNull DeviceStateListener listener) {
         mGlobal.unregisterDeviceStateListener(listener);
     }
 

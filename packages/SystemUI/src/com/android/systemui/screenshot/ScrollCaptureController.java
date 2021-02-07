@@ -81,6 +81,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private View mEdit;
     private View mShare;
     private CropView mCropView;
+    private MagnifierView mMagnifierView;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter, UiEventLogger uiEventLogger) {
@@ -120,13 +121,14 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mEdit = findViewById(R.id.edit);
         mShare = findViewById(R.id.share);
         mCropView = findViewById(R.id.crop_view);
+        mMagnifierView = findViewById(R.id.magnifier);
+        mCropView.setCropInteractionListener(mMagnifierView);
 
         mSave.setOnClickListener(this::onClicked);
         mCancel.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
-        //mPreview.setImageDrawable(mImageTileSet.getDrawable());
         mConnection.start(this::startCapture);
     }
 
@@ -164,6 +166,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
 
     private void doFinish() {
         mPreview.setImageDrawable(null);
+        mMagnifierView.setImageTileset(null);
         mImageTileSet.clear();
         mCallback.onFinish();
         mWindow.getDecorView().getViewTreeObserver()
@@ -273,6 +276,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
             session.end(mCallback::onFinish);
         } else {
             mPreview.setImageDrawable(mImageTileSet.getDrawable());
+            mMagnifierView.setImageTileset(mImageTileSet);
         }
     }
 }
