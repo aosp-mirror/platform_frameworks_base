@@ -51075,7 +51075,7 @@ package android.view.inputmethod {
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public boolean setComposingText(CharSequence, int);
-    method public default boolean setImeTemporarilyConsumesInput(boolean);
+    method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2

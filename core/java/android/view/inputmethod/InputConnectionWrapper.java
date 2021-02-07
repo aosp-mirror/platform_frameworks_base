@@ -341,7 +341,7 @@ public class InputConnectionWrapper implements InputConnection {
      * @throws NullPointerException if the target is {@code null}.
      */
     @Override
-    public boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
-        return mTarget.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+    public boolean setImeConsumesInput(boolean imeConsumesInput) {
+        return mTarget.setImeConsumesInput(imeConsumesInput);
     }
 }

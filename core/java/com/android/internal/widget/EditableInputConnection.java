@@ -245,11 +245,11 @@ public class EditableInputConnection extends BaseInputConnection
     }
 
     @Override
-    public boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+    public boolean setImeConsumesInput(boolean imeConsumesInput) {
         if (mTextView == null) {
-            return super.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+            return super.setImeConsumesInput(imeConsumesInput);
         }
-        mTextView.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+        mTextView.setImeConsumesInput(imeConsumesInput);
         return true;
     }
 
