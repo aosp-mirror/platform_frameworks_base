@@ -299,7 +299,7 @@ public class EditorInfo implements InputType, Parcelable {
      * {@link EditorInfo} is using {@link Configuration#ORIENTATION_PORTRAIT} mode.
      * @hide
      */
-    public static final int IME_FLAG_APP_WINDOW_PORTRAIT = 0x80000000;
+    public static final int IME_INTERNAL_FLAG_APP_WINDOW_PORTRAIT = 0x00000001;
 
     /**
      * Generic unspecified type for {@link #imeOptions}.
@@ -321,7 +321,6 @@ public class EditorInfo implements InputType, Parcelable {
      *                               1 1 IME_ACTION_NEXT
      *                               11  IME_ACTION_DONE
      *                               111 IME_ACTION_PREVIOUS
-     *          1                        IME_FLAG_APP_WINDOW_PORTRAIT
      *         1                         IME_FLAG_NO_PERSONALIZED_LEARNING
      *        1                          IME_FLAG_NO_FULLSCREEN
      *       1                           IME_FLAG_NAVIGATE_PREVIOUS
@@ -356,7 +355,7 @@ public class EditorInfo implements InputType, Parcelable {
      * Masks for {@link internalImeOptions}
      *
      * <pre>
-     *  1                                IME_FLAG_APP_WINDOW_PORTRAIT
+     *                                 1 IME_INTERNAL_FLAG_APP_WINDOW_PORTRAIT
      * |-------|-------|-------|-------|</pre>
      */
 
@@ -984,6 +983,7 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeInt(inputType);
         dest.writeInt(imeOptions);
         dest.writeString(privateImeOptions);
+        dest.writeInt(internalImeOptions);
         TextUtils.writeToParcel(actionLabel, dest, flags);
         dest.writeInt(actionId);
         dest.writeInt(initialSelStart);
@@ -1019,6 +1019,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.inputType = source.readInt();
                     res.imeOptions = source.readInt();
                     res.privateImeOptions = source.readString();
+                    res.internalImeOptions = source.readInt();
                     res.actionLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.actionId = source.readInt();
                     res.initialSelStart = source.readInt();

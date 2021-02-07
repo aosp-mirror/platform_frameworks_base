@@ -120,6 +120,7 @@ import android.net.NetworkState;
 import android.net.NetworkTestResultParcelable;
 import android.net.NetworkUtils;
 import android.net.NetworkWatchlistManager;
+import android.net.OemNetworkPreferences;
 import android.net.PrivateDnsConfigParcel;
 import android.net.ProxyInfo;
 import android.net.QosCallbackException;
@@ -171,7 +172,6 @@ import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.LocalLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -192,6 +192,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.modules.utils.LocalLog;
 import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.server.am.BatteryStatsService;
@@ -2030,7 +2031,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_PRIVATE_DNS_VALIDATION_UPDATE,
                         new PrivateDnsValidationUpdate(netId,
-                                InetAddress.parseNumericAddress(ipAddress),
+                                InetAddresses.parseNumericAddress(ipAddress),
                                 hostname, validated)));
             } catch (IllegalArgumentException e) {
                 loge("Error parsing ip address in validation event");
@@ -9100,6 +9101,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     }
+
     /**
      * Registers {@link QosSocketFilter} with {@link IQosCallback}.
      *
@@ -9148,5 +9150,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void unregisterQosCallback(@NonNull final IQosCallback callback) {
         mQosCallbackTracker.unregisterCallback(callback);
+    }
+
+    @Override
+    public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference) {
+        // TODO http://b/176495594 track multiple default networks with networkPreferences
+        if (DBG) log("setOemNetworkPreference() called with: " + preference.toString());
     }
 }

@@ -51,7 +51,7 @@ android_test {
     ],
 
     libs: [
-        "android.hardware.power-java",
+        "android.hardware.power-V1-java",
         "android.test.mock",
         "android.test.base",
         "android.test.runner",

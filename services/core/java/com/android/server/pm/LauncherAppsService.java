@@ -1316,10 +1316,6 @@ public class LauncherAppsService extends SystemService {
                 } finally {
                     mListeners.finishBroadcast();
                 }
-                PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-                pmi.registerInstalledLoadingProgressCallback(packageName,
-                        new PackageLoadingProgressCallback(packageName, user),
-                        user.getIdentifier());
                 super.onPackageAdded(packageName, uid);
             }
 
@@ -1540,39 +1536,6 @@ public class LauncherAppsService extends SystemService {
             @Override
             public void onCallbackDied(T callback, Object cookie) {
                 checkCallbackCount();
-            }
-        }
-
-        class PackageLoadingProgressCallback extends
-                PackageManagerInternal.InstalledLoadingProgressCallback {
-            private String mPackageName;
-            private UserHandle mUser;
-
-            PackageLoadingProgressCallback(String packageName, UserHandle user) {
-                super(mCallbackHandler);
-                mPackageName = packageName;
-                mUser = user;
-            }
-
-            @Override
-            public void onLoadingProgressChanged(float progress) {
-                final int n = mListeners.beginBroadcast();
-                try {
-                    for (int i = 0; i < n; i++) {
-                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, mUser, "onLoadingProgressChanged")) {
-                            continue;
-                        }
-                        try {
-                            listener.onPackageLoadingProgressChanged(mUser, mPackageName, progress);
-                        } catch (RemoteException re) {
-                            Slog.d(TAG, "Callback failed ", re);
-                        }
-                    }
-                } finally {
-                    mListeners.finishBroadcast();
-                }
             }
         }
     }

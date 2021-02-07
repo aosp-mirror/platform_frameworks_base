@@ -3059,6 +3059,8 @@
     <public name="hand_second" />
     <public name="memtagMode" />
     <public name="nativeHeapZeroInit" />
+    <!-- @hide @SystemApi -->
+    <public name="hotwordDetectionService" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

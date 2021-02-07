@@ -191,7 +191,7 @@ public class ShellRoot {
             }
         }
         if (mDisplayContent.mWmService.mAccessibilityController != null) {
-            mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(
+            mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(
                     mDisplayContent.getDisplayId());
         }
     }

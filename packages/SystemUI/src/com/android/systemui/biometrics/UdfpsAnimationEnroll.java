@@ -38,6 +38,7 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     private static final String TAG = "UdfpsAnimationEnroll";
 
     private static final float SHADOW_RADIUS = 5.f;
+    private static final float PROGRESS_BAR_RADIUS = 140.f;
 
     @Nullable private RectF mSensorRect;
     @NonNull private final Paint mSensorPaint;
@@ -81,12 +82,12 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
 
     @Override
     public int getPaddingX() {
-        return (int) Math.ceil(SHADOW_RADIUS);
+        return (int) Math.ceil(PROGRESS_BAR_RADIUS);
     }
 
     @Override
     public int getPaddingY() {
-        return (int) Math.ceil(SHADOW_RADIUS);
+        return (int) Math.ceil(PROGRESS_BAR_RADIUS);
     }
 
     @Override
@@ -103,13 +104,5 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     @Override
     public int getOpacity() {
         return 0;
-    }
-
-    public void onEnrollmentProgress(int remaining) {
-        Log.d(TAG, "Remaining: " + remaining);
-    }
-
-    public void onEnrollmentHelp() {
-        Log.d(TAG, "onEnrollmentHelp");
     }
 }

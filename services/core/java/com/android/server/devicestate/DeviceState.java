@@ -16,8 +16,6 @@
 
 package com.android.server.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
-
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 
@@ -37,16 +35,16 @@ import java.util.Objects;
  */
 public final class DeviceState {
     /** Unique identifier for the device state. */
-    @IntRange(from = INVALID_DEVICE_STATE)
+    @IntRange(from = 0)
     private final int mIdentifier;
 
     /** String description of the device state. */
     @NonNull
     private final String mName;
 
-    public DeviceState(@IntRange(from = INVALID_DEVICE_STATE) int identifier,
+    public DeviceState(@IntRange(from = 0) int identifier,
             @NonNull String name) {
-        if (identifier != INVALID_DEVICE_STATE && identifier < 0) {
+        if (identifier < 0) {
             throw new IllegalArgumentException("Identifier must be greater than or equal to zero.");
         }
         mIdentifier = identifier;
@@ -54,7 +52,7 @@ public final class DeviceState {
     }
 
     /** Returns the unique identifier for the device state. */
-    @IntRange(from = INVALID_DEVICE_STATE)
+    @IntRange(from = 0)
     public int getIdentifier() {
         return mIdentifier;
     }
