@@ -56,6 +56,8 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @NonNull private final RectF mSensorRect;
     @NonNull private final Paint mDebugTextPaint;
 
+    @Nullable private UdfpsProgressBar mProgressBar;
+
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
 
@@ -64,6 +66,7 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     private boolean mIlluminationRequested;
     private int mStatusBarState;
     private boolean mNotificationShadeExpanded;
+    @Nullable private UdfpsEnrollHelper mEnrollHelper;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -110,6 +113,18 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     void setUdfpsAnimation(@Nullable UdfpsAnimation animation) {
         mAnimationView.setAnimation(animation);
+        if (animation instanceof UdfpsAnimationEnroll) {
+            mProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            mProgressBar.setVisibility(View.GONE);
+        }
+    }
+
+    void setEnrollHelper(@Nullable UdfpsEnrollHelper enrollHelper) {
+        mEnrollHelper = enrollHelper;
+        if (mEnrollHelper != null) {
+            mEnrollHelper.updateProgress(mProgressBar);
+        }
     }
 
     @Override
@@ -135,6 +150,11 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @Override
     public void onExpansionChanged(float expansion, boolean expanded) {
         mAnimationView.onExpansionChanged(expansion, expanded);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 
     @Override
@@ -233,10 +253,10 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     }
 
     void onEnrollmentProgress(int remaining) {
-        mAnimationView.onEnrollmentProgress(remaining);
+        mEnrollHelper.onEnrollmentProgress(remaining, mProgressBar);
     }
 
     void onEnrollmentHelp() {
-        mAnimationView.onEnrollmentHelp();
+
     }
 }

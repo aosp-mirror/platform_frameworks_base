@@ -817,7 +817,7 @@ class WindowStateAnimator {
         }
 
         if (mService.mAccessibilityController != null) {
-            mService.mAccessibilityController.onWindowTransitionLocked(mWin, transit);
+            mService.mAccessibilityController.onWindowTransition(mWin, transit);
         }
     }
 

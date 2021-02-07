@@ -35,7 +35,7 @@ import com.android.systemui.R;
  * cropped out.
  */
 public class CropView extends View {
-    private enum CropBoundary {
+    public enum CropBoundary {
         NONE, TOP, BOTTOM
     }
 
@@ -48,8 +48,14 @@ public class CropView extends View {
     private float mTopCrop = 0f;
     private float mBottomCrop = 1f;
 
+    // When the user is dragging a handle, these variables store the distance between the top/bottom
+    // crop values and
+    private float mTopDelta = 0f;
+    private float mBottomDelta = 0f;
+
     private CropBoundary mCurrentDraggingBoundary = CropBoundary.NONE;
-    private float mLastY;
+    private float mStartingY;  // y coordinate of ACTION_DOWN
+    private CropInteractionListener mCropInteractionListener;
 
     public CropView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
@@ -73,52 +79,82 @@ public class CropView extends View {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawShade(canvas, 0, mTopCrop);
-        drawShade(canvas, mBottomCrop, 1f);
-        drawHandle(canvas, mTopCrop);
-        drawHandle(canvas, mBottomCrop);
+        float top = mTopCrop + mTopDelta;
+        float bottom = mBottomCrop + mBottomDelta;
+        drawShade(canvas, 0, top);
+        drawShade(canvas, bottom, 1f);
+        drawHandle(canvas, top);
+        drawHandle(canvas, bottom);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int topPx = fractionToPixels(mTopCrop);
         int bottomPx = fractionToPixels(mBottomCrop);
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mCurrentDraggingBoundary = nearestBoundary(event, topPx, bottomPx);
-            if (mCurrentDraggingBoundary != CropBoundary.NONE) {
-                mLastY = event.getY();
-            }
-            return true;
-        }
-        if (event.getAction() == MotionEvent.ACTION_MOVE
-                && mCurrentDraggingBoundary != CropBoundary.NONE) {
-            float delta = event.getY() - mLastY;
-            if (mCurrentDraggingBoundary == CropBoundary.TOP) {
-                mTopCrop = pixelsToFraction((int) MathUtils.constrain(topPx + delta, 0,
-                        bottomPx - 2 * mCropTouchMargin));
-            } else {  // Bottom
-                mBottomCrop = pixelsToFraction((int) MathUtils.constrain(bottomPx + delta,
-                        topPx + 2 * mCropTouchMargin, getMeasuredHeight()));
-            }
-            mLastY = event.getY();
-            invalidate();
-            return true;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mCurrentDraggingBoundary = nearestBoundary(event, topPx, bottomPx);
+                if (mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    mStartingY = event.getY();
+                    updateListener(event);
+                }
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                if (mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    float delta = event.getY() - mStartingY;
+                    if (mCurrentDraggingBoundary == CropBoundary.TOP) {
+                        mTopDelta = pixelsToFraction((int) MathUtils.constrain(delta, -topPx,
+                                bottomPx - 2 * mCropTouchMargin - topPx));
+                    } else {  // Bottom
+                        mBottomDelta = pixelsToFraction((int) MathUtils.constrain(delta,
+                                topPx + 2 * mCropTouchMargin - bottomPx,
+                                getMeasuredHeight() - bottomPx));
+                    }
+                    updateListener(event);
+                    invalidate();
+                    return true;
+                }
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                if (mCurrentDraggingBoundary != CropBoundary.NONE) {
+                    // Commit the delta to the stored crop values.
+                    mTopCrop += mTopDelta;
+                    mBottomCrop += mBottomDelta;
+                    mTopDelta = 0;
+                    mBottomDelta = 0;
+                    updateListener(event);
+                }
         }
         return super.onTouchEvent(event);
     }
 
     /**
-     * @return value [0,1] representing the position of the top crop boundary.
+     * @return value [0,1] representing the position of the top crop boundary. Does not reflect
+     * changes from any in-progress touch input.
      */
     public float getTopBoundary() {
         return mTopCrop;
     }
 
     /**
-     * @return value [0,1] representing the position of the bottom crop boundary.
+     * @return value [0,1] representing the position of the bottom crop boundary. Does not reflect
+     * changes from any in-progress touch input.
      */
     public float getBottomBoundary() {
         return mBottomCrop;
+    }
+
+    public void setCropInteractionListener(CropInteractionListener listener) {
+        mCropInteractionListener = listener;
+    }
+
+    private void updateListener(MotionEvent event) {
+        if (mCropInteractionListener != null) {
+            float boundaryPosition = (mCurrentDraggingBoundary == CropBoundary.TOP)
+                    ? mTopCrop + mTopDelta : mBottomCrop + mBottomDelta;
+            mCropInteractionListener.onCropMotionEvent(event, mCurrentDraggingBoundary,
+                    boundaryPosition, fractionToPixels(boundaryPosition));
+        }
     }
 
     private void drawShade(Canvas canvas, float fracStart, float fracEnd) {
@@ -147,5 +183,18 @@ public class CropView extends View {
             return CropBoundary.BOTTOM;
         }
         return CropBoundary.NONE;
+    }
+
+    /**
+     * Listen for crop motion events and state.
+     */
+    public interface CropInteractionListener {
+        /**
+         * Called whenever CropView has a MotionEvent that can impact the position of the crop
+         * boundaries.
+         */
+        void onCropMotionEvent(MotionEvent event, CropBoundary boundary, float boundaryPosition,
+                int boundaryPositionPx);
+
     }
 }

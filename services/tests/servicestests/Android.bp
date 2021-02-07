@@ -59,9 +59,9 @@ android_test {
     },
 
     libs: [
-        "android.hardware.power-java",
+        "android.hardware.power-V1-java",
         "android.hardware.tv.cec-V1.0-java",
-        "android.hardware.vibrator-java",
+        "android.hardware.vibrator-V1-java",
         "android.hidl.manager-V1.0-java",
         "android.test.mock",
         "android.test.base",
@@ -88,7 +88,7 @@ android_test {
         "libui",
         "libunwindstack",
         "libutils",
-        "netd_aidl_interface-cpp",
+        "netd_aidl_interface-V5-cpp",
     ],
 
     dxflags: ["--multi-dex"],

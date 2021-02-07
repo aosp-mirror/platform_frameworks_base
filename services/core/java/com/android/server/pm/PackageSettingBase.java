@@ -26,8 +26,6 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IncrementalStatesInfo;
-import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.UninstallReason;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
@@ -42,8 +40,6 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
-import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
@@ -731,14 +727,14 @@ public abstract class PackageSettingBase extends SettingBase {
      * @return True if package is startable, false otherwise.
      */
     public boolean isPackageStartable() {
-        return incrementalStates.isStartable();
+        return getIncrementalStates().isStartable();
     }
 
     /**
      * @return True if package is still being loaded, false if the package is fully loaded.
      */
     public boolean isPackageLoading() {
-        return incrementalStates.isLoading();
+        return getIncrementalStates().isLoading();
     }
 
     /**
