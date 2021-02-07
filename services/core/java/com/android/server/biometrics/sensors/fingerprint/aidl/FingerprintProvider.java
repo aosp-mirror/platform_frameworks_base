@@ -28,6 +28,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -366,7 +367,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName, boolean shouldLogMetrics) {
+            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason) {
         mHandler.post(() -> {
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
@@ -388,7 +389,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                         opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                        mUdfpsOverlayController, maxTemplatesPerUser, shouldLogMetrics);
+                        mUdfpsOverlayController, maxTemplatesPerUser, enrollReason);
                 scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
                     @Override
                     public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
