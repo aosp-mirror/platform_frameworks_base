@@ -435,25 +435,7 @@ public class NetworkRequest implements Parcelable {
      * @hide
      */
     public boolean isRequest() {
-        return isForegroundRequest() || isBackgroundRequest();
-    }
-
-    /**
-     * Returns true iff. the contained NetworkRequest is one that:
-     *
-     *     - should be associated with at most one satisfying network
-     *       at a time;
-     *
-     *     - should cause a network to be kept up and in the foreground if
-     *       it is the best network which can satisfy the NetworkRequest.
-     *
-     * For full detail of how isRequest() is used for pairing Networks with
-     * NetworkRequests read rematchNetworkAndRequests().
-     *
-     * @hide
-     */
-    public boolean isForegroundRequest() {
-        return type == Type.TRACK_DEFAULT || type == Type.REQUEST;
+        return type == Type.REQUEST || type == Type.BACKGROUND_REQUEST;
     }
 
     /**
