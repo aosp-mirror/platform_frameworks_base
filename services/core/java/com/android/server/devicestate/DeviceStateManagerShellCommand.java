@@ -16,6 +16,13 @@
 
 package com.android.server.devicestate;
 
+import static android.Manifest.permission.CONTROL_DEVICE_STATE;
+
+import android.annotation.Nullable;
+import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateRequest;
+import android.os.Binder;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
@@ -27,10 +34,15 @@ import java.util.Optional;
  * Use with {@code adb shell cmd device_state ...}.
  */
 public class DeviceStateManagerShellCommand extends ShellCommand {
-    private final DeviceStateManagerService mInternal;
+    @Nullable
+    private static DeviceStateRequest sLastRequest;
+
+    private final DeviceStateManagerService mService;
+    private final DeviceStateManager mClient;
 
     public DeviceStateManagerShellCommand(DeviceStateManagerService service) {
-        mInternal = service;
+        mService = service;
+        mClient = service.getContext().getSystemService(DeviceStateManager.class);
     }
 
     @Override
@@ -51,15 +63,15 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     }
 
     private void printState(PrintWriter pw) {
-        DeviceState committedState = mInternal.getCommittedState();
-        Optional<DeviceState> requestedState = mInternal.getRequestedState();
-        Optional<DeviceState> requestedOverrideState = mInternal.getOverrideState();
+        DeviceState committedState = mService.getCommittedState();
+        Optional<DeviceState> baseState = mService.getBaseState();
+        Optional<DeviceState> overrideState = mService.getOverrideState();
 
         pw.println("Committed state: " + committedState);
-        if (requestedOverrideState.isPresent()) {
+        if (overrideState.isPresent()) {
             pw.println("----------------------");
-            pw.println("Base state: " + requestedState.orElse(null));
-            pw.println("Override state: " + requestedOverrideState.get());
+            pw.println("Base state: " + baseState.orElse(null));
+            pw.println("Override state: " + overrideState.get());
         }
     }
 
@@ -67,32 +79,51 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         final String nextArg = getNextArg();
         if (nextArg == null) {
             printState(pw);
-        } else if ("reset".equals(nextArg)) {
-            mInternal.clearOverrideState();
-        } else {
-            int requestedState;
-            try {
-                requestedState = Integer.parseInt(nextArg);
-            } catch (NumberFormatException e) {
-                getErrPrintWriter().println("Error: requested state should be an integer");
-                return -1;
-            }
-
-            boolean success = mInternal.setOverrideState(requestedState);
-            if (!success) {
-                getErrPrintWriter().println("Error: failed to set override state. Run:");
-                getErrPrintWriter().println("");
-                getErrPrintWriter().println("    print-states");
-                getErrPrintWriter().println("");
-                getErrPrintWriter().println("to get the list of currently supported device states");
-                return -1;
-            }
         }
+
+        final Context context = mService.getContext();
+        context.enforceCallingOrSelfPermission(
+                CONTROL_DEVICE_STATE,
+                "Permission required to request device state.");
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            if ("reset".equals(nextArg)) {
+                if (sLastRequest != null) {
+                    mClient.cancelRequest(sLastRequest);
+                    sLastRequest = null;
+                }
+            } else {
+                int requestedState = Integer.parseInt(nextArg);
+                DeviceStateRequest request = DeviceStateRequest.newBuilder(requestedState).build();
+
+                mClient.requestState(request, null /* executor */, null /* callback */);
+                if (sLastRequest != null) {
+                    mClient.cancelRequest(sLastRequest);
+                }
+
+                sLastRequest = request;
+            }
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: requested state should be an integer");
+            return -1;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println("Error: " + e.getMessage());
+            getErrPrintWriter().println("-------------------");
+            getErrPrintWriter().println("Run:");
+            getErrPrintWriter().println("");
+            getErrPrintWriter().println("    print-states");
+            getErrPrintWriter().println("");
+            getErrPrintWriter().println("to get the list of currently supported device states");
+            return -1;
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
+
         return 0;
     }
 
     private int runPrintStates(PrintWriter pw) {
-        DeviceState[] states = mInternal.getSupportedStates();
+        DeviceState[] states = mService.getSupportedStates();
         pw.print("Supported states: [\n");
         for (int i = 0; i < states.length; i++) {
             pw.print("  " + states[i] + ",\n");

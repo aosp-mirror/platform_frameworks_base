@@ -313,6 +313,7 @@ import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.ActiveAdmin.TrustAgentInfo;
+import com.android.server.devicepolicy.Owners.OwnerDto;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.RestrictionsSet;
@@ -1128,6 +1129,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DevicePolicyManager.operationToString(operation),
                 DevicePolicyManager.unsafeOperationReasonToString(reason)));
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, reason);
+    }
+
+    // Used by DevicePolicyManagerServiceShellCommand
+    List<OwnerDto> listAllOwners() {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+
+        List<OwnerDto> owners = mOwners.listAllOwners();
+        synchronized (getLockObject()) {
+            for (int i = 0; i < owners.size(); i++) {
+                OwnerDto owner = owners.get(i);
+                owner.isAffiliated = isUserAffiliatedWithDeviceLocked(owner.userId);
+            }
+        }
+
+        return owners;
     }
 
     /**
@@ -13466,13 +13483,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mOwners.hasDeviceOwner()) {
             return false;
         }
-        if (userId == mOwners.getDeviceOwnerUserId()) {
-            // The user that the DO is installed on is always affiliated with the device.
-            return true;
-        }
         if (userId == UserHandle.USER_SYSTEM) {
             // The system user is always affiliated in a DO device,
             // even if in headless system user mode.
+            return true;
+        }
+        if (userId == mOwners.getDeviceOwnerUserId()) {
+            // The user that the DO is installed on is always affiliated with the device.
             return true;
         }
 

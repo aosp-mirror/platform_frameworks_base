@@ -71,12 +71,12 @@ public class IncrementalStatesTest {
     @Before
     public void setUp() {
         mIncrementalStates = new IncrementalStates();
-        assertFalse(mIncrementalStates.isStartable());
+        assertFalse(mIncrementalStates.getIncrementalStatesInfo().isStartable());
         mIncrementalStates.setCallback(mCallback);
         mIncrementalStates.onCommit(true);
         // Test that package is now startable and loading
-        assertTrue(mIncrementalStates.isStartable());
-        assertTrue(mIncrementalStates.isLoading());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isLoading());
         mUnstartableCalled.close();
         mFullyLoadedCalled.close();
     }
@@ -90,7 +90,7 @@ public class IncrementalStatesTest {
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
         // Test that package is still startable
         assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
         assertEquals(PackageManager.UNSTARTABLE_REASON_UNKNOWN, mUnstartableReason.get());
     }
 
@@ -104,7 +104,7 @@ public class IncrementalStatesTest {
                 IStorageHealthListener.HEALTH_STATUS_READS_PENDING);
         // Test that package is still startable
         assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
     }
 
     /**
@@ -116,7 +116,7 @@ public class IncrementalStatesTest {
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_STORAGE);
         // Test that package is still startable
         assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
         assertEquals(PackageManager.UNSTARTABLE_REASON_UNKNOWN,
                 mUnstartableReason.get());
     }
@@ -130,7 +130,7 @@ public class IncrementalStatesTest {
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_TRANSPORT);
         // Test that package is still startable
         assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
         assertEquals(PackageManager.UNSTARTABLE_REASON_UNKNOWN,
                 mUnstartableReason.get());
     }
@@ -145,12 +145,12 @@ public class IncrementalStatesTest {
         mIncrementalStates.setProgress(1.0f);
         // Test that package is now fully loaded
         assertTrue(mFullyLoadedCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isLoading());
+        assertFalse(mIncrementalStates.getIncrementalStatesInfo().isLoading());
         mIncrementalStates.onStorageHealthStatusChanged(
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
         // Test that package is still startable
         assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
     }
 
     /**
@@ -159,6 +159,6 @@ public class IncrementalStatesTest {
     @Test
     public void testStartableTransition_AppCrashOrAnr() {
         mIncrementalStates.onCrashOrAnr();
-        assertTrue(mIncrementalStates.isStartable());
+        assertTrue(mIncrementalStates.getIncrementalStatesInfo().isStartable());
     }
 }
