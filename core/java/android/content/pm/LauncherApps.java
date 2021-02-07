@@ -450,6 +450,7 @@ public class LauncherApps {
                 FLAG_MATCH_PINNED,
                 FLAG_MATCH_MANIFEST,
                 FLAG_MATCH_CACHED,
+                FLAG_MATCH_PINNED_BY_ANY_LAUNCHER,
                 FLAG_GET_KEY_FIELDS_ONLY,
                 FLAG_GET_PERSONS_DATA,
         })

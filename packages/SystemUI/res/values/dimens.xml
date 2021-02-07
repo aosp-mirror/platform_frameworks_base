@@ -345,6 +345,7 @@
     <dimen name="screenshot_action_chip_padding_end">16dp</dimen>
     <dimen name="screenshot_action_chip_text_size">14sp</dimen>
     <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
+    <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
@@ -1116,6 +1117,9 @@
     <!-- Y translation for credential contents when animating in -->
     <dimen name="biometric_dialog_credential_translation_offset">60dp</dimen>
 
+    <!-- UDFPS enrollment progress bar thickness -->
+    <dimen name="udfps_enroll_progress_thickness">12dp</dimen>
+
     <!-- Wireless Charging Animation values -->
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
     <dimen name="wireless_charging_dots_radius_end">4dp</dimen>
@@ -1259,6 +1263,7 @@
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_top_offset">100dp</dimen>
+    <dimen name="controls_activity_view_side_offset">12dp</dimen>
     <dimen name="controls_activity_view_text_size">17sp</dimen>
     <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>
 

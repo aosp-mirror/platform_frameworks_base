@@ -84,6 +84,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private boolean mIsOverlayRequested;
     // Reason the overlay has been requested. See IUdfpsOverlayController for definitions.
     private int mRequestReason;
+    @Nullable UdfpsEnrollHelper mEnrollHelper;
 
     // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
     // to turn off high brightness mode. To get around this limitation, the state of the AOD
@@ -95,6 +96,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
         public void showUdfpsOverlay(int sensorId, int reason) {
+            if (reason == IUdfpsOverlayController.REASON_ENROLL) {
+                mEnrollHelper = new UdfpsEnrollHelper();
+            }
             UdfpsController.this.showOverlay(reason);
         }
 
@@ -297,6 +301,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
                     final UdfpsAnimation animation = getUdfpsAnimationForReason(reason);
                     mView.setUdfpsAnimation(animation);
+                    mView.setEnrollHelper(mEnrollHelper);
                     mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
                     mIsOverlayShowing = true;
