@@ -111,19 +111,16 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         mSensorProps = properties;
     }
 
-    void setUdfpsAnimation(@Nullable UdfpsAnimation animation) {
+    void setExtras(@Nullable UdfpsAnimation animation, @Nullable UdfpsEnrollHelper enrollHelper) {
         mAnimationView.setAnimation(animation);
-        if (animation instanceof UdfpsAnimationEnroll) {
-            mProgressBar.setVisibility(View.VISIBLE);
+        mEnrollHelper = enrollHelper;
+
+        if (enrollHelper != null) {
+            mEnrollHelper.updateProgress(mProgressBar);
+            mProgressBar.setVisibility(enrollHelper.shouldShowProgressBar()
+                    ? View.VISIBLE : View.GONE);
         } else {
             mProgressBar.setVisibility(View.GONE);
-        }
-    }
-
-    void setEnrollHelper(@Nullable UdfpsEnrollHelper enrollHelper) {
-        mEnrollHelper = enrollHelper;
-        if (mEnrollHelper != null) {
-            mEnrollHelper.updateProgress(mProgressBar);
         }
     }
 

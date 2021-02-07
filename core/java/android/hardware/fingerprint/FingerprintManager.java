@@ -24,6 +24,7 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -55,6 +56,8 @@ import android.security.identity.IdentityCredential;
 import android.util.Slog;
 import android.view.Surface;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +91,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_FINGERPRINT_DETECTED = 107;
     private static final int MSG_UDFPS_POINTER_DOWN = 108;
     private static final int MSG_UDFPS_POINTER_UP = 109;
+
+    /**
+     * @hide
+     */
+    public static final int ENROLL_FIND_SENSOR = 1;
+    /**
+     * @hide
+     */
+    public static final int ENROLL_ENROLL = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef({ENROLL_FIND_SENSOR, ENROLL_ENROLL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnrollReason {}
 
     /**
      * Request authentication with any single sensor.
@@ -580,7 +599,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] hardwareAuthToken, CancellationSignal cancel, int userId,
-            EnrollmentCallback callback, boolean shouldLogMetrics) {
+            EnrollmentCallback callback, @EnrollReason int enrollReason) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentUserId();
         }
@@ -601,7 +620,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             try {
                 mEnrollmentCallback = callback;
                 mService.enroll(mToken, hardwareAuthToken, userId, mServiceReceiver,
-                        mContext.getOpPackageName(), shouldLogMetrics);
+                        mContext.getOpPackageName(), enrollReason);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try
