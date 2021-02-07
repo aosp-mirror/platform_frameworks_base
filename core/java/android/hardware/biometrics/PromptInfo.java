@@ -40,6 +40,7 @@ public class PromptInfo implements Parcelable {
     private @BiometricManager.Authenticators.Types int mAuthenticators;
     private boolean mDisallowBiometricsIfPolicyExists;
     private boolean mReceiveSystemEvents;
+    private int mSensorId = -1;
 
     public PromptInfo() {
 
@@ -59,6 +60,7 @@ public class PromptInfo implements Parcelable {
         mAuthenticators = in.readInt();
         mDisallowBiometricsIfPolicyExists = in.readBoolean();
         mReceiveSystemEvents = in.readBoolean();
+        mSensorId = in.readInt();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -93,6 +95,7 @@ public class PromptInfo implements Parcelable {
         dest.writeInt(mAuthenticators);
         dest.writeBoolean(mDisallowBiometricsIfPolicyExists);
         dest.writeBoolean(mReceiveSystemEvents);
+        dest.writeInt(mSensorId);
     }
 
     public boolean containsPrivateApiConfigurations() {
@@ -166,6 +169,10 @@ public class PromptInfo implements Parcelable {
         mReceiveSystemEvents = receiveSystemEvents;
     }
 
+    public void setSensorId(int sensorId) {
+        mSensorId = sensorId;
+    }
+
     // Getters
 
     public CharSequence getTitle() {
@@ -225,5 +232,9 @@ public class PromptInfo implements Parcelable {
 
     public boolean isReceiveSystemEvents() {
         return mReceiveSystemEvents;
+    }
+
+    public int getSensorId() {
+        return mSensorId;
     }
 }

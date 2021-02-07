@@ -25,6 +25,10 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR;
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +36,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
@@ -49,6 +54,7 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -80,6 +86,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -219,8 +226,8 @@ public class FingerprintService extends SystemService implements BiometricServic
         @SuppressWarnings("deprecation")
         @Override // Binder call
         public void authenticate(final IBinder token, final long operationId,
-                @FingerprintManager.SensorId final int sensorId, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName) {
+                final int sensorId, final int userId, final IFingerprintServiceReceiver receiver,
+                final String opPackageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -236,7 +243,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             final boolean isKeyguard = Utils.isKeyguard(getContext(), opPackageName);
 
             // Clear calling identity when checking LockPatternUtils for StrongAuth flags.
-            final long identity = Binder.clearCallingIdentity();
+            long identity = Binder.clearCallingIdentity();
             try {
                 if (isKeyguard && Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
                     // If this happens, something in KeyguardUpdateMonitor is wrong.
@@ -266,9 +273,101 @@ public class FingerprintService extends SystemService implements BiometricServic
                 return;
             }
 
-            provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
-                    0 /* cookie */, new ClientMonitorCallbackConverter(receiver), opPackageName,
-                    restricted, statsClient, isKeyguard);
+            final FingerprintSensorPropertiesInternal sensorProps =
+                    provider.second.getSensorProperties(sensorId);
+            if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
+                    && sensorProps != null && sensorProps.isAnyUdfpsType()) {
+                identity = Binder.clearCallingIdentity();
+                try {
+                    authenticateWithPrompt(operationId, sensorProps, userId, receiver);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } else {
+                provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
+                        0 /* cookie */, new ClientMonitorCallbackConverter(receiver), opPackageName,
+                        restricted, statsClient, isKeyguard);
+            }
+        }
+
+        private void authenticateWithPrompt(
+                final long operationId,
+                @NonNull final FingerprintSensorPropertiesInternal props,
+                final int userId,
+                final IFingerprintServiceReceiver receiver) {
+
+            final Context context = getUiContext();
+            final Executor executor = context.getMainExecutor();
+
+            final BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(context)
+                    .setTitle(context.getString(R.string.biometric_dialog_default_title))
+                    .setSubtitle(context.getString(R.string.fingerprint_dialog_default_subtitle))
+                    .setNegativeButton(
+                            context.getString(R.string.cancel),
+                            executor,
+                            (dialog, which) -> {
+                                try {
+                                    receiver.onError(
+                                            FINGERPRINT_ERROR_USER_CANCELED, 0 /* vendorCode */);
+                                } catch (RemoteException e) {
+                                    Slog.e(TAG, "Remote exception in negative button onClick()", e);
+                                }
+                            })
+                    .setSensorId(props.sensorId)
+                    .build();
+
+            final BiometricPrompt.AuthenticationCallback promptCallback =
+                    new BiometricPrompt.AuthenticationCallback() {
+                        @Override
+                        public void onAuthenticationError(int errorCode, CharSequence errString) {
+                            try {
+                                if (FingerprintUtils.isKnownErrorCode(errorCode)) {
+                                    receiver.onError(errorCode, 0 /* vendorCode */);
+                                } else {
+                                    receiver.onError(FINGERPRINT_ERROR_VENDOR, errorCode);
+                                }
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Remote exception in onAuthenticationError()", e);
+                            }
+                        }
+
+                        @Override
+                        public void onAuthenticationSucceeded(
+                                BiometricPrompt.AuthenticationResult result) {
+                            final Fingerprint fingerprint = new Fingerprint("", 0, 0L);
+                            final boolean isStrong = props.sensorStrength == STRENGTH_STRONG;
+                            try {
+                                receiver.onAuthenticationSucceeded(fingerprint, userId, isStrong);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Remote exception in onAuthenticationSucceeded()", e);
+                            }
+                        }
+
+                        @Override
+                        public void onAuthenticationFailed() {
+                            try {
+                                receiver.onAuthenticationFailed();
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Remote exception in onAuthenticationFailed()", e);
+                            }
+                        }
+
+                        @Override
+                        public void onAuthenticationAcquired(int acquireInfo) {
+                            try {
+                                if (FingerprintUtils.isKnownAcquiredCode(acquireInfo)) {
+                                    receiver.onAcquired(acquireInfo, 0 /* vendorCode */);
+                                } else {
+                                    receiver.onAcquired(FINGERPRINT_ACQUIRED_VENDOR, acquireInfo);
+                                }
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Remote exception in onAuthenticationAcquired()", e);
+                            }
+                        }
+                    };
+
+            biometricPrompt.authenticateUserForOperation(
+                    new CancellationSignal(), executor, promptCallback, userId, operationId);
         }
 
         @Override
@@ -374,6 +473,7 @@ public class FingerprintService extends SystemService implements BiometricServic
         @Override // Binder call
         public void cancelAuthenticationFromService(final int sensorId, final IBinder token,
                 final String opPackageName) {
+
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);

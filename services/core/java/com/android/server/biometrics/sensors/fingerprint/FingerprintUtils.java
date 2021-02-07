@@ -16,8 +16,18 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_IMAGER_DIRTY;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_INSUFFICIENT;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_PARTIAL;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_FAST;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_SLOW;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
+
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.fingerprint.V2_1.FingerprintError;
 import android.hardware.fingerprint.Fingerprint;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -136,6 +146,52 @@ public class FingerprintUtils implements BiometricUtils<Fingerprint> {
                 mUserStates.put(userId, state);
             }
             return state;
+        }
+    }
+
+    /**
+     * Checks if the given error code corresponds to a known fingerprint error.
+     *
+     * @param errorCode The error code to be checked.
+     * @return Whether the error code corresponds to a known error.
+     */
+    public static boolean isKnownErrorCode(int errorCode) {
+        switch (errorCode) {
+            case FingerprintError.ERROR_HW_UNAVAILABLE:
+            case FingerprintError.ERROR_UNABLE_TO_PROCESS:
+            case FingerprintError.ERROR_TIMEOUT:
+            case FingerprintError.ERROR_NO_SPACE:
+            case FingerprintError.ERROR_CANCELED:
+            case FingerprintError.ERROR_UNABLE_TO_REMOVE:
+            case FingerprintError.ERROR_LOCKOUT:
+            case FingerprintError.ERROR_VENDOR:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Checks if the given acquired code corresponds to a known fingerprint error.
+     *
+     * @param acquiredCode The acquired code to be checked.
+     * @return Whether the acquired code corresponds to a known error.
+     */
+    public static boolean isKnownAcquiredCode(int acquiredCode) {
+        switch (acquiredCode) {
+            case FINGERPRINT_ACQUIRED_GOOD:
+            case FINGERPRINT_ACQUIRED_PARTIAL:
+            case FINGERPRINT_ACQUIRED_INSUFFICIENT:
+            case FINGERPRINT_ACQUIRED_IMAGER_DIRTY:
+            case FINGERPRINT_ACQUIRED_TOO_SLOW:
+            case FINGERPRINT_ACQUIRED_TOO_FAST:
+            case FINGERPRINT_ACQUIRED_VENDOR:
+            case FINGERPRINT_ACQUIRED_START:
+                return true;
+
+            default:
+                return false;
         }
     }
 }
