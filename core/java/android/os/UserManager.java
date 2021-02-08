@@ -2300,6 +2300,19 @@ public class UserManager {
     }
 
     /**
+     * Checks if the calling user is running on foreground.
+     *
+     * @return whether the calling user is running on foreground.
+     */
+    public boolean isUserForeground() {
+        try {
+            return mService.isUserForeground();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the calling user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've
