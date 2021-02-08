@@ -36,6 +36,7 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
@@ -90,6 +91,9 @@ interface ILocationManager
 
     void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, @nullable String attributionTag);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
+
+    void addProviderRequestListener(in IProviderRequestListener listener);
+    void removeProviderRequestListener(in IProviderRequestListener listener);
 
     int getGnssBatchSize();
     void startGnssBatch(long periodNanos, in ILocationListener listener, String packageName, @nullable String attributionTag, @nullable String listenerId);
