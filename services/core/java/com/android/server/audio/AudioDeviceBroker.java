@@ -765,10 +765,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return mAudioService.getVssVolumeForDevice(streamType, device);
     }
 
-    /*package*/ int getModeOwnerPid() {
-        return mModeOwnerPid;
-    }
-
     /*package*/ int getDeviceForStream(int streamType) {
         return mAudioService.getDeviceForStream(streamType);
     }
