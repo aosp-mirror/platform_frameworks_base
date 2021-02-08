@@ -226,9 +226,9 @@ public class ProxyTracker {
         final ProxyInfo defaultProxy = getDefaultProxy();
         final ProxyInfo proxyInfo = null != defaultProxy ?
                 defaultProxy : ProxyInfo.buildDirectProxy("", 0, Collections.emptyList());
+        mPacProxyInstaller.setCurrentProxyScriptUrl(proxyInfo);
 
-        if (mPacProxyInstaller.setCurrentProxyScriptUrl(proxyInfo)
-                == PacProxyInstaller.DONT_SEND_BROADCAST) {
+        if (!shouldSendBroadcast(proxyInfo)) {
             return;
         }
         if (DBG) Log.d(TAG, "sending Proxy Broadcast for " + proxyInfo);
@@ -242,6 +242,10 @@ public class ProxyTracker {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private boolean shouldSendBroadcast(ProxyInfo proxy) {
+        return Uri.EMPTY.equals(proxy.getPacFileUrl()) || proxy.getPort() > 0;
     }
 
     /**
