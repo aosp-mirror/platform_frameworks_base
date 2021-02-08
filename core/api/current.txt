@@ -21890,6 +21890,7 @@ package android.media {
     field public static final String KEY_COLOR_RANGE = "color-range";
     field public static final String KEY_COLOR_STANDARD = "color-standard";
     field public static final String KEY_COLOR_TRANSFER = "color-transfer";
+    field public static final String KEY_COLOR_TRANSFER_REQUEST = "color-transfer-request";
     field public static final String KEY_COMPLEXITY = "complexity";
     field public static final String KEY_CREATE_INPUT_SURFACE_SUSPENDED = "create-input-buffers-suspended";
     field public static final String KEY_DURATION = "durationUs";
