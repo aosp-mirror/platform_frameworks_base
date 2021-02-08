@@ -95,7 +95,7 @@ static jstring FontFamily_getLangTags(JNIEnv* env, jobject, jlong familyPtr) {
 }
 
 // CriticalNative
-static jint FontFamily_getVariant(jlong familyPtr) {
+static jint FontFamily_getVariant(CRITICAL_JNI_PARAMS_COMMA jlong familyPtr) {
     FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
     return static_cast<jint>(family->family->variant());
 }
