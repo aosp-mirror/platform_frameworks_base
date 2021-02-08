@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Uhlole Okunhlobonhlobo kulungile. Ukuze uqale ukuyisebenzisa, qalisa kabusha idivayisi yakho."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Ukufaka kuyaqhubeka"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Ukufaka kwehlulekile"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Ukuqinisekiswa kwesithombe kuhlulekile. Yekisa ukufakwa."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Ukuqinisekiswa kwe-disk image kuhlulekile. Yekisa ukufakwa."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Manje iqalisa uhlole olunhlobonhlobo. Qalisa kabusha ukuze usebenzise inguqulo yangempela ye-Android."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Khansela"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Lahla"</string>

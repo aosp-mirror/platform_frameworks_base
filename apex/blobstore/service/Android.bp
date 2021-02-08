@@ -25,4 +25,9 @@ java_library {
         "services.core",
         "services.usage",
     ],
+    visibility: [
+        // These are required until blobstore is properly unbundled.
+        "//frameworks/base/services",
+        "//frameworks/base/services/tests/mockingservicestests",
+    ],
 }

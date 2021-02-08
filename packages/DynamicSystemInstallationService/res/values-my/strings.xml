@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ပြောင်းလဲနိုင်သောစနစ် အသင့်ဖြစ်ပါပြီ။ ၎င်းကို စတင်အသုံးပြုရန် သင့်စက်ကို ပြန်စပါ။"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ထည့်သွင်းနေဆဲဖြစ်သည်"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ထည့်သွင်း၍မရပါ"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ပုံအတည်ပြု၍ မရပါ။ ထည့်သွင်းမှုကို ရပ်ပါ။"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ဒစ်ခ် မိတ္တူကို အတည်ပြု၍ မရပါ။ ထည့်သွင်းမှုကို ရပ်ပါ။"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"လက်ရှိတွင် ပြောင်းလဲနိုင်သောစနစ်ကို အသုံးပြုနေသည်။ မူလ Android ဗားရှင်း အသုံးပြုရန် ပြန်စတင်ပါ။"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"မလုပ်တော့"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"ဖယ်ပစ်ရန်"</string>

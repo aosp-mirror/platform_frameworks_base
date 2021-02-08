@@ -178,7 +178,6 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -199,6 +198,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -287,18 +287,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             1 << 30);
     @Mock
     StatusBarManagerInternal mStatusBar;
+    private final FakeSystemClock mSystemClock = new FakeSystemClock();
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
         int countLogSmartSuggestionsVisible = 0;
+        // If true, don't enqueue the PostNotificationRunnables, just trap them
+        boolean trapEnqueuedNotifications = false;
+        final ArrayList<NotificationManagerService.PostNotificationRunnable> trappedRunnables =
+                new ArrayList<>();
         @Nullable
         NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
 
-        TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
+        TestableNotificationManagerService(
+                Context context,
+                NotificationRecordLogger logger,
+                InjectableSystemClock systemClock,
                 InstanceIdSequence notificationInstanceIdSequence) {
-            super(context, logger, notificationInstanceIdSequence);
+            super(context, logger, systemClock, notificationInstanceIdSequence);
         }
 
         RankingHelper getRankingHelper() {
@@ -353,6 +361,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             return new String[] {PKG_O};
         }
 
+        @Override
+        protected void postPostNotificationRunnableMaybeDelayedLocked(NotificationRecord record,
+                PostNotificationRunnable runnable) {
+            if (trapEnqueuedNotifications) {
+                trappedRunnables.add(runnable);
+                return;
+            }
+
+            super.postPostNotificationRunnableMaybeDelayedLocked(record, runnable);
+        }
+
+        void drainTrappedRunnableQueue() {
+            for (Runnable r : trappedRunnables) {
+                getWorkHandler().post(r);
+            }
+        }
+
         private void setNotificationAssistantAccessGrantedCallback(
                 @Nullable NotificationAssistantAccessGrantedCallback callback) {
             this.mNotificationAssistantAccessGrantedCallback = callback;
@@ -402,7 +427,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
         mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
-                mNotificationInstanceIdSequence);
+                mSystemClock, mNotificationInstanceIdSequence);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -1344,10 +1369,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
                 sbn.getNotification(), sbn.getUserId());
-        Thread.sleep(1);  // make sure the system clock advances before the next step
+        mSystemClock.advanceTime(1);
         // THEN it is canceled
         mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
-        Thread.sleep(1);  // here too
+        mSystemClock.advanceTime(1);
         // THEN it is posted again (before the cancel has a chance to finish)
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
                 sbn.getNotification(), sbn.getUserId());
@@ -1359,6 +1384,60 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
         assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testChangeSystemTimeAfterPost_thenCancel_noFgs() throws Exception {
+        // GIVEN time X
+        mSystemClock.setCurrentTimeMillis(10000);
+
+        // GIVEN a notification is posted
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        mSystemClock.advanceTime(1);
+        waitForIdle();
+
+        // THEN the system time is changed to an earlier time
+        mSystemClock.setCurrentTimeMillis(5000);
+
+        // THEN a cancel is requested
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+
+        // It should work
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testChangeSystemTimeAfterPost_thenCancel_fgs() throws Exception {
+        // GIVEN time X
+        mSystemClock.setCurrentTimeMillis(10000);
+
+        // GIVEN a notification is posted
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags =
+                Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        mSystemClock.advanceTime(1);
+        waitForIdle();
+
+        // THEN the system time is changed to an earlier time
+        mSystemClock.setCurrentTimeMillis(5000);
+
+        // THEN a cancel is requested
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+
+        // It should work
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -1380,6 +1459,56 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertEquals(NotificationStats.DISMISSAL_OTHER, captor.getValue().getDismissalSurface());
+    }
+
+    @Test
+    public void testDelayCancelWhenEnqueuedHasNotPosted() throws Exception {
+        // Don't allow PostNotificationRunnables to execute so we can set up problematic state
+        mService.trapEnqueuedNotifications = true;
+        // GIVEN an enqueued notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        mSystemClock.advanceTime(1);
+        // WHEN a cancel is requested before it has posted
+        mBinderService.cancelNotificationWithTag(PKG, PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0, 0);
+
+        waitForIdle();
+
+        // THEN the cancel notification runnable is captured and associated with that record
+        ArrayMap<NotificationRecord,
+                ArrayList<NotificationManagerService.CancelNotificationRunnable>> delayed =
+                        mService.mDelayedCancelations;
+        Set<NotificationRecord> keySet = delayed.keySet();
+        assertEquals(1, keySet.size());
+    }
+
+    @Test
+    public void testDelayedCancelsExecuteAfterPost() throws Exception {
+        // Don't allow PostNotificationRunnables to execute so we can set up problematic state
+        mService.trapEnqueuedNotifications = true;
+        // GIVEN an enqueued notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        mSystemClock.advanceTime(1);
+        // WHEN a cancel is requested before it has posted
+        mBinderService.cancelNotificationWithTag(PKG, PKG,
+                "testDelayCancelWhenEnqueuedHasNotPosted", 0, 0);
+
+        waitForIdle();
+
+        // We're now in a state with an a notification awaiting PostNotificationRunnable to execute
+        // WHEN the PostNotificationRunnable is allowed to execute
+        mService.drainTrappedRunnableQueue();
+        waitForIdle();
+
+        // THEN the cancel executes and the notification is removed
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
     }
 
     @Test
@@ -2529,8 +2658,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testHasCompanionDevice_noService() {
-        mService = new TestableNotificationManagerService(mContext,  mNotificationRecordLogger,
-                mNotificationInstanceIdSequence);
+        mService =
+                new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
+                mSystemClock, mNotificationInstanceIdSequence);
 
         assertFalse(mService.hasCompanionDevice(mListener));
     }
