@@ -357,16 +357,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         return Utils.isInService(mServiceState);
     }
 
-    String getNonDefaultCarrierName() {
-        if (!mCurrentState.networkNameData.equals(mNetworkNameDefault)) {
-            return mCurrentState.networkNameData;
-        } else if (mSubscriptionInfo.getCarrierName() != null) {
-            return mSubscriptionInfo.getCarrierName().toString();
-        } else if (mSubscriptionInfo.getDisplayName() != null) {
-            return mSubscriptionInfo.getDisplayName().toString();
-        } else {
-            return "";
-        }
+    String getNetworkNameForCarrierWiFi() {
+        return mPhone.getSimOperatorName();
     }
 
     private boolean isRoaming() {
