@@ -715,7 +715,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Noklusējums"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbulis"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Nav skaņas signāla vai vibrācijas"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nav skaņas signāla vai vibrācijas, kā arī atrodas zemāk sarunu sadaļā"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nav skaņas signāla vai vibrācijas, kā arī atrodas tālāk sarunu sadaļā"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Atkarībā no tālruņa iestatījumiem var zvanīt vai vibrēt"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Atkarībā no tālruņa iestatījumiem var zvanīt vai vibrēt. Sarunas no lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> pēc noklusējuma tiek parādītas burbulī."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Piesaista jūsu uzmanību, rādot peldošu saīsni uz šo saturu."</string>
