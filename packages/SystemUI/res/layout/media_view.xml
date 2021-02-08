@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="@color/media_primary_text"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="start"
             android:textSize="14sp" />
 
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
-            android:textColor="@color/media_primary_text"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="end"
             android:textSize="14sp" />
     </FrameLayout>
@@ -120,13 +120,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical|end"
+        android:gravity="center"
+        android:background="@drawable/qs_media_light_source"
         android:forceHasOverlappingRendering="false">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:foreground="@drawable/qs_media_seamless_background"
-            android:background="@drawable/qs_media_light_source"
+            android:background="@drawable/qs_media_seamless_background"
             android:orientation="horizontal"
             android:padding="6dp"
             android:contentDescription="@string/quick_settings_media_device_label">
@@ -135,7 +135,7 @@
                 android:layout_width="@dimen/qs_seamless_icon_size"
                 android:layout_height="@dimen/qs_seamless_icon_size"
                 android:layout_gravity="center"
-                android:tint="@color/media_primary_text"
+                android:tint="?android:attr/colorPrimary"
                 android:src="@*android:drawable/ic_media_seamless" />
             <TextView
                 android:visibility="gone"
@@ -147,7 +147,7 @@
                 android:fontFamily="@*android:string/config_headlineFontFamily"
                 android:singleLine="true"
                 android:text="@*android:string/ext_media_seamless_action"
-                android:textColor="@color/media_primary_text"
+                android:textColor="?android:attr/colorPrimary"
                 android:textDirection="locale"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -157,7 +157,7 @@
         android:id="@+id/media_seamless_fallback"
         android:layout_width="@dimen/qs_seamless_icon_size"
         android:layout_height="@dimen/qs_seamless_icon_size"
-        android:tint="@color/media_primary_text"
+        android:tint="?android:attr/textColorPrimary"
         android:src="@drawable/ic_cast_connected"
         android:forceHasOverlappingRendering="false" />
 
@@ -171,15 +171,15 @@
         android:clickable="true"
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
         android:paddingVertical="@dimen/qs_media_enabled_seekbar_vertical_padding"
-        android:thumbTint="@color/media_primary_text"
-        android:progressTint="@color/media_seekbar_progress"
-        android:progressBackgroundTint="@color/media_disabled"
+        android:thumbTint="?android:attr/textColorPrimary"
+        android:progressTint="?android:attr/textColorPrimary"
+        android:progressBackgroundTint="?android:attr/colorBackground"
         android:splitTrack="false" />
 
     <!-- App name -->
     <TextView
         android:id="@+id/app_name"
-        android:textColor="@color/media_primary_text"
+        android:textColor="?android:attr/textColorPrimary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -194,7 +194,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
-        android:textColor="@color/media_primary_text"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp" />
 
     <!-- Artist name -->
@@ -204,12 +204,12 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="@color/media_secondary_text"
+        android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
-        android:tint="@color/media_primary_text"
+        android:tint="?android:attr/textColorPrimary"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="6dp" />
@@ -223,7 +223,7 @@
         android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
         android:id="@+id/media_text"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-        android:textColor="@color/media_primary_text"
+        android:textColor="?android:attr/textColorSecondary"
         android:text="@string/controls_media_title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -238,7 +238,7 @@
         android:id="@+id/remove_text"
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
-        android:textColor="@color/media_primary_text"
+        android:textColor="?android:attr/textColorPrimary"
         android:text="@string/controls_media_close_session"
         app:layout_constraintTop_toBottomOf="@id/media_text"
         app:layout_constraintStart_toStartOf="parent"
@@ -262,7 +262,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimary"
             android:text="@string/controls_media_settings_button" />
     </FrameLayout>
 
@@ -283,7 +283,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimary"
             android:text="@string/cancel" />
     </FrameLayout>
 
@@ -304,7 +304,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimary"
             android:text="@string/controls_media_dismiss_button"
         />
     </FrameLayout>

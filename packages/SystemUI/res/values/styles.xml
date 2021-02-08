@@ -582,7 +582,7 @@
 
     <style name="MediaPlayer.Button" parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@drawable/qs_media_light_source</item>
-        <item name="android:tint">@android:color/white</item>
+        <item name="android:tint">?android:attr/textColorPrimary</item>
         <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
     </style>
 
