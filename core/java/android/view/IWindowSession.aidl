@@ -123,14 +123,6 @@ interface IWindowSession {
     boolean outOfMemory(IWindow window);
 
     /**
-     * Give the window manager a hint of the part of the window that is
-     * completely transparent, allowing it to work with the surface flinger
-     * to optimize compositing of this part of the window.
-     */
-    @UnsupportedAppUsage
-    oneway void setTransparentRegion(IWindow window, in Region region);
-
-    /**
      * Tell the window manager about the content and visible insets of the
      * given window, which can be used to adjust the <var>outContentInsets</var>
      * and <var>outVisibleInsets</var> values returned by

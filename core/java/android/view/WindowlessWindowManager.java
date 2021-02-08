@@ -71,7 +71,7 @@ public class WindowlessWindowManager implements IWindowSession {
         new HashMap<IBinder, ResizeCompleteCallback>();
 
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
-    private final SurfaceControl mRootSurface;
+    protected final SurfaceControl mRootSurface;
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
     private final IBinder mHostInputToken;
@@ -299,10 +299,6 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public boolean outOfMemory(android.view.IWindow window) {
         return false;
-    }
-
-    @Override
-    public void setTransparentRegion(android.view.IWindow window, android.graphics.Region region) {
     }
 
     @Override

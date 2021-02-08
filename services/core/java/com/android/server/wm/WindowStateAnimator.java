@@ -679,14 +679,6 @@ class WindowStateAnimator {
         }
     }
 
-    void setTransparentRegionHintLocked(final Region region) {
-        if (mSurfaceController == null) {
-            Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
-            return;
-        }
-        mSurfaceController.setTransparentRegionHint(region);
-    }
-
     boolean setWallpaperOffset(int dx, int dy, float scale) {
         if (mXOffset == dx && mYOffset == dy && Float.compare(mWallpaperScale, scale) == 0) {
             return false;

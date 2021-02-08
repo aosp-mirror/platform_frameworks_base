@@ -253,11 +253,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void setTransparentRegion(IWindow window, Region region) {
-        mService.setTransparentRegionWindow(this, window, region);
-    }
-
-    @Override
     public void setInsets(IWindow window, int touchableInsets,
             Rect contentInsets, Rect visibleInsets, Region touchableArea) {
         mService.setInsetsWindow(this, window, touchableInsets, contentInsets,
