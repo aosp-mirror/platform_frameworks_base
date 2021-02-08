@@ -49,6 +49,10 @@ final class WindowManagerConstants {
     static final String KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS =
             "system_gesture_exclusion_log_debounce_millis";
 
+    // Enable logging from the sensor which publishes accel and gyro data generating a rotation
+    // event
+    private static final String KEY_RAW_SENSOR_LOGGING_ENABLED = "raw_sensor_logging_enabled";
+
     private static final int MIN_GESTURE_EXCLUSION_LIMIT_DP = 200;
 
     /** @see #KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS */
@@ -57,6 +61,8 @@ final class WindowManagerConstants {
     int mSystemGestureExclusionLimitDp;
     /** @see AndroidDeviceConfig#KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE */
     boolean mSystemGestureExcludedByPreQStickyImmersive;
+
+    boolean mRawSensorLoggingEnabled;
 
     private final WindowManagerGlobalLock mGlobalLock;
     private final Runnable mUpdateSystemGestureExclusionCallback;
@@ -133,6 +139,9 @@ final class WindowManagerConstants {
                     case KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS:
                         updateSystemGestureExclusionLogDebounceMillis();
                         break;
+                    case KEY_RAW_SENSOR_LOGGING_ENABLED:
+                        updateRawSensorDataLoggingEnabled();
+                        break;
                     default:
                         break;
                 }
@@ -158,6 +167,12 @@ final class WindowManagerConstants {
                 KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
     }
 
+    private void updateRawSensorDataLoggingEnabled() {
+        mRawSensorLoggingEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                KEY_RAW_SENSOR_LOGGING_ENABLED, false);
+    }
+
     void dump(PrintWriter pw) {
         pw.println("WINDOW MANAGER CONSTANTS (dumpsys window constants):");
 
@@ -167,6 +182,8 @@ final class WindowManagerConstants {
         pw.print("="); pw.println(mSystemGestureExclusionLimitDp);
         pw.print("  "); pw.print(KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE);
         pw.print("="); pw.println(mSystemGestureExcludedByPreQStickyImmersive);
+        pw.print("  "); pw.print(KEY_RAW_SENSOR_LOGGING_ENABLED);
+        pw.print("="); pw.println(mRawSensorLoggingEnabled);
         pw.println();
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import static com.android.server.wm.WindowOrientationListenerProto.ENABLED;
 import static com.android.server.wm.WindowOrientationListenerProto.ROTATION;
@@ -30,6 +30,8 @@ import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -63,6 +65,7 @@ public abstract class WindowOrientationListener {
     private OrientationJudge mOrientationJudge;
     private int mCurrentRotation = -1;
     private final Context mContext;
+    private final WindowManagerConstants mConstants;
 
     private final Object mLock = new Object();
 
@@ -71,9 +74,11 @@ public abstract class WindowOrientationListener {
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
+     * @param wmService WindowManagerService to read the device config from.
      */
-    public WindowOrientationListener(Context context, Handler handler) {
-        this(context, handler, SensorManager.SENSOR_DELAY_UI);
+    public WindowOrientationListener(
+            Context context, Handler handler, WindowManagerService wmService) {
+        this(context, handler, wmService, SensorManager.SENSOR_DELAY_UI);
     }
 
     /**
@@ -81,6 +86,7 @@ public abstract class WindowOrientationListener {
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
+     * @param wmService WindowManagerService to read the device config from.
      * @param rate at which sensor events are processed (see also
      * {@link android.hardware.SensorManager SensorManager}). Use the default
      * value of {@link android.hardware.SensorManager#SENSOR_DELAY_NORMAL
@@ -88,10 +94,12 @@ public abstract class WindowOrientationListener {
      *
      * This constructor is private since no one uses it.
      */
-    private WindowOrientationListener(Context context, Handler handler, int rate) {
+    private WindowOrientationListener(
+            Context context, Handler handler, WindowManagerService wmService, int rate) {
         mContext = context;
         mHandler = handler;
-        mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+        mConstants = wmService.mConstants;
+        mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
         List<Sensor> l = mSensorManager.getSensorList(Sensor.TYPE_DEVICE_ORIENTATION);
         Sensor wakeUpDeviceOrientationSensor = null;
@@ -497,7 +505,7 @@ public abstract class WindowOrientationListener {
         private static final float MIN_ACCELERATION_MAGNITUDE =
                 SensorManager.STANDARD_GRAVITY - ACCELERATION_TOLERANCE;
         private static final float MAX_ACCELERATION_MAGNITUDE =
-            SensorManager.STANDARD_GRAVITY + ACCELERATION_TOLERANCE;
+                SensorManager.STANDARD_GRAVITY + ACCELERATION_TOLERANCE;
 
         // Maximum absolute tilt angle at which to consider orientation data.  Beyond this (i.e.
         // when screen is facing the sky or ground), we completely ignore orientation data
@@ -1072,8 +1080,14 @@ public abstract class WindowOrientationListener {
                 mDesiredRotation = reportedRotation;
                 newRotation = evaluateRotationChangeLocked();
             }
-            if (newRotation >=0) {
+            if (newRotation >= 0) {
                 onProposedRotationChanged(newRotation);
+                if (mConstants.mRawSensorLoggingEnabled) {
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.DEVICE_ROTATED,
+                            event.timestamp,
+                            rotationToLogEnum(reportedRotation));
+                }
             }
         }
 
@@ -1180,5 +1194,20 @@ public abstract class WindowOrientationListener {
                 }
             }
         };
+
+        private int rotationToLogEnum(int rotation) {
+            switch (rotation) {
+                case 0:
+                    return FrameworkStatsLog.DEVICE_ROTATED__PROPOSED_ORIENTATION__ROTATION_0;
+                case 1:
+                    return FrameworkStatsLog.DEVICE_ROTATED__PROPOSED_ORIENTATION__ROTATION_90;
+                case 2:
+                    return FrameworkStatsLog.DEVICE_ROTATED__PROPOSED_ORIENTATION__ROTATION_180;
+                case 3:
+                    return FrameworkStatsLog.DEVICE_ROTATED__PROPOSED_ORIENTATION__ROTATION_270;
+                default:
+                    return FrameworkStatsLog.DEVICE_ROTATED__PROPOSED_ORIENTATION__UNKNOWN;
+            }
+        }
     }
 }
