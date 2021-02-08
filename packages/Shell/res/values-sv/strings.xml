@@ -25,9 +25,9 @@
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Felrapporten visas på mobilen inom kort"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Tryck för att dela felrapporten"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tryck om du vill dela felrapporten"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Svep för att dela felrapporten utan en skärmdump eller vänta tills skärmdumpen är klar"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryck om du vill dela felrapporten utan en skärmdump eller vänta tills skärmdumpen är klar"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryck om du vill dela felrapporten utan en skärmdump eller vänta tills skärmdumpen är klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Svep för att dela felrapporten utan en skärmbild eller vänta tills skärmbilden är klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryck om du vill dela felrapporten utan en skärmbild eller vänta tills skärmbilden är klar"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryck om du vill dela felrapporten utan en skärmbild eller vänta tills skärmbilden är klar"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Felrapporter innehåller data från systemets olika loggfiler, vilka kan innehålla data som är känslig för dig (som appanvändning och platsdata). Dela bara felrapporter med personer du litar på."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Visa inte igen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Felrapporter"</string>
@@ -35,8 +35,8 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Det gick inte att lägga till information om felrapporten i ZIP-filen"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"namnlös"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Information"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skärmdump"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Skärmdump har tagits."</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skärmbild"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Skärmbild har tagits."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Det gick inte att ta skrämdump."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Information för felrapporten <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Filnamn"</string>

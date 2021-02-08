@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"可能會根據手機設定發出鈴聲或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機設定發出鈴聲或震動。「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會預設以對話氣泡顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"為此內容建立浮動捷徑以保持注意力。"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"在對話部分的頂部以浮動對話氣泡顯示，並在上鎖畫面顯示個人檔案相片"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話泡顯示在對話部分的頂部，並在上鎖畫面顯示個人檔案相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"省電模式將會在電量低於 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟。"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"設定"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"知道了"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"轉儲 SysUI 堆"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"感應器已關閉"</string>
     <string name="device_services" msgid="1549944177856658705">"裝置服務"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"無標題"</string>

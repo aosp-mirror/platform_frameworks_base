@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinamik sistem hazırdır. İstifadəyə başlamaq üçün cihazınızı yenidən başladın."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Quraşdırılır"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Quraşdırılmadı"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Şəkil təsdiqlənmədi. Quraşdırmanı dayandırın."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Görüntü doğrulanması alınmadı. Quraşdırmanı dayandırın."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Hazırda dinamik sistem icra olunur. Orijinal Android versiyasından istifadə etmək üçün yenidən başladın."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Ləğv edin"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"İmtina edin"</string>

@@ -88,11 +88,11 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ปิดภาพหน้าจอ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ตัวอย่างภาพหน้าจอ"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมอัดหน้าจอ"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนที่ปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนซึ่งปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"บันทึกเสียง"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"เสียงจากอุปกรณ์"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"เสียงจากอุปกรณ์ เช่น เพลง การโทร และเสียงเรียกเข้า"</string>
@@ -339,7 +339,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาหน้าจอ"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาจอภาพ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"แตะไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
@@ -511,7 +511,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"จัดการ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ประวัติ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"ใหม่"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"เงียบ"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"ปิดเสียง"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"การแจ้งเตือน"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"การสนทนา"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ล้างการแจ้งเตือนแบบไม่มีเสียงทั้งหมด"</string>
@@ -708,7 +708,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"แจ้งเตือนต่อไป"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ปิดการแจ้งเตือน"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"แสดงการแจ้งเตือนจากแอปนี้ต่อไปไหม"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"เงียบ"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"ปิดเสียง"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ค่าเริ่มต้น"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"บับเบิล"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ไม่มีเสียงหรือการสั่น"</string>
@@ -753,7 +753,7 @@
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"เพิ่มลงในหน้าจอหลัก"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"ส่วนควบคุมการแจ้งเตือน"</string>
-    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ตัวเลือกการปิดเสียงแจ้งเตือนชั่วคราว"</string>
+    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ตัวเลือกการเลื่อนการแจ้งเตือน"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"เตือนฉัน"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"การตั้งค่า"</string>
     <string name="snooze_undo" msgid="60890935148417175">"เลิกทำ"</string>
@@ -856,7 +856,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มการ์ด"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดการ์ดค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดค้างแล้วลากเพื่อจัดเรียงการ์ดใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"แก้ไข"</string>

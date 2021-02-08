@@ -722,7 +722,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя. Размовы ў праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" стандартна паяўляюцца ў выглядзе ўсплывальных апавяшчэнняў."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Прыцягвае ўвагу да гэтага змесціва ўсплывальнай кнопкай."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў у выглядзе ўсплывальнага апавяшчэння, а на экране блакіроўкі – у выглядзе відарыса профілю"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў, як усплывальнае апавяшчэнне, паказвае фота профілю на экране блакіроўкі"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налады"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
