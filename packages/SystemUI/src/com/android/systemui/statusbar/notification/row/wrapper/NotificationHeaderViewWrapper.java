@@ -36,7 +36,6 @@ import android.widget.TextView;
 
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
-import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
@@ -205,11 +204,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void clearConversationSkin() {
         if (mAppNameText != null) {
             final ColorStateList colors = mAppNameText.getTextColors();
-            final int textAppearance = Utils.getThemeAttr(
-                    mAppNameText.getContext(),
-                    com.android.internal.R.attr.notificationHeaderTextAppearance,
+            mAppNameText.setTextAppearance(
                     com.android.internal.R.style.TextAppearance_DeviceDefault_Notification_Info);
-            mAppNameText.setTextAppearance(textAppearance);
             mAppNameText.setTextColor(colors);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             final int marginStart = mAppNameText.getResources().getDimensionPixelSize(
