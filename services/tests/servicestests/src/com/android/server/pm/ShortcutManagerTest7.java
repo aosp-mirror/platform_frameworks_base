@@ -221,11 +221,13 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
 
     // This command is deprecated. Will remove the test later.
     public void testLauncherCommands() throws Exception {
+        prepareGetRoleHoldersAsUser(getSystemLauncher().activityInfo.packageName, USER_0);
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ getSystemLauncher().activityInfo.getComponentName(),
                 list(getSystemLauncher(), getFallbackLauncher()),
                 USER_0);
 
+        prepareGetRoleHoldersAsUser(CALLING_PACKAGE_2, USER_10);
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ cn(CALLING_PACKAGE_2, "name"),
                 list(getSystemLauncher(), getFallbackLauncher(),
@@ -247,6 +249,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                 "Launcher: ComponentInfo{com.android.test.2/name}");
 
         // Change user-0's launcher.
+        prepareGetRoleHoldersAsUser(CALLING_PACKAGE_1, USER_0);
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ cn(CALLING_PACKAGE_1, "name"),
                 list(ri(CALLING_PACKAGE_1, "name", false, 0)),
