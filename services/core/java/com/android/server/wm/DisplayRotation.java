@@ -481,11 +481,11 @@ public class DisplayRotation {
 
         mRotation = rotation;
 
+        mDisplayContent.setLayoutNeeded();
+
         mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
         mService.mH.sendNewMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
                 mDisplayContent, WINDOW_FREEZE_TIMEOUT_DURATION);
-
-        mDisplayContent.setLayoutNeeded();
 
         if (shouldRotateSeamlessly(oldRotation, rotation, forceUpdate)) {
             // The screen rotation animation uses a screenshot to freeze the screen while windows
