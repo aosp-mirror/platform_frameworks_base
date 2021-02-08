@@ -193,7 +193,6 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
-import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -25914,6 +25913,17 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             throw new RemoteException("Couldn't get targetSdkVersion for package " + packageName);
+        }
+
+        @Override
+        public boolean isPackageDebuggable(String packageName) throws RemoteException {
+            int callingUser = UserHandle.getCallingUserId();
+            ApplicationInfo appInfo = getApplicationInfo(packageName, 0, callingUser);
+            if (appInfo != null) {
+                return (0 != (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE));
+            }
+
+            throw new RemoteException("Couldn't get debug flag for package " + packageName);
         }
 
         @Override
