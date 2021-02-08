@@ -49,10 +49,11 @@ cc_library_shared {
         "libhwui",
         "liblog",
         "libminikin",
-        "libnativehelper",
         "libz",
         "libziparchive",
     ],
+
+    static_libs: ["libnativehelper_lazy"],
 
     export_include_dirs: [
         ".",
@@ -271,11 +272,12 @@ cc_library_shared {
                 "libstatspull",
             ],
             export_shared_lib_headers: [
-                // AndroidRuntime.h depends on nativehelper/jni.h
-                "libnativehelper",
-
                 // our headers include libnativewindow's public headers
                 "libnativewindow",
+            ],
+            export_static_lib_headers: [
+                // AndroidRuntime.h depends on nativehelper/jni.h
+                "libnativehelper_lazy",
             ],
             header_libs: [
                 "bionic_libc_platform_headers",
