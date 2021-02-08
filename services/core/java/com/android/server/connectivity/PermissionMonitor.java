@@ -265,7 +265,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         for (Entry<Integer, Boolean> app : apps.entrySet()) {
             List<Integer> list = app.getValue() ? system : network;
             for (int user : users) {
-                list.add(UserHandle.getUid(user, app.getKey()));
+                final UserHandle handle = UserHandle.of(user);
+                if (handle == null) continue;
+
+                list.add(UserHandle.getUid(handle, app.getKey()));
             }
         }
         try {
@@ -550,7 +553,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         for (UidRange range : ranges) {
             for (int userId = range.getStartUser(); userId <= range.getEndUser(); userId++) {
                 for (int appId : appIds) {
-                    final int uid = UserHandle.getUid(userId, appId);
+                    final UserHandle handle = UserHandle.of(userId);
+                    if (handle == null) continue;
+
+                    final int uid = UserHandle.getUid(handle, appId);
                     if (range.contains(uid)) {
                         result.add(uid);
                     }
