@@ -6541,6 +6541,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public List<String> getAllPackages() {
         final int callingUid = Binder.getCallingUid();
+        // enforceSystemOrRootOrShell:
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID 
+                && callingUid != Process.SHELL_UID) {
+            throw new SecurityException("getAllPackages is limited to privileged callers");
+        }        
         final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
             if (canViewInstantApps(callingUid, callingUserId)) {
