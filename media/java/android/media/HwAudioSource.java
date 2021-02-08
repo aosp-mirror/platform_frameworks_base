@@ -54,7 +54,7 @@ public class HwAudioSource extends PlayerBase {
         Preconditions.checkArgument(device.isSource(), "Requires a source device");
         mAudioDeviceInfo = device;
         mAudioAttributes = attributes;
-        baseRegisterPlayer();
+        baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
