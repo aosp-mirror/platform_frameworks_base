@@ -94,7 +94,8 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
         synchronized (this) {
             if (!hasSession(sessionHandle)) {
                 Log.w(TAG,
-                        "onRangingOpened - received unexpected SessionHandle: " + sessionHandle);
+                        "onRangingOpenedFailed - received unexpected SessionHandle: "
+                                + sessionHandle);
                 return;
             }
 
@@ -124,7 +125,7 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
             @RangingChangeReason int reason, PersistableBundle params) {
         synchronized (this) {
             if (!hasSession(sessionHandle)) {
-                Log.w(TAG, "onRangingStartFailed - received unexpected SessionHandle: "
+                Log.w(TAG, "onRangingReconfigureFailed - received unexpected SessionHandle: "
                         + sessionHandle);
                 return;
             }
