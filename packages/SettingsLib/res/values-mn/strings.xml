@@ -397,8 +397,8 @@
     <item msgid="1282170165150762976">"Дижитал агуулгад зориулан тааруулсан өнгө"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Зогсолтын горимын апп"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Идэвхгүй байна. Унтраах/асаахын тулд дарна уу."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Идэвхтэй байна. Унтраах/асаахын тулд дарна уу."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Идэвхгүй байна. Асаах/унтраахын тулд дарна уу."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Идэвхтэй байна. Асаах/унтраахын тулд дарна уу."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Апп зогсолтын горимын төлөв:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
