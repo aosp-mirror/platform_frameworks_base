@@ -2447,4 +2447,10 @@ interface ITelephony {
      * Gets the current phone capability.
      */
     PhoneCapability getPhoneCapability();
+
+    /**
+     * Request to get the current slicing configuration including URSP rules and
+     * NSSAIs (configured, allowed and rejected).
+     */
+    void getSlicingConfig(in ResultReceiver callback);
 }
