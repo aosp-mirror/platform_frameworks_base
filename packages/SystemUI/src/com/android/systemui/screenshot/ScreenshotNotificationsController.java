@@ -82,7 +82,7 @@ public class ScreenshotNotificationsController {
                 dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
         if (intent != null) {
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                    mContext, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED, null, UserHandle.CURRENT);
+                    mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
             b.setContentIntent(pendingIntent);
         }
 
