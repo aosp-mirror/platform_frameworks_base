@@ -191,7 +191,7 @@ public class RotationResolverManagerService extends
                     TAG);
             final RotationResolverManagerPerUserService service = getServiceForUserLocked(
                     UserHandle.getCallingUserId());
-            new RotationResolverShellCommend(service).exec(this, in, out, err, args, callback,
+            new RotationResolverShellCommand(service).exec(this, in, out, err, args, callback,
                     resultReceiver);
         }
     }
