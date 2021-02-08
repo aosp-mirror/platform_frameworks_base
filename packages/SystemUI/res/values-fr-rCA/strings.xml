@@ -461,7 +461,7 @@
     <string name="camera_hint" msgid="4519495795000658637">"Balayez à partir de l\'icône pour accéder à l\'appareil photo"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Aucune interruption"</string>
-    <string name="interruption_level_priority" msgid="661294280016622209">"Priorités seulement"</string>
+    <string name="interruption_level_priority" msgid="661294280016622209">"Prioritaires seulement"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"Alarmes seulement"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Priorités\nuniquement"</string>
@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Économiseur de pile activé"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Réduire les performances et de fond"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économiseur de pile"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et l\'audio que vous faites jouer."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et le contenu audio que vous faites jouer."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service offrant cette fonction aura accès à toute l\'information qui est visible sur votre écran ou sur ce qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et le contenu audio que vous faites jouer."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Commencer à enregistrer ou à diffuser?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Commencer à enregistrer ou à diffuser avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
@@ -718,7 +718,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Garde votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations sous forme de bulle flottante et affiche la photo du profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les fonctionnalités de conversation"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
@@ -954,7 +954,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Application ouverte sans avoir été installée."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Application ouverte sans avoir été installée. Touchez ici pour en savoir plus."</string>
-    <string name="app_info" msgid="5153758994129963243">"Détails de l\'applic."</string>
+    <string name="app_info" msgid="5153758994129963243">"Détails de l\'appli"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ouvrir le navigateur"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Données cellulaires"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> : <xliff:g id="ID_2">%2$s</xliff:g>"</string>

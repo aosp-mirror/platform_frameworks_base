@@ -206,7 +206,7 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB perkrova"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Derinimo režimas, kai prijungtas USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Panaikinti USB derinimo prieigos teises"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Belaidžio ryšio derinimas"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Belaidžio ryšio derin."</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Derinimo režimas, kai prisijungta prie „Wi‑Fi“"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Klaida"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Belaidžio ryšio derinimas"</string>

@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF వలె సేవ్ చేయి"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ముద్రణ ఎంపికలు విస్తరించబడ్డాయి"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ముద్రణ ఎంపికలు కుదించబడ్డాయి"</string>
-    <string name="search" msgid="5421724265322228497">"వెతుకు"</string>
+    <string name="search" msgid="5421724265322228497">"సెర్చ్"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"అన్ని ప్రింటర్‌లు"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"సేవను జోడించు"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"శోధన పెట్టె చూపబడింది"</string>

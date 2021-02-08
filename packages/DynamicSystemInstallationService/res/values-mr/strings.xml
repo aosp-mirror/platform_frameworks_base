@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"डायनॅमिक सिस्टम तयार आहे. ती वापरणे सुरू करण्यासाठी, तुमचे डिव्हाइस रीस्टार्ट करा."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"इंस्टॉल प्रगतीपथावर आहे"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"इंस्टॉल करता आली नाही"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"इमेज प्रमाणीकरण करता आले नाही. इंस्टॉलेशन रद्द करा."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"इमेज प्रमाणित करता आली नाही. इंस्टॉलेशन रद्द करा."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"सध्या डायनॅमिक सिस्टम रन करत आहे. मूळ Android आवृत्ती वापरण्यासाठी रीस्टार्ट करा."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"रद्द करा"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"काढून टाका"</string>
