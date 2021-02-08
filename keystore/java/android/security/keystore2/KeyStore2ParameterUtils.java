@@ -28,6 +28,7 @@ import android.security.keystore.KeyProperties;
 import android.security.keystore.UserAuthArgs;
 import android.system.keystore2.Authorization;
 
+import java.math.BigInteger;
 import java.security.ProviderException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -154,6 +155,23 @@ public abstract class KeyStore2ParameterUtils {
     }
 
     /**
+     * This function constructs a {@link KeyParameter} expressing a Bignum.
+     * @param tag Must be KeyMint tag with the associated type BIGNUM.
+     * @param b A BitInteger to be stored in the new key parameter.
+     * @return An instance of {@link KeyParameter}.
+     * @hide
+     */
+    static @NonNull KeyParameter makeBignum(int tag, @NonNull BigInteger b) {
+        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_BIGNUM) {
+            throw new IllegalArgumentException("Not a bignum tag: " + tag);
+        }
+        KeyParameter p = new KeyParameter();
+        p.tag = tag;
+        p.value = KeyParameterValue.blob(b.toByteArray());
+        return p;
+    }
+
+    /**
      * This function constructs a {@link KeyParameter} expressing date.
      * @param tag Must be KeyMint tag with the associated type DATE.
      * @param date A date
@@ -167,10 +185,6 @@ public abstract class KeyStore2ParameterUtils {
         KeyParameter p = new KeyParameter();
         p.tag = tag;
         p.value = KeyParameterValue.dateTime(date.getTime());
-        if (p.value.getDateTime() < 0) {
-            throw new IllegalArgumentException("Date tag value out of range: "
-                    + p.value.getDateTime());
-        }
         return p;
     }
     /**
