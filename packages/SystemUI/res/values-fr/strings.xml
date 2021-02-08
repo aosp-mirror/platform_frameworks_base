@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Économiseur de batterie activé"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Limite les performances et les données en arrière-plan."</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver l\'économiseur de batterie"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Par exemple, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore vos contenus audio lus."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, données de paiement, photos, messages ou encore contenus audio lus."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service qui fournit cette fonction aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil lors d\'un enregistrement ou d\'une diffusion de contenu. Cela comprend, entre autres, vos mots de passe, vos données de paiement, vos photos, vos messages ou encore les contenus audio que vous lisez."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Démarrer l\'enregistrement ou la diffusion ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Démarrer l\'enregistrement ou la diffusion avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
@@ -857,7 +857,7 @@
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les icônes pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Sélectionnez et faites glisser les icônes pour réorganiser"</string>
-    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer."</string>
+    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les icônes ici pour les supprimer."</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Au minimum <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles sont nécessaires"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifier"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Heure"</string>

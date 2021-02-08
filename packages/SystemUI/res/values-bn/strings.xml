@@ -125,7 +125,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"অ্যাক্সেসযোগ্যতা"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"স্ক্রিন ঘোরান"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"এক নজরে"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"খুঁজুন"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"সার্চ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ক্যামেরা"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফোন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ভয়েস সহায়তা"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"পূর্ণ হতে <xliff:g id="CHARGING_TIME">%s</xliff:g> সময় লাগবে"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"চার্জ হচ্ছে না"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"নেটওয়ার্ক নিরীক্ষণ\nকরা হতে পারে"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"খুঁজুন"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"সার্চ"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য উপরের দিকে স্লাইড করুন৷"</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য বাঁ দিকে স্লাইড করুন৷"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"অ্যালার্ম, রিমাইন্ডার, ইভেন্ট, এবং আপনার নির্দিষ্ট করে দেওয়া ব্যক্তিদের কল ছাড়া অন্য কোনও আওয়াজ বা ভাইব্রেশন হবে না। তবে সঙ্গীত, ভিডিও, এবং গেম সহ আপনি যা কিছু চালাবেন তার আওয়াজ শুনতে পাবেন।"</string>
@@ -950,7 +950,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধারণ বার্তাগুলি"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"স্টোরেজ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"হিন্ট"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ইনস্ট্যান্ট অ্যাপ"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"অ্যাপটি ইনস্টল না করে চালু করা হয়েছে।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"অ্যাপটি ইনস্টল না করে চালু করা হয়েছে। আরও জানতে ট্যাপ করুন।"</string>

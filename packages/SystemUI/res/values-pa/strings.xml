@@ -950,7 +950,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ਆਮ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ਸਟੋਰੇਜ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ਸੰਕੇਤ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ਤਤਕਾਲ ਐਪਾਂ"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ਚੱਲ ਰਹੀ ਹੈ"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ਸਥਾਪਤ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਖੋਲ੍ਹੀ ਗਈ।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ਸਥਾਪਤ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਖੋਲ੍ਹੀ ਗਈ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
