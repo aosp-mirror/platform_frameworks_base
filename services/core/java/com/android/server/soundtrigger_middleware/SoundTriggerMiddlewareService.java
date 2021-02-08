@@ -82,7 +82,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             @NonNull Context context) {
         mDelegate = Objects.requireNonNull(delegate);
         mContext = context;
-        new ExternalCaptureStateTracker(active -> {
+        new ExternalCaptureStateTracker().registerListener(active -> {
             try {
                 mDelegate.setCaptureState(active);
             } catch (RemoteException e) {

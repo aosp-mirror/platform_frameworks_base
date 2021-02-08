@@ -16,40 +16,46 @@
 
 package com.android.server.soundtrigger_middleware;
 
+import android.annotation.NonNull;
 import android.util.Log;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.function.Consumer;
 
 /**
  * This is a never-give-up listener for sound trigger external capture state notifications, as
  * published by the audio policy service.
  *
  * This class will constantly try to connect to the service over a background thread and tolerate
- * its death. The client will be notified by a single provided function that is called in a
- * synchronized manner.
- * For simplicity, there is currently no way to stop the tracker. This is possible to add if the
- * need ever arises.
+ * its death.
  */
-class ExternalCaptureStateTracker {
+class ExternalCaptureStateTracker implements ICaptureStateNotifier {
     private static final String TAG = "CaptureStateTracker";
-    /** Our client's listener. */
-    private final Consumer<Boolean> mListener;
+
+    /** Our client's listeners. Also used as lock. */
+    private final List<Listener> mListeners = new LinkedList<>();
+
+    /** Conservatively, until notified otherwise, we assume capture is active. */
+    private boolean mCaptureActive = true;
+
     /** This semaphore will get a permit every time we need to reconnect. */
     private final Semaphore mNeedToConnect = new Semaphore(1);
 
     /**
      * Constructor. Will start a background thread to do the work.
-     *
-     * @param listener A client provided listener that will be called on state
-     *                 changes. May be
-     *                 called multiple consecutive times with the same value. Never
-     *                 called
-     *                 concurrently.
      */
-    ExternalCaptureStateTracker(Consumer<Boolean> listener) {
-        mListener = listener;
+    ExternalCaptureStateTracker() {
         new Thread(this::run).start();
+    }
+
+
+    @Override
+    public boolean registerListener(@NonNull Listener listener) {
+        synchronized (mListeners) {
+            mListeners.add(listener);
+            return mCaptureActive;
+        }
     }
 
     /**
@@ -74,7 +80,12 @@ class ExternalCaptureStateTracker {
      */
     private void setCaptureState(boolean active) {
         try {
-            mListener.accept(active);
+            synchronized (mListeners) {
+                mCaptureActive = active;
+                for (Listener listener : mListeners) {
+                    listener.onCaptureStateChange(active);
+                }
+            }
         } catch (Exception e) {
             Log.e(TAG, "Exception caught while setting capture state", e);
         }
