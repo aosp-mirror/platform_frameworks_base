@@ -89,7 +89,7 @@ public class SystemSettingsValidators {
                         return value == null || value.length() < MAX_LENGTH;
                     }
                 });
-        VALIDATORS.put(System.FONT_SCALE, new InclusiveFloatRangeValidator(0.85f, 1.3f));
+        VALIDATORS.put(System.FONT_SCALE, new InclusiveFloatRangeValidator(0.25f, 5.0f));
         VALIDATORS.put(System.DIM_SCREEN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 System.DISPLAY_COLOR_MODE,

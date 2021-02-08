@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ระบบแบบไดนามิกพร้อมแล้ว โปรดรีสตาร์ทอุปกรณ์เพื่อเริ่มใช้"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"กำลังติดตั้ง"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ติดตั้งไม่สำเร็จ"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ตรวจสอบรูปภาพไม่สำเร็จ ล้มเลิกการติดตั้ง"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ตรวจสอบอิมเมจดิสก์ไม่สำเร็จ ล้มเลิกการติดตั้ง"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"ปัจจุบันใช้ระบบแบบไดนามิกอยู่ รีสตาร์ทเพื่อใช้ Android เวอร์ชันดั้งเดิม"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"ยกเลิก"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"ยกเลิก"</string>

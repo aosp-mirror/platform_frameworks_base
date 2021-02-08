@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinamik sistem hazır. Kullanmaya başlamak için cihazınızı yeniden başlatın."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Yükleme devam ediyor"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Yükleme başarısız oldu"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Resim doğrulanamadı. Yüklemeyi iptal edin."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Görüntü doğrulanamadı. Yüklemeyi iptal edin."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Şu anda dinamik sistem çalıştırılıyor. Orijinal Android sürümünü kullanmak için cihazı yeniden başlatın."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"İptal"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Sil"</string>
