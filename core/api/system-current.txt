@@ -1613,6 +1613,7 @@ package android.bluetooth {
     field public static final int UUID_BYTES_128_BIT = 16; // 0x10
     field public static final int UUID_BYTES_16_BIT = 2; // 0x2
     field public static final int UUID_BYTES_32_BIT = 4; // 0x4
+    field @NonNull public static final android.os.ParcelUuid VOLUME_CONTROL;
   }
 
   public final class BufferConstraint implements android.os.Parcelable {
