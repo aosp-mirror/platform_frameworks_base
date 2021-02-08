@@ -103,7 +103,7 @@ public final class Zygote {
      */
     public static final int PROFILE_FROM_SHELL = 1 << 15;
 
-    /*
+    /**
      * Enable using the ART app image startup cache
      */
     public static final int USE_APP_IMAGE_STARTUP_CACHE = 1 << 16;
@@ -115,13 +115,6 @@ public final class Zygote {
      * Used for debugging only. Usage: set debug.ignoreappsignalhandler to 1.
      */
     public static final int DEBUG_IGNORE_APP_SIGNAL_HANDLER = 1 << 17;
-
-    /**
-     * Disable runtime access to {@link android.annotation.TestApi} annotated members.
-     *
-     * <p>This only takes effect if Hidden API access restrictions are enabled as well.
-     */
-    public static final int DISABLE_TEST_API_ENFORCEMENT_POLICY = 1 << 18;
 
     public static final int MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20);
     /**
