@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
 
@@ -63,17 +64,27 @@ public class WorkCountTrackerTest {
         public final SparseIntArray running = new SparseIntArray();
         public final SparseIntArray pending = new SparseIntArray();
 
-        public void maybeEnqueueJobs(double startRatio, double fgJobRatio) {
+        public void maybeEnqueueJobs(double startRatio, double fgJobRatio, double fgUserJobRatio) {
+            // fgUserJobRatio should always be at least fgJobRatio, otherwise no WORK_TYPE_BG will
+            // be enqueued.
             while (mRandom.nextDouble() < startRatio) {
-                if (mRandom.nextDouble() < fgJobRatio) {
+                final double random = mRandom.nextDouble();
+                if (random < fgJobRatio) {
                     pending.put(WORK_TYPE_TOP, pending.get(WORK_TYPE_TOP) + 1);
-                } else {
+                } else if (random < fgUserJobRatio) {
                     pending.put(WORK_TYPE_BG, pending.get(WORK_TYPE_BG) + 1);
+                } else {
+                    pending.put(WORK_TYPE_BGUSER, pending.get(WORK_TYPE_BGUSER) + 1);
                 }
             }
         }
 
         public void maybeFinishJobs(double stopRatio) {
+            for (int i = running.get(WORK_TYPE_BGUSER); i > 0; i--) {
+                if (mRandom.nextDouble() < stopRatio) {
+                    running.put(WORK_TYPE_BGUSER, running.get(WORK_TYPE_BGUSER) - 1);
+                }
+            }
             for (int i = running.get(WORK_TYPE_BG); i > 0; i--) {
                 if (mRandom.nextDouble() < stopRatio) {
                     running.put(WORK_TYPE_BG, running.get(WORK_TYPE_BG) - 1);
@@ -120,8 +131,11 @@ public class WorkCountTrackerTest {
         while ((jobs.pending.get(WORK_TYPE_TOP) > 0
                 && mWorkCountTracker.canJobStart(WORK_TYPE_TOP) != WORK_TYPE_NONE)
                 || (jobs.pending.get(WORK_TYPE_BG) > 0
-                && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE)) {
+                && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE)
+                || (jobs.pending.get(WORK_TYPE_BGUSER) > 0
+                && mWorkCountTracker.canJobStart(WORK_TYPE_BGUSER) != WORK_TYPE_NONE)) {
             final boolean isStartingFg = mRandom.nextBoolean();
+            final boolean isStartingFgUser = mRandom.nextBoolean();
 
             if (isStartingFg) {
                 if (jobs.pending.get(WORK_TYPE_TOP) > 0
@@ -131,13 +145,21 @@ public class WorkCountTrackerTest {
                     mWorkCountTracker.stageJob(WORK_TYPE_TOP);
                     mWorkCountTracker.onJobStarted(WORK_TYPE_TOP);
                 }
-            } else {
+            } else if (isStartingFgUser) {
                 if (jobs.pending.get(WORK_TYPE_BG) > 0
                         && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE) {
                     jobs.pending.put(WORK_TYPE_BG, jobs.pending.get(WORK_TYPE_BG) - 1);
                     jobs.running.put(WORK_TYPE_BG, jobs.running.get(WORK_TYPE_BG) + 1);
                     mWorkCountTracker.stageJob(WORK_TYPE_BG);
                     mWorkCountTracker.onJobStarted(WORK_TYPE_BG);
+                }
+            } else {
+                if (jobs.pending.get(WORK_TYPE_BGUSER) > 0
+                        && mWorkCountTracker.canJobStart(WORK_TYPE_BGUSER) != WORK_TYPE_NONE) {
+                    jobs.pending.put(WORK_TYPE_BGUSER, jobs.pending.get(WORK_TYPE_BGUSER) - 1);
+                    jobs.running.put(WORK_TYPE_BGUSER, jobs.running.get(WORK_TYPE_BGUSER) + 1);
+                    mWorkCountTracker.stageJob(WORK_TYPE_BGUSER);
+                    mWorkCountTracker.onJobStarted(WORK_TYPE_BGUSER);
                 }
             }
         }
@@ -149,10 +171,10 @@ public class WorkCountTrackerTest {
     private void checkRandom(Jobs jobs, int numTests, int totalMax,
             @NonNull List<Pair<Integer, Integer>> minLimits,
             @NonNull List<Pair<Integer, Integer>> maxLimits,
-            double startRatio, double fgJobRatio, double stopRatio) {
+            double startRatio, double fgJobRatio, double fgUserJobRatio, double stopRatio) {
         for (int i = 0; i < numTests; i++) {
             jobs.maybeFinishJobs(stopRatio);
-            jobs.maybeEnqueueJobs(startRatio, fgJobRatio);
+            jobs.maybeEnqueueJobs(startRatio, fgJobRatio, fgUserJobRatio);
 
             recount(jobs, totalMax, minLimits, maxLimits);
             startPendingJobs(jobs);
@@ -182,14 +204,21 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
-        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double stopRatio = 0.1;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 50%
+        // WORK_TYPE_BG -- 50%
+        // WORK_TYPE_BGUSER -- 0%
         final double fgJobRatio = 0.5;
+        final double fgUserJobRatio = 1;
         final double startRatio = 0.1;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -198,14 +227,20 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 2;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of();
         final double stopRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 50%
+        // WORK_TYPE_BG -- 50%
+        // WORK_TYPE_BGUSER -- 0%
         final double fgJobRatio = 0.5;
+        final double fgUserJobRatio = 1;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -214,14 +249,20 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 2;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.5;
-        final double fgJobRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 33%
+        // WORK_TYPE_BG -- 33%
+        // WORK_TYPE_BGUSER -- 33%
+        final double fgJobRatio = 1 / 3.0;
+        final double fgUserJobRatio = 2 / 3.0;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -230,14 +271,20 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 10;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of();
         final double stopRatio = 0.5;
-        final double fgJobRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 33%
+        // WORK_TYPE_BG -- 33%
+        // WORK_TYPE_BGUSER -- 33%
+        final double fgJobRatio = 1 / 3.0;
+        final double fgUserJobRatio = 2 / 3.0;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -246,14 +293,20 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 10%
+        // WORK_TYPE_BG -- 80%
+        // WORK_TYPE_BGUSER -- 10%
         final double fgJobRatio = 0.1;
+        final double fgUserJobRatio = 0.9;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -262,14 +315,20 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 90%
+        // WORK_TYPE_BG -- 10%
+        // WORK_TYPE_BGUSER -- 0%
         final double fgJobRatio = 0.9;
+        final double fgUserJobRatio = 1;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -278,14 +337,20 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.4;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 10%
+        // WORK_TYPE_BG -- 10%
+        // WORK_TYPE_BGUSER -- 80%
         final double fgJobRatio = 0.1;
+        final double fgUserJobRatio = 0.2;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     @Test
@@ -294,14 +359,90 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
-        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double stopRatio = 0.4;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 90%
+        // WORK_TYPE_BG -- 5%
+        // WORK_TYPE_BGUSER -- 5%
         final double fgJobRatio = 0.9;
+        final double fgUserJobRatio = 0.95;
         final double startRatio = 0.5;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
-                startRatio, fgJobRatio, stopRatio);
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
+    }
+
+    @Test
+    public void testRandom9() {
+        final Jobs jobs = new Jobs();
+
+        final int numTests = 5000;
+        final int totalMax = 6;
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
+        final double stopRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 0%
+        // WORK_TYPE_BG -- 50%
+        // WORK_TYPE_BGUSER -- 50%
+        final double fgJobRatio = 0;
+        final double fgUserJobRatio = 0.5;
+        final double startRatio = 0.5;
+
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
+    }
+
+    @Test
+    public void testRandom10() {
+        final Jobs jobs = new Jobs();
+
+        final int numTests = 5000;
+        final int totalMax = 6;
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
+        final double stopRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 0%
+        // WORK_TYPE_BG -- 10%
+        // WORK_TYPE_BGUSER -- 90%
+        final double fgJobRatio = 0;
+        final double fgUserJobRatio = 0.1;
+        final double startRatio = 0.5;
+
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
+    }
+
+    @Test
+    public void testRandom11() {
+        final Jobs jobs = new Jobs();
+
+        final int numTests = 5000;
+        final int totalMax = 6;
+        final List<Pair<Integer, Integer>> maxLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
+        final double stopRatio = 0.5;
+        // WorkType probabilities:
+        // WORK_TYPE_TOP -- 0%
+        // WORK_TYPE_BG -- 90%
+        // WORK_TYPE_BGUSER -- 10%
+        final double fgJobRatio = 0;
+        final double fgUserJobRatio = 0.9;
+        final double startRatio = 0.5;
+
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, fgUserJobRatio, stopRatio);
     }
 
     /** Used by the following tests */
@@ -337,7 +478,7 @@ public class WorkCountTrackerTest {
     public void testBasic() {
         checkSimple(6,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
-                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2)),
                 /* run */ List.of(),
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 1)),
                 /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 1)),
@@ -345,7 +486,7 @@ public class WorkCountTrackerTest {
 
         checkSimple(6,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
-                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2)),
                 /* run */ List.of(),
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10)),
                 /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 6)),
@@ -354,7 +495,7 @@ public class WorkCountTrackerTest {
         // When there are BG jobs pending, 2 (min-BG) jobs should run.
         checkSimple(6,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
-                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2)),
                 /* run */ List.of(),
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 1)),
                 /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 5), Pair.create(WORK_TYPE_BG, 1)),
@@ -385,6 +526,16 @@ public class WorkCountTrackerTest {
 
         checkSimple(8,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* run */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 4)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 49), Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 4)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 47), Pair.create(WORK_TYPE_BG, 49))
+        );
+
+
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
                 /* max */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 6)),
                 /* run */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 4)),
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 49)),
@@ -398,6 +549,14 @@ public class WorkCountTrackerTest {
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 49)),
                 /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 2)),
                 /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 48)));
+
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 2)),
+                /* run */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 8), Pair.create(WORK_TYPE_BG, 49)));
 
         checkSimple(8,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, 1)),
@@ -425,6 +584,38 @@ public class WorkCountTrackerTest {
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)),
                 /* resRun */ List.of(Pair.create(WORK_TYPE_BG, 6)),
                 /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)));
+
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2)),
+                /* run */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10),
+                        Pair.create(WORK_TYPE_BG, 3),
+                        Pair.create(WORK_TYPE_BGUSER, 3)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 2)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 6),
+                        Pair.create(WORK_TYPE_BG, 3),
+                        Pair.create(WORK_TYPE_BGUSER, 3)));
+
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 3)),
+                /* run */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_BG, 3), Pair.create(WORK_TYPE_BGUSER, 3)),
+                /* resRun */ List.of(
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2)),
+                /* resPen */ List.of(
+                        Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1)));
+
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 1)),
+                /* run */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_BG, 3), Pair.create(WORK_TYPE_BGUSER, 3)),
+                /* resRun */ List.of(
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 1)),
+                /* resPen */ List.of(
+                        Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 2)));
     }
 
     /** Tests that the counter updates properly when jobs are stopped. */

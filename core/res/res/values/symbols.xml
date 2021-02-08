@@ -2680,6 +2680,8 @@
 
   <java-symbol type="integer" name="config_jobSchedulerInactivityIdleThreshold" />
   <java-symbol type="integer" name="config_jobSchedulerIdleWindowSlop" />
+  <java-symbol type="bool" name="config_jobSchedulerRestrictBackgroundUser" />
+  <java-symbol type="integer" name="config_jobSchedulerUserGracePeriod" />
 
   <java-symbol type="style" name="Animation.ImmersiveModeConfirmation" />
 
