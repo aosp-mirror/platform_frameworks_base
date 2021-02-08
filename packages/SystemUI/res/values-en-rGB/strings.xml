@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processing screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Start recording?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"While recording, Android System can capture any sensitive information that’s visible on your screen or played on your device. This includes passwords, payment info, photos, messages and audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"While recording, the Android System can capture any sensitive information that’s visible on your screen or played on your device. This includes passwords, payment info, photos, messages and audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Record audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Device audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sound from your device, like music, calls and ringtones"</string>
@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Battery Saver is on"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduces performance and background data"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Turn off Battery Saver"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information, such as passwords, payment details, photos, messages and audio that you play."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages and audio that you play."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages and audio that you play."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Start recording or casting?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Start recording or casting with <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>

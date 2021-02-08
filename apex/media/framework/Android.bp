@@ -48,6 +48,10 @@ java_library {
         "test_com.android.media",
     ],
     min_sdk_version: "29",
+    visibility: [
+        "//frameworks/av/apex:__subpackages__",
+        "//frameworks/base", // For framework-all
+    ],
 }
 
 filegroup {
@@ -57,6 +61,7 @@ filegroup {
         ":mediasession2-java-srcs",
         ":mediasession2-aidl-srcs",
     ],
+    visibility: ["//frameworks/base"],
 }
 
 filegroup {

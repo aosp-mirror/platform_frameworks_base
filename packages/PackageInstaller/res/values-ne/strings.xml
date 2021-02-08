@@ -37,7 +37,7 @@
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"तपाईंको टिभी मा <xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन।"</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"तपाईंको फोनमा <xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन।"</string>
     <string name="launch" msgid="3952550563999890101">"खोल्नुहोस्"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"तपाईंका प्रशासकले अज्ञात स्रोतहरूबाट प्राप्त अनुप्रयोगहरूलाई स्थापना गर्ने अनुमति दिनुहुन्न"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"तपाईंका प्रशासकले अज्ञात स्रोतहरूबाट प्राप्त एपहरूलाई स्थापना गर्ने अनुमति दिनुहुन्न"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"यी प्रयोगकर्ता अज्ञात एपहरू स्थापना गर्न सक्नुहुन्न"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"यो प्रयोगकर्तालाई एपहरू स्थापना गर्ने अनुमति छैन"</string>
     <string name="ok" msgid="7871959885003339302">"ठिक छ"</string>

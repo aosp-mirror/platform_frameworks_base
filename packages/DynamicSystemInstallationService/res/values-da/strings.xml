@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Det dynamiske system er klar. Hvis du vil begynde at bruge det, skal du genstarte din enhed."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Installation i gang"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Installationen mislykkedes"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Billedet kunne ikke valideres. Afbryd installationen."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Systembilledet kunne ikke valideres. Afbryd installationen."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Der køres i øjeblikket et dynamisk system. Genstart for at bruge den oprindelige Android-version."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Annuller"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Afbryd"</string>
