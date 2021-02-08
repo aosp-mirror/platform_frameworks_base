@@ -24,6 +24,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -46,6 +47,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     private static final String TAG = "FingerprintEnrollClient";
 
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
+    private final @FingerprintManager.EnrollReason int mEnrollReason;
 
     FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
@@ -53,12 +55,16 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int timeoutSec, int sensorId,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            boolean shouldLogMetrics) {
+            @FingerprintManager.EnrollReason int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 true /* shouldVibrate */);
         mUdfpsOverlayController = udfpsOverlayController;
-        setShouldLog(shouldLogMetrics);
+
+        mEnrollReason = enrollReason;
+        if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
+            setShouldLog(false);
+        }
     }
 
     @Override
@@ -76,7 +82,8 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_ENROLL,
+        UdfpsHelper.showUdfpsOverlay(getSensorId(),
+                UdfpsHelper.getReasonFromEnrollReason(mEnrollReason),
                 mUdfpsOverlayController);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.

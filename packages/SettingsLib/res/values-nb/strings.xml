@@ -36,8 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Kobler ikke til automatisk"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen internettilgang"</string>
     <string name="saved_network" msgid="7143698034077223645">"Lagret av <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_to_metered_access_point (9179693207918156341) -->
-    <skip />
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Koble til et nettverk med datamåling"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisk tilkoblet via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisk tilkoblet via leverandør av nettverksvurdering"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Tilkoblet via %1$s"</string>

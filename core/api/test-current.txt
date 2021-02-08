@@ -464,6 +464,7 @@ package android.app.admin {
   }
 
   public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
+    method public boolean canDeviceOwnerGrantSensorsPermissions();
     method public int describeContents();
     method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
     method public long getLocalTime();
@@ -478,6 +479,7 @@ package android.app.admin {
   public static final class FullyManagedDeviceProvisioningParams.Builder {
     ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setDeviceOwnerCanGrantSensorsPermissions(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocale(@Nullable java.util.Locale);

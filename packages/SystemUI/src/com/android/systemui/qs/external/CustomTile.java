@@ -315,7 +315,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         }
         try {
             if (DEBUG) Log.d(TAG, "Adding token");
-            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG, DEFAULT_DISPLAY);
+            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG, DEFAULT_DISPLAY,
+                    null /* options */);
             mIsTokenGranted = true;
         } catch (RemoteException e) {
         }

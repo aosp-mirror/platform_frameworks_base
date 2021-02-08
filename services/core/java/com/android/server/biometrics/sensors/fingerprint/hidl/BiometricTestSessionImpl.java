@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
 import android.util.Slog;
@@ -132,7 +133,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mFingerprint21.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
-                mContext.getOpPackageName(), true/* shouldLogMetrics */);
+                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
     }
 
     @Override

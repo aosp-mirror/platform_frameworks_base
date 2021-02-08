@@ -65,6 +65,17 @@ public class UdfpsHelper {
         }
     }
 
+    public static int getReasonFromEnrollReason(@FingerprintManager.EnrollReason int reason) {
+        switch (reason) {
+            case FingerprintManager.ENROLL_FIND_SENSOR:
+                return IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR;
+            case FingerprintManager.ENROLL_ENROLL:
+                return IUdfpsOverlayController.REASON_ENROLL_ENROLLING;
+            default:
+                return IUdfpsOverlayController.REASON_UNKNOWN;
+        }
+    }
+
     public static void showUdfpsOverlay(int sensorId, int reason,
             @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {

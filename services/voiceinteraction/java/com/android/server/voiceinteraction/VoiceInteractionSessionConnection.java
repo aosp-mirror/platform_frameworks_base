@@ -165,7 +165,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                         | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS, new UserHandle(mUser));
         if (mBound) {
             try {
-                mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY);
+                mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY,
+                        null /* options */);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed adding window token", e);
             }

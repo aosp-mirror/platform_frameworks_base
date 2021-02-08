@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import android.hardware.fingerprint.IUdfpsOverlayController;
+
 import androidx.annotation.NonNull;
 
 /**
@@ -24,9 +26,19 @@ import androidx.annotation.NonNull;
 public class UdfpsEnrollHelper {
     private static final String TAG = "UdfpsEnrollHelper";
 
+    // IUdfpsOverlayController reason
+    private final int mEnrollReason;
 
     private int mTotalSteps = -1;
     private int mCurrentProgress = 0;
+
+    public UdfpsEnrollHelper(int reason) {
+        mEnrollReason = reason;
+    }
+
+    boolean shouldShowProgressBar() {
+        return mEnrollReason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING;
+    }
 
     void onEnrollmentProgress(int remaining, @NonNull UdfpsProgressBar progressBar) {
         if (mTotalSteps == -1) {
