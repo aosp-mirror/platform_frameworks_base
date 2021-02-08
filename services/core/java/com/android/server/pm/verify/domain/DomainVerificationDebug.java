@@ -32,14 +32,29 @@ import android.util.SparseArray;
 
 import com.android.internal.util.CollectionUtils;
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 
+@SuppressWarnings("PointlessBooleanExpression")
 public class DomainVerificationDebug {
+
+    // Disable to turn off all logging. This is used to allow a "basic" set of debug flags to be
+    // enabled and checked in, without having everything be on or off.
+    public static final boolean DEBUG_ANY = false;
+
+    // Enable to turn on all logging. Requires enabling DEBUG_ANY.
+    public static final boolean DEBUG_ALL = false;
+
+    public static final boolean DEBUG_APPROVAL = DEBUG_ANY && (DEBUG_ALL || true);
+    public static final boolean DEBUG_BROADCASTS = DEBUG_ANY && (DEBUG_ALL || false);
+    public static final boolean DEBUG_PROXIES = DEBUG_ANY && (DEBUG_ALL || false);
 
     @NonNull
     private final DomainVerificationCollector mCollector;
@@ -50,7 +65,7 @@ public class DomainVerificationDebug {
 
     public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable @UserIdInt Integer userId,
-            @NonNull DomainVerificationService.Connection connection,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> stateMap)
             throws NameNotFoundException {
         ArrayMap<String, Integer> reusedMap = new ArrayMap<>();
@@ -61,7 +76,7 @@ public class DomainVerificationDebug {
             for (int index = 0; index < size; index++) {
                 DomainVerificationPkgState pkgState = stateMap.valueAt(index);
                 String pkgName = pkgState.getPackageName();
-                PackageSetting pkgSetting = connection.getPackageSettingLocked(pkgName);
+                PackageSetting pkgSetting = pkgSettingFunction.apply(pkgName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     continue;
                 }
@@ -77,7 +92,7 @@ public class DomainVerificationDebug {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
 
-            PackageSetting pkgSetting = connection.getPackageSettingLocked(packageName);
+            PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
             if (pkgSetting == null || pkgSetting.getPkg() == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
