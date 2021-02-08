@@ -40,7 +40,7 @@ static struct {
 
     jmethodID dispatchVsync;
     jmethodID dispatchHotplug;
-    jmethodID dispatchConfigChanged;
+    jmethodID dispatchModeChanged;
     jmethodID dispatchFrameRateOverrides;
 
     struct {
@@ -69,8 +69,8 @@ private:
     void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count,
                        VsyncEventData vsyncEventData) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
-    void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
-                               int32_t configId, nsecs_t vsyncPeriod) override;
+    void dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId, int32_t modeId,
+                             nsecs_t vsyncPeriod) override;
     void dispatchFrameRateOverrides(nsecs_t timestamp, PhysicalDisplayId displayId,
                                     std::vector<FrameRateOverride> overrides) override;
     void dispatchNullEvent(nsecs_t timestamp, PhysicalDisplayId displayId) override {}
@@ -129,20 +129,19 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
     mMessageQueue->raiseAndClearException(env, "dispatchHotplug");
 }
 
-void NativeDisplayEventReceiver::dispatchConfigChanged(
-    nsecs_t timestamp, PhysicalDisplayId displayId, int32_t configId, nsecs_t) {
-  JNIEnv* env = AndroidRuntime::getJNIEnv();
+void NativeDisplayEventReceiver::dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
+                                                     int32_t modeId, nsecs_t) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-  ScopedLocalRef<jobject> receiverObj(env,
-                                      jniGetReferent(env, mReceiverWeakGlobal));
-  if (receiverObj.get()) {
-    ALOGV("receiver %p ~ Invoking config changed handler.", this);
-    env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchConfigChanged,
-                        timestamp, displayId.value, configId);
-    ALOGV("receiver %p ~ Returned from config changed handler.", this);
-  }
+    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+    if (receiverObj.get()) {
+        ALOGV("receiver %p ~ Invoking mode changed handler.", this);
+        env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchModeChanged,
+                            timestamp, displayId.value, modeId);
+        ALOGV("receiver %p ~ Returned from mode changed handler.", this);
+    }
 
-  mMessageQueue->raiseAndClearException(env, "dispatchConfigChanged");
+    mMessageQueue->raiseAndClearException(env, "dispatchModeChanged");
 }
 
 void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
@@ -173,7 +172,7 @@ void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
         ALOGV("receiver %p ~ Returned from FrameRateOverride handler.", this);
     }
 
-    mMessageQueue->raiseAndClearException(env, "dispatchConfigChanged");
+    mMessageQueue->raiseAndClearException(env, "dispatchModeChanged");
 }
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject messageQueueObj,
@@ -243,8 +242,9 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
                              "(JJIJJ)V");
     gDisplayEventReceiverClassInfo.dispatchHotplug = GetMethodIDOrDie(env,
             gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
-    gDisplayEventReceiverClassInfo.dispatchConfigChanged = GetMethodIDOrDie(env,
-           gDisplayEventReceiverClassInfo.clazz, "dispatchConfigChanged", "(JJI)V");
+    gDisplayEventReceiverClassInfo.dispatchModeChanged =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchModeChanged",
+                             "(JJI)V");
     gDisplayEventReceiverClassInfo.dispatchFrameRateOverrides =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz,
                              "dispatchFrameRateOverrides",
