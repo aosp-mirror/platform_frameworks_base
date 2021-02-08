@@ -106,6 +106,8 @@ public interface SplitScreen extends DragAndDropPolicy.Starter {
 
     /** Removes the split-screen stages. */
     void exitSplitScreen();
+    /** @param exitSplitScreenOnHide if to exit split-screen if both stages are not visible. */
+    void exitSplitScreenOnHide(boolean exitSplitScreenOnHide);
     /** Gets the stage bounds. */
     void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds);
 
