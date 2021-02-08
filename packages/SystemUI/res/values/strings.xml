@@ -954,11 +954,8 @@
     <string name="quick_settings_dark_mode_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
     <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
     <string name="quick_settings_dark_mode_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
-    <!-- TODO(b/170970602): remove translatable=false when RBC has official name and strings -->
-    <!-- QuickSettings: Label for the toggle that controls whether Reduce Bright Colors is enabled. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_reduce_bright_colors_label" translatable="false">Reduce Bright Colors</string>
-        <!-- QuickSettings: Secondary text for intensity level of Reduce Bright Colors. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_reduce_bright_colors_secondary_label" translatable="false"> <xliff:g id="intensity" example="50">%d</xliff:g>%% reduction</string>
+    <!-- QuickSettings: Label for the toggle that controls whether Reduce Brightness is enabled. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_reduce_bright_colors_label">Reduce Brightness</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
