@@ -953,14 +953,7 @@ public class VpnTest {
     }
 
     private Vpn startLegacyVpn(final Vpn vpn, final VpnProfile vpnProfile) throws Exception {
-        // TODO(b/175883995): once these tests have been updated for the changes to the UserManager
-        // API, remove this ad-hoc setup code and use setMockedUsers(primaryUser) again.
-        // setMockedUsers(primaryUser);
-        final ArrayList<UserInfo> users = new ArrayList<>();
-        users.add(primaryUser);
-        when(mUserManager.getAliveUsers()).thenReturn(users);
-        when(mUserManager.getUserInfo(primaryUser.id)).thenReturn(primaryUser);
-        when(mUserManager.canHaveRestrictedProfile()).thenReturn(false);
+        setMockedUsers(primaryUser);
 
         // Dummy egress interface
         final LinkProperties lp = new LinkProperties();
@@ -1159,10 +1152,6 @@ public class VpnTest {
         doReturn(UserHandle.of(userId)).when(asUserContext).getUser();
         when(mContext.createContextAsUser(eq(UserHandle.of(userId)), anyInt()))
                 .thenReturn(asUserContext);
-        when(asUserContext.getSystemServiceName(UserManager.class))
-                .thenReturn(Context.USER_SERVICE);
-        when(asUserContext.getSystemService(UserManager.class))
-                .thenReturn(mUserManager);
         final TestLooper testLooper = new TestLooper();
         final Vpn vpn = new Vpn(testLooper.getLooper(), mContext, new TestDeps(), mNetService,
                 mNetd, userId, mKeyStore, mSystemServices, mIkev2SessionCreator);
