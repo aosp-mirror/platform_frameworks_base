@@ -36,8 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Kein automatischer Verbindungsaufbau"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Kein Internetzugriff"</string>
     <string name="saved_network" msgid="7143698034077223645">"Gespeichert von <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for connected_to_metered_access_point (9179693207918156341) -->
-    <skip />
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Mit kostenpflichtigem Netzwerk verbunden"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisch über %1$s verbunden"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisch über Anbieter von Netzwerkbewertungen verbunden"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Über %1$s verbunden"</string>
@@ -287,7 +286,7 @@
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wenn dieser Modus aktiviert ist, kann sich die MAC-Adresse dieses Geräts bei jeder Verbindung mit einem Netzwerk ändern, bei dem die MAC-Adressen randomisiert werden."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
-    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Kostenlos"</string>
+    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ohne Datenlimit"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-Puffergrößen"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Größe pro Protokollpuffer wählen"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Speicher der dauerhaften Protokollierung löschen?"</string>

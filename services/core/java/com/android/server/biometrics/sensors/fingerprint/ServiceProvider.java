@@ -78,7 +78,7 @@ public interface ServiceProvider {
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            boolean shouldLogMetrics);
+            @FingerprintManager.EnrollReason int enrollReason);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 

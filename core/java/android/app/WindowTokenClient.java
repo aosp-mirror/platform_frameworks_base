@@ -44,8 +44,8 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * Attaches {@code context} to this {@link WindowTokenClient}. Each {@link WindowTokenClient}
      * can only attach one {@link Context}.
      * <p>This method must be called before invoking
-     * {@link android.view.IWindowManager#addWindowTokenWithOptions(IBinder, int, int, Bundle,
-     * String)}.<p/>
+     * {@link android.view.IWindowManager#registerWindowContextListener(IBinder, int, int,
+     * Bundle, boolean)}.<p/>
      *
      * @param context context to be attached
      * @throws IllegalStateException if attached context has already existed.

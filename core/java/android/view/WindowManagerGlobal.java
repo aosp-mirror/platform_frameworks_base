@@ -139,7 +139,6 @@ public final class WindowManagerGlobal {
     public static final int ADD_INVALID_DISPLAY = -9;
     public static final int ADD_INVALID_TYPE = -10;
     public static final int ADD_INVALID_USER = -11;
-    public static final int ADD_TOO_MANY_TOKENS = -12;
 
     @UnsupportedAppUsage
     private static WindowManagerGlobal sDefaultWindowManager;

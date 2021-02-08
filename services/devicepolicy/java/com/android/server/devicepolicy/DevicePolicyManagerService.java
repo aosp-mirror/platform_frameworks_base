@@ -2991,6 +2991,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePasswordQualityCacheForUserGroup(
                 userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
         updatePermissionPolicyCache(userId);
+        updateAdminCanGrantSensorsPermissionCache(userId);
 
         startOwnerService(userId, "start-user");
     }
@@ -16334,6 +16335,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             disallowAddUser();
+            setAdminCanGrantSensorsPermissionForUserUnchecked(caller.getUserId(),
+                    provisioningParams.canDeviceOwnerGrantSensorsPermissions());
         } catch (Exception e) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)
@@ -16472,5 +16475,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Shouldn't happen.
             }
         });
+    }
+
+    private void setAdminCanGrantSensorsPermissionForUserUnchecked(int userId, boolean canGrant) {
+        synchronized (getLockObject()) {
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+
+            Preconditions.checkState(
+                    isDeviceOwner(owner) && owner.getUserHandle().getIdentifier() == userId,
+                    "May only be set on a the user of a device owner.");
+
+            owner.mAdminCanGrantSensorsPermissions = canGrant;
+            mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
+            saveSettingsLocked(userId);
+        }
+    }
+
+    private void updateAdminCanGrantSensorsPermissionCache(int userId) {
+        synchronized (getLockObject()) {
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            final boolean canGrant = owner != null ? owner.mAdminCanGrantSensorsPermissions : false;
+            mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
+        }
+    }
+
+    @Override
+    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
+        if (!mHasFeature) {
+            return false;
+        }
+
+        return mPolicyCache.canAdminGrantSensorsPermissionsForUser(userId);
     }
 }

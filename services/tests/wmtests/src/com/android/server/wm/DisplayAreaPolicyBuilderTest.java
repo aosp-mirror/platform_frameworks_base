@@ -15,7 +15,7 @@
  */
 
 package com.android.server.wm;
-import static android.os.Process.INVALID_UID;
+
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -587,7 +587,7 @@ public class DisplayAreaPolicyBuilderTest {
 
         final WindowToken token = new WindowToken(mWms, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
                 false /* fromClientToken */, null /* options */);
         policy.addWindow(token);
 
@@ -621,11 +621,11 @@ public class DisplayAreaPolicyBuilderTest {
 
         final WindowToken token1 = new WindowToken(mWms, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
                 false /* fromClientToken */, null /* options */);
         final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
                 TYPE_WALLPAPER, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
                 false /* fromClientToken */, null /* options */);
         policy.addWindow(token1);
         policy.addWindow(token2);
@@ -672,15 +672,15 @@ public class DisplayAreaPolicyBuilderTest {
         options2.putInt("HIERARCHY_ROOT_ID", mGroupRoot2.mFeatureId);
         final WindowToken token0 = new WindowToken(mWms, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
                 false /* fromClientToken */, null /* options */);
         final WindowToken token1 = new WindowToken(mWms, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
                 false /* fromClientToken */, options1);
         final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
                 TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
-                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
                 false /* fromClientToken */, options2);
 
         policy.addWindow(token0);

@@ -525,12 +525,12 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     /**
-     * See {@link InputConnection#setImeTemporarilyConsumesInput(boolean)}.
+     * See {@link InputConnection#setImeConsumesInput(boolean)}.
      */
     @AnyThread
-    public boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+    public boolean setImeConsumesInput(boolean imeConsumesInput) {
         try {
-            mIInputContext.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+            mIInputContext.setImeConsumesInput(imeConsumesInput);
             return true;
         } catch (RemoteException e) {
             return false;
