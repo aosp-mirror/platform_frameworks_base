@@ -542,8 +542,6 @@ public class DomainVerificationService extends SystemService
                 userState.removeHosts(domains);
             }
         }
-
-        mConnection.scheduleWriteSettings();
     }
 
     @Nullable
@@ -849,6 +847,7 @@ public class DomainVerificationService extends SystemService
     public void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state) {
         mEnforcer.callerIsLegacyUserSelector(mConnection.getCallingUid());
         mLegacySettings.add(packageName, userId, state);
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
@@ -1067,6 +1066,8 @@ public class DomainVerificationService extends SystemService
                 }
             }
         }
+
+        mConnection.scheduleWriteSettings();
     }
 
     /**
@@ -1124,6 +1125,8 @@ public class DomainVerificationService extends SystemService
                 }
             }
         }
+
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
