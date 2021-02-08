@@ -224,17 +224,18 @@ shared_ptr<DemuxCapabilities> TunerClient::getDemuxCaps() {
     return NULL;
 }
 
-sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
+sp<DescramblerClient> TunerClient::openDescrambler(int descramblerHandle) {
     if (mTunerService != NULL) {
-        // TODO: handle error code
-        /*shared_ptr<ITunerDescrambler> tunerDescrambler;
-        mTunerService->openDescrambler(demuxHandle, &tunerDescrambler);
-        return new DescramblerClient(tunerDescrambler);*/
+        shared_ptr<ITunerDescrambler> tunerDescrambler;
+        Status s = mTunerService->openDescrambler(descramblerHandle, &tunerDescrambler);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        return new DescramblerClient(tunerDescrambler);
     }
 
     if (mTuner != NULL) {
-        // TODO: pending aidl interface
-        sp<DescramblerClient> descramblerClient = new DescramblerClient();
+        sp<DescramblerClient> descramblerClient = new DescramblerClient(NULL);
         sp<IDescrambler> hidlDescrambler = openHidlDescrambler();
         if (hidlDescrambler != NULL) {
             descramblerClient->setHidlDescrambler(hidlDescrambler);

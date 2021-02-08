@@ -27,13 +27,12 @@ namespace android {
 
 /////////////// DescramblerClient ///////////////////////
 
-// TODO: pending aidl interface
-DescramblerClient::DescramblerClient() {
-    //mTunerDescrambler = tunerDescrambler;
+DescramblerClient::DescramblerClient(shared_ptr<ITunerDescrambler> tunerDescrambler) {
+    mTunerDescrambler = tunerDescrambler;
 }
 
 DescramblerClient::~DescramblerClient() {
-    //mTunerDescrambler = NULL;
+    mTunerDescrambler = NULL;
     mDescrambler = NULL;
 }
 
@@ -47,7 +46,10 @@ Result DescramblerClient::setDemuxSource(sp<DemuxClient> demuxClient) {
         return Result::INVALID_ARGUMENT;
     }
 
-    // TODO: pending aidl interface
+    if (mTunerDescrambler != NULL) {
+        Status s = mTunerDescrambler->setDemuxSource(demuxClient->getAidlDemux());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDescrambler != NULL) {
         return mDescrambler->setDemuxSource(demuxClient->getId());
@@ -57,7 +59,10 @@ Result DescramblerClient::setDemuxSource(sp<DemuxClient> demuxClient) {
 }
 
 Result DescramblerClient::setKeyToken(vector<uint8_t> keyToken) {
-    // TODO: pending aidl interface
+    if (mTunerDescrambler != NULL) {
+        Status s = mTunerDescrambler->setKeyToken(keyToken);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDescrambler != NULL) {
         return mDescrambler->setKeyToken(keyToken);
@@ -67,7 +72,11 @@ Result DescramblerClient::setKeyToken(vector<uint8_t> keyToken) {
 }
 
 Result DescramblerClient::addPid(DemuxPid pid, sp<FilterClient> optionalSourceFilter) {
-    // TODO: pending aidl interface
+    if (mTunerDescrambler != NULL) {
+        Status s = mTunerDescrambler->addPid(
+                getAidlDemuxPid(pid), optionalSourceFilter->getAidlFilter());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDescrambler != NULL) {
         return mDescrambler->addPid(pid, optionalSourceFilter->getHalFilter());
@@ -76,16 +85,24 @@ Result DescramblerClient::addPid(DemuxPid pid, sp<FilterClient> optionalSourceFi
     return Result::INVALID_STATE;}
 
 Result DescramblerClient::removePid(DemuxPid pid, sp<FilterClient> optionalSourceFilter) {
-    // TODO: pending aidl interface
-
-    if (mDescrambler != NULL) {
-        return mDescrambler->addPid(pid, optionalSourceFilter->getHalFilter());
+    if (mTunerDescrambler != NULL) {
+        Status s = mTunerDescrambler->removePid(
+                getAidlDemuxPid(pid), optionalSourceFilter->getAidlFilter());
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
-    return Result::INVALID_STATE;}
+    if (mDescrambler != NULL) {
+        return mDescrambler->removePid(pid, optionalSourceFilter->getHalFilter());
+    }
+
+    return Result::INVALID_STATE;
+}
 
 Result DescramblerClient::close() {
-    // TODO: pending aidl interface
+    if (mTunerDescrambler != NULL) {
+        Status s = mTunerDescrambler->close();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDescrambler != NULL) {
         return mDescrambler->close();
@@ -95,4 +112,16 @@ Result DescramblerClient::close() {
 
 /////////////// DescramblerClient Helper Methods ///////////////////////
 
+TunerDemuxPid DescramblerClient::getAidlDemuxPid(DemuxPid& pid) {
+    TunerDemuxPid aidlPid;
+    switch (pid.getDiscriminator()) {
+        case DemuxPid::hidl_discriminator::tPid:
+            aidlPid.set<TunerDemuxPid::tPid>((int)pid.tPid());
+            break;
+        case DemuxPid::hidl_discriminator::mmtpPid:
+            aidlPid.set<TunerDemuxPid::mmtpPid>((int)pid.mmtpPid());
+            break;
+    }
+    return aidlPid;
+}
 }  // namespace android
