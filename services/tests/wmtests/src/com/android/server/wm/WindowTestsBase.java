@@ -890,6 +890,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     mTask.moveToFront("createActivity");
                 }
                 // Make visible by default...
+                activity.mVisibleRequested = true;
                 activity.setVisible(true);
             }
 
