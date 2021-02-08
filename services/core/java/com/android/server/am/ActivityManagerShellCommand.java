@@ -2984,7 +2984,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         pw.println("Reset all changes for " + packageName + " to default value.");
                         return 0;
                     }
-                    if (platformCompat.clearOverride(changeId, packageName)) {
+                    boolean existed;
+                    if (killPackage) {
+                        existed = platformCompat.clearOverride(changeId, packageName);
+                    } else {
+                        existed = platformCompat.clearOverrideForTest(changeId, packageName);
+                    }
+                    if (existed) {
                         pw.println("Reset change " + changeId + " for " + packageName
                                 + " to default value.");
                     } else {
