@@ -66,6 +66,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
@@ -878,6 +879,20 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGnssManagerService != null) {
             mGnssManagerService.removeGnssMeasurementsListener(
                     listener);
+        }
+    }
+
+    @Override
+    public void addProviderRequestListener(IProviderRequestListener listener) {
+        for (LocationProviderManager manager : mProviderManagers) {
+            manager.addProviderRequestListener(listener);
+        }
+    }
+
+    @Override
+    public void removeProviderRequestListener(IProviderRequestListener listener) {
+        for (LocationProviderManager manager : mProviderManagers) {
+            manager.removeProviderRequestListener(listener);
         }
     }
 
