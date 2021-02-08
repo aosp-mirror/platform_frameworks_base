@@ -41,13 +41,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param context A context to create the dialog
  * @param list list of elements to show in the dialog. The elements will show in the same order they
  *             appear in the list
- * @param activityStarter a callback to start an activity for a given permission group name (as
- *                        given by [PrivacyType.permGroupName])
+ * @param activityStarter a callback to start an activity for a given package name and user id
  */
 class PrivacyDialog(
     context: Context,
     private val list: List<PrivacyElement>,
-    activityStarter: (String) -> Unit
+    activityStarter: (String, Int) -> Unit
 ) : SystemUIDialog(context, R.style.ScreenRecord) {
 
     private val dismissListeners = mutableListOf<WeakReference<OnDialogDismissed>>()
@@ -129,7 +128,7 @@ class PrivacyDialog(
         } ?: firstLine
         newView.requireViewById<TextView>(R.id.text).text = finalText
         newView.apply {
-            tag = element.type.permGroupName
+            setTag(element)
             setOnClickListener(clickListener)
         }
         return newView
@@ -152,12 +151,17 @@ class PrivacyDialog(
     }
 
     private val clickListener = View.OnClickListener { v ->
-        v.tag?.let { activityStarter(it as String) }
+        v.tag?.let {
+            val element = it as PrivacyElement
+            activityStarter(element.packageName, element.userId)
+        }
     }
 
     /** */
     data class PrivacyElement(
         val type: PrivacyType,
+        val packageName: String,
+        val userId: Int,
         val applicationName: CharSequence,
         val attribution: CharSequence?,
         val lastActiveTimestamp: Long,
@@ -169,6 +173,8 @@ class PrivacyDialog(
 
         init {
             builder.append("type=${type.logName}")
+            builder.append(", packageName=$packageName")
+            builder.append(", userId=$userId")
             builder.append(", appName=$applicationName")
             if (attribution != null) {
                 builder.append(", attribution=$attribution")
