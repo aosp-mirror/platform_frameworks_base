@@ -37,10 +37,11 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.DomainVerificationCollector;
+import com.android.server.pm.verify.domain.DomainVerificationDebug;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationMessageCodes;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +53,7 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
 
     private static final String TAG = "DomainVerificationProxyV1";
 
-    private static final boolean DEBUG_BROADCASTS = false;
+    private static final boolean DEBUG_BROADCASTS = DomainVerificationDebug.DEBUG_BROADCASTS;
 
     @NonNull
     private final Context mContext;
