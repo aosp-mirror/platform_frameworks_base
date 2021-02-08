@@ -1535,6 +1535,27 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.println(")");
     }
 
+    public void dumpShortcuts(@NonNull PrintWriter pw, int matchFlags) {
+        final boolean matchDynamic = (matchFlags & ShortcutManager.FLAG_MATCH_DYNAMIC) != 0;
+        final boolean matchPinned = (matchFlags & ShortcutManager.FLAG_MATCH_PINNED) != 0;
+        final boolean matchManifest = (matchFlags & ShortcutManager.FLAG_MATCH_MANIFEST) != 0;
+        final boolean matchCached = (matchFlags & ShortcutManager.FLAG_MATCH_CACHED) != 0;
+
+        final int shortcutFlags = (matchDynamic ? ShortcutInfo.FLAG_DYNAMIC : 0)
+                | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
+                | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
+                | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
+
+        final ArrayMap<String, ShortcutInfo> shortcuts = mShortcuts;
+        final int size = shortcuts.size();
+        for (int i = 0; i < size; i++) {
+            final ShortcutInfo si = shortcuts.valueAt(i);
+            if ((si.getFlags() & shortcutFlags) != 0) {
+                pw.println(si.toDumpString(""));
+            }
+        }
+    }
+
     @Override
     public JSONObject dumpCheckin(boolean clear) throws JSONException {
         final JSONObject result = super.dumpCheckin(clear);

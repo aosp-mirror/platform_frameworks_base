@@ -278,29 +278,29 @@ public class TextViewTest {
 
     @Test
     @UiThreadTest
-    public void setSetImeTemporarilyConsumesInput_recoveryToVisible() {
+    public void setSetImeConsumesInput_recoveryToVisible() {
         mTextView = new TextView(mActivity);
         mTextView.setCursorVisible(true);
         assertTrue(mTextView.isCursorVisible());
 
-        mTextView.setImeTemporarilyConsumesInput(true);
+        mTextView.setImeConsumesInput(true);
         assertFalse(mTextView.isCursorVisible());
 
-        mTextView.setImeTemporarilyConsumesInput(false);
+        mTextView.setImeConsumesInput(false);
         assertTrue(mTextView.isCursorVisible());
     }
 
     @Test
     @UiThreadTest
-    public void setSetImeTemporarilyConsumesInput_recoveryToInvisible() {
+    public void setSetImeConsumesInput_recoveryToInvisible() {
         mTextView = new TextView(mActivity);
         mTextView.setCursorVisible(false);
         assertFalse(mTextView.isCursorVisible());
 
-        mTextView.setImeTemporarilyConsumesInput(true);
+        mTextView.setImeConsumesInput(true);
         assertFalse(mTextView.isCursorVisible());
 
-        mTextView.setImeTemporarilyConsumesInput(false);
+        mTextView.setImeConsumesInput(false);
         assertFalse(mTextView.isCursorVisible());
     }
 

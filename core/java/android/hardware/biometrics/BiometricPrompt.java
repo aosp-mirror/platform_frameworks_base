@@ -36,7 +36,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.security.identity.IdentityCredential;
-import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Log;
@@ -325,7 +324,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * request authentication with the proper set of authenticators (e.g. match the
          * authenticators specified during key generation).
          *
-         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see android.security.keystore.KeyGenParameterSpec.Builder
          * @see KeyProperties#AUTH_BIOMETRIC_STRONG
          * @see KeyProperties#AUTH_DEVICE_CREDENTIAL
          *
@@ -361,6 +360,21 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public Builder setReceiveSystemEvents(boolean set) {
             mPromptInfo.setReceiveSystemEvents(set);
+            return this;
+        }
+
+        /**
+         * If set, authenticate using the biometric sensor with the given ID.
+         *
+         * @param sensorId The ID of a biometric sensor, or -1 to allow any sensor (default).
+         * @return This builder.
+         *
+         * @hide
+         */
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        @NonNull
+        public Builder setSensorId(int sensorId) {
+            mPromptInfo.setSensorId(sensorId);
             return this;
         }
 
@@ -589,7 +603,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      *
      * <p>Cryptographic operations in Android can be split into two categories: auth-per-use and
      * time-based. This is specified during key creation via the timeout parameter of the
-     * {@link KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)} API.
+     * {@code setUserAuthenticationParameters(int, int)} method of {@link
+     * android.security.keystore.KeyGenParameterSpec.Builder}.
      *
      * <p>CryptoObjects are used to unlock auth-per-use keys via
      * {@link BiometricPrompt#authenticate(CryptoObject, CancellationSignal, Executor,
@@ -778,6 +793,27 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
             int userId) {
+        authenticateUserForOperation(cancel, executor, callback, userId, 0 /* operationId */);
+    }
+
+    /**
+     * Authenticates for the given user and keystore operation.
+     *
+     * @param cancel An object that can be used to cancel authentication
+     * @param executor An executor to handle callback events
+     * @param callback An object to receive authentication events
+     * @param userId The user to authenticate
+     * @param operationId The keystore operation associated with authentication
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void authenticateUserForOperation(
+            @NonNull CancellationSignal cancel,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AuthenticationCallback callback,
+            int userId,
+            long operationId) {
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
         }
@@ -787,7 +823,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticateInternal(null /* crypto */, cancel, executor, callback, userId);
+        authenticateInternal(operationId, cancel, executor, callback, userId);
     }
 
     /**
@@ -912,11 +948,31 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
     }
 
-    private void authenticateInternal(@Nullable CryptoObject crypto,
+    private void authenticateInternal(
+            @Nullable CryptoObject crypto,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
             int userId) {
+
+        mCryptoObject = crypto;
+        final long operationId = crypto != null ? crypto.getOpId() : 0L;
+        authenticateInternal(operationId, cancel, executor, callback, userId);
+    }
+
+    private void authenticateInternal(
+            long operationId,
+            @NonNull CancellationSignal cancel,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AuthenticationCallback callback,
+            int userId) {
+
+        // Ensure we don't return the wrong crypto object as an auth result.
+        if (mCryptoObject != null && mCryptoObject.getOpId() != operationId) {
+            Log.w(TAG, "CryptoObject operation ID does not match argument; setting field to null");
+            mCryptoObject = null;
+        }
+
         try {
             if (cancel.isCanceled()) {
                 Log.w(TAG, "Authentication already canceled");
@@ -925,13 +981,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 cancel.setOnCancelListener(new OnAuthenticationCancelListener());
             }
 
-            mCryptoObject = crypto;
             mExecutor = executor;
             mAuthenticationCallback = callback;
-            final long operationId = crypto != null ? crypto.getOpId() : 0;
 
             final PromptInfo promptInfo;
-            if (crypto != null) {
+            if (operationId != 0L) {
                 // Allowed authenticators should default to BIOMETRIC_STRONG for crypto auth.
                 // Note that we use a new PromptInfo here so as to not overwrite the application's
                 // preference, since it is possible that the same prompt configuration be used
@@ -952,10 +1006,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
-            mExecutor.execute(() -> {
-                callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                        mContext.getString(R.string.biometric_error_hw_unavailable));
-            });
+            mExecutor.execute(() -> callback.onAuthenticationError(
+                    BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                    mContext.getString(R.string.biometric_error_hw_unavailable)));
         }
     }
 }

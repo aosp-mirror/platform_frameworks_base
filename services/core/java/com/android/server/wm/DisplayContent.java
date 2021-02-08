@@ -5960,36 +5960,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    /**
-     * Returns the number of window tokens without surface on this display. A {@link WindowToken}
-     * won't have its {@link SurfaceControl} until a window is added to a {@link WindowToken}.
-     * The purpose of this method is to accumulate non-window containing {@link WindowToken}s and
-     * limit the usage if the count exceeds a number.
-     *
-     * @param callingUid app calling uid
-     * @return the number of window tokens without surface on this display
-     * @see WindowToken#addWindow(WindowState)
-     */
-    int getWindowTokensWithoutSurfaceCount(int callingUid) {
-        List<WindowToken> tokens = new ArrayList<>(mTokenMap.values());
-        int count = 0;
-        for (int i = tokens.size() - 1; i >= 0; i--) {
-            final WindowToken token = tokens.get(i);
-            if (callingUid != token.getOwnerUid()) {
-                continue;
-            }
-            // Skip if token is an Activity
-            if (token.asActivityRecord() != null) {
-                continue;
-            }
-            if (token.mSurfaceControl != null) {
-                continue;
-            }
-            count++;
-        }
-        return count;
-    }
-
     MagnificationSpec getMagnificationSpec() {
         return mMagnificationSpec;
     }

@@ -4556,6 +4556,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
         private int mUserId = UserHandle.USER_SYSTEM;
 
+        private int mShortcutMatchFlags = ShortcutManager.FLAG_MATCH_CACHED
+                | ShortcutManager.FLAG_MATCH_DYNAMIC | ShortcutManager.FLAG_MATCH_MANIFEST
+                | ShortcutManager.FLAG_MATCH_PINNED;
+
         private void parseOptionsLocked(boolean takeUser)
                 throws CommandException {
             String opt;
@@ -4571,6 +4575,9 @@ public class ShortcutService extends IShortcutService.Stub {
                             break;
                         }
                         // fallthrough
+                    case "--flags":
+                        mShortcutMatchFlags = Integer.parseInt(getNextArgRequired());
+                        break;
                     default:
                         throw new CommandException("Unknown option: " + opt);
                 }
@@ -4605,6 +4612,9 @@ public class ShortcutService extends IShortcutService.Stub {
                         break;
                     case "clear-shortcuts":
                         handleClearShortcuts();
+                        break;
+                    case "get-shortcuts":
+                        handleGetShortcuts();
                         break;
                     case "verify-states": // hidden command to verify various internal states.
                         handleVerifyStates();
@@ -4648,6 +4658,9 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println();
             pw.println("cmd shortcut clear-shortcuts [--user USER_ID] PACKAGE");
             pw.println("    Remove all shortcuts from a package, including pinned shortcuts");
+            pw.println();
+            pw.println("cmd shortcut get-shortcuts [--user USER_ID] [--flags FLAGS] PACKAGE");
+            pw.println("    Show the shortcuts for a package that match the given flags");
             pw.println();
         }
 
@@ -4720,6 +4733,24 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 ShortcutService.this.cleanUpPackageForAllLoadedUsers(packageName, mUserId,
                         /* appStillExists = */ true);
+            }
+        }
+
+        private void handleGetShortcuts() throws CommandException {
+            synchronized (mLock) {
+                parseOptionsLocked(/* takeUser =*/ true);
+                final String packageName = getNextArgRequired();
+
+                Slog.i(TAG, "cmd: handleGetShortcuts: user=" + mUserId + ", flags="
+                        + mShortcutMatchFlags + ", package=" + packageName);
+
+                final ShortcutUser user = ShortcutService.this.getUserShortcutsLocked(mUserId);
+                final ShortcutPackage p = user.getPackageShortcutsIfExists(packageName);
+                if (p == null) {
+                    return;
+                }
+
+                p.dumpShortcuts(getOutPrintWriter(), mShortcutMatchFlags);
             }
         }
 
