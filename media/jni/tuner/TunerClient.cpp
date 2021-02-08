@@ -22,7 +22,10 @@
 
 #include "TunerClient.h"
 
+using ::aidl::android::media::tv::tuner::TunerFrontendCapabilities;
+using ::aidl::android::media::tv::tuner::TunerFrontendDtmbCapabilities;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
+using ::android::hardware::tv::tuner::V1_0::FrontendStatusType;
 using ::android::hardware::tv::tuner::V1_0::FrontendType;
 
 namespace android {
@@ -136,12 +139,11 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
 shared_ptr<FrontendInfo> TunerClient::getFrontendInfo(int id) {
     if (mTunerService != NULL) {
         TunerFrontendInfo aidlFrontendInfo;
-        // TODO: handle error code
         Status s = mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
         if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
             return NULL;
         }
-        return make_shared<FrontendInfo>(FrontendInfoAidlToHidl(aidlFrontendInfo));
+        return make_shared<FrontendInfo>(frontendInfoAidlToHidl(aidlFrontendInfo));
     }
 
     if (mTuner != NULL) {
@@ -157,7 +159,22 @@ shared_ptr<FrontendInfo> TunerClient::getFrontendInfo(int id) {
 }
 
 shared_ptr<FrontendDtmbCapabilities> TunerClient::getFrontendDtmbCapabilities(int id) {
-    // pending aidl interface
+    if (mTunerService != NULL) {
+        TunerFrontendDtmbCapabilities dtmbCaps;
+        Status s = mTunerService->getFrontendDtmbCapabilities(id, &dtmbCaps);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        FrontendDtmbCapabilities hidlCaps{
+            .transmissionModeCap = static_cast<uint32_t>(dtmbCaps.transmissionModeCap),
+            .bandwidthCap = static_cast<uint32_t>(dtmbCaps.bandwidthCap),
+            .modulationCap = static_cast<uint32_t>(dtmbCaps.modulationCap),
+            .codeRateCap = static_cast<uint32_t>(dtmbCaps.codeRateCap),
+            .guardIntervalCap = static_cast<uint32_t>(dtmbCaps.guardIntervalCap),
+            .interleaveModeCap = static_cast<uint32_t>(dtmbCaps.interleaveModeCap),
+        };
+        return make_shared<FrontendDtmbCapabilities>(hidlCaps);
+    }
 
     if (mTuner_1_1 != NULL) {
         Result result;
@@ -487,7 +504,7 @@ DemuxCapabilities TunerClient::getHidlDemuxCaps(TunerDemuxCapabilities& aidlCaps
     return caps;
 }
 
-FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo) {
+FrontendInfo TunerClient::frontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo) {
     FrontendInfo hidlFrontendInfo {
         .type = static_cast<FrontendType>(aidlFrontendInfo.type),
         .minFrequency = static_cast<uint32_t>(aidlFrontendInfo.minFrequency),
@@ -497,8 +514,102 @@ FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendI
         .acquireRange = static_cast<uint32_t>(aidlFrontendInfo.acquireRange),
         .exclusiveGroupId = static_cast<uint32_t>(aidlFrontendInfo.exclusiveGroupId),
     };
-    // TODO: handle Frontend caps
 
+    int size = aidlFrontendInfo.statusCaps.size();
+    hidlFrontendInfo.statusCaps.resize(size);
+    for (int i = 0; i < size; i++) {
+        hidlFrontendInfo.statusCaps[i] =
+                static_cast<FrontendStatusType>(aidlFrontendInfo.statusCaps[i]);
+    }
+
+    switch (aidlFrontendInfo.caps.getTag()) {
+        case TunerFrontendCapabilities::analogCaps: {
+            auto analog = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::analogCaps>();
+            hidlFrontendInfo.frontendCaps.analogCaps({
+                .typeCap = static_cast<uint32_t>(analog.typeCap),
+                .sifStandardCap = static_cast<uint32_t>(analog.sifStandardCap),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::atscCaps: {
+            auto atsc = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::atscCaps>();
+            hidlFrontendInfo.frontendCaps.atscCaps({
+                .modulationCap = static_cast<uint32_t>(atsc.modulationCap),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::atsc3Caps: {
+            auto atsc3 = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::atsc3Caps>();
+            hidlFrontendInfo.frontendCaps.atsc3Caps({
+                .bandwidthCap = static_cast<uint32_t>(atsc3.bandwidthCap),
+                .modulationCap = static_cast<uint32_t>(atsc3.modulationCap),
+                .timeInterleaveModeCap = static_cast<uint32_t>(atsc3.timeInterleaveModeCap),
+                .codeRateCap = static_cast<uint32_t>(atsc3.codeRateCap),
+                .fecCap = static_cast<uint32_t>(atsc3.fecCap),
+                .demodOutputFormatCap = static_cast<uint8_t>(atsc3.demodOutputFormatCap),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::cableCaps: {
+            auto cable = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::cableCaps>();
+            hidlFrontendInfo.frontendCaps.dvbcCaps({
+                .modulationCap = static_cast<uint32_t>(cable.modulationCap),
+                .fecCap = static_cast<uint64_t>(cable.codeRateCap),
+                .annexCap = static_cast<uint8_t>(cable.annexCap),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::dvbsCaps: {
+            auto dvbs = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::dvbsCaps>();
+            hidlFrontendInfo.frontendCaps.dvbsCaps({
+                .modulationCap = static_cast<int32_t>(dvbs.modulationCap),
+                .innerfecCap = static_cast<uint64_t>(dvbs.codeRateCap),
+                .standard = static_cast<uint8_t>(dvbs.standard),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::dvbtCaps: {
+            auto dvbt = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::dvbtCaps>();
+            hidlFrontendInfo.frontendCaps.dvbtCaps({
+                .transmissionModeCap = static_cast<uint32_t>(dvbt.transmissionModeCap),
+                .bandwidthCap = static_cast<uint32_t>(dvbt.bandwidthCap),
+                .constellationCap = static_cast<uint32_t>(dvbt.constellationCap),
+                .coderateCap = static_cast<uint32_t>(dvbt.codeRateCap),
+                .hierarchyCap = static_cast<uint32_t>(dvbt.hierarchyCap),
+                .guardIntervalCap = static_cast<uint32_t>(dvbt.guardIntervalCap),
+                .isT2Supported = dvbt.isT2Supported,
+                .isMisoSupported = dvbt.isMisoSupported,
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::isdbsCaps: {
+            auto isdbs = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::isdbsCaps>();
+            hidlFrontendInfo.frontendCaps.isdbsCaps({
+                .modulationCap = static_cast<uint32_t>(isdbs.modulationCap),
+                .coderateCap = static_cast<uint32_t>(isdbs.codeRateCap),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::isdbs3Caps: {
+            auto isdbs3 = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::isdbs3Caps>();
+            hidlFrontendInfo.frontendCaps.isdbs3Caps({
+                .modulationCap = static_cast<uint32_t>(isdbs3.modulationCap),
+                .coderateCap = static_cast<uint32_t>(isdbs3.codeRateCap),
+            });
+            break;
+        }
+        case TunerFrontendCapabilities::isdbtCaps: {
+            auto isdbt = aidlFrontendInfo.caps.get<TunerFrontendCapabilities::isdbtCaps>();
+            hidlFrontendInfo.frontendCaps.isdbtCaps({
+                .modeCap = static_cast<uint32_t>(isdbt.modeCap),
+                .bandwidthCap = static_cast<uint32_t>(isdbt.bandwidthCap),
+                .modulationCap = static_cast<uint32_t>(isdbt.modulationCap),
+                .coderateCap = static_cast<uint32_t>(isdbt.codeRateCap),
+                .guardIntervalCap = static_cast<uint32_t>(isdbt.guardIntervalCap),
+            });
+            break;
+        }
+    }
     return hidlFrontendInfo;
 }
 

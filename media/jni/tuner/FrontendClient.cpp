@@ -91,8 +91,8 @@ Result FrontendClient::setCallback(sp<FrontendClientCallback> frontendClientCall
     if (mTunerFrontend != NULL) {
         mAidlCallback = ::ndk::SharedRefBase::make<TunerFrontendCallback>(frontendClientCallback);
         mAidlCallback->setFrontendType(mType);
-        mTunerFrontend->setCallback(mAidlCallback);
-        return Result::SUCCESS;
+        Status s = mTunerFrontend->setCallback(mAidlCallback);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     mHidlCallback = new HidlFrontendCallback(frontendClientCallback);
@@ -243,9 +243,8 @@ vector<FrontendStatusExt1_1> FrontendClient::getStatusExtended_1_1(
 
 Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
-        /*mTunerFrontend->setLnb(lnbClient->getAidlLnb());
-        return Result::SUCCESS;*/
+        Status s = mTunerFrontend->setLnb(lnbClient->getAidlLnb());
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend != NULL) {
@@ -258,9 +257,8 @@ Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
 
 Result FrontendClient::setLna(bool bEnable) {
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
-        /*mTunerFrontend->setLna(bEnable);
-        return Result::SUCCESS;*/
+        Status s = mTunerFrontend->setLna(bEnable);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend != NULL) {
@@ -275,9 +273,11 @@ int FrontendClient::linkCiCamToFrontend(int ciCamId) {
     int ltsId = (int)Constant::INVALID_LTS_ID;
 
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
-        /*mTunerFrontend->linkCiCamToFrontend(ciCamId, ltsId);
-        return ltsId;*/
+        Status s = mTunerFrontend->linkCiCamToFrontend(ciCamId, &ltsId);
+        if (ClientHelper::getServiceSpecificErrorCode(s) == Result::SUCCESS) {
+            return ltsId;
+        }
+        return (int)Constant::INVALID_LTS_ID;
     }
 
     if (mFrontend_1_1 != NULL) {
@@ -297,9 +297,8 @@ int FrontendClient::linkCiCamToFrontend(int ciCamId) {
 
 Result FrontendClient::unlinkCiCamToFrontend(int ciCamId) {
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
-        /*mTunerFrontend->unlinkCiCamToFrontend(ciCamId);
-        return Result::SUCCESS;*/
+        Status s = mTunerFrontend->unlinkCiCamToFrontend(ciCamId);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend_1_1 != NULL) {
