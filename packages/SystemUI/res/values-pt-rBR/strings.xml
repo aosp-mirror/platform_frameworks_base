@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Economia de bateria ativada"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduz o desempenho e os dados em segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desativar a Economia de bateria"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"O app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acesso a todas as informações visíveis na tela ou tocadas no dispositivo, como gravação ou transmissão Isso inclui informações como senhas, detalhes de pagamento, fotos, mensagens e áudio que você toca."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"O app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acesso a todas as informações visíveis na tela ou tocadas no dispositivo, como gravação ou transmissão. Isso inclui informações como senhas, detalhes de pagamento, fotos, mensagens e o áudio que você tocar."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O serviço que oferece essa função terá acesso a todas as informações visíveis na tela ou reproduzidas durante uma gravação ou transmissão. Isso inclui senhas, detalhes de pagamento, fotos, mensagens e áudio."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Iniciar gravação ou transmissão?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Iniciar gravação ou transmissão com o app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
@@ -713,12 +713,12 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bolha"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"O som e a vibração estão desativados, e o balão aparece na parte inferior da seção de conversa"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode vibrar ou tocar com base nas configurações do smartphone"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Podem vibrar ou tocar com base nas configurações do smartphone"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode vibrar ou tocar com base nas configurações do smartphone. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém sua atenção com um atalho flutuante para esse conteúdo."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece na parte superior de uma seção de conversa, em forma de balão, mostrando a foto do perfil na tela de bloqueio"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparecem na parte superior de uma seção de conversa, em forma de balões, mostrando a foto do perfil na tela de bloqueio"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configurações"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nenhum balão recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Os balões recentes e dispensados aparecerão aqui"</string>
@@ -845,7 +845,7 @@
     <item msgid="7453955063378349599">"Inclinação à esquerda"</item>
     <item msgid="5874146774389433072">"Inclinação à direita"</item>
   </string-array>
-    <string name="menu_ime" msgid="5677467548258017952">"Alternador de teclado"</string>
+    <string name="menu_ime" msgid="5677467548258017952">"Seletor de teclado"</string>
     <string name="save" msgid="3392754183673848006">"Salvar"</string>
     <string name="reset" msgid="8715144064608810383">"Redefinir"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Ajustar largura do botão"</string>
