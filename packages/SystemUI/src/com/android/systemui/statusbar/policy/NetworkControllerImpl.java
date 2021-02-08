@@ -549,9 +549,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
     }
 
-    String getNonDefaultMobileDataNetworkName(int subId) {
+    String getNetworkNameForCarrierWiFi(int subId) {
         MobileSignalController controller = getControllerWithSubId(subId);
-        return controller != null ? controller.getNonDefaultCarrierName() : "";
+        return controller != null ? controller.getNetworkNameForCarrierWiFi() : "";
     }
 
     private void notifyControllersMobileDataChanged() {
