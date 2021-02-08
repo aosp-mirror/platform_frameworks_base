@@ -787,9 +787,19 @@ public class ZygoteInit {
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
             if (Zygote.nativeSupportsMemoryTagging()) {
-                /* The system server is more privileged than regular app processes, so it has async
-                 * tag checks enabled on hardware that supports memory tagging. */
-                parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
+                /* The system server has ASYNC MTE by default, in order to allow
+                 * system services to specify their own MTE level later, as you
+                 * can't re-enable MTE once it's disabled. */
+                String mode = SystemProperties.get("arm64.memtag.process.system_server", "async");
+                if (mode.equals("async")) {
+                    parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_ASYNC;
+                } else if (mode.equals("sync")) {
+                    parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_SYNC;
+                } else if (!mode.equals("off")) {
+                    /* When we have an invalid memory tag level, keep the current level. */
+                    parsedArgs.mRuntimeFlags |= Zygote.nativeCurrentTaggingLevel();
+                    Slog.e(TAG, "Unknown memory tag level for the system server: \"" + mode + "\"");
+                }
             } else if (Zygote.nativeSupportsTaggedPointers()) {
                 /* Enable pointer tagging in the system server. Hardware support for this is present
                  * in all ARMv8 CPUs. */

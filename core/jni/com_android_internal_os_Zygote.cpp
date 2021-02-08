@@ -2506,6 +2506,36 @@ static jboolean com_android_internal_os_Zygote_nativeSupportsTaggedPointers(JNIE
 #endif
 }
 
+static jint com_android_internal_os_Zygote_nativeCurrentTaggingLevel(JNIEnv* env, jclass) {
+#if defined(__aarch64__)
+  int level = prctl(PR_GET_TAGGED_ADDR_CTRL, 0, 0, 0, 0);
+  if (level < 0) {
+    ALOGE("Failed to get memory tag level: %s", strerror(errno));
+    return 0;
+  } else if (!(level & PR_TAGGED_ADDR_ENABLE)) {
+    return 0;
+  }
+  // TBI is only possible on non-MTE hardware.
+  if (!mte_supported()) {
+    return MEMORY_TAG_LEVEL_TBI;
+  }
+
+  switch (level & PR_MTE_TCF_MASK) {
+    case PR_MTE_TCF_NONE:
+      return 0;
+    case PR_MTE_TCF_SYNC:
+      return MEMORY_TAG_LEVEL_SYNC;
+    case PR_MTE_TCF_ASYNC:
+      return MEMORY_TAG_LEVEL_ASYNC;
+    default:
+      ALOGE("Unknown memory tagging level: %i", level);
+      return 0;
+  }
+#else // defined(__aarch64__)
+  return 0;
+#endif // defined(__aarch64__)
+}
+
 static const JNINativeMethod gMethods[] = {
         {"nativeForkAndSpecialize",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/"
@@ -2545,6 +2575,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_internal_os_Zygote_nativeSupportsMemoryTagging},
         {"nativeSupportsTaggedPointers", "()Z",
          (void*)com_android_internal_os_Zygote_nativeSupportsTaggedPointers},
+        {"nativeCurrentTaggingLevel", "()I",
+         (void*)com_android_internal_os_Zygote_nativeCurrentTaggingLevel},
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
