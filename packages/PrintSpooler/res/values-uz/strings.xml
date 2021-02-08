@@ -94,13 +94,13 @@
     <item msgid="2762241247228983754">"Rang"</item>
   </string-array>
   <string-array name="duplex_mode_labels">
-    <item msgid="3882302912790928315">"Yo‘q"</item>
+    <item msgid="3882302912790928315">"Hech qanday"</item>
     <item msgid="7296563835355641719">"Uzun tomoni"</item>
     <item msgid="79513688117503758">"Qisqa tomoni"</item>
   </string-array>
   <string-array name="orientation_labels">
     <item msgid="4061931020926489228">"Tik holat"</item>
-    <item msgid="3199660090246166812">"Eniga"</item>
+    <item msgid="3199660090246166812">"Yotiq"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Faylga yozib bo‘lmadi"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"Xatolik yuz berdi. Qaytadan urining."</string>

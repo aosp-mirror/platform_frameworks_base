@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਤਿਆਰ ਹੈ। ਇਸ ਦੀ ਵਰਤੋਂ ਸ਼ੁਰੂ ਕਰਨ ਲਈ, ਆਪਣਾ ਡੀਵਾਈਸ ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ।"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ਸਥਾਪਨਾ ਜਾਰੀ ਹੈ"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ਚਿੱਤਰ ਪ੍ਰਮਾਣਿਕਤਾ ਅਸਫਲ ਰਹੀ। ਸਥਾਪਨਾ ਨੂੰ ਰੱਦ ਕਰੋ।"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ਇਮੇਜ ਪ੍ਰਮਾਣਿਕਤਾ ਅਸਫਲ ਰਹੀ। ਸਥਾਪਨਾ ਨੂੰ ਰੱਦ ਕਰੋ।"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"ਫ਼ਿਲਹਾਲ ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਚੱਲ ਰਿਹਾ ਹੈ। ਮੂਲ Android ਵਰਜਨ ਵਰਤਣ ਲਈ ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ।"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"ਰੱਦ ਕਰੋ"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"ਖਾਰਜ ਕਰੋ"</string>

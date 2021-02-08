@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP тохируулга амжилтгүй"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Сүлжээний чанар муу байгаа тул холбогдож чадсангүй"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi холболт амжилтгүй"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Гэрчлэлийн асуудал"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Баталгаажуулалтын асуудал"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Холбогдож чадсангүй"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'-д холбогдож чадсангүй"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Нууц үгийг шалгаад дахин оролдоно уу"</string>
@@ -397,8 +397,8 @@
     <item msgid="1282170165150762976">"Дижитал агуулгад зориулан тааруулсан өнгө"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Зогсолтын горимын апп"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Идэвхгүй байна. Унтраах/асаахын тулд дарна уу."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Идэвхтэй байна. Унтраах/асаахын тулд дарна уу."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Идэвхгүй байна. Асаах/унтраахын тулд дарна уу."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Идэвхтэй байна. Асаах/унтраахын тулд дарна уу."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Апп зогсолтын горимын төлөв:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
@@ -531,7 +531,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Хэрэглэгч"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, ханын цаас болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Хэрэглэгчийг одоо тохируулах уу?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Хэрэглэгч төхөөрөмжийг авч өөрийн профайлыг тохируулах боломжтой эсэхийг шалгана уу"</string>

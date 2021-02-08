@@ -31,7 +31,7 @@
     <string name="template_all_pages" msgid="3322235982020148762">"همه <xliff:g id="PAGE_COUNT">%1$s</xliff:g> صفحه"</string>
     <string name="template_page_range" msgid="428638530038286328">"محدوده <xliff:g id="PAGE_COUNT">%1$s</xliff:g> صفحه"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"‏‏‎مثلاً ۱—۵،‏۹،۷—۱۰"</string>
-    <string name="print_preview" msgid="8010217796057763343">"پیش‌نمایش چاپ"</string>
+    <string name="print_preview" msgid="8010217796057763343">"پیش‌نمای چاپ"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"‏نصب نمایشگر PDF برای پیش‌نمایش"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"برنامه چاپ خراب شد"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"در حال ایجاد کار چاپ"</string>

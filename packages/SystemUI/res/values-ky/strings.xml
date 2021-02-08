@@ -502,10 +502,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Батареяны үнөмдөгүч режими күйүк"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Иштин майнаптуулугун начарлатып, фондук дайын-даректерди чектейт"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Батареяны үнөмдөгүчтү өчүрүү"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Бул функцияны аткарган <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> кызматы экраныңызда көрүнүп турган бардык маалыматты же жаздыруу жана тышкы экранга чыгаруу учурунда түзмөгүңүздө ойнотулган маалыматты колдоно алат. Буга сырсөздөр, төлөмдүн чоо-жайы, сүрөттөр, билдирүүлөр жана ойнотулган аудио кирет."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Бул функцияны аткарган кызматка экраныңыздагы бардык маалымат же түзмөктө ойнотулуп жаткан нерсе, сырсөздөр, төлөмдөрдүн чоо-жайы, сүрөттөр, билдирүүлөр жана аудио файлдар жеткиликтүү болот."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Жаздырып же тышкы экранга чыгарып жатканда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Жаздырып же тышкы экранга чыгарып жатканда, бул колдонмо экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> менен жаздырылып же тышкы экранга чыгарылып башталсынбы?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу аркылуу жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Экинчи көрүнбөсүн"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Баарын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Башкаруу"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Калкыма ыкчам баскыч менен көңүлүңүздү бул мазмунга буруп турат."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Жазышуу бөлүмүнүн жогорку жагында калкып чыкма билдирме түрүндө көрүнүп, профиль сүрөтү кулпуланган экрандан чагылдырылат"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Жазышуулар тизмесинин өйдө жагында калкып чыкма билдирме түрүндө көрүнүп, профиль сүрөтү кулпуланган экрандан чагылдырылат"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Жөндөөлөр"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маанилүүлүгү"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> жазышуу функцияларын колдоого албайт"</string>
@@ -856,7 +856,7 @@
     <string name="left_icon" msgid="5036278531966897006">"¨Солго¨ сүрөтчөсү"</string>
     <string name="right_icon" msgid="1103955040645237425">"¨Оңго¨ сүрөтчөсү"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Керектүү элементтерди сүйрөп келиңиз"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн, кармап туруп, сүйрөңүз"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Сизге жок дегенде <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> мозаика керек"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Түзөтүү"</string>

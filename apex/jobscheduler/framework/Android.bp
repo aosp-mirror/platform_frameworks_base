@@ -8,6 +8,7 @@ filegroup {
         "java/android/os/IDeviceIdleController.aidl",
     ],
     path: "java",
+    visibility: ["//frameworks/base"],
 }
 
 java_library {
