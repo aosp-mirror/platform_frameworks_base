@@ -153,18 +153,22 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
 
                 UUID domainSetId = pair.first;
                 String packageName = pair.second;
-                DomainVerificationInfo set;
+                DomainVerificationInfo info;
                 try {
-                    set = mManager.getDomainVerificationInfo(packageName);
+                    info = mManager.getDomainVerificationInfo(packageName);
                 } catch (PackageManager.NameNotFoundException ignored) {
                     return true;
                 }
 
-                if (!Objects.equals(domainSetId, set.getIdentifier())) {
+                if (info == null) {
                     return true;
                 }
 
-                Set<String> successfulDomains = new ArraySet<>(set.getHostToStateMap().keySet());
+                if (!Objects.equals(domainSetId, info.getIdentifier())) {
+                    return true;
+                }
+
+                Set<String> successfulDomains = new ArraySet<>(info.getHostToStateMap().keySet());
                 successfulDomains.removeAll(response.failedDomains);
 
                 int callingUid = response.callingUid;
