@@ -282,15 +282,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // connect anyway?" dialog after the user selects a network that doesn't validate.
     private static final int PROMPT_UNVALIDATED_DELAY_MS = 8 * 1000;
 
-    // Default to 30s linger time-out. Modifiable only for testing.
+    // Default to 30s linger time-out, and 5s for nascent network. Modifiable only for testing.
     private static final String LINGER_DELAY_PROPERTY = "persist.netmon.linger";
     private static final int DEFAULT_LINGER_DELAY_MS = 30_000;
+    private static final int DEFAULT_NASCENT_DELAY_MS = 5_000;
 
     // The maximum number of network request allowed per uid before an exception is thrown.
     private static final int MAX_NETWORK_REQUESTS_PER_UID = 100;
 
     @VisibleForTesting
     protected int mLingerDelayMs;  // Can't be final, or test subclass constructors can't change it.
+    @VisibleForTesting
+    protected int mNascentDelayMs;
 
     // How long to delay to removal of a pending intent based request.
     // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
@@ -1064,6 +1067,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS, 5_000);
 
         mLingerDelayMs = mSystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
+        // TODO: Consider making the timer customizable.
+        mNascentDelayMs = DEFAULT_NASCENT_DELAY_MS;
 
         mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
@@ -3335,7 +3340,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // 3. If this network is unneeded (which implies it is not lingering), and there is at least
         //    one lingered request, set inactive.
         nai.updateInactivityTimer();
-        if (nai.isLingering() && nai.numForegroundNetworkRequests() > 0) {
+        if (nai.isInactive() && nai.numForegroundNetworkRequests() > 0) {
             if (DBG) log("Unsetting inactive " + nai.toShortString());
             nai.unsetInactive();
             logNetworkEvent(nai, NetworkEvent.NETWORK_UNLINGER);
@@ -3629,7 +3634,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return true;
         }
 
-        if (!nai.everConnected || nai.isVPN() || nai.isLingering() || numRequests > 0) {
+        if (!nai.everConnected || nai.isVPN() || nai.isInactive() || numRequests > 0) {
             return false;
         }
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
@@ -7242,7 +7247,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Tear the network down.
             teardownUnneededNetwork(oldNetwork);
         } else {
-            // Put the network in the background.
+            // Put the network in the background if it doesn't satisfy any foreground request.
             updateCapabilitiesForNetwork(oldNetwork);
         }
     }
@@ -7496,6 +7501,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } else {
                 if (VDBG || DDBG) log("   accepting network in place of null");
             }
+
+            // To prevent constantly CPU wake up for nascent timer, if a network comes up
+            // and immediately satisfies a request then remove the timer. This will happen for
+            // all networks except in the case of an underlying network for a VCN.
+            if (newSatisfier.isNascent()) {
+                newSatisfier.unlingerRequest(NetworkRequest.REQUEST_ID_NONE);
+            }
+
             newSatisfier.unlingerRequest(newRequest.requestId);
             if (!newSatisfier.addRequest(newRequest)) {
                 Log.wtf(TAG, "BUG: " + newSatisfier.toShortString() + " already has "
@@ -7638,19 +7651,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        // Update the linger state before processing listen callbacks, because the background
-        // computation depends on whether the network is lingering. Don't send the LOSING callbacks
+        // Update the inactivity state before processing listen callbacks, because the background
+        // computation depends on whether the network is inactive. Don't send the LOSING callbacks
         // just yet though, because they have to be sent after the listens are processed to keep
         // backward compatibility.
-        final ArrayList<NetworkAgentInfo> lingeredNetworks = new ArrayList<>();
+        final ArrayList<NetworkAgentInfo> inactiveNetworks = new ArrayList<>();
         for (final NetworkAgentInfo nai : nais) {
-            // Rematching may have altered the linger state of some networks, so update all linger
-            // timers. updateLingerState reads the state from the network agent and does nothing
-            // if the state has not changed : the source of truth is controlled with
-            // NetworkAgentInfo#lingerRequest and NetworkAgentInfo#unlingerRequest, which have been
-            // called while rematching the individual networks above.
+            // Rematching may have altered the inactivity state of some networks, so update all
+            // inactivity timers. updateInactivityState reads the state from the network agent
+            // and does nothing if the state has not changed : the source of truth is controlled
+            // with NetworkAgentInfo#lingerRequest and NetworkAgentInfo#unlingerRequest, which
+            // have been called while rematching the individual networks above.
             if (updateInactivityState(nai, now)) {
-                lingeredNetworks.add(nai);
+                inactiveNetworks.add(nai);
             }
         }
 
@@ -7667,7 +7680,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             processNewlySatisfiedListenRequests(nai);
         }
 
-        for (final NetworkAgentInfo nai : lingeredNetworks) {
+        for (final NetworkAgentInfo nai : inactiveNetworks) {
+            // For nascent networks, if connecting with no foreground request, skip broadcasting
+            // LOSING for backward compatibility. This is typical when mobile data connected while
+            // wifi connected with mobile data always-on enabled.
+            if (nai.isNascent()) continue;
             notifyNetworkLosing(nai, now);
         }
 
@@ -7907,6 +7924,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // disconnection NetworkAgents should stop any signal strength monitoring they have been
             // doing.
             updateSignalStrengthThresholds(networkAgent, "CONNECT", null);
+
+            // Before first rematching networks, put an inactivity timer without any request, this
+            // allows {@code updateInactivityState} to update the state accordingly and prevent
+            // tearing down for any {@code unneeded} evaluation in this period.
+            // Note that the timer will not be rescheduled since the expiry time is
+            // fixed after connection regardless of the network satisfying other requests or not.
+            // But it will be removed as soon as the network satisfies a request for the first time.
+            networkAgent.lingerRequest(NetworkRequest.REQUEST_ID_NONE,
+                    SystemClock.elapsedRealtime(), mNascentDelayMs);
 
             // Consider network even though it is not yet validated.
             rematchAllNetworksAndRequests();
