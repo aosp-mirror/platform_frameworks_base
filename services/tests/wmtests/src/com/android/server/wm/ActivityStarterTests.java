@@ -844,6 +844,9 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));
+        // Activity should start invisible since we are bringing it to front.
+        singleTaskActivity.setVisible(false);
+        singleTaskActivity.mVisibleRequested = false;
 
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,

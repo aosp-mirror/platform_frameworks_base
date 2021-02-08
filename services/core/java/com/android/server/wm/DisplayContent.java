@@ -952,7 +952,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         final ActivityRecord activity = w.mActivityRecord;
-        if (activity != null) {
+        if (activity != null && activity.isVisibleRequested()) {
             activity.updateLetterboxSurface(w);
             final boolean updateAllDrawn = activity.updateDrawnWindowStates(w);
             if (updateAllDrawn && !mTmpUpdateAllDrawn.contains(activity)) {
@@ -1451,7 +1451,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             config = new Configuration();
             computeScreenConfiguration(config);
-        } else if (currentConfig != null) {
+        } else if (currentConfig != null
+                // If waiting for a remote rotation, don't prematurely update configuration.
+                && !mDisplayRotation.isWaitingForRemoteRotation()) {
             // No obvious action we need to take, but if our current state mismatches the
             // activity manager's, update it, disregarding font scale, which should remain set
             // to the value of the previous configuration.
