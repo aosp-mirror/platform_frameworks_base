@@ -5877,6 +5877,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
         }
+
+        @Override
+        public boolean getImeRequestedVisibility(@InternalInsetsType int type) {
+            return getInsetsStateController().getImeSourceProvider().isImeShowing();
+        }
     }
 
     /**
