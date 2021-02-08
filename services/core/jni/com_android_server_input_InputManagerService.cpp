@@ -106,6 +106,7 @@ static struct {
     jmethodID notifyFocusChanged;
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
+    jmethodID notifyVibratorState;
     jmethodID notifyUntrustedTouch;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -305,6 +306,7 @@ public:
                            const std::vector<float>& values) override;
     void notifySensorAccuracy(int32_t deviceId, InputDeviceSensorType sensorType,
                               InputDeviceSensorAccuracy accuracy) override;
+    void notifyVibratorState(int32_t deviceId, bool isOn) override;
     void notifyUntrustedTouch(const std::string& obscuringPackage) override;
     bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
     void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
@@ -916,6 +918,18 @@ void NativeInputManager::notifySensorAccuracy(int32_t deviceId, InputDeviceSenso
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySensorAccuracy, deviceId,
                         static_cast<jint>(sensorType), accuracy);
     checkAndClearExceptionFromCallback(env, "notifySensorAccuracy");
+}
+
+void NativeInputManager::notifyVibratorState(int32_t deviceId, bool isOn) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifyVibratorState isOn:%d", isOn);
+#endif
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyVibratorState,
+                        static_cast<jint>(deviceId), static_cast<jboolean>(isOn));
+    checkAndClearExceptionFromCallback(env, "notifyVibratorState");
 }
 
 void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
@@ -2247,6 +2261,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifySensorEvent, clazz, "notifySensorEvent", "(IIIJ[F)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifySensorAccuracy, clazz, "notifySensorAccuracy", "(III)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyUntrustedTouch, clazz, "notifyUntrustedTouch",
                   "(Ljava/lang/String;)V");
