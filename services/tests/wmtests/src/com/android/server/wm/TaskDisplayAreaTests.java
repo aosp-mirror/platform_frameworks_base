@@ -156,6 +156,9 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         spyOn(mDisplayContent);
         doReturn(true).when(mDisplayContent).isTrusted();
 
+        // Allow child stack to move to top.
+        mDisplayContent.mDontMoveToTop = false;
+
         // The display contains pinned stack that was added in {@link #setUp}.
         final Task stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
@@ -170,6 +173,65 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
         assertEquals("The testing DisplayContent should be moved to top with task",
                 mWm.mRoot.getChildCount() - 1, indexOfDisplayWithPinnedStack);
+    }
+
+    @Test
+    public void testMovingChildTaskOnTop() {
+        // Make sure the display is trusted display which capable to move the stack to top.
+        spyOn(mDisplayContent);
+        doReturn(true).when(mDisplayContent).isTrusted();
+
+        // Allow child stack to move to top.
+        mDisplayContent.mDontMoveToTop = false;
+
+        // The display contains pinned stack that was added in {@link #setUp}.
+        Task stack = createTaskStackOnDisplay(mDisplayContent);
+        Task task = createTaskInStack(stack, 0 /* userId */);
+
+        // Add another display at top.
+        mWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
+                false /* includingParents */);
+
+        // Ensure that original display ({@code mDisplayContent}) is not on top.
+        assertEquals("Testing DisplayContent should not be on the top",
+                mWm.mRoot.getChildCount() - 2, mWm.mRoot.mChildren.indexOf(mDisplayContent));
+
+        // Move the task of {@code mDisplayContent} to top.
+        stack.positionChildAt(WindowContainer.POSITION_TOP, task, true /* includingParents */);
+
+        // Ensure that original display ({@code mDisplayContent}) is now on the top.
+        assertEquals("The testing DisplayContent should be moved to top with task",
+                mWm.mRoot.getChildCount() - 1, mWm.mRoot.mChildren.indexOf(mDisplayContent));
+    }
+
+    @Test
+    public void testDontMovingChildTaskOnTop() {
+        // Make sure the display is trusted display which capable to move the stack to top.
+        spyOn(mDisplayContent);
+        doReturn(true).when(mDisplayContent).isTrusted();
+
+        // Allow child stack to move to top.
+        mDisplayContent.mDontMoveToTop = true;
+
+        // The display contains pinned stack that was added in {@link #setUp}.
+        Task stack = createTaskStackOnDisplay(mDisplayContent);
+        Task task = createTaskInStack(stack, 0 /* userId */);
+
+        // Add another display at top.
+        mWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
+                false /* includingParents */);
+
+        // Ensure that original display ({@code mDisplayContent}) is not on top.
+        assertEquals("Testing DisplayContent should not be on the top",
+                mWm.mRoot.getChildCount() - 2, mWm.mRoot.mChildren.indexOf(mDisplayContent));
+
+        // Try moving the task of {@code mDisplayContent} to top.
+        stack.positionChildAt(WindowContainer.POSITION_TOP, task, true /* includingParents */);
+
+        // Ensure that original display ({@code mDisplayContent}) hasn't moved and is not
+        // on the top.
+        assertEquals("The testing DisplayContent should not be moved to top with task",
+                mWm.mRoot.getChildCount() - 2, mWm.mRoot.mChildren.indexOf(mDisplayContent));
     }
 
     @Test
