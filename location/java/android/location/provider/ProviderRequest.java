@@ -53,6 +53,17 @@ public final class ProviderRequest implements Parcelable {
     private final boolean mLocationSettingsIgnored;
     private final WorkSource mWorkSource;
 
+    /**
+     * Listener to be invoked when a new request is set to the provider.
+     */
+    public interface Listener {
+
+        /**
+         * Invoked when a new request is set.
+         */
+        void onProviderRequestChanged(@NonNull String provider, @NonNull ProviderRequest request);
+    }
+
     private ProviderRequest(
             long intervalMillis,
             @Quality int quality,
