@@ -16,6 +16,8 @@
 
 package com.android.server.vcn;
 
+import static com.android.server.VcnManagementService.VDBG;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.net.NetworkProvider;
@@ -83,11 +85,16 @@ public class VcnNetworkProvider extends NetworkProvider {
 
     @Override
     public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
-        Slog.v(
-                TAG,
-                String.format(
-                        "Network requested: Request = %s, score = %d, providerId = %d",
-                        request, score, providerId));
+        if (VDBG) {
+            Slog.v(
+                    TAG,
+                    "Network requested: Request = "
+                            + request
+                            + ", score = "
+                            + score
+                            + ", providerId = "
+                            + providerId);
+        }
 
         final NetworkRequestEntry entry = new NetworkRequestEntry(request, score, providerId);
 
