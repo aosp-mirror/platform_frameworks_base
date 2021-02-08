@@ -57,6 +57,7 @@ import android.os.CombinedVibrationEffect;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionResult;
 import android.os.InputEventInjectionSync;
 import android.os.LocaleList;
@@ -64,6 +65,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -77,6 +79,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
@@ -100,6 +103,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -220,6 +224,14 @@ public class InputManagerService extends IInputManager.Stub
     private Object mVibratorLock = new Object();
     private Map<IBinder, VibratorToken> mVibratorTokens = new ArrayMap<IBinder, VibratorToken>();
     private int mNextVibratorTokenValue;
+
+    // List of currently registered vibrator state changed listeners by device id.
+    @GuardedBy("mVibratorLock")
+    private final SparseArray<RemoteCallbackList<IVibratorStateListener>> mVibratorStateListeners =
+            new SparseArray<RemoteCallbackList<IVibratorStateListener>>();
+    // List of vibrator states by device id.
+    @GuardedBy("mVibratorLock")
+    private final SparseBooleanArray mIsVibrating = new SparseBooleanArray();
 
     // State for lid switch
     // Lock for the lid switch state. Held when triggering callbacks to guarantee lid switch events
@@ -2004,6 +2016,92 @@ public class InputManagerService extends IInputManager.Stub
             if (v.mVibrating) {
                 nativeCancelVibrate(mPtr, v.mDeviceId, v.mTokenValue);
                 v.mVibrating = false;
+            }
+        }
+    }
+
+    // Native callback.
+    private void notifyVibratorState(int deviceId, boolean isOn) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyVibratorState: deviceId=" + deviceId + " isOn=" + isOn);
+        }
+        synchronized (mVibratorLock) {
+            mIsVibrating.put(deviceId, isOn);
+            notifyVibratorStateListenersLocked(deviceId);
+        }
+    }
+
+    @GuardedBy("mVibratorLock")
+    private void notifyVibratorStateListenersLocked(int deviceId) {
+        if (!mVibratorStateListeners.contains(deviceId)) {
+            if (DEBUG) {
+                Slog.v(TAG, "Device " + deviceId + " doesn't have vibrator state listener.");
+            }
+            return;
+        }
+        RemoteCallbackList<IVibratorStateListener> listeners =
+                mVibratorStateListeners.get(deviceId);
+        final int length = listeners.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                notifyVibratorStateListenerLocked(deviceId, listeners.getBroadcastItem(i));
+            }
+        } finally {
+            listeners.finishBroadcast();
+        }
+    }
+
+    @GuardedBy("mVibratorLock")
+    private void notifyVibratorStateListenerLocked(int deviceId, IVibratorStateListener listener) {
+        try {
+            listener.onVibrating(mIsVibrating.get(deviceId));
+        } catch (RemoteException | RuntimeException e) {
+            Slog.e(TAG, "Vibrator state listener failed to call", e);
+        }
+    }
+
+    @Override // Binder call
+    public boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        Preconditions.checkNotNull(listener, "listener must not be null");
+
+        RemoteCallbackList<IVibratorStateListener> listeners;
+        synchronized (mVibratorLock) {
+            if (!mVibratorStateListeners.contains(deviceId)) {
+                listeners = new RemoteCallbackList<>();
+                mVibratorStateListeners.put(deviceId, listeners);
+            } else {
+                listeners = mVibratorStateListeners.get(deviceId);
+            }
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!listeners.register(listener)) {
+                    Slog.e(TAG, "Could not register vibrator state listener " + listener);
+                    return false;
+                }
+                // Notify its callback after new client registered.
+                notifyVibratorStateListenerLocked(deviceId, listener);
+                return true;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    @Override // Binder call
+    public boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        synchronized (mVibratorLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!mVibratorStateListeners.contains(deviceId)) {
+                    Slog.w(TAG, "Vibrator state listener " + deviceId + " doesn't exist");
+                    return false;
+                }
+                RemoteCallbackList<IVibratorStateListener> listeners =
+                        mVibratorStateListeners.get(deviceId);
+                return listeners.unregister(listener);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
