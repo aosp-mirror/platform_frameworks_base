@@ -31,7 +31,7 @@
     <string name="bugreport_confirm" msgid="5917407234515812495">"Извештаите за грешка содржат податоци од разни датотеки за евиденција на системот, вклучувајќи и податоци што можеби ги сметате за чувствителни (како што се користење на апликациите и податоци за локацијата). Извештаите за грешки споделувајте ги само со апликации и луѓе во кои имате доверба."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Не покажувај повторно"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Извештаи за грешки"</string>
-    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Датотеката со извештај за грешка не можеше да се прочита"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Датотеката со извештај за грешка не може да се прочита"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Не можевме да ги додадеме деталите на извештајот за грешки во zip-датотеката"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"неименувани"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Детали"</string>

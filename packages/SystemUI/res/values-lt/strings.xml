@@ -508,7 +508,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Akumuliatoriaus tausojimo priemonė įjungta"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Išjungti Akumuliatoriaus tausojimo priemonę"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"„<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Šią funkcija teikianti paslauga galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Pradėti įrašyti ar perduoti turinį?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Pradėti įrašyti ar perduoti turinį naudojant „<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“?"</string>
@@ -778,7 +778,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Akum. energ. vartoj."</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akumuliat. taus. pr."</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akum. taus. pr."</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Mygtukas <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Pagrindinis"</string>

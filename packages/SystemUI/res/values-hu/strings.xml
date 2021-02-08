@@ -430,7 +430,7 @@
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Az NFC ki van kapcsolva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Az NFC be van kapcsolva"</string>
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Képernyő rögzítése"</string>
-    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Kezdés"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Indítás"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Eszköz"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Váltás az alkalmazások között felfelé csúsztatással"</string>
