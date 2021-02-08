@@ -124,16 +124,10 @@ interface IWindowManager
      *
      * @param token Token to be registered.
      * @param type Window type to be used with this token.
-     * @param options A bundle used to pass window-related options.
      * @param displayId The ID of the display where this token should be added.
-     * @param packageName The name of package to request to add window token. Could be {@code null}
-     *                    if callers holds the MANAGE_APP_TOKENS permission.
-     * @return {@link WindowManagerGlobal#ADD_OKAY} if the addition was successful, an error code
-     *         otherwise.
+     * @param options A bundle used to pass window-related options.
      */
-    int addWindowTokenWithOptions(IBinder token, int type, int displayId, in Bundle options,
-            String packageName);
-    void addWindowToken(IBinder token, int type, int displayId);
+    void addWindowToken(IBinder token, int type, int displayId, in Bundle options);
     /**
      * Remove window token on a specific display.
      *
@@ -784,6 +778,10 @@ interface IWindowManager
     /**
      * Registers a listener for a {@link android.app.WindowContext} to handle configuration changes
      * from the server side.
+     * <p>
+     * Note that this API should be invoked after calling
+     * {@link android.app.WindowTokenClient#attachContext(WindowContext)}
+     * </p>
      *
      * @param clientToken the window context's token
      * @param type Window type of the window context

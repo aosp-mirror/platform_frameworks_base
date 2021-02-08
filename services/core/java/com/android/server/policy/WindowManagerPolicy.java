@@ -417,8 +417,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             WindowManagerFuncs windowManagerFuncs);
 
     /**
-     * Check permissions when adding a window or a window token from
-     * {@link android.app.WindowContext}.
+     * Check permissions when adding a window.
      *
      * @param type The window type
      * @param isRoundedCornerOverlay {@code true} to indicate the adding window is
@@ -431,7 +430,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *      else an error code, usually
      *      {@link WindowManagerGlobal#ADD_PERMISSION_DENIED}, to abort the add.
      *
-     * @see IWindowManager#addWindowTokenWithOptions(IBinder, int, int, Bundle, String)
      * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
     int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,

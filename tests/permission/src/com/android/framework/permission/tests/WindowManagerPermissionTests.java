@@ -28,8 +28,6 @@ import android.view.IWindowManager;
 
 import junit.framework.TestCase;
 
-import org.junit.Test;
-
 /**
  * TODO: Remove this. This is only a placeholder, need to implement this.
  */
@@ -56,7 +54,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.addWindowToken(null, TYPE_APPLICATION, DEFAULT_DISPLAY);
+            mWm.addWindowToken(null, TYPE_APPLICATION, DEFAULT_DISPLAY, null /* options */);
             fail("IWindowManager.addWindowToken did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
@@ -148,31 +146,6 @@ public class WindowManagerPermissionTests extends TestCase {
         try {
             mWm.thawRotation();
             fail("IWindowManager.thawRotation did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-    }
-
-    @Test
-    public void testADD_WINDOW_TOKEN_WITH_OPTIONS() {
-        // Verify if addWindowTokenWithOptions throw SecurityException for privileged window type.
-        try {
-            mWm.addWindowTokenWithOptions(null, TYPE_APPLICATION, DEFAULT_DISPLAY, null, "");
-            fail("IWindowManager.addWindowTokenWithOptions did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        // Verify if addWindowTokenWithOptions throw SecurityException for null packageName.
-        try {
-            mWm.addWindowTokenWithOptions(null, TYPE_APPLICATION, DEFAULT_DISPLAY, null, null);
-            fail("IWindowManager.addWindowTokenWithOptions did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
             // expected

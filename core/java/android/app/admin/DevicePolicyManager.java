@@ -980,6 +980,19 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
 
     /**
+     * A boolean extra indicating the admin of a fully-managed device opts out of controlling
+     * permission grants for sensor-related permissions,
+     * see {@link #setPermissionGrantState(ComponentName, String, String, int)}.
+     *
+     * The default for this extra is {@code false} - by default, the admin of a fully-managed
+     * device has the ability to grant sensors-related permissions.
+     *
+     * <p>Use with {@link #ACTION_PROVISION_MANAGED_DEVICE} only.
+     */
+    public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT =
+            "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
+
+    /**
      * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
      * android package archive at the download location specified in {@link
      * #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
@@ -10520,6 +10533,13 @@ public class DevicePolicyManager {
      * As this policy only acts on runtime permission requests, it only applies to applications
      * built with a {@code targetSdkVersion} of {@link android.os.Build.VERSION_CODES#M} or later.
      *
+     * <p>
+     * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, an auto-grant
+     * policy will not apply to certain sensors-related permissions on some configurations.
+     * See {@link #setPermissionGrantState(ComponentName, String, String, int)} for the list of
+     * permissions affected, and the behavior change for managed profiles and fully-managed
+     * devices.
+     *
      * @param admin Which profile or device owner this request is associated with.
      * @param policy One of the policy constants {@link #PERMISSION_POLICY_PROMPT},
      *            {@link #PERMISSION_POLICY_AUTO_GRANT} and {@link #PERMISSION_POLICY_AUTO_DENY}.
@@ -10578,6 +10598,31 @@ public class DevicePolicyManager {
      * application built with a {@code targetSdkVersion} &lt;
      * {@link android.os.Build.VERSION_CODES#M} the app-op matching the permission is set to
      * {@link android.app.AppOpsManager#MODE_IGNORED}, but the permission stays granted.
+     * <p>
+     * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
+     * the following, sensors-related, permissions is restricted:
+     * <ul>
+     *    <li>Manifest.permission.ACCESS_FINE_LOCATION</li>
+     *    <li>Manifest.permission.ACCESS_BACKGROUND_LOCATION</li>
+     *    <li>Manifest.permission.ACCESS_COARSE_LOCATION</li>
+     *    <li>Manifest.permission.CAMERA</li>
+     *    <li>Manifest.permission.RECORD_AUDIO</li>
+     *    <li>Manifest.permission.RECORD_BACKGROUND_AUDIO</li>
+     *    <li>Manifest.permission.ACTIVITY_RECOGNITION</li>
+     *    <li>Manifest.permission.BODY_SENSORS</li>
+     * </ul>
+     * <p>
+     * A profile owner may not grant these permissions (i.e. call this method with any of the
+     * permissions listed above and {@code grantState} of {@code #PERMISSION_GRANT_STATE_GRANTED}),
+     * but may deny them.
+     * <p>
+     * A device owner, by default, may continue granting these permissions. However, for increased
+     * user control, the admin may opt out of controlling grants for these permissions by including
+     * {@link #EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters. In that
+     * case the device owner's control will be limited do denying these permissions.
+     * <p>
+     * Attempts by the admin to grant these permissions, when the admin is restricted from doing
+     * so, will be silently ignored (no exception will be thrown).
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
@@ -13269,6 +13314,40 @@ public class DevicePolicyManager {
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+        }
+    }
+    /**
+     * Returns true if the caller is running on a device where the admin can grant
+     * permissions related to device sensors.
+     * This is a signal that the device is a fully-managed device where personal usage is
+     * discouraged.
+     * The list of permissions is listed in
+     * {@link #setPermissionGrantState(ComponentName, String, String, int)}.
+     *
+     * May be called by any app.
+     * @return true if the app can grant device sensors-related permissions, false otherwise.
+     */
+    public boolean canAdminGrantSensorsPermissions() {
+        return canAdminGrantSensorsPermissionsForUser(myUserId());
+    }
+
+    /**
+     * Returns true if the admin can control grants of sensors-related permissions, for
+     * a given user.
+     *
+     * @hide
+     * @param userId The ID of the user to check.
+     * @return if the admin may grant these permissions, false otherwise.
+     */
+    @SystemApi
+    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
+        if (mService == null) {
+            return false;
+        }
+        try {
+            return mService.canAdminGrantSensorsPermissionsForUser(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

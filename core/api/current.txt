@@ -6931,6 +6931,7 @@ package android.app.admin {
     method public void addPersistentPreferredActivity(@NonNull android.content.ComponentName, android.content.IntentFilter, @NonNull android.content.ComponentName);
     method public void addUserRestriction(@NonNull android.content.ComponentName, String);
     method public boolean bindDeviceAdminServiceAsUser(@NonNull android.content.ComponentName, android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
+    method public boolean canAdminGrantSensorsPermissions();
     method public void clearApplicationUserData(@NonNull android.content.ComponentName, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.app.admin.DevicePolicyManager.OnClearApplicationUserDataListener);
     method public void clearCrossProfileIntentFilters(@NonNull android.content.ComponentName);
     method @Deprecated public void clearDeviceOwnerApp(String);
@@ -7228,6 +7229,7 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_LOGO_URI = "android.app.extra.PROVISIONING_LOGO_URI";
     field public static final String EXTRA_PROVISIONING_MAIN_COLOR = "android.app.extra.PROVISIONING_MAIN_COLOR";
     field public static final String EXTRA_PROVISIONING_MODE = "android.app.extra.PROVISIONING_MODE";
+    field public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT = "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
     field public static final String EXTRA_PROVISIONING_SERIAL_NUMBER = "android.app.extra.PROVISIONING_SERIAL_NUMBER";
     field public static final String EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS = "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
     field public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION = "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
@@ -21921,6 +21923,14 @@ package android.media {
     field public static final String KEY_TILE_HEIGHT = "tile-height";
     field public static final String KEY_TILE_WIDTH = "tile-width";
     field public static final String KEY_TRACK_ID = "track-id";
+    field public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
+    field public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
+    field public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
+    field public static final String KEY_VIDEO_QP_I_MIN = "video-qp-i-min";
+    field public static final String KEY_VIDEO_QP_MAX = "video-qp-max";
+    field public static final String KEY_VIDEO_QP_MIN = "video-qp-min";
+    field public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
+    field public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
     field public static final String KEY_WIDTH = "width";
     field public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     field public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
@@ -51077,7 +51087,7 @@ package android.view.inputmethod {
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public boolean setComposingText(CharSequence, int);
-    method public default boolean setImeTemporarilyConsumesInput(boolean);
+    method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2

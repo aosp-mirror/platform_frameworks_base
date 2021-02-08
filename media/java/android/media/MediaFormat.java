@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -979,6 +978,74 @@ public final class MediaFormat {
      * @see MediaCodecInfo.EncoderCapabilities#isBitrateModeSupported(int)
      */
     public static final String KEY_BITRATE_MODE = "bitrate-mode";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This key applies to all three video frame types (I, P, and B). This value fills
+     * in for any of the frame-specific #KEY_VIDEO_QP_I_MAX, #KEY_VIDEO_QP_P_MAX, or
+     * #KEY_VIDEO_QP_B_MAX keys that are not specified
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_MAX = "video-qp-max";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This key applies to all three video frame types (I, P, and B). This value fills
+     * in for any of the frame-specific #KEY_VIDEO_QP_I_MIN, #KEY_VIDEO_QP_P_MIN, or
+     * #KEY_VIDEO_QP_B_MIN keys that are not specified
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_MIN = "video-qp-min";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This value applies to video I-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This value applies to video I-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_I_MIN = "video-qp-i-min";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This value applies to video P-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This value applies to video P-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This value applies to video B-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This value applies to video B-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
 
     /**
      * A key describing the audio session ID of the AudioTrack associated

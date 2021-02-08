@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -113,8 +112,6 @@ class WindowToken extends WindowContainer<WindowState> {
      */
     private final boolean mFromClientToken;
 
-    private final int mOwnerUid;
-
     /**
      * Used to fix the transform of the token to be rotated to a rotation different than it's
      * display. The window frames and surfaces corresponding to this token will be layouted and
@@ -205,27 +202,19 @@ class WindowToken extends WindowContainer<WindowState> {
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
             DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
-        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens, INVALID_UID,
-                roundedCornerOverlay, false /* fromClientToken */);
+        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
+                roundedCornerOverlay, false /* fromClientToken */, null /* options */);
     }
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, int ownerUid,
-            boolean roundedCornerOverlay, boolean fromClientToken) {
-        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens, ownerUid,
-                roundedCornerOverlay, fromClientToken, null /* options */);
-    }
-
-    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, int ownerUid,
-            boolean roundedCornerOverlay, boolean fromClientToken, @Nullable Bundle options) {
+            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay,
+            boolean fromClientToken, @Nullable Bundle options) {
         super(service);
         token = _token;
         windowType = type;
         mOptions = options;
         mPersistOnEmpty = persistOnEmpty;
         mOwnerCanManageAppTokens = ownerCanManageAppTokens;
-        mOwnerUid = ownerUid;
         mRoundedCornerOverlay = roundedCornerOverlay;
         mFromClientToken = fromClientToken;
         if (dc != null) {
@@ -737,10 +726,6 @@ class WindowToken extends WindowContainer<WindowState> {
     int getWindowLayerFromType() {
         return mWmService.mPolicy.getWindowLayerFromTypeLw(windowType, mOwnerCanManageAppTokens,
                 mRoundedCornerOverlay);
-    }
-
-    int getOwnerUid() {
-        return mOwnerUid;
     }
 
     boolean isFromClient() {
