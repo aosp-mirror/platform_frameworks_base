@@ -1675,7 +1675,8 @@ public final class ViewRootImpl implements ViewParent,
         requestLayout();
 
         // See comment for View.sForceLayoutWhenInsetsChanged
-        if (View.sForceLayoutWhenInsetsChanged && mView != null) {
+        if (View.sForceLayoutWhenInsetsChanged && mView != null
+                && mWindowAttributes.softInputMode == SOFT_INPUT_ADJUST_RESIZE) {
             forceLayout(mView);
         }
 
