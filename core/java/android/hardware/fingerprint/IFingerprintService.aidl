@@ -78,7 +78,7 @@ interface IFingerprintService {
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
-            String opPackageName, boolean shouldLogMetrics);
+            String opPackageName, int enrollReason);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);

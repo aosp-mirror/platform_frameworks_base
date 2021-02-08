@@ -46,11 +46,15 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
 
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mCanGrantSensorsPermissions = new SparseBooleanArray();
+
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
             mScreenCaptureDisabled.delete(userHandle);
             mPasswordQuality.delete(userHandle);
             mPermissionPolicy.delete(userHandle);
+            mCanGrantSensorsPermissions.delete(userHandle);
         }
     }
 
@@ -97,6 +101,21 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         }
     }
 
+    @Override
+    public boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle) {
+        synchronized (mLock) {
+            return mCanGrantSensorsPermissions.get(userHandle, false);
+        }
+    }
+
+    /** Sets ahmin control over permission grants for user. */
+    public void setAdminCanGrantSensorsPermissions(@UserIdInt int userHandle,
+            boolean canGrant) {
+        synchronized (mLock) {
+            mCanGrantSensorsPermissions.put(userHandle, canGrant);
+        }
+    }
+
     /** Dump content */
     public void dump(IndentingPrintWriter pw) {
         pw.println("Device policy cache:");
@@ -104,6 +123,8 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         pw.println("Screen capture disabled: " + mScreenCaptureDisabled.toString());
         pw.println("Password quality: " + mPasswordQuality.toString());
         pw.println("Permission policy: " + mPermissionPolicy.toString());
+        pw.println("Admin can grant sensors permission: "
+                + mCanGrantSensorsPermissions.toString());
         pw.decreaseIndent();
     }
 }

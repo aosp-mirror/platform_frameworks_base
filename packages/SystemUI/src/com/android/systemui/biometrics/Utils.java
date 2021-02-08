@@ -16,13 +16,16 @@
 
 package com.android.systemui.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.UserManager;
@@ -115,5 +118,11 @@ public class Utils {
         }
 
         return false;
+    }
+
+    static boolean isSystem(@NonNull Context context, @Nullable String clientPackage) {
+        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
+        return hasPermission && "android".equals(clientPackage);
     }
 }

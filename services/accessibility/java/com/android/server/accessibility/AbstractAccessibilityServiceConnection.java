@@ -1113,7 +1113,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         try {
             final IBinder overlayWindowToken = new Binder();
             mWindowManagerService.addWindowToken(overlayWindowToken, TYPE_ACCESSIBILITY_OVERLAY,
-                    displayId);
+                    displayId, null /* options */);
             synchronized (mLock) {
                 mOverlayWindowTokens.put(displayId, overlayWindowToken);
             }

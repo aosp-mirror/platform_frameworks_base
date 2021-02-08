@@ -96,8 +96,11 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
         public void showUdfpsOverlay(int sensorId, int reason) {
-            if (reason == IUdfpsOverlayController.REASON_ENROLL) {
-                mEnrollHelper = new UdfpsEnrollHelper();
+            if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
+                    || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                mEnrollHelper = new UdfpsEnrollHelper(reason);
+            } else {
+                mEnrollHelper = null;
             }
             UdfpsController.this.showOverlay(reason);
         }
@@ -300,8 +303,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
                     final UdfpsAnimation animation = getUdfpsAnimationForReason(reason);
-                    mView.setUdfpsAnimation(animation);
-                    mView.setEnrollHelper(mEnrollHelper);
+                    mView.setExtras(animation, mEnrollHelper);
                     mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
                     mIsOverlayShowing = true;
@@ -318,7 +320,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     private UdfpsAnimation getUdfpsAnimationForReason(int reason) {
         Log.d(TAG, "getUdfpsAnimationForReason: " + reason);
         switch (reason) {
-            case IUdfpsOverlayController.REASON_ENROLL:
+            case IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR:
+            case IUdfpsOverlayController.REASON_ENROLL_ENROLLING:
                 return new UdfpsAnimationEnroll(mContext);
             case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
                 return new UdfpsAnimationKeyguard(mView, mContext, mStatusBarStateController);
@@ -334,7 +337,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mFgExecutor.execute(() -> {
             if (mIsOverlayShowing) {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
-                mView.setUdfpsAnimation(null);
+                mView.setExtras(null, null);
                 mView.setOnTouchListener(null);
                 // Reset the controller back to its starting state.
                 onFingerUp();

@@ -29,7 +29,6 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.RemoteException;
-import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
 
@@ -45,6 +44,13 @@ import java.util.List;
 public class BiometricManager {
 
     private static final String TAG = "BiometricManager";
+
+    /**
+     * An ID that should match any biometric sensor on the device.
+     *
+     * @hide
+     */
+    public static final int SENSOR_ID_ANY = -1;
 
     /**
      * No error detected.
@@ -139,7 +145,7 @@ public class BiometricManager {
          *
          * <p>This corresponds to {@link KeyProperties#AUTH_BIOMETRIC_STRONG} during key generation.
          *
-         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int BIOMETRIC_STRONG = 0x000F;
 
@@ -182,7 +188,7 @@ public class BiometricManager {
          * <p>This corresponds to {@link KeyProperties#AUTH_DEVICE_CREDENTIAL} during key
          * generation.
          *
-         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int DEVICE_CREDENTIAL = 1 << 15;
     }

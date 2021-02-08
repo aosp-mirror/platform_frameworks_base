@@ -109,9 +109,10 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             this.sensorLocationY = props[1];
             this.sensorRadius = props[2];
         } else {
-            this.sensorLocationX = 0;
-            this.sensorLocationY = 0;
-            this.sensorRadius = 0;
+            // Fake coordinates that could be used for the fake UDFPS mode.
+            this.sensorLocationX = 540;
+            this.sensorLocationY = 1636;
+            this.sensorRadius = 130;
         }
     }
 
