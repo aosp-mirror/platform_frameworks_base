@@ -75,7 +75,8 @@ public class Watchdog {
     //         can trigger the watchdog.
     // Note 2: The debug value is already below the wait time in ZygoteConnection. Wrapped
     //         applications may not work with a debug build. CTS will fail.
-    private static final long DEFAULT_TIMEOUT = DB ? 10 * 1000 : 60 * 1000;
+    private static final long DEFAULT_TIMEOUT =
+            (DB ? 10 * 1000 : 60 * 1000) * Build.HW_TIMEOUT_MULTIPLIER;
     private static final long CHECK_INTERVAL = DEFAULT_TIMEOUT / 2;
 
     // These are temporally ordered: larger values as lateness increases

@@ -33,7 +33,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;

@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
-import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;

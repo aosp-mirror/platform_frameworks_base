@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
-import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_BOTTOM;

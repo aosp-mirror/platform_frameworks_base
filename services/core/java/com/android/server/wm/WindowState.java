@@ -26,7 +26,7 @@ import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.hardware.input.InputManager.BLOCK_UNTRUSTED_TOUCHES;
-import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
