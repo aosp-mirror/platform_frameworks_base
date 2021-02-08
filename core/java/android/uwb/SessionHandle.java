@@ -19,6 +19,8 @@ package android.uwb;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * @hide
  */
@@ -70,6 +72,11 @@ public final class SessionHandle implements Parcelable  {
             return mId == other.mId;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mId);
     }
 
     @Override
