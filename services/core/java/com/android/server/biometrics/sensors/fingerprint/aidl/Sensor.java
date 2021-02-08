@@ -31,7 +31,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.util.Slog;
@@ -65,7 +64,7 @@ import java.util.Map;
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} HAL.
  */
 @SuppressWarnings("deprecation")
-class Sensor implements IBinder.DeathRecipient {
+class Sensor {
 
     private boolean mTestHalEnabled;
 
@@ -461,7 +460,6 @@ class Sensor implements IBinder.DeathRecipient {
                 mTag, mScheduler, sensorId, userId, callback);
 
         final ISession newSession = daemon.createSession(sensorId, userId, resultController);
-        newSession.asBinder().linkToDeath(this, 0 /* flags */);
         mCurrentSession = new Session(mTag, newSession, userId, resultController);
     }
 
@@ -503,24 +501,21 @@ class Sensor implements IBinder.DeathRecipient {
         proto.end(sensorToken);
     }
 
-    @Override
-    public void binderDied() {
-        Slog.e(mTag, "Binder died");
-        mHandler.post(() -> {
-            final BaseClientMonitor client = mScheduler.getCurrentClient();
-            if (client instanceof Interruptable) {
-                Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
-                final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        0 /* vendorCode */);
+    public void onBinderDied() {
+        final BaseClientMonitor client = mScheduler.getCurrentClient();
+        if (client instanceof Interruptable) {
+            Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
+            final Interruptable interruptable = (Interruptable) client;
+            interruptable.onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                    0 /* vendorCode */);
 
-                mScheduler.recordCrashState();
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                    BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                    BiometricsProtoEnums.ISSUE_HAL_DEATH);
+        }
 
-                FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
-                        BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                        BiometricsProtoEnums.ISSUE_HAL_DEATH);
-                mCurrentSession = null;
-            }
-        });
+        mScheduler.recordCrashState();
+        mScheduler.reset();
+        mCurrentSession = null;
     }
 }
