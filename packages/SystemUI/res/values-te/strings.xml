@@ -52,7 +52,7 @@
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ని హ్యాండిల్ చేయడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ను తెరవాలా?\nఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ని నిర్వహించడానికి <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవాలా?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ఈ USB ఉపకరణంతో ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలు ఏవీ పని చేయవు. ఈ ఉపకరణం గురించి <xliff:g id="URL">%1$s</xliff:g>లో మరింత తెలుసుకోండి"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"ఈ USB ఉపకరణంతో ఇన్‌స్టాల్ చేయబడిన యాప్‌లు ఏవీ పని చేయవు. ఈ ఉపకరణం గురించి <xliff:g id="URL">%1$s</xliff:g>లో మరింత తెలుసుకోండి"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB ఉపకరణం"</string>
     <string name="label_view" msgid="6815442985276363364">"వీక్షించండి"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> కనెక్ట్ అయి ఉన్న ఎల్లప్పుడూ <xliff:g id="APPLICATION">%1$s</xliff:g>ని తెరవండి"</string>
@@ -121,11 +121,11 @@
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Macకు Android ఫైల్ బదిలీ యాప్ ఇన్‌స్టాల్ చేయండి"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
-    <string name="accessibility_menu" msgid="2701163794470513040">"మెను"</string>
+    <string name="accessibility_menu" msgid="2701163794470513040">"మెనూ"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"యాక్సెస్ సామర్థ్యం"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"స్క్రీన్‌ను తిప్పండి"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ఓవర్‌వ్యూ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"వెతుకు"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"సెర్చ్"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ఫోన్"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"వాయిస్ అసిస్టెంట్"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ఛార్జ్ కావడం లేదు"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"నెట్‌వర్క్\nపర్యవేక్షించబడవచ్చు"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"శోధించండి"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"సెర్చ్"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం పైకి స్లైడ్ చేయండి."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం ఎడమవైపుకు స్లైడ్ చేయండి."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
@@ -477,14 +477,14 @@
     <string name="user_add_user" msgid="4336657383006913022">"వినియోగదారుని జోడించండి"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"కొత్త వినియోగదారు"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"అతిథిని తీసివేయాలా?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని అనువర్తనాలు మరియు డేటా తొలగించబడతాయి."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"తీసివేయి"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"పునఃస్వాగతం, అతిథి!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"అతిథి వినియోగదారు"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"అనువర్తనాలు, డేటా తొలగించేందుకు అతిథి వినియోగదారు తీసివేయండి"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"యాప్‌లు, డేటా తొలగించేందుకు అతిథి వినియోగదారు తీసివేయండి"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"అతిథిని తీసివేయి"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"వినియోగదారుని లాగ్ అవుట్ చేయండి"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"ప్రస్తుత వినియోగదారును లాగ్ అవుట్ చేయండి"</string>
@@ -497,7 +497,7 @@
       <item quantity="one">ఒక్క వినియోగదారుని మాత్రమే సృష్టించవచ్చు.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"వినియోగదారుని తీసివేయాలా?"</string>
-    <string name="user_remove_user_message" msgid="6702834122128031833">"ఈ వినియోగదారుకు సంబంధించిన అన్ని అనువర్తనాలు మరియు డేటా తొలగించబడతాయి."</string>
+    <string name="user_remove_user_message" msgid="6702834122128031833">"ఈ వినియోగదారుకు సంబంధించిన అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"తీసివేయి"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
@@ -551,29 +551,29 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"మీ కార్యాలయ ప్రొఫైల్‌లో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ఈ పరికరంలో ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేసారు."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"మీరు ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP_0">%1$s</xliff:g> మరియు <xliff:g id="VPN_APP_1">%2$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"మీ కార్యాలయ ప్రొఫైల్ ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"మీ వ్యక్తిగత ప్రొఫైల్ ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
+    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"మీరు ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP_0">%1$s</xliff:g> మరియు <xliff:g id="VPN_APP_1">%2$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"మీ కార్యాలయ ప్రొఫైల్ ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"మీ వ్యక్తిగత ప్రొఫైల్ ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"మీ పరికరం <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ద్వారా నిర్వహించబడుతోంది."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> మీ పరికరాన్ని నిర్వహించడానికి <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>ని ఉపయోగిస్తుంది."</string>
     <string name="monitoring_description_do_body" msgid="7700878065625769970">"మీ పరికరంతో అనుబంధించబడిన సెట్టింగ్‌లు, కార్పొరేట్ యాక్సెస్, యాప్‌లు, డేటా మరియు మీ పరికరం యొక్క స్థాన సమాచారాన్ని మీ నిర్వాహకులు పర్యవేక్షించగలరు మరియు నిర్వహించగలరు."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"మరింత తెలుసుకోండి"</string>
-    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN సెట్టింగ్‌లను తెరవండి"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"విశ్వసనీయ ఆధారాలను తెరువు"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేసారు.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"మీరు VPN కనెక్షన్ సెటప్ చేయడానికి ఒక యాప్‌నకు అనుమతి ఇచ్చారు.\n\nఈ యాప్ ఇమెయిల్‌లు,యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ డివైజ్ మరియు నెట్‌వర్క్ కార్యకలాపాన్ని పర్యవేక్షించగలదు."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ద్వారా మీ కార్యాలయ ప్రొఫైల్ నిర్వహించబడుతోంది.\n\nఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల సామర్థ్యం మీ నిర్వాహకులకు ఉంది.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ అయ్యారు, ఇది మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ద్వారా మీ కార్యాలయ ప్రొఫైల్ నిర్వహించబడుతోంది.\n\nఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల సామర్థ్యం మీ నిర్వాహకులకు ఉంది.\n\nమరింత సమాచారం కావాలంటే, మీ నిర్వాహకులను సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ అయ్యారు, ఇది మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
-    <string name="monitoring_description_app" msgid="376868879287922929">"మీరు ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
-    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌‍సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
-    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకులను సంప్రదించండి."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>కి కూడా మీరు కనెక్ట్ చేయబడ్డారు."</string>
+    <string name="monitoring_description_app" msgid="376868879287922929">"మీరు ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
+    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌‍సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"మీరు <xliff:g id="APPLICATION">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకులను సంప్రదించండి."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది. ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ కార్యాలయ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>కి ప్రొఫైల్ కనెక్ట్ చేయబడింది.\n\nమీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>కి కూడా మీరు కనెక్ట్ చేయబడ్డారు."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ద్వారా అన్‌లాక్ చేయబడింది"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"మీరు మాన్యువల్‌గా అన్‌లాక్ చేస్తే మినహా పరికరం లాక్ చేయబడి ఉంటుంది"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
@@ -695,7 +695,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ఈ నోటిఫికేషన్‌లు మిమ్మల్ని హెచ్చరిస్తాయి"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"మీరు సాధారణంగా ఈ నోటిఫికేషన్‌లను విస్మరిస్తారు. \nవాటి ప్రదర్శనను కొనసాగించాలా?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"పూర్తయింది"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"అప్లై చేయి"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"అప్లయి చేయి"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"నిశ్శబ్దంగా బట్వాడా చేయండి"</string>
@@ -913,7 +913,7 @@
     <string name="pip_phone_close" msgid="8801864042095341824">"మూసివేయి"</string>
     <string name="pip_phone_settings" msgid="5687538631925004341">"సెట్టింగ్‌లు"</string>
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"తీసివేయడానికి కిందికి లాగండి"</string>
-    <string name="pip_menu_title" msgid="6365909306215631910">"మెను"</string>
+    <string name="pip_menu_title" msgid="6365909306215631910">"మెనూ"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> చిత్రంలో చిత్రం రూపంలో ఉంది"</string>
     <string name="pip_notification_message" msgid="4991831338795022227">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="pip_play" msgid="333995977693142810">"ప్లే చేయి"</string>
@@ -923,7 +923,7 @@
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"పరిమాణం మార్చు"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"వేడెక్కినందుకు ఫోన్ ఆఫ్ చేయబడింది"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"మీ ఫోన్ చాలా వేడిగా ఉంది, కనుక చల్లబర్చడానికి ఆఫ్ చేయబడింది. మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది.\n\nమీరు ఇలా చేస్తే మీ ఫోన్ చాలా వేడెక్కవచ్చు:\n	• వనరు-ఆధారిత అనువర్తనాలు (గేమింగ్, వీడియో లేదా నావిగేషన్ వంటి అనువర్తనాలు) ఉపయోగించడం\n	• పెద్ద ఫైల్‌లను డౌన్‌లోడ్ లేదా అప్‌లోడ్ చేయడం\n	• అధిక ఉష్ణోగ్రతలలో మీ ఫోన్‌ని ఉపయోగించడం"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"మీ ఫోన్ చాలా వేడిగా ఉంది, కనుక చల్లబర్చడానికి ఆఫ్ చేయబడింది. మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది.\n\nమీరు ఇలా చేస్తే మీ ఫోన్ చాలా వేడెక్కవచ్చు:\n	• వనరు-ఆధారిత యాప్‌లు (గేమింగ్, వీడియో లేదా నావిగేషన్ వంటి యాప్‌లు) ఉపయోగించడం\n	• పెద్ద ఫైల్‌లను డౌన్‌లోడ్ లేదా అప్‌లోడ్ చేయడం\n	• అధిక ఉష్ణోగ్రతలలో మీ ఫోన్‌ని ఉపయోగించడం"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ఫోన్ వేడెక్కుతోంది"</string>
     <string name="high_temp_notif_message" msgid="163928048626045592">"ఫోన్‌ను చల్లబరిచే క్రమంలో కొన్ని లక్షణాలు పరిమితం చేయబడ్డాయి"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"మీ ఫోన్ స్వయంచాలకంగా చల్లబడటానికి ప్రయత్నిస్తుంది. మీరు ఇప్పటికీ మీ ఫోన్‌ను ఉపయోగించవచ్చు, కానీ దాని పనితీరు నెమ్మదిగా ఉండవచ్చు.\n\nమీ ఫోన్ చల్లబడిన తర్వాత, అది సాధారణ రీతిలో పని చేస్తుంది."</string>
@@ -942,7 +942,7 @@
     <string name="tuner_minus" msgid="5258518368944598545">"తీసివేత చిహ్నం"</string>
     <string name="tuner_left" msgid="5758862558405684490">"ఎడమ"</string>
     <string name="tuner_right" msgid="8247571132790812149">"కుడి"</string>
-    <string name="tuner_menu" msgid="363690665924769420">"మెను"</string>
+    <string name="tuner_menu" msgid="363690665924769420">"మెనూ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> అనురవర్తనం"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"హెచ్చరికలు"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"బ్యాటరీ"</string>

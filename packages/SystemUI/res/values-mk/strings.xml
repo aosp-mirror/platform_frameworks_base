@@ -82,7 +82,7 @@
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Сликата на екранот се зачувува..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Сликата од екранот е зачувана"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Допрете за да ја видите сликата од екранот"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"Не можеше да се зачува слика од екранот"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"Не може да се зачува слика од екранот"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Повторно обидете се да направите слика од екранот"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сликата од екранот не може да се зачува поради ограничена меморија"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
@@ -502,8 +502,8 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Штедачот на батерија е вклучен"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Исклучете го штедачот на батерија"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите информации што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како, на пример, лозинки, детали на исплатата, фотографии, пораки и аудио што го пуштате."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите информации што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како, на пример, лозинки, детали на исплатата, фотографии, пораки и аудио што го пуштате."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува информации како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да почне снимање или емитување?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не покажувај повторно"</string>
@@ -667,7 +667,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Забава за некои, но не за сите"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Адаптерот на УИ на системот ви дава дополнителни начини за дотерување и приспособување на корисничкиот интерфејс на Android. Овие експериментални функции можеби ќе се изменат, расипат или ќе исчезнат во следните изданија. Продолжете со претпазливост."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Овие експериментални функции можеби ќе се изменат, расипат или ќе исчезнат во следните изданија. Продолжете со претпазливост."</string>
-    <string name="got_it" msgid="477119182261892069">"Разбрав"</string>
+    <string name="got_it" msgid="477119182261892069">"Сфатив"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Честито! Го додадовте Адаптерот на УИ на системот на Поставки"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Отстрани од поставки"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Да се отстрани Адаптерот на УИ на системот од Поставки и да престанат да се користат сите негови функции?"</string>
@@ -712,13 +712,13 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Стандардно"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Балонче"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува под делот за разговор"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да ѕвони или вибрира во зависност од поставките на телефонот"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Се појавува на горниот дел од секцијата на разговорот во вид на лебдечко меурче, покажувајќи ја профилната слика на заклучениот екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема неодамнешни балончиња"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Неодамнешните и отфрлените балончиња ќе се појавуваат тука"</string>
@@ -1047,7 +1047,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Видете други апликации"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Контролите не можеше да се вчитаат. Проверете ја апликацијата <xliff:g id="APP">%s</xliff:g> за да се уверите дека поставките за апликацијата не се променети."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Контролите не може да се вчитаат. Проверете ја апликацијата <xliff:g id="APP">%s</xliff:g> за да се уверите дека поставките за апликацијата не се променети."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Нема компатибилни контроли"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>

@@ -242,19 +242,19 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Nödsituation"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Felrapport"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Avsluta session"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Skärmdump"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Skärmbild"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Felrapport"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Nu hämtas information om aktuell status för enheten, som sedan skickas i ett e-postmeddelade. Det tar en liten stund innan felrapporten är färdig och kan skickas, så vi ber dig ha tålamod."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiv rapport"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bör användas i de flesta fall. Då kan du spåra rapportförloppet, ange mer information om problemet och ta skärmdumpar. En del mindre använda avsnitt, som det tar lång tid att rapportera om, kan uteslutas."</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Bör användas i de flesta fall. Då kan du spåra rapportförloppet, ange mer information om problemet och ta skärmbilder. En del mindre använda avsnitt, som det tar lång tid att rapportera om, kan uteslutas."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Fullständig rapport"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Alternativet innebär minsta möjliga störning när enheten inte svarar eller är långsam, eller när alla avsnitt ska ingå i rapporten. Du kan inte ange mer information eller ta ytterligare skärmdumpar."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Alternativet innebär minsta möjliga störning när enheten inte svarar eller är långsam, eller när alla avsnitt ska ingå i rapporten. Du kan inte ange mer information eller ta ytterligare skärmbilder."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
-      <item quantity="one">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_0">%d</xliff:g> sekund.</item>
+      <item quantity="other">Tar en skärmbild till felrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
+      <item quantity="one">Tar en skärmbild till felrapporten om <xliff:g id="NUMBER_0">%d</xliff:g> sekund.</item>
     </plurals>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Skärmdump med felrapport har tagits"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Det gick inte att ta en skärmdump med felrapport"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Skärmbild med felrapport har tagits"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Det gick inte att ta en skärmbild med felrapport"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Tyst läge"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Ljudet är AV"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Ljudet är PÅ"</string>
@@ -327,8 +327,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan trycka, svepa, nypa och göra andra rörelser."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmdump"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmdump av skärmen."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -2039,7 +2039,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Snabbinställningar"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialogruta för ström"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Låsskärm"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skärmdump"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skärmbild"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Tillgänglighetsgenväg på skärmen"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Valfunktion för tillgänglighetsgenväg på skärmen"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Aktivera tillgänglighet snabbt"</string>

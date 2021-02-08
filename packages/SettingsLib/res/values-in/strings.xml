@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Mode debug ketika USB tersambung"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Cabut otorisasi debug USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Proses debug nirkabel"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode debug saat Wi-Fi tersambung"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode debug saat Wi-Fi terhubung"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Error"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Proses debug nirkabel"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Untuk melihat dan menggunakan perangkat yang tersedia, aktifkan proses debug nirkabel"</string>
@@ -225,13 +225,13 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Sambungkan dengan perangkat"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Kode penyambungan Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Penyambungan perangkat gagal"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Pastikan perangkat tersambung ke jaringan yang sama."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Menyambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Pastikan perangkat terhubung ke jaringan yang sama."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Sambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Menyambungkan perangkat…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Gagal menyambungkan perangkat. Kode QR salah, atau perangkat tidak tersambung ke jaringan yang sama."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Alamat IP &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Memindai kode QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Menyambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Harap sambungkan ke jaringan Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Pintasan laporan bug"</string>
