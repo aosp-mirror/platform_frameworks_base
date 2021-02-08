@@ -360,7 +360,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU жөндеу қабаттарын қосу"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU жөндеу қабаттарының жүктелуіне рұқсат ету"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Жеткізушілерді журналға тіркеу"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Қате туралы есепте қызмет көрсетушінің құрылғыға қатысты қосымша ақпаратын қамту. Мұнда жеке ақпарат көрсетілуі, батарея шығыны артуы және/немесе қосымша жад пайдаланылуы мүмкін."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Қате туралы есепте жеткізушінің құрылғыға қатысты қосымша ақпараты қамтылады. Мұнда жеке ақпарат көрсетілуі, батарея шығыны артуы және/немесе қосымша жад пайдаланылуы мүмкін."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Терезе анимациясының өлшемі"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Ауысу анимациясының өлшемі"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Аниматор ұзақтығы"</string>

@@ -57,15 +57,15 @@
     <string name="label_view" msgid="6815442985276363364">"Pamje"</string>
     <string name="always_use_device" msgid="210535878779644679">"Hap gjithmonë <xliff:g id="APPLICATION">%1$s</xliff:g> kur lidhet <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Hap gjithmonë <xliff:g id="APPLICATION">%1$s</xliff:g> kur lidhet <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"Të lejohet korrigjimi i USB-së?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"Të lejohet korrigjimi përmes USB-së?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Gjurma e gishtit të tastit \"RSA\" së kompjuterit është:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Lejo gjithmonë nga ky kompjuter"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Lejo"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Korrigjimi i USB-së nuk lejohet"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin e USB-së. Për ta përdorur këtë funksion, kalo te përdoruesi parësor."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Korrigjimi përmes USB-së nuk lejohet"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin përmes USB-së. Për ta përdorur këtë veçori, kalo te përdoruesi parësor."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Do ta lejosh korrigjimin përmes Wi-Fi në këtë rrjet?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Emri i rrjetit (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"Shfaq gjithmonë në këtë rrjet"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Lejo gjithmonë në këtë rrjet"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Lejo"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Korrigjimi përmes Wi-Fi nuk lejohet"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin përmes Wi-Fi. Për ta përdorur këtë veçori, kalo te përdoruesi parësor."</string>
@@ -116,7 +116,7 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Marrja e lejeve dështoi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Gabim gjatë nisjes së regjistrimit të ekranit"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opsionet e transferimit të dosjeve të USB-së"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Lidh si një lexues \"media\" (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Lidh si një luajtës të medias (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Montoje si kamerë (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalo \"Transferimi i skedarëve të Android\" për Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Prapa"</string>
@@ -248,7 +248,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Pastro njoftimin."</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS-ja është e aktivizuar."</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Po siguron GPS-në."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teleprinteri është i aktivizuar."</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletajpi është i aktivizuar."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Zile me dridhje."</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Zilja është heshtur."</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -482,7 +482,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Mirë se erdhe, i ftuar!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Fillo nga e para"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo!"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Përdorues vizitor"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Për të fshirë aplikacionet dhe të dhënat, hiqe përdoruesin vizitor"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"HIQ VIZITORIN"</string>
@@ -502,8 +502,8 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"\"Kursyesi i baterisë\" është i aktivizuar"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Pakëson veprimtarinë dhe të dhënat në sfond"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Çaktivizo \"Kursyesin e baterisë\""</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Do të fillosh regjistrimin ose transmetimin?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Fillo regjistrimin ose transmetimin me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Mos e shfaq sërish"</string>

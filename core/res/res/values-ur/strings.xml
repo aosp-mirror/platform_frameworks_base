@@ -818,7 +818,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"‏PUK اور نیا PIN کوڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"‏PUK کوڈ"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="5505434724229581207">"‏نیا PIN کوڈ"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"پاسورڈ ٹائپ کرنے کیلئے تھپتھپائیں"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="4032288032993261520"><font size="17">"پاس ورڈ ٹائپ کرنے کیلئے تھپتھپائیں"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"غیر مقفل کرنے کیلئے پاس ورڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"‏غلط PIN کوڈ۔"</string>

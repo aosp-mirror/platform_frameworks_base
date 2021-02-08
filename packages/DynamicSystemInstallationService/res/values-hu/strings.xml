@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"A dinamikus rendszer készen áll. A használatához indítsa újra az eszközt."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Telepítés…"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Sikertelen telepítés"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"A kép ellenőrzése nem sikerült. A telepítés megszakad."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"A lemezkép ellenőrzése nem sikerült. A telepítés megszakad."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Jelenleg dinamikus rendszert futtat. Az eredeti Android-verzió használatához indítsa újra az eszközt."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Mégse"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Elvetés"</string>

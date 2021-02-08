@@ -1173,6 +1173,7 @@ filegroup {
 java_library {
     name: "framework-wifi-util-lib",
     sdk_version: "module_current",
+    min_sdk_version: "30",
     srcs: [
         "core/java/android/content/pm/BaseParceledListSlice.java",
         "core/java/android/content/pm/ParceledListSlice.java",
