@@ -46,6 +46,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings.Config;
 import com.android.settingslib.mobile.MobileStatusTracker;
+import com.android.settingslib.mobile.MobileStatusTracker.MobileStatus;
 import com.android.settingslib.mobile.MobileStatusTracker.SubscriptionDefaults;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
@@ -54,6 +55,7 @@ import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +64,8 @@ import java.util.Map;
  * Monitors the mobile signal changes and update the SysUI icons.
  */
 public class MobileSignalController extends SignalController<MobileState, MobileIconGroup> {
+    private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+
     private final TelephonyManager mPhone;
     private final SubscriptionDefaults mDefaults;
     private final String mNetworkNameDefault;
@@ -89,6 +93,11 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private MobileStatusTracker.Callback mCallback;
     @VisibleForTesting
     MobileStatusTracker mMobileStatusTracker;
+
+    // Save the previous HISTORY_SIZE states for logging.
+    private final String[] mMobileStatusHistory = new String[HISTORY_SIZE];
+    // Where to copy the next state into.
+    private int mMobileStatusHistoryIndex;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.
@@ -126,12 +135,17 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mCallback = new MobileStatusTracker.Callback() {
             @Override
             public void onMobileStatusChanged(boolean updateTelephony,
-                    MobileStatusTracker.MobileStatus mobileStatus) {
+                    MobileStatus mobileStatus) {
                 if (Log.isLoggable(mTag, Log.DEBUG)) {
                     Log.d(mTag, "onMobileStatusChanged="
                             + " updateTelephony=" + updateTelephony
                             + " mobileStatus=" + mobileStatus.toString());
                 }
+                String status = new StringBuilder()
+                        .append(SSDF.format(System.currentTimeMillis())).append(",")
+                        .append(mobileStatus.toString())
+                        .toString();
+                recordLastMobileStatus(status);
                 updateMobileStatus(mobileStatus);
                 if (updateTelephony) {
                     updateTelephony();
@@ -455,7 +469,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         return CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
-    private void updateMobileStatus(MobileStatusTracker.MobileStatus mobileStatus) {
+    private void updateMobileStatus(MobileStatus mobileStatus) {
         mCurrentState.activityIn = mobileStatus.activityIn;
         mCurrentState.activityOut = mobileStatus.activityOut;
         mCurrentState.dataSim = mobileStatus.dataSim;
@@ -570,6 +584,10 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         notifyListenersIfNecessary();
     }
 
+    private void recordLastMobileStatus(String mobileStatus) {
+        mMobileStatusHistory[mMobileStatusHistoryIndex++ & (HISTORY_SIZE - 1)] = mobileStatus;
+    }
+
     @Override
     public void dump(PrintWriter pw) {
         super.dump(pw);
@@ -580,5 +598,17 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
+        pw.println("  MobileStatusHistory");
+        int size = 0;
+        for (int i = 0; i < HISTORY_SIZE; i++) {
+            if (mMobileStatusHistory[i] != null) size++;
+        }
+        // Print out the previous states in ordered number.
+        for (int i = mMobileStatusHistoryIndex + HISTORY_SIZE - 1;
+                i >= mMobileStatusHistoryIndex + HISTORY_SIZE - size; i--) {
+            pw.println("  Previous MobileStatus("
+                    + (mMobileStatusHistoryIndex + HISTORY_SIZE - i) + "): "
+                    + mMobileStatusHistory[i & (HISTORY_SIZE - 1)]);
+        }
     }
 }
