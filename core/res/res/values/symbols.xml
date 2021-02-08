@@ -2814,6 +2814,7 @@
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
   <java-symbol type="id" name="pending_intent_tag" />
+  <java-symbol type="id" name="remote_checked_change_listener_tag" />
   <java-symbol type="id" name="notification_action_index_tag" />
 
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />

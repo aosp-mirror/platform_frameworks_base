@@ -54698,6 +54698,7 @@ package android.widget {
     method public void setLabelFor(@IdRes int, @IdRes int);
     method public void setLightBackgroundLayoutId(@LayoutRes int);
     method public void setLong(@IdRes int, String, long);
+    method public void setOnCheckedChangeResponse(@IdRes int, @NonNull android.widget.RemoteViews.RemoteResponse);
     method public void setOnClickFillInIntent(@IdRes int, android.content.Intent);
     method public void setOnClickPendingIntent(@IdRes int, android.app.PendingIntent);
     method public void setOnClickResponse(@IdRes int, @NonNull android.widget.RemoteViews.RemoteResponse);
@@ -54724,6 +54725,7 @@ package android.widget {
     method public void showPrevious(@IdRes int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews> CREATOR;
+    field public static final String EXTRA_CHECKED = "android.widget.extra.CHECKED";
     field public static final String EXTRA_SHARED_ELEMENT_BOUNDS = "android.widget.extra.SHARED_ELEMENT_BOUNDS";
   }
 
