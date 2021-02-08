@@ -521,7 +521,7 @@ public class WindowStateTests extends WindowTestsBase {
         matrix.mapPoints(curSurfacePos);
         verify(t).setPosition(eq(app.mSurfaceControl), eq(curSurfacePos[0]), eq(curSurfacePos[1]));
 
-        app.finishSeamlessRotation(false /* timeout */);
+        app.finishSeamlessRotation(t);
         assertFalse(app.mSeamlesslyRotated);
         assertNull(app.mPendingSeamlessRotate);
 

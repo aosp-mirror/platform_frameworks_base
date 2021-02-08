@@ -141,7 +141,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         assertNull(mProvider.getControlTarget());
 
         // We can have the control and the control target after seamless rotation.
-        mProvider.finishSeamlessRotation(false /* timeout */);
+        mProvider.finishSeamlessRotation();
         mProvider.updateControlForTarget(target, false /* force */);
         assertNotNull(mProvider.getControl(target));
         assertNotNull(mProvider.getControlTarget());

@@ -263,6 +263,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -752,6 +753,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final WindowProcessController mWpcForDisplayAreaConfigChanges;
 
     /**
+     * We split the draw handlers in to a "pending" and "ready" list, in order to solve
+     * sequencing problems. Think of it this way, let's say I update a windows orientation
+     * (in configuration), and then I call applyWithNextDraw. What I'm hoping for is to
+     * apply with the draw that contains the orientation change. However, since the client
+     * can call finishDrawing at any time, it could be about to call a previous call to
+     * finishDrawing (or maybe its already called it, we just haven't handled it). Since this
+     * frame was already completed it had no time to include the orientation change we made.
+     * To solve this problem we accumulate draw handlers in mPendingDrawHandlers, and then force
+     * the client to call relayout. Only the frame post relayout will contain the configuration
+     * change since the window has to relayout), and so in relayout we drain mPendingDrawHandlers
+     * into mReadyDrawHandlers. Finally once we get to finishDrawing we know everything in
+     * mReadyDrawHandlers corresponds to state which was observed by the client and we can
+     * invoke the consumers.
+     */
+    private final List<Consumer<SurfaceControl.Transaction>> mPendingDrawHandlers
+        = new ArrayList<>();
+    private final List<Consumer<SurfaceControl.Transaction>> mReadyDrawHandlers
+        = new ArrayList<>();
+
+    private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
+        finishSeamlessRotation(t);
+        updateSurfacePosition(t);
+    };
+
+    /**
      * Returns the visibility of the given {@link InternalInsetsType type} requested by the client.
      *
      * @param type the given {@link InternalInsetsType type}.
@@ -834,19 +860,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mPendingSeamlessRotate.unrotate(transaction, this);
             getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
                     true /* seamlesslyRotated */);
+            applyWithNextDraw(mSeamlessRotationFinishedConsumer);
         }
     }
 
-    void finishSeamlessRotation(boolean timeout) {
-        if (mPendingSeamlessRotate != null) {
-            mPendingSeamlessRotate.finish(this, timeout);
-            mFinishSeamlessRotateFrameNumber = getFrameNumber();
-            mPendingSeamlessRotate = null;
-            getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
-                    false /* seamlesslyRotated */);
-            if (mControllableInsetProvider != null) {
-                mControllableInsetProvider.finishSeamlessRotation(timeout);
-            }
+    void cancelSeamlessRotation() {
+        finishSeamlessRotation(getPendingTransaction());
+    }
+
+    void finishSeamlessRotation(SurfaceControl.Transaction t) {
+        if (mPendingSeamlessRotate == null) {
+            return;
+        }
+
+        mPendingSeamlessRotate.finish(t, this);
+        mFinishSeamlessRotateFrameNumber = getFrameNumber();
+        mPendingSeamlessRotate = null;
+
+        getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
+            false /* seamlesslyRotated */);
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.finishSeamlessRotation();
         }
     }
 
@@ -5762,6 +5796,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.i(TAG, "finishDrawing of relaunch: " + this + " " + duration + "ms");
             mActivityRecord.mRelaunchStartTime = 0;
         }
+
+        executeDrawHandlers(postDrawTransaction);
         if (!onSyncFinishedDrawing()) {
             return mWinAnimator.finishDrawingLocked(postDrawTransaction);
         }
@@ -5776,6 +5812,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void immediatelyNotifyBlastSync() {
+        prepareDrawHandlers();
         finishDrawing(null);
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (!useBLASTSync()) return;
@@ -5854,5 +5891,67 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Adjust for surface insets.
         outSize.inset(-attrs.surfaceInsets.left, -attrs.surfaceInsets.top,
                 -attrs.surfaceInsets.right, -attrs.surfaceInsets.bottom);
+    }
+
+    /**
+     * This method is used to control whether we return the BLAST_SYNC flag
+     * from relayoutWindow calls on this window (triggering the client to redirect
+     * it's next draw in to a transaction). If we have pending draw handlers, we are
+     * looking for the client to sync.
+     *
+     * See {@link WindowState#mPendingDrawHandlers}
+     */
+    @Override
+    boolean useBLASTSync() {
+        return super.useBLASTSync() || (mPendingDrawHandlers.size() != 0);
+    }
+
+    /**
+     * Apply the transaction with the next window redraw. A full relayout/finishDrawing
+     * cycle must occur before completion. This means if you call the function while
+     * "in relayout", the results may be undefined but at all other times the function
+     * should sort of transparently work like this:
+     *    1. Make changes to WM hierarchy (say change app configuration)
+     *    2. Call apply with next draw.
+     *    3. After finishDrawing, our consumer will be passed the Transaction
+     *    containing the buffer, and we can merge in additional operations.
+     * See {@link WindowState#mPendingDrawHandlers}
+     */
+    void applyWithNextDraw(Consumer<SurfaceControl.Transaction> consumer) {
+        mPendingDrawHandlers.add(consumer);
+        requestRedrawForSync();
+
+        mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
+            BLAST_TIMEOUT_DURATION);
+    }
+
+    /**
+     * Called from relayout, to indicate the next "finishDrawing" will contain
+     * all changes applied by the time mPendingDrawHandlers was populated.
+     *
+     * See {@link WindowState#mPendingDrawHandlers}
+     */
+    void prepareDrawHandlers() {
+        mReadyDrawHandlers.addAll(mPendingDrawHandlers);
+        mPendingDrawHandlers.clear();
+    }
+
+    /**
+     * Drain the draw handlers, called from finishDrawing()
+     * See {@link WindowState#mPendingDrawHandlers}
+     */
+    boolean executeDrawHandlers(SurfaceControl.Transaction t) {
+        if (t == null) t = mTmpTransaction;
+        boolean hadHandlers = false;
+        for (int i = 0; i < mReadyDrawHandlers.size(); i++) {
+            mReadyDrawHandlers.get(i).accept(t);
+            hadHandlers = true;
+        }
+        mReadyDrawHandlers.clear();
+        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
+
+        t.apply();
+
+        return hadHandlers;
     }
 }

@@ -367,9 +367,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
-    /** Amount of time (in milliseconds) to delay before declaring a seamless rotation timeout. */
-    static final int SEAMLESS_ROTATION_TIMEOUT_DURATION = 2000;
-
     /** Amount of time (in milliseconds) to delay before declaring a window replacement timeout. */
     static final int WINDOW_REPLACEMENT_TIMEOUT_DURATION = 2000;
 
@@ -2245,9 +2242,6 @@ public class WindowManagerService extends IWindowManager.Stub
             win.setFrameNumber(frameNumber);
 
             final DisplayContent dc = win.getDisplayContent();
-            if (!dc.mWaitingForConfig) {
-                win.finishSeamlessRotation(false /* timeout */);
-            }
 
             if (win.mPendingPositionChanged != null) {
                 win.mPendingPositionChanged.updateLeashPosition(frameNumber);
@@ -2255,6 +2249,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
+                win.prepareDrawHandlers();
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
@@ -5080,7 +5075,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
-        public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
         public static final int RESTORE_POINTER_ICON = 55;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int ANIMATION_FAILSAFE = 60;
@@ -5360,13 +5354,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 case RESTORE_POINTER_ICON: {
                     synchronized (mGlobalLock) {
                         restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
-                    }
-                    break;
-                }
-                case SEAMLESS_ROTATION_TIMEOUT: {
-                    final DisplayContent displayContent = (DisplayContent) msg.obj;
-                    synchronized (mGlobalLock) {
-                        displayContent.getDisplayRotation().onSeamlessRotationTimeout();
                     }
                     break;
                 }

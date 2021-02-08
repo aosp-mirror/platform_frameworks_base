@@ -93,7 +93,6 @@ class InsetsSourceProvider {
     private boolean mServerVisible;
 
     private boolean mSeamlessRotating;
-    private long mFinishSeamlessRotateFrameNumber = -1;
 
     private final boolean mControllable;
 
@@ -342,15 +341,6 @@ class InsetsSourceProvider {
         mIsLeashReadyForDispatching = false;
 
         final SurfaceControl leash = mAdapter.mCapturedLeash;
-        final long frameNumber = mFinishSeamlessRotateFrameNumber;
-        mFinishSeamlessRotateFrameNumber = -1;
-        if (mWin.mHasSurface && leash != null) {
-            // We just finished the seamless rotation. We don't want to change the position or the
-            // window crop of the surface controls (including the leash) until the client finishes
-            // drawing the new frame of the new orientation. Although we cannot defer the reparent
-            // operation, it is fine, because reparent won't cause any visual effect.
-            deferTransactionUntil(t, leash, frameNumber);
-        }
         mControlTarget = target;
         updateVisibility();
         mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition);
@@ -359,19 +349,14 @@ class InsetsSourceProvider {
     }
 
     void startSeamlessRotation() {
-        if (!mSeamlessRotating) {
-            mSeamlessRotating = true;
-
-            // This will revoke the leash and clear the control target.
-            mWin.cancelAnimation();
-        }
+      if (!mSeamlessRotating) {
+          mSeamlessRotating = true;
+          mWin.cancelAnimation();
+      }
     }
 
-    void finishSeamlessRotation(boolean timeout) {
-        if (mSeamlessRotating) {
-            mSeamlessRotating = false;
-            mFinishSeamlessRotateFrameNumber = timeout ? -1 : mWin.getFrameNumber();
-        }
+    void finishSeamlessRotation() {
+        mSeamlessRotating = false;
     }
 
     boolean updateClientVisibility(InsetsControlTarget caller) {
@@ -529,7 +514,6 @@ class InsetsSourceProvider {
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(SERVER_VISIBLE, mServerVisible);
         proto.write(SEAMLESS_ROTATING, mSeamlessRotating);
-        proto.write(FINISH_SEAMLESS_ROTATE_FRAME_NUMBER, mFinishSeamlessRotateFrameNumber);
         proto.write(CONTROLLABLE, mControllable);
         proto.end(token);
     }
