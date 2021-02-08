@@ -843,7 +843,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
-        public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
+        public void setMediaButtonReceiver(PendingIntent pi, String sessionPackageName)
+                throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
                 if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
@@ -851,7 +852,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     return;
                 }
                 mMediaButtonReceiverHolder =
-                        MediaButtonReceiverHolder.create(mContext, mUserId, pi);
+                        MediaButtonReceiverHolder.create(mContext, mUserId, pi, sessionPackageName);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
