@@ -1453,11 +1453,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed) {
+    public void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed,
+            boolean isBubbleSuppressed) {
         enforceStatusBarService();
         final long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.onBubbleNotificationSuppressionChanged(key, isNotifSuppressed);
+            mNotificationDelegate.onBubbleNotificationSuppressionChanged(key, isNotifSuppressed,
+                    isBubbleSuppressed);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

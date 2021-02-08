@@ -68,7 +68,7 @@ public class Bubble implements BubbleViewProvider {
     private long mLastAccessed;
 
     @Nullable
-    private Bubbles.NotificationSuppressionChangedListener mSuppressionListener;
+    private Bubbles.SuppressionChangedListener mSuppressionListener;
 
     /** Whether the bubble should show a dot for the notification indicating updated content. */
     private boolean mShowBubbleUpdateDot = true;
@@ -184,7 +184,7 @@ public class Bubble implements BubbleViewProvider {
 
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(@NonNull final BubbleEntry entry,
-            @Nullable final Bubbles.NotificationSuppressionChangedListener listener,
+            @Nullable final Bubbles.SuppressionChangedListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
         mKey = entry.getKey();
@@ -547,6 +547,13 @@ public class Bubble implements BubbleViewProvider {
      */
     boolean showInShade() {
         return !shouldSuppressNotification() || !mIsClearable;
+    }
+
+    /**
+     * Whether this bubble is currently being hidden from the stack.
+     */
+    boolean isSuppressed() {
+        return (mFlags & Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE) != 0;
     }
 
     /**
