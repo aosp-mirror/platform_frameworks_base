@@ -487,6 +487,8 @@ applications that come with the platform
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <!-- Permissions required for quick settings tile -->
         <permission name="android.permission.STATUS_BAR"/>
+        <!-- Permissions required to query Betterbug -->
+        <permission name="android.permission.QUERY_ALL_PACKAGES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">
