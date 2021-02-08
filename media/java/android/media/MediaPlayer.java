@@ -663,6 +663,10 @@ public class MediaPlayer extends PlayerBase
      * result in an exception.</p>
      */
     public MediaPlayer() {
+        this(AudioSystem.AUDIO_SESSION_ALLOCATE);
+    }
+
+    private MediaPlayer(int sessionId) {
         super(new AudioAttributes.Builder().build(),
                 AudioPlaybackConfiguration.PLAYER_TYPE_JAM_MEDIAPLAYER);
 
@@ -684,7 +688,7 @@ public class MediaPlayer extends PlayerBase
         native_setup(new WeakReference<MediaPlayer>(this),
                 getCurrentOpPackageName());
 
-        baseRegisterPlayer();
+        baseRegisterPlayer(sessionId);
     }
 
     /*
@@ -913,7 +917,7 @@ public class MediaPlayer extends PlayerBase
             AudioAttributes audioAttributes, int audioSessionId) {
 
         try {
-            MediaPlayer mp = new MediaPlayer();
+            MediaPlayer mp = new MediaPlayer(audioSessionId);
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
@@ -978,7 +982,7 @@ public class MediaPlayer extends PlayerBase
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resid);
             if (afd == null) return null;
 
-            MediaPlayer mp = new MediaPlayer();
+            MediaPlayer mp = new MediaPlayer(audioSessionId);
 
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
@@ -2365,7 +2369,13 @@ public class MediaPlayer extends PlayerBase
      * This method must be called before one of the overloaded <code> setDataSource </code> methods.
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public native void setAudioSessionId(int sessionId)  throws IllegalArgumentException, IllegalStateException;
+    public void setAudioSessionId(int sessionId)
+            throws IllegalArgumentException, IllegalStateException {
+        native_setAudioSessionId(sessionId);
+        baseUpdateSessionId(sessionId);
+    }
+
+    private native void native_setAudioSessionId(int sessionId);
 
     /**
      * Returns the audio session ID.
