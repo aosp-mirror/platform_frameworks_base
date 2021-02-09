@@ -79,6 +79,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     private DisplayAreaInfo mDisplayAreaInfo;
     private final Context mContext;
     private final List<SplitScreen.SplitScreenListener> mListeners = new ArrayList<>();
+    private boolean mExitSplitScreenOnHide = true;
 
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer) {
@@ -113,7 +114,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
             @SplitScreen.StagePosition int sideStagePosition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mSideStagePosition = sideStagePosition;
+        setSideStagePosition(sideStagePosition);
         mMainStage.activate(getMainStageBounds(), wct);
         mSideStage.addTask(task, getSideStageBounds(), wct);
         mTaskOrganizer.applyTransaction(wct);
@@ -144,10 +145,14 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     void setSideStagePosition(@SplitScreen.StagePosition int sideStagePosition) {
+        if (mSideStagePosition == sideStagePosition) return;
+
         mSideStagePosition = sideStagePosition;
         if (mSideStageListener.mVisible) {
             onStageVisibilityChanged(mSideStageListener);
         }
+
+        sendOnStagePositionChanged();
     }
 
     void setSideStageVisibility(boolean visible) {
@@ -160,6 +165,10 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
     void exitSplitScreen() {
         exitSplitScreen(null /* childrenToTop */);
+    }
+
+    void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
+        mExitSplitScreenOnHide = exitSplitScreenOnHide;
     }
 
     private void exitSplitScreen(StageTaskListener childrenToTop) {
@@ -200,6 +209,14 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
     void unregisterSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         mListeners.remove(listener);
+    }
+
+    private void sendOnStagePositionChanged() {
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            final SplitScreen.SplitScreenListener l = mListeners.get(i);
+            l.onStagePositionChanged(STAGE_TYPE_MAIN, getMainStagePosition());
+            l.onStagePositionChanged(STAGE_TYPE_SIDE, getSideStagePosition());
+        }
     }
 
     private void onStageChildTaskStatusChanged(
@@ -251,7 +268,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
             }
         }
 
-        if (!mainStageVisible && !sideStageVisible) {
+        if (mExitSplitScreenOnHide && !mainStageVisible && !sideStageVisible) {
             // Exit split-screen if both stage are not visible.
             // TODO: This is only a temporary request from UX and is likely to be removed soon...
             exitSplitScreen();

@@ -126,6 +126,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter {
         mStageCoordinator.exitSplitScreen();
     }
 
+    public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
+        mStageCoordinator.exitSplitScreenOnHide(exitSplitScreenOnHide);
+    }
+
     public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
         mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
     }
@@ -288,6 +292,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter {
         public void exitSplitScreen() {
             mMainExecutor.execute(() -> {
                 SplitScreenController.this.exitSplitScreen();
+            });
+        }
+
+        @Override
+        public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.exitSplitScreenOnHide(exitSplitScreenOnHide);
             });
         }
 
