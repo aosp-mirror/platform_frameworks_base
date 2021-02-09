@@ -54637,6 +54637,8 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
+    method public void setViewOutlinePreferredRadius(@IdRes int, float, int);
+    method public void setViewOutlinePreferredRadiusDimen(@IdRes int, @DimenRes int);
     method public void setViewPadding(@IdRes int, @Px int, @Px int, @Px int, @Px int);
     method public void setViewVisibility(@IdRes int, int);
     method public void showNext(@IdRes int);
@@ -54659,6 +54661,12 @@ package android.widget {
   }
 
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public static @interface RemoteViews.RemoteView {
+  }
+
+  public static final class RemoteViews.RemoteViewOutlineProvider extends android.view.ViewOutlineProvider {
+    ctor public RemoteViews.RemoteViewOutlineProvider(float);
+    method public void getOutline(@NonNull android.view.View, @NonNull android.graphics.Outline);
+    method public float getRadius();
   }
 
   public abstract class RemoteViewsService extends android.app.Service {
