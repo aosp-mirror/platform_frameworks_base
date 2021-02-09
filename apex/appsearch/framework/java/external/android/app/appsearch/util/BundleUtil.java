@@ -147,35 +147,41 @@ public final class BundleUtil {
         if (bundle == null) {
             return 0;
         }
-        int[] hashCodes = new int[bundle.size()];
-        int i = 0;
+        int[] hashCodes = new int[bundle.size() + 1];
+        int hashCodeIdx = 0;
         // Bundle inherit its hashCode() from Object.java, which only relative to their memory
         // address. Bundle doesn't have an order, so we should iterate all keys and combine
         // their value's hashcode into an array. And use the hashcode of the array to be
         // the hashcode of the bundle.
-        for (String key : bundle.keySet()) {
-            Object value = bundle.get(key);
+        // Because bundle.keySet() doesn't guarantee any particular order, we need to sort the keys
+        // in case the iteration order varies from run to run.
+        String[] keys = bundle.keySet().toArray(new String[0]);
+        Arrays.sort(keys);
+        // Hash the keys so we can detect key-only differences
+        hashCodes[hashCodeIdx++] = Arrays.hashCode(keys);
+        for (int keyIdx = 0; keyIdx < keys.length; keyIdx++) {
+            Object value = bundle.get(keys[keyIdx]);
             if (value instanceof Bundle) {
-                hashCodes[i++] = deepHashCode((Bundle) value);
+                hashCodes[hashCodeIdx++] = deepHashCode((Bundle) value);
             } else if (value instanceof int[]) {
-                hashCodes[i++] = Arrays.hashCode((int[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((int[]) value);
             } else if (value instanceof byte[]) {
-                hashCodes[i++] = Arrays.hashCode((byte[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((byte[]) value);
             } else if (value instanceof char[]) {
-                hashCodes[i++] = Arrays.hashCode((char[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((char[]) value);
             } else if (value instanceof long[]) {
-                hashCodes[i++] = Arrays.hashCode((long[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((long[]) value);
             } else if (value instanceof float[]) {
-                hashCodes[i++] = Arrays.hashCode((float[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((float[]) value);
             } else if (value instanceof short[]) {
-                hashCodes[i++] = Arrays.hashCode((short[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((short[]) value);
             } else if (value instanceof double[]) {
-                hashCodes[i++] = Arrays.hashCode((double[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((double[]) value);
             } else if (value instanceof boolean[]) {
-                hashCodes[i++] = Arrays.hashCode((boolean[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((boolean[]) value);
             } else if (value instanceof String[]) {
                 // Optimization to avoid Object[] handler creating an inner array for common cases
-                hashCodes[i++] = Arrays.hashCode((String[]) value);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode((String[]) value);
             } else if (value instanceof Object[]) {
                 Object[] array = (Object[]) value;
                 int[] innerHashCodes = new int[array.length];
@@ -186,7 +192,7 @@ public final class BundleUtil {
                         innerHashCodes[j] = array[j].hashCode();
                     }
                 }
-                hashCodes[i++] = Arrays.hashCode(innerHashCodes);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode(innerHashCodes);
             } else if (value instanceof ArrayList) {
                 ArrayList<?> list = (ArrayList<?>) value;
                 int[] innerHashCodes = new int[list.size()];
@@ -198,7 +204,7 @@ public final class BundleUtil {
                         innerHashCodes[j] = item.hashCode();
                     }
                 }
-                hashCodes[i++] = Arrays.hashCode(innerHashCodes);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode(innerHashCodes);
             } else if (value instanceof SparseArray) {
                 SparseArray<?> array = (SparseArray<?>) value;
                 int[] innerHashCodes = new int[array.size() * 2];
@@ -211,9 +217,9 @@ public final class BundleUtil {
                         innerHashCodes[j * 2 + 1] = item.hashCode();
                     }
                 }
-                hashCodes[i++] = Arrays.hashCode(innerHashCodes);
+                hashCodes[hashCodeIdx++] = Arrays.hashCode(innerHashCodes);
             } else {
-                hashCodes[i++] = value.hashCode();
+                hashCodes[hashCodeIdx++] = value.hashCode();
             }
         }
         return Arrays.hashCode(hashCodes);
