@@ -620,6 +620,19 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
+        public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
+            if (!verifyCaller("exitSplitScreenOnHide")) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mSplitScreenOptional.ifPresent(s -> s.exitSplitScreenOnHide(exitSplitScreenOnHide));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void startTask(int taskId, int stage, int position, Bundle options) {
             if (!verifyCaller("startTask")) {
                 return;
