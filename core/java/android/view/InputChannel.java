@@ -111,6 +111,13 @@ public final class InputChannel implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public boolean isValid() {
+        return mPtr != 0;
+    }
+
+    /**
      * Disposes the input channel.
      * Explicitly releases the reference this object is holding on the input channel.
      * When all references are released, the input channel will be closed.
