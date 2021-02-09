@@ -190,7 +190,7 @@ public class KeyStoreSecurityLevel {
         keyDescriptor.blob = wrappedKey;
         keyDescriptor.domain = wrappedKeyDescriptor.domain;
 
-        return handleExceptions(() -> mSecurityLevel.importWrappedKey(wrappedKeyDescriptor,
+        return handleExceptions(() -> mSecurityLevel.importWrappedKey(keyDescriptor,
                 wrappingKeyDescriptor, maskingKey,
                 args.toArray(new KeyParameter[args.size()]), authenticatorSpecs));
     }
