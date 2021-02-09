@@ -101,7 +101,8 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
         return;
     }
 
-    mGrContext->flushAndSubmit();
+    // flush and submit all work to the gpu and wait for it to finish
+    mGrContext->flushAndSubmit(/*syncCpu=*/true);
 
     switch (mode) {
         case TrimMemoryMode::Complete:
@@ -119,11 +120,6 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
             SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
             break;
     }
-
-    // We must sync the cpu to make sure deletions of resources still queued up on the GPU actually
-    // happen.
-    mGrContext->flush({});
-    mGrContext->submit(true);
 }
 
 void CacheManager::trimStaleResources() {
