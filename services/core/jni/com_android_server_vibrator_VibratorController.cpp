@@ -77,7 +77,7 @@ static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId)
     if (vibratorId < 0) {
         return std::move(std::make_unique<vibrator::HalController>());
     }
-    vibrator::ManagerHalWrapper* manager = android_server_VibratorManagerService_getManager();
+    vibrator::ManagerHalController* manager = android_server_VibratorManagerService_getManager();
     if (manager == nullptr) {
         return nullptr;
     }

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +46,7 @@ import android.content.pm.PackageManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.IVibrator;
+import android.hardware.vibrator.IVibratorManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.os.CombinedVibrationEffect;
@@ -204,7 +207,7 @@ public class VibratorManagerServiceTest {
     public void createService_initializesNativeManagerServiceAndVibrators() {
         mockVibrators(1, 2);
         createService();
-        verify(mNativeWrapperMock).init();
+        verify(mNativeWrapperMock).init(any());
         assertTrue(mVibratorProviders.get(1).isInitialized());
         assertTrue(mVibratorProviders.get(2).isInitialized());
     }
@@ -557,8 +560,6 @@ public class VibratorManagerServiceTest {
     @Test
     public void vibrate_withNativeCallbackTriggered_finishesVibration() throws Exception {
         mockVibrators(1);
-        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS,
-                IVibrator.CAP_AMPLITUDE_CONTROL);
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         VibratorManagerService service = createService();
         // The native callback will be dispatched manually in this test.
@@ -577,6 +578,139 @@ public class VibratorManagerServiceTest {
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
     }
 
+    @Test
+    public void vibrate_withTriggerCallback_finishesVibration() throws Exception {
+        mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_COMPOSE);
+        mockVibrators(1, 2);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        VibratorManagerService service = createService();
+        // The native callback will be dispatched manually in this test.
+        mTestLooper.stopAutoDispatchAndIgnoreExceptions();
+
+        ArgumentCaptor<VibratorManagerService.OnSyncedVibrationCompleteListener> listenerCaptor =
+                ArgumentCaptor.forClass(
+                        VibratorManagerService.OnSyncedVibrationCompleteListener.class);
+        verify(mNativeWrapperMock).init(listenerCaptor.capture());
+
+        // Mock trigger callback on registered listener.
+        when(mNativeWrapperMock.prepareSynced(eq(new int[]{1, 2}))).thenReturn(true);
+        when(mNativeWrapperMock.triggerSynced(anyLong())).then(answer -> {
+            listenerCaptor.getValue().onComplete(answer.getArgument(0));
+            return true;
+        });
+
+        VibrationEffect composed = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100)
+                .compose();
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(composed);
+
+        // Wait for vibration to start, it should finish right away with trigger callback.
+        vibrate(service, effect, ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until callback is triggered.
+        assertTrue(waitUntil(s -> !listenerCaptor.getAllValues().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
+
+        verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
+        verify(mNativeWrapperMock).triggerSynced(anyLong());
+        assertEquals(Arrays.asList(composed), mVibratorProviders.get(1).getEffects());
+        assertEquals(Arrays.asList(composed), mVibratorProviders.get(2).getEffects());
+    }
+
+    @Test
+    public void vibrate_withMultipleVibratorsAndCapabilities_prepareAndTriggerCalled()
+            throws Exception {
+        mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_PERFORM,
+                IVibratorManager.CAP_PREPARE_COMPOSE, IVibratorManager.CAP_MIXED_TRIGGER_PERFORM,
+                IVibratorManager.CAP_MIXED_TRIGGER_COMPOSE);
+        mockVibrators(1, 2);
+        when(mNativeWrapperMock.prepareSynced(eq(new int[]{1, 2}))).thenReturn(true);
+        when(mNativeWrapperMock.triggerSynced(anyLong())).thenReturn(true);
+        FakeVibratorControllerProvider fakeVibrator1 = mVibratorProviders.get(1);
+        fakeVibrator1.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        VibratorManagerService service = createService();
+
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose())
+                .combine();
+        vibrate(service, effect, ALARM_ATTRS);
+        assertTrue(waitUntil(s -> !fakeVibrator1.getEffects().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
+
+        verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
+        verify(mNativeWrapperMock).triggerSynced(anyLong());
+        verify(mNativeWrapperMock).cancelSynced(); // Trigger on service creation only.
+    }
+
+    @Test
+    public void vibrate_withMultipleVibratorsWithoutCapabilities_skipPrepareAndTrigger()
+            throws Exception {
+        // Missing CAP_MIXED_TRIGGER_ON and CAP_MIXED_TRIGGER_PERFORM.
+        mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_ON,
+                IVibratorManager.CAP_PREPARE_PERFORM);
+        mockVibrators(1, 2);
+        FakeVibratorControllerProvider fakeVibrator1 = mVibratorProviders.get(1);
+        fakeVibrator1.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createService();
+
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2, VibrationEffect.createOneShot(10, 100))
+                .combine();
+        vibrate(service, effect, ALARM_ATTRS);
+        assertTrue(waitUntil(s -> !fakeVibrator1.getEffects().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
+
+        verify(mNativeWrapperMock, never()).prepareSynced(any());
+        verify(mNativeWrapperMock, never()).triggerSynced(anyLong());
+        verify(mNativeWrapperMock).cancelSynced(); // Trigger on service creation only.
+    }
+
+    @Test
+    public void vibrate_withMultipleVibratorsPrepareFailed_skipTrigger() throws Exception {
+        mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_ON);
+        mockVibrators(1, 2);
+        when(mNativeWrapperMock.prepareSynced(any())).thenReturn(false);
+        VibratorManagerService service = createService();
+
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.createOneShot(10, 50))
+                .addVibrator(2, VibrationEffect.createOneShot(10, 100))
+                .combine();
+        vibrate(service, effect, ALARM_ATTRS);
+        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getEffects().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
+
+        verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
+        verify(mNativeWrapperMock, never()).triggerSynced(anyLong());
+        verify(mNativeWrapperMock).cancelSynced(); // Trigger on service creation only.
+    }
+
+    @Test
+    public void vibrate_withMultipleVibratorsTriggerFailed_cancelPreparedSynced() throws Exception {
+        mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_ON);
+        mockVibrators(1, 2);
+        when(mNativeWrapperMock.prepareSynced(eq(new int[]{1, 2}))).thenReturn(true);
+        when(mNativeWrapperMock.triggerSynced(anyLong())).thenReturn(false);
+        VibratorManagerService service = createService();
+
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.createOneShot(10, 50))
+                .addVibrator(2, VibrationEffect.createOneShot(10, 100))
+                .combine();
+        vibrate(service, effect, ALARM_ATTRS);
+        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getEffects().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
+
+        verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
+        verify(mNativeWrapperMock).triggerSynced(anyLong());
+        verify(mNativeWrapperMock, times(2)).cancelSynced(); // Trigger on service creation too.
+    }
 
     @Test
     public void vibrate_withIntensitySettings_appliesSettingsToScaleVibrations() throws Exception {
@@ -680,6 +814,11 @@ public class VibratorManagerServiceTest {
 
         service.cancelVibrate(service);
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+    }
+
+    private void mockCapabilities(long... capabilities) {
+        when(mNativeWrapperMock.getCapabilities()).thenReturn(
+                Arrays.stream(capabilities).reduce(0, (a, b) -> a | b));
     }
 
     private void mockVibrators(int... vibratorIds) {

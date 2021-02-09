@@ -24,27 +24,47 @@
 #include <utils/Log.h>
 #include <utils/misc.h>
 
-#include <vibratorservice/VibratorManagerHalWrapper.h>
+#include <vibratorservice/VibratorManagerHalController.h>
 
 #include "com_android_server_VibratorManagerService.h"
 
 namespace android {
 
+static JavaVM* sJvm = nullptr;
+static jmethodID sMethodIdOnComplete;
 static std::mutex gManagerMutex;
-static vibrator::ManagerHalWrapper* gManager GUARDED_BY(gManagerMutex) = nullptr;
+static vibrator::ManagerHalController* gManager GUARDED_BY(gManagerMutex) = nullptr;
 
 class NativeVibratorManagerService {
 public:
-    NativeVibratorManagerService() : mHal(std::make_unique<vibrator::LegacyManagerHalWrapper>()) {}
-    ~NativeVibratorManagerService() = default;
+    NativeVibratorManagerService(JNIEnv* env, jobject callbackListener)
+          : mHal(std::make_unique<vibrator::ManagerHalController>()),
+            mCallbackListener(env->NewGlobalRef(callbackListener)) {
+        LOG_ALWAYS_FATAL_IF(mHal == nullptr, "Unable to find reference to vibrator manager hal");
+        LOG_ALWAYS_FATAL_IF(mCallbackListener == nullptr,
+                            "Unable to create global reference to vibration callback handler");
+    }
 
-    vibrator::ManagerHalWrapper* hal() const { return mHal.get(); }
+    ~NativeVibratorManagerService() {
+        auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+        jniEnv->DeleteGlobalRef(mCallbackListener);
+    }
+
+    vibrator::ManagerHalController* hal() const { return mHal.get(); }
+
+    std::function<void()> createCallback(jlong vibrationId) {
+        return [vibrationId, this]() {
+            auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
+            jniEnv->CallVoidMethod(mCallbackListener, sMethodIdOnComplete, vibrationId);
+        };
+    }
 
 private:
-    const std::unique_ptr<vibrator::ManagerHalWrapper> mHal;
+    const std::unique_ptr<vibrator::ManagerHalController> mHal;
+    const jobject mCallbackListener;
 };
 
-vibrator::ManagerHalWrapper* android_server_VibratorManagerService_getManager() {
+vibrator::ManagerHalController* android_server_VibratorManagerService_getManager() {
     std::lock_guard<std::mutex> lock(gManagerMutex);
     return gManager;
 }
@@ -58,9 +78,9 @@ static void destroyNativeService(void* ptr) {
     }
 }
 
-static jlong nativeInit(JNIEnv* /* env */, jclass /* clazz */) {
+static jlong nativeInit(JNIEnv* env, jclass /* clazz */, jobject callbackListener) {
     std::unique_ptr<NativeVibratorManagerService> service =
-            std::make_unique<NativeVibratorManagerService>();
+            std::make_unique<NativeVibratorManagerService>(env, callbackListener);
     {
         std::lock_guard<std::mutex> lock(gManagerMutex);
         gManager = service->hal();
@@ -70,6 +90,17 @@ static jlong nativeInit(JNIEnv* /* env */, jclass /* clazz */) {
 
 static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyNativeService));
+}
+
+static jlong nativeGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorManagerService* service =
+            reinterpret_cast<NativeVibratorManagerService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("nativeGetCapabilities failed because native service was not initialized");
+        return 0;
+    }
+    auto result = service->hal()->getCapabilities();
+    return result.isOk() ? static_cast<jlong>(result.value()) : 0;
 }
 
 static jintArray nativeGetVibratorIds(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
@@ -89,13 +120,61 @@ static jintArray nativeGetVibratorIds(JNIEnv* env, jclass /* clazz */, jlong ser
     return ids;
 }
 
+static jboolean nativePrepareSynced(JNIEnv* env, jclass /* clazz */, jlong servicePtr,
+                                    jintArray vibratorIds) {
+    NativeVibratorManagerService* service =
+            reinterpret_cast<NativeVibratorManagerService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("nativePrepareSynced failed because native service was not initialized");
+        return JNI_FALSE;
+    }
+    jsize size = env->GetArrayLength(vibratorIds);
+    std::vector<int32_t> ids(size);
+    env->GetIntArrayRegion(vibratorIds, 0, size, reinterpret_cast<jint*>(ids.data()));
+    return service->hal()->prepareSynced(ids).isOk() ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean nativeTriggerSynced(JNIEnv* env, jclass /* clazz */, jlong servicePtr,
+                                    jlong vibrationId) {
+    NativeVibratorManagerService* service =
+            reinterpret_cast<NativeVibratorManagerService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("nativeTriggerSynced failed because native service was not initialized");
+        return JNI_FALSE;
+    }
+    auto callback = service->createCallback(vibrationId);
+    return service->hal()->triggerSynced(callback).isOk() ? JNI_TRUE : JNI_FALSE;
+}
+
+static void nativeCancelSynced(JNIEnv* env, jclass /* clazz */, jlong servicePtr) {
+    NativeVibratorManagerService* service =
+            reinterpret_cast<NativeVibratorManagerService*>(servicePtr);
+    if (service == nullptr) {
+        ALOGE("nativeCancelSynced failed because native service was not initialized");
+        return;
+    }
+    service->hal()->cancelSynced();
+}
+
 static const JNINativeMethod method_table[] = {
-        {"nativeInit", "()J", (void*)nativeInit},
+        {"nativeInit",
+         "(Lcom/android/server/VibratorManagerService$OnSyncedVibrationCompleteListener;)J",
+         (void*)nativeInit},
         {"nativeGetFinalizer", "()J", (void*)nativeGetFinalizer},
+        {"nativeGetCapabilities", "(J)J", (void*)nativeGetCapabilities},
         {"nativeGetVibratorIds", "(J)[I", (void*)nativeGetVibratorIds},
+        {"nativePrepareSynced", "(J[I)Z", (void*)nativePrepareSynced},
+        {"nativeTriggerSynced", "(JJ)Z", (void*)nativeTriggerSynced},
+        {"nativeCancelSynced", "(J)V", (void*)nativeCancelSynced},
 };
 
-int register_android_server_VibratorManagerService(JNIEnv* env) {
+int register_android_server_VibratorManagerService(JavaVM* jvm, JNIEnv* env) {
+    sJvm = jvm;
+    auto listenerClassName =
+            "com/android/server/VibratorManagerService$OnSyncedVibrationCompleteListener";
+    jclass listenerClass = FindClassOrDie(env, listenerClassName);
+    sMethodIdOnComplete = GetMethodIDOrDie(env, listenerClass, "onComplete", "(J)V");
+
     return jniRegisterNativeMethods(env, "com/android/server/VibratorManagerService", method_table,
                                     NELEM(method_table));
 }
