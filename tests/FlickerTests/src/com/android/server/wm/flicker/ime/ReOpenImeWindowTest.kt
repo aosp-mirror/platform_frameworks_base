@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -52,7 +51,6 @@ import org.junit.runners.Parameterized
  * Test IME window opening transitions.
  * To run this test: `atest FlickerTests:ReOpenImeWindowTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -67,34 +65,37 @@ class ReOpenImeWindowTest(
             val testAppComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
             return FlickerTestRunnerFactory.getInstance()
                 .buildTest(instrumentation, repetitions = 1) { configuration ->
-                        val testApp = ImeAppAutoFocusHelper(instrumentation,
-                            configuration.startRotation)
-                        withTestName { buildTestTag("reOpenImeAutoFocus", configuration) }
-                        repeat { configuration.repetitions }
-                        setup {
-                            test {
-                                device.wakeUpAndGoToHomeScreen()
-                                testApp.launchViaIntent(wmHelper)
-                                testApp.openIME(device, wmHelper)
-                            }
-                            eachRun {
-                                device.pressRecentApps()
-                                wmHelper.waitImeWindowGone()
-                                wmHelper.waitForAppTransitionIdle()
-                                this.setRotation(configuration.startRotation)
-                            }
+                    val testApp = ImeAppAutoFocusHelper(instrumentation,
+                        configuration.startRotation)
+                    withTestName { buildTestTag(configuration) }
+                    repeat { configuration.repetitions }
+                    setup {
+                        test {
+                            device.wakeUpAndGoToHomeScreen()
+                            testApp.launchViaIntent(wmHelper)
+                            testApp.openIME(device, wmHelper)
                         }
-                        transitions {
-                            device.reopenAppFromOverview()
-                            wmHelper.waitImeWindowShown()
+                        eachRun {
+                            device.pressRecentApps()
+                            wmHelper.waitImeWindowGone()
+                            wmHelper.waitForAppTransitionIdle()
+                            this.setRotation(configuration.startRotation)
                         }
-                        teardown {
-                            test {
-                                this.setRotation(Surface.ROTATION_0)
-                                testApp.exit()
-                            }
+                    }
+                    transitions {
+                        device.reopenAppFromOverview()
+                        wmHelper.waitImeWindowShown()
+                    }
+                    teardown {
+                        test {
+                            this.setRotation(Surface.ROTATION_0)
+                            testApp.exit()
                         }
-                        assertions {
+                    }
+                    assertions {
+                        val isRotated = configuration.startRotation.isRotated()
+
+                        presubmit {
                             windowManagerTrace {
                                 navBarWindowIsAlwaysVisible()
                                 statusBarWindowIsAlwaysVisible()
@@ -107,21 +108,34 @@ class ReOpenImeWindowTest(
 
                             layersTrace {
                                 noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation)
-                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
-                                        configuration.endRotation,
-                                        enabled = !configuration.startRotation.isRotated())
-                                statusBarLayerRotatesScales(Surface.ROTATION_0,
-                                        configuration.endRotation,
-                                        enabled = !configuration.startRotation.isRotated())
                                 statusBarLayerIsAlwaysVisible()
                                 navBarLayerIsAlwaysVisible()
-                                visibleLayersShownMoreThanOneConsecutiveEntry(enabled = false)
-
                                 imeLayerBecomesVisible()
                                 appLayerReplacesWallpaperLayer(testAppComponentName.className)
+
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                    statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                }
+                            }
+                        }
+
+                        flaky {
+                            layersTrace {
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
+
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                    statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                }
                             }
                         }
                     }
+                }
         }
     }
 }
