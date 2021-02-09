@@ -538,6 +538,12 @@ public final class CachedAppOptimizer {
     private static native int getBinderFreezeInfo(int pid);
 
     /**
+     * Returns the path to be checked to verify whether the freezer is supported by this system.
+     * @return absolute path to the file
+     */
+    private static native String getFreezerCheckPath();
+
+    /**
      * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
@@ -545,11 +551,15 @@ public final class CachedAppOptimizer {
         FileReader fr = null;
 
         try {
-            fr = new FileReader("/sys/fs/cgroup/uid_0/cgroup.freeze");
+            fr = new FileReader(getFreezerCheckPath());
             char state = (char) fr.read();
 
             if (state == '1' || state == '0') {
                 supported = true;
+                // This is a workaround after reverting the cgroup v2 uid/pid hierarchy due to
+                // http://b/179006802.
+                // TODO: remove once the uid/pid hierarchy is restored
+                enableFreezerInternal(true);
             } else {
                 Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
             }
