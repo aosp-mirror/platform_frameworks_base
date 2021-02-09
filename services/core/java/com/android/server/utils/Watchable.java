@@ -19,8 +19,8 @@ package com.android.server.utils;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
+import android.util.Log;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 /**
@@ -61,40 +61,54 @@ public interface Watchable {
     public void dispatchChange(@Nullable Watchable what);
 
     /**
-     * Return true if the field is tagged with @Watched
-     */
-    private static boolean isWatched(Field f) {
-        for (Annotation a : f.getDeclaredAnnotations()) {
-            if (a.annotationType().equals(Watched.class)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Verify that all @Watched {@link Watchable} attributes are being watched by this
      * class.  This requires reflection and only runs in engineering or user debug
      * builds.
+     * @param base The object that contains watched attributes.
+     * @param observer The {@link Watcher} that should be watching these attributes.
+     * @param logOnly If true then log errors; if false then throw an RuntimeExecption on error.
      */
-    static void verifyWatchedAttributes(Object base, Watcher observer) {
-        if (Build.IS_ENG || Build.IS_USERDEBUG) {
-            for (Field f : base.getClass().getDeclaredFields()) {
+    static void verifyWatchedAttributes(Object base, Watcher observer, boolean logOnly) {
+        if (!(Build.IS_ENG || Build.IS_USERDEBUG)) {
+            return;
+        }
+        for (Field f : base.getClass().getDeclaredFields()) {
+            if (f.getAnnotation(Watched.class) != null) {
+                final String fn = base.getClass().getName() + "." + f.getName();
                 try {
-                    final boolean flagged = isWatched(f);
+                    f.setAccessible(true);
                     final Object o = f.get(base);
-                    final boolean watchable = o instanceof Watchable;
-                    if (flagged && watchable) {
-                        Watchable attr = (Watchable) f.get(base);
+                    if (o instanceof Watchable) {
+                        Watchable attr = (Watchable) (o);
                         if (attr != null && !attr.isRegisteredObserver(observer)) {
-                            throw new RuntimeException(f.getName() + " missing an observer");
+                            if (logOnly) {
+                                Log.e("Watchable", fn + " missing an observer");
+                            } else {
+                                throw new RuntimeException("Watchable " + fn
+                                                           + " missing an observer");
+                            }
                         }
                     }
                 } catch (IllegalAccessException e) {
                     // The field is protected; ignore it.  Other exceptions that may be thrown by
                     // Field.get() are allowed to roll up.
+                    if (logOnly) {
+                        Log.e("Watchable", fn + " not visible");
+                    } else {
+                        throw new RuntimeException("Watchable " + fn + " not visible");
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Verify that all @Watched {@link Watchable} attributes are being watched by this
+     * class.  This calls verifyWatchedAttributes() with logOnly set to false.
+     * @param base The object that contains watched attributes.
+     * @param observer The {@link Watcher} that should be watching these attributes.
+     */
+    static void verifyWatchedAttributes(Object base, Watcher observer) {
+        verifyWatchedAttributes(base, observer, false);
     }
 }

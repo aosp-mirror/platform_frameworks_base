@@ -5940,6 +5940,21 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    // Link watchables to the class
+    private void registerObserver() {
+        mPackages.registerObserver(mWatcher);
+        mSharedLibraries.registerObserver(mWatcher);
+        mStaticLibsByDeclaringPackage.registerObserver(mWatcher);
+        mInstrumentation.registerObserver(mWatcher);
+        mWebInstantAppsDisabled.registerObserver(mWatcher);
+        mAppsFilter.registerObserver(mWatcher);
+        mInstantAppRegistry.registerObserver(mWatcher);
+        mSettings.registerObserver(mWatcher);
+        // If neither "build" attribute is true then this may be a mockito test, and verification
+        // can fail as a false positive.
+        Watchable.verifyWatchedAttributes(this, mWatcher, !(mIsEngBuild || mIsUserDebugBuild));
+    }
+
     /**
      * A extremely minimal constructor designed to start up a PackageManagerService instance for
      * testing.
@@ -6023,15 +6038,7 @@ public class PackageManagerService extends IPackageManager.Stub
         sSnapshotCorked = true;
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = mLiveComputer;
-
-        // Link up the watchers
-        mPackages.registerObserver(mWatcher);
-        mSharedLibraries.registerObserver(mWatcher);
-        mStaticLibsByDeclaringPackage.registerObserver(mWatcher);
-        mInstrumentation.registerObserver(mWatcher);
-        mWebInstantAppsDisabled.registerObserver(mWatcher);
-        mAppsFilter.registerObserver(mWatcher);
-        Watchable.verifyWatchedAttributes(this, mWatcher);
+        registerObserver();
 
         mPackages.putAll(testParams.packages);
         mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
@@ -6185,15 +6192,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mDomainVerificationManager.setConnection(mDomainVerificationConnection);
 
-        // Link up the watchers
-        mPackages.registerObserver(mWatcher);
-        mSharedLibraries.registerObserver(mWatcher);
-        mStaticLibsByDeclaringPackage.registerObserver(mWatcher);
-        mInstrumentation.registerObserver(mWatcher);
-        mWebInstantAppsDisabled.registerObserver(mWatcher);
-        mAppsFilter.registerObserver(mWatcher);
-        Watchable.verifyWatchedAttributes(this, mWatcher);
-
         // Create the computer as soon as the state objects have been installed.  The
         // cached computer is the same as the live computer until the end of the
         // constructor, at which time the invalidation method updates it.  The cache is
@@ -6202,6 +6200,7 @@ public class PackageManagerService extends IPackageManager.Stub
         sSnapshotCorked = true;
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = mLiveComputer;
+        registerObserver();
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
