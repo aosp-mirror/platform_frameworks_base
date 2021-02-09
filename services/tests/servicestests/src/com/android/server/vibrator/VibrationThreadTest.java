@@ -229,9 +229,9 @@ public class VibrationThreadTest {
                 .compose();
         VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
 
-        Thread.sleep(20);
+        assertTrue(waitUntil(t -> t.getVibrators().get(VIBRATOR_ID).isVibrating(), vibrationThread,
+                TEST_TIMEOUT_MILLIS));
         assertTrue(vibrationThread.isAlive());
-        assertTrue(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
@@ -254,9 +254,9 @@ public class VibrationThreadTest {
         VibrationEffect effect = VibrationEffect.createWaveform(new long[]{100}, new int[]{100}, 0);
         VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
 
-        Thread.sleep(20);
+        assertTrue(waitUntil(t -> t.getVibrators().get(VIBRATOR_ID).isVibrating(), vibrationThread,
+                TEST_TIMEOUT_MILLIS));
         assertTrue(vibrationThread.isAlive());
-        assertTrue(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
         // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
@@ -621,10 +621,8 @@ public class VibrationThreadTest {
                 .combine();
         VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
 
-        Thread.sleep(10);
-        assertTrue(vibrationThread.isAlive());
-        assertTrue(vibrationThread.getVibrators().get(1).isVibrating());
-        assertTrue(vibrationThread.getVibrators().get(2).isVibrating());
+        assertTrue(waitUntil(t -> t.getVibrators().get(2).isVibrating(), vibrationThread,
+                TEST_TIMEOUT_MILLIS));
 
         // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.

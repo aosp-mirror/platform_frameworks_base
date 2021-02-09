@@ -50,6 +50,7 @@ import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -81,6 +82,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -92,6 +94,7 @@ import java.util.stream.Collectors;
 @Presubmit
 public class VibratorServiceTest {
 
+    private static final int TEST_TIMEOUT_MILLIS = 1_000;
     private static final int UID = Process.ROOT_UID;
     private static final int VIBRATOR_ID = 1;
     private static final String PACKAGE_NAME = "package";
@@ -342,8 +345,8 @@ public class VibratorServiceTest {
         verify(mIInputManagerMock).vibrate(eq(1), eq(effect), any());
 
         // VibrationThread will start this vibration async, so wait before checking it never played.
-        Thread.sleep(10);
-        assertTrue(mVibratorProvider.getEffects().isEmpty());
+        assertFalse(waitUntil(s -> !mVibratorProvider.getEffects().isEmpty(), service,
+                /* timeout= */ 20));
     }
 
     @Test
@@ -399,8 +402,8 @@ public class VibratorServiceTest {
         verify(mIInputManagerMock).vibrate(eq(1), any(), any());
 
         // VibrationThread will start this vibration async, so wait before checking it never played.
-        Thread.sleep(10);
-        assertTrue(mVibratorProvider.getEffects().isEmpty());
+        assertFalse(waitUntil(s -> !mVibratorProvider.getEffects().isEmpty(), service,
+                /* timeout= */ 20));
     }
 
     @Test
@@ -409,16 +412,10 @@ public class VibratorServiceTest {
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
         vibrate(service, VibrationEffect.createOneShot(1000, 100), HAPTIC_FEEDBACK_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait before triggering callbacks.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        assertTrue(waitUntil(s -> s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-
-        // Wait for callback to cancel vibration.
-        Thread.sleep(10);
-        assertFalse(service.isVibrating());
+        assertTrue(waitUntil(s -> !s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -427,26 +424,18 @@ public class VibratorServiceTest {
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
         vibrate(service, VibrationEffect.createOneShot(1000, 100), RINGTONE_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait before triggering callbacks.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        assertTrue(waitUntil(s -> s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-
-        // Wait for callback to cancel vibration.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        // Settings callback is async, so wait before checking it never got cancelled.
+        assertFalse(waitUntil(s -> !s.isVibrating(), service, /* timeout= */ 20));
     }
 
     @Test
     public void vibrate_withSettingsChanged_doNotCancelVibration() throws Exception {
         VibratorService service = createService();
         vibrate(service, VibrationEffect.createOneShot(1000, 100), HAPTIC_FEEDBACK_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait before triggering callbacks.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        assertTrue(waitUntil(s -> s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_MEDIUM);
@@ -454,9 +443,8 @@ public class VibratorServiceTest {
         // FakeSettingsProvider don't support testing triggering ContentObserver yet.
         service.updateVibrators();
 
-        // Wait for callback to cancel vibration.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        // Settings callback is async, so wait before checking it never got cancelled.
+        assertFalse(waitUntil(s -> !s.isVibrating(), service, /* timeout= */ 20));
     }
 
     @Test
@@ -488,8 +476,8 @@ public class VibratorServiceTest {
         inOrderVerifier.verify(mIInputManagerMock).vibrate(eq(2), eq(effect), any());
 
         // VibrationThread will start this vibration async, so wait before checking it never played.
-        Thread.sleep(10);
-        assertTrue(mVibratorProvider.getEffects().isEmpty());
+        assertFalse(waitUntil(s -> !mVibratorProvider.getEffects().isEmpty(), service,
+                /* timeout= */ 20));
     }
 
     @Test
@@ -521,8 +509,8 @@ public class VibratorServiceTest {
         verify(mIInputManagerMock).vibrate(eq(1), eq(effect), any());
 
         // VibrationThread will start this vibration async, so wait before checking it never played.
-        Thread.sleep(10);
-        assertTrue(mVibratorProvider.getEffects().isEmpty());
+        assertFalse(waitUntil(s -> !mVibratorProvider.getEffects().isEmpty(), service,
+                /* timeout= */ 20));
     }
 
     @Test
@@ -531,18 +519,12 @@ public class VibratorServiceTest {
         VibratorService service = createService();
 
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), ALARM_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait before triggering callbacks.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        assertTrue(waitUntil(s -> s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         // Trigger callbacks from controller.
         mTestLooper.moveTimeForward(50);
         mTestLooper.dispatchAll();
-
-        // VibrationThread needs some time to react to native callbacks and stop the vibrator.
-        Thread.sleep(10);
-        assertFalse(service.isVibrating());
+        assertTrue(waitUntil(s -> !s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -550,16 +532,10 @@ public class VibratorServiceTest {
         VibratorService service = createService();
 
         vibrate(service, VibrationEffect.createOneShot(100, 100), ALARM_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait before checking.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        assertTrue(waitUntil(s -> s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         service.cancelVibrate(service);
-
-        // VibrationThread will stop this vibration async, so wait before checking.
-        Thread.sleep(10);
-        assertFalse(service.isVibrating());
+        assertTrue(waitUntil(s -> !s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
     }
 
     @Test
@@ -584,17 +560,13 @@ public class VibratorServiceTest {
         service.registerVibratorStateListener(mVibratorStateListenerMock);
 
         vibrate(service, VibrationEffect.createOneShot(30, 100), ALARM_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait before triggering callbacks.
-        Thread.sleep(10);
-        assertTrue(service.isVibrating());
+        assertTrue(waitUntil(s -> s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         service.unregisterVibratorStateListener(mVibratorStateListenerMock);
         // Trigger callbacks from controller.
         mTestLooper.moveTimeForward(50);
         mTestLooper.dispatchAll();
-        Thread.sleep(20);
-        assertFalse(service.isVibrating());
+        assertTrue(waitUntil(s -> !s.isVibrating(), service, TEST_TIMEOUT_MILLIS));
 
         InOrder inOrderVerifier = inOrder(mVibratorStateListenerMock);
         // First notification done when listener is registered.
@@ -770,5 +742,16 @@ public class VibratorServiceTest {
 
     private void setGlobalSetting(String settingName, int value) {
         Settings.Global.putInt(mContextSpy.getContentResolver(), settingName, value);
+    }
+
+    private boolean waitUntil(Predicate<VibratorService> predicate,
+            VibratorService service, long timeout) throws InterruptedException {
+        long timeoutTimestamp = SystemClock.uptimeMillis() + timeout;
+        boolean predicateResult = false;
+        while (!predicateResult && SystemClock.uptimeMillis() < timeoutTimestamp) {
+            Thread.sleep(10);
+            predicateResult = predicate.test(service);
+        }
+        return predicateResult;
     }
 }
