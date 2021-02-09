@@ -317,6 +317,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final String DUMP_CONTAINERS_CMD = "containers";
     public static final String DUMP_RECENTS_CMD = "recents";
     public static final String DUMP_RECENTS_SHORT_CMD = "r";
+    public static final String DUMP_TOP_RESUMED_ACTIVITY = "top-resumed";
 
     /** This activity is not being relaunched, or being relaunched for a non-resize reason. */
     public static final int RELAUNCH_REASON_NONE = 0;
@@ -3730,6 +3731,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    void dumpTopResumedActivityLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER TOP-RESUMED (dumpsys activity top-resumed)");
+        ActivityRecord topRecord = mRootWindowContainer.getTopResumedActivity();
+        if (topRecord != null) {
+            topRecord.dump(pw, "", true);
+        }
+    }
+
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage,
@@ -5869,6 +5878,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     if (getRecentTasks() != null) {
                         getRecentTasks().dump(pw, dumpAll, dumpPackage);
                     }
+                } else if (DUMP_TOP_RESUMED_ACTIVITY.equals(cmd)) {
+                    dumpTopResumedActivityLocked(pw);
                 }
             }
         }
