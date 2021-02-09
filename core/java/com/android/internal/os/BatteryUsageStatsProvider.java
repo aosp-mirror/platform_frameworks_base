@@ -52,6 +52,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators = new ArrayList<>();
 
                 // Power calculators are applied in the order of registration
+                mPowerCalculators.add(new DischargedPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
@@ -106,21 +107,19 @@ public class BatteryUsageStatsProvider {
 
         ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
         for (int i = 0; i < queries.size(); i++) {
-            results.add(getBatteryUsageStats(queries.get(i), batteryStatsHelper));
+            results.add(getBatteryUsageStats(queries.get(i)));
         }
         return results;
     }
 
-    private BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query,
-            BatteryStatsHelper batteryStatsHelper) {
+    private BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
         // TODO(b/174186358): read extra power component number from configuration
         final int customPowerComponentCount = 0;
         final int customTimeComponentCount = 0;
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder =
                 new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
-                        .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
-                        .setConsumedPower(batteryStatsHelper.getTotalPower());
+                        .setStatsStartRealtime(mStats.getStatsStartRealtime() / 1000);
 
         SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
         for (int i = uidStats.size() - 1; i >= 0; i--) {
