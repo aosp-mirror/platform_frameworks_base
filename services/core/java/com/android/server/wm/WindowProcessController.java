@@ -1329,6 +1329,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mHasPendingConfigurationChange = true;
             return;
         }
+        dispatchConfiguration(config);
+    }
+
+    void dispatchConfiguration(Configuration config) {
         mHasPendingConfigurationChange = false;
         if (mThread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1367,8 +1371,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mPauseConfigurationDispatchCount++;
     }
 
-    void resumeConfigurationDispatch() {
+    /** Returns {@code true} if the configuration change is pending to dispatch. */
+    boolean resumeConfigurationDispatch() {
+        if (mPauseConfigurationDispatchCount == 0) {
+            return false;
+        }
         mPauseConfigurationDispatchCount--;
+        return mHasPendingConfigurationChange;
     }
 
     /**
