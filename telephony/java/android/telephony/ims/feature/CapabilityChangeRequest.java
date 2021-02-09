@@ -36,12 +36,9 @@ import java.util.Set;
 public final class CapabilityChangeRequest implements Parcelable {
 
     /**
-     * Contains a feature capability, defined as
-     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},
-     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
-     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
-     * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS},
-     * along with an associated technology, defined as
+     * Contains a MMTEL feature capability {@link MmTelFeature.MmTelCapabilities} and RCS feature
+     * capability {@link RcsFeature.RcsImsCapabilities}, along with an associated technology,
+     * defined as
      * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
      * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
      */
@@ -49,7 +46,7 @@ public final class CapabilityChangeRequest implements Parcelable {
         private final int mCapability;
         private final int radioTech;
 
-        public CapabilityPair(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+        public CapabilityPair(int capability,
                 @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
             this.mCapability = capability;
             this.radioTech = radioTech;
@@ -80,13 +77,10 @@ public final class CapabilityChangeRequest implements Parcelable {
         }
 
         /**
-         * @return The stored capability, defined as
-         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},
-         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
-         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
-         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS}
+         * @return The stored capability, defined as {@link MmTelFeature.MmTelCapabilities} and
+         * {@link RcsFeature.RcsImsCapabilities}
          */
-        public @MmTelFeature.MmTelCapabilities.MmTelCapability int getCapability() {
+        public int getCapability() {
             return mCapability;
         }
 
@@ -123,12 +117,11 @@ public final class CapabilityChangeRequest implements Parcelable {
      * Add one or many capabilities to the request to be enabled.
      *
      * @param capabilities A bitfield of capabilities to enable, valid values are defined in
-     *   {@link MmTelFeature.MmTelCapabilities.MmTelCapability}.
+     *   {@link MmTelFeature.MmTelCapabilities} and {@link RcsFeature.RcsImsCapabilities}.
      * @param radioTech  the radio tech that these capabilities should be enabled for, valid
      *   values are in {@link ImsRegistrationImplBase.ImsRegistrationTech}.
      */
-    public void addCapabilitiesToEnableForTech(
-            @MmTelFeature.MmTelCapabilities.MmTelCapability int capabilities,
+    public void addCapabilitiesToEnableForTech(int capabilities,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
         addAllCapabilities(mCapabilitiesToEnable, capabilities, radioTech);
     }
@@ -136,12 +129,11 @@ public final class CapabilityChangeRequest implements Parcelable {
     /**
      * Add one or many capabilities to the request to be disabled.
      * @param capabilities A bitfield of capabilities to diable, valid values are defined in
-     *   {@link MmTelFeature.MmTelCapabilities.MmTelCapability}.
+     *   {@link MmTelFeature.MmTelCapabilities} and {@link RcsFeature.RcsImsCapabilities}.
      * @param radioTech the radio tech that these capabilities should be disabled for, valid
      *   values are in {@link ImsRegistrationImplBase.ImsRegistrationTech}.
      */
-    public void addCapabilitiesToDisableForTech(
-            @MmTelFeature.MmTelCapabilities.MmTelCapability int capabilities,
+    public void addCapabilitiesToDisableForTech(int capabilities,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
         addAllCapabilities(mCapabilitiesToDisable, capabilities, radioTech);
     }
