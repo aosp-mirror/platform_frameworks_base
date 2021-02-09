@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 
 /**
  * Interface to engage split-screen feature.
+ * TODO: Figure out which of these are actually needed outside of the Shell
  */
 @ExternalThread
 public interface SplitScreen extends DragAndDropPolicy.Starter {
@@ -102,18 +103,11 @@ public interface SplitScreen extends DragAndDropPolicy.Starter {
     void setSideStagePosition(@StagePosition int sideStagePosition);
     /** Hides the side-stage if it is currently visible. */
     void setSideStageVisibility(boolean visible);
-    default void enterSplitScreen(int taskId, boolean leftOrTop) {
-        moveToSideStage(taskId,
-                leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT);
-    }
+
     /** Removes the split-screen stages. */
     void exitSplitScreen();
     /** Gets the stage bounds. */
     void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds);
-    /** Dumps current status of split-screen. */
-    void dump(@NonNull PrintWriter pw, String prefix);
-    /** Called when the shell organizer has been registered. */
-    void onOrganizerRegistered();
 
     void registerSplitScreenListener(SplitScreenListener listener);
     void unregisterSplitScreenListener(SplitScreenListener listener);

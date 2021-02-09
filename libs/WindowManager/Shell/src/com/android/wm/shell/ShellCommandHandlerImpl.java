@@ -25,6 +25,7 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -38,7 +39,7 @@ public final class ShellCommandHandlerImpl {
     private static final String TAG = ShellCommandHandlerImpl.class.getSimpleName();
 
     private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<Pip> mPipOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutout;
@@ -50,7 +51,7 @@ public final class ShellCommandHandlerImpl {
     public static ShellCommandHandler create(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
@@ -64,7 +65,7 @@ public final class ShellCommandHandlerImpl {
     private ShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
