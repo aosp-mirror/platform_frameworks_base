@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.SOURCE)
 @IntDef({
+    FaceEnrollStage.UNKNOWN,
     FaceEnrollStage.FIRST_FRAME_RECEIVED,
     FaceEnrollStage.WAITING_FOR_CENTERING,
     FaceEnrollStage.HOLD_STILL_IN_CENTER,
@@ -36,6 +37,11 @@ import java.lang.annotation.RetentionPolicy;
     FaceEnrollStage.ENROLLMENT_FINISHED
 })
 public @interface FaceEnrollStage {
+    /**
+     * The current enrollment stage is not known.
+     */
+    int UNKNOWN = -1;
+
     /**
      * Enrollment has just begun. No action is needed from the user yet.
      */
