@@ -84,7 +84,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
         /** Whether this task listener supports size compat UI. */
         default boolean supportSizeCompatUI() {
-            return false;
+            // All TaskListeners should support size compat except PIP.
+            return true;
         }
         /** Attaches the a child window surface to the task surface. */
         default void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {

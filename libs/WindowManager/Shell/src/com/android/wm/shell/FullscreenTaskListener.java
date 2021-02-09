@@ -95,11 +95,6 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     @Override
-    public boolean supportSizeCompatUI() {
-        return true;
-    }
-
-    @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
         if (!mLeashByTaskId.contains(taskId)) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
