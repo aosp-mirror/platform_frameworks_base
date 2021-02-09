@@ -24,7 +24,6 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
@@ -89,26 +88,27 @@ public class BatteryUsageStatsProvider {
         final BatteryStatsHelper batteryStatsHelper = new BatteryStatsHelper(mContext,
                 false /* collectBatteryBroadcast */);
         batteryStatsHelper.create((Bundle) null);
-        final UserManager userManager = mContext.getSystemService(UserManager.class);
-        final List<UserHandle> asUsers = userManager.getUserProfiles();
-        final int n = asUsers.size();
-        SparseArray<UserHandle> users = new SparseArray<>(n);
-        for (int i = 0; i < n; ++i) {
-            UserHandle userHandle = asUsers.get(i);
-            users.put(userHandle.getIdentifier(), userHandle);
+        final List<UserHandle> users = new ArrayList<>();
+        for (int i = 0; i < queries.size(); i++) {
+            BatteryUsageStatsQuery query = queries.get(i);
+            for (int userId : query.getUserIds()) {
+                UserHandle userHandle = UserHandle.of(userId);
+                if (!users.contains(userHandle)) {
+                    users.add(userHandle);
+                }
+            }
         }
-
         batteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, users);
 
         ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
         for (int i = 0; i < queries.size(); i++) {
-            results.add(getBatteryUsageStats(queries.get(i), batteryStatsHelper, users));
+            results.add(getBatteryUsageStats(queries.get(i), batteryStatsHelper));
         }
         return results;
     }
 
     private BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query,
-            BatteryStatsHelper batteryStatsHelper, SparseArray<UserHandle> users) {
+            BatteryStatsHelper batteryStatsHelper) {
         // TODO(b/174186358): read extra power component number from configuration
         final int customPowerComponentCount = 0;
         final int customTimeComponentCount = 0;
@@ -128,8 +128,8 @@ public class BatteryUsageStatsProvider {
 
         final List<PowerCalculator> powerCalculators = getPowerCalculators();
         for (PowerCalculator powerCalculator : powerCalculators) {
-            powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs, query,
-                    users);
+            powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs,
+                    query);
         }
 
         return batteryUsageStatsBuilder.build();

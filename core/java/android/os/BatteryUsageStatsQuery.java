@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.util.IntArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,9 +54,13 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     public static final int FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL = 1;
 
     private final int mFlags;
+    @NonNull
+    private final int[] mUserIds;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
+        mUserIds = builder.mUserIds != null ? builder.mUserIds.toArray()
+                : new int[]{UserHandle.USER_ALL};
     }
 
     @BatteryUsageStatsFlags
@@ -63,13 +68,28 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return mFlags;
     }
 
+    /**
+     * Returns an array of users for which the attribution is requested.  It may
+     * contain {@link UserHandle#USER_ALL} to indicate that the attribution
+     * should be performed for all users. Battery consumed by users <b>not</b> included
+     * in this array will be returned in the aggregated form as {@link UserBatteryConsumer}'s.
+     */
+    @NonNull
+    public int[] getUserIds() {
+        return mUserIds;
+    }
+
     private BatteryUsageStatsQuery(Parcel in) {
         mFlags = in.readInt();
+        mUserIds = new int[in.readInt()];
+        in.readIntArray(mUserIds);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mFlags);
+        dest.writeInt(mUserIds.length);
+        dest.writeIntArray(mUserIds);
     }
 
     @Override
@@ -96,12 +116,25 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      */
     public static final class Builder {
         private int mFlags;
+        private IntArray mUserIds;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
          */
         public BatteryUsageStatsQuery build() {
             return new BatteryUsageStatsQuery(this);
+        }
+
+        /**
+         * Add a user whose battery stats should be included in the battery usage stats.
+         * {@link UserHandle#USER_ALL} will be used by default if no users are added explicitly.
+         */
+        public Builder addUser(@NonNull UserHandle userHandle) {
+            if (mUserIds == null) {
+                mUserIds = new IntArray(1);
+            }
+            mUserIds.add(userHandle.getIdentifier());
+            return this;
         }
 
         /**
