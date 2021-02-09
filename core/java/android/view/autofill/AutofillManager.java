@@ -200,6 +200,34 @@ public final class AutofillManager {
             "android.view.autofill.extra.AUTHENTICATION_RESULT";
 
     /**
+     * Intent extra: The optional boolean extra field provided by the
+     * {@link android.service.autofill.AutofillService} accompanying the {@link
+     * android.service.autofill.Dataset} result of an authentication operation.
+     *
+     * <p> Before {@link android.os.Build.VERSION_CODES#R}, if the authentication result is a
+     * {@link android.service.autofill.Dataset}, it'll be used to autofill the fields, and also
+     * replace the existing dataset in the cached {@link android.service.autofill.FillResponse}.
+     * That means if the user clears the field values, the autofill suggestion will show up again
+     * with the new authenticated Dataset.
+     *
+     * <p> In {@link android.os.Build.VERSION_CODES#R}, we added an exception to this behavior
+     * that if the Dataset being authenticated is a pinned dataset (see
+     * {@link android.service.autofill.InlinePresentation#isPinned()}), the old Dataset will not be
+     * replaced.
+     *
+     * <p> In {@link android.os.Build.VERSION_CODES#S}, we added this boolean extra field to
+     * allow the {@link android.service.autofill.AutofillService} to explicitly specify whether
+     * the returned authenticated Dataset is ephemeral. An ephemeral Dataset will be used to
+     * autofill once and then thrown away. Therefore, when the boolean extra is set to true, the
+     * returned Dataset will not replace the old dataset from the existing
+     * {@link android.service.autofill.FillResponse}. When it's set to false, it will. When it's not
+     * set, the old dataset will be replaced, unless it is a pinned inline suggestion, which is
+     * consistent with the behavior in {@link android.os.Build.VERSION_CODES#R}.
+     */
+    public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET =
+            "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
+
+    /**
      * Intent extra: The optional extras provided by the
      * {@link android.service.autofill.AutofillService}.
      *
@@ -1754,6 +1782,11 @@ public final class AutofillManager {
             final Bundle newClientState = data.getBundleExtra(EXTRA_CLIENT_STATE);
             if (newClientState != null) {
                 responseData.putBundle(EXTRA_CLIENT_STATE, newClientState);
+            }
+            if (data.getExtras().containsKey(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET)) {
+                responseData.putBoolean(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET,
+                        data.getBooleanExtra(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET,
+                                false));
             }
             try {
                 mService.setAuthenticationResult(responseData, mSessionId, authenticationId,

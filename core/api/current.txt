@@ -50687,6 +50687,7 @@ package android.view.autofill {
     method public void unregisterCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     field public static final String EXTRA_ASSIST_STRUCTURE = "android.view.autofill.extra.ASSIST_STRUCTURE";
     field public static final String EXTRA_AUTHENTICATION_RESULT = "android.view.autofill.extra.AUTHENTICATION_RESULT";
+    field public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET = "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
     field public static final String EXTRA_CLIENT_STATE = "android.view.autofill.extra.CLIENT_STATE";
   }
 
