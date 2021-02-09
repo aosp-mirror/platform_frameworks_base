@@ -39,6 +39,13 @@ interface InsetsControlTarget {
     }
 
     /**
+     * @return The requested visibility of this target.
+     */
+    default boolean getImeRequestedVisibility(@InsetsState.InternalInsetsType int type) {
+        return InsetsState.getDefaultVisibility(type);
+    }
+
+    /**
      * @return The requested {@link InsetsState} of this target.
      */
     default InsetsState getRequestedInsetsState() {

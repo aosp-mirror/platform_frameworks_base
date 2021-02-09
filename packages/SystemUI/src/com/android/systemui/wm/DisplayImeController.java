@@ -203,6 +203,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     return;
                 }
 
+                mImeShowing = insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME);
+
                 final InsetsSource newSource = insetsState.getSource(InsetsState.ITYPE_IME);
                 final Rect newFrame = newSource.getFrame();
                 final Rect oldFrame = mInsetsState.getSource(InsetsState.ITYPE_IME).getFrame();

@@ -279,7 +279,7 @@ class InsetsSourceProvider {
         }
         mAdapter = new ControlAdapter();
         if (getSource().getType() == ITYPE_IME) {
-            setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
+            setClientVisible(target.getImeRequestedVisibility(mSource.getType()));
         }
         final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
