@@ -16318,8 +16318,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
+            final int deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
+                    ? UserHandle.USER_SYSTEM : caller.getUserId();
             if (!removeNonRequiredAppsForManagedDevice(
-                    caller.getUserId(),
+                    deviceOwnerUserId,
                     provisioningParams.isLeaveAllSystemAppsEnabled(),
                     deviceAdmin)) {
                 throw new ServiceSpecificException(
@@ -16327,15 +16329,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         "PackageManager failed to remove non required apps.");
             }
 
+
             if (!setActiveAdminAndDeviceOwner(
-                    caller.getUserId(), deviceAdmin, provisioningParams.getOwnerName())) {
+                    deviceOwnerUserId, deviceAdmin, provisioningParams.getOwnerName())) {
                 throw new ServiceSpecificException(
                         PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED,
                         "Failed to set device owner.");
             }
 
             disallowAddUser();
-            setAdminCanGrantSensorsPermissionForUserUnchecked(caller.getUserId(),
+            setAdminCanGrantSensorsPermissionForUserUnchecked(deviceOwnerUserId,
                     provisioningParams.canDeviceOwnerGrantSensorsPermissions());
         } catch (Exception e) {
             DevicePolicyEventLogger
@@ -16378,28 +16381,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean removeNonRequiredAppsForManagedDevice(
-            int userId, boolean leaveAllSystemAppsEnabled, ComponentName admin) {
+            @UserIdInt int userId, boolean leaveAllSystemAppsEnabled, ComponentName admin) {
         Set<String> packagesToDelete = leaveAllSystemAppsEnabled
                 ? Collections.emptySet()
                 : mOverlayPackagesProvider.getNonRequiredApps(
                         admin, userId, ACTION_PROVISION_MANAGED_DEVICE);
+
+        removeNonInstalledPackages(packagesToDelete, userId);
         if (packagesToDelete.isEmpty()) {
+            Slog.i(LOG_TAG, "No packages to delete on user " + userId);
             return true;
         }
+
         NonRequiredPackageDeleteObserver packageDeleteObserver =
                 new NonRequiredPackageDeleteObserver(packagesToDelete.size());
         for (String packageName : packagesToDelete) {
-            if (isPackageInstalledForUser(packageName, userId)) {
-                Slog.i(LOG_TAG, "Deleting package [" + packageName + "] as user " + userId);
-                mContext.getPackageManager().deletePackageAsUser(
-                        packageName,
-                        packageDeleteObserver,
-                        PackageManager.DELETE_SYSTEM_APP,
-                        userId);
-            }
+            Slog.i(LOG_TAG, "Deleting package [" + packageName + "] as user " + userId);
+            mContext.getPackageManager().deletePackageAsUser(
+                    packageName,
+                    packageDeleteObserver,
+                    PackageManager.DELETE_SYSTEM_APP,
+                    userId);
         }
         Slog.i(LOG_TAG, "Waiting for non required apps to be deleted");
         return packageDeleteObserver.awaitPackagesDeletion();
+    }
+
+    private void removeNonInstalledPackages(Set<String> packages, @UserIdInt int userId) {
+        final Set<String> toBeRemoved = new HashSet<>();
+        for (String packageName : packages) {
+            if (!isPackageInstalledForUser(packageName, userId)) {
+                toBeRemoved.add(packageName);
+            }
+        }
+        packages.removeAll(toBeRemoved);
     }
 
     private void disallowAddUser() {
