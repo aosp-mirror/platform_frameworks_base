@@ -1878,7 +1878,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"افزودن زبان"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادشده"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادی"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"همه زبان‌ها"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"همه منطقه‌ها"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"جستجو"</string>

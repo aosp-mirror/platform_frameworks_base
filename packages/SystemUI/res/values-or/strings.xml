@@ -125,7 +125,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"ସ୍କ୍ରୀନ୍‌କୁ ଘୁରାନ୍ତୁ"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ଓଭରଭିଉ"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"କ୍ୟାମେରା"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ଫୋନ୍‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ଭଏସ୍‌ ସହାୟକ"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାକୁ ଆଉ <xliff:g id="CHARGING_TIME">%s</xliff:g> ଅଛି"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"ନେଟ୍‍ୱର୍କ\nମନିଟର୍‍ କରାଯାଇପାରେ"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"ସର୍ଚ୍ଚ"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ଉପରକୁ ସ୍ଲାଇଡ୍‍ କରନ୍ତୁ।"</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ପାଇଁ ବାମକୁ ସ୍ଲାଇଡ୍ କରନ୍ତୁ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ଆଲାର୍ମ, ରିମାଇଣ୍ଡର୍‌, ଇଭେଣ୍ଟ ଏବଂ ଆପଣ ନିର୍ଦ୍ଦିଷ୍ଟ କରିଥିବା କଲର୍‌ଙ୍କ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ଏହି ବିଷୟବସ୍ତୁ ପାଇଁ ଏକ ଭାସମାନ ସର୍ଟକଟ୍ ସହ ଆପଣଙ୍କର ଧ୍ୟାନ ଦିଅନ୍ତୁ।"</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାଏ, ଭାସମାନ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଡିସପ୍ଲେ କରେ"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାଏ, ଫ୍ଲୋଟିଂ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଡିସପ୍ଲେ କରେ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
@@ -855,7 +855,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"ଡାହାଣ କୀ\'କୋଡ୍‍"</string>
     <string name="left_icon" msgid="5036278531966897006">"ବାମ ଆଇକନ୍‍"</string>
     <string name="right_icon" msgid="1103955040645237425">"ଡାହାଣ ଆଇକନ୍"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଡ଼ିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ଟାଇଲ୍ ଯୋଗ କରିବା ପାଇଁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ଟାଇଲ୍‍ ପୁଣି ସଜାଇବାକୁ ଦାବିଧରି ଟାଣନ୍ତୁ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ବାହାର କରିବାକୁ ଏଠାକୁ ଡ୍ରାଗ୍‍ କରନ୍ତୁ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ଆପଣଙ୍କର ଅତିକମ୍‌ରେ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>ଟି ଟାଇଲ୍ ଆବଶ୍ୟକ"</string>
@@ -950,7 +950,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ସାଧାରଣ ମେସେଜ୍"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ହିଣ୍ଟ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ଇନଷ୍ଟାଣ୍ଟ ଆପ୍‌"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
