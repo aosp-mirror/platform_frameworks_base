@@ -580,6 +580,15 @@ static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj
     transaction->setBlurRegions(ctrl, blurRegionVector);
 }
 
+static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                   jlong nativeObject, jfloat left, jfloat top, jfloat right,
+                                   jfloat bottom, jfloat vecX, jfloat vecY,
+                                   jfloat maxStretchAmount) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setStretchEffect(ctrl, left, top, right, bottom, vecX, vecY, maxStretchAmount);
+}
+
 static void nativeSetSize(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint w, jint h) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -1754,6 +1763,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetLayerStack },
     {"nativeSetBlurRegions", "(JJ[[FI)V",
             (void*)nativeSetBlurRegions },
+    {"nativeSetStretchEffect", "(JJFFFFFFF)V",
+            (void*) nativeSetStretchEffect },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFIZ)V",

@@ -1444,6 +1444,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
 
         @Override
+        public void applyStretch(long frameNumber, float left, float top, float right,
+                float bottom, float vecX, float vecY, float maxStretch) {
+            mRtTransaction.setStretchEffect(mSurfaceControl, left, top, right, bottom, vecX, vecY,
+                    maxStretch);
+            applyRtTransaction(frameNumber);
+        }
+
+        @Override
         public void positionLost(long frameNumber) {
             if (DEBUG) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
