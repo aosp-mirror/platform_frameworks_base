@@ -187,7 +187,8 @@ public class SoundHw2CompatTest {
         }
     }
 
-    private void testLoadGenericModel_2_0() throws Exception {
+    private int loadGenericModel_2_0(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final int handle = 29;
         ArgumentCaptor<android.hardware.soundtrigger.V2_0.ISoundTriggerHw.SoundModel>
                 modelCaptor =
@@ -207,8 +208,6 @@ public class SoundHw2CompatTest {
             return null;
         }).when(mHalDriver).loadSoundModel(any(), any(), anyInt(), any());
 
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
                 canonicalCallback));
 
@@ -217,9 +216,11 @@ public class SoundHw2CompatTest {
 
         TestUtil.validateGenericSoundModel_2_0(modelCaptor.getValue());
         validateCallback_2_0(callbackCaptor.getValue(), canonicalCallback);
+        return handle;
     }
 
-    private void testLoadGenericModel_2_1() throws Exception {
+    private int loadGenericModel_2_1(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final android.hardware.soundtrigger.V2_1.ISoundTriggerHw driver_2_1 =
                 (android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver;
 
@@ -242,8 +243,6 @@ public class SoundHw2CompatTest {
             return null;
         }).when(driver_2_1).loadSoundModel_2_1(any(), any(), anyInt(), any());
 
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
                 canonicalCallback));
 
@@ -253,9 +252,11 @@ public class SoundHw2CompatTest {
 
         TestUtil.validateGenericSoundModel_2_1(modelCaptor.getValue());
         validateCallback_2_1(callbackCaptor.getValue(), canonicalCallback);
+        return handle;
     }
 
-    private void testLoadGenericModel_2_4() throws Exception {
+    private int loadGenericModel_2_4(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final android.hardware.soundtrigger.V2_4.ISoundTriggerHw driver_2_4 =
                 (android.hardware.soundtrigger.V2_4.ISoundTriggerHw) mHalDriver;
 
@@ -278,8 +279,6 @@ public class SoundHw2CompatTest {
             return null;
         }).when(driver_2_4).loadSoundModel_2_4(any(), any(), any());
 
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
                 canonicalCallback));
 
@@ -288,36 +287,43 @@ public class SoundHw2CompatTest {
 
         TestUtil.validateGenericSoundModel_2_1(modelCaptor.getValue());
         validateCallback_2_4(callbackCaptor.getValue(), canonicalCallback);
+        return handle;
+    }
+
+    private int loadGenericModel(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
+            return loadGenericModel_2_4(canonicalCallback);
+        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
+            return loadGenericModel_2_1(canonicalCallback);
+        } else {
+            return loadGenericModel_2_0(canonicalCallback);
+        }
     }
 
     @Test
     public void testLoadGenericModel() throws Exception {
-        if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
-            testLoadGenericModel_2_4();
-        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
-            testLoadGenericModel_2_1();
-        } else {
-            testLoadGenericModel_2_0();
-        }
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
+        loadGenericModel(canonicalCallback);
     }
 
     @Test
     public void testMaxModels() throws Exception {
         assumeFalse(mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw);
 
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
         final int maxModels = TestUtil.createDefaultProperties(false).maxSoundModels;
         // Load as many models as we're allowed.
         for (int i = 0; i < maxModels; ++i) {
-            testLoadGenericModel();
+            loadGenericModel(canonicalCallback);
             verifyNoMoreInteractions(mHalDriver);
             clearInvocations(mHalDriver);
         }
 
         // Now try to load an additional one and expect failure without invoking the underlying
         // driver.
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
-
         try {
             mCanonical.loadPhraseSoundModel(TestUtil.createPhraseSoundModel_2_1(),
                     canonicalCallback);
@@ -359,7 +365,8 @@ public class SoundHw2CompatTest {
         }
     }
 
-    private void testLoadPhraseModel_2_0() throws Exception {
+    private int loadPhraseModel_2_0(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final int handle = 29;
         ArgumentCaptor<android.hardware.soundtrigger.V2_0.ISoundTriggerHw.PhraseSoundModel>
                 modelCaptor =
@@ -379,8 +386,6 @@ public class SoundHw2CompatTest {
             return null;
         }).when(mHalDriver).loadPhraseSoundModel(any(), any(), anyInt(), any());
 
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadPhraseSoundModel(TestUtil.createPhraseSoundModel_2_1(),
                 canonicalCallback));
 
@@ -390,9 +395,11 @@ public class SoundHw2CompatTest {
 
         TestUtil.validatePhraseSoundModel_2_0(modelCaptor.getValue());
         validateCallback_2_0(callbackCaptor.getValue(), canonicalCallback);
+        return handle;
     }
 
-    private void testLoadPhraseModel_2_1() throws Exception {
+    private int loadPhraseModel_2_1(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final android.hardware.soundtrigger.V2_1.ISoundTriggerHw driver_2_1 =
                 (android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver;
 
@@ -415,8 +422,6 @@ public class SoundHw2CompatTest {
             return null;
         }).when(driver_2_1).loadPhraseSoundModel_2_1(any(), any(), anyInt(), any());
 
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadPhraseSoundModel(TestUtil.createPhraseSoundModel_2_1(),
                 canonicalCallback));
 
@@ -426,9 +431,11 @@ public class SoundHw2CompatTest {
 
         TestUtil.validatePhraseSoundModel_2_1(modelCaptor.getValue());
         validateCallback_2_1(callbackCaptor.getValue(), canonicalCallback);
+        return handle;
     }
 
-    private void testLoadPhraseModel_2_4() throws Exception {
+    private int loadPhraseModel_2_4(ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final android.hardware.soundtrigger.V2_4.ISoundTriggerHw driver_2_4 =
                 (android.hardware.soundtrigger.V2_4.ISoundTriggerHw) mHalDriver;
 
@@ -451,8 +458,6 @@ public class SoundHw2CompatTest {
             return null;
         }).when(driver_2_4).loadPhraseSoundModel_2_4(any(), any(), any());
 
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadPhraseSoundModel(TestUtil.createPhraseSoundModel_2_1(),
                 canonicalCallback));
 
@@ -461,17 +466,24 @@ public class SoundHw2CompatTest {
 
         TestUtil.validatePhraseSoundModel_2_1(modelCaptor.getValue());
         validateCallback_2_4(callbackCaptor.getValue(), canonicalCallback);
+        return handle;
+    }
+
+    public int loadPhraseModel(ISoundTriggerHw2.ModelCallback canonicalCallback) throws Exception {
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
+            return loadPhraseModel_2_4(canonicalCallback);
+        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
+            return loadPhraseModel_2_1(canonicalCallback);
+        } else {
+            return loadPhraseModel_2_0(canonicalCallback);
+        }
     }
 
     @Test
     public void testLoadPhraseModel() throws Exception {
-        if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
-            testLoadPhraseModel_2_4();
-        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
-            testLoadPhraseModel_2_1();
-        } else {
-            testLoadPhraseModel_2_0();
-        }
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
+        loadPhraseModel(canonicalCallback);
     }
 
     private void testLoadPhraseModelBusy_2_4() throws Exception {
@@ -513,23 +525,10 @@ public class SoundHw2CompatTest {
     }
 
     private void testStartRecognition_2_0() throws Exception {
-        final int handle = 65;
-
         // First load (this registers the callback).
-        doAnswer(invocation -> {
-            android.hardware.soundtrigger.V2_0.ISoundTriggerHw.loadSoundModelCallback
-                    resultCallback = invocation.getArgument(3);
-
-            // This is the return of this method.
-            resultCallback.onValues(0, handle);
-            return null;
-        }).when(mHalDriver).loadSoundModel(any(), any(), anyInt(), any());
-
         ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
                 ISoundTriggerHw2.ModelCallback.class);
-        assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
-                canonicalCallback));
-        verify(mHalDriver).loadSoundModel(any(), any(), anyInt(), any());
+        final int handle = loadGenericModel(canonicalCallback);
 
         // Then start.
         ArgumentCaptor<android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig>
@@ -556,23 +555,10 @@ public class SoundHw2CompatTest {
         final android.hardware.soundtrigger.V2_1.ISoundTriggerHw driver_2_1 =
                 (android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver;
 
-        final int handle = 68;
-
         // First load (this registers the callback).
-        doAnswer(invocation -> {
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadSoundModel_2_1Callback
-                    resultCallback = invocation.getArgument(3);
-
-            // This is the return of this method.
-            resultCallback.onValues(0, handle);
-            return null;
-        }).when(driver_2_1).loadSoundModel_2_1(any(), any(), anyInt(), any());
-
         ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
                 ISoundTriggerHw2.ModelCallback.class);
-        assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
-                canonicalCallback));
-        verify(driver_2_1).loadSoundModel_2_1(any(), any(), anyInt(), any());
+        final int handle = loadGenericModel(canonicalCallback);
 
         // Then start.
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig>
@@ -876,6 +862,8 @@ public class SoundHw2CompatTest {
             TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
                     666);
         }
+        verifyNoMoreInteractions(canonicalCallback);
+        clearInvocations(canonicalCallback);
     }
 
     private void validateCallback_2_1(
@@ -910,6 +898,8 @@ public class SoundHw2CompatTest {
             TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
                     888);
         }
+        verifyNoMoreInteractions(canonicalCallback);
+        clearInvocations(canonicalCallback);
     }
 
     private void validateCallback_2_4(
@@ -950,5 +940,7 @@ public class SoundHw2CompatTest {
             hwCallback.modelUnloaded(handle);
             verify(canonicalCallback).modelUnloaded(handle);
         }
+        verifyNoMoreInteractions(canonicalCallback);
+        clearInvocations(canonicalCallback);
     }
 }
