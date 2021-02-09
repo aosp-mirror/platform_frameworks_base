@@ -66,7 +66,7 @@ public class RotationResolverManagerService extends
     private static final String KEY_SERVICE_ENABLED = "service_enabled";
 
     /** Default value in absence of {@link DeviceConfig} override. */
-    private static final boolean DEFAULT_SERVICE_ENABLED = false;
+    private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
     static final int ORIENTATION_UNKNOWN =
             FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__UNKNOWN;
