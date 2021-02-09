@@ -1526,15 +1526,19 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public ParceledListSlice<UsageStats> queryUsageStats(int bucketType, long beginTime,
-                long endTime, String callingPackage) {
+                long endTime, String callingPackage, int userId) {
             if (!hasPermission(callingPackage)) {
                 return null;
             }
 
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    Binder.getCallingUid(), UserHandle.getCallingUserId());
+            final int callingUid = Binder.getCallingUid();
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
+                    userId, false, true, "queryUsageStats", callingPackage);
 
-            final int userId = UserHandle.getCallingUserId();
+            // Check the caller's userId for obfuscation decision, not the user being queried
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    callingUid, UserHandle.getCallingUserId());
+
             final long token = Binder.clearCallingIdentity();
             try {
                 final List<UsageStats> results = UsageStatsService.this.queryUsageStats(
