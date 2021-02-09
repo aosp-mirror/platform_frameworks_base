@@ -55,6 +55,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
@@ -117,6 +118,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 
 /**
@@ -1219,6 +1221,8 @@ public class LocationProviderManager extends
     @GuardedBy("mLock")
     private final ArrayList<ProviderEnabledListener> mEnabledListeners;
 
+    private final CopyOnWriteArrayList<IProviderRequestListener> mProviderRequestListeners;
+
     protected final LocationManagerInternal mLocationManagerInternal;
     protected final SettingsHelper mSettingsHelper;
     protected final UserInfoHelper mUserHelper;
@@ -1279,6 +1283,7 @@ public class LocationProviderManager extends
         mLastLocations = new SparseArray<>(2);
 
         mEnabledListeners = new ArrayList<>();
+        mProviderRequestListeners = new CopyOnWriteArrayList<>();
 
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
@@ -1344,6 +1349,7 @@ public class LocationProviderManager extends
             // if external entities are registering listeners it's their responsibility to
             // unregister them before stopManager() is called
             Preconditions.checkState(mEnabledListeners.isEmpty());
+            mProviderRequestListeners.clear();
 
             mEnabled.clear();
             mLastLocations.clear();
@@ -1402,6 +1408,16 @@ public class LocationProviderManager extends
             Preconditions.checkState(mState != STATE_STOPPED);
             mEnabledListeners.remove(listener);
         }
+    }
+
+    /** Add a {@link IProviderRequestListener}. */
+    public void addProviderRequestListener(IProviderRequestListener listener) {
+        mProviderRequestListeners.add(listener);
+    }
+
+    /** Remove a {@link IProviderRequestListener}. */
+    public void removeProviderRequestListener(IProviderRequestListener listener) {
+        mProviderRequestListeners.remove(listener);
     }
 
     public void setRealProvider(@Nullable AbstractLocationProvider provider) {
@@ -1873,8 +1889,7 @@ public class LocationProviderManager extends
         Preconditions.checkState(delayMs >= 0 && delayMs <= newRequest.getIntervalMillis());
 
         if (delayMs < MIN_REQUEST_DELAY_MS) {
-            mLocationEventLog.logProviderUpdateRequest(mName, newRequest);
-            mProvider.getController().setRequest(newRequest);
+            setProviderRequest(newRequest);
         } else {
             if (D) {
                 Log.d(TAG, mName + " provider delaying request update " + newRequest + " by "
@@ -1886,8 +1901,7 @@ public class LocationProviderManager extends
                 public void onAlarm() {
                     synchronized (mLock) {
                         if (mDelayedRegister == this) {
-                            mLocationEventLog.logProviderUpdateRequest(mName, newRequest);
-                            mProvider.getController().setRequest(newRequest);
+                            setProviderRequest(newRequest);
                             mDelayedRegister = null;
                         }
                     }
@@ -1906,8 +1920,23 @@ public class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        mLocationEventLog.logProviderUpdateRequest(mName, ProviderRequest.EMPTY_REQUEST);
-        mProvider.getController().setRequest(ProviderRequest.EMPTY_REQUEST);
+        setProviderRequest(ProviderRequest.EMPTY_REQUEST);
+    }
+
+    @GuardedBy("mLock")
+    private void setProviderRequest(ProviderRequest request) {
+        mLocationEventLog.logProviderUpdateRequest(mName, request);
+        mProvider.getController().setRequest(request);
+
+        FgThread.getHandler().post(() -> {
+            for (IProviderRequestListener listener : mProviderRequestListeners) {
+                try {
+                    listener.onProviderRequestChanged(mName, request);
+                } catch (RemoteException e) {
+                    mProviderRequestListeners.remove(listener);
+                }
+            }
+        });
     }
 
     @GuardedBy("mLock")

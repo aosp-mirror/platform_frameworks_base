@@ -108,7 +108,7 @@ public:
      */
     Result close();
 
-    //shared_ptr<ITunerLnb> getAidlLnb() { return mTunerLnb; }
+    shared_ptr<ITunerLnb> getAidlLnb() { return mTunerLnb; }
     void setId(LnbId id) { mId = id; }
     LnbId getId() { return mId; }
 

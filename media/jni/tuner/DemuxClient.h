@@ -100,6 +100,11 @@ public:
      */
     Result close();
 
+    /**
+     * Get the Aidl demux to set as source.
+     */
+    shared_ptr<ITunerDemux> getAidlDemux() { return mTunerDemux; }
+
     void setId(int id) { mId = id; }
     int getId() { return mId; }
 

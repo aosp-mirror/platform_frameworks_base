@@ -146,11 +146,8 @@ public abstract class RotationResolverService extends Service {
         }
         mPendingCallback = new RotationResolverCallbackWrapper(callback, this);
         mCancellationSignal = CancellationSignal.fromTransport(transport);
-        try {
-            onResolveRotation(request, mCancellationSignal, mPendingCallback);
-        } catch (UnsupportedOperationException e) {
-            reportFailures(callback, ROTATION_RESULT_FAILURE_CANCELLED);
-        }
+
+        onResolveRotation(request, mCancellationSignal, mPendingCallback);
     }
 
     @MainThread

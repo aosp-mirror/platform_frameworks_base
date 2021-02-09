@@ -1409,7 +1409,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_setup",        "(Ljava/lang/Object;Ljava/lang/String;)V",(void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
-    {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
+    {"native_setAudioSessionId",   "(I)V",                      (void *)android_media_MediaPlayer_set_audio_session_id},
     {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},

@@ -4,7 +4,6 @@ android.os.FileObserver
 android.os.NullVibrator
 android.speech.tts.TextToSpeech$Connection$SetupConnectionAsyncTask
 android.widget.Magnifier
-com.android.server.BootReceiver$2
 gov.nist.core.net.DefaultNetworkLayer
 android.net.rtp.AudioGroup
 android.net.rtp.AudioStream

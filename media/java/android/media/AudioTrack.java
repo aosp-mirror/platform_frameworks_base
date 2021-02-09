@@ -836,7 +836,7 @@ public class AudioTrack extends PlayerBase
             mState = STATE_INITIALIZED;
         }
 
-        baseRegisterPlayer();
+        baseRegisterPlayer(mSessionId);
     }
 
     /**
@@ -866,7 +866,7 @@ public class AudioTrack extends PlayerBase
 
         // other initialization...
         if (nativeTrackInJavaObj != 0) {
-            baseRegisterPlayer();
+            baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
             deferred_connect(nativeTrackInJavaObj);
         } else {
             mState = STATE_UNINITIALIZED;

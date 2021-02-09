@@ -122,6 +122,13 @@ import java.util.TreeSet;
 //
 // When ConnectivityService disconnects a network:
 // -----------------------------------------------
+// If a network is just connected, ConnectivityService will think it will be used soon, but might
+// not be used. Thus, a 5s timer will be held to prevent the network being torn down immediately.
+// This "nascent" state is implemented by the "lingering" logic below without relating to any
+// request, and is used in some cases where network requests race with network establishment. The
+// nascent state ends when the 5-second timer fires, or as soon as the network satisfies a
+// request, whichever is earlier. In this state, the network is considered in the background.
+//
 // If a network has no chance of satisfying any requests (even if it were to become validated
 // and enter state #5), ConnectivityService will disconnect the NetworkAgent's AsyncChannel.
 //
@@ -271,7 +278,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // All inactivity timers for this network, sorted by expiry time. A timer is added whenever
     // a request is moved to a network with a better score, regardless of whether the network is or
-    // was lingering or not.
+    // was lingering or not. An inactivity timer is also added when a network connects
+    // without immediately satisfying any requests.
     // TODO: determine if we can replace this with a smaller or unsorted data structure. (e.g.,
     // SparseLongArray) combined with the timestamp of when the last timer is scheduled to fire.
     private final SortedSet<InactivityTimer> mInactivityTimers = new TreeSet<>();
@@ -896,7 +904,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     /**
      * Sets the specified requestId to linger on this network for the specified time. Called by
-     * ConnectivityService when the request is moved to another network with a higher score.
+     * ConnectivityService when the request is moved to another network with a higher score, or
+     * when a network is newly created.
+     *
+     * @param requestId The requestId of the request that no longer need to be served by this
+     *                  network. Or {@link NetworkRequest.REQUEST_ID_NONE} if this is the
+     *                  {@code LingerTimer} for a newly created network.
      */
     public void lingerRequest(int requestId, long now, long duration) {
         if (mInactivityTimerForRequest.get(requestId) != null) {
@@ -969,8 +982,21 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         mInactive = false;
     }
 
-    public boolean isLingering() {
+    public boolean isInactive() {
         return mInactive;
+    }
+
+    public boolean isLingering() {
+        return mInactive && !isNascent();
+    }
+
+    /**
+     * Return whether the network is just connected and about to be torn down because of not
+     * satisfying any request.
+     */
+    public boolean isNascent() {
+        return mInactive && mInactivityTimers.size() == 1
+                && mInactivityTimers.first().requestId == NetworkRequest.REQUEST_ID_NONE;
     }
 
     public void clearInactivityState() {
@@ -1022,7 +1048,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"
                 + networkInfo.toShortString() + "} "
                 + "  Score{" + getCurrentScore() + "} "
-                + (isLingering() ? " lingering" : "")
+                + (isNascent() ? " nascent" : (isLingering() ? " lingering" : ""))
                 + (everValidated ? " everValidated" : "")
                 + (lastValidated ? " lastValidated" : "")
                 + (partialConnectivity ? " partialConnectivity" : "")

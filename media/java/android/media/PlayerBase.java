@@ -97,6 +97,7 @@ public abstract class PlayerBase {
      * Constructor. Must be given audio attributes, as they are required for AppOps.
      * @param attr non-null audio attributes
      * @param class non-null class of the implementation of this abstract class
+     * @param sessionId the audio session Id
      */
     PlayerBase(@NonNull AudioAttributes attr, int implType) {
         if (attr == null) {
@@ -110,7 +111,7 @@ public abstract class PlayerBase {
     /**
      * Call from derived class when instantiation / initialization is successful
      */
-    protected void baseRegisterPlayer() {
+    protected void baseRegisterPlayer(int sessionId) {
         if (!USE_AUDIOFLINGER_MUTING_FOR_OP) {
             IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
             mAppOps = IAppOpsService.Stub.asInterface(b);
@@ -128,7 +129,8 @@ public abstract class PlayerBase {
         }
         try {
             mPlayerIId = getService().trackPlayer(
-                    new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this)));
+                    new PlayerIdCard(mImplType, mAttributes, new IPlayerWrapper(this),
+                            sessionId));
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, player will not be tracked", e);
         }
@@ -145,12 +147,24 @@ public abstract class PlayerBase {
         try {
             getService().playerAttributes(mPlayerIId, attr);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
+            Log.e(TAG, "Error talking to audio service, audio attributes will not be updated", e);
         }
         synchronized (mLock) {
             boolean attributesChanged = (mAttributes != attr);
             mAttributes = attr;
             updateAppOpsPlayAudio_sync(attributesChanged);
+        }
+    }
+
+    /**
+     * To be called whenever the session ID of the player changes
+     * @param sessionId, the new session Id
+     */
+    void baseUpdateSessionId(int sessionId) {
+        try {
+            getService().playerSessionId(mPlayerIId, sessionId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to audio service, the session ID will not be updated", e);
         }
     }
 
@@ -566,16 +580,19 @@ public abstract class PlayerBase {
         public static final int AUDIO_ATTRIBUTES_DEFINED = 1;
         public final AudioAttributes mAttributes;
         public final IPlayer mIPlayer;
+        public final int mSessionId;
 
-        PlayerIdCard(int type, @NonNull AudioAttributes attr, @NonNull IPlayer iplayer) {
+        PlayerIdCard(int type, @NonNull AudioAttributes attr, @NonNull IPlayer iplayer,
+                     int sessionId) {
             mPlayerType = type;
             mAttributes = attr;
             mIPlayer = iplayer;
+            mSessionId = sessionId;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mPlayerType);
+            return Objects.hash(mPlayerType, mSessionId);
         }
 
         @Override
@@ -588,6 +605,7 @@ public abstract class PlayerBase {
             dest.writeInt(mPlayerType);
             mAttributes.writeToParcel(dest, 0);
             dest.writeStrongBinder(mIPlayer == null ? null : mIPlayer.asBinder());
+            dest.writeInt(mSessionId);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<PlayerIdCard> CREATOR
@@ -611,6 +629,7 @@ public abstract class PlayerBase {
             // IPlayer can be null if unmarshalling a Parcel coming from who knows where
             final IBinder b = in.readStrongBinder();
             mIPlayer = (b == null ? null : IPlayer.Stub.asInterface(b));
+            mSessionId = in.readInt();
         }
 
         @Override
@@ -621,7 +640,8 @@ public abstract class PlayerBase {
             PlayerIdCard that = (PlayerIdCard) o;
 
             // FIXME change to the binder player interface once supported as a member
-            return ((mPlayerType == that.mPlayerType) && mAttributes.equals(that.mAttributes));
+            return ((mPlayerType == that.mPlayerType) && mAttributes.equals(that.mAttributes)
+                    && (mSessionId == that.mSessionId));
         }
     }
 
