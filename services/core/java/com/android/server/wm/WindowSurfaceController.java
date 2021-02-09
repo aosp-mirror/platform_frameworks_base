@@ -194,22 +194,6 @@ class WindowSurfaceController {
         return true;
     }
 
-    void setTransparentRegionHint(final Region region) {
-        if (mSurfaceControl == null) {
-            Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
-            return;
-        }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setTransparentRegion");
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setTransparentRegionHint(mSurfaceControl, region);
-        } finally {
-            mService.closeSurfaceTransaction("setTransparentRegion");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    "<<< CLOSE TRANSACTION setTransparentRegion");
-        }
-    }
-
     void setOpaque(boolean isOpaque) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isOpaque=%b: %s", isOpaque, title);
 
