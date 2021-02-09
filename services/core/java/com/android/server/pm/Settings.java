@@ -2712,7 +2712,6 @@ public final class Settings implements Watchable, Snappable {
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
-        mDomainVerificationManager.writeLegacySettings(serializer, pkg.name);
         writeMimeGroupLPr(serializer, pkg.mimeGroups);
 
         serializer.endTag(null, "package");

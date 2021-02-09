@@ -1749,6 +1749,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public AndroidPackage getPackage(@NonNull String packageName) {
             return getPackageLocked(packageName);
         }
+
+        @Override
+        public boolean filterAppAccess(String packageName, int callingUid, int userId) {
+            return mPmInternal.filterAppAccess(packageName, callingUid, userId);
+        }
     }
 
     /**
@@ -16157,8 +16162,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Deprecated
     @Override
     public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
-        mDomainVerificationManager.setLegacyUserState(packageName, userId, status);
-        return true;
+        return mDomainVerificationManager.setLegacyUserState(packageName, userId, status);
     }
 
     @Deprecated
