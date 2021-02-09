@@ -234,12 +234,7 @@ public class InputManagerService extends IInputManager.Stub
     private final SparseBooleanArray mIsVibrating = new SparseBooleanArray();
 
     // State for lid switch
-    // Lock for the lid switch state. Held when triggering callbacks to guarantee lid switch events
-    // are delivered in order. For ex, when a new lid switch callback is registered the lock is held
-    // while the callback is processing the initial lid switch event which guarantees that any
-    // events that occur at the same time are delivered after the callback has returned.
     private final Object mLidSwitchLock = new Object();
-    @GuardedBy("mLidSwitchLock")
     private List<LidSwitchCallback> mLidSwitchCallbacks = new ArrayList<>();
 
     // State for the currently installed input filter.
@@ -387,6 +382,9 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
     public static final int SW_MUTE_DEVICE_BIT = 1 << SW_MUTE_DEVICE;
 
+    /** Indicates an open state for the lid switch. */
+    public static final int SW_STATE_LID_OPEN = 0;
+
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
 
@@ -422,18 +420,13 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     void registerLidSwitchCallbackInternal(@NonNull LidSwitchCallback callback) {
+        boolean lidOpen;
         synchronized (mLidSwitchLock) {
             mLidSwitchCallbacks.add(callback);
-
-            // Skip triggering the initial callback if the system is not yet ready as the switch
-            // state will be reported as KEY_STATE_UNKNOWN. The callback will be triggered in
-            // systemRunning().
-            if (mSystemReady) {
-                boolean lidOpen = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY, SW_LID)
-                        == KEY_STATE_UP;
-                callback.notifyLidSwitchChanged(0 /* whenNanos */, lidOpen);
-            }
+            lidOpen = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY, SW_LID)
+                    == SW_STATE_LID_OPEN;
         }
+        callback.notifyLidSwitchChanged(0 /* whenNanos */, lidOpen);
     }
 
     void unregisterLidSwitchCallbackInternal(@NonNull LidSwitchCallback callback) {
@@ -481,18 +474,7 @@ public class InputManagerService extends IInputManager.Stub
         }
         mNotificationManager = (NotificationManager)mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
-
-        synchronized (mLidSwitchLock) {
-            mSystemReady = true;
-
-            // Send the initial lid switch state to any callback registered before the system was
-            // ready.
-            int switchState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY, SW_LID);
-            for (int i = 0; i < mLidSwitchCallbacks.size(); i++) {
-                LidSwitchCallback callback = mLidSwitchCallbacks.get(i);
-                callback.notifyLidSwitchChanged(0 /* whenNanos */, switchState == KEY_STATE_UP);
-            }
-        }
+        mSystemReady = true;
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -2349,13 +2331,14 @@ public class InputManagerService extends IInputManager.Stub
 
         if ((switchMask & SW_LID_BIT) != 0) {
             final boolean lidOpen = ((switchValues & SW_LID_BIT) == 0);
+
+            ArrayList<LidSwitchCallback> callbacksCopy;
             synchronized (mLidSwitchLock) {
-                if (mSystemReady) {
-                    for (int i = 0; i < mLidSwitchCallbacks.size(); i++) {
-                        LidSwitchCallback callbacks = mLidSwitchCallbacks.get(i);
-                        callbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
-                    }
-                }
+                callbacksCopy = new ArrayList<>(mLidSwitchCallbacks);
+            }
+            for (int i = 0; i < callbacksCopy.size(); i++) {
+                LidSwitchCallback callbacks = callbacksCopy.get(i);
+                callbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
             }
         }
 
