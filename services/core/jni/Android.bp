@@ -56,10 +56,10 @@ cc_library_static {
         "com_android_server_vibrator_VibratorController.cpp",
         "com_android_server_VibratorManagerService.cpp",
         "com_android_server_PersistentDataBlockService.cpp",
-        "com_android_server_am_CachedAppOptimizer.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "onload.cpp",
+        ":lib_cachedAppOptimizer_native",
         ":lib_networkStatsFactory_native",
     ],
 
@@ -191,5 +191,12 @@ filegroup {
     name: "lib_networkStatsFactory_native",
     srcs: [
         "com_android_server_net_NetworkStatsFactory.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_cachedAppOptimizer_native",
+    srcs: [
+        "com_android_server_am_CachedAppOptimizer.cpp",
     ],
 }
