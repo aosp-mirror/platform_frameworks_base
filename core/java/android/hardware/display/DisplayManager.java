@@ -854,8 +854,8 @@ public final class DisplayManager {
      *
      * @hide Requires signature permission.
      */
-    public void setTemporaryBrightness(float brightness) {
-        mGlobal.setTemporaryBrightness(brightness);
+    public void setTemporaryBrightness(int displayId, float brightness) {
+        mGlobal.setTemporaryBrightness(displayId, brightness);
     }
 
     /**
