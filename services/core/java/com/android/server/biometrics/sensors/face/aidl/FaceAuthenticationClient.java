@@ -29,7 +29,6 @@ import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.FaceAuthenticationFrame;
-import android.hardware.face.FaceDataFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -179,19 +178,16 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
         return isBiometricPrompt() ? mBiometricPromptIgnoreListVendor : mKeyguardIgnoreListVendor;
     }
 
-    private boolean shouldSend(int acquireInfo, int vendorCode) {
-        if (acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR) {
-            return !Utils.listContains(getAcquireVendorIgnorelist(), vendorCode);
-        } else {
-            return !Utils.listContains(getAcquireIgnorelist(), acquireInfo);
-        }
+    private boolean shouldSendAcquiredMessage(int acquireInfo, int vendorCode) {
+        return acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR
+                ? !Utils.listContains(getAcquireVendorIgnorelist(), vendorCode)
+                : !Utils.listContains(getAcquireIgnorelist(), acquireInfo);
     }
 
     @Override
     public void onAcquired(int acquireInfo, int vendorCode) {
         mLastAcquire = acquireInfo;
-
-        final boolean shouldSend = shouldSend(acquireInfo, vendorCode);
+        final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
         onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
     }
 
@@ -201,9 +197,21 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
      * @param frame Information about the current frame.
      */
     public void onAuthenticationFrame(@NonNull FaceAuthenticationFrame frame) {
-        // TODO(b/178414967): Send additional frame data to the client callback.
-        final FaceDataFrame data = frame.getData();
-        onAcquired(data.getAcquiredInfo(), data.getVendorCode());
+        // Log acquisition but don't send it to the client yet, since that's handled below.
+        final int acquireInfo = frame.getData().getAcquiredInfo();
+        final int vendorCode = frame.getData().getVendorCode();
+        mLastAcquire = acquireInfo;
+        onAcquiredInternal(acquireInfo, vendorCode, false /* shouldSend */);
+
+        final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
+        if (shouldSend && getListener() != null) {
+            try {
+                getListener().onAuthenticationFrame(frame);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to send authentication frame", e);
+                mCallback.onClientFinished(this, false /* success */);
+            }
+        }
     }
 
     @Override public void onLockoutTimed(long durationMillis) {

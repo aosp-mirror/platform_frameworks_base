@@ -16,6 +16,8 @@
 package android.hardware.face;
 
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticationFrame;
+import android.hardware.face.FaceEnrollFrame;
 
 /**
  * Communication channel from the FaceService back to FaceAuthenticationManager.
@@ -34,4 +36,6 @@ oneway interface IFaceServiceReceiver {
     void onChallengeGenerated(int sensorId, long challenge);
     void onChallengeInterrupted(int sensorId);
     void onChallengeInterruptFinished(int sensorId);
+    void onAuthenticationFrame(in FaceAuthenticationFrame frame);
+    void onEnrollmentFrame(in FaceEnrollFrame frame);
 }
