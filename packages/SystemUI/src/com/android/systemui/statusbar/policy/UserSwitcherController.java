@@ -113,7 +113,9 @@ public class UserSwitcherController implements Dumpable {
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
     private boolean mResumeUserOnGuestLogout = true;
     private boolean mSimpleUserSwitcher;
-    private boolean mAddUsersWhenLocked;
+    // When false, there won't be any visual affordance to add a new user from the keyguard even if
+    // the user is unlocked
+    private boolean mAddUsersFromLockScreen;
     private boolean mPauseRefreshUsers;
     private int mSecondaryUser = UserHandle.USER_NULL;
     private Intent mSecondaryUserServiceIntent;
@@ -204,7 +206,7 @@ public class UserSwitcherController implements Dumpable {
         }
         mForcePictureLoadForUserId.clear();
 
-        final boolean addUsersWhenLocked = mAddUsersWhenLocked;
+        final boolean addUsersWhenLocked = mAddUsersFromLockScreen;
         new AsyncTask<SparseArray<Bitmap>, Void, ArrayList<UserRecord>>() {
             @SuppressWarnings("unchecked")
             @Override
@@ -554,7 +556,7 @@ public class UserSwitcherController implements Dumpable {
     private final ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
         public void onChange(boolean selfChange) {
             mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
-            mAddUsersWhenLocked = Settings.Global.getInt(mContext.getContentResolver(),
+            mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
             refreshUsers(UserHandle.USER_NULL);
         };
@@ -610,43 +612,26 @@ public class UserSwitcherController implements Dumpable {
         }
 
         public int getUserCount() {
-            boolean secureKeyguardShowing = mKeyguardStateController.isShowing()
-                    && mKeyguardStateController.isMethodSecure()
-                    && !mKeyguardStateController.canDismissLockScreen();
-            if (!secureKeyguardShowing) {
-                return getUsers().size();
-            }
-            // The lock screen is secure and showing. Filter out restricted records.
-            final int userSize = getUsers().size();
-            int count = 0;
-            for (int i = 0; i < userSize; i++) {
-                if (getUsers().get(i).isGuest) continue;
-                if (getUsers().get(i).isRestricted) {
-                    break;
-                } else {
-                    count++;
-                }
-            }
-            return count;
+            return countUsers(false);
         }
 
         @Override
         public int getCount() {
-            boolean secureKeyguardShowing = mKeyguardStateController.isShowing()
-                    && mKeyguardStateController.isMethodSecure()
-                    && !mKeyguardStateController.canDismissLockScreen();
-            if (!secureKeyguardShowing) {
-                return getUsers().size();
-            }
-            // The lock screen is secure and showing. Filter out restricted records.
+            return countUsers(true);
+        }
+
+        private int countUsers(boolean includeGuest) {
+            boolean keyguardShowing = mKeyguardStateController.isShowing();
             final int userSize = getUsers().size();
             int count = 0;
             for (int i = 0; i < userSize; i++) {
-                if (getUsers().get(i).isRestricted) {
-                    break;
-                } else {
-                    count++;
+                if (getUsers().get(i).isGuest && !includeGuest) {
+                    continue;
                 }
+                if (getUsers().get(i).isRestricted && keyguardShowing) {
+                    break;
+                }
+                count++;
             }
             return count;
         }
