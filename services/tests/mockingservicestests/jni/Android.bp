@@ -1,0 +1,33 @@
+cc_library_shared {
+    name: "libactivitymanagermockingservicestestjni",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+
+    srcs: [
+        ":lib_cachedAppOptimizer_native",
+        "onload.cpp",
+    ],
+
+    include_dirs: [
+        "frameworks/base/libs",
+        "frameworks/native/services",
+        "system/memory/libmeminfo/include",
+    ],
+
+    shared_libs: [
+        "libandroid",
+        "libandroid_runtime",
+        "libbase",
+        "libbinder",
+        "liblog",
+        "libmeminfo",
+        "libnativehelper",
+        "libprocessgroup",
+        "libutils",
+    ],
+}
