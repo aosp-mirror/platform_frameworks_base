@@ -13328,6 +13328,7 @@ public class DevicePolicyManager {
      * @return true if the app can grant device sensors-related permissions, false otherwise.
      */
     public boolean canAdminGrantSensorsPermissions() {
+        throwIfParentInstance("canAdminGrantSensorsPermissions");
         return canAdminGrantSensorsPermissionsForUser(myUserId());
     }
 
