@@ -132,9 +132,6 @@ cc_test {
         "tests/XmlParserTests.cpp",
         "tests/ZipFileTests.cpp",
     ],
-    required: [
-        "idmap2",
-    ],
     static_libs: ["libgmock"],
     target: {
         android: {
@@ -163,9 +160,19 @@ cc_test {
             shared_libs: [
                 "libz",
             ],
+            data: [
+                ":libz",
+                ":idmap2",
+            ],
         },
     },
-    data: ["tests/data/**/*.apk"],
+    data: [
+        "tests/data/**/*.apk",
+    ],
+    compile_multilib: "first",
+    test_options: {
+        unit_test: true,
+    },
 }
 
 cc_binary {
