@@ -116,7 +116,7 @@ class CompatConfigBuilder {
     }
 
     CompatConfigBuilder addOverridableChangeWithId(long id) {
-        mChanges.add(new CompatChange(id, "", -1, -1, false, true, "", true));
+        mChanges.add(new CompatChange(id, "", -1, -1, true, false, "", true));
         return this;
     }
 
