@@ -36,6 +36,7 @@ import java.io.File;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -154,6 +155,32 @@ public final class FontConfig implements Parcelable {
             return new FontConfig[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FontConfig that = (FontConfig) o;
+        return mLastModifiedTimeMillis == that.mLastModifiedTimeMillis
+                && mConfigVersion == that.mConfigVersion
+                && Objects.equals(mFamilies, that.mFamilies)
+                && Objects.equals(mAliases, that.mAliases);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mFamilies, mAliases, mLastModifiedTimeMillis, mConfigVersion);
+    }
+
+    @Override
+    public String toString() {
+        return "FontConfig{"
+                + "mFamilies=" + mFamilies
+                + ", mAliases=" + mAliases
+                + ", mLastModifiedTimeMillis=" + mLastModifiedTimeMillis
+                + ", mConfigVersion=" + mConfigVersion
+                + '}';
+    }
 
     /**
      * Represents single font entry in system font configuration.
@@ -317,6 +344,37 @@ public final class FontConfig implements Parcelable {
         public boolean isItalic() {
             return getStyle().getSlant() == FontStyle.FONT_SLANT_ITALIC;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Font font = (Font) o;
+            return mIndex == font.mIndex
+                    && Objects.equals(mFile, font.mFile)
+                    && Objects.equals(mOriginalFile, font.mOriginalFile)
+                    && Objects.equals(mStyle, font.mStyle)
+                    && Objects.equals(mFontVariationSettings, font.mFontVariationSettings)
+                    && Objects.equals(mFontFamilyName, font.mFontFamilyName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFile, mOriginalFile, mStyle, mIndex, mFontVariationSettings,
+                    mFontFamilyName);
+        }
+
+        @Override
+        public String toString() {
+            return "Font{"
+                    + "mFile=" + mFile
+                    + ", mOriginalFile=" + mOriginalFile
+                    + ", mStyle=" + mStyle
+                    + ", mIndex=" + mIndex
+                    + ", mFontVariationSettings='" + mFontVariationSettings + '\''
+                    + ", mFontFamilyName='" + mFontFamilyName + '\''
+                    + '}';
+        }
     }
 
     /**
@@ -398,6 +456,30 @@ public final class FontConfig implements Parcelable {
                 return new Alias[size];
             }
         };
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Alias alias = (Alias) o;
+            return mWeight == alias.mWeight
+                    && Objects.equals(mName, alias.mName)
+                    && Objects.equals(mOriginal, alias.mOriginal);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mName, mOriginal, mWeight);
+        }
+
+        @Override
+        public String toString() {
+            return "Alias{"
+                    + "mName='" + mName + '\''
+                    + ", mOriginal='" + mOriginal + '\''
+                    + ", mWeight=" + mWeight
+                    + '}';
+        }
     }
 
     /**
@@ -413,7 +495,7 @@ public final class FontConfig implements Parcelable {
     public static final class FontFamily implements Parcelable {
         private final @NonNull List<Font> mFonts;
         private final @Nullable String mName;
-        private final @Nullable LocaleList mLocaleList;
+        private final @NonNull LocaleList mLocaleList;
         private final @Variant int mVariant;
 
         /** @hide */
@@ -454,7 +536,7 @@ public final class FontConfig implements Parcelable {
          * @hide Only system server can create this instance and passed via IPC.
          */
         public FontFamily(@NonNull List<Font> fonts, @Nullable String name,
-                @Nullable LocaleList localeList, @Variant int variant) {
+                @NonNull LocaleList localeList, @Variant int variant) {
             mFonts = fonts;
             mName = name;
             mLocaleList = localeList;
@@ -493,8 +575,6 @@ public final class FontConfig implements Parcelable {
          *
          * The locale list will be used for deciding which font family should be used in fallback
          * list.
-         *
-         * @return non-null if a locale list is available. Otherwise null.
          */
         public @NonNull LocaleList getLocaleList() {
             return mLocaleList;
@@ -558,6 +638,32 @@ public final class FontConfig implements Parcelable {
         @Deprecated
         public @NonNull String getLanguages() {
             return mLocaleList.toLanguageTags();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FontFamily that = (FontFamily) o;
+            return mVariant == that.mVariant
+                    && Objects.equals(mFonts, that.mFonts)
+                    && Objects.equals(mName, that.mName)
+                    && Objects.equals(mLocaleList, that.mLocaleList);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFonts, mName, mLocaleList, mVariant);
+        }
+
+        @Override
+        public String toString() {
+            return "FontFamily{"
+                    + "mFonts=" + mFonts
+                    + ", mName='" + mName + '\''
+                    + ", mLocaleList=" + mLocaleList
+                    + ", mVariant=" + mVariant
+                    + '}';
         }
     }
 }
