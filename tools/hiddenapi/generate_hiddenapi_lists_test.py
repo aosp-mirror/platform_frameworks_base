@@ -61,8 +61,8 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         self.assertEqual(flags.generate_csv(), [
             'A,' + FLAG_UNSUPPORTED,
             'B,' + FLAG_BLOCKED + "," + FLAG_MAX_TARGET_O,
-            'C,' + FLAG_SYSTEM_API + ',' + FLAG_SDK,
-            'D,' + FLAG_UNSUPPORTED + ',' + FLAG_TEST_API,
+            'C,' + FLAG_SDK + ',' + FLAG_SYSTEM_API,
+            'D,' + FLAG_TEST_API + ',' + FLAG_UNSUPPORTED,
             'E,' + FLAG_BLOCKED + ',' + FLAG_TEST_API,
         ])
 
@@ -77,7 +77,7 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         # Test new additions.
         flags.assign_flag(FLAG_UNSUPPORTED, set([ 'A', 'B' ]))
         self.assertEqual(flags.generate_csv(),
-            [ 'A,' + FLAG_UNSUPPORTED + "," + FLAG_SDK, 'B,' + FLAG_UNSUPPORTED ])
+            [ 'A,' + FLAG_SDK + "," + FLAG_UNSUPPORTED, 'B,' + FLAG_UNSUPPORTED ])
 
         # Test invalid API signature.
         with self.assertRaises(AssertionError):
