@@ -34,6 +34,9 @@
 
     <bool name="flag_brightness_slider">false</bool>
 
+    <!-- The new animations to/from lockscreen and AOD! -->
+    <bool name="flag_lockscreen_animations">false</bool>
+
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
 </resources>
