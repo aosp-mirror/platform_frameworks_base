@@ -20,8 +20,11 @@ package com.android.server.companion;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.Context.BIND_IMPORTANT;
+import static android.content.pm.PackageManager.MATCH_ALL;
 
+import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.CollectionUtils.emptyIfNull;
+import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.CollectionUtils.find;
 import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.internal.util.CollectionUtils.map;
@@ -45,6 +48,7 @@ import android.app.PendingIntent;
 import android.app.role.RoleManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
@@ -58,15 +62,18 @@ import android.companion.ICompanionDeviceDiscoveryService;
 import android.companion.ICompanionDeviceManager;
 import android.companion.ICompanionDeviceService;
 import android.companion.IFindDeviceCallback;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -186,6 +193,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private BluetoothDeviceConnectedListener mBluetoothDeviceConnectedListener =
             new BluetoothDeviceConnectedListener();
+    private BleStateBroadcastReceiver mBleStateBroadcastReceiver = new BleStateBroadcastReceiver();
     private List<String> mCurrentlyConnectedDevices = new ArrayList<>();
     private ArrayMap<String, Date> mDevicesLastNearby = new ArrayMap<>();
     private UnbindDeviceListenersRunnable
@@ -283,11 +291,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            // Init Bluetooth
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter != null) {
                 mBluetoothAdapter.registerBluetoothConnectionCallback(
                         getContext().getMainExecutor(),
                         mBluetoothDeviceConnectedListener);
+                getContext().registerReceiver(
+                        mBleStateBroadcastReceiver, mBleStateBroadcastReceiver.mIntentFilter);
                 initBleScanning();
             } else {
                 Log.w(LOG_TAG, "No BluetoothAdapter available");
@@ -550,7 +561,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 return true;
             }
 
-            return CollectionUtils.any(
+            return any(
                     getAllAssociations(userId, packageName),
                     a -> Objects.equals(a.getDeviceMacAddress(), macAddress));
         }
@@ -902,7 +913,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private List<UserInfo> getAllUsers() {
-        return getContext().getSystemService(UserManager.class).getUsers();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return mUserManager.getUsers();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Nullable
@@ -913,11 +929,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private Set<Association> getAllAssociations() {
-        ArraySet<Association> result = new ArraySet<>();
-        for (UserInfo user : mUserManager.getAliveUsers()) {
-            result.addAll(getAllAssociations(user.id));
+        long identity = Binder.clearCallingIdentity();
+        try {
+            ArraySet<Association> result = new ArraySet<>();
+            for (UserInfo user : mUserManager.getAliveUsers()) {
+                result.addAll(getAllAssociations(user.id));
+            }
+            return result;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        return result;
     }
 
     private Set<Association> readAllAssociations(int userId) {
@@ -1004,11 +1025,28 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             Association a) {
         return mDeviceListenerServiceConnectors.forUser(a.getUserId()).computeIfAbsent(
                 a.getPackageName(),
-                pkg -> new ServiceConnector.Impl<>(getContext(),
-                        new Intent(CompanionDeviceService.SERVICE_INTERFACE),
-                        BIND_IMPORTANT,
-                        a.getUserId(),
-                        ICompanionDeviceService.Stub::asInterface));
+                pkg -> createDeviceListenerServiceConnector(a));
+    }
+
+    private ServiceConnector<ICompanionDeviceService> createDeviceListenerServiceConnector(
+            Association a) {
+        List<ResolveInfo> resolveInfos = getContext().getPackageManager().queryIntentServicesAsUser(
+                new Intent(CompanionDeviceService.SERVICE_INTERFACE), MATCH_ALL, a.getUserId());
+        List<ResolveInfo> packageResolveInfos = filter(resolveInfos,
+                info -> Objects.equals(info.serviceInfo.packageName, a.getPackageName()));
+        if (packageResolveInfos.size() != 1) {
+            Log.w(LOG_TAG, "Device presence listener package must have exactly one "
+                    + "CompanionDeviceService, but " + a.getPackageName()
+                    + " has " + packageResolveInfos.size());
+            return new ServiceConnector.NoOp<>();
+        }
+        ComponentName componentName = packageResolveInfos.get(0).serviceInfo.getComponentName();
+        Log.i(LOG_TAG, "Initializing CompanionDeviceService binding for " + componentName);
+        return new ServiceConnector.Impl<>(getContext(),
+                new Intent(CompanionDeviceService.SERVICE_INTERFACE).setComponent(componentName),
+                BIND_IMPORTANT,
+                a.getUserId(),
+                ICompanionDeviceService.Stub::asInterface);
     }
 
     private class BleScanCallback extends ScanCallback {
@@ -1034,8 +1072,34 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             if (errorCode == SCAN_FAILED_ALREADY_STARTED) {
                 // ignore - this might happen if BT tries to auto-restore scans for us in the
                 // future
+                Log.i(LOG_TAG, "Ignoring BLE scan error: SCAN_FAILED_ALREADY_STARTED");
             } else {
-                Log.wtf(LOG_TAG, "Failed to start BLE scan: error " + errorCode);
+                Log.w(LOG_TAG, "Failed to start BLE scan: error " + errorCode);
+            }
+        }
+    }
+
+    private class BleStateBroadcastReceiver extends BroadcastReceiver {
+
+        final IntentFilter mIntentFilter =
+                new IntentFilter(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, -1);
+            int newState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+            Log.i(LOG_TAG, "Received BT state transition broadcast: "
+                    + BluetoothAdapter.nameForState(previousState)
+                    + " -> " + BluetoothAdapter.nameForState(newState));
+
+            boolean bleOn = newState == BluetoothAdapter.STATE_ON
+                    || newState == BluetoothAdapter.STATE_BLE_ON;
+            if (bleOn) {
+                if (mBluetoothAdapter.getBluetoothLeScanner() != null) {
+                    startBleScan();
+                } else {
+                    Log.wtf(LOG_TAG, "BLE on, but BluetoothLeScanner == null");
+                }
             }
         }
     }
@@ -1100,7 +1164,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private void onDeviceNearby(String address) {
         Date timestamp = new Date();
-        mDevicesLastNearby.put(address, timestamp);
+        Date oldTimestamp = mDevicesLastNearby.put(address, timestamp);
 
         cancelUnbindDeviceListener(address);
 
@@ -1108,15 +1172,20 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 .computeIfAbsent(address, addr -> new TriggerDeviceDisappearedRunnable(address))
                 .schedule();
 
-        for (Association association : getAllAssociations(address)) {
-            if (association.isNotifyOnDeviceNearby()) {
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Device " + address
-                            + " managed by " + association.getPackageName()
-                            + " is nearby on " + timestamp);
+        // Avoid spamming the app if device is already known to be nearby
+        boolean justAppeared = oldTimestamp == null
+                || timestamp.getTime() - oldTimestamp.getTime() >= DEVICE_DISAPPEARED_TIMEOUT_MS;
+        if (justAppeared) {
+            for (Association association : getAllAssociations(address)) {
+                if (association.isNotifyOnDeviceNearby()) {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Device " + address
+                                + " managed by " + association.getPackageName()
+                                + " is nearby on " + timestamp);
+                    }
+                    getDeviceListenerServiceConnector(association).run(
+                            service -> service.onDeviceAppeared(association.getDeviceMacAddress()));
                 }
-                getDeviceListenerServiceConnector(association).run(
-                        service -> service.onDeviceAppeared(association.getDeviceMacAddress()));
             }
         }
     }
@@ -1152,6 +1221,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void initBleScanning() {
+        Log.i(LOG_TAG, "initBleScanning()");
+
         boolean bluetoothReady = mBluetoothAdapter.registerServiceLifecycleCallback(
                 new BluetoothAdapter.ServiceLifecycleCallback() {
                     @Override
@@ -1171,14 +1242,21 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void startBleScan() {
+        Log.i(LOG_TAG, "startBleScan()");
+
         List<ScanFilter> filters = getBleScanFilters();
         if (filters.isEmpty()) {
             return;
         }
-        mBluetoothAdapter.getBluetoothLeScanner().startScan(
-                filters,
-                new ScanSettings.Builder().setScanMode(SCAN_MODE_BALANCED).build(),
-                mBleScanCallback);
+        BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+        if (scanner == null) {
+            Log.w(LOG_TAG, "scanner == null (likely BLE isn't ON yet)");
+        } else {
+            scanner.startScan(
+                    filters,
+                    new ScanSettings.Builder().setScanMode(SCAN_MODE_BALANCED).build(),
+                    mBleScanCallback);
+        }
     }
 
     void restartBleScan() {
