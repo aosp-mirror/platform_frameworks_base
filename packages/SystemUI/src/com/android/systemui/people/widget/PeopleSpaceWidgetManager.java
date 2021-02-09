@@ -135,12 +135,14 @@ public class PeopleSpaceWidgetManager {
         try {
             String sbnShortcutId = sbn.getShortcutId();
             if (sbnShortcutId == null) {
+                if (DEBUG) Log.d(TAG, "Sbn shortcut id is null");
                 return;
             }
             int[] widgetIds = mAppWidgetService.getAppWidgetIds(
                     new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
             );
             if (widgetIds.length == 0) {
+                Log.d(TAG, "No app widget ids returned");
                 return;
             }
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -148,6 +150,7 @@ public class PeopleSpaceWidgetManager {
             String key = PeopleSpaceUtils.getKey(sbnShortcutId, sbn.getPackageName(), userId);
             Set<String> storedWidgetIds = new HashSet<>(sp.getStringSet(key, new HashSet<>()));
             if (storedWidgetIds.isEmpty()) {
+                Log.d(TAG, "No stored widget ids");
                 return;
             }
             for (String widgetIdString : storedWidgetIds) {
