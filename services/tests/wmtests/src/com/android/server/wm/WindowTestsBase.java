@@ -37,6 +37,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
+
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -258,6 +260,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
             win.mHasSurface = true;
             win.mHidden = false;
             win.showLw(false /* doAnimation */, false /* requestAnim */);
+        }
+    }
+
+    static void makeWindowVisibleAndDrawn(WindowState... windows) {
+        makeWindowVisible(windows);
+        for (WindowState win : windows) {
+            win.mWinAnimator.mDrawState = HAS_DRAWN;
         }
     }
 
