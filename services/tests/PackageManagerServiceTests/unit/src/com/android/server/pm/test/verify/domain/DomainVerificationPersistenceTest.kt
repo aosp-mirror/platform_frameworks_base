@@ -104,14 +104,14 @@ class DomainVerificationPersistenceTest {
 
             userSelectionStates[1] = DomainVerificationUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
-                isDisallowLinkHandling = false
+                isLinkHandlingAllowed = true
             }
         }
         val stateOne = mockEmptyPkgState(1).apply {
             // It's valid to have a user selection without any autoVerify domains
             userSelectionStates[1] = DomainVerificationUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
-                isDisallowLinkHandling = true
+                isLinkHandlingAllowed = false
             }
         }
 
@@ -137,13 +137,15 @@ class DomainVerificationPersistenceTest {
                         hasAutoVerifyDomains="true"
                         >
                         <state>
-                            <domain name="example.com" state="${DomainVerificationManager.STATE_SUCCESS}"/>
-                            <domain name="example.org" state="${DomainVerificationManager.STATE_FIRST_VERIFIER_DEFINED}"/>
+                            <domain name="example.com" state="${
+                                DomainVerificationManager.STATE_SUCCESS}"/>
+                            <domain name="example.org" state="${
+                                DomainVerificationManager.STATE_FIRST_VERIFIER_DEFINED}"/>
                             <not-domain name="not-domain.com" state="1"/>
                             <domain name="missing-state.com"/>
                         </state>
                         <user-states>
-                            <user-state userId="1" disallowLinkHandling="false">
+                            <user-state userId="1" allowLinkHandling="true">
                                 <enabled-hosts>
                                     <host name="example-user1.com"/>
                                     <not-host name="not-host.com"/>
@@ -171,7 +173,7 @@ class DomainVerificationPersistenceTest {
                         >
                         <state/>
                         <user-states>
-                            <user-state userId="1" disallowLinkHandling="true">
+                            <user-state userId="1" allowLinkHandling="false">
                                 <enabled-hosts>
                                     <host name="example-user1.com"/>
                                     <host name="example-user1.org"/>
@@ -214,9 +216,9 @@ class DomainVerificationPersistenceTest {
         stateMap["$packageName.com"] = id
         userSelectionStates[id] = DomainVerificationUserState(id).apply {
             addHosts(setOf("$packageName-user.com"))
-            isDisallowLinkHandling = true
+            isLinkHandlingAllowed = true
         }
     }
 
-    private fun pkgName(id: Int) = "${PKG_PREFIX}.pkg$id"
+    private fun pkgName(id: Int) = "$PKG_PREFIX.pkg$id"
 }
