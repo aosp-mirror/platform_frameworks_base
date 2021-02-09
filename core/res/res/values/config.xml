@@ -673,6 +673,15 @@
         -->
     </integer-array>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as unfolded by
+         the display fold controller. Default is empty. -->
+    <integer-array name="config_unfoldedDeviceStates">
+        <!-- Example:
+        <item>3</item>
+        <item>4</item>
+        -->
+    </integer-array>
+
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
 
