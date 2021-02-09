@@ -39,7 +39,7 @@ public class QSDetailDisplayer {
     /** Show the supplied DetailAdapter in the Quick Settings. */
     public void showDetailAdapter(DetailAdapter detailAdapter, int x, int y) {
         if (mQsPanelController != null) {
-            mQsPanelController.showDetailDapater(detailAdapter, x, y);
+            mQsPanelController.showDetailAdapter(detailAdapter, x, y);
         }
     }
 }
