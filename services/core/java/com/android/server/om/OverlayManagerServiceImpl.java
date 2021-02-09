@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -697,19 +698,20 @@ final class OverlayManagerServiceImpl {
         removeIdmapIfPossible(oi);
     }
 
-    List<String> getEnabledOverlayPackageNames(@NonNull final String targetPackageName,
+    OverlayPaths getEnabledOverlayPaths(@NonNull final String targetPackageName,
             final int userId) {
         final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
                 userId);
-        final List<String> paths = new ArrayList<>(overlays.size());
+        final OverlayPaths.Builder paths = new OverlayPaths.Builder();
         final int n = overlays.size();
         for (int i = 0; i < n; i++) {
             final OverlayInfo oi = overlays.get(i);
-            if (oi.isEnabled()) {
-                paths.add(oi.packageName);
+            if (!oi.isEnabled()) {
+                continue;
             }
+            paths.addApkPath(oi.baseCodePath);
         }
-        return paths;
+        return paths.build();
     }
 
     /**
