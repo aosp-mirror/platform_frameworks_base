@@ -794,7 +794,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             case BiometricAuthenticator.TYPE_FINGERPRINT:
                 return FingerprintManager.getAcquiredString(mContext, acquiredInfo, vendorCode);
             case BiometricAuthenticator.TYPE_FACE:
-                return FaceManager.getAcquiredString(mContext, acquiredInfo, vendorCode);
+                return FaceManager.getAuthHelpMessage(mContext, acquiredInfo, vendorCode);
             default:
                 return null;
         }
