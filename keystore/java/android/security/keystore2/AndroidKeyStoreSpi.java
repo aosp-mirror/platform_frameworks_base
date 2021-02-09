@@ -866,7 +866,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         try {
             response = mKeyStore.getKeyEntry(wrappingkey);
         } catch (android.security.KeyStoreException e) {
-            throw new KeyStoreException("Failed to load wrapping key.", e);
+            throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
+                    + e.getErrorCode(), e);
         }
 
         KeyDescriptor wrappedKey = makeKeyDescriptor(alias);
