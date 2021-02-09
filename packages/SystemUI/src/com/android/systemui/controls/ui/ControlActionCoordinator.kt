@@ -24,6 +24,9 @@ import android.service.controls.Control
  */
 interface ControlActionCoordinator {
 
+    // Handle actions launched from GlobalActionsDialog or ControlDialog
+    var startedFromGlobalActions: Boolean
+
     /**
      * Close any dialogs which may have been open
      */
