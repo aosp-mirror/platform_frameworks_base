@@ -47,6 +47,7 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -200,7 +201,8 @@ public interface StatusBarPhoneModule {
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
-            BrightnessSlider.Factory brightnessSliderFactory) {
+            BrightnessSlider.Factory brightnessSliderFactory,
+            FeatureFlags featureFlags) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -279,6 +281,7 @@ public interface StatusBarPhoneModule {
                 notificationShadeDepthController,
                 statusBarTouchableRegionManager,
                 notificationIconAreaController,
-                brightnessSliderFactory);
+                brightnessSliderFactory,
+                featureFlags);
     }
 }
