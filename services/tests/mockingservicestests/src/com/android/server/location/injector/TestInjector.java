@@ -28,6 +28,8 @@ public class TestInjector implements Injector {
     private final FakeAppForegroundHelper mAppForegroundHelper;
     private final FakeLocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
     private final FakeScreenInteractiveHelper mScreenInteractiveHelper;
+    private final FakeDeviceStationaryHelper mDeviceStationaryHelper;
+    private final FakeDeviceIdleHelper mDeviceIdleHelper;
     private final LocationAttributionHelper mLocationAttributionHelper;
     private final FakeEmergencyHelper mEmergencyHelper;
     private final LocationUsageLogger mLocationUsageLogger;
@@ -45,6 +47,8 @@ public class TestInjector implements Injector {
         mAppForegroundHelper = new FakeAppForegroundHelper();
         mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper(eventLog);
         mScreenInteractiveHelper = new FakeScreenInteractiveHelper();
+        mDeviceStationaryHelper = new FakeDeviceStationaryHelper();
+        mDeviceIdleHelper = new FakeDeviceIdleHelper();
         mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
         mEmergencyHelper = new FakeEmergencyHelper();
         mLocationUsageLogger = new LocationUsageLogger();
@@ -88,6 +92,16 @@ public class TestInjector implements Injector {
     @Override
     public FakeScreenInteractiveHelper getScreenInteractiveHelper() {
         return mScreenInteractiveHelper;
+    }
+
+    @Override
+    public FakeDeviceStationaryHelper getDeviceStationaryHelper() {
+        return mDeviceStationaryHelper;
+    }
+
+    @Override
+    public FakeDeviceIdleHelper getDeviceIdleHelper() {
+        return mDeviceIdleHelper;
     }
 
     @Override
