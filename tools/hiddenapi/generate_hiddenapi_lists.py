@@ -153,7 +153,7 @@ def write_lines(filename, lines):
     """Writes list of lines into a file, overwriting the file if it exists.
 
     Args:
-        filename (string): Path to the file to be writting into.
+        filename (string): Path to the file to be writing into.
         lines (list): List of strings to write into the file.
     """
     lines = map(lambda line: line + '\n', lines)
