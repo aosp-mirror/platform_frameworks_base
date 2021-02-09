@@ -523,8 +523,7 @@ public final class SystemServer implements Dumpable {
             String filename = "/data/system/heapdump/fdtrack-" + date + ".hprof";
             Debug.dumpHprofData(filename);
         } catch (IOException ex) {
-            Slog.e("System", "Failed to dump fdtrack hprof");
-            ex.printStackTrace();
+            Slog.e("System", "Failed to dump fdtrack hprof", ex);
         }
     }
 
