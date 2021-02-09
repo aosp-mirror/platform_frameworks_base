@@ -1490,6 +1490,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void setOrientationChanging(boolean changing) {
         mOrientationChanging = changing;
         mOrientationChangeTimedOut = false;
+        if (changing) {
+            mLastFreezeDuration = 0;
+            mWmService.mRoot.mOrientationChangeComplete = false;
+        }
     }
 
     void orientationChangeTimedOut() {
@@ -3287,7 +3291,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ORIENTATION,
                     "set mOrientationChanging of %s", this);
             setOrientationChanging(true);
-            mWmService.mRoot.mOrientationChangeComplete = false;
         }
         mLastFreezeDuration = 0;
         setDisplayLayoutNeeded();
