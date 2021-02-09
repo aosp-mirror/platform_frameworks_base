@@ -434,14 +434,16 @@ public class AndroidKeyStoreProvider extends Provider {
     @NonNull
     public static java.security.KeyStore getKeyStoreForUid(int uid)
             throws KeyStoreException, NoSuchProviderException {
-        String providerName = PROVIDER_NAME;
+        final java.security.KeyStore.LoadStoreParameter loadParameter;
         if (android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) {
-            providerName = "AndroidKeyStoreLegacy";
+            loadParameter = new android.security.keystore2.AndroidKeyStoreLoadStoreParameter(
+                    KeyProperties.legacyUidToNamespace(uid));
+        } else {
+            loadParameter = new AndroidKeyStoreLoadStoreParameter(uid);
         }
-        java.security.KeyStore result =
-                java.security.KeyStore.getInstance(providerName);
+        java.security.KeyStore result = java.security.KeyStore.getInstance(PROVIDER_NAME);
         try {
-            result.load(new AndroidKeyStoreLoadStoreParameter(uid));
+            result.load(loadParameter);
         } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
             throw new KeyStoreException(
                     "Failed to load AndroidKeyStore KeyStore for UID " + uid, e);
