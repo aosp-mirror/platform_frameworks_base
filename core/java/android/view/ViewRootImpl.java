@@ -3064,11 +3064,14 @@ public final class ViewRootImpl implements ViewParent,
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
                     mPreviousTransparentRegion.set(mTransparentRegion);
                     mFullRedrawNeeded = true;
-                    // reconfigure window manager
-                    try {
-                        mWindowSession.setTransparentRegion(mWindow, mTransparentRegion);
-                    } catch (RemoteException e) {
-                    }
+                    // TODO: Ideally we would do this in prepareSurfaces,
+                    // but prepareSurfaces is currently working under
+                    // the assumption that we paused the render thread
+                    // via the WM relayout code path. We probably eventually
+                    // want to synchronize transparent region hint changes
+                    // with draws.
+                    mTransaction.setTransparentRegionHint(getSurfaceControl(),
+                        mTransparentRegion).apply();
                 }
             }
 

@@ -2150,23 +2150,6 @@ public class WindowManagerService extends IWindowManager.Stub
         Slog.i(tag, s, e);
     }
 
-    void setTransparentRegionWindow(Session session, IWindow client, Region region) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                WindowState w = windowForClientLocked(session, client, false);
-                ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE transparentRegionHint=%s: %s",
-                        region, w);
-
-                if ((w != null) && w.mHasSurface) {
-                    w.mWinAnimator.setTransparentRegionHintLocked(region);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     void setInsetsWindow(Session session, IWindow client, int touchableInsets, Rect contentInsets,
             Rect visibleInsets, Region touchableRegion) {
         int uid = Binder.getCallingUid();
