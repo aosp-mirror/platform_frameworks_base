@@ -113,7 +113,8 @@ public final class LoadedApk {
     private String mAppDir;
     @UnsupportedAppUsage
     private String mResDir;
-    private String[] mOverlayDirs;
+    private String[] mLegacyOverlayDirs;
+    private String[] mOverlayPaths;
     @UnsupportedAppUsage
     private String mDataDir;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -222,7 +223,8 @@ public final class LoadedApk {
         mSplitAppDirs = null;
         mSplitResDirs = null;
         mSplitClassLoaderNames = null;
-        mOverlayDirs = null;
+        mLegacyOverlayDirs = null;
+        mOverlayPaths = null;
         mDataDir = null;
         mDataDirFile = null;
         mDeviceProtectedDataDirFile = null;
@@ -364,8 +366,8 @@ public final class LoadedApk {
                 }
 
                 mResources = ResourcesManager.getInstance().getResources(null, mResDir,
-                        splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
-                        null, null, getCompatibilityInfo(),
+                        splitPaths, mLegacyOverlayDirs, mOverlayPaths,
+                        mApplicationInfo.sharedLibraryFiles, null, null, getCompatibilityInfo(),
                         getClassLoader(), mApplication == null ? null
                                 : mApplication.getResources().getLoaders());
             }
@@ -379,7 +381,8 @@ public final class LoadedApk {
         mApplicationInfo = aInfo;
         mAppDir = aInfo.sourceDir;
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
-        mOverlayDirs = aInfo.resourceDirs;
+        mLegacyOverlayDirs = aInfo.resourceDirs;
+        mOverlayPaths = aInfo.overlayPaths;
         mDataDir = aInfo.dataDir;
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
@@ -1213,9 +1216,19 @@ public final class LoadedApk {
         return mSplitResDirs;
     }
 
+    /**
+     * Corresponds to {@link ApplicationInfo#resourceDirs}.
+     */
     @UnsupportedAppUsage
     public String[] getOverlayDirs() {
-        return mOverlayDirs;
+        return mLegacyOverlayDirs;
+    }
+
+    /**
+     * Corresponds to {@link ApplicationInfo#overlayPaths}.
+     */
+    public String[] getOverlayPaths() {
+        return mOverlayPaths;
     }
 
     public String getDataDir() {
@@ -1252,8 +1265,8 @@ public final class LoadedApk {
             }
 
             mResources = ResourcesManager.getInstance().getResources(null, mResDir,
-                    splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
-                    null, null, getCompatibilityInfo(),
+                    splitPaths, mLegacyOverlayDirs, mOverlayPaths,
+                    mApplicationInfo.sharedLibraryFiles, null, null, getCompatibilityInfo(),
                     getClassLoader(), null);
         }
         return mResources;

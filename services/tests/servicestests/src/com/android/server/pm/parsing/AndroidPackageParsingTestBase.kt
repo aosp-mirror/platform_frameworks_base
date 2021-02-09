@@ -248,6 +248,7 @@ open class AndroidPackageParsingTestBase {
             .ignored("Deferred pre-R, but assigned immediately in R")}
             requiresSmallestWidthDp=${this.requiresSmallestWidthDp}
             resourceDirs=${this.resourceDirs?.contentToString()}
+            overlayPaths=${this.overlayPaths?.contentToString()}
             roundIconRes=${this.roundIconRes}
             scanPublicSourceDir=${this.scanPublicSourceDir
             .ignored("Deferred pre-R, but assigned immediately in R")}
