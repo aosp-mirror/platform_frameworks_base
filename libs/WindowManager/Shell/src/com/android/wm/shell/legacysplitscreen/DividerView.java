@@ -862,14 +862,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
      * assigned to it.
      */
     private SurfaceControl getWindowSurfaceControl() {
-        final ViewRootImpl root = getViewRootImpl();
-        if (root == null) {
-            return null;
-        }
-        SurfaceControl out = root.getSurfaceControl();
-        if (out != null && out.isValid()) {
-            return out;
-        }
         return mWindowManager.mSystemWindows.getViewSurface(this);
     }
 
