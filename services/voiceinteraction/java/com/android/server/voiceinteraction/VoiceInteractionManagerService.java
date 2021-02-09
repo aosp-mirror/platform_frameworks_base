@@ -1787,6 +1787,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (isPackageAppearing(pkgName) != PACKAGE_UNCHANGED) {
                     return;
                 }
+                if (getCurRecognizer(mCurUser) == null) {
+                    initRecognizer(mCurUser);
+                }
                 final String curInteractorStr = Settings.Secure.getStringForUser(
                         mContext.getContentResolver(),
                         Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);
@@ -1801,12 +1804,6 @@ public class VoiceInteractionManagerService extends SystemService {
                                 availInteractorInfo.getServiceInfo().packageName,
                                 availInteractorInfo.getServiceInfo().name);
                         setCurInteractor(availInteractor, mCurUser);
-                        if (getCurRecognizer(mCurUser) == null &&
-                                availInteractorInfo.getRecognitionService() != null) {
-                            setCurRecognizer(new ComponentName(
-                                    availInteractorInfo.getServiceInfo().packageName,
-                                    availInteractorInfo.getRecognitionService()), mCurUser);
-                        }
                     }
                 } else {
                     if (didSomePackagesChange()) {
