@@ -5685,6 +5685,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
                 amOverrideConfig, contextThemeWrapperOverrideConfig);
         mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig, displayId);
+        final Resources res = activity.getResources();
+        if (res.hasOverrideDisplayAdjustments()) {
+            // If fixed rotation is applied while the activity is visible (e.g. PiP), the rotated
+            // configuration of activity may be sent later than the adjustments. In this case, the
+            // adjustments need to be updated for the consistency of display info.
+            res.getDisplayAdjustments().getConfiguration().updateFrom(finalOverrideConfig);
+        }
 
         activity.mConfigChangeFlags = 0;
         activity.mCurrentConfig = new Configuration(newConfig);

@@ -1603,7 +1603,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mFixedRotationLaunchingApp != mFixedRotationTransitionListener.mAnimatingRecents;
     }
 
-    @VisibleForTesting
     boolean isFixedRotationLaunchingApp(ActivityRecord r) {
         return mFixedRotationLaunchingApp == r;
     }
