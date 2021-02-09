@@ -100,7 +100,7 @@ public class ResolverListControllerTest {
         final List<UsageStats> slices = new ArrayList<>();
         slices.add(packageStats);
         ParceledListSlice<UsageStats> stats = new ParceledListSlice<>(slices);
-        when(mMockService.queryUsageStats(anyInt(), anyLong(), anyLong(), anyString()))
+        when(mMockService.queryUsageStats(anyInt(), anyLong(), anyLong(), anyString(), anyInt()))
                 .thenReturn(stats);
         Answer<Void> answer = new Answer<Void>() {
             @Override
