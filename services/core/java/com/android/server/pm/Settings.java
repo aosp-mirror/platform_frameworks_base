@@ -107,9 +107,6 @@ import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
-import com.android.server.pm.verify.domain.DomainVerificationPersistence;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -117,6 +114,9 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
+import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationPersistence;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
@@ -489,7 +489,7 @@ public final class Settings implements Watchable, Snappable {
     // App-link priority tracking, per-user
     @NonNull
     @Watched
-    final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
+    private final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
 
     final StringBuilder mReadMessages = new StringBuilder();
 
@@ -554,6 +554,7 @@ public final class Settings implements Watchable, Snappable {
         mAppIds.registerObserver(mObserver);
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
+        mNextAppLinkGeneration.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
@@ -604,6 +605,7 @@ public final class Settings implements Watchable, Snappable {
         mAppIds.registerObserver(mObserver);
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
+        mNextAppLinkGeneration.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
@@ -651,6 +653,7 @@ public final class Settings implements Watchable, Snappable {
         mPastSignatures.addAll(r.mPastSignatures);
         mKeySetRefs.putAll(r.mKeySetRefs);
         mRenamedPackages.snapshot(r.mRenamedPackages);
+        mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
         // mReadMessages
         mPendingPackages.addAll(r.mPendingPackages);
