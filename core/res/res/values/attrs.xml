@@ -3251,6 +3251,16 @@
              a value of 'true' will not override any 'false' value in its parent chain nor will
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
+
+        <!-- <p>Whether the View's Outline should be used to clip the contents of the View.
+             <p>Only a single non-rectangular clip can be applied on a View at any time. Circular
+             clips from a
+             {@link android.view.ViewAnimationUtils#createCircularReveal(View, int, int, float,
+             float)} circular reveal animation take priority over Outline clipping, and child
+             Outline clipping takes priority over Outline clipping done by a parent.
+             <p>Note that this flag will only be respected if the View's Outline returns true from
+             {@link android.graphics.Outline#canClip()}. -->
+        <attr name="clipToOutline" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
