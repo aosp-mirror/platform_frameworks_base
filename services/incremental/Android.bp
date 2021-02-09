@@ -51,9 +51,9 @@ cc_defaults {
     static_libs: [
         "libbase",
         "libext2_uuid",
-        "libdataloader_aidl-unstable-cpp",
-        "libincremental_aidl-unstable-cpp",
-        "libincremental_manager_aidl-unstable-cpp",
+        "libdataloader_aidl-cpp",
+        "libincremental_aidl-cpp",
+        "libincremental_manager_aidl-cpp",
         "libprotobuf-cpp-lite",
         "service.incremental.proto",
         "libutils",
