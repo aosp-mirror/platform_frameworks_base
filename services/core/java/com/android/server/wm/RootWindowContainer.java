@@ -89,7 +89,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
-import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 
@@ -1181,10 +1180,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mUpdateRotation = true;
             doRequest = true;
         }
-        if ((bulkUpdateParams & SET_ORIENTATION_CHANGE_COMPLETE) == 0) {
-            mOrientationChangeComplete = false;
-        } else {
-            mOrientationChangeComplete = true;
+        if (mOrientationChangeComplete) {
             mLastWindowFreezeSource = mWmService.mAnimator.mLastWindowFreezeSource;
             if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
                 doRequest = true;
