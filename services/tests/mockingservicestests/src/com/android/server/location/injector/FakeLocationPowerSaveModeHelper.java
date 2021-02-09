@@ -19,6 +19,8 @@ package com.android.server.location.injector;
 import android.os.IPowerManager;
 import android.os.PowerManager.LocationPowerSaveMode;
 
+import com.android.server.location.eventlog.LocationEventLog;
+
 /**
  * Version of LocationPowerSaveModeHelper for testing. Power save mode is initialized as "no
  * change".
