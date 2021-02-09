@@ -40,6 +40,7 @@ import android.content.IntentSender.SendIntentException;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
@@ -4619,6 +4620,9 @@ public class ShortcutService extends IShortcutService.Stub {
                     case "verify-states": // hidden command to verify various internal states.
                         handleVerifyStates();
                         break;
+                    case "has-shortcut-access":
+                        handleHasShortcutAccess();
+                        break;
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -4650,7 +4654,7 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println("[Deprecated] cmd shortcut get-default-launcher [--user USER_ID]");
             pw.println("    Show the default launcher");
             pw.println("    Note: This command is deprecated. Callers should query the default"
-                    + " launcher directly from RoleManager instead.");
+                    + " launcher from RoleManager instead.");
             pw.println();
             pw.println("cmd shortcut unload-user [--user USER_ID]");
             pw.println("    Unload a user from the memory");
@@ -4661,6 +4665,10 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println();
             pw.println("cmd shortcut get-shortcuts [--user USER_ID] [--flags FLAGS] PACKAGE");
             pw.println("    Show the shortcuts for a package that match the given flags");
+            pw.println();
+            pw.println("cmd shortcut has-shortcut-access [--user USER_ID] PACKAGE");
+            pw.println("    Prints \"true\" if the package can access shortcuts,"
+                    + " \"false\" otherwise");
             pw.println();
         }
 
@@ -4706,11 +4714,24 @@ public class ShortcutService extends IShortcutService.Stub {
         private void handleGetDefaultLauncher() throws CommandException {
             synchronized (mLock) {
                 parseOptionsLocked(/* takeUser =*/ true);
+
+                final String defaultLauncher = getDefaultLauncher(mUserId);
+                if (defaultLauncher == null) {
+                    throw new CommandException(
+                            "Failed to get the default launcher for user " + mUserId);
+                }
+
+                // Get the class name of the component from PM to keep the old behaviour.
                 final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
-                // Default launcher from package manager.
-                final ComponentName defaultLauncher = mPackageManagerInternal
-                        .getHomeActivitiesAsUser(allHomeCandidates, getParentOrSelfUserId(mUserId));
-                getOutPrintWriter().println("Launcher: " + defaultLauncher);
+                mPackageManagerInternal.getHomeActivitiesAsUser(allHomeCandidates,
+                        getParentOrSelfUserId(mUserId));
+                for (ResolveInfo ri : allHomeCandidates) {
+                    final ComponentInfo ci = ri.getComponentInfo();
+                    if (ci.packageName.equals(defaultLauncher)) {
+                        getOutPrintWriter().println("Launcher: " + ci.getComponentName());
+                        break;
+                    }
+                }
             }
         }
 
@@ -4759,6 +4780,16 @@ public class ShortcutService extends IShortcutService.Stub {
                 verifyStatesForce(); // This will throw when there's an issue.
             } catch (Throwable th) {
                 throw new CommandException(th.getMessage() + "\n" + Log.getStackTraceString(th));
+            }
+        }
+
+        private void handleHasShortcutAccess() throws CommandException {
+            synchronized (mLock) {
+                parseOptionsLocked(/* takeUser =*/ true);
+                final String packageName = getNextArgRequired();
+
+                boolean shortcutAccess = hasShortcutHostPermissionInner(packageName, mUserId);
+                getOutPrintWriter().println(Boolean.toString(shortcutAccess));
             }
         }
     }

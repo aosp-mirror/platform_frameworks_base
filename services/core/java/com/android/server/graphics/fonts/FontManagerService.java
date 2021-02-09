@@ -345,6 +345,7 @@ public final class FontManagerService extends IFontManager.Stub {
             synchronized (mSerializedFontMapLock) {
                 mSerializedFontMap = serializeFontMap;
             }
+            return;
         } catch (IOException | ErrnoException e) {
             Slog.w(TAG, "Failed to serialize updatable font map. "
                     + "Retrying with system image fonts.", e);

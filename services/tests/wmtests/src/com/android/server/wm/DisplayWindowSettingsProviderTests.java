@@ -217,6 +217,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
         SettingsEntry overrideSettings = provider.getOverrideSettings(secondaryDisplayInfo);
         overrideSettings.mShouldShowSystemDecors = true;
         overrideSettings.mImePolicy = DISPLAY_IME_POLICY_LOCAL;
+        overrideSettings.mDontMoveToTop = true;
         provider.updateOverrideSettings(secondaryDisplayInfo, overrideSettings);
         assertTrue(mOverrideSettingsStorage.wasWriteSuccessful());
 
@@ -227,6 +228,8 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "shouldShowSystemDecors"));
         assertEquals("Attribute value must be stored", "0",
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "imePolicy"));
+        assertEquals("Attribute value must be stored", "true",
+                getStoredDisplayAttributeValue(mOverrideSettingsStorage, "dontMoveToTop"));
     }
 
     @Test

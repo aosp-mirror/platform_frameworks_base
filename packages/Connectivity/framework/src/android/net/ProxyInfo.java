@@ -23,6 +23,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.net.module.util.ProxyUtils;
+
 import java.net.InetSocketAddress;
 import java.net.URLConnection;
 import java.util.List;
@@ -233,7 +235,7 @@ public class ProxyInfo implements Parcelable {
      */
     public boolean isValid() {
         if (!Uri.EMPTY.equals(mPacFileUrl)) return true;
-        return Proxy.PROXY_VALID == Proxy.validate(mHost == null ? "" : mHost,
+        return ProxyUtils.PROXY_VALID == ProxyUtils.validate(mHost == null ? "" : mHost,
                 mPort == 0 ? "" : Integer.toString(mPort),
                 mExclusionList == null ? "" : mExclusionList);
     }

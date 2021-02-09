@@ -492,10 +492,12 @@ class ZygoteServer {
                 long elapsedTimeMs = System.currentTimeMillis() - mUsapPoolRefillTriggerTimestamp;
 
                 if (elapsedTimeMs >= mUsapPoolRefillDelayMs) {
-                    // Normalize the poll timeout value when the time between one poll event and the
-                    // next pushes us over the delay value.  This prevents poll receiving a 0
-                    // timeout value, which would result in it returning immediately.
-                    pollTimeoutMs = -1;
+                    // The refill delay has elapsed during the period between poll invocations.
+                    // We will now check for any currently ready file descriptors before refilling
+                    // the USAP pool.
+                    pollTimeoutMs = 0;
+                    mUsapPoolRefillTriggerTimestamp = INVALID_TIMESTAMP;
+                    mUsapPoolRefillAction = UsapPoolRefillAction.DELAYED;
 
                 } else if (elapsedTimeMs <= 0) {
                     // This can occur if the clock used by currentTimeMillis is reset, which is
@@ -517,9 +519,11 @@ class ZygoteServer {
             }
 
             if (pollReturnValue == 0) {
-                // The poll timeout has been exceeded.  This only occurs when we have finished the
-                // USAP pool refill delay period.
-
+                // The poll returned zero results either when the timeout value has been exceeded
+                // or when a non-blocking poll is issued and no FDs are ready.  In either case it
+                // is time to refill the pool.  This will result in a duplicate assignment when
+                // the non-blocking poll returns zero results, but it avoids an additional
+                // conditional in the else branch.
                 mUsapPoolRefillTriggerTimestamp = INVALID_TIMESTAMP;
                 mUsapPoolRefillAction = UsapPoolRefillAction.DELAYED;
 

@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.CombinedVibrationEffect;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionSync;
 import android.os.Looper;
 import android.os.Message;
@@ -1478,6 +1479,32 @@ public final class InputManager {
     boolean isVibrating(int deviceId)  {
         try {
             return mIm.isVibrating(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register input device vibrator state listener
+     *
+     * @hide
+     */
+    public boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        try {
+            return mIm.registerVibratorStateListener(deviceId, listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister input device vibrator state listener
+     *
+     * @hide
+     */
+    public boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        try {
+            return mIm.unregisterVibratorStateListener(deviceId, listener);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

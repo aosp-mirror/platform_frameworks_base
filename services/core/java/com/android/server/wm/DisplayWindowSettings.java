@@ -16,11 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
@@ -196,6 +196,14 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
+    void setDontMoveToTop(DisplayContent dc, boolean dontMoveToTop) {
+        DisplayInfo displayInfo = dc.getDisplayInfo();
+        SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getSettings(displayInfo);
+        overrideSettings.mDontMoveToTop = dontMoveToTop;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+    }
+
     boolean shouldShowSystemDecorsLocked(DisplayContent dc) {
         if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
             // Default display should show system decors.
@@ -274,6 +282,10 @@ class DisplayWindowSettings {
         final int forcedScalingMode = settings.mForcedScalingMode != null
                 ? settings.mForcedScalingMode : FORCE_SCALING_MODE_AUTO;
         dc.mDisplayScalingDisabled = forcedScalingMode == FORCE_SCALING_MODE_DISABLED;
+
+        boolean dontMoveToTop = settings.mDontMoveToTop != null
+                ? settings.mDontMoveToTop : false;
+        dc.mDontMoveToTop = dontMoveToTop;
     }
 
     /**
@@ -358,6 +370,8 @@ class DisplayWindowSettings {
             Boolean mIgnoreOrientationRequest;
             @Nullable
             Boolean mIgnoreDisplayCutout;
+            @Nullable
+            Boolean mDontMoveToTop;
 
             SettingsEntry() {}
 
@@ -430,6 +444,10 @@ class DisplayWindowSettings {
                 }
                 if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
                     mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
+                    changed = true;
+                }
+                if (other.mDontMoveToTop != mDontMoveToTop) {
+                    mDontMoveToTop = other.mDontMoveToTop;
                     changed = true;
                 }
                 return changed;
@@ -515,6 +533,11 @@ class DisplayWindowSettings {
                     mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
                     changed = true;
                 }
+                if (delta.mDontMoveToTop != null
+                        && delta.mDontMoveToTop != mDontMoveToTop) {
+                    mDontMoveToTop = delta.mDontMoveToTop;
+                    changed = true;
+                }
                 return changed;
             }
 
@@ -531,7 +554,8 @@ class DisplayWindowSettings {
                         && mImePolicy == null
                         && mFixedToUserRotation == null
                         && mIgnoreOrientationRequest == null
-                        && mIgnoreDisplayCutout == null;
+                        && mIgnoreDisplayCutout == null
+                        && mDontMoveToTop == null;
             }
 
             @Override
@@ -553,7 +577,8 @@ class DisplayWindowSettings {
                         && Objects.equals(mImePolicy, that.mImePolicy)
                         && Objects.equals(mFixedToUserRotation, that.mFixedToUserRotation)
                         && Objects.equals(mIgnoreOrientationRequest, that.mIgnoreOrientationRequest)
-                        && Objects.equals(mIgnoreDisplayCutout, that.mIgnoreDisplayCutout);
+                        && Objects.equals(mIgnoreDisplayCutout, that.mIgnoreDisplayCutout)
+                        && Objects.equals(mDontMoveToTop, that.mDontMoveToTop);
             }
 
             @Override
@@ -561,7 +586,8 @@ class DisplayWindowSettings {
                 return Objects.hash(mWindowingMode, mUserRotationMode, mUserRotation, mForcedWidth,
                         mForcedHeight, mForcedDensity, mForcedScalingMode, mRemoveContentMode,
                         mShouldShowWithInsecureKeyguard, mShouldShowSystemDecors, mImePolicy,
-                        mFixedToUserRotation, mIgnoreOrientationRequest, mIgnoreDisplayCutout);
+                        mFixedToUserRotation, mIgnoreOrientationRequest, mIgnoreDisplayCutout,
+                        mDontMoveToTop);
             }
 
             @Override
@@ -581,6 +607,7 @@ class DisplayWindowSettings {
                         + ", mFixedToUserRotation=" + mFixedToUserRotation
                         + ", mIgnoreOrientationRequest=" + mIgnoreOrientationRequest
                         + ", mIgnoreDisplayCutout=" + mIgnoreDisplayCutout
+                        + ", mDontMoveToTop=" + mDontMoveToTop
                         + '}';
             }
         }

@@ -16,6 +16,7 @@
 
 package com.android.server.vcn;
 
+import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.net.NetworkCapabilities;
@@ -225,7 +226,7 @@ public class Vcn extends Handler {
 
     private void handleConfigUpdated(@NonNull VcnConfig config) {
         // TODO: Add a dump function in VcnConfig that omits PII. Until then, use hashCode()
-        Slog.v(getLogTag(), String.format("Config updated: config = %s", config.hashCode()));
+        Slog.v(getLogTag(), "Config updated: config = " + config.hashCode());
 
         mConfig = config;
 
@@ -251,17 +252,29 @@ public class Vcn extends Handler {
     private void handleNetworkRequested(
             @NonNull NetworkRequest request, int score, int providerId) {
         if (score > getNetworkScore()) {
-            Slog.v(getLogTag(),
-                    "Request already satisfied by higher-scoring (" + score + ") network from "
-                            + "provider " + providerId + ": " + request);
+            if (VDBG) {
+                Slog.v(
+                        getLogTag(),
+                        "Request already satisfied by higher-scoring ("
+                                + score
+                                + ") network from "
+                                + "provider "
+                                + providerId
+                                + ": "
+                                + request);
+            }
             return;
         }
 
         // If preexisting VcnGatewayConnection(s) satisfy request, return
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : mVcnGatewayConnections.keySet()) {
             if (requestSatisfiedByGatewayConnectionConfig(request, gatewayConnectionConfig)) {
-                Slog.v(getLogTag(),
-                        "Request already satisfied by existing VcnGatewayConnection: " + request);
+                if (VDBG) {
+                    Slog.v(
+                            getLogTag(),
+                            "Request already satisfied by existing VcnGatewayConnection: "
+                                    + request);
+                }
                 return;
             }
         }
@@ -308,7 +321,7 @@ public class Vcn extends Handler {
     }
 
     private String getLogTag() {
-        return String.format("%s [%d]", TAG, mSubscriptionGroup.hashCode());
+        return TAG + " [" + mSubscriptionGroup.hashCode() + "]";
     }
 
     /** Retrieves the network score for a VCN Network */

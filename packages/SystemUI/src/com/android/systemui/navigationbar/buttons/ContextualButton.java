@@ -51,7 +51,7 @@ public class ContextualButton extends ButtonDispatcher {
      * Reload the drawable from resource id, should reapply the previous dark intensity.
      */
     public void updateIcon(int lightIconColor, int darkIconColor) {
-        if (getCurrentView() == null || !getCurrentView().isAttachedToWindow() || mIconResId == 0) {
+        if (mIconResId == 0) {
             return;
         }
         final KeyButtonDrawable currentDrawable = getImageDrawable();
