@@ -58,6 +58,9 @@ final class MediaButtonReceiverHolder {
     private static final String TAG = "PendingIntentHolder";
     private static final boolean DEBUG_KEY_EVENT = MediaSessionService.DEBUG_KEY_EVENT;
     private static final String COMPONENT_NAME_USER_ID_DELIM = ",";
+    // Filter apps regardless of the phone's locked/unlocked state.
+    private static final int PACKAGE_MANAGER_COMMON_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
     private final int mUserId;
     private final PendingIntent mPendingIntent;
@@ -105,40 +108,22 @@ final class MediaButtonReceiverHolder {
      * @return Can be {@code null} if pending intent was null.
      */
     public static MediaButtonReceiverHolder create(Context context, int userId,
-            PendingIntent pendingIntent) {
+            PendingIntent pendingIntent, String sessionPackageName) {
         if (pendingIntent == null) {
             return null;
         }
-        ComponentName componentName = (pendingIntent != null && pendingIntent.getIntent() != null)
-                ? pendingIntent.getIntent().getComponent() : null;
+        int componentType = getComponentType(pendingIntent);
+        ComponentName componentName = getComponentName(pendingIntent, componentType);
         if (componentName != null) {
-            // Explicit intent, where component name is in the PendingIntent.
             return new MediaButtonReceiverHolder(userId, pendingIntent, componentName,
-                    getComponentType(context, componentName));
-        }
-
-        // Implicit intent, where component name isn't in the PendingIntent. Try resolve.
-        PackageManager pm = context.getPackageManager();
-        Intent intent = pendingIntent.getIntent();
-        if ((componentName = resolveImplicitServiceIntent(pm, intent)) != null) {
-            return new MediaButtonReceiverHolder(
-                    userId, pendingIntent, componentName, COMPONENT_TYPE_SERVICE);
-        } else if ((componentName = resolveManifestDeclaredBroadcastReceiverIntent(pm, intent))
-                != null) {
-            return new MediaButtonReceiverHolder(
-                    userId, pendingIntent, componentName, COMPONENT_TYPE_BROADCAST);
-        } else if ((componentName = resolveImplicitActivityIntent(pm, intent)) != null) {
-            return new MediaButtonReceiverHolder(
-                    userId, pendingIntent, componentName, COMPONENT_TYPE_ACTIVITY);
+                    componentType);
         }
 
         // Failed to resolve target component for the pending intent. It's unlikely to be usable.
-        // However, the pending intent would be still used, just to follow the legacy behavior.
+        // However, the pending intent would be still used, so setting the package name to the
+        // package name of the session that set this pending intent.
         Log.w(TAG, "Unresolvable implicit intent is set, pi=" + pendingIntent);
-        String packageName = (pendingIntent != null && pendingIntent.getIntent() != null)
-                ? pendingIntent.getIntent().getPackage() : null;
-        return new MediaButtonReceiverHolder(userId, pendingIntent,
-                packageName != null ? packageName : "");
+        return new MediaButtonReceiverHolder(userId, pendingIntent, sessionPackageName);
     }
 
     public static MediaButtonReceiverHolder create(int userId, ComponentName broadcastReceiver) {
@@ -269,6 +254,18 @@ final class MediaButtonReceiverHolder {
                 String.valueOf(mComponentType));
     }
 
+    @ComponentType
+    private static int getComponentType(PendingIntent pendingIntent) {
+        if (pendingIntent.isBroadcast()) {
+            return COMPONENT_TYPE_BROADCAST;
+        } else if (pendingIntent.isActivity()) {
+            return COMPONENT_TYPE_ACTIVITY;
+        } else if (pendingIntent.isForegroundService() || pendingIntent.isService()) {
+            return COMPONENT_TYPE_SERVICE;
+        }
+        return COMPONENT_TYPE_INVALID;
+    }
+
     /**
      * Gets the type of the component
      *
@@ -284,9 +281,7 @@ final class MediaButtonReceiverHolder {
         PackageManager pm = context.getPackageManager();
         try {
             ActivityInfo activityInfo = pm.getActivityInfo(componentName,
-                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.GET_ACTIVITIES);
+                    PACKAGE_MANAGER_COMMON_FLAGS | PackageManager.GET_ACTIVITIES);
             if (activityInfo != null) {
                 return COMPONENT_TYPE_ACTIVITY;
             }
@@ -294,9 +289,7 @@ final class MediaButtonReceiverHolder {
         }
         try {
             ServiceInfo serviceInfo = pm.getServiceInfo(componentName,
-                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.GET_SERVICES);
+                    PACKAGE_MANAGER_COMMON_FLAGS | PackageManager.GET_SERVICES);
             if (serviceInfo != null) {
                 return COMPONENT_TYPE_SERVICE;
             }
@@ -306,40 +299,29 @@ final class MediaButtonReceiverHolder {
         return COMPONENT_TYPE_BROADCAST;
     }
 
-    private static ComponentName resolveImplicitServiceIntent(PackageManager pm, Intent intent) {
-        // Flag explanations.
-        // - MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE:
-        //     filter apps regardless of the phone's locked/unlocked state.
-        // - GET_SERVICES: Return service
-        return createComponentName(pm.resolveService(intent,
-                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                        | PackageManager.GET_SERVICES));
-    }
-
-    private static ComponentName resolveManifestDeclaredBroadcastReceiverIntent(
-            PackageManager pm, Intent intent) {
-        // Flag explanations.
-        // - MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE:
-        //     filter apps regardless of the phone's locked/unlocked state.
-        List<ResolveInfo> resolveInfos = pm.queryBroadcastReceivers(intent,
-                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-        return (resolveInfos != null && !resolveInfos.isEmpty())
-                ? createComponentName(resolveInfos.get(0)) : null;
-    }
-
-    private static ComponentName resolveImplicitActivityIntent(PackageManager pm, Intent intent) {
-        // Flag explanations.
-        // - MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE:
-        //     Filter apps regardless of the phone's locked/unlocked state.
-        // - MATCH_DEFAULT_ONLY:
-        //     Implicit intent receiver should be set as default. Only needed for activity.
-        // - GET_ACTIVITIES: Return activity
-        return createComponentName(pm.resolveActivity(intent,
-                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                        | PackageManager.MATCH_DEFAULT_ONLY
-                        | PackageManager.GET_ACTIVITIES));
+    private static ComponentName getComponentName(PendingIntent pendingIntent, int componentType) {
+        List<ResolveInfo> resolveInfos = null;
+        switch (componentType) {
+            case COMPONENT_TYPE_ACTIVITY:
+                resolveInfos = pendingIntent.queryIntentComponents(
+                        PACKAGE_MANAGER_COMMON_FLAGS
+                                | PackageManager.MATCH_DEFAULT_ONLY /* Implicit intent receiver
+                                should be set as default. Only needed for activity. */
+                                | PackageManager.GET_ACTIVITIES);
+                break;
+            case COMPONENT_TYPE_SERVICE:
+                resolveInfos = pendingIntent.queryIntentComponents(
+                        PACKAGE_MANAGER_COMMON_FLAGS | PackageManager.GET_SERVICES);
+                break;
+            case COMPONENT_TYPE_BROADCAST:
+                resolveInfos = pendingIntent.queryIntentComponents(
+                        PACKAGE_MANAGER_COMMON_FLAGS | PackageManager.GET_RECEIVERS);
+                break;
+        }
+        if (resolveInfos != null && !resolveInfos.isEmpty()) {
+            return createComponentName(resolveInfos.get(0));
+        }
+        return null;
     }
 
     private static ComponentName createComponentName(ResolveInfo resolveInfo) {

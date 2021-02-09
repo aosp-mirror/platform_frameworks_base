@@ -26,13 +26,13 @@ import android.view.Surface;
 
 import java.io.PrintWriter;
 
-final class RotationResolverShellCommend extends ShellCommand {
+final class RotationResolverShellCommand extends ShellCommand {
     private static final int INITIAL_RESULT_CODE = -1;
 
     @NonNull
     private final RotationResolverManagerPerUserService mService;
 
-    RotationResolverShellCommend(@NonNull RotationResolverManagerPerUserService service) {
+    RotationResolverShellCommand(@NonNull RotationResolverManagerPerUserService service) {
         mService = service;
     }
 

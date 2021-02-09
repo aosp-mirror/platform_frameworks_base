@@ -404,7 +404,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
         // We don't allow untrusted display to top when root task moves to top,
         // until user tapping this display to change display position as top intentionally.
-        if (!mDisplayContent.isTrusted() && !getParent().isOnTop()) {
+        //
+        // Displays with {@code mDontMoveToTop} property set to {@code true} won't be
+        // allowed to top neither.
+        if ((!mDisplayContent.isTrusted() || mDisplayContent.mDontMoveToTop)
+                && !getParent().isOnTop()) {
             includingParents = false;
         }
         final int targetPosition = findPositionForRootTask(position, child, false /* adding */);

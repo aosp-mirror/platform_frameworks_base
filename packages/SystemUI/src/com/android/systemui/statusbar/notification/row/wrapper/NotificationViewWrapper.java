@@ -80,6 +80,9 @@ public abstract class NotificationViewWrapper implements TransformableView {
             if (Notification.DecoratedCustomViewStyle.class.equals(style)) {
                 return new NotificationDecoratedCustomViewWrapper(ctx, v, row);
             }
+            if (NotificationDecoratedCustomViewWrapper.hasCustomView(v)) {
+                return new NotificationDecoratedCustomViewWrapper(ctx, v, row);
+            }
             return new NotificationTemplateViewWrapper(ctx, v, row);
         } else if (v instanceof NotificationHeaderView) {
             return new NotificationHeaderViewWrapper(ctx, v, row);

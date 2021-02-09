@@ -1990,6 +1990,7 @@ package android.bluetooth {
     field public static final int UUID_BYTES_128_BIT = 16; // 0x10
     field public static final int UUID_BYTES_16_BIT = 2; // 0x2
     field public static final int UUID_BYTES_32_BIT = 4; // 0x4
+    field @NonNull public static final android.os.ParcelUuid VOLUME_CONTROL;
   }
 
   public final class BufferConstraint implements android.os.Parcelable {
@@ -4666,6 +4667,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String, @Nullable String);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.UPDATE_APP_OPS_STATS}) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerProviderRequestListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.Listener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
@@ -4674,6 +4676,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void unregisterProviderRequestListener(@NonNull android.location.provider.ProviderRequest.Listener);
   }
 
   public final class LocationRequest implements android.os.Parcelable {
@@ -4821,6 +4824,10 @@ package android.location.provider {
     method @NonNull public android.location.provider.ProviderRequest.Builder setMaxUpdateDelayMillis(@IntRange(from=0) long);
     method @NonNull public android.location.provider.ProviderRequest.Builder setQuality(int);
     method @NonNull public android.location.provider.ProviderRequest.Builder setWorkSource(@NonNull android.os.WorkSource);
+  }
+
+  public static interface ProviderRequest.Listener {
+    method public void onProviderRequestChanged(@NonNull String, @NonNull android.location.provider.ProviderRequest);
   }
 
 }
@@ -4972,6 +4979,7 @@ package android.media {
     method public android.media.PlayerProxy getPlayerProxy();
     method public int getPlayerState();
     method public int getPlayerType();
+    method @IntRange(from=0) public int getSessionId();
     method public boolean isActive();
     field public static final int PLAYER_STATE_IDLE = 1; // 0x1
     field public static final int PLAYER_STATE_PAUSED = 3; // 0x3
@@ -8644,6 +8652,7 @@ package android.os {
     method @NonNull public static String formatUid(int);
     method public static int getAppId(int);
     method public int getIdentifier();
+    method public static int getUid(@NonNull android.os.UserHandle, int);
     method @Deprecated public boolean isOwner();
     method public boolean isSystem();
     method public static int myUserId();
@@ -12950,6 +12959,17 @@ package android.telephony.ims {
     method @Deprecated public void onRegistering(int);
   }
 
+  public class ImsRcsManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addOnAvailabilityChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsRcsManager.OnAvailabilityChangedListener) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(int, int) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(int, int) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeOnAvailabilityChangedListener(@NonNull android.telephony.ims.ImsRcsManager.OnAvailabilityChangedListener);
+  }
+
+  public static interface ImsRcsManager.OnAvailabilityChangedListener {
+    method public void onAvailabilityChanged(int);
+  }
+
   public final class ImsReasonInfo implements android.os.Parcelable {
     field public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED = "Forbidden. Not Authorized for Service";
   }
@@ -13590,9 +13610,22 @@ package android.telephony.ims.feature {
     ctor public RcsFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method @NonNull public android.telephony.ims.stub.RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener);
+    method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.RcsFeature.RcsImsCapabilities);
     method public void onFeatureReady();
     method public void onFeatureRemoved();
+    method public boolean queryCapabilityConfiguration(int, int);
+    method @NonNull public final android.telephony.ims.feature.RcsFeature.RcsImsCapabilities queryCapabilityStatus();
     method public void removeCapabilityExchangeImpl(@NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase);
+  }
+
+  public static class RcsFeature.RcsImsCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
+    ctor public RcsFeature.RcsImsCapabilities(int);
+    method public void addCapabilities(int);
+    method public boolean isCapable(int);
+    method public void removeCapabilities(int);
+    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
+    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
+    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }

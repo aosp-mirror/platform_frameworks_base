@@ -190,7 +190,7 @@ public final class RenderEffect {
     }
 
     /**
-     * Create a filter that applies the color filter to the provided RenderEffect
+     * Create a {@link RenderEffect} that applies the color filter to the provided RenderEffect
      *
      * @param colorFilter ColorFilter applied to the content in the input RenderEffect
      * @param renderEffect Source to be transformed by the specified {@link ColorFilter}
@@ -209,7 +209,7 @@ public final class RenderEffect {
     }
 
     /**
-     * Create a filter that applies the color filter to the contents of the
+     * Create a {@link RenderEffect} that applies the color filter to the contents of the
      * {@link android.graphics.RenderNode} that this RenderEffect is installed on
      * @param colorFilter ColorFilter applied to the content in the input RenderEffect
      */
@@ -224,7 +224,7 @@ public final class RenderEffect {
     }
 
     /**
-     * {@link RenderEffect} that is a composition of 2 other {@link RenderEffect} instances
+     * Create a {@link RenderEffect} that is a composition of 2 other {@link RenderEffect} instances
      * combined by the specified {@link BlendMode}
      *
      * @param dst The Dst pixels used in blending
@@ -248,8 +248,8 @@ public final class RenderEffect {
     }
 
     /**
-     * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
-     * treated as the source bitmap passed to 'outer', i.e.
+     * Create a {@link RenderEffect} that composes 'inner' with 'outer', such that the results of
+     * 'inner' are treated as the source bitmap passed to 'outer', i.e.
      *
      * <pre>
      * {@code
@@ -276,6 +276,18 @@ public final class RenderEffect {
                     inner.getNativeInstance()
                 )
             );
+    }
+
+    /**
+     * Create a {@link RenderEffect} that renders the contents of the input {@link Shader}.
+     * This is useful to create an input for other {@link RenderEffect} types such as
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, TileMode)}
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, TileMode)} or
+     * {@link RenderEffect#createColorFilterEffect(ColorFilter, RenderEffect)}.
+     */
+    @NonNull
+    public static RenderEffect createShaderEffect(@NonNull Shader shader) {
+        return new RenderEffect(nativeCreateShaderEffect(shader.getNativeInstance()));
     }
 
     private final long mNativeRenderEffect;
@@ -305,5 +317,6 @@ public final class RenderEffect {
     private static native long nativeCreateColorFilterEffect(long colorFilter, long nativeInput);
     private static native long nativeCreateBlendModeEffect(long dst, long src, int blendmode);
     private static native long nativeCreateChainEffect(long outer, long inner);
+    private static native long nativeCreateShaderEffect(long shader);
     private static native long nativeGetFinalizer();
 }

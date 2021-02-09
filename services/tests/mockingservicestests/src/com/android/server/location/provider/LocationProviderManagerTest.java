@@ -64,6 +64,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
@@ -659,6 +660,23 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         verify(listener, times(1))
                 .onLocationChanged(any(List.class), nullable(IRemoteCallback.class));
+    }
+
+    @Test
+    public void testProviderRequestListener() throws Exception {
+        IProviderRequestListener requestListener = mock(IProviderRequestListener.class);
+        mManager.addProviderRequestListener(requestListener);
+
+        ILocationListener locationListener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(1).setWorkSource(
+                WORK_SOURCE).build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, locationListener);
+
+        verify(requestListener, timeout(TIMEOUT_MS).times(1)).onProviderRequestChanged(anyString(),
+                any(ProviderRequest.class));
+
+        mManager.unregisterLocationRequest(locationListener);
+        mManager.removeProviderRequestListener(requestListener);
     }
 
     @Test
