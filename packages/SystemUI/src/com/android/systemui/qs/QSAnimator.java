@@ -362,7 +362,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if(view == parent || view == null) return;
         // Ignore tile pages as they can have some offset we don't want to take into account in
         // RTL.
-        if (!(view instanceof PagedTileLayout.TilePage)) {
+        if (!(view instanceof PagedTileLayout.TilePage || view instanceof SideLabelTileLayout)) {
             loc1[0] += view.getLeft();
             loc1[1] += view.getTop();
         }
