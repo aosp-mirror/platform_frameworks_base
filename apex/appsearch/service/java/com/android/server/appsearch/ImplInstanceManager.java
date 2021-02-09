@@ -73,8 +73,8 @@ public final class ImplInstanceManager {
     /**
      * Gets an instance of AppSearchImpl for the given user.
      *
-     * <p>If no AppSearchImpl instance exists for this user, Icing will be initialized and one will
-     * be created.
+     * <p>If no AppSearchImpl instance exists for the unlocked user, Icing will be initialized and
+     * one will be created.
      *
      * @param context The context
      * @param userId The multi-user userId of the device user calling AppSearch
