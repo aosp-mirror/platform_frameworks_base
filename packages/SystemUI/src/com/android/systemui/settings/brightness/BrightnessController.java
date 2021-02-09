@@ -79,6 +79,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final float mMaximumBacklightForVr;
     private final float mDefaultBacklightForVr;
 
+    private final int mDisplayId;
     private final Context mContext;
     private final ToggleSlider mControl;
     private final boolean mAutomaticAvailable;
@@ -311,6 +312,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         };
         mBrightnessObserver = new BrightnessObserver(mHandler);
 
+        mDisplayId = mContext.getDisplayId();
         PowerManager pm = context.getSystemService(PowerManager.class);
         mMinimumBacklight = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
@@ -420,7 +422,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     private void setBrightness(float brightness) {
-        mDisplayManager.setTemporaryBrightness(brightness);
+        mDisplayManager.setTemporaryBrightness(mDisplayId, brightness);
     }
 
     private void updateVrMode(boolean isEnabled) {
