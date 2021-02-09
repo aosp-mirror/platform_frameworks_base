@@ -312,8 +312,7 @@ public class ImageWriter implements AutoCloseable {
      * (acquired via {@link #dequeueInputImage}). In the former case, the Image
      * data will be moved to this ImageWriter. Note that the Image properties
      * (size, format, strides, etc.) must be the same as the properties of the
-     * images dequeued from this ImageWriter, or this method will throw an
-     * {@link IllegalArgumentException}. In the latter case, the application has
+     * images dequeued from this ImageWriter. In the latter case, the application has
      * filled the input image with data. This method then passes the filled
      * buffer to the downstream consumer. In both cases, it's up to the caller
      * to ensure that the Image timestamp (in nanoseconds) is correctly set, as
