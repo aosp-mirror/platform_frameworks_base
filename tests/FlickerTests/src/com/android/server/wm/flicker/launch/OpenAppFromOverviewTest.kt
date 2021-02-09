@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -52,7 +51,6 @@ import org.junit.runners.Parameterized
  * Launch an app from the recents app view (the overview)
  * To run this test: `atest FlickerTests:OpenAppFromOverviewTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -67,7 +65,7 @@ class OpenAppFromOverviewTest(
             val testApp = SimpleAppHelper(instrumentation)
             return FlickerTestRunnerFactory.getInstance()
                 .buildTest(instrumentation, repetitions = 5) { configuration ->
-                    withTestName { buildTestTag("openAppFromOverview", configuration) }
+                    withTestName { buildTestTag(configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
@@ -92,36 +90,57 @@ class OpenAppFromOverviewTest(
                         }
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry()
+                        val isRotated = configuration.startRotation.isRotated()
 
-                            appWindowReplacesLauncherAsTopWindow(testApp)
-                            wallpaperWindowBecomesInvisible()
+                        presubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                appWindowReplacesLauncherAsTopWindow(testApp)
+                                wallpaperWindowBecomesInvisible()
+                            }
+
+                            layersTrace {
+                                appLayerReplacesWallpaperLayer(testApp.`package`)
+
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                    statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                } else {
+                                    statusBarLayerIsAlwaysVisible()
+                                    navBarLayerIsAlwaysVisible()
+                                }
+                            }
+
+                            eventLog {
+                                focusChanges("NexusLauncherActivity", testApp.`package`)
+                            }
                         }
 
-                        layersTrace {
-                            noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation,
-                                bugId = 141361128)
-                            navBarLayerRotatesAndScales(Surface.ROTATION_0,
-                                configuration.endRotation,
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerRotatesScales(Surface.ROTATION_0,
-                                configuration.endRotation,
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerIsAlwaysVisible(
-                                enabled = Surface.ROTATION_0 == configuration.endRotation)
-                            navBarLayerIsAlwaysVisible(
-                                enabled = Surface.ROTATION_0 == configuration.endRotation)
-                            visibleLayersShownMoreThanOneConsecutiveEntry(
-                                enabled = false)
-
-                            appLayerReplacesWallpaperLayer(testApp.`package`)
+                        postsubmit {
+                            windowManagerTrace {
+                                visibleWindowsShownMoreThanOneConsecutiveEntry()
+                            }
                         }
 
-                        eventLog {
-                            focusChanges("NexusLauncherActivity", testApp.`package`)
+                        flaky {
+                            layersTrace {
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
+                                noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation,
+                                    bugId = 141361128)
+
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                    statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                } else {
+                                    statusBarLayerIsAlwaysVisible()
+                                    navBarLayerIsAlwaysVisible()
+                                }
+                            }
                         }
                     }
                 }
