@@ -29,6 +29,7 @@ package android.media {
   }
 
   public class MediaCommunicationManager {
+    method @IntRange(from=1) public int getVersion();
   }
 
   public class MediaController2 implements java.lang.AutoCloseable {
