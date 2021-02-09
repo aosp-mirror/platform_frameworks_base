@@ -20,7 +20,7 @@ from generate_hiddenapi_lists import *
 class TestHiddenapiListGeneration(unittest.TestCase):
 
     def test_filter_apis(self):
-        # Initialize flags so that A and B are put on the whitelist and
+        # Initialize flags so that A and B are put on the allow list and
         # C, D, E are left unassigned. Try filtering for the unassigned ones.
         flags = FlagsDict()
         flags.parse_and_merge_csv(['A,' + FLAG_SDK, 'B,' + FLAG_SDK,
@@ -39,7 +39,7 @@ class TestHiddenapiListGeneration(unittest.TestCase):
 
         # Check three things:
         # (1) B is selected as valid unassigned
-        # (2) A is not selected because it is assigned 'whitelist'
+        # (2) A is not selected because it is assigned to the allow list
         # (3) D is not selected because it is not a valid key
         self.assertEqual(
             flags.get_valid_subset_of_unassigned_apis(set(['A', 'B', 'D'])), set([ 'B' ]))
