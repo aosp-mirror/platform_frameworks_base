@@ -71,7 +71,7 @@ public class WindowlessWindowManager implements IWindowSession {
         new HashMap<IBinder, ResizeCompleteCallback>();
 
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
-    private final SurfaceControl mRootSurface;
+    protected final SurfaceControl mRootSurface;
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
     private final IBinder mHostInputToken;
@@ -126,7 +126,7 @@ public class WindowlessWindowManager implements IWindowSession {
         }
     }
 
-    protected void attachToParentSurface(SurfaceControl.Builder b) {
+    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
         b.setParent(mRootSurface);
     }
 
@@ -140,10 +140,10 @@ public class WindowlessWindowManager implements IWindowSession {
             InsetsSourceControl[] outActiveControls) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setFormat(attrs.format)
-                .setBufferSize(getSurfaceWidth(attrs), getSurfaceHeight(attrs))
+                .setBLASTLayer()
                 .setName(attrs.getTitle().toString())
                 .setCallsite("WindowlessWindowManager.addToDisplay");
-        attachToParentSurface(b);
+        attachToParentSurface(window, b);
         final SurfaceControl sc = b.build();
 
         if (((attrs.inputFeatures &
@@ -162,7 +162,11 @@ public class WindowlessWindowManager implements IWindowSession {
             mStateForWindow.put(window.asBinder(), state);
         }
 
-        return WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
+        final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
+                        WindowManagerGlobal.ADD_FLAG_USE_BLAST;
+
+        // Include whether the window is in touch mode.
+        return isInTouchMode() ? res | WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE : res;
     }
 
     /**
@@ -210,6 +214,26 @@ public class WindowlessWindowManager implements IWindowSession {
         return !PixelFormat.formatHasAlpha(attrs.format);
     }
 
+    private boolean isInTouchMode() {
+        try {
+            return WindowManagerGlobal.getWindowSession().getInTouchMode();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to check if the window is in touch mode", e);
+        }
+        return false;
+    }
+
+    /** Access to package members for SystemWindow leashing
+     * @hide
+     */
+    protected IBinder getWindowBinder(View rootView) {
+        final ViewRootImpl root = rootView.getViewRootImpl();
+        if (root == null) {
+            return null;
+        }
+        return root.mWindow.asBinder();
+    }
+
     /** @hide */
     @Nullable
     protected SurfaceControl getSurfaceControl(View rootView) {
@@ -254,8 +278,8 @@ public class WindowlessWindowManager implements IWindowSession {
         WindowManager.LayoutParams attrs = state.mParams;
 
         if (viewFlags == View.VISIBLE) {
-            t.setBufferSize(sc, getSurfaceWidth(attrs), getSurfaceHeight(attrs))
-                    .setOpaque(sc, isOpaque(attrs)).show(sc).apply();
+            outSurfaceSize.set(getSurfaceWidth(attrs), getSurfaceHeight(attrs));
+            t.setOpaque(sc, isOpaque(attrs)).show(sc).apply();
             outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
         } else {
             t.hide(sc).apply();
@@ -276,7 +300,8 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
 
-        return 0;
+        // Include whether the window is in touch mode.
+        return isInTouchMode() ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
     }
 
     @Override

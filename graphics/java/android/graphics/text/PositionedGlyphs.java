@@ -184,7 +184,7 @@ public final class PositionedGlyphs {
             long ptr = nGetFont(layoutPtr, i);
             if (prevPtr != ptr) {
                 prevPtr = ptr;
-                prevFont = Font.findOrCreateFontFromNativePtr(ptr);
+                prevFont = new Font(ptr);
             }
             mFonts.add(prevFont);
         }
@@ -224,9 +224,7 @@ public final class PositionedGlyphs {
             if (getGlyphId(i) != that.getGlyphId(i)) return false;
             if (getGlyphX(i) != that.getGlyphX(i)) return false;
             if (getGlyphY(i) != that.getGlyphY(i)) return false;
-            // Intentionally using reference equality since font equality is heavy due to buffer
-            // compare.
-            if (getFont(i) != that.getFont(i)) return false;
+            if (!getFont(i).equals(that.getFont(i))) return false;
         }
 
         return true;

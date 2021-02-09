@@ -45,6 +45,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.ServiceConnector;
 
+import java.lang.ref.WeakReference;
+
 
 /** Manages the connection to the remote rotation resolver service. */
 class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResolverService> {
@@ -128,13 +130,20 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
             mProposedRotation = proposedRotation;
             mCurrentRotation = currentRotation;
             mPackageName = packageName;
-            mIRotationResolverCallback = new RotationResolverCallback();
+            mIRotationResolverCallback = new RotationResolverCallback(this);
             mCancellationSignalInternal = cancellationSignal;
             mRequestStartTimeMillis = SystemClock.elapsedRealtime();
         }
 
 
         void cancelInternal() {
+            synchronized (mLock) {
+                if (mIsFulfilled) {
+                    Slog.v(TAG, "Trying to cancel the request that has been already fulfilled.");
+                    return;
+                }
+                mIsFulfilled = true;
+            }
             Handler.getMain().post(() -> {
                 synchronized (mLock) {
                     try {
@@ -147,9 +156,6 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     }
                 }
             });
-            synchronized (mLock) {
-                mIsFulfilled = true;
-            }
             mCallbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);
         }
 
@@ -160,44 +166,53 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
             ipw.decreaseIndent();
         }
 
-        private class RotationResolverCallback extends IRotationResolverCallback.Stub {
+        private static class RotationResolverCallback extends IRotationResolverCallback.Stub {
+            private WeakReference<RotationRequest> mRequestWeakReference;
+
+            RotationResolverCallback(RotationRequest request) {
+                this.mRequestWeakReference = new WeakReference<>(request);
+            }
+
             @Override
             public void onSuccess(int rotation) {
-                synchronized (mLock) {
-                    if (mIsFulfilled) {
+                final RotationRequest request = mRequestWeakReference.get();
+                synchronized (request.mLock) {
+                    if (request.mIsFulfilled) {
                         Slog.w(TAG, "Callback received after the rotation request is fulfilled.");
                         return;
                     }
-                    mIsFulfilled = true;
-                    mCallbackInternal.onSuccess(rotation);
+                    request.mIsFulfilled = true;
+                    request.mCallbackInternal.onSuccess(rotation);
                     final long timeToCalculate =
-                            SystemClock.elapsedRealtime() - mRequestStartTimeMillis;
-                    logRotationStats(mProposedRotation, mCurrentRotation, rotation,
+                            SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
+                    logRotationStats(request.mProposedRotation, request.mCurrentRotation, rotation,
                             timeToCalculate);
                 }
             }
 
             @Override
             public void onFailure(int error) {
-                synchronized (mLock) {
-                    if (mIsFulfilled) {
+                final RotationRequest request = mRequestWeakReference.get();
+                synchronized (request.mLock) {
+                    if (request.mIsFulfilled) {
                         Slog.w(TAG, "Callback received after the rotation request is fulfilled.");
                         return;
                     }
-                    mIsFulfilled = true;
-                    mCallbackInternal.onFailure(error);
+                    request.mIsFulfilled = true;
+                    request.mCallbackInternal.onFailure(error);
                     final long timeToCalculate =
-                            SystemClock.elapsedRealtime() - mRequestStartTimeMillis;
-                    logRotationStats(mProposedRotation, mCurrentRotation, RESOLUTION_FAILURE,
-                            timeToCalculate);
+                            SystemClock.elapsedRealtime() - request.mRequestStartTimeMillis;
+                    logRotationStats(request.mProposedRotation, request.mCurrentRotation,
+                            RESOLUTION_FAILURE, timeToCalculate);
                 }
             }
 
             @Override
             public void onCancellable(@NonNull ICancellationSignal cancellation) {
-                synchronized (mLock) {
-                    mCancellation = cancellation;
-                    if (mCancellationSignalInternal.isCanceled()) {
+                final RotationRequest request = mRequestWeakReference.get();
+                synchronized (request.mLock) {
+                    request.mCancellation = cancellation;
+                    if (request.mCancellationSignalInternal.isCanceled()) {
                         // Dispatch the cancellation signal if the client has cancelled the request.
                         try {
                             cancellation.cancel();

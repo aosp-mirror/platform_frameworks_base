@@ -8940,7 +8940,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public List<String> getAllPackages() {
-        enforceSystemOrRootOrShell("getAllPackages is limited to privileged callers");
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mLock) {
@@ -23934,7 +23933,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 writer.println("Domain verification status:");
                 writer.increaseIndent();
                 try {
-                    mDomainVerificationManager.printState(writer, packageName, UserHandle.USER_ALL);
+                    mDomainVerificationManager.printState(writer, packageName, UserHandle.USER_ALL,
+                            mSettings::getPackageLPr);
                 } catch (PackageManager.NameNotFoundException e) {
                     pw.println("Failure printing domain verification information");
                     Slog.e(TAG, "Failure printing domain verification information", e);

@@ -147,7 +147,7 @@ private:
     sp<IDescrambler> openHidlDescrambler();
     vector<int> getLnbHandles();
     DemuxCapabilities getHidlDemuxCaps(TunerDemuxCapabilities& aidlCaps);
-    FrontendInfo FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo);
+    FrontendInfo frontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo);
     void updateTunerResources();
     void updateFrontendResources();
     void updateLnbResources();

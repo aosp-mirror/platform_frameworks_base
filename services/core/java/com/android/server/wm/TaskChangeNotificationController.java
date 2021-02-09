@@ -497,7 +497,7 @@ class TaskChangeNotificationController {
     void notifyTaskDisplayChanged(int taskId, int newDisplayId) {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG,
                 taskId, newDisplayId);
-        forAllLocalListeners(mNotifyTaskStackChanged, msg);
+        forAllLocalListeners(mNotifyTaskDisplayChanged, msg);
         msg.sendToTarget();
     }
 

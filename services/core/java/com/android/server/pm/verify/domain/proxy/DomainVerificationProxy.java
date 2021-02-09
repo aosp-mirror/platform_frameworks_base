@@ -23,9 +23,10 @@ import android.content.Context;
 import android.util.Slog;
 
 import com.android.server.DeviceIdleInternal;
-import com.android.server.pm.verify.domain.DomainVerificationMessageCodes;
 import com.android.server.pm.verify.domain.DomainVerificationCollector;
+import com.android.server.pm.verify.domain.DomainVerificationDebug;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationMessageCodes;
 
 import java.util.Objects;
 import java.util.Set;
@@ -35,7 +36,7 @@ public interface DomainVerificationProxy {
 
     String TAG = "DomainVerificationProxy";
 
-    boolean DEBUG_PROXIES = false;
+    boolean DEBUG_PROXIES = DomainVerificationDebug.DEBUG_PROXIES;
 
     static <ConnectionType extends DomainVerificationProxyV1.Connection
             & DomainVerificationProxyV2.Connection> DomainVerificationProxy makeProxy(

@@ -147,7 +147,7 @@ public class WifiSignalController extends
         IconState qsIcon = new IconState(
                 mCurrentState.connected, getQsCurrentIconIdForCarrierWifi(), contentDescription);
         CharSequence description =
-                mNetworkController.getNonDefaultMobileDataNetworkName(mCurrentState.subId);
+                mNetworkController.getNetworkNameForCarrierWiFi(mCurrentState.subId);
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 mCurrentState.activityIn, mCurrentState.activityOut, dataContentDescription,
                 dataContentDescriptionHtml, description, icons.isWide,

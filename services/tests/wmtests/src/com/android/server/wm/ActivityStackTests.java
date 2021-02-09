@@ -1424,6 +1424,9 @@ public class ActivityStackTests extends WindowTestsBase {
         final ActivityRecord nonTopVisibleActivity =
                 new ActivityBuilder(mAtm).setTask(task).build();
         new ActivityBuilder(mAtm).setTask(task).build();
+        // The scenario we are testing is when the app isn't visible yet.
+        nonTopVisibleActivity.setVisible(false);
+        nonTopVisibleActivity.mVisibleRequested = false;
         doReturn(false).when(nonTopVisibleActivity).attachedToProcess();
         doReturn(true).when(nonTopVisibleActivity).shouldBeVisibleUnchecked();
         doNothing().when(mSupervisor).startSpecificActivity(any(), anyBoolean(),

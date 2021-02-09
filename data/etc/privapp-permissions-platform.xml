@@ -471,6 +471,9 @@ applications that come with the platform
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
         <permission name="android.permission.MODIFY_QUIET_MODE" />
+        <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
+        <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
+        <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -484,6 +487,8 @@ applications that come with the platform
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <!-- Permissions required for quick settings tile -->
         <permission name="android.permission.STATUS_BAR"/>
+        <!-- Permissions required to query Betterbug -->
+        <permission name="android.permission.QUERY_ALL_PACKAGES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">

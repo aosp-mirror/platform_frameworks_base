@@ -162,7 +162,8 @@ public final class ColorDisplayService extends SystemService {
     private final ReduceBrightColorsTintController mReduceBrightColorsTintController =
             new ReduceBrightColorsTintController();
 
-    private final Handler mHandler;
+    @VisibleForTesting
+    final Handler mHandler;
 
     private final AppSaturationController mAppSaturationController = new AppSaturationController();
 
@@ -404,13 +405,13 @@ public final class ColorDisplayService extends SystemService {
         // existing activated state. This ensures consistency of tint across the color mode change.
         onDisplayColorModeChanged(getColorModeInternal());
 
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         if (mNightDisplayTintController.isAvailable(getContext())) {
             // Reset the activated state.
             mNightDisplayTintController.setActivated(null);
 
             // Prepare the night display color transformation matrix.
-            mNightDisplayTintController
-                    .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix());
+            mNightDisplayTintController.setUp(getContext(), dtm.needsLinearColorMatrix());
             mNightDisplayTintController
                     .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
 
@@ -432,8 +433,7 @@ public final class ColorDisplayService extends SystemService {
         }
 
         if (mReduceBrightColorsTintController.isAvailable(getContext())) {
-            mReduceBrightColorsTintController
-                    .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix());
+            mReduceBrightColorsTintController.setUp(getContext(), dtm.needsLinearColorMatrix());
             onReduceBrightColorsStrengthLevelChanged();
             final boolean reset = resetReduceBrightColors();
             if (!reset) {
@@ -540,8 +540,8 @@ public final class ColorDisplayService extends SystemService {
         mDisplayWhiteBalanceTintController.cancelAnimator();
 
         if (mNightDisplayTintController.isAvailable(getContext())) {
-            mNightDisplayTintController
-                    .setUp(getContext(), DisplayTransformManager.needsLinearColorMatrix(mode));
+            final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+            mNightDisplayTintController.setUp(getContext(), dtm.needsLinearColorMatrix(mode));
             mNightDisplayTintController
                     .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
         }
@@ -731,10 +731,11 @@ public final class ColorDisplayService extends SystemService {
     @VisibleForTesting
     void updateDisplayWhiteBalanceStatus() {
         boolean oldActivated = mDisplayWhiteBalanceTintController.isActivated();
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled()
                 && !mNightDisplayTintController.isActivated()
                 && !isAccessibilityEnabled()
-                && DisplayTransformManager.needsLinearColorMatrix());
+                && dtm.needsLinearColorMatrix());
         boolean activated = mDisplayWhiteBalanceTintController.isActivated();
 
         if (mDisplayWhiteBalanceListener != null && oldActivated != activated) {

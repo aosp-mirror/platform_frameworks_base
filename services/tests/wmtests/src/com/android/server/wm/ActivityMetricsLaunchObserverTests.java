@@ -96,6 +96,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .setTask(mTrampolineActivity.getTask())
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "TopActivity"))
                 .build();
+        // becomes invisible when covered by mTopActivity
+        mTrampolineActivity.mVisibleRequested = false;
     }
 
     @After
@@ -230,7 +232,6 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityLaunchCancelled_finishedBeforeDrawn() {
-        mTopActivity.mVisibleRequested = true;
         doReturn(true).when(mTopActivity).isReportedDrawn();
 
         // Create an activity with different process that meets process switch.

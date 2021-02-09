@@ -150,7 +150,7 @@ public class RotationResolverManagerService extends
         @Override
         public void resolveRotation(
                 @NonNull RotationResolverCallbackInternal callbackInternal, int proposedRotation,
-                int currentRotation, String packageName, long timeout,
+                int currentRotation, long timeout,
                 @NonNull CancellationSignal cancellationSignalInternal) {
             Objects.requireNonNull(callbackInternal);
             Objects.requireNonNull(cancellationSignalInternal);
@@ -159,7 +159,8 @@ public class RotationResolverManagerService extends
                     final RotationResolverManagerPerUserService service = getServiceForUserLocked(
                             UserHandle.getCallingUserId());
                     service.resolveRotationLocked(callbackInternal, proposedRotation,
-                            currentRotation, packageName, timeout, cancellationSignalInternal);
+                            currentRotation, /* packageName */ "", timeout,
+                            cancellationSignalInternal);
                 } else {
                     Slog.w(TAG, "Rotation Resolver service is disabled.");
                     callbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);
@@ -191,7 +192,7 @@ public class RotationResolverManagerService extends
                     TAG);
             final RotationResolverManagerPerUserService service = getServiceForUserLocked(
                     UserHandle.getCallingUserId());
-            new RotationResolverShellCommend(service).exec(this, in, out, err, args, callback,
+            new RotationResolverShellCommand(service).exec(this, in, out, err, args, callback,
                     resultReceiver);
         }
     }

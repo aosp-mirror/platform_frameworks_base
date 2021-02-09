@@ -81,6 +81,7 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigScopes = new String[] {
         DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_CONFIGURATION,
+        DeviceConfig.NAMESPACE_CONNECTIVITY,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_INTELLIGENCE_CONTENT_SUGGESTIONS,
         DeviceConfig.NAMESPACE_MEDIA_NATIVE,

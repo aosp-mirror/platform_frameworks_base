@@ -3056,7 +3056,6 @@
     <public name="pathAdvancedPattern" />
     <public name="sspAdvancedPattern" />
     <public name="fontProviderSystemFontFamily" />
-    <public name="edgeEffectType" />
     <public name="hand_second" />
     <public name="memtagMode" />
     <public name="nativeHeapZeroInit" />
@@ -3123,6 +3122,27 @@
 
   <public-group type="id" first-id="0x01020055">
     <!-- id definitions go here -->
+  </public-group>
+
+  <!-- ===============================================================
+   Resources added in version T of the platform
+
+   NOTE: add <public> elements within a <public-group> like so:
+
+   <public-group type="attr" first-id="0x01010531">
+       <public name="exampleAttr1" />
+       <public name="exampleAttr2" />
+   </public-group>
+
+   To add a new public-group block, choose an id value that is 1 greater
+   than the last of that item above. For example, the last "attr" id
+   value above is 0x01010530, so the public-group of attrs below has
+   the id value of 0x01010531.
+   =============================================================== -->
+  <eat-comment />
+
+  <public-group type="attr" first-id="0x01010640">
+    <public name="edgeEffectType" />
   </public-group>
 
   <!-- ===============================================================

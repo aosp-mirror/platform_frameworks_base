@@ -69,7 +69,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.policy.WindowOrientationListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
@@ -253,7 +252,7 @@ public class DisplayRotation {
 
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
-            mOrientationListener = new OrientationListener(mContext, uiHandler);
+            mOrientationListener = new OrientationListener(mContext, uiHandler, mService);
             mOrientationListener.setCurrentRotation(mRotation);
             mSettingsObserver = new SettingsObserver(uiHandler);
             mSettingsObserver.observe();
@@ -482,11 +481,11 @@ public class DisplayRotation {
 
         mRotation = rotation;
 
+        mDisplayContent.setLayoutNeeded();
+
         mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
         mService.mH.sendNewMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
                 mDisplayContent, WINDOW_FREEZE_TIMEOUT_DURATION);
-
-        mDisplayContent.setLayoutNeeded();
 
         if (shouldRotateSeamlessly(oldRotation, rotation, forceUpdate)) {
             // The screen rotation animation uses a screenshot to freeze the screen while windows
@@ -1474,8 +1473,8 @@ public class DisplayRotation {
         final SparseArray<Runnable> mRunnableCache = new SparseArray<>(5);
         boolean mEnabled;
 
-        OrientationListener(Context context, Handler handler) {
-            super(context, handler);
+        OrientationListener(Context context, Handler handler, WindowManagerService service) {
+            super(context, handler, service);
         }
 
         private class UpdateRunnable implements Runnable {
@@ -1497,6 +1496,21 @@ public class DisplayRotation {
                             false /* forceRelayout */);
                 }
             }
+        }
+
+        @Override
+        public boolean canUseRotationResolver() {
+            if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) return false;
+
+            switch (mCurrentAppOrientation) {
+                case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
+                case ActivityInfo.SCREEN_ORIENTATION_USER:
+                case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
+                case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
+                case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
+                    return true;
+            }
+            return false;
         }
 
         @Override

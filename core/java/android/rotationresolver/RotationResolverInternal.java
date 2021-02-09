@@ -46,7 +46,6 @@ public abstract class RotationResolverInternal {
      *                 error is captured. {@link RotationResolverCallbackInternal}
      * @param proposedRotation the screen rotation that is proposed by the system.
      * @param currentRotation the current screen rotation.
-     * @param packageName the package name of the current activity that is running in foreground.
      * @param timeoutMillis the timeout in millisecond for the query. If the query doesn't get
      *                      fulfilled within this amount of time. It will be discarded and the
      *                      callback will receive a failure result code {@link
@@ -55,8 +54,7 @@ public abstract class RotationResolverInternal {
      */
     public abstract void resolveRotation(@NonNull RotationResolverCallbackInternal callback,
             @Surface.Rotation int proposedRotation, @Surface.Rotation int currentRotation,
-            String packageName, @DurationMillisLong long timeoutMillis,
-            @NonNull CancellationSignal cancellationSignal);
+            @DurationMillisLong long timeoutMillis, @NonNull CancellationSignal cancellationSignal);
 
     /**
      * Internal interfaces for the rotation resolver callback.

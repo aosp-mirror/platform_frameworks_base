@@ -572,7 +572,7 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
-    field public static final int edgeEffectType = 16844323; // 0x1010623
+    field public static final int edgeEffectType = 16844352; // 0x1010640
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -723,7 +723,7 @@ package android {
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
     field public static final int hand_minute = 16843012; // 0x1010104
-    field public static final int hand_second = 16844324; // 0x1010624
+    field public static final int hand_second = 16844323; // 0x1010623
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -965,7 +965,7 @@ package android {
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
     field public static final int mediaRouteTypes = 16843694; // 0x10103ae
-    field public static final int memtagMode = 16844325; // 0x1010625
+    field public static final int memtagMode = 16844324; // 0x1010624
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeGroup = 16844309; // 0x1010615
     field public static final int mimeType = 16842790; // 0x1010026
@@ -989,7 +989,7 @@ package android {
     field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
-    field public static final int nativeHeapZeroInit = 16844326; // 0x1010626
+    field public static final int nativeHeapZeroInit = 16844325; // 0x1010625
     field public static final int navigationBarColor = 16843858; // 0x1010452
     field public static final int navigationBarDividerColor = 16844141; // 0x101056d
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
@@ -20479,6 +20479,7 @@ package android.media {
     field public static final int QUALITY_480P = 4; // 0x4
     field public static final int QUALITY_4KDCI = 10; // 0xa
     field public static final int QUALITY_720P = 5; // 0x5
+    field public static final int QUALITY_8KUHD = 13; // 0xd
     field public static final int QUALITY_CIF = 3; // 0x3
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_HIGH_SPEED_1080P = 2004; // 0x7d4
@@ -20500,6 +20501,7 @@ package android.media {
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_4KDCI = 1010; // 0x3f2
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
+    field public static final int QUALITY_TIME_LAPSE_8KUHD = 1013; // 0x3f5
     field public static final int QUALITY_TIME_LAPSE_CIF = 1003; // 0x3eb
     field public static final int QUALITY_TIME_LAPSE_HIGH = 1001; // 0x3e9
     field public static final int QUALITY_TIME_LAPSE_LOW = 1000; // 0x3e8
@@ -42736,7 +42738,11 @@ package android.telephony.ims {
   }
 
   public class ImsRcsManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
     field public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN = "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
   }
 

@@ -56,7 +56,15 @@ public abstract class Qos {
         this.uplink = new QosBandwidth(uplink.maxBitrateKbps, uplink.guaranteedBitrateKbps);
     }
 
-    static class QosBandwidth implements Parcelable {
+    public QosBandwidth getDownlinkBandwidth() {
+        return downlink;
+    }
+
+    public QosBandwidth getUplinkBandwidth() {
+        return uplink;
+    }
+
+    public static class QosBandwidth implements Parcelable {
         int maxBitrateKbps;
         int guaranteedBitrateKbps;
 
@@ -71,6 +79,14 @@ public abstract class Qos {
         private QosBandwidth(Parcel source) {
             maxBitrateKbps = source.readInt();
             guaranteedBitrateKbps = source.readInt();
+        }
+
+        public int getMaxBitrateKbps() {
+            return maxBitrateKbps;
+        }
+
+        public int getGuaranteedBitrateKbps() {
+            return guaranteedBitrateKbps;
         }
 
         @Override

@@ -64,13 +64,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class DomainVerificationService extends SystemService
         implements DomainVerificationManagerInternal, DomainVerificationShell.Callback {
 
     private static final String TAG = "DomainVerificationService";
 
-    public static final boolean DEBUG_APPROVAL = true;
+    public static final boolean DEBUG_APPROVAL = DomainVerificationDebug.DEBUG_APPROVAL;
 
     /**
      * The new user preference API for verifying domains marked autoVerify=true in
@@ -541,8 +542,6 @@ public class DomainVerificationService extends SystemService
                 userState.removeHosts(domains);
             }
         }
-
-        mConnection.scheduleWriteSettings();
     }
 
     @Nullable
@@ -848,6 +847,7 @@ public class DomainVerificationService extends SystemService
     public void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state) {
         mEnforcer.callerIsLegacyUserSelector(mConnection.getCallingUid());
         mLegacySettings.add(packageName, userId, state);
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
@@ -890,9 +890,24 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
-            @Nullable @UserIdInt Integer userId) throws NameNotFoundException {
+            @Nullable Integer userId) throws NameNotFoundException {
+        // This method is only used by DomainVerificationShell, which doesn't lock PMS, so it's
+        // safe to pass mConnection directly here and lock PMS. This method is not exposed
+        // to the general system server/PMS.
+        printState(writer, packageName, userId, mConnection);
+    }
+
+    @Override
+    public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
+            @Nullable @UserIdInt Integer userId,
+            @Nullable Function<String, PackageSetting> pkgSettingFunction)
+            throws NameNotFoundException {
+        if (pkgSettingFunction == null) {
+            pkgSettingFunction = mConnection;
+        }
+
         synchronized (mLock) {
-            mDebug.printState(writer, packageName, userId, mConnection, mAttachedPkgStates);
+            mDebug.printState(writer, packageName, userId, pkgSettingFunction, mAttachedPkgStates);
         }
     }
 
@@ -1051,6 +1066,8 @@ public class DomainVerificationService extends SystemService
                 }
             }
         }
+
+        mConnection.scheduleWriteSettings();
     }
 
     /**
@@ -1108,6 +1125,8 @@ public class DomainVerificationService extends SystemService
                 }
             }
         }
+
+        mConnection.scheduleWriteSettings();
     }
 
     @Override

@@ -1608,6 +1608,16 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testGetOrCreateRootHomeTask_dontMoveToTop() {
+        DisplayContent display = createNewDisplay();
+        display.mDontMoveToTop = true;
+        TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
+
+        assertNull(taskDisplayArea.getRootHomeTask());
+        assertNull(taskDisplayArea.getOrCreateRootHomeTask());
+    }
+
+    @Test
     public void testValidWindowingLayer() {
         final SurfaceControl windowingLayer = mDisplayContent.getWindowingLayer();
         assertNotNull(windowingLayer);

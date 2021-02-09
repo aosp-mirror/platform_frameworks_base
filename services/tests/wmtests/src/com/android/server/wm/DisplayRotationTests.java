@@ -121,6 +121,8 @@ public class DisplayRotationTests {
         sMockWm = mock(WindowManagerService.class);
         sMockWm.mPowerManagerInternal = mock(PowerManagerInternal.class);
         sMockWm.mPolicy = mock(WindowManagerPolicy.class);
+        sMockWm.mConstants = mock(WindowManagerConstants.class);
+        sMockWm.mConstants.mRawSensorLoggingEnabled = true;
     }
 
     @AfterClass

@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,9 +52,7 @@ import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -76,25 +73,29 @@ public class ColorDisplayServiceTest {
     private int mUserId;
 
     private MockTwilightManager mTwilightManager;
+    private DisplayTransformManager mDisplayTransformManager;
 
     private ColorDisplayService mCds;
     private ColorDisplayService.BinderService mBinderService;
 
     private Resources mResourcesSpy;
 
-    @BeforeClass
-    public static void setDtm() {
-        final DisplayTransformManager dtm = Mockito.mock(DisplayTransformManager.class);
-        LocalServices.addService(DisplayTransformManager.class, dtm);
-    }
+    private static final int[] MINIMAL_COLOR_MODES = new int[] {
+        ColorDisplayManager.COLOR_MODE_NATURAL,
+        ColorDisplayManager.COLOR_MODE_BOOSTED,
+    };
 
     @Before
     public void setUp() {
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         doReturn(mContext).when(mContext).getApplicationContext();
 
-        mResourcesSpy = Mockito.spy(mContext.getResources());
-        when(mContext.getResources()).thenReturn(mResourcesSpy);
+        final Resources res = Mockito.spy(mContext.getResources());
+        doReturn(MINIMAL_COLOR_MODES).when(res).getIntArray(R.array.config_availableColorModes);
+        doReturn(true).when(res).getBoolean(R.bool.config_nightDisplayAvailable);
+        doReturn(true).when(res).getBoolean(R.bool.config_displayWhiteBalanceAvailable);
+        when(mContext.getResources()).thenReturn(res);
+        mResourcesSpy = res;
 
         mUserId = ActivityManager.getCurrentUser();
 
@@ -108,6 +109,10 @@ public class ColorDisplayServiceTest {
         mTwilightManager = new MockTwilightManager();
         LocalServices.addService(TwilightManager.class, mTwilightManager);
 
+        mDisplayTransformManager = Mockito.mock(DisplayTransformManager.class);
+        doReturn(true).when(mDisplayTransformManager).needsLinearColorMatrix();
+        LocalServices.addService(DisplayTransformManager.class, mDisplayTransformManager);
+
         mCds = new ColorDisplayService(mContext);
         mBinderService = mCds.new BinderService();
         LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
@@ -116,11 +121,17 @@ public class ColorDisplayServiceTest {
 
     @After
     public void tearDown() {
-        LocalServices.removeServiceForTest(TwilightManager.class);
-
+        /*
+         * Wait for internal {@link Handler} to finish processing pending messages, so that test
+         * code can safelyremove {@link DisplayTransformManager} mock from {@link LocalServices}.
+         */
+        mCds.mHandler.runWithScissors(() -> { /* nop */ }, /* timeout */ 1000);
         mCds = null;
 
+        LocalServices.removeServiceForTest(TwilightManager.class);
         mTwilightManager = null;
+
+        LocalServices.removeServiceForTest(DisplayTransformManager.class);
 
         mUserId = UserHandle.USER_NULL;
         mContext = null;
@@ -128,11 +139,6 @@ public class ColorDisplayServiceTest {
         FakeSettingsProvider.clearSettingsProvider();
 
         LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
-    }
-
-    @AfterClass
-    public static void removeDtm() {
-        LocalServices.removeServiceForTest(DisplayTransformManager.class);
     }
 
     @Test
@@ -1064,24 +1070,18 @@ public class ColorDisplayServiceTest {
 
     @Test
     public void compositionColorSpaces_noResources() {
-        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
-        reset(dtm);
-
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
             .thenReturn(new int[] {});
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
             .thenReturn(new int[] {});
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
-        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(),
-                eq(Display.COLOR_MODE_INVALID));
+        verify(mDisplayTransformManager).setColorMode(
+                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), eq(Display.COLOR_MODE_INVALID));
     }
 
     @Test
     public void compositionColorSpaces_invalidResources() {
-        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
-        reset(dtm);
-
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
             .thenReturn(new int[] {
                ColorDisplayManager.COLOR_MODE_NATURAL,
@@ -1094,15 +1094,12 @@ public class ColorDisplayServiceTest {
             });
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
-        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(),
-                eq(Display.COLOR_MODE_INVALID));
+        verify(mDisplayTransformManager).setColorMode(
+                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), eq(Display.COLOR_MODE_INVALID));
     }
 
     @Test
     public void compositionColorSpaces_validResources_validColorMode() {
-        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
-        reset(dtm);
-
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
             .thenReturn(new int[] {
                ColorDisplayManager.COLOR_MODE_NATURAL
@@ -1113,15 +1110,12 @@ public class ColorDisplayServiceTest {
             });
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
-        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(),
-                eq(Display.COLOR_MODE_SRGB));
+        verify(mDisplayTransformManager).setColorMode(
+                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), eq(Display.COLOR_MODE_SRGB));
     }
 
     @Test
     public void compositionColorSpaces_validResources_invalidColorMode() {
-        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
-        reset(dtm);
-
         when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
             .thenReturn(new int[] {
                ColorDisplayManager.COLOR_MODE_NATURAL
@@ -1132,8 +1126,8 @@ public class ColorDisplayServiceTest {
             });
         setColorMode(ColorDisplayManager.COLOR_MODE_BOOSTED);
         startService();
-        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(),
-                eq(Display.COLOR_MODE_INVALID));
+        verify(mDisplayTransformManager).setColorMode(
+                eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(), eq(Display.COLOR_MODE_INVALID));
     }
 
     /**
