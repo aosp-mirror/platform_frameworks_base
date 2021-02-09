@@ -2936,12 +2936,12 @@ package android.accessibilityservice {
     field public static final int GESTURE_2_FINGER_DOUBLE_TAP = 20; // 0x14
     field public static final int GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD = 40; // 0x28
     field public static final int GESTURE_2_FINGER_SINGLE_TAP = 19; // 0x13
-    field public static final int GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD = 43; // 0x2b
     field public static final int GESTURE_2_FINGER_SWIPE_DOWN = 26; // 0x1a
     field public static final int GESTURE_2_FINGER_SWIPE_LEFT = 27; // 0x1b
     field public static final int GESTURE_2_FINGER_SWIPE_RIGHT = 28; // 0x1c
     field public static final int GESTURE_2_FINGER_SWIPE_UP = 25; // 0x19
     field public static final int GESTURE_2_FINGER_TRIPLE_TAP = 21; // 0x15
+    field public static final int GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD = 43; // 0x2b
     field public static final int GESTURE_3_FINGER_DOUBLE_TAP = 23; // 0x17
     field public static final int GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD = 41; // 0x29
     field public static final int GESTURE_3_FINGER_SINGLE_TAP = 22; // 0x16
