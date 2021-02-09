@@ -47,12 +47,12 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyUnavailable;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -92,9 +92,9 @@ public class DomainVerificationService extends SystemService
      * immediately attached once its available.
      * <p>
      * Generally this should be not accessed directly. Prefer calling {@link
-     * #getAndValidateAttachedLocked(UUID, Set, boolean)}.
+     * #getAndValidateAttachedLocked(UUID, Set, boolean, int, Integer)}.
      *
-     * @see #getAndValidateAttachedLocked(UUID, Set, boolean)
+     * @see #getAndValidateAttachedLocked(UUID, Set, boolean, int, Integer)
      **/
     @GuardedBy("mLock")
     @NonNull
@@ -160,6 +160,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public void setConnection(@NonNull Connection connection) {
         mConnection = connection;
+        mEnforcer.setCallback(mConnection);
     }
 
     @NonNull
@@ -285,7 +286,7 @@ public class DomainVerificationService extends SystemService
         mEnforcer.assertApprovedVerifier(callingUid, mProxy);
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
-                    true /* forAutoVerify */);
+                    true /* forAutoVerify */, callingUid, null /* userId */);
             ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
             for (String domain : domains) {
                 Integer previousState = stateMap.get(domain);
@@ -389,8 +390,10 @@ public class DomainVerificationService extends SystemService
 
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed, @UserIdInt int userId) throws NameNotFoundException {
-        mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
-                mConnection.getCallingUserId(), userId);
+        if (!mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), packageName, userId)) {
+            throw DomainVerificationUtils.throwPackageUnavailable(packageName);
+        }
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
@@ -455,11 +458,18 @@ public class DomainVerificationService extends SystemService
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled, @UserIdInt int userId)
             throws InvalidDomainSetException, NameNotFoundException {
-        mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
-                mConnection.getCallingUserId(), userId);
         synchronized (mLock) {
+            final int callingUid = mConnection.getCallingUid();
+            // Pass null for package name here and do the app visibility enforcement inside
+            // getAndValidateAttachedLocked instead, since this has to fail with the same invalid
+            // ID reason if the target app is invisible
+            if (!mEnforcer.assertApprovedUserSelector(callingUid, mConnection.getCallingUserId(),
+                    null /* packageName */, userId)) {
+                throw new InvalidDomainSetException(domainSetId, null,
+                        InvalidDomainSetException.REASON_ID_INVALID);
+            }
             DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
-                    false /* forAutoVerify */);
+                    false /* forAutoVerify */, callingUid, userId);
             DomainVerificationUserState userState = pkgState.getOrCreateUserSelectionState(userId);
             if (enabled) {
                 userState.addHosts(domains);
@@ -556,8 +566,10 @@ public class DomainVerificationService extends SystemService
     @Override
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName, @UserIdInt int userId) throws NameNotFoundException {
-        mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
-                mConnection.getCallingUserId(), userId);
+        if (!mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), packageName, userId)) {
+            throw DomainVerificationUtils.throwPackageUnavailable(packageName);
+        }
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
@@ -844,20 +856,24 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
-    public void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state) {
-        mEnforcer.callerIsLegacyUserSelector(mConnection.getCallingUid());
+    public boolean setLegacyUserState(@NonNull String packageName, @UserIdInt int userId,
+            int state) {
+        if (!mEnforcer.callerIsLegacyUserSelector(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), packageName, userId)) {
+            return false;
+        }
         mLegacySettings.add(packageName, userId, state);
         mConnection.scheduleWriteSettings();
+        return true;
     }
 
     @Override
     public int getLegacyState(@NonNull String packageName, @UserIdInt int userId) {
+        if (!mEnforcer.callerIsLegacyUserQuerent(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), packageName, userId)) {
+            return PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+        }
         return mLegacySettings.getUserState(packageName, userId);
-    }
-
-    @Override
-    public void writeLegacySettings(TypedXmlSerializer serializer, String name) {
-
     }
 
     @Override
@@ -935,10 +951,14 @@ public class DomainVerificationService extends SystemService
      * Validates parameters provided by an external caller. Checks that an ID is still live and that
      * any provided domains are valid. Should be called at the beginning of each API that takes in a
      * {@link UUID} domain set ID.
+     *
+     * @param userIdForFilter which user to filter app access to, or null if the caller has already
+     *                        validated package visibility
      */
     @GuardedBy("mLock")
     private DomainVerificationPkgState getAndValidateAttachedLocked(@NonNull UUID domainSetId,
-            @NonNull Set<String> domains, boolean forAutoVerify)
+            @NonNull Set<String> domains, boolean forAutoVerify, int callingUid,
+            @Nullable Integer userIdForFilter)
             throws InvalidDomainSetException, NameNotFoundException {
         if (domainSetId == null) {
             throw new InvalidDomainSetException(null, null,
@@ -952,6 +972,13 @@ public class DomainVerificationService extends SystemService
         }
 
         String pkgName = pkgState.getPackageName();
+
+        if (userIdForFilter != null
+                && mConnection.filterAppAccess(pkgName, callingUid, userIdForFilter)) {
+            throw new InvalidDomainSetException(domainSetId, null,
+                    InvalidDomainSetException.REASON_ID_INVALID);
+        }
+
         PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
         if (pkgSetting == null || pkgSetting.getPkg() == null) {
             throw DomainVerificationUtils.throwPackageUnavailable(pkgName);

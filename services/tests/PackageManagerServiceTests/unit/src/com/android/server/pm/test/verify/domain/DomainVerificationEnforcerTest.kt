@@ -18,6 +18,7 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.PackageUserState
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.parsing.component.ParsedActivity
@@ -25,7 +26,6 @@ import android.content.pm.parsing.component.ParsedIntentInfo
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
-import android.util.Singleton
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
@@ -46,13 +46,10 @@ import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.testng.Assert.assertThrows
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-
-private typealias Enforcer = DomainVerificationEnforcer
 
 @RunWith(Parameterized::class)
 class DomainVerificationEnforcerTest {
@@ -64,64 +61,27 @@ class DomainVerificationEnforcerTest {
         private const val VERIFIER_UID = Process.FIRST_APPLICATION_UID + 1
         private const val NON_VERIFIER_UID = Process.FIRST_APPLICATION_UID + 2
 
-        private const val TEST_PKG = "com.test"
+        private const val VISIBLE_PKG = "com.test.visible"
+        private val VISIBLE_UUID = UUID.fromString("8db01272-270d-4606-a3db-bb35228ff9a2")
+        private const val INVISIBLE_PKG = "com.test.invisible"
+        private val INVISIBLE_UUID = UUID.fromString("16dcb029-d96c-4a19-833a-4c9d72e2ebc3")
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun parameters(): Array<Any> {
+            val visiblePkg = mockPkg(VISIBLE_PKG)
+            val visiblePkgSetting = mockPkgSetting(VISIBLE_PKG, VISIBLE_UUID)
+            val invisiblePkg = mockPkg(INVISIBLE_PKG)
+            val invisiblePkgSetting = mockPkgSetting(INVISIBLE_PKG, INVISIBLE_UUID)
+
             val makeEnforcer: (Context) -> DomainVerificationEnforcer = {
-                DomainVerificationEnforcer(it)
-            }
-
-            val mockPkg = mockThrowOnUnmocked<AndroidPackage> {
-                whenever(packageName) { TEST_PKG }
-                whenever(targetSdkVersion) { Build.VERSION_CODES.S }
-                whenever(activities) {
-                    listOf(
-                        ParsedActivity().apply {
-                            addIntent(
-                                ParsedIntentInfo().apply {
-                                    autoVerify = true
-                                    addAction(Intent.ACTION_VIEW)
-                                    addCategory(Intent.CATEGORY_BROWSABLE)
-                                    addCategory(Intent.CATEGORY_DEFAULT)
-                                    addDataScheme("https")
-                                    addDataAuthority("example.com", null)
-                                }
-                            )
+                DomainVerificationEnforcer(it).apply {
+                    setCallback(mockThrowOnUnmocked {
+                        whenever(filterAppAccess(eq(VISIBLE_PKG), anyInt(), anyInt())) { false }
+                        whenever(filterAppAccess(eq(INVISIBLE_PKG), anyInt(), anyInt())) {
+                            true
                         }
-                    )
-                }
-            }
-
-            val uuid = UUID.randomUUID()
-
-            // TODO: PackageSetting field encapsulation to move to whenever(name)
-            val mockPkgSetting = spyThrowOnUnmocked(
-                PackageSetting(
-                    TEST_PKG,
-                    TEST_PKG,
-                    File("/test"),
-                    null,
-                    null,
-                    null,
-                    null,
-                    1,
-                    0,
-                    0,
-                    0,
-                    null,
-                    null,
-                    null,
-                    uuid
-                )
-            ) {
-                whenever(getPkg()) { mockPkg }
-                whenever(domainSetId) { uuid }
-                whenever(userState) {
-                    SparseArray<PackageUserState>().apply {
-                        this[0] = PackageUserState()
-                    }
+                    })
                 }
             }
 
@@ -129,142 +89,160 @@ class DomainVerificationEnforcerTest {
                 {
                     val callingUidInt = AtomicInteger(-1)
                     val callingUserIdInt = AtomicInteger(-1)
-                    Triple(
-                        callingUidInt, callingUserIdInt, DomainVerificationService(
-                            it,
-                            mockThrowOnUnmocked { whenever(linkedApps) { ArraySet<String>() } },
-                            mockThrowOnUnmocked {
-                                whenever(
-                                    isChangeEnabled(
-                                        anyLong(),
-                                        any()
-                                    )
-                                ) { true }
-                            }).apply {
-                                setConnection(mockThrowOnUnmocked {
-                                    whenever(callingUid) { callingUidInt.get() }
-                                    whenever(callingUserId) { callingUserIdInt.get() }
-                                    whenever(getPackageSettingLocked(TEST_PKG)) { mockPkgSetting }
-                                    whenever(getPackageLocked(TEST_PKG)) { mockPkg }
-                                    whenever(schedule(anyInt(), any()))
-                                    whenever(scheduleWriteSettings())
-                                })
+
+                    val connection: DomainVerificationManagerInternal.Connection =
+                        mockThrowOnUnmocked {
+                            whenever(callingUid) { callingUidInt.get() }
+                            whenever(callingUserId) { callingUserIdInt.get() }
+                            whenever(getPackageSettingLocked(VISIBLE_PKG)) { visiblePkgSetting }
+                            whenever(getPackageLocked(VISIBLE_PKG)) { visiblePkg }
+                            whenever(getPackageSettingLocked(INVISIBLE_PKG)) { invisiblePkgSetting }
+                            whenever(getPackageLocked(INVISIBLE_PKG)) { invisiblePkg }
+                            whenever(schedule(anyInt(), any()))
+                            whenever(scheduleWriteSettings())
+                            whenever(filterAppAccess(eq(VISIBLE_PKG), anyInt(), anyInt())) { false }
+                            whenever(filterAppAccess(eq(INVISIBLE_PKG), anyInt(), anyInt())) {
+                                true
+                            }
                         }
-                    )
+                    val service = DomainVerificationService(
+                        it,
+                        mockThrowOnUnmocked { whenever(linkedApps) { ArraySet<String>() } },
+                        mockThrowOnUnmocked {
+                            whenever(
+                                isChangeEnabled(
+                                    anyLong(),
+                                    any()
+                                )
+                            ) { true }
+                        }).apply {
+                        setConnection(connection)
+                    }
+
+                    Triple(callingUidInt, callingUserIdInt, service)
                 }
 
             fun enforcer(
                 type: Type,
                 name: String,
-                block: DomainVerificationEnforcer.(
-                    callingUid: Int, callingUserId: Int, userId: Int, proxy: DomainVerificationProxy
-                ) -> Unit
-            ) = Params(
-                type,
-                makeEnforcer,
-                name
-            ) { enforcer, callingUid, callingUserId, userId, proxy ->
-                enforcer.block(callingUid, callingUserId, userId, proxy)
+                block: DomainVerificationEnforcer.(Params.Input<DomainVerificationEnforcer>) -> Any?
+            ) = Params(type, makeEnforcer, name) {
+                it.target.block(it)
             }
 
             fun service(
                 type: Type,
                 name: String,
-                block: DomainVerificationService.(
-                    callingUid: Int, callingUserId: Int, userId: Int
-                ) -> Unit
-            ) = Params(
-                type,
-                makeService,
-                name
-            ) { uidAndUserIdAndService, callingUid, callingUserId, userId, proxy ->
-                val (callingUidInt, callingUserIdInt, service) = uidAndUserIdAndService
-                callingUidInt.set(callingUid)
-                callingUserIdInt.set(callingUserId)
-                service.setProxy(proxy)
-                service.addPackage(mockPkgSetting)
-                service.block(callingUid, callingUserId, userId)
+                block: DomainVerificationService.(Params.Input<Triple<AtomicInteger, AtomicInteger, DomainVerificationService>>) -> Any?
+            ) = Params(type, makeService, name) {
+                val (callingUidInt, callingUserIdInt, service) = it.target
+                callingUidInt.set(it.callingUid)
+                callingUserIdInt.set(it.callingUserId)
+                service.proxy = it.proxy
+                service.addPackage(visiblePkgSetting)
+                service.addPackage(invisiblePkgSetting)
+                service.block(it)
             }
 
             return arrayOf(
-                enforcer(Type.INTERNAL, "internal") { callingUid, _, _, _ ->
-                    assertInternal(callingUid)
+                enforcer(Type.INTERNAL, "internal") {
+                    assertInternal(it.callingUid)
                 },
-                enforcer(Type.QUERENT, "approvedQuerent") { callingUid, _, _, proxy ->
-                    assertApprovedQuerent(callingUid, proxy)
+                enforcer(Type.QUERENT, "approvedQuerent") {
+                    assertApprovedQuerent(it.callingUid, it.proxy)
                 },
-                enforcer(Type.VERIFIER, "approvedVerifier") { callingUid, _, _, proxy ->
-                    assertApprovedVerifier(callingUid, proxy)
+                enforcer(Type.VERIFIER, "approvedVerifier") {
+                    assertApprovedVerifier(it.callingUid, it.proxy)
                 },
                 enforcer(
                     Type.SELECTOR,
                     "approvedUserSelector"
-                ) { callingUid, callingUserId, userId, _ ->
-                    assertApprovedUserSelector(callingUid, callingUserId, userId)
+                ) {
+                    assertApprovedUserSelector(
+                        it.callingUid, it.callingUserId,
+                        it.targetPackageName, it.userId
+                    )
                 },
-
-                service(Type.INTERNAL, "setStatusInternalPackageName") { _, _, _ ->
+                service(Type.INTERNAL, "setStatusInternalPackageName") {
                     setDomainVerificationStatusInternal(
-                        TEST_PKG,
+                        it.targetPackageName,
                         DomainVerificationManager.STATE_SUCCESS,
                         ArraySet(setOf("example.com"))
                     )
                 },
-                service(Type.INTERNAL, "setUserSelectionInternal") { _, _, userId ->
+                service(Type.INTERNAL, "setUserSelectionInternal") {
                     setDomainVerificationUserSelectionInternal(
-                        userId,
-                        TEST_PKG,
+                        it.userId,
+                        it.targetPackageName,
                         false,
                         ArraySet(setOf("example.com"))
                     )
                 },
-                service(Type.INTERNAL, "verifyPackages") { _, _, _ ->
-                    verifyPackages(listOf(TEST_PKG), true)
+                service(Type.INTERNAL, "verifyPackages") {
+                    verifyPackages(listOf(it.targetPackageName), true)
                 },
-                service(Type.INTERNAL, "clearState") { _, _, _ ->
-                    clearDomainVerificationState(listOf(TEST_PKG))
+                service(Type.INTERNAL, "clearState") {
+                    clearDomainVerificationState(listOf(it.targetPackageName))
                 },
-                service(Type.INTERNAL, "clearUserSelections") { _, _, userId ->
-                    clearUserSelections(listOf(TEST_PKG), userId)
+                service(Type.INTERNAL, "clearUserSelections") {
+                    clearUserSelections(listOf(it.targetPackageName), it.userId)
                 },
-                service(Type.VERIFIER, "getPackageNames") { _, _, _ ->
+                service(Type.VERIFIER, "getPackageNames") {
                     validVerificationPackageNames
                 },
-                service(Type.QUERENT, "getInfo") { _, _, _ ->
-                    getDomainVerificationInfo(TEST_PKG)
+                service(Type.QUERENT, "getInfo") {
+                    getDomainVerificationInfo(it.targetPackageName)
                 },
-                service(Type.VERIFIER, "setStatus") { _, _, _ ->
+                service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(
-                        uuid,
+                        it.targetDomainSetId,
                         setOf("example.com"),
                         DomainVerificationManager.STATE_SUCCESS
                     )
                 },
-                service(Type.VERIFIER, "setStatusInternalUid") { callingUid, _, _ ->
+                service(Type.VERIFIER, "setStatusInternalUid") {
                     setDomainVerificationStatusInternal(
-                        callingUid,
-                        uuid,
+                        it.callingUid,
+                        it.targetDomainSetId,
                         setOf("example.com"),
                         DomainVerificationManager.STATE_SUCCESS
                     )
                 },
-                service(Type.SELECTOR, "setLinkHandlingAllowed") { _, _, _ ->
-                    setDomainVerificationLinkHandlingAllowed(TEST_PKG, true)
+                service(Type.SELECTOR, "setLinkHandlingAllowed") {
+                    setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true)
                 },
-                service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") { _, _, userId ->
-                    setDomainVerificationLinkHandlingAllowed(TEST_PKG, true, userId)
+                service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") {
+                    setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true, it.userId)
                 },
-                service(Type.SELECTOR, "getUserSelection") { _, _, _ ->
-                    getDomainVerificationUserSelection(TEST_PKG)
+                service(Type.SELECTOR, "getUserSelection") {
+                    getDomainVerificationUserSelection(it.targetPackageName)
                 },
-                service(Type.SELECTOR_USER, "getUserSelectionUserId") { _, _, userId ->
-                    getDomainVerificationUserSelection(TEST_PKG, userId)
+                service(Type.SELECTOR_USER, "getUserSelectionUserId") {
+                    getDomainVerificationUserSelection(it.targetPackageName, it.userId)
                 },
-                service(Type.SELECTOR, "setUserSelection") { _, _, _ ->
-                    setDomainVerificationUserSelection(uuid, setOf("example.com"), true)
+                service(Type.SELECTOR, "setUserSelection") {
+                    setDomainVerificationUserSelection(
+                        it.targetDomainSetId,
+                        setOf("example.com"),
+                        true
+                    )
                 },
-                service(Type.SELECTOR_USER, "setUserSelectionUserId") { _, _, userId ->
-                    setDomainVerificationUserSelection(uuid, setOf("example.com"), true, userId)
+                service(Type.SELECTOR_USER, "setUserSelectionUserId") {
+                    setDomainVerificationUserSelection(
+                        it.targetDomainSetId,
+                        setOf("example.com"),
+                        true,
+                        it.userId
+                    )
+                },
+                service(Type.LEGACY_SELECTOR, "setLegacyUserState") {
+                    setLegacyUserState(
+                        it.targetPackageName, it.userId,
+                        PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER
+                    )
+                },
+                service(Type.LEGACY_QUERENT, "getLegacyUserState") {
+                    getLegacyState(it.targetPackageName, it.userId)
                 },
             )
         }
@@ -273,9 +251,7 @@ class DomainVerificationEnforcerTest {
             val type: Type,
             val construct: (context: Context) -> T,
             val name: String,
-            private val method: (
-                T, callingUid: Int, callingUserId: Int, userId: Int, proxy: DomainVerificationProxy
-            ) -> Unit
+            private val method: (Input<T>) -> Any?
         ) {
             override fun toString() = "${type}_$name"
 
@@ -284,10 +260,79 @@ class DomainVerificationEnforcerTest {
                 callingUid: Int,
                 callingUserId: Int,
                 userId: Int,
+                targetPackageName: String,
+                targetDomainSetId: UUID,
                 proxy: DomainVerificationProxy
-            ) {
-                @Suppress("UNCHECKED_CAST")
-                method(target as T, callingUid, callingUserId, userId, proxy)
+            ): Any? = method(
+                Input(
+                    @Suppress("UNCHECKED_CAST")
+                    target as T,
+                    callingUid,
+                    callingUserId,
+                    userId,
+                    targetPackageName,
+                    targetDomainSetId,
+                    proxy
+                )
+            )
+
+            data class Input<T>(
+                val target: T,
+                val callingUid: Int,
+                val callingUserId: Int,
+                val userId: Int,
+                val targetPackageName: String,
+                val targetDomainSetId: UUID,
+                val proxy: DomainVerificationProxy
+            )
+        }
+
+        fun mockPkg(packageName: String) = mockThrowOnUnmocked<AndroidPackage> {
+            whenever(this.packageName) { packageName }
+            whenever(targetSdkVersion) { Build.VERSION_CODES.S }
+            whenever(activities) {
+                listOf(
+                    ParsedActivity().apply {
+                        addIntent(
+                            ParsedIntentInfo().apply {
+                                autoVerify = true
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("https")
+                                addDataAuthority("example.com", null)
+                            }
+                        )
+                    }
+                )
+            }
+        }
+
+        fun mockPkgSetting(packageName: String, domainSetId: UUID) = spyThrowOnUnmocked(
+            PackageSetting(
+                packageName,
+                packageName,
+                File("/test"),
+                null,
+                null,
+                null,
+                null,
+                1,
+                0,
+                0,
+                0,
+                null,
+                null,
+                null,
+                domainSetId
+            )
+        ) {
+            whenever(getPkg()) { mockPkg(packageName) }
+            whenever(this.domainSetId) { domainSetId }
+            whenever(userState) {
+                SparseArray<PackageUserState>().apply {
+                    this[0] = PackageUserState()
+                }
             }
         }
     }
@@ -309,6 +354,8 @@ class DomainVerificationEnforcerTest {
             Type.VERIFIER -> approvedVerifier()
             Type.SELECTOR -> approvedUserSelector(verifyCrossUser = false)
             Type.SELECTOR_USER -> approvedUserSelector(verifyCrossUser = true)
+            Type.LEGACY_QUERENT -> legacyQuerent()
+            Type.LEGACY_SELECTOR -> legacyUserSelector()
         }.run { /*exhaust*/ }
     }
 
@@ -316,24 +363,30 @@ class DomainVerificationEnforcerTest {
         val context: Context = mockThrowOnUnmocked()
         val target = params.construct(context)
 
-        INTERNAL_UIDS.forEach { runMethod(target, it) }
-        assertThrows(SecurityException::class.java) { runMethod(target, VERIFIER_UID) }
-        assertThrows(SecurityException::class.java) { runMethod(target, NON_VERIFIER_UID) }
+        // Internal doesn't care about visibility
+        listOf(true, false).forEach { visible ->
+            INTERNAL_UIDS.forEach { runMethod(target, it, visible) }
+            assertFails { runMethod(target, VERIFIER_UID, visible) }
+            assertFails {
+                runMethod(target, NON_VERIFIER_UID, visible)
+            }
+        }
     }
 
     fun approvedQuerent() {
         val allowUserSelection = AtomicBoolean(false)
+        val allowPreferredApps = AtomicBoolean(false)
+        val allowQueryAll = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
-            whenever(
-                enforcePermission(
-                    eq(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION),
-                    anyInt(), anyInt(), anyString()
-                )
-            ) {
-                if (!allowUserSelection.get()) {
-                    throw SecurityException()
-                }
-            }
+            initPermission(
+                allowUserSelection,
+                android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
+            )
+            initPermission(
+                allowPreferredApps,
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS
+            )
+            initPermission(allowQueryAll, android.Manifest.permission.QUERY_ALL_PACKAGES)
         }
         val target = params.construct(context)
 
@@ -341,27 +394,41 @@ class DomainVerificationEnforcerTest {
 
         verifyNoMoreInteractions(context)
 
+        assertFails { runMethod(target, VERIFIER_UID) }
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
+
+        // Check that the verifier only needs QUERY_ALL to pass
+        allowQueryAll.set(true)
         runMethod(target, VERIFIER_UID)
-        assertThrows(SecurityException::class.java) { runMethod(target, NON_VERIFIER_UID) }
+        allowQueryAll.set(false)
+
+        allowPreferredApps.set(true)
+
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
 
         allowUserSelection.set(true)
+
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
+
+        allowQueryAll.set(true)
 
         runMethod(target, NON_VERIFIER_UID)
     }
 
     fun approvedVerifier() {
-        val shouldThrow = AtomicBoolean(false)
+        val allowDomainVerificationAgent = AtomicBoolean(false)
+        val allowIntentVerificationAgent = AtomicBoolean(false)
+        val allowQueryAll = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
-            whenever(
-                enforcePermission(
-                    eq(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT),
-                    anyInt(), anyInt(), anyString()
-                )
-            ) {
-                if (shouldThrow.get()) {
-                    throw SecurityException()
-                }
-            }
+            initPermission(
+                allowDomainVerificationAgent,
+                android.Manifest.permission.DOMAIN_VERIFICATION_AGENT
+            )
+            initPermission(
+                allowIntentVerificationAgent,
+                android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT
+            )
+            initPermission(allowQueryAll, android.Manifest.permission.QUERY_ALL_PACKAGES)
         }
         val target = params.construct(context)
 
@@ -369,94 +436,241 @@ class DomainVerificationEnforcerTest {
 
         verifyNoMoreInteractions(context)
 
+        assertFails { runMethod(target, VERIFIER_UID) }
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
+
+        allowDomainVerificationAgent.set(true)
+
+        assertFails { runMethod(target, VERIFIER_UID) }
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
+
+        allowQueryAll.set(true)
+
         runMethod(target, VERIFIER_UID)
-        assertThrows(SecurityException::class.java) { runMethod(target, NON_VERIFIER_UID) }
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
 
-        shouldThrow.set(true)
+        // Check that v1 verifiers are also allowed through
+        allowDomainVerificationAgent.set(false)
+        allowIntentVerificationAgent.set(true)
 
-        assertThrows(SecurityException::class.java) { runMethod(target, VERIFIER_UID) }
-        assertThrows(SecurityException::class.java) { runMethod(target, NON_VERIFIER_UID) }
+        runMethod(target, VERIFIER_UID)
+        assertFails { runMethod(target, NON_VERIFIER_UID) }
     }
 
     fun approvedUserSelector(verifyCrossUser: Boolean) {
-        val allowUserSelection = AtomicBoolean(true)
-        val allowInteractAcrossUsers = AtomicBoolean(true)
+        val allowUserSelection = AtomicBoolean(false)
+        val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
-            whenever(
-                enforcePermission(
-                    eq(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION),
-                    anyInt(), anyInt(), anyString()
-                )
-            ) {
-                if (!allowUserSelection.get()) {
-                    throw SecurityException()
-                }
-            }
-            whenever(
-                enforcePermission(
-                    eq(android.Manifest.permission.INTERACT_ACROSS_USERS),
-                    anyInt(), anyInt(), anyString()
-                )
-            ) {
-                if (!allowInteractAcrossUsers.get()) {
-                    throw SecurityException()
-                }
-            }
+            initPermission(
+                allowUserSelection,
+                android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
+            )
+            initPermission(
+                allowInteractAcrossUsers,
+                android.Manifest.permission.INTERACT_ACROSS_USERS
+            )
         }
         val target = params.construct(context)
 
-        fun runEachTestCaseWrapped(
-            callingUserId: Int,
-            targetUserId: Int,
-            block: (testCase: () -> Unit) -> Unit = { it.invoke() }
-        ) {
-            block { runMethod(target, VERIFIER_UID, callingUserId, targetUserId) }
-            block { runMethod(target, NON_VERIFIER_UID, callingUserId, targetUserId) }
+        fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
+            // User selector makes no distinction by UID
+            val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
+            if (throws) {
+                allUids.forEach {
+                    assertFails {
+                        runMethod(target, it, visible = true, callingUserId, targetUserId)
+                    }
+                }
+            } else {
+                allUids.forEach {
+                    runMethod(target, it, visible = true, callingUserId, targetUserId)
+                }
+            }
+
+            // User selector doesn't use QUERY_ALL, so the invisible package should always fail
+            allUids.forEach {
+                assertFails {
+                    runMethod(target, it, visible = false, callingUserId, targetUserId)
+                }
+            }
         }
 
         val callingUserId = 0
         val notCallingUserId = 1
 
-        runEachTestCaseWrapped(callingUserId, callingUserId)
+        runTestCases(callingUserId, callingUserId, throws = true)
         if (verifyCrossUser) {
-            runEachTestCaseWrapped(callingUserId, notCallingUserId)
+            runTestCases(callingUserId, notCallingUserId, throws = true)
         }
 
-        allowInteractAcrossUsers.set(false)
+        allowUserSelection.set(true)
 
-        runEachTestCaseWrapped(callingUserId, callingUserId)
-
+        runTestCases(callingUserId, callingUserId, throws = false)
         if (verifyCrossUser) {
-            runEachTestCaseWrapped(callingUserId, notCallingUserId) {
-                assertThrows(SecurityException::class.java, it)
-            }
-        }
-
-        allowUserSelection.set(false)
-
-        runEachTestCaseWrapped(callingUserId, callingUserId) {
-            assertThrows(SecurityException::class.java, it)
-        }
-        if (verifyCrossUser) {
-            runEachTestCaseWrapped(callingUserId, notCallingUserId) {
-                assertThrows(SecurityException::class.java, it)
-            }
+            runTestCases(callingUserId, notCallingUserId, throws = true)
         }
 
         allowInteractAcrossUsers.set(true)
 
-        runEachTestCaseWrapped(callingUserId, callingUserId) {
-            assertThrows(SecurityException::class.java, it)
-        }
+        runTestCases(callingUserId, callingUserId, throws = false)
         if (verifyCrossUser) {
-            runEachTestCaseWrapped(callingUserId, notCallingUserId) {
-                assertThrows(SecurityException::class.java, it)
+            runTestCases(callingUserId, notCallingUserId, throws = false)
+        }
+    }
+
+    private fun legacyUserSelector() {
+        val allowInteractAcrossUsers = AtomicBoolean(false)
+        val allowPreferredApps = AtomicBoolean(false)
+        val context: Context = mockThrowOnUnmocked {
+            initPermission(
+                allowInteractAcrossUsers,
+                android.Manifest.permission.INTERACT_ACROSS_USERS
+            )
+            initPermission(
+                allowPreferredApps,
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS
+            )
+        }
+        val target = params.construct(context)
+
+        fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
+            // Legacy makes no distinction by UID
+            val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
+            if (throws) {
+                allUids.forEach {
+                    assertFails {
+                        runMethod(target, it, visible = true, callingUserId, targetUserId)
+                    }
+                }
+            } else {
+                allUids.forEach {
+                    runMethod(target, it, visible = true, callingUserId, targetUserId)
+                }
+            }
+
+            // Legacy doesn't use QUERY_ALL, so the invisible package should always fail
+            allUids.forEach {
+                assertFails {
+                    runMethod(target, it, visible = false, callingUserId, targetUserId)
+                }
+            }
+        }
+
+        val callingUserId = 0
+        val notCallingUserId = 1
+
+        runTestCases(callingUserId, callingUserId, throws = true)
+        runTestCases(callingUserId, notCallingUserId, throws = true)
+
+        allowPreferredApps.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        runTestCases(callingUserId, notCallingUserId, throws = true)
+
+        allowInteractAcrossUsers.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        runTestCases(callingUserId, notCallingUserId, throws = false)
+    }
+
+    private fun legacyQuerent() {
+        val allowInteractAcrossUsers = AtomicBoolean(false)
+        val allowInteractAcrossUsersFull = AtomicBoolean(false)
+        val context: Context = mockThrowOnUnmocked {
+            initPermission(
+                allowInteractAcrossUsers,
+                android.Manifest.permission.INTERACT_ACROSS_USERS
+            )
+            initPermission(
+                allowInteractAcrossUsersFull,
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
+            )
+        }
+        val target = params.construct(context)
+
+        fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
+            // Legacy makes no distinction by UID
+            val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
+            if (throws) {
+                allUids.forEach {
+                    assertFails {
+                        runMethod(target, it, visible = true, callingUserId, targetUserId)
+                    }
+                }
+            } else {
+                allUids.forEach {
+                    runMethod(target, it, visible = true, callingUserId, targetUserId)
+                }
+            }
+
+            // Legacy doesn't use QUERY_ALL, so the invisible package should always fail
+            allUids.forEach {
+                assertFails {
+                    runMethod(target, it, visible = false, callingUserId, targetUserId)
+                }
+            }
+        }
+
+        val callingUserId = 0
+        val notCallingUserId = 1
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        runTestCases(callingUserId, notCallingUserId, throws = true)
+
+        // Legacy requires the _FULL permission, so this should continue to fail
+        allowInteractAcrossUsers.set(true)
+        runTestCases(callingUserId, callingUserId, throws = false)
+        runTestCases(callingUserId, notCallingUserId, throws = true)
+
+        allowInteractAcrossUsersFull.set(true)
+        runTestCases(callingUserId, callingUserId, throws = false)
+        runTestCases(callingUserId, notCallingUserId, throws = false)
+    }
+
+    private fun Context.initPermission(boolean: AtomicBoolean, permission: String) {
+        whenever(enforcePermission(eq(permission), anyInt(), anyInt(), anyString())) {
+            if (!boolean.get()) {
+                throw SecurityException()
+            }
+        }
+        whenever(checkPermission(eq(permission), anyInt(), anyInt())) {
+            if (boolean.get()) {
+                PackageManager.PERMISSION_GRANTED
+            } else {
+                PackageManager.PERMISSION_DENIED
             }
         }
     }
 
-    private fun runMethod(target: Any, callingUid: Int, callingUserId: Int = 0, userId: Int = 0) {
-        params.runMethod(target, callingUid, callingUserId, userId, proxy)
+    private fun runMethod(
+        target: Any,
+        callingUid: Int,
+        visible: Boolean = true,
+        callingUserId: Int = 0,
+        userId: Int = 0
+    ): Any? {
+        val packageName = if (visible) VISIBLE_PKG else INVISIBLE_PKG
+        val uuid = if (visible) VISIBLE_UUID else INVISIBLE_UUID
+        return params.runMethod(target, callingUid, callingUserId, userId, packageName, uuid, proxy)
+    }
+
+    private fun assertFails(block: () -> Any?) {
+        try {
+            val value = block()
+            // Some methods return false rather than throwing, so check that as well
+            if ((value as? Boolean) != false) {
+                // Can also return default value if it's a legacy call
+                if ((value as? Int)
+                    != PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
+                ) {
+                    throw AssertionError("Expected call to return false, was $value")
+                }
+            }
+        } catch (e: SecurityException) {
+        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (e: DomainVerificationManager.InvalidDomainSetException) {
+            // Any of these 3 exceptions are considered failures, which is expected
+        }
     }
 
     enum class Type {
@@ -473,6 +687,12 @@ class DomainVerificationEnforcerTest {
         SELECTOR,
 
         // Holding the user setting permission, but targeting cross user
-        SELECTOR_USER
+        SELECTOR_USER,
+
+        // Legacy required no permissions except when cross-user
+        LEGACY_QUERENT,
+
+        // Holding the legacy preferred apps permission
+        LEGACY_SELECTOR
     }
 }
