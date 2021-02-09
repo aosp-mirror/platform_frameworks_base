@@ -163,7 +163,7 @@ public class SetSchemaResponse {
 
         /** Adds deletedTypes to the list of deleted schema types. */
         @NonNull
-        public Builder addDeletedType(@NonNull Collection<String> deletedTypes) {
+        public Builder addDeletedTypes(@NonNull Collection<String> deletedTypes) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mDeletedTypes.addAll(Preconditions.checkNotNull(deletedTypes));
             return this;
@@ -171,7 +171,7 @@ public class SetSchemaResponse {
 
         /** Adds incompatibleTypes to the list of incompatible schema types. */
         @NonNull
-        public Builder addIncompatibleType(@NonNull Collection<String> incompatibleTypes) {
+        public Builder addIncompatibleTypes(@NonNull Collection<String> incompatibleTypes) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mIncompatibleTypes.addAll(Preconditions.checkNotNull(incompatibleTypes));
             return this;
@@ -179,7 +179,7 @@ public class SetSchemaResponse {
 
         /** Adds migratedTypes to the list of migrated schema types. */
         @NonNull
-        public Builder addMigratedType(@NonNull Collection<String> migratedTypes) {
+        public Builder addMigratedTypes(@NonNull Collection<String> migratedTypes) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mMigratedTypes.addAll(Preconditions.checkNotNull(migratedTypes));
             return this;

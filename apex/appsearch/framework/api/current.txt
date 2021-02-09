@@ -208,8 +208,8 @@ package android.app.appsearch {
     ctor public GetByUriRequest.Builder();
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUri(@NonNull java.lang.String...);
-    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUri(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest build();
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
   }
@@ -243,8 +243,8 @@ package android.app.appsearch {
 
   public static final class RemoveByUriRequest.Builder {
     ctor public RemoveByUriRequest.Builder();
-    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUri(@NonNull java.lang.String...);
-    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUri(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUris(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.RemoveByUriRequest build();
     method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder setNamespace(@NonNull String);
   }
