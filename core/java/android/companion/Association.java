@@ -23,6 +23,7 @@ import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -39,11 +40,18 @@ public final class Association implements Parcelable {
     private final @NonNull String mPackageName;
     private final @Nullable String mDeviceProfile;
     private final boolean mNotifyOnDeviceNearby;
+    private final long mTimeApprovedMs;
 
     /** @hide */
     public int getUserId() {
         return mUserId;
     }
+
+    private String timeApprovedMsToString() {
+        return new Date(mTimeApprovedMs).toString();
+    }
+
+
 
 
 
@@ -71,7 +79,8 @@ public final class Association implements Parcelable {
             @NonNull String deviceMacAddress,
             @NonNull String packageName,
             @Nullable String deviceProfile,
-            boolean notifyOnDeviceNearby) {
+            boolean notifyOnDeviceNearby,
+            long timeApprovedMs) {
         this.mUserId = userId;
         com.android.internal.util.AnnotationValidations.validate(
                 UserIdInt.class, null, mUserId);
@@ -83,6 +92,7 @@ public final class Association implements Parcelable {
                 NonNull.class, null, mPackageName);
         this.mDeviceProfile = deviceProfile;
         this.mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+        this.mTimeApprovedMs = timeApprovedMs;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -107,6 +117,11 @@ public final class Association implements Parcelable {
         return mNotifyOnDeviceNearby;
     }
 
+    @DataClass.Generated.Member
+    public long getTimeApprovedMs() {
+        return mTimeApprovedMs;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -118,7 +133,8 @@ public final class Association implements Parcelable {
                 "deviceMacAddress = " + mDeviceMacAddress + ", " +
                 "packageName = " + mPackageName + ", " +
                 "deviceProfile = " + mDeviceProfile + ", " +
-                "notifyOnDeviceNearby = " + mNotifyOnDeviceNearby +
+                "notifyOnDeviceNearby = " + mNotifyOnDeviceNearby + ", " +
+                "timeApprovedMs = " + timeApprovedMsToString() +
         " }";
     }
 
@@ -139,7 +155,8 @@ public final class Association implements Parcelable {
                 && Objects.equals(mDeviceMacAddress, that.mDeviceMacAddress)
                 && Objects.equals(mPackageName, that.mPackageName)
                 && Objects.equals(mDeviceProfile, that.mDeviceProfile)
-                && mNotifyOnDeviceNearby == that.mNotifyOnDeviceNearby;
+                && mNotifyOnDeviceNearby == that.mNotifyOnDeviceNearby
+                && mTimeApprovedMs == that.mTimeApprovedMs;
     }
 
     @Override
@@ -154,6 +171,7 @@ public final class Association implements Parcelable {
         _hash = 31 * _hash + Objects.hashCode(mPackageName);
         _hash = 31 * _hash + Objects.hashCode(mDeviceProfile);
         _hash = 31 * _hash + Boolean.hashCode(mNotifyOnDeviceNearby);
+        _hash = 31 * _hash + Long.hashCode(mTimeApprovedMs);
         return _hash;
     }
 
@@ -171,6 +189,7 @@ public final class Association implements Parcelable {
         dest.writeString(mDeviceMacAddress);
         dest.writeString(mPackageName);
         if (mDeviceProfile != null) dest.writeString(mDeviceProfile);
+        dest.writeLong(mTimeApprovedMs);
     }
 
     @Override
@@ -190,6 +209,7 @@ public final class Association implements Parcelable {
         String deviceMacAddress = in.readString();
         String packageName = in.readString();
         String deviceProfile = (flg & 0x8) == 0 ? null : in.readString();
+        long timeApprovedMs = in.readLong();
 
         this.mUserId = userId;
         com.android.internal.util.AnnotationValidations.validate(
@@ -202,6 +222,7 @@ public final class Association implements Parcelable {
                 NonNull.class, null, mPackageName);
         this.mDeviceProfile = deviceProfile;
         this.mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+        this.mTimeApprovedMs = timeApprovedMs;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -221,10 +242,10 @@ public final class Association implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1610482674799L,
+            time = 1612832377589L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/companion/Association.java",
-            inputSignatures = "private final @android.annotation.UserIdInt int mUserId\nprivate final @android.annotation.NonNull java.lang.String mDeviceMacAddress\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mDeviceProfile\nprivate final  boolean mNotifyOnDeviceNearby\npublic  int getUserId()\nclass Association extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.UserIdInt int mUserId\nprivate final @android.annotation.NonNull java.lang.String mDeviceMacAddress\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mDeviceProfile\nprivate final  boolean mNotifyOnDeviceNearby\nprivate final  long mTimeApprovedMs\npublic  int getUserId()\nprivate  java.lang.String timeApprovedMsToString()\nclass Association extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

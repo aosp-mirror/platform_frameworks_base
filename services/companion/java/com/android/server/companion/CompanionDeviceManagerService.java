@@ -161,6 +161,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManagerService";
 
+    private static final long PAIR_WITHOUT_PROMPT_WINDOW_MS = 10 * 60 * 1000; // 10 min
+
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
     private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
 
@@ -170,6 +172,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final String XML_ATTR_DEVICE = "device";
     private static final String XML_ATTR_PROFILE = "profile";
     private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
+    private static final String XML_ATTR_TIME_APPROVED = "time_approved";
     private static final String XML_FILE_NAME = "companion_device_manager_associations.xml";
 
     private final CompanionDeviceManagerImpl mImpl;
@@ -606,7 +609,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                             association.getDeviceMacAddress(),
                             association.getPackageName(),
                             association.getDeviceProfile(),
-                            active /* notifyOnDeviceNearby */);
+                            active, /* notifyOnDeviceNearby */
+                            association.getTimeApprovedMs());
                 } else {
                     return association;
                 }
@@ -636,6 +640,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             throw new IllegalStateException("Must declare uses-feature "
                     + requiredFeature
                     + " in manifest to use this API");
+        }
+
+        @Override
+        public boolean canPairWithoutPrompt(
+                String packageName, String deviceMacAddress, int userId) {
+            return CollectionUtils.any(
+                    getAllAssociations(userId, packageName, deviceMacAddress),
+                    a -> System.currentTimeMillis() - a.getTimeApprovedMs()
+                            < PAIR_WITHOUT_PROMPT_WINDOW_MS);
         }
 
         @Override
@@ -877,6 +890,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                                     Boolean.toString(
                                             association.isNotifyOnDeviceNearby()));
                         }
+                        tag.attribute(null, XML_ATTR_TIME_APPROVED,
+                                Long.toString(association.getTimeApprovedMs()));
                         tag.endTag(null, XML_TAG_ASSOCIATION);
                     });
 
@@ -921,7 +936,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
-    @Nullable
     private Set<Association> getAllAssociations(int userId, @Nullable String packageFilter) {
         return CollectionUtils.filter(
                 getAllAssociations(userId),
@@ -939,6 +953,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private Set<Association> getAllAssociations(
+            int userId, @Nullable String packageFilter, @Nullable String addressFilter) {
+        return CollectionUtils.filter(
+                getAllAssociations(userId),
+                a -> Objects.equals(packageFilter, a.getPackageName())
+                        && Objects.equals(addressFilter, a.getDeviceMacAddress()));
     }
 
     private Set<Association> readAllAssociations(int userId) {
@@ -962,12 +984,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     final String profile = parser.getAttributeValue(null, XML_ATTR_PROFILE);
                     final boolean persistentGrants = Boolean.valueOf(
                             parser.getAttributeValue(null, XML_ATTR_NOTIFY_DEVICE_NEARBY));
+                    final long timeApproved = parseLongOrDefault(
+                            parser.getAttributeValue(null, XML_ATTR_TIME_APPROVED), 0L);
 
                     if (appPackage == null || deviceAddress == null) continue;
 
                     result = ArrayUtils.add(result,
                             new Association(userId, deviceAddress, appPackage,
-                                    profile, persistentGrants));
+                                    profile, persistentGrants, timeApproved));
                 }
                 return result;
             } catch (XmlPullParserException | IOException e) {
@@ -1293,6 +1317,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return result;
     }
 
+    private static long parseLongOrDefault(String str, long def) {
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            Log.w(LOG_TAG, "Failed to parse", e);
+            return def;
+        }
+    }
+
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
                 + "list USER_ID\n"
@@ -1321,7 +1354,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         int userId = getNextArgInt();
                         String pkg = getNextArgRequired();
                         String address = getNextArgRequired();
-                        addAssociation(new Association(userId, address, pkg, null, false));
+                        addAssociation(new Association(userId, address, pkg, null, false,
+                                System.currentTimeMillis()));
                     }
                     break;
 
