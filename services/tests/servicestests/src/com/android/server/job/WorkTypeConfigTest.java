@@ -17,6 +17,7 @@ package com.android.server.job;
 
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -36,7 +37,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -44,9 +44,11 @@ import java.util.List;
 public class WorkTypeConfigTest {
     private static final String KEY_MAX_TOTAL = "concurrency_max_total_test";
     private static final String KEY_MAX_TOP = "concurrency_max_top_test";
+    private static final String KEY_MAX_EJ = "concurrency_max_ej_test";
     private static final String KEY_MAX_BG = "concurrency_max_bg_test";
     private static final String KEY_MAX_BGUSER = "concurrency_max_bguser_test";
     private static final String KEY_MIN_TOP = "concurrency_min_top_test";
+    private static final String KEY_MIN_EJ = "concurrency_min_ej_test";
     private static final String KEY_MIN_BG = "concurrency_min_bg_test";
     private static final String KEY_MIN_BGUSER = "concurrency_min_bguser_test";
 
@@ -59,53 +61,25 @@ public class WorkTypeConfigTest {
         // DeviceConfig.resetToDefaults() doesn't work here. Need to reset constants manually.
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOTAL, "", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOP, "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_EJ, "", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BG, "", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BGUSER, "", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_TOP, "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_EJ, "", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BG, "", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BGUSER, "", false);
     }
 
     private void check(@Nullable DeviceConfig.Properties config,
             int defaultTotal,
-            @Nullable Pair<Integer, Integer> defaultTopLimits,
-            @Nullable Pair<Integer, Integer> defaultBgLimits,
-            @Nullable Pair<Integer, Integer> defaultBgUserLimits,
+            @NonNull List<Pair<Integer, Integer>> defaultMin,
+            @NonNull List<Pair<Integer, Integer>> defaultMax,
             boolean expectedValid, int expectedTotal,
-            @NonNull Pair<Integer, Integer> expectedTopLimits,
-            @NonNull Pair<Integer, Integer> expectedBgLimits,
-            @NonNull Pair<Integer, Integer> expectedBgUserLimits) throws Exception {
+            @NonNull List<Pair<Integer, Integer>> expectedMinLimits,
+            @NonNull List<Pair<Integer, Integer>> expectedMaxLimits) throws Exception {
         resetConfig();
         if (config != null) {
             DeviceConfig.setProperties(config);
-        }
-
-        List<Pair<Integer, Integer>> defaultMin = new ArrayList<>();
-        List<Pair<Integer, Integer>> defaultMax = new ArrayList<>();
-        Integer val;
-        if (defaultTopLimits != null) {
-            if ((val = defaultTopLimits.first) != null) {
-                defaultMin.add(Pair.create(WORK_TYPE_TOP, val));
-            }
-            if ((val = defaultTopLimits.second) != null) {
-                defaultMax.add(Pair.create(WORK_TYPE_TOP, val));
-            }
-        }
-        if (defaultBgLimits != null) {
-            if ((val = defaultBgLimits.first) != null) {
-                defaultMin.add(Pair.create(WORK_TYPE_BG, val));
-            }
-            if ((val = defaultBgLimits.second) != null) {
-                defaultMax.add(Pair.create(WORK_TYPE_BG, val));
-            }
-        }
-        if (defaultBgUserLimits != null) {
-            if ((val = defaultBgUserLimits.first) != null) {
-                defaultMin.add(Pair.create(WORK_TYPE_BGUSER, val));
-            }
-            if ((val = defaultBgUserLimits.second) != null) {
-                defaultMax.add(Pair.create(WORK_TYPE_BGUSER, val));
-            }
         }
 
         final WorkTypeConfig counts;
@@ -128,44 +102,125 @@ public class WorkTypeConfigTest {
         counts.update(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
 
         assertEquals(expectedTotal, counts.getMaxTotal());
-        assertEquals((int) expectedTopLimits.first, counts.getMinReserved(WORK_TYPE_TOP));
-        assertEquals((int) expectedTopLimits.second, counts.getMax(WORK_TYPE_TOP));
-        assertEquals((int) expectedBgLimits.first, counts.getMinReserved(WORK_TYPE_BG));
-        assertEquals((int) expectedBgLimits.second, counts.getMax(WORK_TYPE_BG));
-        assertEquals((int) expectedBgUserLimits.first, counts.getMinReserved(WORK_TYPE_BGUSER));
-        assertEquals((int) expectedBgUserLimits.second, counts.getMax(WORK_TYPE_BGUSER));
+        for (Pair<Integer, Integer> min : expectedMinLimits) {
+            assertEquals((int) min.second, counts.getMinReserved(min.first));
+        }
+        for (Pair<Integer, Integer> max : expectedMaxLimits) {
+            assertEquals((int) max.second, counts.getMax(max.first));
+        }
     }
 
     @Test
     public void test() throws Exception {
         // Tests with various combinations.
-        check(null, /*default*/ 5, Pair.create(4, null), Pair.create(0, 1), Pair.create(0, 1),
-                /*expected*/ true, 5, Pair.create(4, 5), Pair.create(0, 1), Pair.create(0, 1));
-        check(null, /*default*/ 5, Pair.create(5, null), Pair.create(0, 0), Pair.create(0, 0),
-                /*expected*/ true, 5, Pair.create(5, 5), Pair.create(0, 1), Pair.create(0, 1));
-        check(null, /*default*/ 0, Pair.create(5, null), Pair.create(0, 0), Pair.create(0, 0),
-                /*expected*/ false, 1, Pair.create(1, 1), Pair.create(0, 1), Pair.create(0, 1));
-        check(null, /*default*/ -1, null, Pair.create(-1, -1), Pair.create(-1, -1),
-                /*expected*/ false, 1, Pair.create(1, 1), Pair.create(0, 1), Pair.create(0, 1));
-        check(null, /*default*/ 5, null, Pair.create(5, 5), Pair.create(0, 5),
-                /*expected*/ true, 5, Pair.create(1, 5), Pair.create(4, 5), Pair.create(0, 5));
-        check(null, /*default*/ 6, Pair.create(1, null), Pair.create(6, 5), Pair.create(2, 1),
-                /*expected*/ false, 6, Pair.create(1, 6), Pair.create(5, 5), Pair.create(0, 1));
-        check(null, /*default*/ 4, null, Pair.create(6, 5), Pair.create(6, 5),
-                /*expected*/ false, 4, Pair.create(1, 4), Pair.create(3, 4), Pair.create(0, 4));
-        check(null, /*default*/ 5, Pair.create(4, null), Pair.create(1, 1), Pair.create(0, 5),
-                /*expected*/ true, 5, Pair.create(4, 5), Pair.create(1, 1), Pair.create(0, 5));
-        check(null, /*default*/ 5, Pair.create(4, null), Pair.create(0, 1), Pair.create(1, 5),
-                /*expected*/ true, 5, Pair.create(4, 5), Pair.create(0, 1), Pair.create(1, 5));
-        check(null, /*default*/ 15, null, Pair.create(15, 15), Pair.create(0, 15),
-                /*expected*/ true, 15, Pair.create(1, 15), Pair.create(14, 15), Pair.create(0, 15));
-        check(null, /*default*/ 16, null, Pair.create(16, 16), Pair.create(0, 16),
-                /*expected*/ true, 16, Pair.create(1, 16), Pair.create(15, 16), Pair.create(0, 16));
-        check(null, /*default*/ 20, null, Pair.create(20, 20), Pair.create(10, 20),
+        check(null, /*default*/ 13,
+                /* min */ List.of(),
+                /* max */ List.of(),
+                /*expected*/ true, 13,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_EJ, 0),
+                        Pair.create(WORK_TYPE_BG, 0), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 13), Pair.create(WORK_TYPE_EJ, 13),
+                        Pair.create(WORK_TYPE_BG, 13), Pair.create(WORK_TYPE_BGUSER, 13)));
+        check(null, /*default*/ 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 1)),
+                /*expected*/ true, 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 5), Pair.create(WORK_TYPE_BG, 1)));
+        check(null, /*default*/ 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 5),
+                        Pair.create(WORK_TYPE_BG, 0), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 0), Pair.create(WORK_TYPE_BGUSER, 1)),
+                /*expected*/ true, 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 5),
+                        Pair.create(WORK_TYPE_BG, 0), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 5),
+                        Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1)));
+        check(null, /*default*/ 0,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 5), Pair.create(WORK_TYPE_BG, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 0)),
+                /*expected*/ false, 1,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 1)));
+        check(null, /*default*/ -1,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, -1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, -1)),
+                /*expected*/ false, 1,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 1)));
+        check(null, /*default*/ 5,
+                /* min */ List.of(
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 5)),
+                /*expected*/ true, 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1),
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 5),
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 5)));
+        check(null, /*default*/ 6,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1),
+                        Pair.create(WORK_TYPE_BG, 6), Pair.create(WORK_TYPE_BGUSER, 2)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 1)),
+                /*expected*/ false, 6,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1),
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 6),
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 1)));
+        check(null, /*default*/ 4,
+                /* min */ List.of(
+                        Pair.create(WORK_TYPE_BG, 6), Pair.create(WORK_TYPE_BGUSER, 6)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 5), Pair.create(WORK_TYPE_BGUSER, 5)),
+                /*expected*/ false, 4,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1),
+                        Pair.create(WORK_TYPE_BG, 3), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 4),
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 4)));
+        check(null, /*default*/ 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 1)),
+                /*expected*/ true, 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 5), Pair.create(WORK_TYPE_BG, 1)));
+        check(null, /*default*/ 10,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 3),
+                        Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 1)),
+                /*expected*/ true, 10,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 3),
+                        Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 1)));
+        check(null, /*default*/ 15,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 15)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 15)),
+                /*expected*/ true, 15,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 14)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 15), Pair.create(WORK_TYPE_BG, 15)));
+        check(null, /*default*/ 16,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 16)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 16)),
+                /*expected*/ true, 16,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 15)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_BG, 16)));
+        check(null, /*default*/ 20,
+                /* min */ List.of(
+                        Pair.create(WORK_TYPE_BG, 20), Pair.create(WORK_TYPE_BGUSER, 10)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 20), Pair.create(WORK_TYPE_BGUSER, 20)),
                 /*expected*/ false, 16,
-                Pair.create(1, 16), Pair.create(15, 16), Pair.create(0, 16));
-        check(null, /*default*/ 20, null, Pair.create(16, 16), Pair.create(0, 16),
-                /*expected*/ true, 16, Pair.create(1, 16), Pair.create(15, 16), Pair.create(0, 16));
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1),
+                        Pair.create(WORK_TYPE_BG, 15), Pair.create(WORK_TYPE_BGUSER, 0)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 16),
+                        Pair.create(WORK_TYPE_BG, 16), Pair.create(WORK_TYPE_BGUSER, 16)));
+        check(null, /*default*/ 20,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 16)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 16)),
+                /*expected*/ true, 16,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 15)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_BG, 16)));
 
         // Test for overriding with a setting string.
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
@@ -173,26 +228,66 @@ public class WorkTypeConfigTest {
                         .setInt(KEY_MAX_BG, 4)
                         .setInt(KEY_MIN_BG, 3)
                         .build(),
-                /*default*/ 9, null, Pair.create(9, 9), Pair.create(0, 2),
-                /*expected*/ true, 5, Pair.create(1, 5), Pair.create(3, 4), Pair.create(0, 2));
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 9), Pair.create(WORK_TYPE_BGUSER, 2)),
+                /*expected*/ true, 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 3)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 5),
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2)));
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MAX_TOTAL, 5).build(),
-                /*default*/ 9, null, Pair.create(9, 9), Pair.create(0, 0),
-                /*expected*/ true, 5, Pair.create(1, 5), Pair.create(4, 5), Pair.create(0, 1));
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /*expected*/ true, 5,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 4)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 5), Pair.create(WORK_TYPE_BG, 5)));
+
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MAX_BG, 4).build(),
-                /*default*/ 9, null, Pair.create(9, 9), Pair.create(0, 9),
-                /*expected*/ true, 9, Pair.create(1, 9), Pair.create(4, 4), Pair.create(0, 9));
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /*expected*/ true, 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 4)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 9), Pair.create(WORK_TYPE_BG, 4)));
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MIN_BG, 3).build(),
-                /*default*/ 9, null, Pair.create(9, 9), Pair.create(0, 6),
-                /*expected*/ true, 9, Pair.create(1, 9), Pair.create(3, 9), Pair.create(0, 6));
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /*expected*/ true, 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 3)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 9), Pair.create(WORK_TYPE_BG, 9)));
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt(KEY_MAX_TOTAL, 20)
+                        .setInt(KEY_MAX_EJ, 5)
+                        .setInt(KEY_MIN_EJ, 2)
+                        .setInt(KEY_MAX_BG, 16)
+                        .setInt(KEY_MIN_BG, 8)
+                        .build(),
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /*expected*/ true, 16,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_EJ, 2),
+                        Pair.create(WORK_TYPE_BG, 8)),
+                /* max */
+                List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_EJ, 5),
+                        Pair.create(WORK_TYPE_BG, 16)));
+
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MAX_TOTAL, 20)
                         .setInt(KEY_MAX_BG, 20)
                         .setInt(KEY_MIN_BG, 8)
                         .build(),
-                /*default*/ 9, null, Pair.create(9, 9), Pair.create(0, 8),
-                /*expected*/ true, 16, Pair.create(1, 16), Pair.create(8, 16), Pair.create(0, 8));
+                /*default*/ 9,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 9)),
+                /*expected*/ true, 16,
+                /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_BG, 8)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_BG, 16)));
     }
 }

@@ -62,6 +62,7 @@ import com.android.server.LocalServices;
 import com.android.server.PowerAllowlistInternal;
 import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
@@ -128,6 +129,9 @@ public class JobSchedulerServiceTest {
         // Called in DeviceIdleJobsController constructor.
         doReturn(mock(DeviceIdleInternal.class))
                 .when(() -> LocalServices.getService(DeviceIdleInternal.class));
+        // Used in JobConcurrencyManager.
+        doReturn(mock(UserManagerInternal.class))
+                .when(() -> LocalServices.getService(UserManagerInternal.class));
         // Used in JobStatus.
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
