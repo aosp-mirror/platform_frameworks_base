@@ -441,15 +441,17 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         return position > mEditIndex;
     }
 
-    private void addFromPosition(int position) {
-        if (!canAddFromPosition(position)) return;
+    private boolean addFromPosition(int position) {
+        if (!canAddFromPosition(position)) return false;
         move(position, mEditIndex);
+        return true;
     }
 
-    private void removeFromPosition(int position) {
-        if (!canRemoveFromPosition(position)) return;
+    private boolean removeFromPosition(int position) {
+        if (!canRemoveFromPosition(position)) return false;
         TileInfo info = mTiles.get(position);
         move(position, info.isSystem ? mEditIndex : mTileDividerIndex);
+        return true;
     }
 
     public SpanSizeLookup getSizeLookup() {
@@ -578,11 +580,17 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
 
         private void add() {
-            addFromPosition(getLayoutPosition());
+            if (addFromPosition(getLayoutPosition())) {
+                itemView.announceForAccessibility(
+                        itemView.getContext().getText(R.string.accessibility_qs_edit_tile_added));
+            }
         }
 
         private void remove() {
-            removeFromPosition(getLayoutPosition());
+            if (removeFromPosition(getLayoutPosition())) {
+                itemView.announceForAccessibility(
+                        itemView.getContext().getText(R.string.accessibility_qs_edit_tile_removed));
+            }
         }
 
         boolean isCurrentTile() {
