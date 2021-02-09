@@ -103,5 +103,10 @@ public interface ToastPlugin extends Plugin {
         default Animator getOutAnimation() {
             return null;
         }
+
+        /**
+         * Called on orientation changes.
+         */
+        default void onOrientationChange(int orientation) {  }
     }
 }

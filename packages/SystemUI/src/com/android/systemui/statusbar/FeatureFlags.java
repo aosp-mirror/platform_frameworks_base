@@ -74,4 +74,8 @@ public class FeatureFlags {
     public boolean isPeopleTileEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_conversations);
     }
+
+    public boolean isToastStyleEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_toast_style);
+    }
 }
