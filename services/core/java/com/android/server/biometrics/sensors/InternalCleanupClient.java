@@ -69,6 +69,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
                     ((InternalEnumerateClient<T>) mCurrentTask).getUnknownHALTemplates();
 
+            Slog.d(TAG, "Enumerate onClientFinished: " + clientMonitor + ", success: " + success);
+
             if (!unknownHALTemplates.isEmpty()) {
                 Slog.w(TAG, "Adding " + unknownHALTemplates.size() + " templates for deletion");
             }
@@ -90,6 +92,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     private final Callback mRemoveCallback = new Callback() {
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
+            Slog.d(TAG, "Remove onClientFinished: " + clientMonitor + ", success: " + success);
             mCallback.onClientFinished(InternalCleanupClient.this, success);
         }
     };
@@ -115,6 +118,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     }
 
     private void startCleanupUnknownHalTemplates() {
+        Slog.d(TAG, "startCleanupUnknownHalTemplates, size: " + mUnknownHALTemplates.size());
+
         UserTemplate template = mUnknownHALTemplates.get(0);
         mUnknownHALTemplates.remove(template);
         mCurrentTask = getRemovalClient(getContext(), mLazyDaemon, getToken(),
@@ -138,6 +143,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         // Start enumeration. Removal will start if necessary, when enumeration is completed.
         mCurrentTask = getEnumerateClient(getContext(), mLazyDaemon, getToken(), getTargetUserId(),
                 getOwnerString(), mEnrolledList, mBiometricUtils, getSensorId());
+
+        Slog.d(TAG, "Starting enumerate: " + mCurrentTask);
         mCurrentTask.start(mEnumerateCallback);
     }
 
@@ -165,6 +172,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
                     + mCurrentTask.getClass().getSimpleName());
             return;
         }
+        Slog.d(TAG, "onEnumerated, remaining: " + remaining);
         ((EnumerateConsumer) mCurrentTask).onEnumerationResult(identifier, remaining);
     }
 
