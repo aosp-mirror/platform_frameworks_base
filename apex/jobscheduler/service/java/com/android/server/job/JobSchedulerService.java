@@ -1990,8 +1990,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
 
                 final boolean shouldForceBatchJob;
-                // Restricted jobs must always be batched
-                if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
+                if (job.shouldTreatAsExpeditedJob()) {
+                    // Never batch expedited jobs, even for RESTRICTED apps.
+                    shouldForceBatchJob = false;
+                } else if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
+                    // Restricted jobs must always be batched
                     shouldForceBatchJob = true;
                 } else if (job.getNumFailures() > 0) {
                     shouldForceBatchJob = false;
