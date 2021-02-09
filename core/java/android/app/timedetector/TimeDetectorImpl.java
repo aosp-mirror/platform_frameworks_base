@@ -17,7 +17,6 @@
 package android.app.timedetector;
 
 import android.annotation.NonNull;
-import android.app.time.ExternalTimeSuggestion;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -83,18 +82,6 @@ public final class TimeDetectorImpl implements TimeDetector {
         }
         try {
             mITimeDetectorService.suggestGnssTime(timeSuggestion);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @Override
-    public void suggestExternalTime(ExternalTimeSuggestion timeSuggestion) {
-        if (DEBUG) {
-            Log.d(TAG, "suggestExternalTime called: " + timeSuggestion);
-        }
-        try {
-            mITimeDetectorService.suggestExternalTime(timeSuggestion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
