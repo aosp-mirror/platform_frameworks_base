@@ -34,7 +34,7 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
 }
 
 static inline SkScalar isIntegerAligned(SkScalar x) {
-    return fabsf(roundf(x) - x) <= NON_ZERO_EPSILON;
+    return MathUtils::isZero(roundf(x) - x);
 }
 
 // Disable filtering when there is no scaling in screen coordinates and the corners have the same
