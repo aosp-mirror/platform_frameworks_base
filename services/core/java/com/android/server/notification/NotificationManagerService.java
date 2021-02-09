@@ -378,7 +378,9 @@ public class NotificationManagerService extends SystemService {
     static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
             Adjustment.KEY_TEXT_REPLIES,
-            Adjustment.KEY_NOT_CONVERSATION};
+            Adjustment.KEY_NOT_CONVERSATION,
+            Adjustment.KEY_IMPORTANCE,
+            Adjustment.KEY_RANKING_SCORE};
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
@@ -9048,7 +9050,8 @@ public class NotificationManagerService extends SystemService {
     public class NotificationAssistants extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "q_allowed_adjustments";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES_OLD = "q_allowed_adjustments";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "s_allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
@@ -9150,12 +9153,18 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
-            if (TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
+            if (TAG_ALLOWED_ADJUSTMENT_TYPES_OLD.equals(tag)
+                    || TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
                 final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
                 synchronized (mLock) {
                     mAllowedAdjustments.clear();
                     if (!TextUtils.isEmpty(types)) {
                         mAllowedAdjustments.addAll(Arrays.asList(types.split(",")));
+                    }
+                    if (TAG_ALLOWED_ADJUSTMENT_TYPES_OLD.equals(tag)) {
+                        if (DEBUG) Slog.d(TAG, "Migrate allowed adjustments.");
+                        mAllowedAdjustments.addAll(
+                                Arrays.asList(DEFAULT_ALLOWED_ADJUSTMENTS));
                     }
                 }
             }
