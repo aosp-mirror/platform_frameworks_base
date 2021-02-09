@@ -16,7 +16,9 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
 import android.content.Context;
@@ -73,8 +75,8 @@ public final class GameManager {
     /**
      * Returns the game mode for the given package.
      */
-    // TODO(b/178111358): Add @RequiresPermission.
     @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int getGameMode(String packageName) {
         try {
             return mService.getGameMode(packageName, mContext.getUserId());
@@ -86,8 +88,8 @@ public final class GameManager {
     /**
      * Sets the game mode for the given package.
      */
-    // TODO(b/178111358): Add @RequiresPermission.
     @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public void setGameMode(String packageName, @GameMode int gameMode) {
         try {
             mService.setGameMode(packageName, gameMode, mContext.getUserId());
