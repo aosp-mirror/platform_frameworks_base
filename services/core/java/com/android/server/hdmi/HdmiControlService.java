@@ -56,6 +56,8 @@ import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.hardware.tv.cec.V1_0.OptionKey;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.net.Uri;
@@ -3291,6 +3293,16 @@ public class HdmiControlService extends SystemService {
     ActiveSource getLocalActiveSource() {
         synchronized (mLock) {
             return mActiveSource;
+        }
+    }
+
+    @VisibleForTesting
+    void pauseActiveMediaSessions() {
+        MediaSessionManager mediaSessionManager = getContext()
+                .getSystemService(MediaSessionManager.class);
+        List<MediaController> mediaControllers = mediaSessionManager.getActiveSessions(null);
+        for (MediaController mediaController : mediaControllers) {
+            mediaController.getTransportControls().pause();
         }
     }
 
