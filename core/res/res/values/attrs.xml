@@ -7969,9 +7969,17 @@
         <!-- A class name in the AppWidget's package to be launched to configure.
              If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
-        <!-- A preview of what the AppWidget will look like after it's configured.
-              If not supplied, the AppWidget's icon will be used. -->
+        <!-- A preview, in a drawable resource id, of what the AppWidget will look like after it's
+             configured.
+             If not supplied, the AppWidget's icon will be used. -->
         <attr name="previewImage" format="reference" />
+        <!-- The layout resource id of a preview of what the AppWidget will look like after it's
+             configured.
+             Unlike previewImage, previewLayout can better showcase AppWidget in different locales,
+             system themes, display sizes & density etc.
+             If supplied, this will take precedence over the previewImage on supported widget hosts.
+             Otherwise, previewImage will be used. -->
+        <attr name="previewLayout" format="reference" />
         <!-- The view id of the AppWidget subview which should be auto-advanced.
              by the widget's host. -->
         <attr name="autoAdvanceViewId" format="reference" />

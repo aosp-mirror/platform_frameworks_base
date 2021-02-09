@@ -3061,6 +3061,7 @@
     <public name="nativeHeapZeroInit" />
     <!-- @hide @SystemApi -->
     <public name="hotwordDetectionService" />
+    <public name="previewLayout" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
