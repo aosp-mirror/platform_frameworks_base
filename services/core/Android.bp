@@ -103,7 +103,7 @@ java_library_static {
         "android.hardware.gnss-V1-java",
         "android.hardware.power-V1-java",
         "android.hardware.power-V1.0-java",
-        "android.hardware.vibrator-V1-java",
+        "android.hardware.vibrator-V2-java",
         "android.net.ipsec.ike.stubs.module_lib",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",

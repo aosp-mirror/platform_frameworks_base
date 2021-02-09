@@ -17,11 +17,11 @@
 #ifndef _ANDROID_SERVER_VIBRATOR_MANAGER_SERVICE_H
 #define _ANDROID_SERVER_VIBRATOR_MANAGER_SERVICE_H
 
-#include <vibratorservice/VibratorManagerHalWrapper.h>
+#include <vibratorservice/VibratorManagerHalController.h>
 
 namespace android {
 
-extern vibrator::ManagerHalWrapper* android_server_VibratorManagerService_getManager();
+extern vibrator::ManagerHalController* android_server_VibratorManagerService_getManager();
 
 } // namespace android
 
