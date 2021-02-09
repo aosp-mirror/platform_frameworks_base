@@ -4712,4 +4712,10 @@
 
     <!-- Whether to select voice/data/sms preference without user confirmation -->
     <bool name="config_voice_data_sms_auto_fallback">false</bool>
+
+    <!-- Whether to enable the one-handed keyguard on the lock screen for wide-screen devices. -->
+    <bool name="config_enableOneHandedKeyguard">false</bool>
+
+    <!-- Whether to allow the caching of the SIM PIN for verification after unattended reboot -->
+    <bool name="config_allow_pin_storage_for_unattended_reboot">true</bool>
 </resources>
