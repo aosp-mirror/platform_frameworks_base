@@ -16,13 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -50,8 +48,7 @@ class EnterExitPipTest(
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val testApp = FixedAppHelper(instrumentation)
-            val baseConfig = getTransitionLaunch(eachRun = true)
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
+            val testSpec = getTransition(eachRun = true) { configuration ->
                 setup {
                     eachRun {
                         testApp.launchViaIntent(wmHelper)
@@ -97,7 +94,7 @@ class EnterExitPipTest(
                     }
                 }
             }
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation, baseConfig,
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
                 testSpec, supportedRotations = listOf(Surface.ROTATION_0),
                 repetitions = 5)
         }

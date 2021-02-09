@@ -16,13 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
@@ -55,8 +53,7 @@ class PipRotationTest(
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val fixedApp = FixedAppHelper(instrumentation)
-            val baseConfig = getTransitionLaunch(eachRun = false)
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
+            val testSpec = getTransition(eachRun = false) { configuration ->
                 setup {
                     test {
                         fixedApp.launchViaIntent(wmHelper)
@@ -112,8 +109,7 @@ class PipRotationTest(
             }
 
             return FlickerTestRunnerFactory.getInstance().buildRotationTest(instrumentation,
-                baseConfig, testSpec,
-                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
+                testSpec, supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
                 repetitions = 5)
         }
     }
