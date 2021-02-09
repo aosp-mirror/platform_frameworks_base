@@ -16,8 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -47,11 +45,9 @@ import org.junit.runners.Parameterized
  * Test IME window closing back to app window transitions.
  * To run this test: `atest FlickerTests:CloseImeWindowToAppTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 178015460)
 class CloseImeWindowToAppTest(
     testSpec: FlickerTestRunnerFactory.TestSpec
 ) : FlickerTestRunner(testSpec) {
@@ -64,7 +60,7 @@ class CloseImeWindowToAppTest(
             val testApp = ImeAppHelper(instrumentation)
             return FlickerTestRunnerFactory.getInstance()
                 .buildTest(instrumentation, repetitions = 5) { configuration ->
-                    withTestName { buildTestTag("imeToApp", configuration) }
+                    withTestName { buildTestTag(configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
@@ -86,24 +82,25 @@ class CloseImeWindowToAppTest(
                         testApp.closeIME(device, wmHelper)
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(listOf("InputMethod"))
+                        postsubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry(
+                                    listOf(IME_WINDOW_TITLE))
+                                imeAppWindowIsAlwaysVisible(testApp)
+                            }
 
-                            imeAppWindowIsAlwaysVisible(testApp)
-                        }
-
-                        layersTrace {
-                            navBarLayerIsAlwaysVisible()
-                            statusBarLayerIsAlwaysVisible()
-                            noUncoveredRegions(configuration.startRotation)
-                            navBarLayerRotatesAndScales(configuration.startRotation)
-                            statusBarLayerRotatesScales(configuration.startRotation)
-                            visibleLayersShownMoreThanOneConsecutiveEntry()
-
-                            imeLayerBecomesInvisible()
-                            imeAppLayerIsAlwaysVisible(testApp)
+                            layersTrace {
+                                navBarLayerIsAlwaysVisible()
+                                statusBarLayerIsAlwaysVisible()
+                                noUncoveredRegions(configuration.startRotation)
+                                navBarLayerRotatesAndScales(configuration.startRotation)
+                                statusBarLayerRotatesScales(configuration.startRotation)
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
+                                imeLayerBecomesInvisible()
+                                imeAppLayerIsAlwaysVisible(testApp)
+                            }
                         }
                     }
                 }
