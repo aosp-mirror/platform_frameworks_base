@@ -219,7 +219,7 @@ static jlong Font_getBufferAddress(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
 }
 
 // Critical Native
-static jlong Font_getReleaseNativeFontFunc() {
+static jlong Font_getReleaseNativeFontFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(releaseFont);
 }
 
