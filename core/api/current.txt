@@ -960,6 +960,8 @@ package android {
     field public static final int maxLines = 16843091; // 0x1010153
     field public static final int maxLongVersionCode = 16844163; // 0x1010583
     field public static final int maxRecents = 16843846; // 0x1010446
+    field public static final int maxResizeHeight = 16844339; // 0x1010633
+    field public static final int maxResizeWidth = 16844338; // 0x1010632
     field public static final int maxRows = 16843059; // 0x1010133
     field public static final int maxSdkVersion = 16843377; // 0x1010271
     field public static final int maxWidth = 16843039; // 0x101011f
@@ -1394,6 +1396,8 @@ package android {
     field public static final int tabWidgetStyle = 16842883; // 0x1010083
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
+    field public static final int targetCellHeight = 16844341; // 0x1010635
+    field public static final int targetCellWidth = 16844340; // 0x1010634
     field public static final int targetClass = 16842799; // 0x101002f
     field @Deprecated public static final int targetDescriptions = 16843680; // 0x10103a0
     field public static final int targetId = 16843740; // 0x10103dc
@@ -8421,6 +8425,8 @@ package android.appwidget {
     field public int initialKeyguardLayout;
     field public int initialLayout;
     field @Deprecated public String label;
+    field public int maxResizeHeight;
+    field public int maxResizeWidth;
     field public int minHeight;
     field public int minResizeHeight;
     field public int minResizeWidth;
@@ -8429,6 +8435,8 @@ package android.appwidget {
     field @IdRes public int previewLayout;
     field public android.content.ComponentName provider;
     field public int resizeMode;
+    field public int targetCellHeight;
+    field public int targetCellWidth;
     field public int updatePeriodMillis;
     field public int widgetCategory;
     field public int widgetFeatures;

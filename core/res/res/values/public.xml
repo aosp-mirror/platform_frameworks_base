@@ -3072,6 +3072,10 @@
     <public name="windowSplashScreenBrandingImage"/>
     <public name="splashScreenTheme" />
     <public name="rippleStyle" />
+    <public name="maxResizeWidth" />
+    <public name="maxResizeHeight" />
+    <public name="targetCellWidth" />
+    <public name="targetCellHeight" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
