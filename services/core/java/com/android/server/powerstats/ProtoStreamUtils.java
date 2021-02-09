@@ -49,6 +49,12 @@ public class ProtoStreamUtils {
     private static final String TAG = ProtoStreamUtils.class.getSimpleName();
 
     static class PowerEntityUtils {
+        public static byte[] getProtoBytes(PowerEntity[] powerEntity) {
+            ProtoOutputStream pos = new ProtoOutputStream();
+            packProtoMessage(powerEntity, pos);
+            return pos.getBytes();
+        }
+
         public static void packProtoMessage(PowerEntity[] powerEntity,
                 ProtoOutputStream pos) {
             if (powerEntity == null) return;
@@ -260,6 +266,12 @@ public class ProtoStreamUtils {
     }
 
     static class ChannelUtils {
+        public static byte[] getProtoBytes(Channel[] channel) {
+            ProtoOutputStream pos = new ProtoOutputStream();
+            packProtoMessage(channel, pos);
+            return pos.getBytes();
+        }
+
         public static void packProtoMessage(Channel[] channel, ProtoOutputStream pos) {
             if (channel == null) return;
 
@@ -396,6 +408,12 @@ public class ProtoStreamUtils {
     }
 
     static class EnergyConsumerUtils {
+        public static byte[] getProtoBytes(EnergyConsumer[] energyConsumer) {
+            ProtoOutputStream pos = new ProtoOutputStream();
+            packProtoMessage(energyConsumer, pos);
+            return pos.getBytes();
+        }
+
         public static void packProtoMessage(EnergyConsumer[] energyConsumer,
                 ProtoOutputStream pos) {
             if (energyConsumer == null) return;
@@ -407,6 +425,72 @@ public class ProtoStreamUtils {
                 pos.write(EnergyConsumerProto.TYPE, energyConsumer[i].type);
                 pos.write(EnergyConsumerProto.NAME, energyConsumer[i].name);
                 pos.end(token);
+            }
+        }
+
+        public static EnergyConsumer[] unpackProtoMessage(byte[] data) throws IOException {
+            final ProtoInputStream pis = new ProtoInputStream(new ByteArrayInputStream(data));
+            List<EnergyConsumer> energyConsumerList = new ArrayList<EnergyConsumer>();
+
+            while (true) {
+                try {
+                    int nextField = pis.nextField();
+                    EnergyConsumer energyConsumer = new EnergyConsumer();
+
+                    if (nextField == (int) PowerStatsServiceModelProto.ENERGY_CONSUMER) {
+                        long token = pis.start(PowerStatsServiceModelProto.ENERGY_CONSUMER);
+                        energyConsumerList.add(unpackEnergyConsumerProto(pis));
+                        pis.end(token);
+                    } else if (nextField == ProtoInputStream.NO_MORE_FIELDS) {
+                        return energyConsumerList.toArray(
+                            new EnergyConsumer[energyConsumerList.size()]);
+                    } else {
+                        Slog.e(TAG, "Unhandled field in proto: "
+                                + ProtoUtils.currentFieldToString(pis));
+                    }
+                } catch (WireTypeMismatchException wtme) {
+                    Slog.e(TAG, "Wire Type mismatch in proto: "
+                            + ProtoUtils.currentFieldToString(pis));
+                }
+            }
+        }
+
+        private static EnergyConsumer unpackEnergyConsumerProto(ProtoInputStream pis)
+                throws IOException {
+            final EnergyConsumer energyConsumer = new EnergyConsumer();
+
+            while (true) {
+                try {
+                    switch (pis.nextField()) {
+                        case (int) EnergyConsumerProto.ID:
+                            energyConsumer.id = pis.readInt(EnergyConsumerProto.ID);
+                            break;
+
+                        case (int) EnergyConsumerProto.ORDINAL:
+                            energyConsumer.ordinal = pis.readInt(EnergyConsumerProto.ORDINAL);
+                            break;
+
+                        case (int) EnergyConsumerProto.TYPE:
+                            energyConsumer.type = (byte) pis.readInt(EnergyConsumerProto.TYPE);
+                            break;
+
+                        case (int) EnergyConsumerProto.NAME:
+                            energyConsumer.name = pis.readString(EnergyConsumerProto.NAME);
+                            break;
+
+                        case ProtoInputStream.NO_MORE_FIELDS:
+                            return energyConsumer;
+
+                        default:
+                            Slog.e(TAG, "Unhandled field in EnergyConsumerProto: "
+                                    + ProtoUtils.currentFieldToString(pis));
+                            break;
+
+                    }
+                } catch (WireTypeMismatchException wtme) {
+                    Slog.e(TAG, "Wire Type mismatch in EnergyConsumerProto: "
+                            + ProtoUtils.currentFieldToString(pis));
+                }
             }
         }
 
