@@ -41,14 +41,18 @@ import java.util.function.Supplier;
 public class DefaultAppProvider {
     @NonNull
     private final Supplier<RoleManager> mRoleManagerSupplier;
+    @NonNull
+    private final Supplier<UserManagerInternal> mUserManagerInternalSupplier;
 
     /**
      * Create a new instance of this class
      *
      * @param roleManagerSupplier the supplier for {@link RoleManager}
      */
-    public DefaultAppProvider(@NonNull Supplier<RoleManager> roleManagerSupplier) {
+    public DefaultAppProvider(@NonNull Supplier<RoleManager> roleManagerSupplier,
+            @NonNull Supplier<UserManagerInternal> userManagerInternalSupplier) {
         mRoleManagerSupplier = roleManagerSupplier;
+        mUserManagerInternalSupplier = userManagerInternalSupplier;
     }
 
     /**
@@ -132,7 +136,8 @@ public class DefaultAppProvider {
      */
     @Nullable
     public String getDefaultHome(@NonNull int userId) {
-        return getRoleHolder(RoleManager.ROLE_HOME, userId);
+        return getRoleHolder(RoleManager.ROLE_HOME,
+                mUserManagerInternalSupplier.get().getProfileParentId(userId));
     }
 
     /**

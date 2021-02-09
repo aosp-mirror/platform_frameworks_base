@@ -41,7 +41,7 @@ oneway interface INotificationListener
     void onListenerHintsChanged(int hints);
     void onInterruptionFilterChanged(int interruptionFilter);
 
-    // companion device managers only
+    // companion device managers and assistants only
     void onNotificationChannelModification(String pkgName, in UserHandle user, in NotificationChannel channel, int modificationType);
     void onNotificationChannelGroupModification(String pkgName, in UserHandle user, in NotificationChannelGroup group, int modificationType);
 

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Surface;
 
 /**
  * This class represents a request to an {@link RotationResolverService}. The request contains
@@ -54,7 +55,7 @@ public final class RotationResolutionRequest implements Parcelable {
         mTimeoutMillis = timeoutMillis;
     }
 
-    public int getProposedRotation() {
+    @Surface.Rotation public int getProposedRotation() {
         return mProposedRotation;
     }
 

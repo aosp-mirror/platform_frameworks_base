@@ -59,7 +59,7 @@ per-file IInstantAppResolver.aidl = file:/services/core/java/com/android/server/
 per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 
 # ResourcesManager
-per-file ResourcesManager.java = rtmitchell@google.com, toddke@google.com
+per-file ResourcesManager.java = file:RESOURCES_OWNERS
 
 # VoiceInteraction
 per-file *VoiceInteract* = file:/core/java/android/service/voice/OWNERS

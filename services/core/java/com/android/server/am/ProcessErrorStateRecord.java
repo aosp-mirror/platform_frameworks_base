@@ -416,6 +416,14 @@ class ProcessErrorStateRecord {
             return;
         }
 
+        // Retrieve max ANR delay from AnrControllers without the mService lock since the
+        // controllers might in turn call into apps
+        long anrDialogDelayMs = mService.mActivityTaskManager.getMaxAnrDelayMillis(aInfo);
+        if (aInfo != null && aInfo.packageName != null && anrDialogDelayMs > 0) {
+            Slog.i(TAG, "Delaying ANR dialog for " + aInfo.packageName + " for " + anrDialogDelayMs
+                    + "ms");
+        }
+
         synchronized (mService) {
             // mBatteryStatsService can be null if the AMS is constructed with injector only. This
             // will only happen in tests.
@@ -447,7 +455,7 @@ class ProcessErrorStateRecord {
                 msg.what = ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG;
                 msg.obj = new AppNotRespondingDialog.Data(mApp, aInfo, aboveSystem);
 
-                mService.mUiHandler.sendMessage(msg);
+                mService.mUiHandler.sendMessageDelayed(msg, anrDialogDelayMs);
             }
         }
     }

@@ -40,9 +40,9 @@ const DisplayInfo& getDisplayInfo() {
     return info;
 }
 
-const DisplayConfig& getActiveDisplayConfig() {
-    static DisplayConfig config = [] {
-        DisplayConfig config;
+const ui::DisplayMode& getActiveDisplayMode() {
+    static ui::DisplayMode config = [] {
+        ui::DisplayMode config;
 #if HWUI_NULL_GPU
         config.resolution = ui::Size(1080, 1920);
         config.xDpi = config.yDpi = 320.f;
@@ -51,7 +51,7 @@ const DisplayConfig& getActiveDisplayConfig() {
         const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
         LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
 
-        const status_t status = SurfaceComposerClient::getActiveDisplayConfig(token, &config);
+        const status_t status = SurfaceComposerClient::getActiveDisplayMode(token, &config);
         LOG_ALWAYS_FATAL_IF(status, "%s: Failed to get active display config", __FUNCTION__);
 #endif
         return config;

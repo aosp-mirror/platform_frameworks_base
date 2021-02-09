@@ -32,15 +32,16 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 public interface DomainVerificationManagerInternal extends DomainVerificationManager {
 
@@ -191,12 +192,21 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
     /**
      * Print the verification state and user selection state of a package.
      *
-     * @param packageName the package whose state to change, or all packages if none is specified
-     * @param userId      the specific user to print, or null to skip printing user selection
-     *                    states, supports {@link android.os.UserHandle#USER_ALL}
+     * @param packageName        the package whose state to change, or all packages if none is
+     *                           specified
+     * @param userId             the specific user to print, or null to skip printing user selection
+     *                           states, supports {@link android.os.UserHandle#USER_ALL}
+     * @param pkgSettingFunction the method by which to retrieve package data; if this is called
+     *                           from {@link com.android.server.pm.PackageManagerService}, it is
+     *                           expected to pass in the snapshot of {@link PackageSetting} objects,
+     *                           or if null is passed, the manager may decide to lock {@link
+     *                           com.android.server.pm.PackageManagerService} through {@link
+     *                           Connection#getPackageSettingLocked(String)}
      */
     void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
-            @Nullable @UserIdInt Integer userId) throws NameNotFoundException;
+            @Nullable @UserIdInt Integer userId,
+            @Nullable Function<String, PackageSetting> pkgSettingFunction)
+            throws NameNotFoundException;
 
     @NonNull
     DomainVerificationShell getShell();
@@ -225,7 +235,7 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
             throws IllegalArgumentException, NameNotFoundException;
 
 
-    interface Connection {
+    interface Connection extends Function<String, PackageSetting> {
 
         /**
          * Notify that a settings change has been made and that eventually
@@ -249,10 +259,19 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
          */
         void schedule(int code, @Nullable Object object);
 
+        // TODO(b/178733426): Make DomainVerificationService PMS snapshot aware so it can avoid
+        //  locking package state at all. This can be as simple as removing this method in favor of
+        //  accepting a PackageSetting function in at every method call, although should probably
+        //  be abstracted to a wrapper class.
         @Nullable
         PackageSetting getPackageSettingLocked(@NonNull String pkgName);
 
         @Nullable
         AndroidPackage getPackageLocked(@NonNull String pkgName);
+
+        @Override
+        default PackageSetting apply(@NonNull String pkgName) {
+            return getPackageSettingLocked(pkgName);
+        }
     }
 }

@@ -7,3 +7,8 @@ filegroup {
     name: "IDropBoxManagerService.aidl",
     srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
 }
+
+filegroup {
+    name: "ITracingServiceProxy.aidl",
+    srcs: ["android/tracing/ITracingServiceProxy.aidl"],
+}

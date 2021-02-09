@@ -18,10 +18,18 @@ package android.hardware.input;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.app.ActivityThread;
+import android.content.Context;
 import android.os.Binder;
+import android.os.IVibratorStateListener;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.ArrayMap;
+import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.util.concurrent.Executor;
 
@@ -29,17 +37,40 @@ import java.util.concurrent.Executor;
  * Vibrator implementation that communicates with the input device vibrators.
  */
 final class InputDeviceVibrator extends Vibrator {
+    private static final String TAG = "InputDeviceVibrator";
+
     // mDeviceId represents InputDevice ID the vibrator belongs to
     private final int mDeviceId;
     private final int mVibratorId;
     private final Binder mToken;
     private final InputManager mInputManager;
 
+    @GuardedBy("mDelegates")
+    private final ArrayMap<OnVibratorStateChangedListener,
+            OnVibratorStateChangedListenerDelegate> mDelegates = new ArrayMap<>();
+
     InputDeviceVibrator(InputManager inputManager, int deviceId, int vibratorId) {
         mInputManager = inputManager;
         mDeviceId = deviceId;
         mVibratorId = vibratorId;
         mToken = new Binder();
+    }
+
+    private class OnVibratorStateChangedListenerDelegate extends
+            IVibratorStateListener.Stub {
+        private final Executor mExecutor;
+        private final OnVibratorStateChangedListener mListener;
+
+        OnVibratorStateChangedListenerDelegate(@NonNull OnVibratorStateChangedListener listener,
+                @NonNull Executor executor) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onVibrating(boolean isVibrating) {
+            mExecutor.execute(() -> mListener.onVibratorStateChanged(isVibrating));
+        }
     }
 
     @Override
@@ -52,25 +83,73 @@ final class InputDeviceVibrator extends Vibrator {
         return mInputManager.isVibrating(mDeviceId);
     }
 
-    /* TODO: b/161634264 Support Vibrator listener API in input devices */
+    /**
+     * Adds a listener for vibrator state changes. Callbacks will be executed on the main thread.
+     * If the listener was previously added and not removed, this call will be ignored.
+     *
+     * @param listener listener to be added
+     */
     @Override
     public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
-        throw new UnsupportedOperationException(
-            "addVibratorStateListener not supported in InputDeviceVibrator");
+        Preconditions.checkNotNull(listener);
+        Context context = ActivityThread.currentApplication();
+        addVibratorStateListener(context.getMainExecutor(), listener);
     }
 
+    /**
+     * Adds a listener for vibrator state change. If the listener was previously added and not
+     * removed, this call will be ignored.
+     *
+     * @param listener Listener to be added.
+     * @param executor The {@link Executor} on which the listener's callbacks will be executed on.
+     */
     @Override
     public void addVibratorStateListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnVibratorStateChangedListener listener) {
-        throw new UnsupportedOperationException(
-            "addVibratorStateListener not supported in InputDeviceVibrator");
+        Preconditions.checkNotNull(listener);
+        Preconditions.checkNotNull(executor);
+
+        synchronized (mDelegates) {
+            // If listener is already registered, reject and return.
+            if (mDelegates.containsKey(listener)) {
+                Log.w(TAG, "Listener already registered.");
+                return;
+            }
+
+            final OnVibratorStateChangedListenerDelegate delegate =
+                    new OnVibratorStateChangedListenerDelegate(listener, executor);
+            if (!mInputManager.registerVibratorStateListener(mDeviceId, delegate)) {
+                Log.w(TAG, "Failed to register vibrate state listener");
+                return;
+            }
+            mDelegates.put(listener, delegate);
+
+        }
     }
 
+    /**
+     * Removes the listener for vibrator state changes. If the listener was not previously
+     * registered, this call will do nothing.
+     *
+     * @param listener Listener to be removed.
+     */
     @Override
     public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
-        throw new UnsupportedOperationException(
-            "removeVibratorStateListener not supported in InputDeviceVibrator");
+        Preconditions.checkNotNull(listener);
+
+        synchronized (mDelegates) {
+            // Check if the listener is registered, otherwise will return.
+            if (mDelegates.containsKey(listener)) {
+                final OnVibratorStateChangedListenerDelegate delegate = mDelegates.get(listener);
+
+                if (!mInputManager.unregisterVibratorStateListener(mDeviceId, delegate)) {
+                    Log.w(TAG, "Failed to unregister vibrate state listener");
+                    return;
+                }
+                mDelegates.remove(listener);
+            }
+        }
     }
 
     @Override

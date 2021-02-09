@@ -122,14 +122,9 @@ final class RotationResolverManagerPerUserService extends
             }
         });
 
-        if (mRemoteService != null) {
-            mRemoteService.resolveRotationLocked(mCurrentRequest);
-            mCurrentRequest.mIsDispatched = true;
-        } else {
-            Slog.w(TAG, "Remote service is not available at this moment.");
-            callbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);
-            cancelLocked();
-        }
+
+        mRemoteService.resolveRotationLocked(mCurrentRequest);
+        mCurrentRequest.mIsDispatched = true;
     }
 
     @GuardedBy("mLock")
@@ -198,15 +193,6 @@ final class RotationResolverManagerPerUserService extends
         if (mCurrentRequest == null) {
             return;
         }
-
-        if (mCurrentRequest.mIsFulfilled) {
-            if (isVerbose()) {
-                Slog.d(TAG, "Trying to cancel the request that has been already fulfilled.");
-            }
-            mCurrentRequest = null;
-            return;
-        }
-
         mCurrentRequest.cancelInternal();
         mCurrentRequest = null;
     }

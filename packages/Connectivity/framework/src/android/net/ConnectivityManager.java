@@ -1368,7 +1368,7 @@ public class ConnectivityManager {
     public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
         try {
             return mService.getDefaultNetworkCapabilitiesForUser(
-                    userId, mContext.getOpPackageName());
+                    userId, mContext.getOpPackageName(), getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1450,7 +1450,8 @@ public class ConnectivityManager {
     @Nullable
     public NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
         try {
-            return mService.getNetworkCapabilities(network, mContext.getOpPackageName());
+            return mService.getNetworkCapabilities(
+                    network, mContext.getOpPackageName(), getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3735,7 +3736,8 @@ public class ConnectivityManager {
                 Binder binder = new Binder();
                 if (reqType == LISTEN) {
                     request = mService.listenForNetwork(
-                            need, messenger, binder, callingPackageName);
+                            need, messenger, binder, callingPackageName,
+                            getAttributionTag());
                 } else {
                     request = mService.requestNetwork(
                             need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
@@ -4180,7 +4182,8 @@ public class ConnectivityManager {
         checkPendingIntentNotNull(operation);
         try {
             mService.pendingListenForNetwork(
-                    request.networkCapabilities, operation, mContext.getOpPackageName());
+                    request.networkCapabilities, operation, mContext.getOpPackageName(),
+                    getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
