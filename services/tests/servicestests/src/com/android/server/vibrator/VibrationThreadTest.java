@@ -19,6 +19,7 @@ package com.android.server.vibrator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,8 +28,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.hardware.vibrator.IVibrator;
+import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibrationEffect;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -388,6 +391,20 @@ public class VibrationThreadTest {
     }
 
     @Test
+    public void vibrate_singleVibrator_skipsSyncedCallbacks() {
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        long vibrationId = 1;
+        waitForCompletion(startThreadAndDispatcher(vibrationId++,
+                VibrationEffect.createOneShot(10, 100)));
+
+        verify(mThreadCallbacks).onVibrationEnded(anyLong(), eq(Vibration.Status.FINISHED));
+        verify(mThreadCallbacks, never()).prepareSyncedVibration(anyLong(), any());
+        verify(mThreadCallbacks, never()).triggerSyncedVibration(anyLong());
+        verify(mThreadCallbacks, never()).cancelSyncedVibration();
+    }
+
+    @Test
     public void vibrate_multipleExistingAndMissingVibrators_vibratesOnlyExistingOnes()
             throws Exception {
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_TICK);
@@ -484,8 +501,7 @@ public class VibrationThreadTest {
     }
 
     @Test
-    public void vibrate_multipleSequential_runsVibrationInOrderWithDelays()
-            throws Exception {
+    public void vibrate_multipleSequential_runsVibrationInOrderWithDelays() throws Exception {
         mockVibrators(1, 2, 3);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
@@ -526,6 +542,126 @@ public class VibrationThreadTest {
         assertEquals(Arrays.asList(composed), mVibratorProviders.get(2).getEffects());
         assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
                 mVibratorProviders.get(3).getEffects());
+    }
+
+    @Test
+    public void vibrate_multipleSyncedCallbackTriggered_finishSteps() throws Exception {
+        int[] vibratorIds = new int[]{1, 2};
+        long vibrationId = 1;
+        mockVibrators(vibratorIds);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        when(mThreadCallbacks.prepareSyncedVibration(anyLong(), eq(vibratorIds))).thenReturn(true);
+        when(mThreadCallbacks.triggerSyncedVibration(eq(vibrationId))).thenReturn(true);
+
+        VibrationEffect composed = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100)
+                .compose();
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(composed);
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+
+        assertTrue(waitUntil(t -> !mVibratorProviders.get(1).getEffects().isEmpty()
+                && !mVibratorProviders.get(2).getEffects().isEmpty(), thread, TEST_TIMEOUT_MILLIS));
+        thread.syncedVibrationComplete();
+        waitForCompletion(thread);
+
+        long expectedCap = IVibratorManager.CAP_SYNC | IVibratorManager.CAP_PREPARE_COMPOSE;
+        verify(mThreadCallbacks).prepareSyncedVibration(eq(expectedCap), eq(vibratorIds));
+        verify(mThreadCallbacks).triggerSyncedVibration(eq(vibrationId));
+        verify(mThreadCallbacks, never()).cancelSyncedVibration();
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+
+        assertEquals(Arrays.asList(composed), mVibratorProviders.get(1).getEffects());
+        assertEquals(Arrays.asList(composed), mVibratorProviders.get(2).getEffects());
+    }
+
+    @Test
+    public void vibrate_multipleSynced_callsPrepareAndTriggerCallbacks() {
+        int[] vibratorIds = new int[]{1, 2, 3, 4};
+        mockVibrators(vibratorIds);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        mVibratorProviders.get(4).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        when(mThreadCallbacks.prepareSyncedVibration(anyLong(), any())).thenReturn(true);
+        when(mThreadCallbacks.triggerSyncedVibration(anyLong())).thenReturn(true);
+
+        long vibrationId = 1;
+        VibrationEffect composed = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .compose();
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2, VibrationEffect.createOneShot(10, 100))
+                .addVibrator(3, VibrationEffect.createWaveform(new long[]{10}, new int[]{100}, -1))
+                .addVibrator(4, composed)
+                .combine();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        long expectedCap = IVibratorManager.CAP_SYNC
+                | IVibratorManager.CAP_PREPARE_ON
+                | IVibratorManager.CAP_PREPARE_PERFORM
+                | IVibratorManager.CAP_PREPARE_COMPOSE
+                | IVibratorManager.CAP_MIXED_TRIGGER_ON
+                | IVibratorManager.CAP_MIXED_TRIGGER_PERFORM
+                | IVibratorManager.CAP_MIXED_TRIGGER_COMPOSE;
+        verify(mThreadCallbacks).prepareSyncedVibration(eq(expectedCap), eq(vibratorIds));
+        verify(mThreadCallbacks).triggerSyncedVibration(eq(vibrationId));
+        verify(mThreadCallbacks, never()).cancelSyncedVibration();
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.FINISHED));
+    }
+
+    @Test
+    public void vibrate_multipleSyncedPrepareFailed_skipTriggerStepAndVibrates() {
+        int[] vibratorIds = new int[]{1, 2};
+        mockVibrators(vibratorIds);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        when(mThreadCallbacks.prepareSyncedVibration(anyLong(), any())).thenReturn(false);
+
+        long vibrationId = 1;
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.createOneShot(10, 100))
+                .addVibrator(2, VibrationEffect.createWaveform(new long[]{5}, new int[]{200}, -1))
+                .combine();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        long expectedCap = IVibratorManager.CAP_SYNC | IVibratorManager.CAP_PREPARE_ON;
+        verify(mThreadCallbacks).prepareSyncedVibration(eq(expectedCap), eq(vibratorIds));
+        verify(mThreadCallbacks, never()).triggerSyncedVibration(eq(vibrationId));
+        verify(mThreadCallbacks, never()).cancelSyncedVibration();
+
+        assertEquals(Arrays.asList(expectedOneShot(10)), mVibratorProviders.get(1).getEffects());
+        assertEquals(Arrays.asList(100), mVibratorProviders.get(1).getAmplitudes());
+        assertEquals(Arrays.asList(expectedOneShot(5)), mVibratorProviders.get(2).getEffects());
+        assertEquals(Arrays.asList(200), mVibratorProviders.get(2).getAmplitudes());
+    }
+
+    @Test
+    public void vibrate_multipleSyncedTriggerFailed_cancelPreparedVibrationAndSkipSetAmplitude() {
+        int[] vibratorIds = new int[]{1, 2};
+        mockVibrators(vibratorIds);
+        mVibratorProviders.get(2).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        when(mThreadCallbacks.prepareSyncedVibration(anyLong(), any())).thenReturn(true);
+        when(mThreadCallbacks.triggerSyncedVibration(anyLong())).thenReturn(false);
+
+        long vibrationId = 1;
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.createOneShot(10, 100))
+                .addVibrator(2, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .combine();
+        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        waitForCompletion(thread);
+
+        long expectedCap = IVibratorManager.CAP_SYNC
+                | IVibratorManager.CAP_PREPARE_ON
+                | IVibratorManager.CAP_PREPARE_PERFORM
+                | IVibratorManager.CAP_MIXED_TRIGGER_ON
+                | IVibratorManager.CAP_MIXED_TRIGGER_PERFORM;
+        verify(mThreadCallbacks).prepareSyncedVibration(eq(expectedCap), eq(vibratorIds));
+        verify(mThreadCallbacks).triggerSyncedVibration(eq(vibrationId));
+        verify(mThreadCallbacks).cancelSyncedVibration();
+        assertTrue(mVibratorProviders.get(1).getAmplitudes().isEmpty());
     }
 
     @Test
@@ -623,6 +759,7 @@ public class VibrationThreadTest {
 
         assertTrue(waitUntil(t -> t.getVibrators().get(2).isVibrating(), vibrationThread,
                 TEST_TIMEOUT_MILLIS));
+        assertTrue(vibrationThread.isAlive());
 
         // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
