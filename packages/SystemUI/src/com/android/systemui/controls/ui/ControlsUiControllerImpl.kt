@@ -102,7 +102,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
     private var hidden = true
-    private lateinit var dismissGlobalActions: Runnable
+    private lateinit var onDismiss: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
     private var retainCache = false
 
@@ -145,12 +145,18 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun show(parent: ViewGroup, dismissGlobalActions: Runnable) {
+    override fun show(
+        parent: ViewGroup,
+        onDismiss: Runnable,
+        startedFromGlobalActions: Boolean
+    ) {
         Log.d(ControlsUiController.TAG, "show()")
         this.parent = parent
-        this.dismissGlobalActions = dismissGlobalActions
+        this.onDismiss = onDismiss
         hidden = false
         retainCache = false
+
+        controlActionCoordinator.startedFromGlobalActions = startedFromGlobalActions
 
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
@@ -187,7 +193,7 @@ class ControlsUiControllerImpl @Inject constructor (
                 controlViewsById.clear()
                 controlsById.clear()
 
-                show(parent, dismissGlobalActions)
+                show(parent, onDismiss, controlActionCoordinator.startedFromGlobalActions)
                 val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
                 showAnim.setInterpolator(DecelerateInterpolator(1.0f))
                 showAnim.setDuration(FADE_IN_MILLIS)
@@ -260,7 +266,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun startActivity(context: Context, intent: Intent) {
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
-        dismissGlobalActions.run()
+        onDismiss.run()
 
         activityStarter.dismissKeyguardThenExecute({
             shadeController.collapsePanel(false)

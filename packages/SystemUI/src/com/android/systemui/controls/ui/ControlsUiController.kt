@@ -29,7 +29,7 @@ interface ControlsUiController {
         public const val EXTRA_ANIMATE = "extra_animate"
     }
 
-    fun show(parent: ViewGroup, dismissGlobalActions: Runnable)
+    fun show(parent: ViewGroup, onDismiss: Runnable, startedFromGlobalActions: Boolean)
     fun hide()
 
     /**
