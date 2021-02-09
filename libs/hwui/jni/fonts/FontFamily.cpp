@@ -101,13 +101,13 @@ static jint FontFamily_getVariant(CRITICAL_JNI_PARAMS_COMMA jlong familyPtr) {
 }
 
 // CriticalNative
-static jint FontFamily_getFontSize(jlong familyPtr) {
+static jint FontFamily_getFontSize(CRITICAL_JNI_PARAMS_COMMA jlong familyPtr) {
     FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
     return family->family->getNumFonts();
 }
 
 // CriticalNative
-static jlong FontFamily_getFont(jlong familyPtr, jint index) {
+static jlong FontFamily_getFont(CRITICAL_JNI_PARAMS_COMMA jlong familyPtr, jint index) {
     FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
     std::shared_ptr<minikin::Font> font = family->family->getFontRef(index);
     return reinterpret_cast<jlong>(new FontWrapper(std::move(font)));
