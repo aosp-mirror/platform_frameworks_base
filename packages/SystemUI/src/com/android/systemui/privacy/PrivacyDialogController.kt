@@ -43,7 +43,7 @@ private val defaultDialogProvider = object : PrivacyDialogController.DialogProvi
     override fun makeDialog(
         context: Context,
         list: List<PrivacyDialog.PrivacyElement>,
-        starter: (String) -> Unit
+        starter: (String, Int) -> Unit
     ): PrivacyDialog {
         return PrivacyDialog(context, list, starter)
     }
@@ -107,10 +107,11 @@ class PrivacyDialogController(
     }
 
     @MainThread
-    private fun startActivity(permGroupName: String) {
-        val intent = Intent(Intent.ACTION_MANAGE_PERMISSION_APPS)
-        intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName)
-        privacyLogger.logStartSettingsActivityFromDialog(permGroupName)
+    private fun startActivity(packageName: String, userId: Int) {
+        val intent = Intent(Intent.ACTION_MANAGE_APP_PERMISSIONS)
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+        privacyLogger.logStartSettingsActivityFromDialog(packageName, userId)
         if (!keyguardStateController.isUnlocked) {
             // If we are locked, hide the dialog so the user can unlock
             dialog?.hide()
@@ -159,6 +160,8 @@ class PrivacyDialogController(
                         }
                         PrivacyDialog.PrivacyElement(
                                 t,
+                                it.packageName,
+                                UserHandle.getUserId(it.uid),
                                 appName,
                                 it.attribution,
                                 it.lastAccess,
@@ -257,7 +260,7 @@ class PrivacyDialogController(
         fun makeDialog(
             context: Context,
             list: List<PrivacyDialog.PrivacyElement>,
-            starter: (String) -> Unit
+            starter: (String, Int) -> Unit
         ): PrivacyDialog
     }
 }
