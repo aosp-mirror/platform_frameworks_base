@@ -180,6 +180,10 @@ cc_library_shared {
         "libstagefright_foundation_headers",
     ],
 
+    // TunerService is a system service required for Tuner feature.
+    // TunerJNI is a client of TunerService so we build the dependency here.
+    required: ["mediatuner"],
+
     export_include_dirs: ["."],
 
     cflags: [

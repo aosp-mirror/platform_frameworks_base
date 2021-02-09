@@ -108,7 +108,7 @@ private:
 struct FrontendClient : public RefBase {
 
 public:
-    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int id, int type);
+    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int type);
     ~FrontendClient();
 
     /**
@@ -180,6 +180,7 @@ public:
 
     shared_ptr<ITunerFrontend> getAidlFrontend();
 
+    void setId(int id);
     int getId();
 
 private:
