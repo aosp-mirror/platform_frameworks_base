@@ -3014,8 +3014,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         // This is a workaround for R QPR, new API change is not allowed. We only allow the current
         // voice recognizer is also the voice interactor to noteproxy op.
-        final boolean isTrustVoiceServiceProxy =
-                AppOpsManager.isTrustedVoiceServiceProxy(mContext, proxyPackageName, code);
+        final boolean isTrustVoiceServiceProxy = AppOpsManager.isTrustedVoiceServiceProxy(mContext,
+                proxyPackageName, code, UserHandle.getUserId(proxyUid));
         final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)

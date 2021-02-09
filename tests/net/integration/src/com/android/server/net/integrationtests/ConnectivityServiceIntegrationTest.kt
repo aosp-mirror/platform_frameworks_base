@@ -195,7 +195,8 @@ class ConnectivityServiceIntegrationTest {
                 "https://secure.test.android.com",
                 responseCode = 204, contentLength = 42, redirectUrl = null))
 
-        val na = NetworkAgentWrapper(TRANSPORT_CELLULAR, LinkProperties(), context)
+        val na = NetworkAgentWrapper(TRANSPORT_CELLULAR, LinkProperties(), null /* ncTemplate */,
+                context)
         networkStackClient.verifyNetworkMonitorCreated(na.network, TEST_TIMEOUT_MS)
 
         na.addCapability(NET_CAPABILITY_INTERNET)
