@@ -24,8 +24,8 @@
     </target_preparer>
 
     <!-- Restart to clear test code from system server -->
-    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
-        <option name="teardown-command" value="am restart" />
+    <target_preparer class="com.android.tradefed.targetprep.DeviceCleaner">
+        <option name="cleanup-action" value="REBOOT" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
