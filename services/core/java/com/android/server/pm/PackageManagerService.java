@@ -193,6 +193,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -234,6 +235,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -18119,11 +18121,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             if (libPs == null) {
                                 continue;
                             }
-                            final String[] overlayPaths = libPs.getOverlayPaths(currentUserId);
-                            if (overlayPaths != null) {
-                                ps.setOverlayPathsForLibrary(sharedLib.getName(),
-                                        Arrays.asList(overlayPaths), currentUserId);
-                            }
+                            ps.setOverlayPathsForLibrary(sharedLib.getName(),
+                                    libPs.getOverlayPaths(currentUserId), currentUserId);
                         }
                     }
                 }
@@ -26614,34 +26613,19 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public boolean setEnabledOverlayPackages(int userId, @NonNull String targetPackageName,
-                @Nullable List<String> overlayPackageNames,
-                @NonNull Collection<String> outUpdatedPackageNames) {
+                @Nullable OverlayPaths overlayPaths,
+                @NonNull Set<String> outUpdatedPackageNames) {
+            boolean modified = false;
             synchronized (mLock) {
                 final AndroidPackage targetPkg = mPackages.get(targetPackageName);
                 if (targetPackageName == null || targetPkg == null) {
                     Slog.e(TAG, "failed to find package " + targetPackageName);
                     return false;
                 }
-                ArrayList<String> overlayPaths = null;
-                if (overlayPackageNames != null && overlayPackageNames.size() > 0) {
-                    final int N = overlayPackageNames.size();
-                    overlayPaths = new ArrayList<>(N);
-                    for (int i = 0; i < N; i++) {
-                        final String packageName = overlayPackageNames.get(i);
-                        final AndroidPackage pkg = mPackages.get(packageName);
-                        if (pkg == null) {
-                            Slog.e(TAG, "failed to find package " + packageName);
-                            return false;
-                        }
-                        overlayPaths.add(pkg.getBaseApkPath());
-                    }
-                }
 
-                ArraySet<String> updatedPackageNames = null;
                 if (targetPkg.getLibraryNames() != null) {
                     // Set the overlay paths for dependencies of the shared library.
-                    updatedPackageNames = new ArraySet<>();
-                    for (String libName : targetPkg.getLibraryNames()) {
+                    for (final String libName : targetPkg.getLibraryNames()) {
                         final SharedLibraryInfo info = getSharedLibraryInfoLPr(libName,
                                 SharedLibraryInfo.VERSION_UNDEFINED);
                         if (info == null) {
@@ -26652,28 +26636,30 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (dependents == null) {
                             continue;
                         }
-                        for (VersionedPackage dependent : dependents) {
+                        for (final VersionedPackage dependent : dependents) {
                             final PackageSetting ps = mSettings.getPackageLPr(
                                     dependent.getPackageName());
                             if (ps == null) {
                                 continue;
                             }
-                            ps.setOverlayPathsForLibrary(libName, overlayPaths, userId);
-                            updatedPackageNames.add(dependent.getPackageName());
+                            if (ps.setOverlayPathsForLibrary(libName, overlayPaths, userId)) {
+                                outUpdatedPackageNames.add(dependent.getPackageName());
+                                modified = true;
+                            }
                         }
                     }
                 }
 
                 final PackageSetting ps = mSettings.getPackageLPr(targetPackageName);
-                ps.setOverlayPaths(overlayPaths, userId);
-
-                outUpdatedPackageNames.add(targetPackageName);
-                if (updatedPackageNames != null) {
-                    outUpdatedPackageNames.addAll(updatedPackageNames);
+                if (ps.setOverlayPaths(overlayPaths, userId)) {
+                    outUpdatedPackageNames.add(targetPackageName);
+                    modified = true;
                 }
             }
 
-            invalidatePackageInfoCache();
+            if (modified) {
+                invalidatePackageInfoCache();
+            }
             return true;
         }
 

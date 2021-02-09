@@ -923,6 +923,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String[] resourceDirs;
 
     /**
+     * Contains the contents of {@link #resourceDirs} and along with paths for overlays that may or
+     * may not be APK packages.
+     *
+     * {@hide}
+     */
+    public String[] overlayPaths;
+
+    /**
      * String retrieved from the seinfo tag found in selinux policy. This value can be set through
      * the mac_permissions.xml policy construct. This value is used for setting an SELinux security
      * context on the process as well as its data directory.
@@ -1472,6 +1480,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (resourceDirs != null) {
             pw.println(prefix + "resourceDirs=" + Arrays.toString(resourceDirs));
         }
+        if (overlayPaths != null) {
+            pw.println(prefix + "overlayPaths=" + Arrays.toString(overlayPaths));
+        }
         if ((dumpFlags & DUMP_FLAG_DETAILS) != 0 && seInfo != null) {
             pw.println(prefix + "seinfo=" + seInfo);
             pw.println(prefix + "seinfoUser=" + seInfoUser);
@@ -1566,6 +1577,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (resourceDirs != null) {
             for (String dir : resourceDirs) {
                 proto.write(ApplicationInfoProto.RESOURCE_DIRS, dir);
+            }
+        }
+        if (overlayPaths != null) {
+            for (String dir : overlayPaths) {
+                proto.write(ApplicationInfoProto.OVERLAY_PATHS, dir);
             }
         }
         proto.write(ApplicationInfoProto.DATA_DIR, dataDir);
@@ -1717,6 +1733,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         primaryCpuAbi = orig.primaryCpuAbi;
         secondaryCpuAbi = orig.secondaryCpuAbi;
         resourceDirs = orig.resourceDirs;
+        overlayPaths = orig.overlayPaths;
         seInfo = orig.seInfo;
         seInfoUser = orig.seInfoUser;
         sharedLibraryFiles = orig.sharedLibraryFiles;
@@ -1803,6 +1820,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString8(primaryCpuAbi);
         dest.writeString8(secondaryCpuAbi);
         dest.writeString8Array(resourceDirs);
+        dest.writeString8Array(overlayPaths);
         dest.writeString8(seInfo);
         dest.writeString8(seInfoUser);
         dest.writeString8Array(sharedLibraryFiles);
@@ -1886,6 +1904,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         primaryCpuAbi = source.readString8();
         secondaryCpuAbi = source.readString8();
         resourceDirs = source.createString8Array();
+        overlayPaths = source.createString8Array();
         seInfo = source.readString8();
         seInfoUser = source.readString8();
         sharedLibraryFiles = source.createString8Array();
@@ -2282,7 +2301,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public String[] getAllApkPaths() {
-        final String[][] inputLists = { splitSourceDirs, sharedLibraryFiles, resourceDirs };
+        final String[][] inputLists = {
+                splitSourceDirs, sharedLibraryFiles, resourceDirs, overlayPaths
+        };
         final List<String> output = new ArrayList<>(10);
         if (sourceDir != null) {
             output.add(sourceDir);
