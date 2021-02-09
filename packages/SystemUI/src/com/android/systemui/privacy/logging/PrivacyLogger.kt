@@ -121,11 +121,12 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
-    fun logStartSettingsActivityFromDialog(permGroupName: String) {
+    fun logStartSettingsActivityFromDialog(packageName: String, userId: Int) {
         log(LogLevel.INFO, {
-            str1 = permGroupName
+            str1 = packageName
+            int1 = userId
         }, {
-            "Start settings activity from dialog for perm group: $str1"
+            "Start settings activity from dialog for packageName=$str1, userId=$int1 "
         })
     }
 
