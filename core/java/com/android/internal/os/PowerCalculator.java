@@ -143,7 +143,11 @@ public abstract class PowerCalculator {
         return String.format(Locale.ENGLISH, format, power);
     }
 
-    static double mAhToUJ(long energyUJ) {
+    static double uJtoMah(long energyUJ) {
+        if (energyUJ == 0) {
+            return 0;
+        }
+
         // TODO(b/173765509): Convert properly. This is mJ / V * (h/3600s) = mAh with V = 3.7 fixed.
         //                    Leaving for later since desired units of energy have yet to be decided
         return energyUJ / 1000.0 / 3.7  / 3600;
