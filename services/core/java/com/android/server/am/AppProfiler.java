@@ -1322,7 +1322,7 @@ public class AppProfiler {
             infoMap.put(mi.pid, mi);
         }
         updateCpuStatsNow();
-        long[] memtrackTmp = new long[1];
+        long[] memtrackTmp = new long[4];
         long[] swaptrackTmp = new long[2];
         // Get a list of Stats that have vsize > 0
         final List<ProcessCpuTracker.Stats> stats = getCpuStats(st -> st.vsize > 0);
@@ -1345,6 +1345,8 @@ public class AppProfiler {
         long totalPss = 0;
         long totalSwapPss = 0;
         long totalMemtrack = 0;
+        long totalMemtrackGraphics = 0;
+        long totalMemtrackGl = 0;
         for (int i = 0, size = memInfos.size(); i < size; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
@@ -1355,6 +1357,8 @@ public class AppProfiler {
             totalPss += mi.pss;
             totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
+            totalMemtrackGraphics += memtrackTmp[1];
+            totalMemtrackGl += memtrackTmp[2];
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
             @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
@@ -1521,10 +1525,16 @@ public class AppProfiler {
         } else {
             final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
             if (totalExportedDmabuf >= 0) {
+                final long dmabufMapped = Debug.getDmabufMappedSizeKb();
+                final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
                 memInfoBuilder.append("DMA-BUF: ");
                 memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));
                 memInfoBuilder.append("\n");
-                kernelUsed += totalExportedDmabuf;
+                // Account unmapped dmabufs as part of kernel memory allocations
+                kernelUsed += dmabufUnmapped;
+                // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                totalPss -= totalMemtrackGraphics;
+                totalPss += dmabufMapped;
             }
 
             final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
@@ -1547,6 +1557,10 @@ public class AppProfiler {
                 memInfoBuilder.append(" dmabuf + ");
                 memInfoBuilder.append(stringifyKBSize(gpuPrivateUsage));
                 memInfoBuilder.append(" private)\n");
+                // Replace memtrack HAL reported GL category with private GPU allocations and
+                // account it as part of kernel memory allocations
+                totalPss -= totalMemtrackGl;
+                kernelUsed += gpuPrivateUsage;
             } else {
                 memInfoBuilder.append("       GPU: ");
                 memInfoBuilder.append(stringifyKBSize(gpuUsage));
@@ -1559,10 +1573,8 @@ public class AppProfiler {
                                   totalPss - cachedPss + kernelUsed));
         memInfoBuilder.append("\n");
 
-        /*
-         * Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
-         * memInfo.getCachedSizeKb().
-         */
+        // Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+        // memInfo.getCachedSizeKb().
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
