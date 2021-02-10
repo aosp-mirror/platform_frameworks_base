@@ -2573,13 +2573,13 @@ public final class Debug
     public static native long getIonPoolsSizeKb();
 
     /**
-     * Return ION memory mapped by processes in kB.
+     * Return DMA-BUF memory mapped by processes in kB.
      * Notes:
      *  * Warning: Might impact performance as it reads /proc/<pid>/maps files for each process.
      *
      * @hide
      */
-    public static native long getIonMappedSizeKb();
+    public static native long getDmabufMappedSizeKb();
 
     /**
      * Return memory size in kilobytes used by GPU.
