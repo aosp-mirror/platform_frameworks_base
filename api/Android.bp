@@ -28,6 +28,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-current.txt",
     srcs: [
+        ":android.net.ipsec.ike{.public.api.txt}",
         ":art.module.public.api{.public.api.txt}",
         ":conscrypt.module.public.api{.public.api.txt}",
         ":framework-appsearch{.public.api.txt}",
@@ -64,6 +65,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-current.srcjar",
     srcs: [
+        ":android.net.ipsec.ike{.public.stubs.source}",
         ":api-stubs-docs-non-updatable",
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
@@ -88,6 +90,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-removed.txt",
     srcs: [
+        ":android.net.ipsec.ike{.public.removed-api.txt}",
         ":art.module.public.api{.public.removed-api.txt}",
         ":conscrypt.module.public.api{.public.removed-api.txt}",
         ":framework-appsearch{.public.removed-api.txt}",
@@ -123,6 +126,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current.txt",
     srcs: [
+        ":android.net.ipsec.ike{.system.api.txt}",
         ":framework-appsearch{.system.api.txt}",
         ":framework-graphics{.system.api.txt}",
         ":framework-media{.system.api.txt}",
@@ -156,6 +160,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-removed.txt",
     srcs: [
+        ":android.net.ipsec.ike{.system.removed-api.txt}",
         ":framework-appsearch{.system.removed-api.txt}",
         ":framework-graphics{.system.removed-api.txt}",
         ":framework-media{.system.removed-api.txt}",
@@ -189,6 +194,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-current.txt",
     srcs: [
+        ":android.net.ipsec.ike{.module-lib.api.txt}",
         ":framework-appsearch{.module-lib.api.txt}",
         ":framework-graphics{.module-lib.api.txt}",
         ":framework-media{.module-lib.api.txt}",
@@ -221,6 +227,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-removed.txt",
     srcs: [
+        ":android.net.ipsec.ike{.module-lib.removed-api.txt}",
         ":framework-appsearch{.module-lib.removed-api.txt}",
         ":framework-graphics{.module-lib.removed-api.txt}",
         ":framework-media{.module-lib.removed-api.txt}",
