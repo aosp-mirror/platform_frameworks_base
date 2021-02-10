@@ -400,6 +400,7 @@
     <uses-permission android:name="android.permission.BIND_VOICE_INTERACTION" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
