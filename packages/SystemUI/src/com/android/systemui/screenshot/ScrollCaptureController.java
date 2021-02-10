@@ -67,7 +67,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         SAVE
     }
 
-    public static final int MAX_PAGES = 5;
     public static final int MAX_HEIGHT = 12000;
 
     private final Connection mConnection;

@@ -50,8 +50,8 @@ import javax.inject.Inject;
 public class ScrollCaptureClient {
     private static final int TILE_SIZE_PX_MAX = 4 * (1024 * 1024);
     private static final int TILES_PER_PAGE = 2; // increase once b/174571735 is addressed
-    private static final int MAX_PAGES = 5;
-    private static final int MAX_IMAGE_COUNT = MAX_PAGES * TILES_PER_PAGE;
+    private static final float MAX_PAGES = 3f;
+    private static final int MAX_IMAGE_COUNT = (int) Math.ceil(MAX_PAGES * TILES_PER_PAGE);
 
     @VisibleForTesting
     static final int MATCH_ANY_TASK = ActivityTaskManager.INVALID_TASK_ID;
