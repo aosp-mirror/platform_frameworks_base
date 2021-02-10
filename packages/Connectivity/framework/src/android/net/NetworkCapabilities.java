@@ -762,12 +762,14 @@ public final class NetworkCapabilities implements Parcelable {
         final int originalSignalStrength = mSignalStrength;
         final int originalOwnerUid = getOwnerUid();
         final int[] originalAdministratorUids = getAdministratorUids();
+        final TransportInfo originalTransportInfo = getTransportInfo();
         clearAll();
         mTransportTypes = (originalTransportTypes & TEST_NETWORKS_ALLOWED_TRANSPORTS)
                 | (1 << TRANSPORT_TEST);
         mNetworkCapabilities = originalCapabilities & TEST_NETWORKS_ALLOWED_CAPABILITIES;
         mNetworkSpecifier = originalSpecifier;
         mSignalStrength = originalSignalStrength;
+        mTransportInfo = originalTransportInfo;
 
         // Only retain the owner and administrator UIDs if they match the app registering the remote
         // caller that registered the network.
