@@ -4753,7 +4753,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.app.scheduling.RebootReadinessManagerService} for communicating
+     * {@link android.scheduling.RebootReadinessManagerService} for communicating
      * with the reboot readiness detector.
      *
      * @see #getSystemService(String)
