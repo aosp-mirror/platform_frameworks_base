@@ -394,10 +394,6 @@
     <dimen name="alert_dialog_button_bar_width">64dp</dimen>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">48dip</dimen>
-    <!-- Leanback dialog vertical margin -->
-    <dimen name="leanback_alert_dialog_vertical_margin">27dip</dimen>
-    <!-- Leanback dialog horizontal margin -->
-    <dimen name="leanback_alert_dialog_horizontal_margin">54dip</dimen>
 
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height">48dip</dimen>
