@@ -810,6 +810,16 @@ class Task extends WindowContainer<WindowContainer> {
     private boolean mDeferTaskAppear;
 
     /**
+     * Forces this task to be unorganized. Currently it is used for deferring the control of
+     * organizer when windowing mode is changing from PiP to fullscreen with orientation change.
+     * It is true only during Task#setWindowingMode ~ DisplayRotation#continueRotation.
+     *
+     * TODO(b/179235349): Remove this field by making surface operations from task organizer sync
+     *                    with display rotation.
+     */
+    private boolean mForceNotOrganized;
+
+    /**
      * This task was created by the task organizer which has the following implementations.
      * <ul>
      *     <lis>The task won't be removed when it is empty. Removal has to be an explicit request
@@ -2246,6 +2256,21 @@ class Task extends WindowContainer<WindowContainer> {
 
         if (pipChanging) {
             mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
+            // If the top activity is using fixed rotation, it should be changing from PiP to
+            // fullscreen with display orientation change. Do not notify fullscreen task organizer
+            // because the restoration of task surface and the transformation of activity surface
+            // need to be done synchronously.
+            final ActivityRecord r = topRunningActivity();
+            if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
+                mForceNotOrganized = true;
+            }
+        } else if (mForceNotOrganized) {
+            // If the display orientation change is done, let the corresponding task organizer take
+            // back the control of this task.
+            final ActivityRecord r = topRunningActivity();
+            if (r == null || !mDisplayContent.isFixedRotationLaunchingApp(r)) {
+                mForceNotOrganized = false;
+            }
         }
         try {
             // We have 2 reasons why we need to report orientation change here.
@@ -2835,6 +2860,9 @@ class Task extends WindowContainer<WindowContainer> {
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = newParentConfig.windowConfiguration.getWindowingMode();
         }
+        // Commit the resolved windowing mode so the canSpecifyOrientation won't get the old
+        // mode that may cause the bounds to be miscalculated, e.g. letterboxed.
+        getConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         Rect outOverrideBounds =
                 getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
@@ -4533,6 +4561,9 @@ class Task extends WindowContainer<WindowContainer> {
         pw.print(" mSupportsPictureInPicture="); pw.print(mSupportsPictureInPicture);
         pw.print(" isResizeable="); pw.println(isResizeable());
         pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
+        if (mForceNotOrganized) {
+            pw.print(prefix); pw.println("mForceNotOrganized=true");
+        }
         pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
 
@@ -4977,6 +5008,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private boolean canBeOrganized() {
+        if (mForceNotOrganized) {
+            return false;
+        }
         // All root tasks can be organized
         if (isRootTask()) {
             return true;

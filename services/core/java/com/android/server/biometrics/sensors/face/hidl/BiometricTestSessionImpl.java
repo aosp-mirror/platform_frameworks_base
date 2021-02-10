@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticationFrame;
+import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.util.Slog;
@@ -104,6 +106,16 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
 
         @Override
         public void onChallengeInterruptFinished(int sensorId) {
+
+        }
+
+        @Override
+        public void onAuthenticationFrame(FaceAuthenticationFrame frame) {
+
+        }
+
+        @Override
+        public void onEnrollmentFrame(FaceEnrollFrame frame) {
 
         }
     };

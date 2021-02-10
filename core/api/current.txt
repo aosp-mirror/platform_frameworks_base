@@ -435,6 +435,7 @@ package android {
     field public static final int clickable = 16842981; // 0x10100e5
     field public static final int clipChildren = 16842986; // 0x10100ea
     field public static final int clipOrientation = 16843274; // 0x101020a
+    field public static final int clipToOutline = 16844328; // 0x1010628
     field public static final int clipToPadding = 16842987; // 0x10100eb
     field public static final int closeIcon = 16843905; // 0x1010481
     field @Deprecated public static final int codes = 16843330; // 0x1010242
@@ -1100,6 +1101,7 @@ package android {
     field public static final int presentationTheme = 16843712; // 0x10103c0
     field public static final int preserveLegacyExternalStorage = 16844308; // 0x1010614
     field public static final int previewImage = 16843482; // 0x10102da
+    field public static final int previewLayout = 16844327; // 0x1010627
     field public static final int primaryContentAlpha = 16844114; // 0x1010552
     field public static final int priority = 16842780; // 0x101001c
     field public static final int privateImeOptions = 16843299; // 0x1010223
@@ -2935,12 +2937,12 @@ package android.accessibilityservice {
     field public static final int GESTURE_2_FINGER_DOUBLE_TAP = 20; // 0x14
     field public static final int GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD = 40; // 0x28
     field public static final int GESTURE_2_FINGER_SINGLE_TAP = 19; // 0x13
-    field public static final int GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD = 43; // 0x2b
     field public static final int GESTURE_2_FINGER_SWIPE_DOWN = 26; // 0x1a
     field public static final int GESTURE_2_FINGER_SWIPE_LEFT = 27; // 0x1b
     field public static final int GESTURE_2_FINGER_SWIPE_RIGHT = 28; // 0x1c
     field public static final int GESTURE_2_FINGER_SWIPE_UP = 25; // 0x19
     field public static final int GESTURE_2_FINGER_TRIPLE_TAP = 21; // 0x15
+    field public static final int GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD = 43; // 0x2b
     field public static final int GESTURE_3_FINGER_DOUBLE_TAP = 23; // 0x17
     field public static final int GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD = 41; // 0x29
     field public static final int GESTURE_3_FINGER_SINGLE_TAP = 22; // 0x16
@@ -8386,6 +8388,7 @@ package android.appwidget {
     field public int minResizeWidth;
     field public int minWidth;
     field public int previewImage;
+    field @IdRes public int previewLayout;
     field public android.content.ComponentName provider;
     field public int resizeMode;
     field public int updatePeriodMillis;
@@ -20478,6 +20481,7 @@ package android.media {
     field public static final int QUALITY_480P = 4; // 0x4
     field public static final int QUALITY_4KDCI = 10; // 0xa
     field public static final int QUALITY_720P = 5; // 0x5
+    field public static final int QUALITY_8KUHD = 13; // 0xd
     field public static final int QUALITY_CIF = 3; // 0x3
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_HIGH_SPEED_1080P = 2004; // 0x7d4
@@ -20499,6 +20503,7 @@ package android.media {
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_4KDCI = 1010; // 0x3f2
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
+    field public static final int QUALITY_TIME_LAPSE_8KUHD = 1013; // 0x3f5
     field public static final int QUALITY_TIME_LAPSE_CIF = 1003; // 0x3eb
     field public static final int QUALITY_TIME_LAPSE_HIGH = 1001; // 0x3e9
     field public static final int QUALITY_TIME_LAPSE_LOW = 1000; // 0x3e8
@@ -40334,6 +40339,7 @@ package android.telephony {
     field public static final String KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL = "simplified_network_settings_bool";
     field public static final String KEY_SIM_NETWORK_UNLOCK_ALLOW_DISMISS_BOOL = "sim_network_unlock_allow_dismiss_bool";
     field public static final String KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL = "sms_requires_destination_number_conversion_bool";
+    field public static final String KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL = "store_sim_pin_for_unattended_reboot_bool";
     field public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
     field public static final String KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL = "support_3gpp_call_forwarding_while_roaming_bool";
     field public static final String KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL = "support_add_conference_participants_bool";
@@ -50683,6 +50689,7 @@ package android.view.autofill {
     method public void unregisterCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     field public static final String EXTRA_ASSIST_STRUCTURE = "android.view.autofill.extra.ASSIST_STRUCTURE";
     field public static final String EXTRA_AUTHENTICATION_RESULT = "android.view.autofill.extra.AUTHENTICATION_RESULT";
+    field public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET = "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
     field public static final String EXTRA_CLIENT_STATE = "android.view.autofill.extra.CLIENT_STATE";
   }
 
@@ -54630,6 +54637,8 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
+    method public void setViewOutlinePreferredRadius(@IdRes int, float, int);
+    method public void setViewOutlinePreferredRadiusDimen(@IdRes int, @DimenRes int);
     method public void setViewPadding(@IdRes int, @Px int, @Px int, @Px int, @Px int);
     method public void setViewVisibility(@IdRes int, int);
     method public void showNext(@IdRes int);
@@ -54652,6 +54661,12 @@ package android.widget {
   }
 
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public static @interface RemoteViews.RemoteView {
+  }
+
+  public static final class RemoteViews.RemoteViewOutlineProvider extends android.view.ViewOutlineProvider {
+    ctor public RemoteViews.RemoteViewOutlineProvider(float);
+    method public void getOutline(@NonNull android.view.View, @NonNull android.graphics.Outline);
+    method public float getRadius();
   }
 
   public abstract class RemoteViewsService extends android.app.Service {

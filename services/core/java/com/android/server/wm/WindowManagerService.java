@@ -100,6 +100,7 @@ import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_FREEZE_DISPLAY;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
@@ -750,6 +751,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final TaskSnapshotController mTaskSnapshotController;
 
     boolean mIsTouchDevice;
+    boolean mIsFakeTouchDevice;
 
     final H mH = new H();
 
@@ -2146,23 +2148,6 @@ public class WindowManagerService extends IWindowManager.Stub
             e.fillInStackTrace();
         }
         Slog.i(tag, s, e);
-    }
-
-    void setTransparentRegionWindow(Session session, IWindow client, Region region) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                WindowState w = windowForClientLocked(session, client, false);
-                ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE transparentRegionHint=%s: %s",
-                        region, w);
-
-                if ((w != null) && w.mHasSurface) {
-                    w.mWinAnimator.setTransparentRegionHintLocked(region);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
     }
 
     void setInsetsWindow(Session session, IWindow client, int touchableInsets, Rect contentInsets,
@@ -4960,6 +4945,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
+            mIsFakeTouchDevice = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_FAKETOUCH);
         }
 
         try {
@@ -5726,8 +5713,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!w.mToken.okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Changing surface while display frozen: %s", w);
             w.setOrientationChanging(true);
-            w.mLastFreezeDuration = 0;
-            mRoot.mOrientationChangeComplete = false;
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
                 mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
                 // XXX should probably keep timeout from
@@ -5838,6 +5823,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             "startFreezingDisplayLocked: exitAnim=%d enterAnim=%d called by %s",
                             exitAnim, enterAnim, Debug.getCallers(8));
         mScreenFrozenLock.acquire();
+        // Apply launch power mode to reduce screen frozen time because orientation change may
+        // relaunch activity and redraw windows. This may also help speed up user switching.
+        mAtmService.startLaunchPowerMode(POWER_MODE_REASON_FREEZE_DISPLAY);
 
         mDisplayFrozen = true;
         mDisplayFreezeTime = SystemClock.elapsedRealtime();
@@ -5981,6 +5969,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (configChanged) {
             displayContent.sendNewConfiguration();
         }
+        mAtmService.endLaunchPowerMode(POWER_MODE_REASON_FREEZE_DISPLAY);
         mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN);
     }
 
@@ -7956,13 +7945,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isTouchableDisplay(int displayId) {
+        public boolean isTouchOrFaketouchDevice() {
             synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                final Configuration configuration =
-                        displayContent != null ? displayContent.getConfiguration() : null;
-                return configuration != null
-                        && configuration.touchscreen == Configuration.TOUCHSCREEN_FINGER;
+                // All touchable devices are also faketouchable.
+                return mIsFakeTouchDevice;
             }
         }
 

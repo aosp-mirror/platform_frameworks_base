@@ -59,6 +59,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
 import com.android.server.utils.Watcher;
@@ -123,6 +124,7 @@ class InstantAppRegistry implements Watchable, Snappable {
     private final CookiePersistence mCookiePersistence;
 
     /** State for uninstalled instant apps */
+    @Watched
     @GuardedBy("mService.mLock")
     private final WatchedSparseArray<List<UninstalledInstantAppState>> mUninstalledInstantApps;
 
@@ -132,10 +134,12 @@ class InstantAppRegistry implements Watchable, Snappable {
      * The value is a set of instant app UIDs.
      * UserID -> TargetAppId -> InstantAppId
      */
+    @Watched
     @GuardedBy("mService.mLock")
     private final WatchedSparseArray<WatchedSparseArray<WatchedSparseBooleanArray>> mInstantGrants;
 
     /** The set of all installed instant apps. UserID -> AppID */
+    @Watched
     @GuardedBy("mService.mLock")
     private final WatchedSparseArray<WatchedSparseBooleanArray> mInstalledInstantAppUids;
 
@@ -189,6 +193,7 @@ class InstantAppRegistry implements Watchable, Snappable {
         mUninstalledInstantApps.registerObserver(mObserver);
         mInstantGrants.registerObserver(mObserver);
         mInstalledInstantAppUids.registerObserver(mObserver);
+        Watchable.verifyWatchedAttributes(this, mObserver);
     }
 
     /**

@@ -16,11 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.app.ActivityTaskManager
-import android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT
-import android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS
-import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
-import android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED
 import android.os.SystemClock
 import com.android.wm.shell.flicker.NonRotationTestBase
 
@@ -29,14 +24,6 @@ abstract class AppTestBase(
     rotation: Int
 ) : NonRotationTestBase(rotationName, rotation) {
     companion object {
-        fun removeAllTasksButHome() {
-            val ALL_ACTIVITY_TYPE_BUT_HOME = intArrayOf(
-                    ACTIVITY_TYPE_STANDARD, ACTIVITY_TYPE_ASSISTANT, ACTIVITY_TYPE_RECENTS,
-                    ACTIVITY_TYPE_UNDEFINED)
-            val atm = ActivityTaskManager.getService()
-            atm.removeRootTasksWithActivityTypes(ALL_ACTIVITY_TYPE_BUT_HOME)
-        }
-
         fun waitForAnimationComplete() {
             // TODO: UiDevice doesn't have reliable way to wait for the completion of animation.
             // Consider to introduce WindowManagerStateHelper to access Activity state.

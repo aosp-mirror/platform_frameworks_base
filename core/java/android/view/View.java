@@ -740,6 +740,7 @@ import java.util.function.Predicate;
  * @attr ref android.R.styleable#View_alpha
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
+ * @attr ref android.R.styleable#View_clipToOutline
  * @attr ref android.R.styleable#View_contentDescription
  * @attr ref android.R.styleable#View_drawingCacheQuality
  * @attr ref android.R.styleable#View_duplicateParentState
@@ -5967,6 +5968,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_scrollCaptureHint:
                     setScrollCaptureHint((a.getInt(attr, SCROLL_CAPTURE_HINT_AUTO)));
+                    break;
+                case R.styleable.View_clipToOutline:
+                    setClipToOutline(a.getBoolean(attr, false));
                     break;
             }
         }
@@ -17921,6 +17925,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setOutlineProvider(ViewOutlineProvider)
      * @see #getClipToOutline()
+     *
+     * @attr ref android.R.styleable#View_clipToOutline
      */
     @RemotableViewMethod
     public void setClipToOutline(boolean clipToOutline) {

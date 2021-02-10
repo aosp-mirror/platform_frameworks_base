@@ -24,6 +24,7 @@ import android.location.provider.ProviderRequest;
 import android.os.Binder;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.location.eventlog.LocationEventLog;
 import com.android.server.location.injector.Injector;
 
 import java.util.Collection;
@@ -33,8 +34,9 @@ import java.util.Collection;
  */
 public class PassiveLocationProviderManager extends LocationProviderManager {
 
-    public PassiveLocationProviderManager(Context context, Injector injector) {
-        super(context, injector, LocationManager.PASSIVE_PROVIDER, null);
+    public PassiveLocationProviderManager(Context context, Injector injector,
+            LocationEventLog eventLog) {
+        super(context, injector, eventLog, LocationManager.PASSIVE_PROVIDER, null);
     }
 
     @Override

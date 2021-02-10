@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.dagger;
 
+import android.content.Context;
+import android.hardware.display.ColorDisplayManager;
+
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.FeatureFlags;
 
@@ -27,11 +30,20 @@ import dagger.Provides;
 @Module
 public interface QSFlagsModule {
     String QS_LABELS_FLAG = "qs_labels_flag";
+    String RBC_AVAILABLE = "rbc_available";
 
     @Provides
     @SysUISingleton
     @Named(QS_LABELS_FLAG)
     static boolean provideQSFlag(FeatureFlags featureFlags) {
         return featureFlags.isQSLabelsEnabled();
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @Named(RBC_AVAILABLE)
+    static boolean isReduceBrightColorsAvailable(Context context) {
+        return ColorDisplayManager.isReduceBrightColorsAvailable(context);
     }
 }

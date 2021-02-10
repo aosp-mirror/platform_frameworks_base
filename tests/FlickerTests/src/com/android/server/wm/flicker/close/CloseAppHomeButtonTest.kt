@@ -37,6 +37,7 @@ import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEn
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
@@ -64,7 +65,7 @@ class CloseAppHomeButtonTest(
             val testApp = SimpleAppHelper(instrumentation)
             return FlickerTestRunnerFactory.getInstance()
                 .buildTest(instrumentation, repetitions = 5) { configuration ->
-                    withTestName { buildTestTag("closeAppHomeButton", configuration) }
+                    withTestName { buildTestTag(configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
@@ -88,28 +89,46 @@ class CloseAppHomeButtonTest(
                         }
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173689015)
+                        val isRotated = configuration.startRotation.isRotated()
 
-                            launcherReplacesAppWindowAsTopWindow(testApp)
-                            wallpaperWindowBecomesVisible()
+                        presubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                launcherReplacesAppWindowAsTopWindow(testApp)
+                                wallpaperWindowBecomesVisible()
+                            }
+
+                            layersTrace {
+                                noUncoveredRegions(configuration.startRotation,
+                                    Surface.ROTATION_0)
+                                navBarLayerIsAlwaysVisible()
+                                statusBarLayerIsAlwaysVisible()
+                                wallpaperLayerReplacesAppLayer(testApp)
+
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                }
+                            }
                         }
 
-                        layersTrace {
-                            val isRotation0 = configuration.startRotation == Surface.ROTATION_0
-                            noUncoveredRegions(configuration.startRotation,
-                                Surface.ROTATION_0)
-                            navBarLayerRotatesAndScales(configuration.startRotation,
-                                Surface.ROTATION_0, enabled = isRotation0)
-                            statusBarLayerRotatesScales(configuration.startRotation,
-                                Surface.ROTATION_0, enabled = isRotation0)
-                            navBarLayerIsAlwaysVisible()
-                            statusBarLayerIsAlwaysVisible()
-                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173689015)
+                        flaky {
+                            windowManagerTrace {
+                                visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173689015)
+                            }
+                            layersTrace {
+                                visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173689015)
 
-                            wallpaperLayerReplacesAppLayer(testApp)
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                }
+                            }
                         }
                     }
                 }

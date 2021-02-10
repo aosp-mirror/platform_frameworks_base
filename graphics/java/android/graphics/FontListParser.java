@@ -25,6 +25,8 @@ import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
 import android.os.LocaleList;
 import android.text.FontConfig;
+import android.text.TextUtils;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -44,6 +46,27 @@ import java.util.regex.Pattern;
  * @hide
  */
 public class FontListParser {
+
+    // XML constants for FontFamily.
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_LANG = "lang";
+    private static final String ATTR_VARIANT = "variant";
+    private static final String TAG_FONT = "font";
+    private static final String VARIANT_COMPACT = "compact";
+    private static final String VARIANT_ELEGANT = "elegant";
+
+    // XML constants for Font.
+    public static final String ATTR_INDEX = "index";
+    public static final String ATTR_WEIGHT = "weight";
+    public static final String ATTR_STYLE = "style";
+    public static final String ATTR_FALLBACK_FOR = "fallbackFor";
+    public static final String STYLE_ITALIC = "italic";
+    public static final String STYLE_NORMAL = "normal";
+    public static final String TAG_AXIS = "axis";
+
+    // XML constants for FontVariationAxis.
+    public static final String ATTR_TAG = "tag";
+    public static final String ATTR_STYLEVALUE = "stylevalue";
 
     /* Parse fallback list (no names) */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -148,7 +171,7 @@ public class FontListParser {
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             final String tag = parser.getName();
-            if (tag.equals("font")) {
+            if (tag.equals(TAG_FONT)) {
                 fonts.add(readFont(parser, fontDir, updatableFontMap));
             } else {
                 skip(parser);
@@ -156,13 +179,39 @@ public class FontListParser {
         }
         int intVariant = FontConfig.FontFamily.VARIANT_DEFAULT;
         if (variant != null) {
-            if (variant.equals("compact")) {
+            if (variant.equals(VARIANT_COMPACT)) {
                 intVariant = FontConfig.FontFamily.VARIANT_COMPACT;
-            } else if (variant.equals("elegant")) {
+            } else if (variant.equals(VARIANT_ELEGANT)) {
                 intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
         return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);
+    }
+
+    /**
+     * Write a family tag representing {@code fontFamily}. The tag should be started by the caller.
+     */
+    public static void writeFamily(TypedXmlSerializer out, FontConfig.FontFamily fontFamily)
+            throws IOException {
+        if (!TextUtils.isEmpty(fontFamily.getName())) {
+            out.attribute(null, ATTR_NAME, fontFamily.getName());
+        }
+        if (!fontFamily.getLocaleList().isEmpty()) {
+            out.attribute(null, ATTR_LANG, fontFamily.getLocaleList().toLanguageTags());
+        }
+        switch (fontFamily.getVariant()) {
+            case FontConfig.FontFamily.VARIANT_COMPACT:
+                out.attribute(null, ATTR_VARIANT, VARIANT_COMPACT);
+                break;
+            case FontConfig.FontFamily.VARIANT_ELEGANT:
+                out.attribute(null, ATTR_VARIANT, VARIANT_ELEGANT);
+                break;
+        }
+        for (FontConfig.Font font : fontFamily.getFontList()) {
+            out.startTag(null, TAG_FONT);
+            writeFont(out, font);
+            out.endTag(null, TAG_FONT);
+        }
     }
 
     /** Matches leading and trailing XML whitespace. */
@@ -175,13 +224,13 @@ public class FontListParser {
             @Nullable Map<String, File> updatableFontMap)
             throws XmlPullParserException, IOException {
 
-        String indexStr = parser.getAttributeValue(null, "index");
+        String indexStr = parser.getAttributeValue(null, ATTR_INDEX);
         int index = indexStr == null ? 0 : Integer.parseInt(indexStr);
         List<FontVariationAxis> axes = new ArrayList<>();
-        String weightStr = parser.getAttributeValue(null, "weight");
-        int weight = weightStr == null ? 400 : Integer.parseInt(weightStr);
-        boolean isItalic = "italic".equals(parser.getAttributeValue(null, "style"));
-        String fallbackFor = parser.getAttributeValue(null, "fallbackFor");
+        String weightStr = parser.getAttributeValue(null, ATTR_WEIGHT);
+        int weight = weightStr == null ? FontStyle.FONT_WEIGHT_NORMAL : Integer.parseInt(weightStr);
+        boolean isItalic = STYLE_ITALIC.equals(parser.getAttributeValue(null, ATTR_STYLE));
+        String fallbackFor = parser.getAttributeValue(null, ATTR_FALLBACK_FOR);
         StringBuilder filename = new StringBuilder();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() == XmlPullParser.TEXT) {
@@ -189,7 +238,7 @@ public class FontListParser {
             }
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
-            if (tag.equals("axis")) {
+            if (tag.equals(TAG_AXIS)) {
                 axes.add(readAxis(parser));
             } else {
                 skip(parser);
@@ -237,12 +286,46 @@ public class FontListParser {
         return null;
     }
 
+    private static void writeFont(TypedXmlSerializer out, FontConfig.Font font)
+            throws IOException {
+        if (font.getTtcIndex() != 0) {
+            out.attributeInt(null, ATTR_INDEX, font.getTtcIndex());
+        }
+        if (font.getStyle().getWeight() != FontStyle.FONT_WEIGHT_NORMAL) {
+            out.attributeInt(null, ATTR_WEIGHT, font.getStyle().getWeight());
+        }
+        if (font.getStyle().getSlant() == FontStyle.FONT_SLANT_ITALIC) {
+            out.attribute(null, ATTR_STYLE, STYLE_ITALIC);
+        } else {
+            out.attribute(null, ATTR_STYLE, STYLE_NORMAL);
+        }
+        if (!TextUtils.isEmpty(font.getFontFamilyName())) {
+            out.attribute(null, ATTR_FALLBACK_FOR, font.getFontFamilyName());
+        }
+        out.text(font.getFile().getName());
+        FontVariationAxis[] axes =
+                FontVariationAxis.fromFontVariationSettings(font.getFontVariationSettings());
+        if (axes != null) {
+            for (FontVariationAxis axis : axes) {
+                out.startTag(null, TAG_AXIS);
+                writeAxis(out, axis);
+                out.endTag(null, TAG_AXIS);
+            }
+        }
+    }
+
     private static FontVariationAxis readAxis(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        String tagStr = parser.getAttributeValue(null, "tag");
-        String styleValueStr = parser.getAttributeValue(null, "stylevalue");
+        String tagStr = parser.getAttributeValue(null, ATTR_TAG);
+        String styleValueStr = parser.getAttributeValue(null, ATTR_STYLEVALUE);
         skip(parser);  // axis tag is empty, ignore any contents and consume end tag
         return new FontVariationAxis(tagStr, Float.parseFloat(styleValueStr));
+    }
+
+    private static void writeAxis(TypedXmlSerializer out, FontVariationAxis axis)
+            throws IOException {
+        out.attribute(null, ATTR_TAG, axis.getTag());
+        out.attributeFloat(null, ATTR_STYLEVALUE, axis.getStyleValue());
     }
 
     /**
@@ -255,7 +338,7 @@ public class FontListParser {
         String weightStr = parser.getAttributeValue(null, "weight");
         int weight;
         if (weightStr == null) {
-            weight = 400;
+            weight = FontStyle.FONT_WEIGHT_NORMAL;
         } else {
             weight = Integer.parseInt(weightStr);
         }

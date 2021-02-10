@@ -180,8 +180,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row,
-            View clickedView) {
-        if (mKeyguardStateController.isShowing()) {
+            View clickedView, boolean deferBouncer, Runnable runnable) {
+        if (!deferBouncer && mKeyguardStateController.isShowing()) {
             onLockedRemoteInput(row, clickedView);
         } else {
             if (row.isChildInGroup() && !row.areChildrenExpanded()) {
@@ -189,7 +189,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
             }
             row.setUserExpanded(true);
-            row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);
+            row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
         }
     }
 

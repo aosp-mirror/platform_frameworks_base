@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.rotation
 
 import android.os.Bundle
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
@@ -48,7 +47,6 @@ import org.junit.runners.Parameterized
  * Cycle through supported app rotations.
  * To run this test: `atest FlickerTests:ChangeAppRotationTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -67,51 +65,56 @@ class ChangeAppRotationTest(
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName { buildTestTag("changeAppRotation", configuration) }
+                withTestName { buildTestTag(configuration) }
                 assertions {
-                    windowManagerTrace {
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        visibleWindowsShownMoreThanOneConsecutiveEntry()
-                    }
-
-                    layersTrace {
-                        navBarLayerIsAlwaysVisible(bugId = 140855415)
-                        statusBarLayerIsAlwaysVisible(bugId = 140855415)
-                        noUncoveredRegions(configuration.startRotation,
-                            configuration.endRotation, allStates = false)
-                        navBarLayerRotatesAndScales(configuration.startRotation,
-                            configuration.endRotation, bugId = 140855415)
-                        statusBarLayerRotatesScales(configuration.startRotation,
-                            configuration.endRotation, bugId = 140855415)
-                        visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 140855415)
-                    }
-
-                    layersTrace {
-                        val startingPos = WindowUtils.getDisplayBounds(
-                            configuration.startRotation)
-                        val endingPos = WindowUtils.getDisplayBounds(
-                            configuration.endRotation)
-
-                        start("appLayerRotates_StartingPos", bugId = 140855415) {
-                            this.hasVisibleRegion(testApp.getPackage(), startingPos)
+                    presubmit {
+                        windowManagerTrace {
+                            navBarWindowIsAlwaysVisible()
+                            statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
                         }
 
-                        end("appLayerRotates_EndingPos", bugId = 140855415) {
-                            this.hasVisibleRegion(testApp.getPackage(), endingPos)
-                        }
+                        layersTrace {
+                            noUncoveredRegions(configuration.startRotation,
+                                configuration.endRotation, allStates = false)
 
-                        all("screenshotLayerBecomesInvisible") {
-                            this.showsLayer(testApp.getPackage())
-                                .then()
-                                .showsLayer(SCREENSHOT_LAYER)
-                                .then()
-                                .showsLayer(testApp.getPackage())
+                            all("screenshotLayerBecomesInvisible") {
+                                this.showsLayer(testApp.getPackage())
+                                    .then()
+                                    .showsLayer(SCREENSHOT_LAYER)
+                                    .then()
+                                    .showsLayer(testApp.getPackage())
+                            }
                         }
                     }
 
-                    eventLog {
-                        focusDoesNotChange(bugId = 151179149)
+                    flaky {
+                        layersTrace {
+                            navBarLayerIsAlwaysVisible(bugId = 140855415)
+                            statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                configuration.endRotation, bugId = 140855415)
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                configuration.endRotation, bugId = 140855415)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 140855415)
+
+                            val startingPos = WindowUtils.getDisplayBounds(
+                                configuration.startRotation)
+                            val endingPos = WindowUtils.getDisplayBounds(
+                                configuration.endRotation)
+
+                            start("appLayerRotates_StartingPos", bugId = 140855415) {
+                                this.hasVisibleRegion(testApp.getPackage(), startingPos)
+                            }
+
+                            end("appLayerRotates_EndingPos", bugId = 140855415) {
+                                this.hasVisibleRegion(testApp.getPackage(), endingPos)
+                            }
+                        }
+
+                        eventLog {
+                            focusDoesNotChange(bugId = 151179149)
+                        }
                     }
                 }
             }

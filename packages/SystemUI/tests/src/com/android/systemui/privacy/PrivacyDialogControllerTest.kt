@@ -100,12 +100,12 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
     private val dialogProvider = object : PrivacyDialogController.DialogProvider {
         var list: List<PrivacyDialog.PrivacyElement>? = null
-        var starter: ((String) -> Unit)? = null
+        var starter: ((String, Int) -> Unit)? = null
 
         override fun makeDialog(
             context: Context,
             list: List<PrivacyDialog.PrivacyElement>,
-            starter: (String) -> Unit
+            starter: (String, Int) -> Unit
         ): PrivacyDialog {
             this.list = list
             this.starter = starter
@@ -210,7 +210,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
     fun testSingleElementInList() {
         val usage = createMockPermGroupUsage(
                 packageName = TEST_PACKAGE_NAME,
-                uid = generateUidForUser(0),
+                uid = generateUidForUser(USER_ID),
                 permGroupName = PERM_CAMERA,
                 lastAccess = 5L,
                 isActive = true,
@@ -224,6 +224,8 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
 
         val expected = PrivacyDialog.PrivacyElement(
                 type = PrivacyType.TYPE_CAMERA,
+                packageName = TEST_PACKAGE_NAME,
+                userId = USER_ID,
                 applicationName = TEST_PACKAGE_NAME,
                 attribution = TEST_ATTRIBUTION,
                 lastActiveTimestamp = 5L,
@@ -459,13 +461,28 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(PERM_MICROPHONE)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
         verify(activityStarter)
                 .startActivity(capture(intentCaptor), eq(true), any<ActivityStarter.Callback>())
 
-        assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_MANAGE_PERMISSION_APPS)
-        assertThat(intentCaptor.value.getStringExtra(Intent.EXTRA_PERMISSION_GROUP_NAME))
-                .isEqualTo(PERM_MICROPHONE)
+        assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_MANAGE_APP_PERMISSIONS)
+        assertThat(intentCaptor.value.getStringExtra(Intent.EXTRA_PACKAGE_NAME))
+                .isEqualTo(TEST_PACKAGE_NAME)
+        assertThat(intentCaptor.value.getParcelableExtra(Intent.EXTRA_USER) as? UserHandle)
+                .isEqualTo(UserHandle.of(USER_ID))
+    }
+
+    @Test
+    fun testStartActivityCorrectIntent_enterpriseUser() {
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, ENT_USER_ID)
+        verify(activityStarter)
+                .startActivity(capture(intentCaptor), eq(true), any<ActivityStarter.Callback>())
+
+        assertThat(intentCaptor.value.getParcelableExtra(Intent.EXTRA_USER) as? UserHandle)
+                .isEqualTo(UserHandle.of(ENT_USER_ID))
     }
 
     @Test
@@ -473,7 +490,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(PERM_MICROPHONE)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
         verify(activityStarter).startActivity(any(), eq(true), capture(activityStartedCaptor))
 
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_DELIVERED_TO_TOP)
@@ -486,7 +503,7 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(PERM_MICROPHONE)
+        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID)
         verify(activityStarter).startActivity(any(), eq(true), capture(activityStartedCaptor))
 
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_ABORTED)

@@ -51,6 +51,17 @@
           "exclude-annotation": "org.junit.Ignore"
         }
       ]
+    },
+    {
+      "name": "FrameworksInProcessTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
     }
   ],
   "postsubmit-managedprofile-stress": [

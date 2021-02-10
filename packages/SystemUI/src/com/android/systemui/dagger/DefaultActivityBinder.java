@@ -20,6 +20,7 @@ import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
 import com.android.systemui.keyguard.WorkLockActivity;
+import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
@@ -92,4 +93,10 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(TvNotificationPanelActivity.class)
     public abstract Activity bindTvNotificationPanelActivity(TvNotificationPanelActivity activity);
+
+    /** Inject into PeopleSpaceActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(PeopleSpaceActivity.class)
+    public abstract Activity bindPeopleSpaceActivity(PeopleSpaceActivity activity);
 }

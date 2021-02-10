@@ -11,13 +11,9 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
-import android.os.SystemProperties
 import android.util.AttributeSet
 import android.view.View
 import com.android.systemui.Interpolators
-
-val enableLightReveal =
-        SystemProperties.getBoolean("persist.sysui.show_new_screen_on_transitions", false)
 
 /**
  * Provides methods to modify the various properties of a [LightRevealScrim] to reveal between 0% to

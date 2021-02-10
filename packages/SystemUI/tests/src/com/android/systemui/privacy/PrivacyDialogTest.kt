@@ -40,8 +40,13 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class PrivacyDialogTest : SysuiTestCase() {
 
+    companion object {
+        private const val TEST_PACKAGE_NAME = "test_pkg"
+        private const val TEST_USER_ID = 0
+    }
+
     @Mock
-    private lateinit var starter: (String) -> Unit
+    private lateinit var starter: (String, Int) -> Unit
 
     private lateinit var dialog: PrivacyDialog
 
@@ -58,10 +63,12 @@ class PrivacyDialogTest : SysuiTestCase() {
     }
 
     @Test
-    fun testStarterCalledWithCorrectPermGroupName() {
+    fun testStarterCalledWithCorrectParams() {
         val list = listOf(
                 PrivacyDialog.PrivacyElement(
                         PrivacyType.TYPE_MICROPHONE,
+                        TEST_PACKAGE_NAME,
+                        TEST_USER_ID,
                         "App",
                         null,
                         0L,
@@ -73,7 +80,7 @@ class PrivacyDialogTest : SysuiTestCase() {
         dialog = PrivacyDialog(context, list, starter)
         dialog.show()
         dialog.requireViewById<View>(R.id.privacy_item).callOnClick()
-        verify(starter).invoke(PrivacyType.TYPE_MICROPHONE.permGroupName)
+        verify(starter).invoke(TEST_PACKAGE_NAME, TEST_USER_ID)
     }
 
     @Test
@@ -104,6 +111,8 @@ class PrivacyDialogTest : SysuiTestCase() {
         val list = listOf(
                 PrivacyDialog.PrivacyElement(
                         PrivacyType.TYPE_CAMERA,
+                        TEST_PACKAGE_NAME,
+                        TEST_USER_ID,
                         "App",
                         null,
                         0L,
@@ -113,6 +122,8 @@ class PrivacyDialogTest : SysuiTestCase() {
                 ),
                 PrivacyDialog.PrivacyElement(
                         PrivacyType.TYPE_MICROPHONE,
+                        TEST_PACKAGE_NAME,
+                        TEST_USER_ID,
                         "App",
                         null,
                         0L,
@@ -130,6 +141,8 @@ class PrivacyDialogTest : SysuiTestCase() {
     fun testUsingText() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_CAMERA,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
                 "App",
                 null,
                 0L,
@@ -154,6 +167,8 @@ class PrivacyDialogTest : SysuiTestCase() {
     fun testRecentText() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_MICROPHONE,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
                 "App",
                 null,
                 0L,
@@ -178,6 +193,8 @@ class PrivacyDialogTest : SysuiTestCase() {
     fun testEnterprise() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_MICROPHONE,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
                 "App",
                 null,
                 0L,
@@ -198,6 +215,8 @@ class PrivacyDialogTest : SysuiTestCase() {
     fun testPhoneCall() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_MICROPHONE,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
                 "App",
                 null,
                 0L,
@@ -218,6 +237,8 @@ class PrivacyDialogTest : SysuiTestCase() {
     fun testAttribution() {
         val element = PrivacyDialog.PrivacyElement(
                 PrivacyType.TYPE_MICROPHONE,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
                 "App",
                 "attribution",
                 0L,

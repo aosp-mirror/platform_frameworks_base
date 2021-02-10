@@ -22,11 +22,11 @@
 namespace android {
 namespace uirenderer {
 
-#define NON_ZERO_EPSILON (0.001f)
-#define ALPHA_EPSILON (0.001f)
-
 class MathUtils {
 public:
+    static constexpr float NON_ZERO_EPSILON = 0.001f;
+    static constexpr float ALPHA_EPSILON = 0.001f;
+
     /**
      * Check for floats that are close enough to zero.
      */

@@ -16,25 +16,36 @@
 
 package com.android.server.wm;
 
+import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
+
 import static com.android.server.wm.WindowOrientationListenerProto.ENABLED;
 import static com.android.server.wm.WindowOrientationListenerProto.ROTATION;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.provider.DeviceConfig;
+import android.provider.Settings;
+import android.rotationresolver.RotationResolverInternal;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A special helper class used by the WindowManager
@@ -55,6 +66,9 @@ public abstract class WindowOrientationListener {
 
     private static final boolean USE_GRAVITY_SENSOR = false;
     private static final int DEFAULT_BATCH_LATENCY = 100000;
+    private static final int DEFAULT_ROTATION_RESOLVER_ENABLED = 0; // disabled
+    private static final String KEY_ROTATION_RESOLVER_TIMEOUT = "rotation_resolver_timeout_millis";
+    private static final long DEFAULT_ROTATION_RESOLVER_TIMEOUT_MILLIS = 700L;
 
     private Handler mHandler;
     private SensorManager mSensorManager;
@@ -62,7 +76,13 @@ public abstract class WindowOrientationListener {
     private int mRate;
     private String mSensorType;
     private Sensor mSensor;
-    private OrientationJudge mOrientationJudge;
+
+    @VisibleForTesting
+    OrientationJudge mOrientationJudge;
+
+    @VisibleForTesting
+    RotationResolverInternal mRotationResolverService;
+
     private int mCurrentRotation = -1;
     private final Context mContext;
     private final WindowManagerConstants mConstants;
@@ -253,6 +273,32 @@ public abstract class WindowOrientationListener {
         synchronized (mLock) {
             return mSensor != null;
         }
+    }
+
+    /**
+     * Returns true if the current status of the phone is suitable for using rotation resolver
+     * service.
+     *
+     * To reduce the power consumption of rotation resolver service, rotation query should run less
+     * frequently than other low power orientation sensors. This method is used to check whether
+     * the current status of the phone is necessary to request a suggested screen rotation from the
+     * rotation resolver service. Note that it always returns {@code false} in the base class. It
+     * should be overridden in the derived classes.
+     */
+    public boolean canUseRotationResolver() {
+        return false;
+    }
+
+    /**
+     * Returns true if the rotation resolver feature is enabled by setting. It means {@link
+     * WindowOrientationListener} will then ask {@link RotationResolverInternal} for the appropriate
+     * screen rotation.
+     */
+    @VisibleForTesting
+    boolean isRotationResolverEnabled() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CAMERA_AUTOROTATE, DEFAULT_ROTATION_RESOLVER_ENABLED,
+                UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -1045,6 +1091,30 @@ public abstract class WindowOrientationListener {
         private int mProposedRotation = -1;
         private int mDesiredRotation = -1;
         private boolean mRotationEvaluationScheduled;
+        private long mRotationResolverTimeoutMillis;
+
+        OrientationSensorJudge() {
+            super();
+            setupRotationResolverParameters();
+        }
+
+        private void setupRotationResolverParameters() {
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_WINDOW_MANAGER,
+                    ActivityThread.currentApplication().getMainExecutor(), (properties) -> {
+                        final Set<String> keys = properties.getKeyset();
+                        if (keys.contains(KEY_ROTATION_RESOLVER_TIMEOUT)) {
+                            readRotationResolverParameters();
+                        }
+                    });
+            readRotationResolverParameters();
+        }
+
+        private void readRotationResolverParameters() {
+            mRotationResolverTimeoutMillis = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                    KEY_ROTATION_RESOLVER_TIMEOUT,
+                    DEFAULT_ROTATION_RESOLVER_TIMEOUT_MILLIS);
+        }
 
         @Override
         public int getProposedRotationLocked() {
@@ -1069,25 +1139,48 @@ public abstract class WindowOrientationListener {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            int newRotation;
-
             int reportedRotation = (int) event.values[0];
             if (reportedRotation < 0 || reportedRotation > 3) {
                 return;
             }
 
-            synchronized (mLock) {
-                mDesiredRotation = reportedRotation;
-                newRotation = evaluateRotationChangeLocked();
-            }
-            if (newRotation >= 0) {
-                onProposedRotationChanged(newRotation);
+            // Log raw sensor rotation.
+            if (evaluateRotationChangeLocked() >= 0) {
                 if (mConstants.mRawSensorLoggingEnabled) {
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.DEVICE_ROTATED,
                             event.timestamp,
                             rotationToLogEnum(reportedRotation));
                 }
+            }
+
+            if (isRotationResolverEnabled() && canUseRotationResolver()) {
+                if (mRotationResolverService == null) {
+                    mRotationResolverService = LocalServices.getService(
+                            RotationResolverInternal.class);
+                }
+
+                final CancellationSignal cancellationSignal = new CancellationSignal();
+                mRotationResolverService.resolveRotation(
+                        new RotationResolverInternal.RotationResolverCallbackInternal() {
+                            @Override
+                            public void onSuccess(int result) {
+                                finalizeRotation(result);
+                            }
+
+                            @Override
+                            public void onFailure(int error) {
+                                finalizeRotation(reportedRotation);
+                            }
+                        },
+                        reportedRotation,
+                        mCurrentRotation,
+                        mRotationResolverTimeoutMillis,
+                        cancellationSignal);
+                getHandler().postDelayed(cancellationSignal::cancel,
+                        mRotationResolverTimeoutMillis);
+            } else {
+                finalizeRotation(reportedRotation);
             }
         }
 
@@ -1129,6 +1222,17 @@ public abstract class WindowOrientationListener {
                 scheduleRotationEvaluationIfNecessaryLocked(now);
             }
             return -1;
+        }
+
+        private void finalizeRotation(int reportedRotation) {
+            int newRotation;
+            synchronized (mLock) {
+                mDesiredRotation = reportedRotation;
+                newRotation = evaluateRotationChangeLocked();
+            }
+            if (newRotation >= 0) {
+                onProposedRotationChanged(newRotation);
+            }
         }
 
         private boolean isDesiredRotationAcceptableLocked(long now) {

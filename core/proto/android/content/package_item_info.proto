@@ -114,4 +114,5 @@ message ApplicationInfoProto {
         optional bool native_heap_zero_init = 21;
     }
     optional Detail detail = 17;
+    repeated string overlay_paths = 18;
 }

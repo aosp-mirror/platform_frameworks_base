@@ -164,6 +164,9 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
 
         List<KeyParameter> parameters = new ArrayList<>();
         parameters.add(KeyStore2ParameterUtils.makeEnum(
+                KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_SIGN
+        ));
+        parameters.add(KeyStore2ParameterUtils.makeEnum(
                 KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_HMAC
         ));
         parameters.add(KeyStore2ParameterUtils.makeEnum(

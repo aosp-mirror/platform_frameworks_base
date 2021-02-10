@@ -56,8 +56,10 @@ public class KeyguardStatusView extends GridLayout {
     private final IActivityManager mIActivityManager;
 
     private TextView mLogoutView;
+    private boolean mCanShowLogout = true; // by default, try to show the logout button here
     private KeyguardClockSwitch mClockView;
     private TextView mOwnerInfo;
+    private boolean mCanShowOwnerInfo = true; // by default, try to show the owner information here
     private KeyguardSliceView mKeyguardSlice;
     private View mNotificationIcons;
     private Runnable mPendingMarqueeStart;
@@ -114,6 +116,25 @@ public class KeyguardStatusView extends GridLayout {
         if (mOwnerInfo != null) mOwnerInfo.setSelected(enabled);
     }
 
+    void setCanShowOwnerInfo(boolean canShowOwnerInfo) {
+        mCanShowOwnerInfo = canShowOwnerInfo;
+        mOwnerInfo = findViewById(R.id.owner_info);
+        if (mOwnerInfo != null) {
+            if (mCanShowOwnerInfo) {
+                mOwnerInfo.setVisibility(VISIBLE);
+                updateOwnerInfo();
+            } else {
+                mOwnerInfo.setVisibility(GONE);
+                mOwnerInfo = null;
+            }
+        }
+    }
+
+    void setCanShowLogout(boolean canShowLogout) {
+        mCanShowLogout = canShowLogout;
+        updateLogoutView();
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -128,7 +149,10 @@ public class KeyguardStatusView extends GridLayout {
         if (KeyguardClockAccessibilityDelegate.isNeeded(mContext)) {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         }
-        mOwnerInfo = findViewById(R.id.owner_info);
+        if (mCanShowOwnerInfo) {
+            mOwnerInfo = findViewById(R.id.owner_info);
+        }
+
         mKeyguardSlice = findViewById(R.id.keyguard_status_area);
         mTextColor = mClockView.getCurrentTextColor();
 
@@ -189,7 +213,7 @@ public class KeyguardStatusView extends GridLayout {
         if (mLogoutView == null) {
             return;
         }
-        mLogoutView.setVisibility(shouldShowLogout() ? VISIBLE : GONE);
+        mLogoutView.setVisibility(mCanShowLogout && shouldShowLogout() ? VISIBLE : GONE);
         // Logout button will stay in language of user 0 if we don't set that manually.
         mLogoutView.setText(mContext.getResources().getString(
                 com.android.internal.R.string.global_action_logout));

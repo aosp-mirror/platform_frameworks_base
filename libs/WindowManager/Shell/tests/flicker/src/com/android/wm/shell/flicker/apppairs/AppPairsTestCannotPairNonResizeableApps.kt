@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.apppairs
 
 import android.os.Bundle
-import android.platform.test.annotations.Presubmit
 import android.os.SystemClock
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -40,7 +39,6 @@ import org.junit.runners.Parameterized
  * Test cold launch app from launcher.
  * To run this test: `atest WMShellFlickerTests:AppPairsTestCannotPairNonResizeableApps`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -51,10 +49,9 @@ class AppPairsTestCannotPairNonResizeableApps(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
-            val testTag = "testAppPairs_cannotPairNonResizeableApps"
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
-                    buildTestTag(testTag, configuration)
+                    buildTestTag(configuration)
                 }
                 transitions {
                     nonResizeableApp?.launchViaIntent(wmHelper)
@@ -64,17 +61,20 @@ class AppPairsTestCannotPairNonResizeableApps(
                     SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
                 }
                 assertions {
-                    layersTrace {
-                        appPairsDividerIsInvisible()
-                    }
-                    windowManagerTrace {
-                        end("onlyResizeableAppWindowVisible") {
+                    presubmit {
+                        layersTrace {
+                            appPairsDividerIsInvisible()
+                        }
+                        windowManagerTrace {
                             val nonResizeableApp = nonResizeableApp
                             require(nonResizeableApp != null) {
                                 "Non resizeable app not initialized"
                             }
-                            isVisible(nonResizeableApp.defaultWindowName)
-                            isInvisible(primaryApp.defaultWindowName)
+
+                            end("onlyResizeableAppWindowVisible") {
+                                isVisible(nonResizeableApp.defaultWindowName)
+                                isInvisible(primaryApp.defaultWindowName)
+                            }
                         }
                     }
                 }
