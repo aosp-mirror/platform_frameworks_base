@@ -123,23 +123,6 @@ public:
     void removeFrameMetricsObserver(FrameMetricsObserver* observer);
     void setForceDark(bool enable);
 
-    /**
-     * Sets a render-ahead depth on the backing renderer. This will increase latency by
-     * <swapInterval> * renderAhead and increase memory usage by (3 + renderAhead) * <resolution>.
-     * In return the renderer will be less susceptible to jitter, resulting in a smoother animation.
-     *
-     * Not recommended to use in response to anything touch driven, but for canned animations
-     * where latency is not a concern careful use may be beneficial.
-     *
-     * Note that when increasing this there will be a frame gap of N frames where N is
-     * renderAhead - <current renderAhead>. When decreasing this if there are any pending
-     * frames they will retain their prior renderAhead value, so it will take a few frames
-     * for the decrease to flush through.
-     *
-     * @param renderAhead How far to render ahead, must be in the range [0..2]
-     */
-    void setRenderAheadDepth(int renderAhead);
-
     static int copySurfaceInto(ANativeWindow* window, int left, int top, int right,
                                            int bottom, SkBitmap* bitmap);
     static void prepareToDraw(Bitmap& bitmap);

@@ -38,7 +38,6 @@ public:
         int count = 0;
         int reportFrametimeWeight = 0;
         bool renderOffscreen = true;
-        int renderAhead = 0;
     };
 
     template <class T>

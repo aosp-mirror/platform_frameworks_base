@@ -1755,7 +1755,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         // End power mode launch before going sleep
-        mRootWindowContainer.endPowerModeLaunchIfNeeded();
+        mService.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_ALL);
 
         removeSleepTimeouts();
 

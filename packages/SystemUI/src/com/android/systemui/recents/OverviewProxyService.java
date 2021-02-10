@@ -101,7 +101,7 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.transition.RemoteTransitions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -149,7 +149,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final ScreenshotHelper mScreenshotHelper;
     private final Optional<OneHanded> mOneHandedOptional;
     private final CommandQueue mCommandQueue;
-    private final Transitions mShellTransitions;
+    private final RemoteTransitions mShellTransitions;
 
     private Region mActiveNavBarRegion;
 
@@ -620,6 +620,19 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
+        public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
+            if (!verifyCaller("exitSplitScreenOnHide")) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mSplitScreenOptional.ifPresent(s -> s.exitSplitScreenOnHide(exitSplitScreenOnHide));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void startTask(int taskId, int stage, int position, Bundle options) {
             if (!verifyCaller("startTask")) {
                 return;
@@ -799,7 +812,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<Lazy<StatusBar>> statusBarOptionalLazy,
             Optional<OneHanded> oneHandedOptional,
             BroadcastDispatcher broadcastDispatcher,
-            Transitions shellTransitions) {
+            RemoteTransitions shellTransitions) {
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;

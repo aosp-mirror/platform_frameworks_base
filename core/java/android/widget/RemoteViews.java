@@ -47,6 +47,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Outline;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -79,6 +80,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewManager;
+import android.view.ViewOutlineProvider;
 import android.view.ViewParent;
 import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
@@ -194,6 +196,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int COMPLEX_UNIT_DIMENSION_REFLECTION_ACTION_TAG = 25;
     private static final int SET_COMPOUND_BUTTON_CHECKED_TAG = 26;
     private static final int SET_RADIO_GROUP_CHECKED = 27;
+    private static final int SET_VIEW_OUTLINE_RADIUS_TAG = 28;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -2642,6 +2645,88 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private static class SetViewOutlinePreferredRadiusAction extends Action {
+
+        private final boolean mIsDimen;
+        private final int mValue;
+
+        SetViewOutlinePreferredRadiusAction(@IdRes int viewId, @DimenRes int dimenResId) {
+            this.viewId = viewId;
+            this.mIsDimen = true;
+            this.mValue = dimenResId;
+        }
+
+        SetViewOutlinePreferredRadiusAction(
+                @IdRes int viewId, float radius, @ComplexDimensionUnit int units) {
+            this.viewId = viewId;
+            this.mIsDimen = false;
+            this.mValue = TypedValue.createComplexDimension(radius, units);
+
+        }
+
+        SetViewOutlinePreferredRadiusAction(Parcel in) {
+            viewId = in.readInt();
+            mIsDimen = in.readBoolean();
+            mValue = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(viewId);
+            dest.writeBoolean(mIsDimen);
+            dest.writeInt(mValue);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
+                throws ActionException {
+            final View target = root.findViewById(viewId);
+            if (target == null) return;
+
+            float radius;
+            if (mIsDimen) {
+                radius = mValue == 0 ? 0 : target.getResources().getDimension(mValue);
+            } else {
+                radius = TypedValue.complexToDimensionPixelSize(mValue,
+                        target.getResources().getDisplayMetrics());
+            }
+            target.setOutlineProvider(new RemoteViewOutlineProvider(radius));
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_VIEW_OUTLINE_RADIUS_TAG;
+        }
+    }
+
+    /**
+     * OutlineProvider for a view with a radius set by
+     * {@link #setViewOutlinePreferredRadius(int, float, int)}.
+     */
+    public static final class RemoteViewOutlineProvider extends ViewOutlineProvider {
+
+        private final float mRadius;
+
+        public RemoteViewOutlineProvider(float radius) {
+            mRadius = radius;
+        }
+
+        /** Returns the corner radius used when providing the view outline. */
+        public float getRadius() {
+            return mRadius;
+        }
+
+        @Override
+        public void getOutline(@NonNull View view, @NonNull Outline outline) {
+            outline.setRoundRect(
+                    0 /*left*/,
+                    0 /* top */,
+                    view.getWidth() /* right */,
+                    view.getHeight() /* bottom */,
+                    mRadius);
+        }
+    }
+
     /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
@@ -2860,6 +2945,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetCompoundButtonCheckedAction(parcel);
             case SET_RADIO_GROUP_CHECKED:
                 return new SetRadioGroupCheckedAction(parcel);
+            case SET_VIEW_OUTLINE_RADIUS_TAG:
+                return new SetViewOutlinePreferredRadiusAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -3592,6 +3679,28 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setViewLayoutHeightDimen(@IdRes int viewId, @DimenRes int heightDimen) {
         addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, heightDimen));
+    }
+
+    /**
+     * Sets an OutlineProvider on the view whose corner radius is a dimension calculated using
+     * {@link TypedValue#applyDimension(int, float, DisplayMetrics)}. This outline may change shape
+     * during system transitions.
+     *
+     * <p>NOTE: It is recommended to use {@link TypedValue#COMPLEX_UNIT_PX} only for 0.
+     * Setting margins in pixels will behave poorly when the RemoteViews object is used on a
+     * display with a different density.
+     */
+    public void setViewOutlinePreferredRadius(
+            @IdRes int viewId, float radius, @ComplexDimensionUnit int units) {
+        addAction(new SetViewOutlinePreferredRadiusAction(viewId, radius, units));
+    }
+
+    /**
+     * Sets an OutlineProvider on the view whose corner radius is a dimension resource with
+     * {@code resId}. This outline may change shape during system transitions.
+     */
+    public void setViewOutlinePreferredRadiusDimen(@IdRes int viewId, @DimenRes int resId) {
+        addAction(new SetViewOutlinePreferredRadiusAction(viewId, resId));
     }
 
     /**

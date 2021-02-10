@@ -643,8 +643,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                 final Sensor sensor = mSensors.valueAt(i);
                 final int sensorId = mSensors.keyAt(i);
                 PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
-                sensor.getScheduler().recordCrashState();
-                sensor.getScheduler().reset();
+                sensor.onBinderDied();
             }
         });
     }

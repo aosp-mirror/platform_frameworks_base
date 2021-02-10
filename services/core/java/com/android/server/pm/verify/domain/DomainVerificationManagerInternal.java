@@ -174,20 +174,16 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      * Set aside a legacy user selection that will be restored to a pending
      * {@link DomainVerificationPkgState} once it's added through
      * {@link #addPackage(PackageSetting)}.
+     *
+     * @return true if state changed successfully
      */
-    void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state);
+    boolean setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state);
 
     /**
      * Until the legacy APIs are entirely removed, returns the legacy state from the previously
      * written info stored in {@link com.android.server.pm.Settings}.
      */
     int getLegacyState(@NonNull String packageName, @UserIdInt int userId);
-
-    /**
-     * Serialize a legacy setting that wasn't attached yet.
-     * TODO: Does this even matter? Should consider for removal.
-     */
-    void writeLegacySettings(TypedXmlSerializer serializer, String name);
 
     /**
      * Print the verification state and user selection state of a package.
@@ -235,7 +231,8 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
             throws IllegalArgumentException, NameNotFoundException;
 
 
-    interface Connection extends Function<String, PackageSetting> {
+    interface Connection extends DomainVerificationEnforcer.Callback,
+            Function<String, PackageSetting> {
 
         /**
          * Notify that a settings change has been made and that eventually

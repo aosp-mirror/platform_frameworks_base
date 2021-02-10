@@ -79,7 +79,6 @@ bool Properties::debuggingEnabled = false;
 bool Properties::isolatedProcess = false;
 
 int Properties::contextPriority = 0;
-int Properties::defaultRenderAhead = -1;
 float Properties::defaultSdrWhitePoint = 200.f;
 
 bool Properties::load() {
@@ -128,10 +127,6 @@ bool Properties::load() {
             base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_QEMU_KERNEL, false);
-
-    defaultRenderAhead = std::max(
-            -1,
-            std::min(2, base::GetIntProperty(PROPERTY_RENDERAHEAD, render_ahead().value_or(-1))));
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

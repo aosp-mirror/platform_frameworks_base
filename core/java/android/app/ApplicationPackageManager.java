@@ -1728,7 +1728,7 @@ public class ApplicationPackageManager extends PackageManager {
         final Resources r = mContext.mMainThread.getTopLevelResources(
                 sameUid ? app.sourceDir : app.publicSourceDir,
                 sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
-                app.resourceDirs, app.sharedLibraryFiles,
+                app.resourceDirs, app.overlayPaths, app.sharedLibraryFiles,
                 mContext.mPackageInfo, configuration);
         if (r != null) {
             return r;

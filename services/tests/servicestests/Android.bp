@@ -61,7 +61,7 @@ android_test {
     libs: [
         "android.hardware.power-V1-java",
         "android.hardware.tv.cec-V1.0-java",
-        "android.hardware.vibrator-V1-java",
+        "android.hardware.vibrator-V2-java",
         "android.hidl.manager-V1.0-java",
         "android.test.mock",
         "android.test.base",

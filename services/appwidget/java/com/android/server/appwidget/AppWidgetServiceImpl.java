@@ -2647,6 +2647,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.icon = activityInfo.getIconResource();
             info.previewImage = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
+            info.previewLayout = sa.getResourceId(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_previewLayout, 0);
             info.autoAdvanceViewId = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId, -1);
             info.resizeMode = sa.getInt(

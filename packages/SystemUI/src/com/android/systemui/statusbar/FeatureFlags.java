@@ -67,6 +67,10 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_brightness_slider);
     }
 
+    public boolean useNewLockscreenAnimations() {
+        return mFlagReader.isEnabled(R.bool.flag_lockscreen_animations);
+    }
+
     public boolean isPeopleTileEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_conversations);
     }

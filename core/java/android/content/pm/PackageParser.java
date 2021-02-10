@@ -54,6 +54,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.split.SplitAssetLoader;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
@@ -7969,7 +7970,11 @@ public class PackageParser {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.getAllOverlayPaths();
+        final OverlayPaths overlayPaths = state.getAllOverlayPaths();
+        if (overlayPaths != null) {
+            ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
+            ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
+        }
         ai.icon = (sUseRoundIcon && ai.roundIconRes != 0) ? ai.roundIconRes : ai.iconRes;
     }
 
@@ -8600,6 +8605,7 @@ public class PackageParser {
                 null,
                 null,
                 androidAppInfo.resourceDirs,
+                androidAppInfo.overlayPaths,
                 androidAppInfo.sharedLibraryFiles,
                 null,
                 null,

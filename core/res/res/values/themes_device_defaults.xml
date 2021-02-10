@@ -222,6 +222,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
     </style>
 
     <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />
@@ -236,6 +238,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -267,6 +271,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -300,6 +306,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -332,6 +340,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -381,6 +391,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -405,6 +417,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -435,6 +449,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -466,6 +482,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -513,6 +531,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -545,6 +565,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -575,6 +597,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -607,6 +631,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -638,6 +664,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -669,6 +697,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -700,6 +730,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -731,6 +763,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -766,6 +800,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Text styles -->
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
@@ -798,6 +834,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -827,6 +865,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1012,6 +1052,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
         <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
         <item name="panelColorBackground">?attr/colorBackgroundFloating</item>
     </style>
@@ -1027,6 +1069,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1057,6 +1101,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1088,6 +1134,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1121,6 +1169,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1153,6 +1203,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1204,6 +1256,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
@@ -1227,6 +1281,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1260,6 +1316,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1294,6 +1352,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1329,6 +1389,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog.NoActionBar that has a fixed size. -->
@@ -1346,6 +1408,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
     </style>
 
     <!-- DeviceDefault light theme for a window that will be displayed either full-screen on smaller
@@ -1362,6 +1426,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1397,6 +1463,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1430,6 +1498,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1462,6 +1532,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1493,6 +1565,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1524,6 +1598,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1553,6 +1629,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1672,6 +1750,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1702,6 +1782,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
@@ -1742,6 +1824,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
@@ -1775,6 +1859,8 @@ easier.
         <item name="textColorPrimary">@color/text_color_primary_device_default_light</item>
         <item name="textColorSecondary">@color/text_color_secondary_device_default_light</item>
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_light</item>
+        <item name="colorForeground">@color/foreground_device_default_light</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_dark</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>

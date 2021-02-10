@@ -63,6 +63,22 @@ public final class FaceDataFrame implements Parcelable {
     }
 
     /**
+     * A container for data common to {@link FaceAuthenticationFrame} and {@link FaceEnrollFrame}.
+     *
+     * @param acquiredInfo An integer corresponding to a known acquired message.
+     * @param vendorCode An integer representing a custom vendor-specific message. Ignored unless
+     *  {@code acquiredInfo} is {@code FACE_ACQUIRED_VENDOR}.
+     */
+    public FaceDataFrame(int acquiredInfo, int vendorCode) {
+        mAcquiredInfo = acquiredInfo;
+        mVendorCode = vendorCode;
+        mPan = 0f;
+        mTilt = 0f;
+        mDistance = 0f;
+        mIsCancellable = false;
+    }
+
+    /**
      * @return An integer corresponding to a known acquired message.
      *
      * @see android.hardware.biometrics.BiometricFaceConstants

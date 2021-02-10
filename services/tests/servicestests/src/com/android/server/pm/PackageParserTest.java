@@ -814,6 +814,7 @@ public class PackageParserTest {
         assertArrayEquals(a.splitSourceDirs, that.splitSourceDirs);
         assertArrayEquals(a.splitPublicSourceDirs, that.splitPublicSourceDirs);
         assertArrayEquals(a.resourceDirs, that.resourceDirs);
+        assertArrayEquals(a.overlayPaths, that.overlayPaths);
         assertEquals(a.seInfo, that.seInfo);
         assertArrayEquals(a.sharedLibraryFiles, that.sharedLibraryFiles);
         assertEquals(a.dataDir, that.dataDir);

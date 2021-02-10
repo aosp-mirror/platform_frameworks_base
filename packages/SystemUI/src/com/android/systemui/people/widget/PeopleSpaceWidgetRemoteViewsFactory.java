@@ -28,9 +28,11 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.people.PeopleSpaceTileView;
 import com.android.systemui.people.PeopleSpaceUtils;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
 
     private IPeopleManager mPeopleManager;
     private INotificationManager mNotificationManager;
+    private NotificationEntryManager mNotificationEntryManager;
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
     private List<PeopleSpaceTile> mTiles = new ArrayList<>();
@@ -56,6 +59,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
         if (DEBUG) Log.d(TAG, "onCreate called");
         mNotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mPackageManager = mContext.getPackageManager();
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
@@ -70,7 +74,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     private void setTileViewsWithPriorityConversations() {
         try {
             mTiles = PeopleSpaceUtils.getTiles(mContext, mNotificationManager,
-                    mPeopleManager, mLauncherApps);
+                    mPeopleManager, mLauncherApps, mNotificationEntryManager);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
         }

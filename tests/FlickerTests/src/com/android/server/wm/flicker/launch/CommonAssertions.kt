@@ -17,14 +17,10 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.WmAssertionBuilderLegacy
+import com.android.server.wm.flicker.dsl.WmAssertionBuilder
 
-fun WmAssertionBuilderLegacy.appWindowReplacesLauncherAsTopWindow(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appWindowReplacesLauncherAsTopWindow", bugId, enabled) {
+fun WmAssertionBuilder.appWindowReplacesLauncherAsTopWindow(testApp: IAppHelper, bugId: Int = 0) {
+    all("appWindowReplacesLauncherAsTopWindow", bugId) {
         this.showsAppWindowOnTop("Launcher")
                 .then()
                 .showsAppWindowOnTop("Snapshot", testApp.getPackage())

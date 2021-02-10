@@ -377,12 +377,10 @@ public class StartingSurfaceDrawer {
         final int taskId = startingWindowInfo.taskInfo.taskId;
         final TaskSnapshotWindow surface = TaskSnapshotWindow.create(startingWindowInfo, appToken,
                 snapshot, mMainExecutor, () -> removeWindowSynced(taskId) /* clearWindow */);
-        mMainExecutor.execute(() -> {
-            mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
-            final StartingWindowRecord tView =
-                    new StartingWindowRecord(null/* decorView */, surface);
-            mStartingWindowRecords.put(taskId, tView);
-        });
+        mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
+        final StartingWindowRecord tView =
+                new StartingWindowRecord(null/* decorView */, surface);
+        mStartingWindowRecords.put(taskId, tView);
     }
 
     /**
@@ -392,42 +390,40 @@ public class StartingSurfaceDrawer {
         if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
             Slog.d(TAG, "Task start finish, remove starting surface for task " + taskId);
         }
-        mMainExecutor.execute(() -> removeWindowSynced(taskId));
+        removeWindowSynced(taskId);
     }
 
     protected void postAddWindow(int taskId, IBinder appToken,
-            View view, WindowManager wm, WindowManager.LayoutParams params) {
-        mMainExecutor.execute(() -> {
-            boolean shouldSaveView = true;
-            try {
-                wm.addView(view, params);
-            } catch (WindowManager.BadTokenException e) {
-                // ignore
-                Slog.w(TAG, appToken + " already running, starting window not displayed. "
-                        + e.getMessage());
+        View view, WindowManager wm, WindowManager.LayoutParams params) {
+        boolean shouldSaveView = true;
+        try {
+            wm.addView(view, params);
+        } catch (WindowManager.BadTokenException e) {
+            // ignore
+            Slog.w(TAG, appToken + " already running, starting window not displayed. "
+                    + e.getMessage());
+            shouldSaveView = false;
+        } catch (RuntimeException e) {
+            // don't crash if something else bad happens, for example a
+            // failure loading resources because we are loading from an app
+            // on external storage that has been unmounted.
+            Slog.w(TAG, appToken + " failed creating starting window", e);
+            shouldSaveView = false;
+        } finally {
+            if (view != null && view.getParent() == null) {
+                Slog.w(TAG, "view not successfully added to wm, removing view");
+                wm.removeViewImmediate(view);
                 shouldSaveView = false;
-            } catch (RuntimeException e) {
-                // don't crash if something else bad happens, for example a
-                // failure loading resources because we are loading from an app
-                // on external storage that has been unmounted.
-                Slog.w(TAG, appToken + " failed creating starting window", e);
-                shouldSaveView = false;
-            } finally {
-                if (view != null && view.getParent() == null) {
-                    Slog.w(TAG, "view not successfully added to wm, removing view");
-                    wm.removeViewImmediate(view);
-                    shouldSaveView = false;
-                }
             }
+        }
 
-            if (shouldSaveView) {
-                removeWindowSynced(taskId);
-                mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
-                final StartingWindowRecord tView =
-                        new StartingWindowRecord(view, null /* TaskSnapshotWindow */);
-                mStartingWindowRecords.put(taskId, tView);
-            }
-        });
+        if (shouldSaveView) {
+            removeWindowSynced(taskId);
+            mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
+            final StartingWindowRecord tView =
+                    new StartingWindowRecord(view, null /* TaskSnapshotWindow */);
+            mStartingWindowRecords.put(taskId, tView);
+        }
     }
 
     protected void removeWindowSynced(int taskId) {
@@ -445,7 +441,7 @@ public class StartingSurfaceDrawer {
                 if (DEBUG_TASK_SNAPSHOT) {
                     Slog.v(TAG, "Removing task snapshot window for " + taskId);
                 }
-                record.mTaskSnapshotWindow.remove(mMainExecutor);
+                record.mTaskSnapshotWindow.remove();
             }
             mStartingWindowRecords.remove(taskId);
         }

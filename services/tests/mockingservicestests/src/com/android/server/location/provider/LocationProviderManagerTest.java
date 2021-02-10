@@ -83,6 +83,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.location.eventlog.LocationEventLog;
 import com.android.server.location.injector.FakeUserInfoHelper;
 import com.android.server.location.injector.TestInjector;
 
@@ -159,17 +160,19 @@ public class LocationProviderManagerTest {
         doReturn(mPowerManager).when(mContext).getSystemService(PowerManager.class);
         doReturn(mWakeLock).when(mPowerManager).newWakeLock(anyInt(), anyString());
 
-        mInjector = new TestInjector();
+        LocationEventLog eventLog = new LocationEventLog();
+
+        mInjector = new TestInjector(eventLog);
         mInjector.getUserInfoHelper().startUser(OTHER_USER);
 
-        mPassive = new PassiveLocationProviderManager(mContext, mInjector);
+        mPassive = new PassiveLocationProviderManager(mContext, mInjector, eventLog);
         mPassive.startManager();
         mPassive.setRealProvider(new PassiveLocationProvider(mContext));
 
         mProvider = new TestProvider(PROPERTIES, IDENTITY);
         mProvider.setProviderAllowed(true);
 
-        mManager = new LocationProviderManager(mContext, mInjector, NAME, mPassive);
+        mManager = new LocationProviderManager(mContext, mInjector, eventLog, NAME, mPassive);
         mManager.startManager();
         mManager.setRealProvider(mProvider);
     }

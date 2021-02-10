@@ -41,6 +41,7 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
@@ -412,7 +413,11 @@ public class PackageInfoWithoutStateUtils {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.getAllOverlayPaths();
+        final OverlayPaths overlayPaths = state.getAllOverlayPaths();
+        if (overlayPaths != null) {
+            ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
+            ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
+        }
 
         return ai;
     }

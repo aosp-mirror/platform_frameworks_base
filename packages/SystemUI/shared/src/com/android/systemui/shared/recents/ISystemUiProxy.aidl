@@ -245,9 +245,11 @@ interface ISystemUiProxy {
     void setSideStageVisibility(in boolean visible) = 36;
     /** Removes the split-screen stages. */
     void exitSplitScreen() = 37;
-    void startTask(in int taskId, in int stage, in int position, in Bundle options) = 38;
+    /** @param exitSplitScreenOnHide if to exit split-screen if both stages are not visible. */
+    void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) = 38;
+    void startTask(in int taskId, in int stage, in int position, in Bundle options) = 39;
     void startShortcut(in String packageName, in String shortcutId, in int stage, in int position,
-            in Bundle options, in UserHandle user) = 39;
+            in Bundle options, in UserHandle user) = 40;
     void startIntent(
-            in PendingIntent intent, in int stage, in int position, in Bundle options) = 40;
+            in PendingIntent intent, in int stage, in int position, in Bundle options) = 41;
 }
