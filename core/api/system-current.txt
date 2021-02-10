@@ -12978,6 +12978,16 @@ package android.telephony.ims {
     field public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED = "Forbidden. Not Authorized for Service";
   }
 
+  public final class ImsRegistrationAttributes implements android.os.Parcelable {
+    method public int getRegistrationTechnology();
+  }
+
+  public static final class ImsRegistrationAttributes.Builder {
+    ctor public ImsRegistrationAttributes.Builder(int);
+    method @NonNull public android.telephony.ims.ImsRegistrationAttributes build();
+    method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFeatureTags(@NonNull java.util.Set<java.lang.String>);
+  }
+
   public class ImsService extends android.app.Service {
     ctor public ImsService();
     method public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
@@ -13761,7 +13771,9 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase();
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onRegistered(int);
+    method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onRegistering(int);
+    method public final void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onSubscriberAssociatedUriChanged(android.net.Uri[]);
     method public final void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
