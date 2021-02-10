@@ -27036,6 +27036,28 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public boolean registerInstalledLoadingProgressCallback(String packageName,
+                PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
+            final PackageSetting ps = getPackageSettingForUser(packageName, Binder.getCallingUid(),
+                    userId);
+            if (ps == null) {
+                return false;
+            }
+            if (!ps.isPackageLoading()) {
+                Slog.w(TAG,
+                        "Failed registering loading progress callback. Package is fully loaded.");
+                return false;
+            }
+            if (mIncrementalManager == null) {
+                Slog.w(TAG,
+                        "Failed registering loading progress callback. Incremental is not enabled");
+                return false;
+            }
+            return mIncrementalManager.registerLoadingProgressCallback(ps.getPathString(),
+                    (IPackageLoadingProgressCallback) callback.getBinder());
+        }
+
+        @Override
         public IncrementalStatesInfo getIncrementalStatesInfo(
                 @NonNull String packageName, int filterCallingUid, int userId) {
             final PackageSetting ps = getPackageSettingForUser(packageName, filterCallingUid,
