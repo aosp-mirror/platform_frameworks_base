@@ -19,8 +19,6 @@ package com.android.server.om;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Process;
 import android.text.TextUtils;
@@ -29,6 +27,7 @@ import android.util.Pair;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.util.List;
@@ -114,12 +113,13 @@ public class OverlayActorEnforcer {
         }
 
         final String targetPackageName = overlayInfo.targetPackageName;
-        final PackageInfo targetPkgInfo = mPackageManager.getPackageInfo(targetPackageName, userId);
+        final AndroidPackage targetPkgInfo = mPackageManager.getPackageForUser(targetPackageName,
+                userId);
         if (targetPkgInfo == null) {
             return ActorState.TARGET_NOT_FOUND;
         }
 
-        if ((targetPkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+        if (targetPkgInfo.isDebuggable()) {
             return ActorState.ALLOWED;
         }
 
@@ -189,23 +189,18 @@ public class OverlayActorEnforcer {
             return actorUriState;
         }
 
-        String packageName = actorUriPair.first;
-        PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName, userId);
-        if (packageInfo == null) {
-            return ActorState.MISSING_APP_INFO;
-        }
-
-        ApplicationInfo appInfo = packageInfo.applicationInfo;
-        if (appInfo == null) {
-            return ActorState.MISSING_APP_INFO;
+        String actorPackageName = actorUriPair.first;
+        AndroidPackage actorPackage = mPackageManager.getPackageForUser(actorPackageName, userId);
+        if (actorPackage == null) {
+            return ActorState.ACTOR_NOT_FOUND;
         }
 
         // Currently only pre-installed apps can be actors
-        if (!appInfo.isSystemApp()) {
+        if (!actorPackage.isSystem()) {
             return ActorState.ACTOR_NOT_PREINSTALLED;
         }
 
-        if (ArrayUtils.contains(callingPackageNames, packageName)) {
+        if (ArrayUtils.contains(callingPackageNames, actorPackageName)) {
             return ActorState.ALLOWED;
         }
 
@@ -231,7 +226,7 @@ public class OverlayActorEnforcer {
         NO_NAMED_ACTORS,
         MISSING_NAMESPACE,
         MISSING_ACTOR_NAME,
-        MISSING_APP_INFO,
+        ACTOR_NOT_FOUND,
         ACTOR_NOT_PREINSTALLED,
         INVALID_ACTOR,
         ALLOWED

@@ -25,7 +25,9 @@
 
 using android::idmap2::Error;
 using android::idmap2::IdmapHeader;
+using android::idmap2::OverlayResourceContainer;
 using android::idmap2::Result;
+using android::idmap2::TargetResourceContainer;
 using android::idmap2::Unit;
 
 Result<Unit> Verify(const std::string& idmap_path, const std::string& target_path,
@@ -39,11 +41,20 @@ Result<Unit> Verify(const std::string& idmap_path, const std::string& target_pat
     return Error("failed to parse idmap header");
   }
 
-  const auto header_ok = header->IsUpToDate(target_path, overlay_path, overlay_name,
-                                            fulfilled_policies, enforce_overlayable);
+  auto target = TargetResourceContainer::FromPath(target_path);
+  if (!target) {
+    return Error("failed to load target '%s'", target_path.c_str());
+  }
+
+  auto overlay = OverlayResourceContainer::FromPath(overlay_path);
+  if (!overlay) {
+    return Error("failed to load overlay '%s'", overlay_path.c_str());
+  }
+
+  const auto header_ok = header->IsUpToDate(**target, **overlay, overlay_name, fulfilled_policies,
+                                            enforce_overlayable);
   if (!header_ok) {
     return Error(header_ok.GetError(), "idmap not up to date");
   }
-
   return Unit{};
 }
