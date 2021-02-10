@@ -11255,16 +11255,21 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
-     * and {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     * Additionally, depending on the level of location permissions the caller holds (i.e. no
+     * location permissions, {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}, or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION}), location-sensitive fields will
+     * be cleared from the return value.
+     *
+     * <p>Note also that if the caller holds any sort of location permission, a usage event for the
+     * {@link android.app.AppOpsManager#OPSTR_FINE_LOCATION} or
+     * {@link android.app.AppOpsManager#OPSTR_FINE_LOCATION}
+     * will be logged against the caller when calling this method.
      *
      * May return {@code null} when the subscription is inactive or when there was an error
      * communicating with the phone process.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(allOf = {
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-    })
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public @Nullable ServiceState getServiceState() {
         return getServiceStateForSubscriber(getSubId());
     }
