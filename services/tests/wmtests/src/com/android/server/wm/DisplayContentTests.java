@@ -1489,7 +1489,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testClearIntermediateFixedRotation() throws RemoteException {
+    public void testClearIntermediateFixedRotationAdjustments() throws RemoteException {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         mDisplayContent.setFixedRotationLaunchingApp(activity,
                 (mDisplayContent.getRotation() + 1) % 4);
@@ -1508,7 +1508,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 ArgumentCaptor.forClass(FixedRotationAdjustmentsItem.class);
         verify(mAtm.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
                 eq(activity.app.getThread()), adjustmentsCaptor.capture());
-        assertFalse(activity.hasFixedRotationTransform());
+        // The transformation is kept for animation in real case.
+        assertTrue(activity.hasFixedRotationTransform());
         final FixedRotationAdjustmentsItem clearAdjustments = FixedRotationAdjustmentsItem.obtain(
                 activity.token, null /* fixedRotationAdjustments */);
         // The captor may match other items. The first one must be the item to clear adjustments.
