@@ -30,8 +30,7 @@ import java.lang.Math.max
  * Provide text style linear interpolation for plain text.
  */
 class TextInterpolator(
-    layout: Layout,
-    lines: Int = 1
+    layout: Layout
 ) {
 
     /**
@@ -40,11 +39,9 @@ class TextInterpolator(
      * Once you modified the style parameters, you have to call reshapeText to recalculate base text
      * layout.
      *
-     * @return an array list of paint objects representing one paint per line of text. If this
-     * list has a smaller size than the number of lines, all extra lines will use the Paint an
-     * index 0.
+     * @return a paint object
      */
-    val basePaint = createDefaultPaint(layout.paint, lines)
+    val basePaint = TextPaint(layout.paint)
 
     /**
      * Returns target paint used for interpolation.
@@ -52,18 +49,9 @@ class TextInterpolator(
      * Once you modified the style parameters, you have to call reshapeText to recalculate target
      * text layout.
      *
-     * @return an array list of paint objects representing one paint per line of text. If this
-     * list has a smaller size than the number of lines, all extra lines will use the Paint an
-     * index 0.
+     * @return a paint object
      */
-    val targetPaint = createDefaultPaint(layout.paint, lines)
-
-    private fun createDefaultPaint(paint: TextPaint, lines: Int): ArrayList<TextPaint> {
-        val paintList = ArrayList<TextPaint>()
-        for (i in 0 until lines)
-            paintList.add(TextPaint(paint))
-        return paintList
-    }
+    val targetPaint = TextPaint(layout.paint)
 
     /**
      * A class represents a single font run.
@@ -102,7 +90,7 @@ class TextInterpolator(
     private val fontInterpolator = FontInterpolator()
 
     // Recycling object for glyph drawing. Will be extended for the longest font run if needed.
-    private val tmpDrawPaints = ArrayList<TextPaint>()
+    private val tmpDrawPaint = TextPaint()
     private var tmpPositionArray = FloatArray(20)
 
     /**
@@ -216,10 +204,10 @@ class TextInterpolator(
         if (progress == 0f) {
             return
         } else if (progress == 1f) {
-            updatePaint(basePaint, targetPaint)
+            basePaint.set(targetPaint)
         } else {
-            lerp(basePaint, targetPaint, progress, tmpDrawPaints)
-            updatePaint(basePaint, tmpDrawPaints)
+            lerp(basePaint, targetPaint, progress, tmpDrawPaint)
+            basePaint.set(tmpDrawPaint)
         }
 
         lines.forEach { line ->
@@ -237,21 +225,13 @@ class TextInterpolator(
         progress = 0f
     }
 
-    companion object {
-        fun updatePaint(toUpdate: ArrayList<TextPaint>, newValues: ArrayList<TextPaint>) {
-            toUpdate.clear()
-            for (paint in newValues)
-                toUpdate.add(TextPaint(paint))
-        }
-    }
-
     /**
      * Draws interpolated text at the given progress.
      *
      * @param canvas a canvas.
      */
     fun draw(canvas: Canvas) {
-        lerp(basePaint, targetPaint, progress, tmpDrawPaints)
+        lerp(basePaint, targetPaint, progress, tmpDrawPaint)
         lines.forEachIndexed { lineNo, line ->
             line.runs.forEach { run ->
                 canvas.save()
@@ -261,10 +241,7 @@ class TextInterpolator(
                     canvas.translate(origin, layout.getLineBaseline(lineNo).toFloat())
 
                     run.fontRuns.forEach { fontRun ->
-                        if (lineNo >= tmpDrawPaints.size)
-                            drawFontRun(canvas, run, fontRun, tmpDrawPaints[0])
-                        else
-                            drawFontRun(canvas, run, fontRun, tmpDrawPaints[lineNo])
+                        drawFontRun(canvas, run, fontRun, tmpDrawPaint)
                     }
                 } finally {
                     canvas.restore()
@@ -430,27 +407,19 @@ class TextInterpolator(
     }
 
     // Linear interpolate the paint.
-    private fun lerp(
-        from: ArrayList<TextPaint>,
-        to: ArrayList<TextPaint>,
-        progress: Float,
-        out: ArrayList<TextPaint>
-    ) {
-        out.clear()
+    private fun lerp(from: Paint, to: Paint, progress: Float, out: Paint) {
+        out.set(from)
+
         // Currently only font size & colors are interpolated.
         // TODO(172943390): Add other interpolation or support custom interpolator.
-        for (index in from.indices) {
-            val paint = TextPaint(from[index])
-            paint.textSize = MathUtils.lerp(from[index].textSize, to[index].textSize, progress)
-            paint.color = ColorUtils.blendARGB(from[index].color, to[index].color, progress)
-            out.add(paint)
-        }
+        out.textSize = MathUtils.lerp(from.textSize, to.textSize, progress)
+        out.color = ColorUtils.blendARGB(from.color, to.color, progress)
     }
 
     // Shape the text and stores the result to out argument.
     private fun shapeText(
         layout: Layout,
-        paints: ArrayList<TextPaint>
+        paint: TextPaint
     ): List<List<PositionedGlyphs>> {
         val out = mutableListOf<List<PositionedGlyphs>>()
         for (lineNo in 0 until layout.lineCount) { // Shape all lines.
@@ -458,7 +427,7 @@ class TextInterpolator(
             val count = layout.getLineEnd(lineNo) - lineStart
             val runs = mutableListOf<PositionedGlyphs>()
             TextShaper.shapeText(layout.text, lineStart, count, layout.textDirectionHeuristic,
-                    paints[lineNo]) { _, _, glyphs, _ ->
+                    paint) { _, _, glyphs, _ ->
                 runs.add(glyphs)
             }
             out.add(runs)

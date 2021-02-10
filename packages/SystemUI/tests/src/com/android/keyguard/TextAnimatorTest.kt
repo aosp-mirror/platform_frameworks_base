@@ -34,9 +34,9 @@ import org.mockito.Mockito.verify
 
 import kotlin.math.ceil
 
-private val PAINT = arrayListOf(TextPaint().apply {
+private val PAINT = TextPaint().apply {
     textSize = 32f
-})
+}
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -49,10 +49,10 @@ class TextAnimatorTest : SysuiTestCase() {
 
     @Test
     fun testAnimationStarted() {
-        val layout = makeLayout("Hello, World", PAINT[0])
+        val layout = makeLayout("Hello, World", PAINT)
         val valueAnimator = mock(ValueAnimator::class.java)
         val textInterpolator = mock(TextInterpolator::class.java)
-        val paint = arrayListOf(mock(TextPaint::class.java))
+        val paint = mock(TextPaint::class.java)
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
         val textAnimator = TextAnimator(layout, {}).apply {
@@ -81,10 +81,10 @@ class TextAnimatorTest : SysuiTestCase() {
 
     @Test
     fun testAnimationNotStarted() {
-        val layout = makeLayout("Hello, World", PAINT[0])
+        val layout = makeLayout("Hello, World", PAINT)
         val valueAnimator = mock(ValueAnimator::class.java)
         val textInterpolator = mock(TextInterpolator::class.java)
-        val paint = arrayListOf(mock(TextPaint::class.java))
+        val paint = mock(TextPaint::class.java)
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
         val textAnimator = TextAnimator(layout, {}).apply {
