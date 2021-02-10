@@ -33,9 +33,11 @@ import java.util.Objects;
  */
 class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Environment {
 
-    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
+    // TODO(b/179488561): Put this back to 5 minutes when primary provider is fully implemented
+    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(1);
+    // TODO(b/179488561): Put this back to 5 minutes when primary provider is fully implemented
     private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ =
-            Duration.ofMinutes(1);
+            Duration.ofSeconds(20);
     private static final Duration DEFAULT_PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
 
     @NonNull private final TimeZoneDetectorInternal mTimeZoneDetectorInternal;
