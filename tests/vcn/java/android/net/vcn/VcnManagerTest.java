@@ -65,7 +65,7 @@ public class VcnManagerTest {
                 ArgumentCaptor.forClass(IVcnUnderlyingNetworkPolicyListener.class);
         verify(mMockVcnManagementService).addVcnUnderlyingNetworkPolicyListener(captor.capture());
 
-        assertTrue(VcnManager.REGISTERED_POLICY_LISTENERS.containsKey(mMockPolicyListener));
+        assertTrue(VcnManager.getAllPolicyListeners().containsKey(mMockPolicyListener));
 
         IVcnUnderlyingNetworkPolicyListener listenerWrapper = captor.getValue();
         listenerWrapper.onPolicyChanged();
@@ -78,7 +78,7 @@ public class VcnManagerTest {
 
         mVcnManager.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
-        assertFalse(VcnManager.REGISTERED_POLICY_LISTENERS.containsKey(mMockPolicyListener));
+        assertFalse(VcnManager.getAllPolicyListeners().containsKey(mMockPolicyListener));
         verify(mMockVcnManagementService)
                 .addVcnUnderlyingNetworkPolicyListener(
                         any(IVcnUnderlyingNetworkPolicyListener.class));
@@ -88,7 +88,7 @@ public class VcnManagerTest {
     public void testRemoveVcnUnderlyingNetworkPolicyListenerUnknownListener() throws Exception {
         mVcnManager.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
-        assertFalse(VcnManager.REGISTERED_POLICY_LISTENERS.containsKey(mMockPolicyListener));
+        assertFalse(VcnManager.getAllPolicyListeners().containsKey(mMockPolicyListener));
         verify(mMockVcnManagementService, never())
                 .addVcnUnderlyingNetworkPolicyListener(
                         any(IVcnUnderlyingNetworkPolicyListener.class));
