@@ -187,12 +187,12 @@ public class ScreenMediaRecorder {
      */
     void end() {
         mMediaRecorder.stop();
-        mMediaProjection.stop();
         mMediaRecorder.release();
-        mMediaRecorder = null;
-        mMediaProjection = null;
         mInputSurface.release();
         mVirtualDisplay.release();
+        mMediaProjection.stop();
+        mMediaRecorder = null;
+        mMediaProjection = null;
         stopInternalAudioRecording();
 
         Log.d(TAG, "end recording");
