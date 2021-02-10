@@ -17,6 +17,7 @@ package com.android.server.hdmi;
  */
 
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.DisplayStatusCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -65,6 +66,20 @@ final class DevicePowerStatusAction extends HdmiCecFeatureAction {
 
     @Override
     boolean start() {
+        HdmiControlService service = localDevice().mService;
+        if (service.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            HdmiDeviceInfo deviceInfo = service.getHdmiCecNetwork().getCecDeviceInfo(
+                    mTargetAddress);
+            if (deviceInfo != null
+                    && deviceInfo.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+                int powerStatus = deviceInfo.getDevicePowerStatus();
+                if (powerStatus != HdmiControlManager.POWER_STATUS_UNKNOWN) {
+                    invokeCallback(powerStatus);
+                    finish();
+                    return true;
+                }
+            }
+        }
         queryDevicePowerStatus();
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
