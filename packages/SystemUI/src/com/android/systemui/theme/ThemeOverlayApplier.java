@@ -15,12 +15,15 @@
  */
 package com.android.systemui.theme;
 
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManager;
+import android.content.om.OverlayManagerTransaction;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -229,47 +232,51 @@ public class ThemeOverlayApplier implements Dumpable {
         final List<OverlayInfo> overlays = new ArrayList<>();
         targetPackagesToQuery.forEach(targetPackage -> overlays.addAll(mOverlayManager
                 .getOverlayInfosForTarget(targetPackage, UserHandle.SYSTEM)));
-        final Map<String, String> overlaysToDisable = overlays.stream()
+        final List<Pair<String, String>> overlaysToDisable = overlays.stream()
                 .filter(o ->
                         mTargetPackageToCategories.get(o.targetPackageName).contains(o.category))
                 .filter(o -> overlayCategoriesToDisable.contains(o.category))
                 .filter(o -> o.isEnabled())
-                .collect(Collectors.toMap((o) -> o.category, (o) -> o.packageName));
+                .map(o -> new Pair<>(o.category, o.packageName))
+                .collect(Collectors.toList());
 
+        OverlayManagerTransaction.Builder transaction = getTransactionBuilder();
         // Toggle overlays in the order of THEME_CATEGORIES.
         for (String category : THEME_CATEGORIES) {
             if (categoryToPackage.containsKey(category)) {
-                setEnabled(categoryToPackage.get(category), category, userHandles, true);
-            } else if (overlaysToDisable.containsKey(category)) {
-                setEnabled(overlaysToDisable.get(category), category, userHandles, false);
+                OverlayIdentifier overlayInfo =
+                        new OverlayIdentifier(categoryToPackage.get(category));
+                setEnabled(transaction, overlayInfo, category, userHandles, true);
             }
         }
+        for (Pair<String, String> packageToDisable : overlaysToDisable) {
+            OverlayIdentifier overlayInfo = new OverlayIdentifier(packageToDisable.second);
+            setEnabled(transaction, overlayInfo, packageToDisable.first, userHandles, false);
+        }
+
+        mExecutor.execute(() -> {
+            mOverlayManager.commit(transaction.build());
+        });
     }
 
-    private void setEnabled(
-            String packageName, String category, Set<UserHandle> handles, boolean enabled) {
+    @VisibleForTesting
+    protected OverlayManagerTransaction.Builder getTransactionBuilder() {
+        return new OverlayManagerTransaction.Builder();
+    }
+
+    private void setEnabled(OverlayManagerTransaction.Builder transaction,
+            OverlayIdentifier identifier, String category, Set<UserHandle> handles,
+            boolean enabled) {
+        if (DEBUG) {
+            Log.d(TAG, "setEnabled: " + identifier.getPackageName() + " category: "
+                    + category + ": " + enabled);
+        }
         for (UserHandle userHandle : handles) {
-            setEnabledAsync(packageName, userHandle, enabled);
+            transaction.setEnabled(identifier, enabled, userHandle.getIdentifier());
         }
         if (!handles.contains(UserHandle.SYSTEM) && SYSTEM_USER_CATEGORIES.contains(category)) {
-            setEnabledAsync(packageName, UserHandle.SYSTEM, enabled);
+            transaction.setEnabled(identifier, enabled, UserHandle.SYSTEM.getIdentifier());
         }
-    }
-
-    private void setEnabledAsync(String pkg, UserHandle userHandle, boolean enabled) {
-        mExecutor.execute(() -> {
-            if (DEBUG) Log.d(TAG, String.format("setEnabled: %s %s %b", pkg, userHandle, enabled));
-            try {
-                if (enabled) {
-                    mOverlayManager.setEnabledExclusiveInCategory(pkg, userHandle);
-                } else {
-                    mOverlayManager.setEnabled(pkg, false, userHandle);
-                }
-            } catch (SecurityException | IllegalStateException e) {
-                Log.e(TAG,
-                        String.format("setEnabled failed: %s %s %b", pkg, userHandle, enabled), e);
-            }
-        });
     }
 
     /**
