@@ -717,8 +717,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 mNumBackgroundNetworkRequests += delta;
                 break;
 
-            case TRACK_DEFAULT:
             case LISTEN:
+            case TRACK_DEFAULT:
+            case TRACK_SYSTEM_DEFAULT:
                 break;
 
             case NONE:

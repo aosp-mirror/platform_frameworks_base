@@ -55,13 +55,29 @@ import java.security.GeneralSecurityException;
 public class VpnManager {
     /** Type representing a lack of VPN @hide */
     public static final int TYPE_VPN_NONE = -1;
-    /** VPN service type code @hide */
+
+    /**
+     * A VPN created by an app using the {@link VpnService} API.
+     * @hide
+     */
     public static final int TYPE_VPN_SERVICE = 1;
-    /** Platform VPN type code @hide */
+
+    /**
+     * A VPN created using a {@link VpnManager} API such as {@link #startProvisionedVpnProfile}.
+     * @hide
+     */
     public static final int TYPE_VPN_PLATFORM = 2;
 
+    /**
+     * An IPsec VPN created by the built-in LegacyVpnRunner.
+     * @deprecated new Android devices should use VPN_TYPE_PLATFORM instead.
+     * @hide
+     */
+    @Deprecated
+    public static final int TYPE_VPN_LEGACY = 3;
+
     /** @hide */
-    @IntDef(value = {TYPE_VPN_NONE, TYPE_VPN_SERVICE, TYPE_VPN_PLATFORM})
+    @IntDef(value = {TYPE_VPN_NONE, TYPE_VPN_SERVICE, TYPE_VPN_PLATFORM, TYPE_VPN_LEGACY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface VpnType {}
 
