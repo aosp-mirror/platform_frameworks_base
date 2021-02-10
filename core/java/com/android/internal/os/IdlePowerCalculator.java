@@ -49,8 +49,7 @@ public class IdlePowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         calculatePowerAndDuration(batteryStats, rawRealtimeUs, rawUptimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
         if (mPowerMah != 0) {

@@ -45,8 +45,7 @@ public class GnssPowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final double averageGnssPowerMa = getAverageGnssPower(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =

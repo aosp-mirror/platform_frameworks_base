@@ -96,6 +96,7 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         private final int mUid;
         private String mPackageWithHighestDrain;
         private boolean mSystemComponent;
+        private boolean mExcludeFromBatteryUsageStats;
 
         public Builder(int customPowerComponentCount, int customTimeComponentCount,
                 BatteryStats.Uid batteryStatsUid) {
@@ -113,14 +114,6 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         }
 
         /**
-         * Creates a read-only object out of the Builder values.
-         */
-        @NonNull
-        public UidBatteryConsumer build() {
-            return new UidBatteryConsumer(this);
-        }
-
-        /**
          * Sets the name of the package owned by this UID that consumed the highest amount
          * of power since BatteryStats reset.
          */
@@ -131,12 +124,27 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         }
 
         /**
-         * Marks the UidBatteryConsumer as part of the system. For example,
-         * the UidBatteryConsumer with the UID {@link Process#BLUETOOTH_UID} is considered
-         * as a system component.
+         * Marks the UidBatteryConsumer for exclusion from the result set.
          */
-        public void setSystemComponent(boolean systemComponent) {
-            mSystemComponent = systemComponent;
+        public Builder excludeFromBatteryUsageStats() {
+            mExcludeFromBatteryUsageStats = true;
+            return this;
+        }
+
+        /**
+         * Returns true if this UidBatteryConsumer must be excluded from the
+         * BatteryUsageStats.
+         */
+        public boolean isExcludedFromBatteryUsageStats() {
+            return mExcludeFromBatteryUsageStats;
+        }
+
+        /**
+         * Creates a read-only object out of the Builder values.
+         */
+        @NonNull
+        public UidBatteryConsumer build() {
+            return new UidBatteryConsumer(this);
         }
     }
 }
