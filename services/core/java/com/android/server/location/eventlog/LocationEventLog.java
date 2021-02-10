@@ -164,6 +164,7 @@ public class LocationEventLog extends LocalEventLog {
         if (Build.IS_DEBUGGABLE || D) {
             addLogEvent(EVENT_PROVIDER_DELIVER_LOCATION, provider, numLocations, identity);
         }
+        getAggregateStats(provider, identity.getPackageName()).markLocationDelivered();
     }
 
     /** Logs that the location power save mode has changed. */
@@ -397,6 +398,8 @@ public class LocationEventLog extends LocalEventLog {
         private int mActiveRequestCount;
         @GuardedBy("this")
         private int mForegroundRequestCount;
+        @GuardedBy("this")
+        private int mDeliveredLocationCount;
 
         @GuardedBy("this")
         private long mFastestIntervalMs = Long.MAX_VALUE;
@@ -464,6 +467,10 @@ public class LocationEventLog extends LocalEventLog {
             Preconditions.checkState(mForegroundRequestCount >= 0);
         }
 
+        synchronized void markLocationDelivered() {
+            mDeliveredLocationCount++;
+        }
+
         public synchronized void updateTotals() {
             if (mAddedRequestCount > 0) {
                 long realtimeMs = SystemClock.elapsedRealtime();
@@ -488,7 +495,8 @@ public class LocationEventLog extends LocalEventLog {
                     + intervalToString(mSlowestIntervalMs)
                     + ", total/active/foreground duration = " + formatDuration(mAddedTimeTotalMs)
                     + "/" + formatDuration(mActiveTimeTotalMs) + "/"
-                    + formatDuration(mForegroundTimeTotalMs);
+                    + formatDuration(mForegroundTimeTotalMs) + ", locations = "
+                    + mDeliveredLocationCount;
         }
 
         private static String intervalToString(long intervalMs) {
