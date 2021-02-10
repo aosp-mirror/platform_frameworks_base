@@ -188,7 +188,7 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
   ATRACE_NAME(base::StringPrintf("LoadApkAssets(%s)", path.c_str()).c_str());
 
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
-  std::unique_ptr<const ApkAssets> apk_assets;
+  std::unique_ptr<ApkAssets> apk_assets;
   switch (format) {
     case FORMAT_APK: {
       auto assets = MultiAssetsProvider::Create(std::move(loader_assets),

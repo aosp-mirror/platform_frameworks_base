@@ -87,10 +87,6 @@ void BinaryStreamVisitor::visit(const IdmapData& data) {
 }
 
 void BinaryStreamVisitor::visit(const IdmapData::Header& header) {
-  Write8(header.GetTargetPackageId());
-  Write8(header.GetOverlayPackageId());
-  Write8(0U);  // padding
-  Write8(0U);  // padding
   Write32(header.GetTargetEntryCount());
   Write32(header.GetTargetInlineEntryCount());
   Write32(header.GetOverlayEntryCount());

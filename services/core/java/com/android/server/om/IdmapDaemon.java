@@ -20,17 +20,23 @@ import static android.content.Context.IDMAP_SERVICE;
 
 import static com.android.server.om.OverlayManagerService.TAG;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.FabricatedOverlayInfo;
+import android.os.FabricatedOverlayInternal;
 import android.os.IBinder;
 import android.os.IIdmap2;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemService;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.server.FgThread;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -104,10 +110,12 @@ class IdmapDaemon {
         return sInstance;
     }
 
-    String createIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
-            int userId) throws TimeoutException, RemoteException {
+    String createIdmap(@NonNull String targetPath, @NonNull String overlayPath,
+            @Nullable String overlayName, int policies, boolean enforce, int userId)
+            throws TimeoutException, RemoteException {
         try (Connection c = connect()) {
-            return mService.createIdmap(targetPath, overlayPath, policies, enforce, userId);
+            return mService.createIdmap(targetPath, overlayPath, TextUtils.emptyIfNull(overlayName),
+                    policies, enforce, userId);
         }
     }
 
@@ -117,11 +125,12 @@ class IdmapDaemon {
         }
     }
 
-    boolean verifyIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
-             int userId)
+    boolean verifyIdmap(@NonNull String targetPath, @NonNull String overlayPath,
+            @Nullable String overlayName, int policies, boolean enforce, int userId)
             throws Exception {
         try (Connection c = connect()) {
-            return mService.verifyIdmap(targetPath, overlayPath, policies, enforce, userId);
+            return mService.verifyIdmap(targetPath, overlayPath, TextUtils.emptyIfNull(overlayName),
+                    policies, enforce, userId);
         }
     }
 
@@ -129,9 +138,35 @@ class IdmapDaemon {
         try (Connection c = connect()) {
             return new File(mService.getIdmapPath(overlayPath, userId)).isFile();
         } catch (Exception e) {
-            Slog.wtf(TAG, "failed to check if idmap exists for " + overlayPath + ": "
-                    + e.getMessage());
+            Slog.wtf(TAG, "failed to check if idmap exists for " + overlayPath, e);
             return false;
+        }
+    }
+
+    FabricatedOverlayInfo createFabricatedOverlay(@NonNull FabricatedOverlayInternal overlay) {
+        try (Connection c = connect()) {
+            return mService.createFabricatedOverlay(overlay);
+        } catch (Exception e) {
+            Slog.wtf(TAG, "failed to fabricate overlay " + overlay, e);
+            return null;
+        }
+    }
+
+    boolean deleteFabricatedOverlay(@NonNull String path) {
+        try (Connection c = connect()) {
+            return mService.deleteFabricatedOverlay(path);
+        } catch (Exception e) {
+            Slog.wtf(TAG, "failed to delete fabricated overlay '" + path + "'", e);
+            return false;
+        }
+    }
+
+    List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
+        try (Connection c = connect()) {
+            return mService.getFabricatedOverlayInfos();
+        } catch (Exception e) {
+            Slog.wtf(TAG, "failed to get fabricated overlays", e);
+            return null;
         }
     }
 
