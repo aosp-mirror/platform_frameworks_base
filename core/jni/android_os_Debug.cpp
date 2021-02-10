@@ -43,6 +43,7 @@
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
+#include <dmabufinfo/dmabuf_sysfs_stats.h>
 #include <dmabufinfo/dmabufinfo.h>
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
@@ -802,6 +803,16 @@ static jlong android_os_Debug_getIonHeapsSizeKb(JNIEnv* env, jobject clazz) {
     return heapsSizeKb;
 }
 
+static jlong android_os_Debug_getDmabufTotalExportedKb(JNIEnv* env, jobject clazz) {
+    jlong dmabufTotalSizeKb = -1;
+    uint64_t size;
+
+    if (dmabufinfo::GetDmabufTotalExportedKb(&size)) {
+        dmabufTotalSizeKb = size;
+    }
+    return dmabufTotalSizeKb;
+}
+
 static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
     jlong poolsSizeKb = -1;
     uint64_t size;
@@ -813,8 +824,19 @@ static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
     return poolsSizeKb;
 }
 
-static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
-    jlong ionPss = 0;
+static jlong android_os_Debug_getDmabufHeapPoolsSizeKb(JNIEnv* env, jobject clazz) {
+    jlong poolsSizeKb = -1;
+    uint64_t size;
+
+    if (meminfo::ReadDmabufHeapPoolsSizeKb(&size)) {
+        poolsSizeKb = size;
+    }
+
+    return poolsSizeKb;
+}
+
+static jlong android_os_Debug_getDmabufMappedSizeKb(JNIEnv* env, jobject clazz) {
+    jlong dmabufPss = 0;
     std::vector<dmabufinfo::DmaBuffer> dmabufs;
 
     std::unique_ptr<DIR, int (*)(DIR*)> dir(opendir("/proc"), closedir);
@@ -838,10 +860,10 @@ static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
     }
 
     for (const dmabufinfo::DmaBuffer& buf : dmabufs) {
-        ionPss += buf.size() / 1024;
+        dmabufPss += buf.size() / 1024;
     }
 
-    return ionPss;
+    return dmabufPss;
 }
 
 static jlong android_os_Debug_getGpuTotalUsageKb(JNIEnv* env, jobject clazz) {
@@ -919,10 +941,14 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getFreeZramKb },
     { "getIonHeapsSizeKb", "()J",
             (void*)android_os_Debug_getIonHeapsSizeKb },
+    { "getDmabufTotalExportedKb", "()J",
+            (void*)android_os_Debug_getDmabufTotalExportedKb },
     { "getIonPoolsSizeKb", "()J",
             (void*)android_os_Debug_getIonPoolsSizeKb },
-    { "getIonMappedSizeKb", "()J",
-            (void*)android_os_Debug_getIonMappedSizeKb },
+    { "getDmabufMappedSizeKb", "()J",
+            (void*)android_os_Debug_getDmabufMappedSizeKb },
+    { "getDmabufHeapPoolsSizeKb", "()J",
+            (void*)android_os_Debug_getDmabufHeapPoolsSizeKb },
     { "getGpuTotalUsageKb", "()J",
             (void*)android_os_Debug_getGpuTotalUsageKb },
     { "isVmapStack", "()Z",
