@@ -21,7 +21,9 @@ import static android.net.IpSecManager.IpSecTunnelInterface;
 import static com.android.server.vcn.VcnGatewayConnection.DUMMY_ADDR;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -101,5 +103,16 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         assertNull(mGatewayConnection.getCurrentState());
         verify(mIpSecSvc).deleteTunnelInterface(eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), any());
         verifySafeModeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
+        assertFalse(mGatewayConnection.isRunning());
+    }
+
+    @Test
+    public void testNonTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
+        assertTrue(mGatewayConnection.isRunning());
+        // No safe mode timer changes expected.
     }
 }

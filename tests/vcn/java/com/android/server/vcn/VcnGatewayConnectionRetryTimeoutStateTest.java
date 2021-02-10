@@ -17,6 +17,9 @@
 package com.android.server.vcn;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -95,5 +98,23 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
     @Test
     public void testSafeModeTimeoutNotifiesCallback() {
         verifySafeModeTimeoutNotifiesCallback(mGatewayConnection.mRetryTimeoutState);
+    }
+
+    @Test
+    public void testTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        assertNull(mGatewayConnection.getCurrentState());
+        assertFalse(mGatewayConnection.isRunning());
+    }
+
+    @Test
+    public void testNonTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
+        assertTrue(mGatewayConnection.isRunning());
     }
 }

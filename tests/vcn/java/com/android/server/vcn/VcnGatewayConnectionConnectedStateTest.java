@@ -290,4 +290,22 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
                 new TemporaryFailureException("vcn test"), VCN_ERROR_CODE_INTERNAL_ERROR);
     }
+
+    @Test
+    public void testTeardown() throws Exception {
+        mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        assertFalse(mGatewayConnection.isRunning());
+    }
+
+    @Test
+    public void testNonTeardownDisconnectRequest() throws Exception {
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        assertTrue(mGatewayConnection.isRunning());
+    }
 }
