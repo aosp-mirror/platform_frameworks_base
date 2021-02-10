@@ -32,13 +32,16 @@ import static com.android.systemui.theme.ThemeOverlayApplier.THEME_CATEGORIES;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManager;
+import android.content.om.OverlayManagerTransaction;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -87,6 +90,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     OverlayManager mOverlayManager;
     @Mock
     DumpManager mDumpManager;
+    @Mock
+    OverlayManagerTransaction.Builder mTransactionBuilder;
 
     private ThemeOverlayApplier mManager;
 
@@ -94,7 +99,12 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mManager = new ThemeOverlayApplier(mOverlayManager, MoreExecutors.directExecutor(),
-                LAUNCHER_PACKAGE, THEMEPICKER_PACKAGE, mDumpManager);
+                LAUNCHER_PACKAGE, THEMEPICKER_PACKAGE, mDumpManager) {
+            @Override
+            protected OverlayManagerTransaction.Builder getTransactionBuilder() {
+                return mTransactionBuilder;
+            }
+        };
         when(mOverlayManager.getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM))
                 .thenReturn(Lists.newArrayList(
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_ACCENT_COLOR,
@@ -148,9 +158,11 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     @Test
     public void allCategoriesSpecified_allEnabledExclusively() {
         mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, TEST_USER_HANDLES);
+        verify(mOverlayManager).commit(any());
 
         for (String overlayPackage : ALL_CATEGORIES_MAP.values()) {
-            verify(mOverlayManager).setEnabledExclusiveInCategory(overlayPackage, TEST_USER);
+            verify(mTransactionBuilder).setEnabled(eq(new OverlayIdentifier(overlayPackage)),
+                    eq(true), eq(TEST_USER.getIdentifier()));
         }
     }
 
@@ -160,11 +172,12 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
 
         for (Map.Entry<String, String> entry : ALL_CATEGORIES_MAP.entrySet()) {
             if (SYSTEM_USER_CATEGORIES.contains(entry.getKey())) {
-                verify(mOverlayManager).setEnabledExclusiveInCategory(
-                        entry.getValue(), UserHandle.SYSTEM);
+                verify(mTransactionBuilder).setEnabled(eq(new OverlayIdentifier(entry.getValue())),
+                        eq(true), eq(UserHandle.SYSTEM.getIdentifier()));
             } else {
-                verify(mOverlayManager, never()).setEnabledExclusiveInCategory(
-                        entry.getValue(), UserHandle.SYSTEM);
+                verify(mTransactionBuilder, never()).setEnabled(
+                        eq(new OverlayIdentifier(entry.getValue())),
+                        eq(true), eq(UserHandle.SYSTEM.getIdentifier()));
             }
         }
     }
@@ -177,8 +190,10 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, userHandles);
 
         for (String overlayPackage : ALL_CATEGORIES_MAP.values()) {
-            verify(mOverlayManager).setEnabledExclusiveInCategory(overlayPackage, TEST_USER);
-            verify(mOverlayManager).setEnabledExclusiveInCategory(overlayPackage, newUserHandle);
+            verify(mTransactionBuilder).setEnabled(eq(new OverlayIdentifier(overlayPackage)),
+                    eq(true), eq(TEST_USER.getIdentifier()));
+            verify(mTransactionBuilder).setEnabled(eq(new OverlayIdentifier(overlayPackage)),
+                    eq(true), eq(newUserHandle.getIdentifier()));
         }
     }
 
@@ -199,12 +214,15 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         mManager.applyCurrentUserOverlays(categoryToPackage, TEST_USER_HANDLES);
 
         for (String overlayPackage : categoryToPackage.values()) {
-            verify(mOverlayManager).setEnabledExclusiveInCategory(overlayPackage, TEST_USER);
+            verify(mTransactionBuilder).setEnabled(eq(new OverlayIdentifier(overlayPackage)),
+                    eq(true), eq(TEST_USER.getIdentifier()));
         }
-        verify(mOverlayManager).setEnabled(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_SETTINGS,
-                false, TEST_USER);
-        verify(mOverlayManager).setEnabled(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_ANDROID,
-                false, TEST_USER);
+        verify(mTransactionBuilder).setEnabled(
+                eq(new OverlayIdentifier(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_SETTINGS)),
+                eq(false), eq(TEST_USER.getIdentifier()));
+        verify(mTransactionBuilder).setEnabled(
+                eq(new OverlayIdentifier(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_ANDROID)),
+                eq(false), eq(TEST_USER.getIdentifier()));
     }
 
     @Test
@@ -212,7 +230,9 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         mManager.applyCurrentUserOverlays(Maps.newArrayMap(), TEST_USER_HANDLES);
 
         for (String category : THEME_CATEGORIES) {
-            verify(mOverlayManager).setEnabled(TEST_ENABLED_PREFIX + category, false, TEST_USER);
+            verify(mTransactionBuilder).setEnabled(
+                    eq(new OverlayIdentifier(TEST_ENABLED_PREFIX + category)), eq(false),
+                    eq(TEST_USER.getIdentifier()));
         }
     }
 
@@ -223,9 +243,12 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
 
         mManager.applyCurrentUserOverlays(categoryToPackage, TEST_USER_HANDLES);
 
-        verify(mOverlayManager, never()).setEnabled("com.example.blah.category", false, TEST_USER);
-        verify(mOverlayManager, never()).setEnabledExclusiveInCategory("com.example.blah.category",
-                TEST_USER);
+        verify(mTransactionBuilder, never()).setEnabled(
+                eq(new OverlayIdentifier("com.example.blah.category")), eq(false),
+                eq(TEST_USER.getIdentifier()));
+        verify(mTransactionBuilder, never()).setEnabled(
+                eq(new OverlayIdentifier("com.example.blah.category")), eq(true),
+                eq(TEST_USER.getIdentifier()));
     }
 
     @Test
