@@ -499,7 +499,7 @@ public class InteractionJankMonitor {
         }
 
         public String getPerfettoTrigger() {
-            return String.format("interaction-jank-monitor-%d", mCujType);
+            return String.format("com.android.telemetry.interaction-jank-monitor-%d", mCujType);
         }
 
         public String getName() {
