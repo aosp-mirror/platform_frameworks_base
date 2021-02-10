@@ -967,6 +967,12 @@ public final class BroadcastQueue {
         }
     }
 
+    static String broadcastDescription(BroadcastRecord r, ComponentName component) {
+        return r.intent.toString()
+                + " from " + r.callerPackage + " (pid=" + r.callingPid
+                + ", uid=" + r.callingUid + ") to " + component.flattenToShortString();
+    }
+
     final void processNextBroadcastLocked(boolean fromMsg, boolean skipOomAdj) {
         BroadcastRecord r;
 
@@ -1349,14 +1355,18 @@ public final class BroadcastQueue {
                         < brOptions.getMinManifestReceiverApiLevel() ||
                 info.activityInfo.applicationInfo.targetSdkVersion
                         > brOptions.getMaxManifestReceiverApiLevel())) {
+            Slog.w(TAG, "Target SDK mismatch: receiver " + info.activityInfo
+                    + " targets " + info.activityInfo.applicationInfo.targetSdkVersion
+                    + " but delivery restricted to ["
+                    + brOptions.getMinManifestReceiverApiLevel() + ", "
+                    + brOptions.getMaxManifestReceiverApiLevel()
+                    + "] broadcasting " + broadcastDescription(r, component));
             skip = true;
         }
         if (!skip && !mService.validateAssociationAllowedLocked(r.callerPackage, r.callingUid,
                 component.getPackageName(), info.activityInfo.applicationInfo.uid)) {
             Slog.w(TAG, "Association not allowed: broadcasting "
-                    + r.intent.toString()
-                    + " from " + r.callerPackage + " (pid=" + r.callingPid
-                    + ", uid=" + r.callingUid + ") to " + component.flattenToShortString());
+                    + broadcastDescription(r, component));
             skip = true;
         }
         if (!skip) {
@@ -1364,9 +1374,7 @@ public final class BroadcastQueue {
                     r.callingPid, r.resolvedType, info.activityInfo.applicationInfo.uid);
             if (skip) {
                 Slog.w(TAG, "Firewall blocked: broadcasting "
-                        + r.intent.toString()
-                        + " from " + r.callerPackage + " (pid=" + r.callingPid
-                        + ", uid=" + r.callingUid + ") to " + component.flattenToShortString());
+                        + broadcastDescription(r, component));
             }
         }
         int perm = mService.checkComponentPermission(info.activityInfo.permission,
@@ -1375,18 +1383,12 @@ public final class BroadcastQueue {
         if (!skip && perm != PackageManager.PERMISSION_GRANTED) {
             if (!info.activityInfo.exported) {
                 Slog.w(TAG, "Permission Denial: broadcasting "
-                        + r.intent.toString()
-                        + " from " + r.callerPackage + " (pid=" + r.callingPid
-                        + ", uid=" + r.callingUid + ")"
-                        + " is not exported from uid " + info.activityInfo.applicationInfo.uid
-                        + " due to receiver " + component.flattenToShortString());
+                        + broadcastDescription(r, component)
+                        + " is not exported from uid " + info.activityInfo.applicationInfo.uid);
             } else {
                 Slog.w(TAG, "Permission Denial: broadcasting "
-                        + r.intent.toString()
-                        + " from " + r.callerPackage + " (pid=" + r.callingPid
-                        + ", uid=" + r.callingUid + ")"
-                        + " requires " + info.activityInfo.permission
-                        + " due to receiver " + component.flattenToShortString());
+                        + broadcastDescription(r, component)
+                        + " requires " + info.activityInfo.permission);
             }
             skip = true;
         } else if (!skip && info.activityInfo.permission != null) {
@@ -1396,13 +1398,9 @@ public final class BroadcastQueue {
                     "Broadcast delivered to " + info.activityInfo.name)
                     != AppOpsManager.MODE_ALLOWED) {
                 Slog.w(TAG, "Appop Denial: broadcasting "
-                        + r.intent.toString()
-                        + " from " + r.callerPackage + " (pid="
-                        + r.callingPid + ", uid=" + r.callingUid + ")"
+                        + broadcastDescription(r, component)
                         + " requires appop " + AppOpsManager.permissionToOp(
-                                info.activityInfo.permission)
-                        + " due to registered receiver "
-                        + component.flattenToShortString());
+                                info.activityInfo.permission));
                 skip = true;
             }
         }
@@ -1520,7 +1518,7 @@ public final class BroadcastQueue {
                         + info.activityInfo.packageName, e);
             }
             if (!isAvailable) {
-                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
+                Slog.w(TAG_BROADCAST,
                         "Skipping delivery to " + info.activityInfo.packageName + " / "
                         + info.activityInfo.applicationInfo.uid
                         + " : package no longer available");
@@ -1536,6 +1534,9 @@ public final class BroadcastQueue {
             if (!requestStartTargetPermissionsReviewIfNeededLocked(r,
                     info.activityInfo.packageName, UserHandle.getUserId(
                             info.activityInfo.applicationInfo.uid))) {
+                Slog.w(TAG_BROADCAST,
+                        "Skipping delivery: permission review required for "
+                                + broadcastDescription(r, component));
                 skip = true;
             }
         }
