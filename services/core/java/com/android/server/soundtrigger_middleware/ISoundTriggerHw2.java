@@ -140,6 +140,14 @@ interface ISoundTriggerHw2 {
      */
     String interfaceDescriptor() throws android.os.RemoteException;
 
+    /*
+     * This is only useful for testing decorators and doesn't actually do anything with the real
+     * HAL. This method would block until all callbacks that were previously generated have been
+     * invoked. For most decorators, this merely flushes the delegate, but for delegates that may
+     * additional buffers for callbacks this should flush them.
+     */
+    void flushCallbacks();
+
     /**
      * Callback interface for model-related events.
      */

@@ -49,7 +49,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This is a decorator of an {@link ISoundTriggerMiddlewareService}, which enforces correct usage by
@@ -123,8 +122,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             this.properties = properties;
         }
     }
-
-    private final AtomicReference<Boolean> mCaptureState = new AtomicReference<>();
 
     private final @NonNull
     ISoundTriggerMiddlewareInternal mDelegate;
@@ -226,23 +223,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
     }
 
-    @Override
-    public void setCaptureState(boolean active) {
-        // This is an internal call. No permissions needed.
-        //
-        // Normally, we would acquire a lock here. However, we do not access any state here so it
-        // is safe to not lock. This call is typically done from a different context than all the
-        // other calls and may result in a deadlock if we lock here (between the audio server and
-        // the system server).
-        try {
-            mDelegate.setCaptureState(active);
-        } catch (Exception e) {
-            throw handleException(e);
-        } finally {
-            mCaptureState.set(active);
-        }
-    }
-
     // Override toString() in order to have the delegate's ID in it.
     @Override
     public String toString() {
@@ -250,17 +230,8 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     }
 
     @Override
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
-    }
-
-    @Override
     public void dump(PrintWriter pw) {
         synchronized (this) {
-            Boolean captureState = mCaptureState.get();
-            pw.printf("Capture state is %s\n\n", captureState == null ? "uninitialized"
-                    : (captureState ? "active" : "inactive"));
             if (mModules != null) {
                 for (int handle : mModules.keySet()) {
                     final ModuleState module = mModules.get(handle);

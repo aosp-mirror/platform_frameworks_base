@@ -137,6 +137,11 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
         return mDelegate.interfaceDescriptor();
     }
 
+    @Override
+    public void flushCallbacks() {
+        mDelegate.flushCallbacks();
+    }
+
     /**
      * Attempts to increment the number of loaded models and throws a {@link
      * RecoverableException} if the maximum number of concurrent models is exceeded (while keeping

@@ -18,6 +18,7 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
@@ -64,19 +65,25 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     private final @NonNull android.hardware.soundtrigger.V2_3.Properties mProperties;
 
     static ISoundTriggerHw2 create(
-            @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw underlying,
-            @NonNull Runnable rebootRunnable) {
-        return create(underlying.asBinder(), rebootRunnable);
+            @NonNull ISoundTriggerHw underlying,
+            @NonNull Runnable rebootRunnable,
+            ICaptureStateNotifier notifier) {
+        return create(underlying.asBinder(), rebootRunnable, notifier);
     }
 
     static ISoundTriggerHw2 create(@NonNull IHwBinder binder,
-            @NonNull Runnable rebootRunnable) {
+            @NonNull Runnable rebootRunnable,
+            ICaptureStateNotifier notifier) {
         SoundTriggerHw2Compat compat = new SoundTriggerHw2Compat(binder, rebootRunnable);
         ISoundTriggerHw2 result = compat;
         // Add max model limiter for versions <2.4.
         if (compat.mUnderlying_2_4 == null) {
             result = new SoundTriggerHw2MaxModelLimiter(result,
                     compat.mProperties.base.maxSoundModels);
+        }
+        // Add concurrent capture handler for versions <2.4 which do not support concurrent capture.
+        if (compat.mUnderlying_2_4 == null && !compat.mProperties.base.concurrentCapture) {
+            result = new SoundTriggerHw2ConcurrentCaptureHandler(result, notifier);
         }
         return result;
     }
@@ -401,6 +408,11 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     @Override
     public String interfaceDescriptor() throws RemoteException {
         return as2_0().interfaceDescriptor();
+    }
+
+    @Override
+    public void flushCallbacks() {
+        // This is a no-op. Only implemented for decorators.
     }
 
     private android.hardware.soundtrigger.V2_3.Properties getProperties_2_0()

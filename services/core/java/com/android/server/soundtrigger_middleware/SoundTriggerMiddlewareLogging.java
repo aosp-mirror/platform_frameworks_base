@@ -97,23 +97,6 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
     }
 
-    @Override
-    public void setCaptureState(boolean active) throws RemoteException {
-        try {
-            mDelegate.setCaptureState(active);
-            logVoidReturn("setCaptureState", active);
-        } catch (Exception e) {
-            logException("setCaptureState", e, active);
-            throw e;
-        }
-    }
-
-    @Override
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
-    }
-
     // Override toString() in order to have the delegate's ID in it.
     @Override
     public String toString() {

@@ -24,11 +24,15 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -47,27 +51,47 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @RunWith(Parameterized.class)
 public class SoundHw2CompatTest {
-    @Parameterized.Parameter
-    public android.hardware.soundtrigger.V2_0.ISoundTriggerHw mHalDriver;
-    private Runnable mRebootRunnable = mock(Runnable.class);
+    @Parameterized.Parameter(0)
+    public String mVersion;
+
+    @Parameterized.Parameter(1)
+    public boolean mSupportConcurrentCapture;
+
+    private final Runnable mRebootRunnable = mock(Runnable.class);
     private ISoundTriggerHw2 mCanonical;
+    private CaptureStateNotifier mCaptureStateNotifier;
+    private android.hardware.soundtrigger.V2_0.ISoundTriggerHw mHalDriver;
 
     // We run the test once for every version of the underlying driver.
-    @Parameterized.Parameters
-    public static Object[] data() {
-        return new Object[]{
-                mock(android.hardware.soundtrigger.V2_0.ISoundTriggerHw.class),
-                mock(android.hardware.soundtrigger.V2_1.ISoundTriggerHw.class),
-                mock(android.hardware.soundtrigger.V2_2.ISoundTriggerHw.class),
-                mock(android.hardware.soundtrigger.V2_3.ISoundTriggerHw.class),
-                mock(android.hardware.soundtrigger.V2_4.ISoundTriggerHw.class),
-        };
+    @Parameterized.Parameters(name = "{0}, concurrent={1}")
+    public static Iterable<Object[]> data() {
+        List<Object[]> result = new LinkedList<>();
+
+        for (String version : new String[]{
+                "V2_0",
+                "V2_1",
+                "V2_2",
+                "V2_3",
+                "V2_4",
+        }) {
+            for (boolean concurrentCapture : new boolean[]{false, true}) {
+                result.add(new Object[]{version, concurrentCapture});
+            }
+        }
+
+        return result;
     }
 
     @Before
     public void setUp() throws Exception {
+        mHalDriver = (android.hardware.soundtrigger.V2_0.ISoundTriggerHw) mock(Class.forName(
+                String.format("android.hardware.soundtrigger.%s.ISoundTriggerHw", mVersion)));
+
         clearInvocations(mRebootRunnable);
 
         // This binder is associated with the mock, so it can be cast to either version of the
@@ -120,7 +144,7 @@ public class SoundHw2CompatTest {
         when(mHalDriver.asBinder()).thenReturn(binder);
 
         android.hardware.soundtrigger.V2_3.Properties halProperties =
-                TestUtil.createDefaultProperties_2_3(true);
+                TestUtil.createDefaultProperties_2_3(mSupportConcurrentCapture);
         doAnswer(invocation -> {
             ((android.hardware.soundtrigger.V2_0.ISoundTriggerHw.getPropertiesCallback)
                     invocation.getArgument(
@@ -141,7 +165,10 @@ public class SoundHw2CompatTest {
             }).when(driver).getProperties_2_3(any());
         }
 
-        mCanonical = SoundTriggerHw2Compat.create(mHalDriver, mRebootRunnable);
+        mCaptureStateNotifier = spy(new CaptureStateNotifier());
+
+        mCanonical = SoundTriggerHw2Compat.create(mHalDriver, mRebootRunnable,
+                mCaptureStateNotifier);
 
         // During initialization any method can be called, but after we're starting to enforce that
         // no additional methods are called.
@@ -167,7 +194,7 @@ public class SoundHw2CompatTest {
     @Test
     public void testGetProperties() throws Exception {
         android.hardware.soundtrigger.V2_3.Properties halProperties =
-                TestUtil.createDefaultProperties_2_3(true);
+                TestUtil.createDefaultProperties_2_3(mSupportConcurrentCapture);
         android.hardware.soundtrigger.V2_3.Properties properties = mCanonical.getProperties();
 
         if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
@@ -524,13 +551,8 @@ public class SoundHw2CompatTest {
         verify(mHalDriver).unloadSoundModel(14);
     }
 
-    private void testStartRecognition_2_0() throws Exception {
-        // First load (this registers the callback).
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
-        final int handle = loadGenericModel(canonicalCallback);
-
-        // Then start.
+    private void startRecognition_2_0(int handle, ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         ArgumentCaptor<android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig>
                 configCaptor = ArgumentCaptor.forClass(
                 android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig.class);
@@ -551,16 +573,11 @@ public class SoundHw2CompatTest {
         validateCallback_2_0(callbackCaptor.getValue(), canonicalCallback);
     }
 
-    private void testStartRecognition_2_1() throws Exception {
+    private void startRecognition_2_1(int handle, ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
         final android.hardware.soundtrigger.V2_1.ISoundTriggerHw driver_2_1 =
                 (android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver;
 
-        // First load (this registers the callback).
-        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
-                ISoundTriggerHw2.ModelCallback.class);
-        final int handle = loadGenericModel(canonicalCallback);
-
-        // Then start.
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig>
                 configCaptor = ArgumentCaptor.forClass(
                 android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig.class);
@@ -582,11 +599,10 @@ public class SoundHw2CompatTest {
         validateCallback_2_1(callbackCaptor.getValue(), canonicalCallback);
     }
 
-    private void testStartRecognition_2_3() throws Exception {
+    private void startRecognition_2_3(int handle)
+            throws Exception {
         final android.hardware.soundtrigger.V2_3.ISoundTriggerHw driver_2_3 =
                 (android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver;
-
-        final int handle = 68;
         ArgumentCaptor<android.hardware.soundtrigger.V2_3.RecognitionConfig>
                 configCaptor = ArgumentCaptor.forClass(
                 android.hardware.soundtrigger.V2_3.RecognitionConfig.class);
@@ -600,11 +616,10 @@ public class SoundHw2CompatTest {
         TestUtil.validateRecognitionConfig_2_3(configCaptor.getValue(), 808, 909);
     }
 
-    private void testStartRecognition_2_4() throws Exception {
+    private void startRecognition_2_4(int handle)
+            throws Exception {
         final android.hardware.soundtrigger.V2_4.ISoundTriggerHw driver_2_4 =
                 (android.hardware.soundtrigger.V2_4.ISoundTriggerHw) mHalDriver;
-
-        final int handle = 68;
         ArgumentCaptor<android.hardware.soundtrigger.V2_3.RecognitionConfig>
                 configCaptor = ArgumentCaptor.forClass(
                 android.hardware.soundtrigger.V2_3.RecognitionConfig.class);
@@ -618,17 +633,28 @@ public class SoundHw2CompatTest {
         TestUtil.validateRecognitionConfig_2_3(configCaptor.getValue(), 21, 22);
     }
 
+    private void startRecognition(int handle, ISoundTriggerHw2.ModelCallback canonicalCallback)
+            throws Exception {
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
+            startRecognition_2_4(handle);
+        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+            startRecognition_2_3(handle);
+        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
+            startRecognition_2_1(handle, canonicalCallback);
+        } else {
+            startRecognition_2_0(handle, canonicalCallback);
+        }
+    }
+
     @Test
     public void testStartRecognition() throws Exception {
-        if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
-            testStartRecognition_2_4();
-        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
-            testStartRecognition_2_3();
-        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
-            testStartRecognition_2_1();
-        } else {
-            testStartRecognition_2_0();
-        }
+        // First load.
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
+        final int handle = loadGenericModel(canonicalCallback);
+
+        // Then start.
+        startRecognition(handle, canonicalCallback);
     }
 
     private void testStartRecognitionBusy_2_4() throws Exception {
@@ -653,6 +679,70 @@ public class SoundHw2CompatTest {
     public void testStartRecognitionBusy() throws Exception {
         if (mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw) {
             testStartRecognitionBusy_2_4();
+        }
+    }
+
+    @Test
+    public void testNoRegisterCaptureStateListener() {
+        assumeTrue(mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw
+                || mSupportConcurrentCapture);
+        verify(mCaptureStateNotifier, never()).registerListener(any());
+    }
+
+    @Test
+    public void testConcurrentCaptureAbort() throws Exception {
+        assumeFalse(mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw
+                || mSupportConcurrentCapture);
+        verify(mCaptureStateNotifier, atLeast(1)).registerListener(any());
+
+        // First load.
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
+        final int handle = loadGenericModel(canonicalCallback);
+
+        // Then start.
+        startRecognition(handle, canonicalCallback);
+
+        // Now activate external capture.
+        mCaptureStateNotifier.setState(true);
+
+        // Expect hardware to have been stopped.
+        verify(mHalDriver).stopRecognition(handle);
+
+        // Expect an abort event (async).
+        ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent>
+                eventCaptor = ArgumentCaptor.forClass(
+                android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent.class);
+        mCanonical.flushCallbacks();
+        verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
+        assertEquals(
+                android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.ABORT,
+                eventCaptor.getValue().header.status);
+        assertEquals(handle, eventCaptor.getValue().header.model);
+    }
+
+    @Test
+    public void testConcurrentCaptureReject() throws Exception {
+        assumeFalse(mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw
+                || mSupportConcurrentCapture);
+        verify(mCaptureStateNotifier, atLeast(1)).registerListener(any());
+
+        // First load (this registers the callback).
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
+        final int handle = loadGenericModel(canonicalCallback);
+
+        // Report external capture active.
+        mCaptureStateNotifier.setState(true);
+
+        // Then start.
+        android.hardware.soundtrigger.V2_3.RecognitionConfig config =
+                TestUtil.createRecognitionConfig_2_3(203, 204);
+        try {
+            mCanonical.startRecognition(handle, config);
+            fail("Expected an exception");
+        } catch (RecoverableException e) {
+            assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
     }
 
@@ -803,6 +893,7 @@ public class SoundHw2CompatTest {
     @Test
     public void testLinkToDeath() throws Exception {
         IHwBinder.DeathRecipient canonicalRecipient = mock(IHwBinder.DeathRecipient.class);
+        when(mHalDriver.linkToDeath(any(), anyLong())).thenReturn(true);
         mCanonical.linkToDeath(canonicalRecipient, 19);
 
         ArgumentCaptor<IHwBinder.DeathRecipient> recipientCaptor = ArgumentCaptor.forClass(
@@ -811,6 +902,7 @@ public class SoundHw2CompatTest {
         verify(mHalDriver).linkToDeath(recipientCaptor.capture(), cookieCaptor.capture());
 
         recipientCaptor.getValue().serviceDied(cookieCaptor.getValue());
+        mCanonical.flushCallbacks();
         verify(canonicalRecipient).serviceDied(19);
 
         mCanonical.unlinkToDeath(canonicalRecipient);
@@ -824,14 +916,15 @@ public class SoundHw2CompatTest {
         verify(mHalDriver).interfaceDescriptor();
     }
 
-    private static void validateGlobalCallback_2_4(
+    private void validateGlobalCallback_2_4(
             android.hardware.soundtrigger.V2_4.ISoundTriggerHwGlobalCallback hwCallback,
             ISoundTriggerHw2.GlobalCallback canonicalCallback) throws Exception {
         hwCallback.tryAgain();
+        mCanonical.flushCallbacks();
         verify(canonicalCallback).tryAgain();
     }
 
-    private static void validateCallback_2_0(
+    private void validateCallback_2_0(
             android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback hwCallback,
             ISoundTriggerHw2.ModelCallback canonicalCallback) throws Exception {
         {
@@ -844,6 +937,7 @@ public class SoundHw2CompatTest {
 
             hwCallback.recognitionCallback(TestUtil.createRecognitionEvent_2_0(handle, status, 555),
                     99);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
             TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status, 555);
         }
@@ -858,6 +952,7 @@ public class SoundHw2CompatTest {
 
             hwCallback.phraseRecognitionCallback(
                     TestUtil.createPhraseRecognitionEvent_2_0(handle, status, 666), 99);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eventCaptor.capture());
             TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
                     666);
@@ -880,6 +975,7 @@ public class SoundHw2CompatTest {
             hwCallback.recognitionCallback_2_1(
                     TestUtil.createRecognitionEvent_2_1(handle, status, 777),
                     99);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
             TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status, 777);
         }
@@ -894,6 +990,7 @@ public class SoundHw2CompatTest {
 
             hwCallback.phraseRecognitionCallback_2_1(
                     TestUtil.createPhraseRecognitionEvent_2_1(handle, status, 888), 99);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eventCaptor.capture());
             TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
                     888);
@@ -916,6 +1013,7 @@ public class SoundHw2CompatTest {
             hwCallback.recognitionCallback_2_1(
                     TestUtil.createRecognitionEvent_2_1(handle, status, 444),
                     99);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eventCaptor.capture());
             TestUtil.validateRecognitionEvent_2_1(eventCaptor.getValue(), handle, status, 444);
         }
@@ -930,6 +1028,7 @@ public class SoundHw2CompatTest {
 
             hwCallback.phraseRecognitionCallback_2_1(
                     TestUtil.createPhraseRecognitionEvent_2_1(handle, status, 555), 99);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eventCaptor.capture());
             TestUtil.validatePhraseRecognitionEvent_2_1(eventCaptor.getValue(), handle, status,
                     555);
@@ -938,9 +1037,28 @@ public class SoundHw2CompatTest {
         {
             final int handle = 23;
             hwCallback.modelUnloaded(handle);
+            mCanonical.flushCallbacks();
             verify(canonicalCallback).modelUnloaded(handle);
         }
         verifyNoMoreInteractions(canonicalCallback);
         clearInvocations(canonicalCallback);
+    }
+
+    public class CaptureStateNotifier implements ICaptureStateNotifier {
+        private boolean mState = false;
+        private List<Listener> mListeners = new LinkedList<>();
+
+        @Override
+        public boolean registerListener(Listener listener) {
+            mListeners.add(listener);
+            return false;
+        }
+
+        public void setState(boolean state) {
+            mState = state;
+            for (Listener listener : mListeners) {
+                listener.onCaptureStateChange(state);
+            }
+        }
     }
 }

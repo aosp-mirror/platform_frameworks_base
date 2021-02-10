@@ -24,7 +24,6 @@ import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.ModelParameterRange;
 import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
 import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.RecognitionEvent;
@@ -41,7 +40,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,7 +93,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
     private final SoundTriggerModuleProperties mProperties;
-    private boolean mRecognitionAvailable;
 
     /**
      * Ctor.
@@ -110,8 +107,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
         attachToHal();
         mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
-        // We conservatively assume that external capture is active until explicitly told otherwise.
-        mRecognitionAvailable = mProperties.concurrentCapture;
     }
 
     /**
@@ -143,40 +138,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         return mProperties;
     }
 
-    /**
-     * Notify the module that external capture has started / finished, using the same input device
-     * used for recognition.
-     * If the underlying driver does not support recognition while capturing, capture will be
-     * aborted, and the recognition callback will receive and abort event. In addition, all active
-     * clients will be notified of the change in state.
-     *
-     * @param active true iff external capture is active.
-     */
-    void setExternalCaptureState(boolean active) {
-        // We should never invoke callbacks while holding the lock, since this may deadlock with
-        // forward calls. Thus, we first gather all the callbacks we need to invoke while holding
-        // the lock, but invoke them after releasing it.
-        List<Runnable> callbacks = new LinkedList<>();
-
-        synchronized (this) {
-            if (mProperties.concurrentCapture) {
-                // If we support concurrent capture, we don't care about any of this.
-                return;
-            }
-            mRecognitionAvailable = !active;
-            if (!mRecognitionAvailable) {
-                // Our module does not support recognition while a capture is active -
-                // need to abort all active recognitions.
-                for (Session session : mActiveSessions) {
-                    session.abortActiveRecognitions(callbacks);
-                }
-            }
-        }
-        for (Runnable callback : callbacks) {
-            callback.run();
-        }
-    }
-
     @Override
     public void serviceDied(long cookie) {
         Log.w(TAG, "Underlying HAL driver died.");
@@ -204,8 +165,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      */
     private void reset() {
         attachToHal();
-        // We conservatively assume that external capture is active until explicitly told otherwise.
-        mRecognitionAvailable = mProperties.concurrentCapture;
     }
 
     /**
@@ -353,18 +312,9 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
         @Override
         public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
-            // We should never invoke callbacks while holding the lock, since this may deadlock with
-            // forward calls. Thus, we first gather all the callbacks we need to invoke while holding
-            // the lock, but invoke them after releasing it.
-            List<Runnable> callbacks = new LinkedList<>();
-
             synchronized (SoundTriggerModule.this) {
                 checkValid();
-                mLoadedModels.get(modelHandle).startRecognition(config, callbacks);
-            }
-
-            for (Runnable callback : callbacks) {
-                callback.run();
+                mLoadedModels.get(modelHandle).startRecognition(config);
             }
         }
 
@@ -405,17 +355,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 return mLoadedModels.get(modelHandle).queryModelParameterSupport(modelParam);
-            }
-        }
-
-        /**
-         * Abort all currently active recognitions.
-         * @param callbacks Will be appended with a list of callbacks that need to be invoked
-         *                  after this method returns, without holding the module lock.
-         */
-        private void abortActiveRecognitions(@NonNull List<Runnable> callbacks) {
-            for (Model model : mLoadedModels.values()) {
-                model.abortActiveRecognition(callbacks);
             }
         }
 
@@ -499,13 +438,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 return mSession.mSessionHandle;
             }
 
-            private void startRecognition(@NonNull RecognitionConfig config,
-                    @NonNull List<Runnable> callbacks) {
-                if (!mRecognitionAvailable) {
-                    // Recognition is unavailable - send an abort event immediately.
-                    callbacks.add(this::notifyAbort);
-                    return;
-                }
+            private void startRecognition(@NonNull RecognitionConfig config) {
                 android.hardware.soundtrigger.V2_3.RecognitionConfig hidlConfig =
                         ConversionUtil.aidl2hidlRecognitionConfig(config);
                 hidlConfig.base.header.captureDevice = mSession.mDeviceHandle;
@@ -548,58 +481,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 return ConversionUtil.hidl2aidlModelParameterRange(
                         mHalService.queryParameter(mHandle,
                                 ConversionUtil.aidl2hidlModelParameter(modelParam)));
-            }
-
-            /**
-             * Abort the recognition, if active.
-             * @param callbacks Will be appended with a list of callbacks that need to be invoked
-             *                  after this method returns, without holding the module lock.
-             */
-            private void abortActiveRecognition(List<Runnable> callbacks) {
-                // If we're inactive, do nothing.
-                if (getState() != ModelState.ACTIVE) {
-                    return;
-                }
-                // Stop recognition.
-                stopRecognition();
-
-                // Notify the client that recognition has been aborted.
-                callbacks.add(this::notifyAbort);
-            }
-
-            /** Notify the client that recognition has been aborted. */
-            private void notifyAbort() {
-                try {
-                    switch (mModelType) {
-                        case SoundModelType.GENERIC: {
-                            android.media.soundtrigger_middleware.RecognitionEvent event =
-                                    newEmptyRecognitionEvent();
-                            event.status =
-                                    android.media.soundtrigger_middleware.RecognitionStatus.ABORTED;
-                            event.type = SoundModelType.GENERIC;
-                            mCallback.onRecognition(mHandle, event);
-                        }
-                        break;
-
-                        case SoundModelType.KEYPHRASE: {
-                            android.media.soundtrigger_middleware.PhraseRecognitionEvent event =
-                                    newEmptyPhraseRecognitionEvent();
-                            event.common.status =
-                                    android.media.soundtrigger_middleware.RecognitionStatus.ABORTED;
-                            event.common.type = SoundModelType.KEYPHRASE;
-                            mCallback.onPhraseRecognition(mHandle, event);
-                        }
-                        break;
-
-                        default:
-                            Log.e(TAG, "Unknown model type: " + mModelType);
-
-                    }
-                } catch (RemoteException e) {
-                    // Dead client will be handled by binderDied() - no need to handle here.
-                    // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback execption.", e);
-                }
             }
 
             @Override
@@ -655,34 +536,5 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 }
             }
         }
-    }
-
-    /**
-     * Creates a default-initialized recognition event.
-     *
-     * Non-nullable object fields are default constructed.
-     * Non-nullable array fields are initialized to 0 length.
-     *
-     * @return The event.
-     */
-    private static RecognitionEvent newEmptyRecognitionEvent() {
-        RecognitionEvent result = new RecognitionEvent();
-        result.data = new byte[0];
-        return result;
-    }
-
-    /**
-     * Creates a default-initialized phrase recognition event.
-     *
-     * Non-nullable object fields are default constructed.
-     * Non-nullable array fields are initialized to 0 length.
-     *
-     * @return The event.
-     */
-    private static PhraseRecognitionEvent newEmptyPhraseRecognitionEvent() {
-        PhraseRecognitionEvent result = new PhraseRecognitionEvent();
-        result.common = newEmptyRecognitionEvent();
-        result.phraseExtras = new PhraseRecognitionExtra[0];
-        return result;
     }
 }

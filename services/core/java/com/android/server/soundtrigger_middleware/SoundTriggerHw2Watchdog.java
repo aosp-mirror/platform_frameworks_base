@@ -139,6 +139,11 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
     }
 
     @Override
+    public void flushCallbacks() {
+        mUnderlying.flushCallbacks();
+    }
+
+    @Override
     public void reboot() {
         mUnderlying.reboot();
     }

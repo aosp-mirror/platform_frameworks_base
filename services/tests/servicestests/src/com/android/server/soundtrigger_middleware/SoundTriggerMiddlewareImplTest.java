@@ -70,12 +70,6 @@ public class SoundTriggerMiddlewareImplTest {
         return mock(ISoundTriggerCallback.Stub.class, Mockito.CALLS_REAL_METHODS);
     }
 
-    private void initService(boolean supportConcurrentCapture) {
-        when(mHalDriver.getProperties()).thenReturn(
-                TestUtil.createDefaultProperties_2_3(supportConcurrentCapture));
-        mService = new SoundTriggerMiddlewareImpl(() -> mHalDriver, mAudioSessionProvider);
-    }
-
     private Pair<Integer, SoundTriggerHwCallback> loadGenericModel(ISoundTriggerModule module,
             int hwHandle) throws RemoteException {
         SoundModel model = TestUtil.createGenericSoundModel();
@@ -147,6 +141,9 @@ public class SoundTriggerMiddlewareImplTest {
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
         clearInvocations(mAudioSessionProvider);
+        when(mHalDriver.getProperties()).thenReturn(
+                TestUtil.createDefaultProperties_2_3(false));
+        mService = new SoundTriggerMiddlewareImpl(() -> mHalDriver, mAudioSessionProvider);
     }
 
     @After
@@ -160,7 +157,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testListModules() {
-        initService(true);
         // Note: input and output properties are NOT the same type, even though they are in any way
         // equivalent. One is a type that's exposed by the HAL and one is a type that's exposed by
         // the service. The service actually performs a (trivial) conversion between the two.
@@ -169,13 +165,12 @@ public class SoundTriggerMiddlewareImplTest {
 
         SoundTriggerModuleProperties properties = allDescriptors[0].properties;
 
-        TestUtil.validateDefaultProperties(properties, true);
+        TestUtil.validateDefaultProperties(properties, false);
     }
 
     @Test
     public void testAttachDetach() throws Exception {
         // Normal attachment / detachment.
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
         assertNotNull(module);
@@ -184,7 +179,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testLoadUnloadModel() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -196,7 +190,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testLoadPreemptModel() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -216,7 +209,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testLoadUnloadPhraseModel() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -228,7 +220,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testStartStopRecognition() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -249,7 +240,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testStartRecognitionBusy() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -274,7 +264,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testStartStopPhraseRecognition() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -295,7 +284,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testRecognition() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -327,7 +315,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testPhraseRecognition() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -360,7 +347,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testForceRecognition() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -398,7 +384,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testForceRecognitionNotSupported() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -430,7 +415,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testForcePhraseRecognition() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -469,7 +453,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testForcePhraseRecognitionNotSupported() throws Exception {
-        initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -502,9 +485,6 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testAbortRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
-        initService(false);
-        mService.setCaptureState(false);
-
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -536,9 +516,6 @@ public class SoundTriggerMiddlewareImplTest {
     @Test
     public void testAbortPhraseRecognition() throws Exception {
         // Make sure the HAL doesn't support concurrent capture.
-        initService(false);
-        mService.setCaptureState(false);
-
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
 
@@ -569,7 +546,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testParameterSupported() throws Exception {
-        initService(false);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
         final int hwHandle = 12;
@@ -596,7 +572,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testParameterNotSupported() throws Exception {
-        initService(false);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
         final int hwHandle = 13;
@@ -617,7 +592,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testGetParameter() throws Exception {
-        initService(false);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
         final int hwHandle = 14;
@@ -637,7 +611,6 @@ public class SoundTriggerMiddlewareImplTest {
 
     @Test
     public void testSetParameter() throws Exception {
-        initService(false);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
         final int hwHandle = 17;

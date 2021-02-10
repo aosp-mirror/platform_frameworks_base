@@ -69,10 +69,10 @@ import java.util.Objects;
 public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareService.Stub {
     static private final String TAG = "SoundTriggerMiddlewareService";
 
-    private final @NonNull
-    ISoundTriggerMiddlewareInternal mDelegate;
-    private final @NonNull
-    Context mContext;
+    private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
+    private static final @NonNull ICaptureStateNotifier mCaptureStateNotifier =
+            new ExternalCaptureStateTracker();
+    private final @NonNull Context mContext;
 
     /**
      * Constructor for internal use only. Could be exposed for testing purposes in the future.
@@ -82,13 +82,6 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             @NonNull Context context) {
         mDelegate = Objects.requireNonNull(delegate);
         mContext = context;
-        new ExternalCaptureStateTracker().registerListener(active -> {
-            try {
-                mDelegate.setCaptureState(active);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            }
-        });
     }
 
     @Override
@@ -243,7 +236,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
                                 // This property needs to be defined in an init.rc script and
                                 // trigger a HAL reboot.
                                 SystemProperties.set("sys.audio.restart.hal", "1");
-                            });
+                            }, mCaptureStateNotifier);
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }

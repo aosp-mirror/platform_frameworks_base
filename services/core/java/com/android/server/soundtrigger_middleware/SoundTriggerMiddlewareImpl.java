@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.os.IBinder;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -119,19 +118,5 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareIntern
     public @NonNull
     ISoundTriggerModule attach(int handle, @NonNull ISoundTriggerCallback callback) {
         return mModules[handle].attach(callback);
-    }
-
-    @Override
-    public void setCaptureState(boolean active) {
-        for (SoundTriggerModule module : mModules) {
-            module.setExternalCaptureState(active);
-        }
-    }
-
-    @Override
-    public @NonNull
-    IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
     }
 }

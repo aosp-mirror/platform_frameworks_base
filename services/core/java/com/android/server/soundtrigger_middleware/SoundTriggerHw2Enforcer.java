@@ -206,6 +206,11 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         return mUnderlying.interfaceDescriptor();
     }
 
+    @Override
+    public void flushCallbacks() {
+        mUnderlying.flushCallbacks();
+    }
+
     private RuntimeException handleException(RuntimeException e) {
         if (e instanceof RecoverableException) {
             throw e;

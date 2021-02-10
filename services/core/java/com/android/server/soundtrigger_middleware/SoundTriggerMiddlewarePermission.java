@@ -89,22 +89,10 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper()));
     }
 
-    @Override
-    public void setCaptureState(boolean active) throws RemoteException {
-        // This is an internal call. No permissions needed.
-        mDelegate.setCaptureState(active);
-    }
-
     // Override toString() in order to have the delegate's ID in it.
     @Override
     public String toString() {
         return Objects.toString(mDelegate);
-    }
-
-    @Override
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
     }
 
     /**
