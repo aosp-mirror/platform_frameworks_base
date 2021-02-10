@@ -102,6 +102,10 @@
   <item type="id" name="selection_end_handle" />
   <item type="id" name="insertion_handle" />
   <item type="id" name="floating_toolbar_menu_item_image_button" />
+  <item type="id" name="camera" />
+  <item type="id" name="mic" />
+  <item type="id" name="overlay" />
+  <item type="id" name="app_ops" />
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
   <item type="id" name="accessibilityActionShowOnScreen" />

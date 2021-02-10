@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.content.Context
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
@@ -48,8 +47,8 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     private lateinit var conversationIconView: CachingIconView
     private lateinit var conversationBadgeBg: View
-    private lateinit var expandButton: View
-    private lateinit var expandButtonContainer: View
+    private lateinit var expandBtn: View
+    private lateinit var expandBtnContainer: View
     private lateinit var imageMessageContainer: ViewGroup
     private lateinit var messagingLinearLayout: MessagingLinearLayout
     private lateinit var conversationTitleView: View
@@ -66,9 +65,8 @@ class NotificationConversationTemplateViewWrapper constructor(
             conversationIconView = requireViewById(com.android.internal.R.id.conversation_icon)
             conversationBadgeBg =
                     requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
-            expandButton = requireViewById(com.android.internal.R.id.expand_button)
-            expandButtonContainer =
-                    requireViewById(com.android.internal.R.id.expand_button_container)
+            expandBtn = requireViewById(com.android.internal.R.id.expand_button)
+            expandBtnContainer = requireViewById(com.android.internal.R.id.expand_button_container)
             importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
             appName = requireViewById(com.android.internal.R.id.app_name_text)
             conversationTitleView = requireViewById(com.android.internal.R.id.conversation_text)
@@ -126,7 +124,7 @@ class NotificationConversationTemplateViewWrapper constructor(
         addViewsTransformingToSimilar(
                 conversationIconView,
                 conversationBadgeBg,
-                expandButton,
+                expandBtn,
                 importanceRing,
                 facePileTop,
                 facePileBottom,
@@ -134,11 +132,9 @@ class NotificationConversationTemplateViewWrapper constructor(
         )
     }
 
-    override fun getExpandButton() = super.getExpandButton()
-
     override fun setShelfIconVisible(visible: Boolean) {
         if (conversationLayout.isImportantConversation) {
-            if (conversationIconView.visibility != GONE) {
+            if (conversationIconView.visibility != View.GONE) {
                 conversationIconView.isForceHidden = visible
                 // We don't want the small icon to be hidden by the extended wrapper, as force
                 // hiding the conversationIcon will already do that via its listener.
@@ -152,7 +148,7 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     override fun getShelfTransformationTarget(): View? =
             if (conversationLayout.isImportantConversation)
-                if (conversationIconView.visibility != GONE)
+                if (conversationIconView.visibility != View.GONE)
                     conversationIconView
                 else
                     // A notification with a fallback icon was set to important. Currently
@@ -169,8 +165,8 @@ class NotificationConversationTemplateViewWrapper constructor(
             conversationLayout.updateExpandability(expandable, onClickListener)
 
     override fun disallowSingleClick(x: Float, y: Float): Boolean {
-        val isOnExpandButton = expandButtonContainer.visibility == View.VISIBLE &&
-                isOnView(expandButtonContainer, x, y)
+        val isOnExpandButton = expandBtnContainer.visibility == View.VISIBLE &&
+                isOnView(expandBtnContainer, x, y)
         return isOnExpandButton || super.disallowSingleClick(x, y)
     }
 
@@ -179,10 +175,4 @@ class NotificationConversationTemplateViewWrapper constructor(
                 minHeightWithActions
             else
                 super.getMinLayoutHeight()
-
-    private fun addTransformedViews(vararg vs: View?) =
-            vs.forEach { view -> view?.let(mTransformationHelper::addTransformedView) }
-
-    private fun addViewsTransformingToSimilar(vararg vs: View?) =
-            vs.forEach { view -> view?.let(mTransformationHelper::addViewTransformingToSimilar) }
 }
