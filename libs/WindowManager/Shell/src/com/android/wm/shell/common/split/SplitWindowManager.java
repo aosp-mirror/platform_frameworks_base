@@ -39,6 +39,7 @@ import android.view.IWindow;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
+import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
@@ -55,6 +56,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     private final ParentContainerCallbacks mParentContainerCallbacks;
     private Context mContext;
     private SurfaceControlViewHost mViewHost;
+    private SurfaceControl mLeash;
     private boolean mResizingSplits;
     private final String mWindowName;
 
@@ -88,7 +90,15 @@ public final class SplitWindowManager extends WindowlessWindowManager {
 
     @Override
     protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
-        mParentContainerCallbacks.attachToParentSurface(b);
+        // Can't set position for the ViewRootImpl SC directly. Create a leash to manipulate later.
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+                .setContainerLayer()
+                .setName(TAG)
+                .setHidden(false)
+                .setCallsite("SplitWindowManager#attachToParentSurface");
+        mParentContainerCallbacks.attachToParentSurface(builder);
+        mLeash = builder.build();
+        b.setParent(mLeash);
     }
 
     /** Inflates {@link DividerView} on to the root surface. */
@@ -118,9 +128,15 @@ public final class SplitWindowManager extends WindowlessWindowManager {
      * hierarchy.
      */
     void release() {
-        if (mViewHost == null) return;
-        mViewHost.release();
-        mViewHost = null;
+        if (mViewHost != null){
+            mViewHost.release();
+            mViewHost = null;
+        }
+
+        if (mLeash != null) {
+            new SurfaceControl.Transaction().remove(mLeash).apply();
+            mLeash = null;
+        }
     }
 
     void setResizingSplits(boolean resizing) {
@@ -139,6 +155,6 @@ public final class SplitWindowManager extends WindowlessWindowManager {
      */
     @Nullable
     SurfaceControl getSurfaceControl() {
-        return mViewHost == null ? null : getSurfaceControl(mViewHost.getWindowToken());
+        return mLeash;
     }
 }
