@@ -39,4 +39,6 @@
 
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
+
+    <bool name="flag_toast_style">false</bool>
 </resources>
