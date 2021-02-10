@@ -478,6 +478,7 @@ class Sensor implements IBinder.DeathRecipient {
     }
 
     void setTestHalEnabled(boolean enabled) {
+        Slog.w(mTag, "setTestHalEnabled, enabled");
         mTestHalEnabled = enabled;
     }
 
