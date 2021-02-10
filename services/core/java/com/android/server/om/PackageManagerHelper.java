@@ -22,10 +22,15 @@ import android.content.om.OverlayableInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.os.RemoteException;
+import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.server.pm.PackageManagerServiceUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +41,33 @@ import java.util.Map;
  * @hide
  */
 interface PackageManagerHelper {
+
+    /**
+     * Initializes the helper for the user. This only needs to be invoked one time before
+     * packages of this user are queried.
+     * @param userId the user id to initialize
+     * @return a map of package name to all packages installed in the user
+     */
+    @NonNull
+    ArrayMap<String, AndroidPackage> initializeForUser(final int userId);
+
+    /**
+     * Retrieves the package information if it is installed for the user.
+     */
+    @Nullable
+    AndroidPackage getPackageForUser(@NonNull final String packageName, final int userId);
+
+    /**
+     * Returns whether the package is an instant app.
+     */
+    boolean isInstantApp(@NonNull final String packageName, final int userId);
+
+    /**
+     * @see PackageManager#getPackagesForUid(int)
+     */
+    @Nullable
+    String[] getPackagesForUid(int uid);
+
     /**
      * @return true if the target package has declared an overlayable
      */
@@ -64,11 +96,6 @@ interface PackageManagerHelper {
     Map<String, Map<String, String>> getNamedActors();
 
     /**
-     * @see PackageManagerInternal#getOverlayPackages(int)
-     */
-    List<PackageInfo> getOverlayPackages(int userId);
-
-    /**
      * Read from the APK and AndroidManifest of a package to return the overlayable defined for
      * a given name.
      *
@@ -78,19 +105,6 @@ interface PackageManagerHelper {
     OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
             @NonNull String targetOverlayableName, int userId)
             throws IOException;
-
-    /**
-     * @see PackageManager#getPackagesForUid(int)
-     */
-    @Nullable
-    String[] getPackagesForUid(int uid);
-
-    /**
-     * @param userId user to filter package visibility by
-     * @see PackageManager#getPackageInfo(String, int)
-     */
-    @Nullable
-    PackageInfo getPackageInfo(@NonNull String packageName, int userId);
 
     /**
      * @return true if {@link PackageManagerServiceUtils#compareSignatures} run on both packages

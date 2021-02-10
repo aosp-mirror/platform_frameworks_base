@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include <android-base/file.h>
+#include <androidfw/ResourceTypes.h>
+#include <gtest/gtest.h>
+
 #include <cstdio>  // fclose
 #include <fstream>
 #include <memory>
@@ -22,14 +26,10 @@
 #include "R.h"
 #include "TestConstants.h"
 #include "TestHelpers.h"
-#include "androidfw/ResourceTypes.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "idmap2/LogInfo.h"
 #include "idmap2/ResourceMapping.h"
 
 using android::Res_value;
-using android::idmap2::utils::ExtractOverlayManifestInfo;
 
 using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
@@ -41,32 +41,36 @@ namespace android::idmap2 {
     ASSERT_TRUE(result) << result.GetErrorMessage(); \
   } while (0)
 
-Result<ResourceMapping> TestGetResourceMapping(const std::string& local_target_apk_path,
-                                               const std::string& local_overlay_apk_path,
+Result<ResourceMapping> TestGetResourceMapping(const std::string& local_target_path,
+                                               const std::string& local_overlay_path,
                                                const std::string& overlay_name,
                                                const PolicyBitmask& fulfilled_policies,
                                                bool enforce_overlayable) {
-  auto overlay_info =
-      ExtractOverlayManifestInfo(GetTestDataPath() + local_overlay_apk_path, overlay_name);
+  const std::string target_path = (local_target_path[0] == '/')
+                                      ? local_target_path
+                                      : (GetTestDataPath() + "/" + local_target_path);
+  auto target = TargetResourceContainer::FromPath(target_path);
+  if (!target) {
+    return Error(target.GetError(), R"(Failed to load target "%s")", target_path.c_str());
+  }
+
+  const std::string overlay_path = (local_overlay_path[0] == '/')
+                                       ? local_overlay_path
+                                       : (GetTestDataPath() + "/" + local_overlay_path);
+  auto overlay = OverlayResourceContainer::FromPath(overlay_path);
+  if (!overlay) {
+    return Error(overlay.GetError(), R"(Failed to load overlay "%s")", overlay_path.c_str());
+  }
+
+  auto overlay_info = (*overlay)->FindOverlayInfo(overlay_name);
   if (!overlay_info) {
-    return overlay_info.GetError();
-  }
-
-  const std::string target_apk_path(GetTestDataPath() + local_target_apk_path);
-  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
-  if (!target_apk) {
-    return Error(R"(Failed to load target apk "%s")", target_apk_path.data());
-  }
-
-  const std::string overlay_apk_path(GetTestDataPath() + local_overlay_apk_path);
-  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
-  if (!overlay_apk) {
-    return Error(R"(Failed to load overlay apk "%s")", overlay_apk_path.data());
+    return Error(overlay_info.GetError(), R"(Failed to find overlay name "%s")",
+                 overlay_name.c_str());
   }
 
   LogInfo log_info;
-  return ResourceMapping::FromApkAssets(*target_apk, *overlay_apk, *overlay_info,
-                                        fulfilled_policies, enforce_overlayable, log_info);
+  return ResourceMapping::FromContainers(**target, **overlay, *overlay_info, fulfilled_policies,
+                                         enforce_overlayable, log_info);
 }
 
 Result<Unit> MappingExists(const ResourceMapping& mapping, ResourceId target_resource,
@@ -128,7 +132,7 @@ Result<Unit> MappingExists(const ResourceMapping& mapping, const ResourceId& tar
 }
 
 TEST(ResourceMappingTests, ResourcesFromApkAssetsLegacy) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay-legacy.apk", "",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay-legacy.apk", "",
                                           PolicyFlags::PUBLIC, /* enforce_overlayable */ false);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
@@ -145,7 +149,7 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsLegacy) {
 }
 
 TEST(ResourceMappingTests, ResourcesFromApkAssetsNonMatchingNames) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk", "SwapNames",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay.apk", "SwapNames",
                                           PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
@@ -161,7 +165,7 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsNonMatchingNames) {
 }
 
 TEST(ResourceMappingTests, DoNotRewriteNonOverlayResourceId) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay.apk",
                                           "DifferentPackages", PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
@@ -176,7 +180,7 @@ TEST(ResourceMappingTests, DoNotRewriteNonOverlayResourceId) {
 }
 
 TEST(ResourceMappingTests, InlineResources) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk", "Inline",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay.apk", "Inline",
                                           PolicyFlags::PUBLIC, /* enforce_overlayable */ false);
 
   constexpr size_t overlay_string_pool_size = 10U;
@@ -189,8 +193,32 @@ TEST(ResourceMappingTests, InlineResources) {
   ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_INT_DEC, 73U));
 }
 
+TEST(ResourceMappingTests, FabricatedOverlay) {
+  auto frro = FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "test.target")
+                  .SetOverlayable("TestResources")
+                  .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U)
+                  .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000)
+                  .Build();
+
+  ASSERT_TRUE(frro);
+  TemporaryFile tf;
+  std::ofstream out(tf.path);
+  ASSERT_TRUE((*frro).ToBinaryStream(out));
+  out.close();
+
+  auto resources = TestGetResourceMapping("target/target.apk", tf.path, "SandTheme",
+                                          PolicyFlags::PUBLIC, /* enforce_overlayable */ false);
+
+  ASSERT_TRUE(resources) << resources.GetErrorMessage();
+  auto& res = *resources;
+  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 2U);
+  ASSERT_EQ(res.GetOverlayToTargetMap().size(), 0U);
+  ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_REFERENCE, 0x7f010000));
+  ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_INT_DEC, 2U));
+}
+
 TEST(ResourceMappingTests, CreateIdmapFromApkAssetsPolicySystemPublic) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay.apk",
                                           TestConstants::OVERLAY_NAME_ALL_POLICIES,
                                           PolicyFlags::SYSTEM_PARTITION | PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ true);
@@ -209,7 +237,7 @@ TEST(ResourceMappingTests, CreateIdmapFromApkAssetsPolicySystemPublic) {
 // Resources that are not declared as overlayable and resources that a protected by policies the
 // overlay does not fulfill must not map to overlay resources.
 TEST(ResourceMappingTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalid) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay.apk",
                                           TestConstants::OVERLAY_NAME_ALL_POLICIES,
                                           PolicyFlags::SYSTEM_PARTITION | PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ true);
@@ -229,7 +257,7 @@ TEST(ResourceMappingTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalid) {
 // overlay does not fulfilled can map to overlay resources when overlayable enforcement is turned
 // off.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsPolicySystemPublicInvalidIgnoreOverlayable) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay.apk",
                                           TestConstants::OVERLAY_NAME_ALL_POLICIES,
                                           PolicyFlags::SYSTEM_PARTITION | PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
@@ -264,7 +292,7 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsPolicySystemPublicInvalidIgnore
 // Overlays that do not target an <overlayable> tag can overlay any resource if overlayable
 // enforcement is disabled.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsNoDefinedOverlayableAndNoTargetName) {
-  auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay-legacy.apk", "",
+  auto resources = TestGetResourceMapping("target/target.apk", "overlay/overlay-legacy.apk", "",
                                           PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
@@ -284,10 +312,9 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsNoDefinedOverlayableAndNoTarget
 // Overlays that are neither pre-installed nor signed with the same signature as the target cannot
 // overlay packages that have not defined overlayable resources.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPoliciesPublicFail) {
-  auto resources =
-      TestGetResourceMapping("/target/target-no-overlayable.apk", "/overlay/overlay.apk",
-                             "NoTargetName", PolicyFlags::PUBLIC,
-                             /* enforce_overlayable */ true);
+  auto resources = TestGetResourceMapping("target/target-no-overlayable.apk", "overlay/overlay.apk",
+                                          "NoTargetName", PolicyFlags::PUBLIC,
+                                          /* enforce_overlayable */ true);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 0U);
@@ -297,9 +324,9 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPoliciesPublicFail) {
 // signed with the same signature as the reference package can overlay packages that have not
 // defined overlayable resources.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPolicies) {
-  auto CheckEntries = [&](const PolicyBitmask& fulfilled_policies) -> void {
+  auto CheckEntries = [&](const PolicyBitmask& fulfilled_policies) {
     auto resources =
-        TestGetResourceMapping("/target/target-no-overlayable.apk", "/overlay/overlay.apk",
+        TestGetResourceMapping("target/target-no-overlayable.apk", "overlay/overlay.apk",
                                TestConstants::OVERLAY_NAME_ALL_POLICIES, fulfilled_policies,
                                /* enforce_overlayable */ true);
 

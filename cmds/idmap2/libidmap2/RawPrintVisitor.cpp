@@ -18,16 +18,13 @@
 
 #include <algorithm>
 #include <cstdarg>
-#include <string>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
-#include "androidfw/ApkAssets.h"
 #include "idmap2/PolicyUtils.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 
-using android::ApkAssets;
 using android::idmap2::policy::PoliciesToDebugString;
 
 namespace android::idmap2 {
@@ -48,27 +45,19 @@ void RawPrintVisitor::visit(const IdmapHeader& header) {
   print(header.GetOverlayName(), true /* print_value */, "overlay name");
   print(header.GetDebugInfo(), false /* print_value */, "debug info");
 
-  auto target_apk_ = ApkAssets::Load(header.GetTargetPath());
-  if (target_apk_) {
-    target_am_.SetApkAssets({target_apk_.get()});
-    apk_assets_.push_back(std::move(target_apk_));
+  if (auto target = TargetResourceContainer::FromPath(header.GetTargetPath())) {
+    target_ = std::move(*target);
   }
-
-  auto overlay_apk_ = ApkAssets::Load(header.GetOverlayPath());
-  if (overlay_apk_) {
-    overlay_am_.SetApkAssets({overlay_apk_.get()});
-    apk_assets_.push_back(std::move(overlay_apk_));
+  if (auto overlay = OverlayResourceContainer::FromPath(header.GetOverlayPath())) {
+    overlay_ = std::move(*overlay);
   }
 }
 
 void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
-  const bool target_package_loaded = !target_am_.GetApkAssets().empty();
-  const bool overlay_package_loaded = !overlay_am_.GetApkAssets().empty();
-
   for (auto& target_entry : data.GetTargetEntries()) {
     Result<std::string> target_name(Error(""));
-    if (target_package_loaded) {
-      target_name = utils::ResToTypeEntryName(target_am_, target_entry.target_id);
+    if (target_ != nullptr) {
+      target_name = target_->GetResourceName(target_entry.target_id);
     }
     if (target_name) {
       print(target_entry.target_id, "target id: %s", target_name->c_str());
@@ -77,8 +66,8 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
     }
 
     Result<std::string> overlay_name(Error(""));
-    if (overlay_package_loaded) {
-      overlay_name = utils::ResToTypeEntryName(overlay_am_, target_entry.overlay_id);
+    if (overlay_ != nullptr) {
+      overlay_name = overlay_->GetResourceName(target_entry.overlay_id);
     }
     if (overlay_name) {
       print(target_entry.overlay_id, "overlay id: %s", overlay_name->c_str());
@@ -89,8 +78,8 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
 
   for (auto& target_entry : data.GetTargetInlineEntries()) {
     Result<std::string> target_name(Error(""));
-    if (target_package_loaded) {
-      target_name = utils::ResToTypeEntryName(target_am_, target_entry.target_id);
+    if (target_ != nullptr) {
+      target_name = target_->GetResourceName(target_entry.target_id);
     }
     if (target_name) {
       print(target_entry.target_id, "target id: %s", target_name->c_str());
@@ -104,10 +93,10 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
           utils::DataTypeToString(target_entry.value.data_type).data());
 
     Result<std::string> overlay_name(Error(""));
-    if (overlay_package_loaded &&
+    if (overlay_ != nullptr &&
         (target_entry.value.data_value == Res_value::TYPE_REFERENCE ||
          target_entry.value.data_value == Res_value::TYPE_DYNAMIC_REFERENCE)) {
-      overlay_name = utils::ResToTypeEntryName(overlay_am_, target_entry.value.data_value);
+      overlay_name = overlay_->GetResourceName(target_entry.value.data_value);
     }
 
     if (overlay_name) {
@@ -119,8 +108,8 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
 
   for (auto& overlay_entry : data.GetOverlayEntries()) {
     Result<std::string> overlay_name(Error(""));
-    if (overlay_package_loaded) {
-      overlay_name = utils::ResToTypeEntryName(overlay_am_, overlay_entry.overlay_id);
+    if (overlay_ != nullptr) {
+      overlay_name = overlay_->GetResourceName(overlay_entry.overlay_id);
     }
 
     if (overlay_name) {
@@ -130,8 +119,8 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
     }
 
     Result<std::string> target_name(Error(""));
-    if (target_package_loaded) {
-      target_name = utils::ResToTypeEntryName(target_am_, overlay_entry.target_id);
+    if (target_ != nullptr) {
+      target_name = target_->GetResourceName(overlay_entry.target_id);
     }
 
     if (target_name) {
@@ -145,9 +134,6 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
 }
 
 void RawPrintVisitor::visit(const IdmapData::Header& header) {
-  print(header.GetTargetPackageId(), "target package id");
-  print(header.GetOverlayPackageId(), "overlay package id");
-  align();
   print(header.GetTargetEntryCount(), "target entry count");
   print(header.GetTargetInlineEntryCount(), "target inline entry count");
   print(header.GetOverlayEntryCount(), "overlay entry count");
