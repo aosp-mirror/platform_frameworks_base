@@ -641,19 +641,32 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         boolean isVcnManagedNetwork = false;
+        boolean isRestrictedCarrierWifi = false;
         if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             synchronized (mLock) {
                 ParcelUuid subGroup = mLastSnapshot.getGroupForSubId(subId);
 
                 Vcn vcn = mVcns.get(subGroup);
-                if (vcn != null && vcn.isActive()) {
-                    isVcnManagedNetwork = true;
+                if (vcn != null) {
+                    if (vcn.isActive()) {
+                        isVcnManagedNetwork = true;
+                    }
+
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        // Carrier WiFi always restricted if VCN exists (even in safe mode).
+                        isRestrictedCarrierWifi = true;
+                    }
                 }
             }
         }
+
         if (isVcnManagedNetwork) {
             networkCapabilities.removeCapability(
                     NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+        }
+
+        if (isRestrictedCarrierWifi) {
+            networkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         }
 
         return new VcnUnderlyingNetworkPolicy(false /* isTearDownRequested */, networkCapabilities);
