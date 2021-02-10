@@ -13746,14 +13746,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.print(" mapped + ");
                     pw.print(stringifyKBSize(dmabufUnmapped));
                     pw.println(" unmapped)");
-                    // TODO(b/167709539): also add pooled memory from DMA-BUF heaps
                     kernelUsed += totalExportedDmabuf;
+                }
+                final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+                if (totalDmabufHeapPool >= 0) {
+                    pw.print("DMA-BUF Heaps pool: ");
+                    pw.println(stringifyKBSize(totalDmabufHeapPool));
                 }
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
                 pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
             }
+
+            /*
+             * Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+             * memInfo.getCachedSizeKb().
+             */
             final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - kernelUsed - memInfo.getZramTotalSizeKb();
@@ -14565,8 +14574,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 memInfoBuilder.append("DMA-BUF: ");
                 memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));
                 memInfoBuilder.append("\n");
-                // TODO(b/167709539): also add pooled memory from DMA-BUF heaps
                 kernelUsed += totalExportedDmabuf;
+            }
+            final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+            if (totalDmabufHeapPool >= 0) {
+                memInfoBuilder.append("DMA-BUF Heaps pool: ");
+                memInfoBuilder.append(stringifyKBSize(totalDmabufHeapPool));
+                memInfoBuilder.append("\n");
             }
         }
 
@@ -14580,6 +14594,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append(stringifyKBSize(
                                   totalPss - cachedPss + kernelUsed));
         memInfoBuilder.append("\n");
+
+        /*
+         * Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+         * memInfo.getCachedSizeKb().
+         */
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
