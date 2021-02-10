@@ -3837,6 +3837,24 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(cellNetworkCallback);
     }
 
+    @Test
+    public void testRegisterSystemDefaultCallbackRequiresNetworkSettings() throws Exception {
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(false /* validated */);
+
+        final Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        assertThrows(SecurityException.class,
+                () -> mCm.registerSystemDefaultNetworkCallback(callback, handler));
+        callback.assertNoCallback();
+
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_GRANTED);
+        mCm.registerSystemDefaultNetworkCallback(callback, handler);
+        callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
+        mCm.unregisterNetworkCallback(callback);
+    }
+
     private void setCaptivePortalMode(int mode) {
         ContentResolver cr = mServiceContext.getContentResolver();
         Settings.Global.putInt(cr, Settings.Global.CAPTIVE_PORTAL_MODE, mode);
