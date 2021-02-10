@@ -686,7 +686,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
      * @return true if this AuthSession is finished, e.g. should be set to null
      */
     boolean onCancelAuthSession(boolean force) {
-        final boolean authStarted = mState == STATE_AUTH_STARTED
+        final boolean authStarted = mState == STATE_AUTH_CALLED
+                || mState == STATE_AUTH_STARTED
                 || mState == STATE_AUTH_STARTED_UI_SHOWING;
 
         if (authStarted && !force) {

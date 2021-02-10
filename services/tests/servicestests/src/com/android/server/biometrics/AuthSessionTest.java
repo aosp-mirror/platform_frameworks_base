@@ -103,7 +103,8 @@ public class AuthSessionTest {
     @Test
     public void testNewAuthSession_eligibleSensorsSetToStateUnknown() throws RemoteException {
         setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_REAR);
-        setupFace(1 /* id */, false /* confirmationAlwaysRequired */);
+        setupFace(1 /* id */, false /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
 
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
@@ -118,7 +119,8 @@ public class AuthSessionTest {
 
     @Test
     public void testStartNewAuthSession() throws RemoteException {
-        setupFace(0 /* id */, false /* confirmationAlwaysRequired */);
+        setupFace(0 /* id */, false /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
         setupFingerprint(1 /* id */, FingerprintSensorProperties.TYPE_REAR);
 
         final boolean requireConfirmation = true;
@@ -181,9 +183,6 @@ public class AuthSessionTest {
 
         final long operationId = 123;
         final int userId = 10;
-        final int callingUid = 100;
-        final int callingPid = 1000;
-        final int callingUserId = 10000;
 
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
@@ -220,7 +219,25 @@ public class AuthSessionTest {
         assertEquals(STATE_AUTH_STARTED_UI_SHOWING, session.getState());
         assertEquals(BiometricSensor.STATE_AUTHENTICATING,
                 session.mPreAuthInfo.eligibleSensors.get(0).getSensorState());
+    }
 
+    @Test
+    public void testCancelAuthentication_whenStateAuthCalled_invokesCancel()
+            throws RemoteException {
+        final IBiometricAuthenticator faceAuthenticator = mock(IBiometricAuthenticator.class);
+
+        setupFace(0 /* id */, false /* confirmationAlwaysRequired */, faceAuthenticator);
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                0 /* operationId */,
+                0 /* userId */);
+
+        session.goToInitialState();
+        assertEquals(STATE_AUTH_CALLED, session.getState());
+        session.onCancelAuthSession(false /* force */);
+
+        verify(faceAuthenticator).cancelAuthenticationFromService(eq(mToken), eq(TEST_PACKAGE));
     }
 
     private PreAuthInfo createPreAuthInfo(List<BiometricSensor> sensors, int userId,
@@ -282,14 +299,14 @@ public class AuthSessionTest {
                 false /* resetLockoutRequiresHardwareAuthToken */));
     }
 
-    private void setupFace(int id, boolean confirmationAlwaysRequired) throws RemoteException {
-        IBiometricAuthenticator faceAuthenticator = mock(IBiometricAuthenticator.class);
-        when(faceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-        when(faceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+    private void setupFace(int id, boolean confirmationAlwaysRequired,
+            IBiometricAuthenticator authenticator) throws RemoteException {
+        when(authenticator.isHardwareDetected(any())).thenReturn(true);
+        when(authenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         mSensors.add(new BiometricSensor(id,
                 TYPE_FACE /* modality */,
                 Authenticators.BIOMETRIC_STRONG /* strength */,
-                faceAuthenticator) {
+                authenticator) {
             @Override
             boolean confirmationAlwaysRequired(int userId) {
                 return confirmationAlwaysRequired;
