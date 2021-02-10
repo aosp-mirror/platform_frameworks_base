@@ -1834,7 +1834,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mWm.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateInputWindows */);
     }
 
-    private void performLayout(DisplayContent dc) {
+    static void performLayout(DisplayContent dc) {
         dc.setLayoutNeeded();
         dc.performLayout(true /* initial */, false /* updateImeWindows */);
     }

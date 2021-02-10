@@ -67,11 +67,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.when;
 
+import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.Gravity;
 import android.view.InputWindowHandle;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -557,6 +560,46 @@ public class WindowStateTests extends WindowTestsBase {
         window.switchUser(mWm.mCurrentUserId);
         assertTrue(window.isVisible());
         assertTrue(window.isVisibleByPolicy());
+    }
+
+    @Test
+    public void testCompatOverrideScale() {
+        final float overrideScale = 2; // 0.5x on client side.
+        final CompatModePackages cmp = mWm.mAtmService.mCompatModePackages;
+        spyOn(cmp);
+        doReturn(overrideScale).when(cmp).getCompatScale(anyString(), anyInt());
+        final WindowState w = createWindow(null, TYPE_APPLICATION_OVERLAY, "win");
+        makeWindowVisible(w);
+        w.setRequestedSize(100, 200);
+        w.mAttrs.width = w.mAttrs.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        w.mAttrs.gravity = Gravity.TOP | Gravity.LEFT;
+        DisplayContentTests.performLayout(mDisplayContent);
+
+        // Frame on screen = 100x200. Compat frame on client = 50x100.
+        final Rect unscaledCompatFrame = new Rect(w.getWindowFrames().mCompatFrame);
+        unscaledCompatFrame.scale(overrideScale);
+        assertEquals(w.getWindowFrames().mFrame, unscaledCompatFrame);
+
+        // Surface should apply the scale.
+        w.prepareSurfaces();
+        verify(w.getPendingTransaction()).setMatrix(w.getSurfaceControl(),
+                overrideScale, 0, 0, overrideScale);
+
+        // According to "dp * density / 160 = px", density is scaled and the size in dp is the same.
+        final CompatibilityInfo compatInfo = cmp.compatibilityInfoForPackageLocked(
+                mContext.getApplicationInfo());
+        final Configuration winConfig = w.getConfiguration();
+        final Configuration clientConfig = new Configuration(w.getConfiguration());
+        compatInfo.applyToConfiguration(clientConfig.densityDpi, clientConfig);
+
+        assertEquals(winConfig.screenWidthDp, clientConfig.screenWidthDp);
+        assertEquals(winConfig.screenHeightDp, clientConfig.screenHeightDp);
+        assertEquals(winConfig.smallestScreenWidthDp, clientConfig.smallestScreenWidthDp);
+        assertEquals(winConfig.densityDpi, (int) (clientConfig.densityDpi * overrideScale));
+
+        final Rect unscaledClientBounds = new Rect(clientConfig.windowConfiguration.getBounds());
+        unscaledClientBounds.scale(overrideScale);
+        assertEquals(w.getWindowConfiguration().getBounds(), unscaledClientBounds);
     }
 
     @UseTestDisplay(addWindows = { W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE })
