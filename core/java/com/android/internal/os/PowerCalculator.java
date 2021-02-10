@@ -92,19 +92,6 @@ public abstract class PowerCalculator {
      */
     protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                                       long rawUptimeUs, int statsType) {
-
-        // TODO(b/175156498): Temporary code during the transition from BatterySippers to
-        //  BatteryConsumers.
-        UidBatteryConsumer.Builder builder = new UidBatteryConsumer.Builder(0, 0, u);
-        calculateApp(builder, u, rawRealtimeUs, rawUptimeUs, BatteryUsageStatsQuery.DEFAULT);
-        final UidBatteryConsumer uidBatteryConsumer = builder.build();
-        app.cpuPowerMah = uidBatteryConsumer.getConsumedPower(
-                UidBatteryConsumer.POWER_COMPONENT_CPU);
-        app.cpuTimeMs = uidBatteryConsumer.getUsageDurationMillis(
-                UidBatteryConsumer.TIME_COMPONENT_CPU);
-        app.cpuFgTimeMs = uidBatteryConsumer.getUsageDurationMillis(
-                UidBatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND);
-        app.packageWithHighestDrain = uidBatteryConsumer.getPackageWithHighestDrain();
     }
 
     /**
