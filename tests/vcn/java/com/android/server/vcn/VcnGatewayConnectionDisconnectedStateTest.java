@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.net.IpSecManager;
@@ -104,6 +105,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         verify(mIpSecSvc).deleteTunnelInterface(eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), any());
         verifySafeModeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
         assertFalse(mGatewayConnection.isRunning());
+        verify(mGatewayStatusCallback).onQuit();
     }
 
     @Test
@@ -113,6 +115,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
 
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
         assertTrue(mGatewayConnection.isRunning());
+        verify(mGatewayStatusCallback, never()).onQuit();
         // No safe mode timer changes expected.
     }
 }

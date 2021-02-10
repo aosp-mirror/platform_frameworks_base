@@ -649,6 +649,8 @@ public class VcnGatewayConnection extends StateMachine {
         cancelSafeModeAlarm();
 
         mUnderlyingNetworkTracker.teardown();
+
+        mGatewayStatusCallback.onQuit();
     }
 
     /**
