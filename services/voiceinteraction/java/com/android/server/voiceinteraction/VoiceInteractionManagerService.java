@@ -581,17 +581,24 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        VoiceInteractionServiceInfo findAvailInteractor(int userHandle, String packageName) {
-            List<ResolveInfo> available =
-                    mContext.getPackageManager().queryIntentServicesAsUser(
-                            new Intent(VoiceInteractionService.SERVICE_INTERFACE)
-                                    .setPackage(packageName),
-                            PackageManager.GET_META_DATA
-                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
+        private List<ResolveInfo> queryInteractorServices(
+                @UserIdInt int user,
+                @Nullable String packageName) {
+            return mContext.getPackageManager().queryIntentServicesAsUser(
+                    new Intent(VoiceInteractionService.SERVICE_INTERFACE).setPackage(packageName),
+                    PackageManager.GET_META_DATA
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                    user);
+        }
+
+        VoiceInteractionServiceInfo findAvailInteractor(
+                @UserIdInt int user,
+                @Nullable String packageName) {
+            List<ResolveInfo> available = queryInteractorServices(user, packageName);
             int numAvailable = available.size();
             if (numAvailable == 0) {
-                Slog.w(TAG, "no available voice interaction services found for user " + userHandle);
+                Slog.w(TAG, "no available voice interaction services found for user " + user);
                 return null;
             }
             // Find first system package.  We never want to allow third party services to
@@ -1643,13 +1650,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     String pkg = roleHolders.get(0);
 
                     // Try to set role holder as VoiceInteractionService
-                    List<ResolveInfo> services = mPm.queryIntentServicesAsUser(
-                            new Intent(VoiceInteractionService.SERVICE_INTERFACE).setPackage(pkg),
-                            PackageManager.GET_META_DATA
-                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
-
-                    for (ResolveInfo resolveInfo : services) {
+                    for (ResolveInfo resolveInfo : queryInteractorServices(userId, pkg)) {
                         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
 
                         VoiceInteractionServiceInfo voiceInteractionServiceInfo =
