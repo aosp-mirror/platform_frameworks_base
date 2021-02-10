@@ -110,6 +110,8 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
+import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_ANIM_BUFFER;
+import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
@@ -284,7 +286,6 @@ import com.android.server.notification.toast.CustomToastRecord;
 import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
-import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
@@ -358,7 +359,7 @@ public class NotificationManagerService extends SystemService {
     private static final int MESSAGE_RECONSIDER_RANKING = 1000;
     private static final int MESSAGE_RANKING_SORT = 1001;
 
-    static final int LONG_DELAY = PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
+    static final int LONG_DELAY = TOAST_WINDOW_TIMEOUT - TOAST_WINDOW_ANIM_BUFFER; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
 
     // 1 second past the ANR timeout.
@@ -378,7 +379,9 @@ public class NotificationManagerService extends SystemService {
     static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
             Adjustment.KEY_TEXT_REPLIES,
-            Adjustment.KEY_NOT_CONVERSATION};
+            Adjustment.KEY_NOT_CONVERSATION,
+            Adjustment.KEY_IMPORTANCE,
+            Adjustment.KEY_RANKING_SCORE};
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
@@ -3054,7 +3057,7 @@ public class NotificationManagerService extends SystemService {
                     // If the callback fails, this will remove it from the list, so don't
                     // assume that it's valid after this.
                     if (index == 0) {
-                        showNextToastLocked();
+                        showNextToastLocked(false);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(callingId);
@@ -7416,7 +7419,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mToastQueue")
-    void showNextToastLocked() {
+    void showNextToastLocked(boolean lastToastWasTextRecord) {
         if (mIsCurrentToastShown) {
             return; // Don't show the same toast twice.
         }
@@ -7430,7 +7433,7 @@ public class NotificationManagerService extends SystemService {
                     mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
 
             if (tryShowToast(record, rateLimitingEnabled, isWithinQuota)) {
-                scheduleDurationReachedLocked(record);
+                scheduleDurationReachedLocked(record, lastToastWasTextRecord);
                 mIsCurrentToastShown = true;
                 if (rateLimitingEnabled) {
                     mToastRateLimiter.noteEvent(userId, record.pkg, TOAST_QUOTA_TAG);
@@ -7501,7 +7504,7 @@ public class NotificationManagerService extends SystemService {
             // Show the next one. If the callback fails, this will remove
             // it from the list, so don't assume that the list hasn't changed
             // after this point.
-            showNextToastLocked();
+            showNextToastLocked(lastToast instanceof TextToastRecord);
         }
     }
 
@@ -7515,7 +7518,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mToastQueue")
-    private void scheduleDurationReachedLocked(ToastRecord r)
+    private void scheduleDurationReachedLocked(ToastRecord r, boolean lastToastWasTextRecord)
     {
         mHandler.removeCallbacksAndMessages(r);
         Message m = Message.obtain(mHandler, MESSAGE_DURATION_REACHED, r);
@@ -7525,6 +7528,14 @@ public class NotificationManagerService extends SystemService {
         // preference.
         delay = mAccessibilityManager.getRecommendedTimeoutMillis(delay,
                 AccessibilityManager.FLAG_CONTENT_TEXT);
+
+        if (lastToastWasTextRecord) {
+            delay += 250; // delay to account for previous toast's "out" animation
+        }
+        if (r instanceof TextToastRecord) {
+            delay += 333; // delay to account for this toast's "in" animation
+        }
+
         mHandler.sendMessageDelayed(m, delay);
     }
 
@@ -9074,7 +9085,8 @@ public class NotificationManagerService extends SystemService {
     public class NotificationAssistants extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "q_allowed_adjustments";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES_OLD = "q_allowed_adjustments";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "s_allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
@@ -9176,12 +9188,18 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
-            if (TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
+            if (TAG_ALLOWED_ADJUSTMENT_TYPES_OLD.equals(tag)
+                    || TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
                 final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
                 synchronized (mLock) {
                     mAllowedAdjustments.clear();
                     if (!TextUtils.isEmpty(types)) {
                         mAllowedAdjustments.addAll(Arrays.asList(types.split(",")));
+                    }
+                    if (TAG_ALLOWED_ADJUSTMENT_TYPES_OLD.equals(tag)) {
+                        if (DEBUG) Slog.d(TAG, "Migrate allowed adjustments.");
+                        mAllowedAdjustments.addAll(
+                                Arrays.asList(DEFAULT_ALLOWED_ADJUSTMENTS));
                     }
                 }
             }

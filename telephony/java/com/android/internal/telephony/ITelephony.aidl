@@ -2387,4 +2387,18 @@ interface ITelephony {
      * Gets the current phone capability.
      */
     PhoneCapability getPhoneCapability();
+
+    /**
+     * Prepare TelephonyManager for an unattended reboot. The reboot is
+     * required to be done shortly after the API is invoked.
+     *
+     * Requires system privileges.
+     *
+     * @return {@link #PREPARE_UNATTENDED_REBOOT_SUCCESS} in case of success.
+     * {@link #PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED} if the device contains
+     * at least one SIM card for which the user needs to manually enter the PIN
+     * code after the reboot. {@link #PREPARE_UNATTENDED_REBOOT_ERROR} in case
+     * of error.
+     */
+    int prepareForUnattendedReboot();
 }

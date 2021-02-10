@@ -40,6 +40,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageUserState;
@@ -49,6 +50,7 @@ import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -105,9 +107,6 @@ import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
-import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
-import com.android.server.pm.verify.domain.DomainVerificationPersistence;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -115,6 +114,9 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
+import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationPersistence;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
@@ -487,7 +489,7 @@ public final class Settings implements Watchable, Snappable {
     // App-link priority tracking, per-user
     @NonNull
     @Watched
-    final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
+    private final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
 
     final StringBuilder mReadMessages = new StringBuilder();
 
@@ -552,6 +554,7 @@ public final class Settings implements Watchable, Snappable {
         mAppIds.registerObserver(mObserver);
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
+        mNextAppLinkGeneration.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
@@ -602,6 +605,7 @@ public final class Settings implements Watchable, Snappable {
         mAppIds.registerObserver(mObserver);
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
+        mNextAppLinkGeneration.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
@@ -649,6 +653,7 @@ public final class Settings implements Watchable, Snappable {
         mPastSignatures.addAll(r.mPastSignatures);
         mKeySetRefs.putAll(r.mKeySetRefs);
         mRenamedPackages.snapshot(r.mRenamedPackages);
+        mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
         // mReadMessages
         mPendingPackages.addAll(r.mPendingPackages);
@@ -2707,7 +2712,6 @@ public final class Settings implements Watchable, Snappable {
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
-        mDomainVerificationManager.writeLegacySettings(serializer, pkg.name);
         writeMimeGroupLPr(serializer, pkg.mimeGroups);
 
         serializer.endTag(null, "package");
@@ -4697,26 +4701,58 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            String[] overlayPaths = ps.getOverlayPaths(user.id);
-            if (overlayPaths != null && overlayPaths.length > 0) {
-                pw.print(prefix); pw.println("    overlay paths:");
-                for (String path : overlayPaths) {
-                    pw.print(prefix); pw.print("      "); pw.println(path);
+            final OverlayPaths overlayPaths = ps.getOverlayPaths(user.id);
+            if (overlayPaths != null) {
+                if (!overlayPaths.getOverlayPaths().isEmpty()) {
+                    pw.print(prefix);
+                    pw.println("    overlay paths:");
+                    for (String path : overlayPaths.getOverlayPaths()) {
+                        pw.print(prefix);
+                        pw.print("      ");
+                        pw.println(path);
+                    }
+                }
+                if (!overlayPaths.getResourceDirs().isEmpty()) {
+                    pw.print(prefix);
+                    pw.println("    legacy overlay paths:");
+                    for (String path : overlayPaths.getResourceDirs()) {
+                        pw.print(prefix);
+                        pw.print("      ");
+                        pw.println(path);
+                    }
                 }
             }
 
-            Map<String, String[]> sharedLibraryOverlayPaths =
+            final Map<String, OverlayPaths> sharedLibraryOverlayPaths =
                     ps.getOverlayPathsForLibrary(user.id);
             if (sharedLibraryOverlayPaths != null) {
-                for (Map.Entry<String, String[]> libOverlayPaths :
+                for (Map.Entry<String, OverlayPaths> libOverlayPaths :
                         sharedLibraryOverlayPaths.entrySet()) {
-                    if (libOverlayPaths.getValue() == null) {
+                    final OverlayPaths paths = libOverlayPaths.getValue();
+                    if (paths == null) {
                         continue;
                     }
-                    pw.print(prefix); pw.print("    ");
-                    pw.print(libOverlayPaths.getKey()); pw.println(" overlay paths:");
-                    for (String path : libOverlayPaths.getValue()) {
-                        pw.print(prefix); pw.print("      "); pw.println(path);
+                    if (!paths.getOverlayPaths().isEmpty()) {
+                        pw.print(prefix);
+                        pw.println("    ");
+                        pw.print(libOverlayPaths.getKey());
+                        pw.println(" overlay paths:");
+                        for (String path : paths.getOverlayPaths()) {
+                            pw.print(prefix);
+                            pw.print("        ");
+                            pw.println(path);
+                        }
+                    }
+                    if (!paths.getResourceDirs().isEmpty()) {
+                        pw.print(prefix);
+                        pw.println("      ");
+                        pw.print(libOverlayPaths.getKey());
+                        pw.println(" legacy overlay paths:");
+                        for (String path : paths.getResourceDirs()) {
+                            pw.print(prefix);
+                            pw.print("      ");
+                            pw.println(path);
+                        }
                     }
                 }
             }

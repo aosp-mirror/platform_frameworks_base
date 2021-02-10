@@ -16,9 +16,12 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticationFrame;
+import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -172,6 +175,35 @@ public class ClientMonitorCallbackConverter {
     public void onUdfpsPointerUp(int sensorId, int cookie) throws RemoteException {
         if (mFingerprintServiceReceiver != null) {
             mFingerprintServiceReceiver.onUdfpsPointerUp(sensorId);
+        }
+    }
+
+    // Face-specific callbacks for FaceManager only
+
+    /**
+     * Called each time a new frame is received during face authentication.
+     *
+     * @param frame Information about the current frame.
+     *
+     * @throws RemoteException If the binder call to {@link IFaceServiceReceiver} fails.
+     */
+    public void onAuthenticationFrame(@NonNull FaceAuthenticationFrame frame)
+            throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onAuthenticationFrame(frame);
+        }
+    }
+
+    /**
+     * Called each time a new frame is received during face enrollment.
+     *
+     * @param frame Information about the current frame.
+     *
+     * @throws RemoteException If the binder call to {@link IFaceServiceReceiver} fails.
+     */
+    public void onEnrollmentFrame(@NonNull FaceEnrollFrame frame) throws RemoteException {
+        if (mFaceServiceReceiver != null) {
+            mFaceServiceReceiver.onEnrollmentFrame(frame);
         }
     }
 }

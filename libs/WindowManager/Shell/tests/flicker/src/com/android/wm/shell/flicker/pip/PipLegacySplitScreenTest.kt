@@ -32,6 +32,7 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.removeAllTasksButHome
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
 import org.junit.FixMethodOrder
 import org.junit.Test

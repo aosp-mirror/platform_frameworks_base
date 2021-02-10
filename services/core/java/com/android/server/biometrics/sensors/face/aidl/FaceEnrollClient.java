@@ -27,7 +27,6 @@ import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
-import android.hardware.face.FaceDataFrame;
 import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
@@ -101,14 +100,15 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 getTargetUserId()).size() >= mMaxTemplatesPerUser;
     }
 
+    private boolean shouldSendAcquiredMessage(int acquireInfo, int vendorCode) {
+        return acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR
+                ? !Utils.listContains(mEnrollIgnoreListVendor, vendorCode)
+                : !Utils.listContains(mEnrollIgnoreList, acquireInfo);
+    }
+
     @Override
     public void onAcquired(int acquireInfo, int vendorCode) {
-        final boolean shouldSend;
-        if (acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR) {
-            shouldSend = !Utils.listContains(mEnrollIgnoreListVendor, vendorCode);
-        } else {
-            shouldSend = !Utils.listContains(mEnrollIgnoreList, acquireInfo);
-        }
+        final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
         onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
     }
 
@@ -118,9 +118,20 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
      * @param frame Information about the current frame.
      */
     public void onEnrollmentFrame(@NonNull FaceEnrollFrame frame) {
-        // TODO(b/178414967): Send additional frame data to the client callback.
-        final FaceDataFrame data = frame.getData();
-        onAcquired(data.getAcquiredInfo(), data.getVendorCode());
+        // Log acquisition but don't send it to the client yet, since that's handled below.
+        final int acquireInfo = frame.getData().getAcquiredInfo();
+        final int vendorCode = frame.getData().getVendorCode();
+        onAcquiredInternal(acquireInfo, vendorCode, false /* shouldSend */);
+
+        final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
+        if (shouldSend && getListener() != null) {
+            try {
+                getListener().onEnrollmentFrame(frame);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to send enrollment frame", e);
+                mCallback.onClientFinished(this, false /* success */);
+            }
+        }
     }
 
     @Override

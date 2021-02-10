@@ -421,6 +421,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws Exception {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
         Notification notificationWithoutMessagingStyle = new Notification.Builder(mContext)
                 .setContentTitle("TEST_TITLE")
@@ -429,15 +430,21 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .build();
         StatusBarNotification sbn = new SbnBuilder()
                 .setNotification(notificationWithoutMessagingStyle)
+                .setPkg(TEST_PACKAGE_A)
+                .setUid(0)
                 .build();
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(sbn)
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mAppWidgetManager, never())
-                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT), any());
-        verify(mAppWidgetManager, never()).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle options = requireNonNull(mBundleArgumentCaptor.getValue());
+        assertThat((PeopleSpaceTile) options.getParcelable(OPTIONS_PEOPLE_SPACE_TILE))
+                .isEqualTo(PERSON_TILE);
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
 

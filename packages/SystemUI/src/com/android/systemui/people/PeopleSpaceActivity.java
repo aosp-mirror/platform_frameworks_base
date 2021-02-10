@@ -37,8 +37,11 @@ import android.view.ViewGroup;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Shows the user their tiles for their priority People (go/live-status).
@@ -54,9 +57,16 @@ public class PeopleSpaceActivity extends Activity {
     private LauncherApps mLauncherApps;
     private Context mContext;
     private AppWidgetManager mAppWidgetManager;
+    private NotificationEntryManager mNotificationEntryManager;
     private int mAppWidgetId;
     private boolean mShowSingleConversation;
     private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+
+    @Inject
+    public PeopleSpaceActivity(NotificationEntryManager notificationEntryManager) {
+        super();
+        mNotificationEntryManager = notificationEntryManager;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +101,8 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            List<PeopleSpaceTile> tiles = PeopleSpaceUtils.getTiles(
-                    mContext, mNotificationManager, mPeopleManager, mLauncherApps);
+            List<PeopleSpaceTile> tiles = PeopleSpaceUtils.getTiles(mContext, mNotificationManager,
+                    mPeopleManager, mLauncherApps, mNotificationEntryManager);
             for (PeopleSpaceTile tile : tiles) {
                 PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext, mPeopleSpaceLayout,
                         tile.getId());

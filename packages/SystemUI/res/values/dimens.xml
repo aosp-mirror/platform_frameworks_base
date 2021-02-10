@@ -163,9 +163,13 @@
     <!-- heads up elevation that is added if the view is pinned -->
     <dimen name="heads_up_pinned_elevation">16dp</dimen>
 
-    <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
+    <!-- Height of a messaging notifications with actions at least. Note that this is an upper bound
          and the notification won't use this much, but is measured with wrap_content -->
     <dimen name="notification_messaging_actions_min_height">196dp</dimen>
+
+    <!-- Height of a call notification. Note that this is an upper bound
+     and the notification won't use this much, but is measured with wrap_content -->
+    <dimen name="call_notification_full_height">172dp</dimen>
 
     <!-- a threshold in dp per second that is considered fast scrolling -->
     <dimen name="scroll_fast_threshold">1500dp</dimen>
@@ -198,6 +202,9 @@
 
     <!-- The amount the content shifts upwards when transforming into the shelf -->
     <dimen name="shelf_transform_content_shift">32dp</dimen>
+
+    <!-- The y translation for keyguard indication text animation for rotating text in/out -->
+    <dimen name="keyguard_indication_y_translation">24dp</dimen>
 
     <!-- The padding on the bottom of the notifications on the keyguard -->
     <dimen name="keyguard_indication_bottom_padding">12sp</dimen>
@@ -685,6 +692,11 @@
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
 
+    <!-- Default line spacing multiplier between hours and minutes of the keyguard clock -->
+    <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
+    <!-- Burmese line spacing multiplier between hours and minutes of the keyguard clock -->
+    <item name="keyguard_clock_line_spacing_scale_burmese" type="dimen" format="float">1</item>
+
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
 
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
@@ -1157,7 +1169,7 @@
     <dimen name="logout_button_layout_height">32dp</dimen>
     <dimen name="logout_button_padding_horizontal">16dp</dimen>
     <dimen name="logout_button_margin_bottom">12dp</dimen>
-    <dimen name="logout_button_corner_radius">2dp</dimen>
+    <dimen name="logout_button_corner_radius">4dp</dimen>
 
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>
@@ -1346,4 +1358,11 @@
     <dimen name="rounded_slider_icon_size">24dp</dimen>
     <!-- rounded_slider_icon_size / 2 -->
     <dimen name="rounded_slider_icon_inset">12dp</dimen>
+
+    <dimen name="toast_width">296dp</dimen>
+    <item name="toast_icon_alpha" format="float" type="dimen">1</item>
+    <dimen name="toast_text_size">14sp</dimen>
+    <dimen name="toast_y_offset">48dp</dimen>
+    <dimen name="toast_icon_size">48dp</dimen>
+    <dimen name="toast_bg_radius">28dp</dimen>
 </resources>

@@ -1603,7 +1603,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mFixedRotationLaunchingApp != mFixedRotationTransitionListener.mAnimatingRecents;
     }
 
-    @VisibleForTesting
     boolean isFixedRotationLaunchingApp(ActivityRecord r) {
         return mFixedRotationLaunchingApp == r;
     }
@@ -1832,8 +1831,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (w.mHasSurface && !rotateSeamlessly) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
                 w.setOrientationChanging(true);
-                mWmService.mRoot.mOrientationChangeComplete = false;
-                w.mLastFreezeDuration = 0;
             }
             w.mReportOrientationChanged = true;
         }, true /* traverseTopToBottom */);

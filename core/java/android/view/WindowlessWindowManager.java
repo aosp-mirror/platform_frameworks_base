@@ -314,10 +314,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void setTransparentRegion(android.view.IWindow window, android.graphics.Region region) {
-    }
-
-    @Override
     public void setInsets(android.view.IWindow window, int touchableInsets,
             android.graphics.Rect contentInsets, android.graphics.Rect visibleInsets,
             android.graphics.Region touchableRegion) {

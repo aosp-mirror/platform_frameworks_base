@@ -284,7 +284,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
             if (reorderMode != REORDER_KEEP_IN_PLACE) {
-                mService.mRootWindowContainer.endPowerModeLaunchIfNeeded();
+                mService.endLaunchPowerMode(
+                        ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
             }
 
             // Once the target is shown, prevent spurious background app switches

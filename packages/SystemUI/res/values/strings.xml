@@ -2253,6 +2253,12 @@
     <!-- Accessibility description indicating the currently selected tile's position. Only used for tiles that are currently in use [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_position">Position <xliff:g id="position" example="5">%1$d</xliff:g></string>
 
+    <!-- Accessibility announcement after a tile has been added [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_added">Tile added</string>
+
+    <!-- Accessibility announcement after a tile has been added [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_removed">Tile removed</string>
+
     <!-- Accessibility label for window when QS editing is happening [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings_edit">Quick settings editor.</string>
 

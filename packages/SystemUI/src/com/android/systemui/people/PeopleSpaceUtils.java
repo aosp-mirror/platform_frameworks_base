@@ -60,9 +60,12 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ArrayUtils;
 import com.android.settingslib.utils.ThreadUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -137,7 +140,7 @@ public class PeopleSpaceUtils {
     /** Returns a list of map entries corresponding to user's conversations. */
     public static List<PeopleSpaceTile> getTiles(
             Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
-            LauncherApps launcherApps)
+            LauncherApps launcherApps, NotificationEntryManager notificationEntryManager)
             throws Exception {
         boolean showOnlyPriority = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 1;
@@ -173,6 +176,8 @@ public class PeopleSpaceUtils {
                     getSortedTiles(peopleManager, launcherApps, mergedStream);
             tiles.addAll(recentTiles);
         }
+
+        tiles = augmentTilesFromVisibleNotifications(tiles, notificationEntryManager);
         return tiles;
     }
 
@@ -258,7 +263,8 @@ public class PeopleSpaceUtils {
                             ServiceManager.getService(Context.NOTIFICATION_SERVICE)),
                             IPeopleManager.Stub.asInterface(
                                     ServiceManager.getService(Context.PEOPLE_SERVICE)),
-                            context.getSystemService(LauncherApps.class));
+                            context.getSystemService(LauncherApps.class),
+                            Dependency.get(NotificationEntryManager.class));
             Optional<PeopleSpaceTile> entry = tiles.stream().filter(
                     e -> e.getId().equals(shortcutId)).findFirst();
             if (entry.isPresent()) {
@@ -339,6 +345,41 @@ public class PeopleSpaceUtils {
                 && storedUserId == userId;
     }
 
+    static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(List<PeopleSpaceTile> tiles,
+            NotificationEntryManager notificationEntryManager) {
+        if (notificationEntryManager == null) {
+            Log.w(TAG, "NotificationEntryManager is null");
+            return tiles;
+        }
+        Map<String, NotificationEntry> visibleNotifications = notificationEntryManager
+                .getVisibleNotifications()
+                .stream()
+                .filter(entry -> entry.getRanking() != null
+                        && entry.getRanking().getConversationShortcutInfo() != null)
+                .collect(Collectors.toMap(PeopleSpaceUtils::getKey, e -> e));
+        if (DEBUG) {
+            Log.d(TAG, "Number of visible notifications:" + visibleNotifications.size());
+        }
+        return tiles
+                .stream()
+                .map(entry -> augmentTileFromVisibleNotifications(entry, visibleNotifications))
+                .collect(Collectors.toList());
+    }
+
+    static PeopleSpaceTile augmentTileFromVisibleNotifications(PeopleSpaceTile tile,
+            Map<String, NotificationEntry> visibleNotifications) {
+        String shortcutId = tile.getId();
+        String packageName = tile.getPackageName();
+        int userId = UserHandle.getUserHandleForUid(tile.getUid()).getIdentifier();
+        String key = getKey(shortcutId, packageName, userId);
+        if (!visibleNotifications.containsKey(key)) {
+            if (DEBUG) Log.d(TAG, "No existing notifications for key:" + key);
+            return tile;
+        }
+        if (DEBUG) Log.d(TAG, "Augmenting tile from visible notifications, key:" + key);
+        return augmentTileFromNotification(tile, visibleNotifications.get(key).getSbn());
+    }
+
     /**
      * If incoming notification changed tile, store the changes in the tile options.
      */
@@ -355,17 +396,7 @@ public class PeopleSpaceUtils {
         }
         if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
             if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
-            Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(sbn);
-            if (message == null) {
-                if (DEBUG) Log.i(TAG, "Notification doesn't have content, skipping.");
-                return;
-            }
-            storedTile = storedTile
-                    .toBuilder()
-                    .setNotificationKey(sbn.getKey())
-                    .setNotificationContent(message.getText())
-                    .setNotificationDataUri(message.getDataUri())
-                    .build();
+            storedTile = augmentTileFromNotification(storedTile, sbn);
         } else {
             if (DEBUG) {
                 Log.i(TAG, "Removing notification from storage, appWidgetId: " + appWidgetId);
@@ -378,6 +409,21 @@ public class PeopleSpaceUtils {
                     .build();
         }
         updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId, storedTile);
+    }
+
+    static PeopleSpaceTile augmentTileFromNotification(PeopleSpaceTile tile,
+            StatusBarNotification sbn) {
+        Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(sbn);
+        if (message == null) {
+            if (DEBUG) Log.i(TAG, "Notification doesn't have content, skipping.");
+            return tile;
+        }
+        return tile
+                .toBuilder()
+                .setNotificationKey(sbn.getKey())
+                .setNotificationContent(message.getText())
+                .setNotificationDataUri(message.getDataUri())
+                .build();
     }
 
     private static void updateAppWidgetOptions(AppWidgetManager appWidgetManager, int appWidgetId,
@@ -790,6 +836,16 @@ public class PeopleSpaceUtils {
             }
         }
         return lookupKeysWithBirthdaysToday;
+    }
+
+    static String getKey(NotificationEntry entry) {
+        if (entry.getRanking() == null || entry.getRanking().getConversationShortcutInfo() == null
+                || entry.getSbn() == null || entry.getSbn().getUser() == null) {
+            return null;
+        }
+        return getKey(entry.getRanking().getConversationShortcutInfo().getId(),
+                entry.getSbn().getPackageName(),
+                entry.getSbn().getUser().getIdentifier());
     }
 
     /**

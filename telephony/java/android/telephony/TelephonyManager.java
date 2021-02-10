@@ -14994,6 +14994,7 @@ public class TelephonyManager {
         }
         return THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR;
     }
+
     /**
      * Registers a listener object to receive notification of changes
      * in specified telephony states.
@@ -15349,5 +15350,67 @@ public class TelephonyManager {
         } else {
             return PhoneCapability.DEFAULT_SSSS_CAPABILITY;
         }
+    }
+
+    /**
+     * The unattended reboot was prepared successfully.
+     * @hide
+     */
+    @SystemApi
+    public static final int PREPARE_UNATTENDED_REBOOT_SUCCESS = 0;
+
+    /**
+     * The unattended reboot was prepared, but the user will need to manually
+     * enter the PIN code of at least one SIM card present in the device.
+     * @hide
+     */
+    @SystemApi
+    public static final int PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED = 1;
+
+    /**
+     * The unattended reboot was not prepared due to generic error.
+     * @hide
+     */
+    @SystemApi
+    public static final int PREPARE_UNATTENDED_REBOOT_ERROR = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"PREPARE_UNATTENDED_REBOOT_"},
+            value = {
+                    PREPARE_UNATTENDED_REBOOT_SUCCESS,
+                    PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED,
+                    PREPARE_UNATTENDED_REBOOT_ERROR
+            })
+    public @interface PrepareUnattendedRebootResult {}
+
+    /**
+     * Prepare TelephonyManager for an unattended reboot. The reboot is required to be done
+     * shortly (e.g. within 15 seconds) after the API is invoked.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#REBOOT}
+     *
+     * @return {@link #PREPARE_UNATTENDED_REBOOT_SUCCESS} in case of success.
+     * {@link #PREPARE_UNATTENDED_REBOOT_PIN_REQUIRED} if the device contains
+     * at least one SIM card for which the user needs to manually enter the PIN
+     * code after the reboot. {@link #PREPARE_UNATTENDED_REBOOT_ERROR} in case
+     * of error.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REBOOT)
+    @PrepareUnattendedRebootResult
+    public int prepareForUnattendedReboot() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.prepareForUnattendedReboot();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Telephony#prepareForUnattendedReboot RemoteException", e);
+            e.rethrowFromSystemServer();
+        }
+        return PREPARE_UNATTENDED_REBOOT_ERROR;
     }
 }

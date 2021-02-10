@@ -24,6 +24,8 @@ import static com.android.server.location.LocationManagerService.TAG;
 import android.os.PowerManager.LocationPowerSaveMode;
 import android.util.Log;
 
+import com.android.server.location.eventlog.LocationEventLog;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**

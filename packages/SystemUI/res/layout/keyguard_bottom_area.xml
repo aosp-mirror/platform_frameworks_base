@@ -43,14 +43,17 @@
             android:accessibilityLiveRegion="polite"/>
 
         <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-            android:id="@+id/keyguard_indication_enterprise_disclosure"
-            android:layout_width="match_parent"
+            android:id="@+id/keyguard_indication_text_bottom"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:minHeight="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
             android:paddingStart="@dimen/keyguard_indication_text_padding"
             android:paddingEnd="@dimen/keyguard_indication_text_padding"
             android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
-            android:alpha=".54"
+            android:alpha=".8"
             android:visibility="gone"/>
 
     </LinearLayout>

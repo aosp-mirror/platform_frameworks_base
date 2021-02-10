@@ -35,7 +35,6 @@ import static com.android.systemui.charging.WirelessChargingLayout.UNKNOWN_BATTE
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
-import static com.android.systemui.statusbar.LightRevealScrimKt.getEnableLightReveal;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -181,6 +180,7 @@ import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -442,6 +442,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
+    private final FeatureFlags mFeatureFlags;
 
     private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
@@ -765,7 +766,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             NotificationIconAreaController notificationIconAreaController,
-            BrightnessSlider.Factory brightnessSliderFactory) {
+            BrightnessSlider.Factory brightnessSliderFactory,
+            FeatureFlags featureFlags) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -843,6 +845,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDemoModeController = demoModeController;
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
+        mFeatureFlags = featureFlags;
 
         mExpansionChangedListeners = new ArrayList<>();
 
@@ -1143,8 +1146,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
         }
 
-        mKeyguardIndicationController.setIndicationArea(
-                mNotificationShadeWindowView.findViewById(R.id.keyguard_indication_area));
         mNotificationPanelViewController.setKeyguardIndicationController(
                 mKeyguardIndicationController);
 
@@ -1186,9 +1187,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
 
-        if (getEnableLightReveal()) {
+        if (mFeatureFlags.useNewLockscreenAnimations() && mDozeParameters.getAlwaysOn()) {
             mLightRevealScrim.setVisibility(View.VISIBLE);
             mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
+        } else {
+            mLightRevealScrim.setVisibility(View.GONE);
         }
 
         mNotificationPanelViewController.initDependencies(
@@ -3620,26 +3623,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNavigationBarController.touchAutoDim(mDisplayId);
         Trace.beginSection("StatusBar#updateKeyguardState");
         if (mState == StatusBarState.KEYGUARD) {
-            mKeyguardIndicationController.setVisible(true);
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(true,
                         mStatusBarStateController.fromShadeLocked());
             }
             if (mStatusBarView != null) mStatusBarView.removePendingHideExpandedRunnables();
-            if (mAmbientIndicationContainer != null) {
-                mAmbientIndicationContainer.setVisibility(View.VISIBLE);
-            }
         } else {
-            mKeyguardIndicationController.setVisible(false);
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(false,
                         mStatusBarStateController.goingToFullShade() ||
                                 mState == StatusBarState.SHADE_LOCKED ||
                                 mStatusBarStateController.fromShadeLocked());
             }
-            if (mAmbientIndicationContainer != null) {
-                mAmbientIndicationContainer.setVisibility(View.INVISIBLE);
-            }
+
         }
         updateDozingState();
         checkBarModes();
@@ -3651,7 +3647,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
-        if (getEnableLightReveal()) {
+        if (mFeatureFlags.useNewLockscreenAnimations()) {
             mLightRevealScrim.setRevealAmount(1f - linear);
         }
     }

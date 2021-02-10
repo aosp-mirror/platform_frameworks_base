@@ -39,8 +39,7 @@ public class PhonePowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED) / 1000;
         final double phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);

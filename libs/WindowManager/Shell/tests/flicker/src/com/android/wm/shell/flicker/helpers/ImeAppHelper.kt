@@ -32,13 +32,12 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     /**
      * Opens the IME and wait for it to be displayed
      *
-     * @param device UIDevice instance to interact with the device
      * @param wmHelper Helper used to wait for WindowManager states
      */
     @JvmOverloads
-    open fun openIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
+    open fun openIME(wmHelper: WindowManagerStateHelper? = null) {
         if (!isTelevision) {
-            val editText = device.wait(
+            val editText = uiDevice.wait(
                 Until.findObject(By.res(getPackage(), "plain_text_input")),
                 FIND_TIMEOUT)
 
@@ -47,7 +46,7 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
                     "was left in an unknown state (e.g. in split screen)"
             }
             editText.click()
-            waitAndAssertIMEShown(device, wmHelper)
+            waitAndAssertIMEShown(uiDevice, wmHelper)
         } else {
             // If we do the same thing as above - editText.click() - on TV, that's going to force TV
             // into the touch mode. We really don't want that.
@@ -69,16 +68,15 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     /**
      * Opens the IME and wait for it to be gone
      *
-     * @param device UIDevice instance to interact with the device
      * @param wmHelper Helper used to wait for WindowManager states
      */
     @JvmOverloads
-    open fun closeIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
+    open fun closeIME(wmHelper: WindowManagerStateHelper? = null) {
         if (!isTelevision) {
-            device.pressBack()
+            uiDevice.pressBack()
             // Using only the AccessibilityInfo it is not possible to identify if the IME is active
             if (wmHelper == null) {
-                device.waitForIdle()
+                uiDevice.waitForIdle()
             } else {
                 require(wmHelper.waitImeWindowGone()) { "IME did did not close" }
             }

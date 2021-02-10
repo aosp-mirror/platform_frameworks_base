@@ -75,6 +75,7 @@ import com.android.wm.shell.sizecompatui.SizeCompatUI;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.transition.RemoteTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -179,7 +180,7 @@ public abstract class WMShellBaseModule {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
@@ -204,7 +205,7 @@ public abstract class WMShellBaseModule {
     static Optional<ShellCommandHandler> provideShellCommandHandler(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
@@ -319,12 +320,21 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<SplitScreen> provideSplitScreen(ShellTaskOrganizer shellTaskOrganizer,
+    static Optional<SplitScreen> provideSplitScreen(
+            Optional<SplitScreenController> splitScreenController) {
+        return splitScreenController.map((controller) -> controller.asSplitScreen());
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<SplitScreenController> provideSplitScreenController(
+            ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            @ShellMainThread ShellExecutor mainExecutor) {
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
             return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
-                    rootTaskDisplayAreaOrganizer));
+                    rootTaskDisplayAreaOrganizer, mainExecutor));
         } else {
             return Optional.empty();
         }
@@ -384,6 +394,12 @@ public abstract class WMShellBaseModule {
     @Provides
     static FullscreenTaskListener provideFullscreenTaskListener(SyncTransactionQueue syncQueue) {
         return new FullscreenTaskListener(syncQueue);
+    }
+
+    @WMSingleton
+    @Provides
+    static RemoteTransitions provideRemoteTransitions(Transitions transitions) {
+        return Transitions.asRemoteTransitions(transitions);
     }
 
     @WMSingleton

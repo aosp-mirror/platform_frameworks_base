@@ -17,106 +17,82 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilderLegacy
-import com.android.server.wm.flicker.dsl.WmAssertionBuilderLegacy
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
+import com.android.server.wm.flicker.dsl.WmAssertionBuilder
 
 const val IME_WINDOW_TITLE = "InputMethod"
 
 @JvmOverloads
-fun LayersAssertionBuilderLegacy.imeLayerBecomesVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeLayerBecomesVisible", bugId, enabled) {
+fun LayersAssertionBuilder.imeLayerBecomesVisible(bugId: Int = 0) {
+    all("imeLayerBecomesVisible", bugId) {
         this.hidesLayer(IME_WINDOW_TITLE)
                 .then()
                 .showsLayer(IME_WINDOW_TITLE)
     }
 }
 
-fun LayersAssertionBuilderLegacy.imeLayerBecomesInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeLayerBecomesInvisible", bugId, enabled) {
+@JvmOverloads
+fun LayersAssertionBuilder.imeLayerBecomesInvisible(bugId: Int = 0) {
+    all("imeLayerBecomesInvisible", bugId) {
         this.showsLayer(IME_WINDOW_TITLE)
                 .then()
                 .hidesLayer(IME_WINDOW_TITLE)
     }
 }
 
-fun LayersAssertionBuilderLegacy.imeAppLayerIsAlwaysVisible(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeAppLayerIsAlwaysVisible", bugId, enabled) {
+@JvmOverloads
+fun LayersAssertionBuilder.imeAppLayerIsAlwaysVisible(testApp: IAppHelper, bugId: Int = 0) {
+    all("imeAppLayerIsAlwaysVisible", bugId) {
         this.showsLayer(testApp.getPackage())
     }
 }
 
-fun WmAssertionBuilderLegacy.imeAppWindowIsAlwaysVisible(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeAppWindowIsAlwaysVisible", bugId, enabled) {
+@JvmOverloads
+fun WmAssertionBuilder.imeAppWindowIsAlwaysVisible(testApp: IAppHelper, bugId: Int = 0) {
+    all("imeAppWindowIsAlwaysVisible", bugId) {
         this.showsAppWindowOnTop(testApp.getPackage())
     }
 }
 
-fun WmAssertionBuilderLegacy.imeWindowBecomesVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeWindowBecomesVisible", bugId, enabled) {
+@JvmOverloads
+fun WmAssertionBuilder.imeWindowBecomesVisible(bugId: Int = 0) {
+    all("imeWindowBecomesVisible", bugId) {
         this.hidesNonAppWindow(IME_WINDOW_TITLE)
                 .then()
                 .showsNonAppWindow(IME_WINDOW_TITLE)
     }
 }
 
-fun WmAssertionBuilderLegacy.imeWindowBecomesInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeWindowBecomesInvisible", bugId, enabled) {
+@JvmOverloads
+fun WmAssertionBuilder.imeWindowBecomesInvisible(bugId: Int = 0) {
+    all("imeWindowBecomesInvisible", bugId) {
         this.showsNonAppWindow(IME_WINDOW_TITLE)
                 .then()
                 .hidesNonAppWindow(IME_WINDOW_TITLE)
     }
 }
 
-fun WmAssertionBuilderLegacy.imeAppWindowBecomesVisible(
-    windowName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeAppWindowBecomesVisible", bugId, enabled) {
+@JvmOverloads
+fun WmAssertionBuilder.imeAppWindowBecomesVisible(windowName: String, bugId: Int = 0) {
+    all("imeAppWindowBecomesVisible", bugId) {
         this.hidesAppWindow(windowName)
                 .then()
                 .showsAppWindow(windowName)
     }
 }
 
-fun WmAssertionBuilderLegacy.imeAppWindowBecomesInvisible(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeAppWindowBecomesInvisible", bugId, enabled) {
+@JvmOverloads
+fun WmAssertionBuilder.imeAppWindowBecomesInvisible(testApp: IAppHelper, bugId: Int = 0) {
+    all("imeAppWindowBecomesInvisible", bugId) {
         this.showsAppWindowOnTop(testApp.getPackage())
                 .then()
                 .appWindowNotOnTop(testApp.getPackage())
     }
 }
 
-fun LayersAssertionBuilderLegacy.imeAppLayerBecomesInvisible(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("imeAppLayerBecomesInvisible", bugId, enabled) {
+@JvmOverloads
+fun LayersAssertionBuilder.imeAppLayerBecomesInvisible(testApp: IAppHelper, bugId: Int = 0) {
+    all("imeAppLayerBecomesInvisible", bugId) {
         this.skipUntilFirstAssertion()
                 .showsLayer(testApp.getPackage())
                 .then()

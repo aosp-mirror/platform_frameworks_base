@@ -73,6 +73,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
@@ -80,6 +81,7 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +101,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private final SendButtonTextWatcher mTextWatcher;
     private final TextView.OnEditorActionListener mEditorActionHandler;
+    private final NotificationRemoteInputManager mRemoteInputManager;
+    private final List<OnFocusChangeListener> mEditTextFocusChangeListeners = new ArrayList<>();
     private RemoteEditText mEditText;
     private ImageButton mSendButton;
     private ProgressBar mProgressBar;
@@ -121,12 +125,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private boolean mResetting;
     private NotificationViewWrapper mWrapper;
     private Consumer<Boolean> mOnVisibilityChangedListener;
+    private NotificationRemoteInputManager.BouncerChecker mBouncerChecker;
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTextWatcher = new SendButtonTextWatcher();
         mEditorActionHandler = new EditorActionHandler();
         mRemoteInputQuickSettingsDisabler = Dependency.get(RemoteInputQuickSettingsDisabler.class);
+        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mStatusBarManagerService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
@@ -200,6 +206,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void sendRemoteInput(Intent intent) {
+        if (mBouncerChecker != null && mBouncerChecker.showBouncerIfNecessary()) {
+            mEditText.hideIme();
+            return;
+        }
+
         mEditText.setEnabled(false);
         mSendButton.setVisibility(INVISIBLE);
         mProgressBar.setVisibility(VISIBLE);
@@ -349,6 +360,11 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (editedSuggestionInfo != null) {
             mEntry.remoteInputText = editedSuggestionInfo.originalText;
         }
+    }
+
+    /** Populates the text field of the remote input with the given content. */
+    public void setEditTextContent(@Nullable CharSequence editTextContent) {
+        mEditText.setText(editTextContent);
     }
 
     public void focusAnimated() {
@@ -552,6 +568,37 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         return getVisibility() == VISIBLE && mController.isSpinning(mEntry.getKey(), mToken);
     }
 
+    /**
+     * Sets a {@link com.android.systemui.statusbar.NotificationRemoteInputManager.BouncerChecker}
+     * that will be used to determine if the device needs to be unlocked before sending the
+     * RemoteInput.
+     */
+    public void setBouncerChecker(
+            @Nullable NotificationRemoteInputManager.BouncerChecker bouncerChecker) {
+        mBouncerChecker = bouncerChecker;
+    }
+
+    /** Registers a listener for focus-change events on the EditText */
+    public void addOnEditTextFocusChangedListener(View.OnFocusChangeListener listener) {
+        mEditTextFocusChangeListeners.add(listener);
+    }
+
+    /** Removes a previously-added listener for focus-change events on the EditText */
+    public void removeOnEditTextFocusChangedListener(View.OnFocusChangeListener listener) {
+        mEditTextFocusChangeListeners.remove(listener);
+    }
+
+    /** Determines if the EditText has focus. */
+    public boolean editTextHasFocus() {
+        return mEditText != null && mEditText.hasFocus();
+    }
+
+    private void onEditTextFocusChanged(RemoteEditText remoteEditText, boolean focused) {
+        for (View.OnFocusChangeListener listener : mEditTextFocusChangeListeners) {
+            listener.onFocusChange(remoteEditText, focused);
+        }
+    }
+
     /** Handler for button click on send action in IME. */
     private class EditorActionHandler implements TextView.OnEditorActionListener {
 
@@ -603,6 +650,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         private RemoteInputView mRemoteInputView;
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
+        private InputMethodManager mInputMethodManager;
         UserHandle mUser;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
@@ -619,6 +667,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 listener = mOnReceiveContentListener;
             }
             setOnReceiveContentListener(types, listener);
+        }
+
+        private void hideIme() {
+            if (mInputMethodManager != null) {
+                mInputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
+            }
         }
 
         private void defocusIfNeeded(boolean animate) {
@@ -654,6 +708,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         @Override
         protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
             super.onFocusChanged(focused, direction, previouslyFocusedRect);
+            if (mRemoteInputView != null) {
+                mRemoteInputView.onEditTextFocusChanged(this, focused);
+            }
             if (!focused) {
                 defocusIfNeeded(true /* animate */);
             }
@@ -724,17 +781,16 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
             if (mShowImeOnInputConnection && ic != null) {
                 Context targetContext = userContext != null ? userContext : getContext();
-                final InputMethodManager imm =
-                        targetContext.getSystemService(InputMethodManager.class);
-                if (imm != null) {
+                mInputMethodManager = targetContext.getSystemService(InputMethodManager.class);
+                if (mInputMethodManager != null) {
                     // onCreateInputConnection is called by InputMethodManager in the middle of
                     // setting up the connection to the IME; wait with requesting the IME until that
                     // work has completed.
                     post(new Runnable() {
                         @Override
                         public void run() {
-                            imm.viewClicked(RemoteEditText.this);
-                            imm.showSoftInput(RemoteEditText.this, 0);
+                            mInputMethodManager.viewClicked(RemoteEditText.this);
+                            mInputMethodManager.showSoftInput(RemoteEditText.this, 0);
                         }
                     });
                 }

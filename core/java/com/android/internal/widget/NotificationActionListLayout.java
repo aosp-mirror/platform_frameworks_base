@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.DimenRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.RippleDrawable;
@@ -41,13 +42,16 @@ public class NotificationActionListLayout extends LinearLayout {
 
     private final int mGravity;
     private int mTotalWidth = 0;
+    private int mExtraStartPadding = 0;
     private ArrayList<Pair<Integer, TextView>> mMeasureOrderTextViews = new ArrayList<>();
     private ArrayList<View> mMeasureOrderOther = new ArrayList<>();
     private boolean mEmphasizedMode;
+    private boolean mPrioritizedWrapMode;
     private int mDefaultPaddingBottom;
     private int mDefaultPaddingTop;
     private int mEmphasizedHeight;
     private int mRegularHeight;
+    @DimenRes private int mCollapsibleIndentDimen;
 
     public NotificationActionListLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -68,7 +72,7 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mEmphasizedMode) {
+        if (mEmphasizedMode && !mPrioritizedWrapMode) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }
@@ -151,7 +155,15 @@ public class NotificationActionListLayout extends LinearLayout {
             measuredChildren++;
         }
 
-        mTotalWidth = usedWidth + mPaddingRight + mPaddingLeft;
+        int collapsibleIndent = mCollapsibleIndentDimen == 0 ? 0
+                : getResources().getDimensionPixelOffset(mCollapsibleIndentDimen);
+        if (innerWidth - usedWidth > collapsibleIndent) {
+            mExtraStartPadding = collapsibleIndent;
+        } else {
+            mExtraStartPadding = 0;
+        }
+
+        mTotalWidth = usedWidth + mPaddingRight + mPaddingLeft + mExtraStartPadding;
         setMeasuredDimension(resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec),
                 resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec));
     }
@@ -163,7 +175,11 @@ public class NotificationActionListLayout extends LinearLayout {
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View c = getChildAt(i);
-            if (c instanceof TextView && ((TextView) c).getText().length() > 0) {
+            if (c instanceof EmphasizedNotificationButton
+                    && ((EmphasizedNotificationButton) c).isPriority()) {
+                // add with 0 length to ensure that this view is measured before others.
+                mMeasureOrderTextViews.add(Pair.create(0, (TextView) c));
+            } else if (c instanceof TextView && ((TextView) c).getText().length() > 0) {
                 mMeasureOrderTextViews.add(Pair.create(((TextView) c).getText().length(),
                         (TextView)c));
             } else {
@@ -197,7 +213,7 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mEmphasizedMode) {
+        if (mEmphasizedMode && !mPrioritizedWrapMode) {
             super.onLayout(changed, left, top, right, bottom);
             return;
         }
@@ -214,6 +230,9 @@ public class NotificationActionListLayout extends LinearLayout {
             int absoluteGravity = Gravity.getAbsoluteGravity(Gravity.START, getLayoutDirection());
             if (absoluteGravity == Gravity.RIGHT) {
                 childLeft += right - left - mTotalWidth;
+            } else {
+                // Put the extra start padding (if any) on the left when LTR
+                childLeft += mExtraStartPadding;
             }
         }
 
@@ -271,6 +290,26 @@ public class NotificationActionListLayout extends LinearLayout {
                 com.android.internal.R.dimen.notification_action_emphasized_height);
         mRegularHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_action_list_height);
+    }
+
+    /**
+     * When used with emphasizedMode, changes the button sizing behavior to prioritize certain
+     * buttons (which are system generated) to not scrunch, and leave the remaining space for
+     * custom actions.
+     */
+    @RemotableViewMethod
+    public void setPrioritizedWrapMode(boolean prioritizedWrapMode) {
+        mPrioritizedWrapMode = prioritizedWrapMode;
+    }
+
+    /**
+     * When buttons are in wrap mode, this is a padding that will be applied at the start of the
+     * layout of the actions, but only when those actions would fit with the entire padding
+     * visible.  Otherwise, this padding will be omitted entirely.
+     */
+    @RemotableViewMethod
+    public void setCollapsibleIndentDimen(@DimenRes int collapsibleIndentDimen) {
+        mCollapsibleIndentDimen = collapsibleIndentDimen;
     }
 
     /**

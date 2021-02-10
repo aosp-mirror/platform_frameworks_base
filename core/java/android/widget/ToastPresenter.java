@@ -172,6 +172,22 @@ public class ToastPresenter {
     }
 
     /**
+     * Update the LayoutParameters of the currently showing toast view. This is used for layout
+     * updates based on orientation changes.
+     */
+    public void updateLayoutParams(int xOffset, int yOffset, float horizontalMargin,
+            float verticalMargin, int gravity) {
+        checkState(mView != null, "Toast must be showing to update its layout parameters.");
+        Configuration config = mResources.getConfiguration();
+        mParams.gravity = Gravity.getAbsoluteGravity(gravity, config.getLayoutDirection());
+        mParams.x = xOffset;
+        mParams.y = yOffset;
+        mParams.horizontalMargin = horizontalMargin;
+        mParams.verticalMargin = verticalMargin;
+        addToastView();
+    }
+
+    /**
      * Sets {@link WindowManager.LayoutParams#SYSTEM_FLAG_SHOW_FOR_ALL_USERS} flag if {@code
      * packageName} is a cross-user package.
      *
@@ -221,18 +237,7 @@ public class ToastPresenter {
 
         adjustLayoutParams(mParams, windowToken, duration, gravity, xOffset, yOffset,
                 horizontalMargin, verticalMargin, removeWindowAnimations);
-        if (mView.getParent() != null) {
-            mWindowManager.removeView(mView);
-        }
-        try {
-            mWindowManager.addView(mView, mParams);
-        } catch (WindowManager.BadTokenException e) {
-            // Since the notification manager service cancels the token right after it notifies us
-            // to cancel the toast there is an inherent race and we may attempt to add a window
-            // after the token has been invalidated. Let us hedge against that.
-            Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
-            return;
-        }
+        addToastView();
         trySendAccessibilityEvent(mView, mPackageName);
         if (callback != null) {
             try {
@@ -287,5 +292,20 @@ public class ToastPresenter {
         event.setPackageName(packageName);
         view.dispatchPopulateAccessibilityEvent(event);
         mAccessibilityManager.sendAccessibilityEvent(event);
+    }
+
+    private void addToastView() {
+        if (mView.getParent() != null) {
+            mWindowManager.removeView(mView);
+        }
+        try {
+            mWindowManager.addView(mView, mParams);
+        } catch (WindowManager.BadTokenException e) {
+            // Since the notification manager service cancels the token right after it notifies us
+            // to cancel the toast there is an inherent race and we may attempt to add a window
+            // after the token has been invalidated. Let us hedge against that.
+            Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
+            return;
+        }
     }
 }

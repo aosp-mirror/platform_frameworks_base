@@ -3260,6 +3260,16 @@
              a value of 'true' will not override any 'false' value in its parent chain nor will
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
+
+        <!-- <p>Whether the View's Outline should be used to clip the contents of the View.
+             <p>Only a single non-rectangular clip can be applied on a View at any time. Circular
+             clips from a
+             {@link android.view.ViewAnimationUtils#createCircularReveal(View, int, int, float,
+             float)} circular reveal animation take priority over Outline clipping, and child
+             Outline clipping takes priority over Outline clipping done by a parent.
+             <p>Note that this flag will only be respected if the View's Outline returns true from
+             {@link android.graphics.Outline#canClip()}. -->
+        <attr name="clipToOutline" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -7978,9 +7988,17 @@
         <!-- A class name in the AppWidget's package to be launched to configure.
              If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
-        <!-- A preview of what the AppWidget will look like after it's configured.
-              If not supplied, the AppWidget's icon will be used. -->
+        <!-- A preview, in a drawable resource id, of what the AppWidget will look like after it's
+             configured.
+             If not supplied, the AppWidget's icon will be used. -->
         <attr name="previewImage" format="reference" />
+        <!-- The layout resource id of a preview of what the AppWidget will look like after it's
+             configured.
+             Unlike previewImage, previewLayout can better showcase AppWidget in different locales,
+             system themes, display sizes & density etc.
+             If supplied, this will take precedence over the previewImage on supported widget hosts.
+             Otherwise, previewImage will be used. -->
+        <attr name="previewLayout" format="reference" />
         <!-- The view id of the AppWidget subview which should be auto-advanced.
              by the widget's host. -->
         <attr name="autoAdvanceViewId" format="reference" />

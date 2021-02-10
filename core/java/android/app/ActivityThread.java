@@ -2289,11 +2289,12 @@ public final class ActivityThread extends ClientTransactionHandler {
      * Creates the top level resources for the given package. Will return an existing
      * Resources if one has already been created.
      */
-    Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
-            String[] libDirs, LoadedApk pkgInfo, Configuration overrideConfig) {
-        return mResourcesManager.getResources(null, resDir, splitResDirs, overlayDirs, libDirs,
-                null, overrideConfig, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader(),
-                null);
+    Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] legacyOverlayDirs,
+                    String[] overlayPaths, String[] libDirs, LoadedApk pkgInfo,
+                    Configuration overrideConfig) {
+        return mResourcesManager.getResources(null, resDir, splitResDirs, legacyOverlayDirs,
+                overlayPaths, libDirs, null, overrideConfig, pkgInfo.getCompatibilityInfo(),
+                pkgInfo.getClassLoader(), null);
     }
 
     @UnsupportedAppUsage
@@ -2462,12 +2463,15 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static boolean isLoadedApkResourceDirsUpToDate(LoadedApk loadedApk,
             ApplicationInfo appInfo) {
         Resources packageResources = loadedApk.mResources;
-        String[] overlayDirs = ArrayUtils.defeatNullable(loadedApk.getOverlayDirs());
-        String[] resourceDirs = ArrayUtils.defeatNullable(appInfo.resourceDirs);
+        boolean resourceDirsUpToDate = Arrays.equals(
+                ArrayUtils.defeatNullable(appInfo.resourceDirs),
+                ArrayUtils.defeatNullable(loadedApk.getOverlayDirs()));
+        boolean overlayPathsUpToDate = Arrays.equals(
+                ArrayUtils.defeatNullable(appInfo.overlayPaths),
+                ArrayUtils.defeatNullable(loadedApk.getOverlayPaths()));
 
         return (packageResources == null || packageResources.getAssets().isUpToDate())
-                && overlayDirs.length == resourceDirs.length
-                && ArrayUtils.containsAll(overlayDirs, resourceDirs);
+                && resourceDirsUpToDate && overlayPathsUpToDate;
     }
 
     @UnsupportedAppUsage
@@ -5685,6 +5689,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
                 amOverrideConfig, contextThemeWrapperOverrideConfig);
         mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig, displayId);
+        final Resources res = activity.getResources();
+        if (res.hasOverrideDisplayAdjustments()) {
+            // If fixed rotation is applied while the activity is visible (e.g. PiP), the rotated
+            // configuration of activity may be sent later than the adjustments. In this case, the
+            // adjustments need to be updated for the consistency of display info.
+            res.getDisplayAdjustments().getConfiguration().updateFrom(finalOverrideConfig);
+        }
 
         activity.mConfigChangeFlags = 0;
         activity.mCurrentConfig = new Configuration(newConfig);

@@ -176,6 +176,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -343,7 +344,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private StatusBarManagerInternal mStatusBarManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
-    PowerManagerInternal mPowerManagerInternal;
+    private PowerManagerInternal mPowerManagerInternal;
     private UsageStatsManagerInternal mUsageStatsInternal;
 
     PendingIntentController mPendingIntentController;
@@ -591,6 +592,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+            POWER_MODE_REASON_START_ACTIVITY,
+            POWER_MODE_REASON_FREEZE_DISPLAY,
+            POWER_MODE_REASON_ALL,
+    })
+    @interface PowerModeReason {}
+
+    static final int POWER_MODE_REASON_START_ACTIVITY = 1 << 0;
+    static final int POWER_MODE_REASON_FREEZE_DISPLAY = 1 << 1;
+    /** This can only be used by {@link #endLaunchPowerMode(int)}.*/
+    static final int POWER_MODE_REASON_ALL = (1 << 2) - 1;
+
+    /** The reasons to use {@link Mode#LAUNCH} power mode. */
+    private @PowerModeReason int mLaunchPowerModeReasons;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
             LAYOUT_REASON_CONFIG_CHANGED,
             LAYOUT_REASON_VISIBILITY_CHANGED,
     })
@@ -771,7 +788,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean sizeCompatFreeform = Settings.Global.getInt(
                 resolver, DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
         final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(
-                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
+                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1) != 0;
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         DisplayProperties.debug_force_rtl(forceRtl);
@@ -4093,6 +4110,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 deferResume);
 
         return changes;
+    }
+
+    void startLaunchPowerMode(@PowerModeReason int reason) {
+        if (mPowerManagerInternal == null) return;
+        mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
+        mLaunchPowerModeReasons |= reason;
+    }
+
+    void endLaunchPowerMode(@PowerModeReason int reason) {
+        if (mPowerManagerInternal == null || mLaunchPowerModeReasons == 0) return;
+        mLaunchPowerModeReasons &= ~reason;
+        if (mLaunchPowerModeReasons == 0) {
+            mPowerManagerInternal.setPowerMode(Mode.LAUNCH, false);
+        }
     }
 
     /** @see WindowSurfacePlacer#deferLayout */

@@ -370,12 +370,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         int newPath = mService.portIdToPath(portId);
-        startRoutingControl(oldPath, newPath, true, callback);
+        startRoutingControl(oldPath, newPath, callback);
     }
 
     @ServiceThreadOnly
-    void startRoutingControl(int oldPath, int newPath, boolean queryDevicePowerStatus,
-            IHdmiControlCallback callback) {
+    void startRoutingControl(int oldPath, int newPath, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (oldPath == newPath) {
             return;
@@ -385,7 +384,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.sendCecCommand(routingChange);
         removeAction(RoutingControlAction.class);
         addAndStartAction(
-                new RoutingControlAction(this, newPath, queryDevicePowerStatus, callback));
+                new RoutingControlAction(this, newPath, callback));
     }
 
     @ServiceThreadOnly
@@ -554,7 +553,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (isTailOfActivePath(path, getActivePath())) {
             int newPath = mService.portIdToPath(getActivePortId());
             setActivePath(newPath);
-            startRoutingControl(getActivePath(), newPath, false, null);
+            startRoutingControl(getActivePath(), newPath, null);
             return true;
         }
         return false;
@@ -598,7 +597,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             getActiveSource().invalidate();
             removeAction(RoutingControlAction.class);
             int newPath = HdmiUtils.twoBytesToInt(params, 2);
-            addAndStartAction(new RoutingControlAction(this, newPath, true, null));
+            addAndStartAction(new RoutingControlAction(this, newPath, null));
         }
         return true;
     }
@@ -1140,7 +1139,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Seq #23
         if (isTailOfActivePath(path, getActivePath())) {
             int newPath = mService.portIdToPath(getActivePortId());
-            startRoutingControl(getActivePath(), newPath, true, null);
+            startRoutingControl(getActivePath(), newPath, null);
         }
     }
 
@@ -1158,7 +1157,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (!routingForBootup && !isProhibitMode()) {
                 int newPath = mService.portIdToPath(getActivePortId());
                 setActivePath(newPath);
-                startRoutingControl(getActivePath(), newPath, routingForBootup, null);
+                startRoutingControl(getActivePath(), newPath, null);
             }
         } else {
             int activePath = mService.getPhysicalAddress();

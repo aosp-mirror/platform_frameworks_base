@@ -30,6 +30,7 @@ import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -112,7 +113,7 @@ public class PipTransition extends PipTransitionController {
                             taskInfo.pictureInPictureParams, currentBounds);
             animator = mPipAnimationController.getAnimator(taskInfo, leash,
                     currentBounds, currentBounds, destinationBounds, sourceHintRect,
-                    TRANSITION_DIRECTION_TO_PIP, 0 /* startingAngle */);
+                    TRANSITION_DIRECTION_TO_PIP, 0 /* startingAngle */, Surface.ROTATION_0);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             t.setAlpha(leash, 0f);
             t.apply();

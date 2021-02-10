@@ -53,6 +53,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
     private final Context mContext;
     private final DisplayController mDisplayController;
-    private SplitScreen mSplitScreen;
+    private SplitScreenController mSplitScreen;
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
@@ -76,7 +77,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         mDisplayController = displayController;
     }
 
-    public void initialize(Optional<SplitScreen> splitscreen) {
+    public void initialize(Optional<SplitScreenController> splitscreen) {
         mSplitScreen = splitscreen.orElse(null);
         mDisplayController.addDisplayWindowListener(this);
     }

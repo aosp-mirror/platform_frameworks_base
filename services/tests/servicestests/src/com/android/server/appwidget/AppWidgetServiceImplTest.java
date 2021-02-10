@@ -16,6 +16,8 @@
 
 package com.android.server.appwidget;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,6 +46,7 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.widget.RemoteViews;
 
+import com.android.frameworks.servicestests.R;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.server.LocalServices;
 
@@ -291,6 +294,13 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         for (int i = 0; i < allProviders.size(); i++) {
             assertEquals(allProviders.get(i).provider, providersForPackage.get(i).provider);
         }
+    }
+
+    public void testGetPreviewLayout() {
+        AppWidgetProviderInfo info =
+                mManager.getInstalledProvidersForPackage(mPkgName, null).get(0);
+
+        assertThat(info.previewLayout).isEqualTo(R.layout.widget_preview);
     }
 
     private int setupHostAndWidget() {

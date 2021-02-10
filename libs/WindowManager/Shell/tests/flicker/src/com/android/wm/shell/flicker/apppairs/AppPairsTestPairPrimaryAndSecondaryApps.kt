@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.os.Bundle
 import android.os.SystemClock
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
@@ -38,7 +37,6 @@ import org.junit.runners.Parameterized
  * Test cold launch app from launcher.
  * To run this test: `atest WMShellFlickerTests:AppPairsTestPairPrimaryAndSecondaryApps`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -49,10 +47,9 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
-            val testTag = "testAppPairs_pairPrimaryAndSecondaryApps"
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
-                    buildTestTag(testTag, configuration)
+                    buildTestTag(configuration)
                 }
                 transitions {
                     // TODO pair apps through normal UX flow
@@ -61,20 +58,27 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
                     SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
                 }
                 assertions {
-                    layersTrace {
-                        appPairsDividerIsVisible()
-                        end("appsEndingBounds", enabled = false) {
-                            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-                            this.hasVisibleRegion(primaryApp.defaultWindowName,
-                                appPairsHelper.getPrimaryBounds(dividerRegion))
-                                .hasVisibleRegion(secondaryApp.defaultWindowName,
-                                    appPairsHelper.getSecondaryBounds(dividerRegion))
+                    presubmit {
+                        layersTrace {
+                            appPairsDividerIsVisible()
+                        }
+                        windowManagerTrace {
+                            end("bothAppWindowsVisible") {
+                                isVisible(primaryApp.defaultWindowName)
+                                isVisible(secondaryApp.defaultWindowName)
+                            }
                         }
                     }
-                    windowManagerTrace {
-                        end("bothAppWindowsVisible") {
-                            isVisible(primaryApp.defaultWindowName)
-                            isVisible(secondaryApp.defaultWindowName)
+
+                    flaky {
+                        layersTrace {
+                            end("appsEndingBounds") {
+                                val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
+                                this.hasVisibleRegion(primaryApp.defaultWindowName,
+                                    appPairsHelper.getPrimaryBounds(dividerRegion))
+                                    .hasVisibleRegion(secondaryApp.defaultWindowName,
+                                        appPairsHelper.getSecondaryBounds(dividerRegion))
+                            }
                         }
                     }
                 }

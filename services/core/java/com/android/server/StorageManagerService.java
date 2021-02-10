@@ -890,7 +890,7 @@ class StorageManagerService extends IStorageManager.Stub
             ZramWriteback.scheduleZramWriteback(mContext);
         }
 
-        updateTranscodeEnabled();
+        configureTranscoding();
     }
 
     /**
@@ -922,7 +922,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void updateTranscodeEnabled() {
+    private void configureTranscoding() {
         // See MediaProvider TranscodeHelper#getBooleanProperty for more information
         boolean transcodeEnabled = false;
         boolean defaultValue = true;
@@ -935,6 +935,15 @@ class StorageManagerService extends IStorageManager.Stub
                     "transcode_enabled", defaultValue);
         }
         SystemProperties.set("sys.fuse.transcode_enabled", String.valueOf(transcodeEnabled));
+
+        if (transcodeEnabled) {
+            LocalServices.getService(ActivityManagerInternal.class)
+                    .registerAnrController((packageName, uid) -> {
+                        // TODO: Retrieve delay from ExternalStorageService that can check
+                        // transcoding status
+                        return SystemProperties.getInt("sys.fuse.transcode_anr_delay_ms", 0);
+                    });
+        }
     }
 
     /**
