@@ -3821,13 +3821,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return true when the window should be letterboxed. */
     boolean isLetterboxedAppWindow() {
         // Fullscreen mode but doesn't fill display area.
-        return (!inMultiWindowMode() && !matchesDisplayAreaBounds())
-                // Activity in size compat.
-                || (mActivityRecord != null && mActivityRecord.inSizeCompatMode())
-                // Task letterboxed.
-                || (getTask() != null && getTask().isTaskLetterboxed())
-                // Letterboxed for display cutout.
-                || isLetterboxedForDisplayCutout();
+        if (!inMultiWindowMode() && !matchesDisplayAreaBounds()) {
+            return true;
+        }
+        if (mActivityRecord != null) {
+            // Activity in size compat.
+            if (mActivityRecord.inSizeCompatMode()) {
+                return true;
+            }
+            // Letterbox for fixed orientation.
+            if (mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio()) {
+                return true;
+            }
+        }
+        // Letterboxed for display cutout.
+        return isLetterboxedForDisplayCutout();
     }
 
     /** Returns {@code true} if the window is letterboxed for the display cutout. */
