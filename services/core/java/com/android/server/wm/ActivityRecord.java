@@ -249,6 +249,7 @@ import android.app.servertransaction.TransferSplashScreenViewStateItem;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
@@ -547,6 +548,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     int mRelaunchReason = RELAUNCH_REASON_NONE;
 
     TaskDescription taskDescription; // the recents information for this activity
+
+    // The locusId associated with this activity, if set.
+    private LocusId mLocusId;
 
     // These configurations are collected from application's resources based on size-sensitive
     // qualifiers. For example, layout-w800dp will be added to mHorizontalSizeConfigurations as 800
@@ -6127,6 +6131,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         taskDescription = _taskDescription;
         getTask().updateTaskDescription();
+    }
+
+    void setLocusId(LocusId locusId) {
+        if (Objects.equals(locusId, mLocusId)) return;
+        mLocusId = locusId;
+        final Task task = getTask();
+        if (task != null) getTask().dispatchTaskInfoChangedIfNeeded(false /* force */);
+    }
+
+    LocusId getLocusId() {
+        return mLocusId;
     }
 
     void setVoiceSessionLocked(IVoiceInteractionSession session) {
