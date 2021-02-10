@@ -363,6 +363,7 @@ filegroup {
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
         ":framework-wifi-updatable-sources",
+        ":ike-srcs",
         ":updatable-media-srcs",
     ],
     visibility: ["//visibility:private"],
@@ -371,6 +372,7 @@ filegroup {
 java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
         "framework-media.stubs.module_lib",
         "framework-mediaprovider.stubs.module_lib",
         "framework-permission.stubs.module_lib",
@@ -387,6 +389,7 @@ java_library {
     name: "framework-all",
     installable: false,
     static_libs: [
+        "android.net.ipsec.ike.impl",
         "framework-minus-apex",
         "framework-mediaprovider.impl",
         "framework-permission.impl",
