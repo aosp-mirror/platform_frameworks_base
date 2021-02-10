@@ -80,8 +80,6 @@ import android.net.INetworkStatsSession;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
@@ -1456,8 +1454,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private static NetworkState buildWifiState(boolean isMetered, @NonNull String iface) {
-        final NetworkInfo info = new NetworkInfo(TYPE_WIFI, 0, null, null);
-        info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(iface);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
@@ -1465,7 +1461,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
         capabilities.setSSID(TEST_SSID);
-        return new NetworkState(info, prop, capabilities, WIFI_NETWORK, null, TEST_SSID);
+        return new NetworkState(TYPE_WIFI, prop, capabilities, WIFI_NETWORK, null, TEST_SSID);
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
@@ -1473,17 +1469,14 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private static NetworkState buildMobile3gState(String subscriberId, boolean isRoaming) {
-        final NetworkInfo info = new NetworkInfo(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UMTS, null, null);
-        info.setDetailedState(DetailedState.CONNECTED, null, null);
-        info.setRoaming(isRoaming);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, subscriberId, null);
+        return new NetworkState(
+                TYPE_MOBILE, prop, capabilities, MOBILE_NETWORK, subscriberId, null);
     }
 
     private NetworkStats buildEmptyStats() {
@@ -1491,11 +1484,9 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private static NetworkState buildVpnState() {
-        final NetworkInfo info = new NetworkInfo(TYPE_VPN, 0, null, null);
-        info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TUN_IFACE);
-        return new NetworkState(info, prop, new NetworkCapabilities(), VPN_NETWORK, null, null);
+        return new NetworkState(TYPE_VPN, prop, new NetworkCapabilities(), VPN_NETWORK, null, null);
     }
 
     private long getElapsedRealtime() {

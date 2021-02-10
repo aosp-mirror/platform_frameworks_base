@@ -350,6 +350,9 @@ public class FontsContract {
             return cachedTypeface;
         }
 
+        Log.w(TAG, "Platform version of downloadable fonts is deprecated. Please use"
+                + " androidx version instead.");
+
         synchronized (sLock) {
             // It is possible that Font is loaded during the thread sleep time
             // re-check the cache to avoid re-loading the font

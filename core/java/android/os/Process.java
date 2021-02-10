@@ -1442,7 +1442,7 @@ public class Process {
      *
      * @hide
      */
-    public static boolean hasFileLocks(int pid) throws IOException {
+    public static boolean hasFileLocks(int pid) throws Exception {
         BufferedReader br = null;
 
         try {
@@ -1454,8 +1454,13 @@ public class Process {
 
                 for (int i = 0; i < 5 && st.hasMoreTokens(); i++) {
                     String str = st.nextToken();
-                    if (i == 4 && Integer.parseInt(str) == pid) {
-                        return true;
+                    try {
+                        if (i == 4 && Integer.parseInt(str) == pid) {
+                            return true;
+                        }
+                    } catch (NumberFormatException nfe) {
+                        throw new Exception("Exception parsing /proc/locks at \" "
+                                + line +  " \", token #" + i);
                     }
                 }
             }

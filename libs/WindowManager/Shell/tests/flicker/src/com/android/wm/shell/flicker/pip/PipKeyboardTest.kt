@@ -16,21 +16,19 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
+import android.os.Bundle
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.dsl.runWithFlicker
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.closePipWindow
-import com.android.server.wm.flicker.helpers.hasPipWindow
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.startRotation
 import com.android.wm.shell.flicker.IME_WINDOW_NAME
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
-import com.android.wm.shell.flicker.testapp.Components
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -39,114 +37,61 @@ import org.junit.runners.Parameterized
  * Test Pip launch.
  * To run this test: `atest WMShellFlickerTests:PipKeyboardTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipKeyboardTest(
-    rotationName: String,
-    rotation: Int
-) : PipTestBase(rotationName, rotation) {
-    private val keyboardApp = ImeAppHelper(instrumentation)
-    private val keyboardComponent = Components.ImeActivity.COMPONENT
-    private val helper = WindowManagerStateHelper()
-
-    private val keyboardScenario: FlickerBuilder
-        get() = FlickerBuilder(instrumentation).apply {
-            repeat { TEST_REPETITIONS }
-            // disable layer tracing
-            withLayerTracing { null }
-            setup {
-                test {
-                    device.wakeUpAndGoToHomeScreen()
-                    device.pressHome()
-                    // launch our target pip app
-                    testApp.launchViaIntent(wmHelper)
-                    this.setRotation(rotation)
-                    testApp.clickEnterPipButton()
-                    // open an app with an input field and a keyboard
-                    // UiAutomator doesn't support to launch the multiple Activities in a task.
-                    // So use launchActivity() for the Keyboard Activity.
-                    keyboardApp.launchViaIntent()
-                    helper.waitForAppTransitionIdle()
-                    helper.waitForFullScreenApp(keyboardComponent)
-                }
-            }
-            teardown {
-                test {
-                    keyboardApp.exit()
-
-                    if (device.hasPipWindow()) {
-                        device.closePipWindow()
-                    }
-                    testApp.exit()
-                    this.setRotation(Surface.ROTATION_0)
-                }
-            }
-        }
-
-    /** Ensure the pip window remains visible throughout any keyboard interactions. */
-    @Test
-    fun pipWindow_doesNotLeaveTheScreen_onKeyboardOpenClose() {
-        val testTag = "pipWindow_doesNotLeaveTheScreen_onKeyboardOpenClose"
-        runWithFlicker(keyboardScenario) {
-            withTestName { testTag }
-            transitions {
-                // open the soft keyboard
-                keyboardApp.openIME(device, wmHelper)
-                helper.waitImeWindowShown()
-
-                // then close it again
-                keyboardApp.closeIME(device, wmHelper)
-                helper.waitImeWindowGone()
-            }
-            assertions {
-                windowManagerTrace {
-                    all("PiP window must remain inside visible bounds") {
-                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
-                        coversAtMostRegion(testApp.defaultWindowName, displayBounds)
-                    }
-                }
-            }
-        }
-    }
-
-    /** Ensure the pip window does not obscure the keyboard. */
-    @Test
-    fun pipWindow_doesNotObscure_keyboard() {
-        val testTag = "pipWindow_doesNotObscure_keyboard"
-        runWithFlicker(keyboardScenario) {
-            withTestName { testTag }
-            transitions {
-                // open the soft keyboard
-                keyboardApp.openIME(device, wmHelper)
-                helper.waitImeWindowShown()
-            }
-            teardown {
-                eachRun {
-                    // close the keyboard
-                    keyboardApp.closeIME(device, wmHelper)
-                    helper.waitImeWindowGone()
-                }
-            }
-            assertions {
-                windowManagerTrace {
-                    end("imeWindowAboveApp") {
-                        isAboveWindow(IME_WINDOW_NAME, testApp.defaultWindowName)
-                    }
-                }
-            }
-        }
-    }
-
-    companion object {
-        private const val TEST_REPETITIONS = 5
+class PipKeyboardTest(testSpec: FlickerTestRunnerFactory.TestSpec) : FlickerTestRunner(testSpec) {
+    companion object : PipTransitionBase(InstrumentationRegistry.getInstrumentation()) {
+        private const val TAG_IME_VISIBLE = "imeIsVisible"
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
-            val supportedRotations = intArrayOf(Surface.ROTATION_0)
-            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
+            val imeApp = ImeAppHelper(instrumentation)
+            val baseConfig = getTransitionLaunch(eachRun = false)
+            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
+                setup {
+                    test {
+                        imeApp.launchViaIntent(wmHelper)
+                        setRotation(configuration.startRotation)
+                    }
+                }
+                teardown {
+                    test {
+                        imeApp.exit()
+                        setRotation(Surface.ROTATION_0)
+                    }
+                }
+                transitions {
+                    // open the soft keyboard
+                    imeApp.openIME(wmHelper)
+                    createTag(TAG_IME_VISIBLE)
+
+                    // then close it again
+                    imeApp.closeIME(wmHelper)
+                }
+                assertions {
+                    presubmit {
+                        windowManagerTrace {
+                            // Ensure the pip window remains visible throughout
+                            // any keyboard interactions
+                            all("pipInVisibleBounds") {
+                                val displayBounds = WindowUtils.getDisplayBounds(
+                                    configuration.startRotation)
+                                coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
+                            }
+                            // Ensure that the pip window does not obscure the keyboard
+                            tag(TAG_IME_VISIBLE) {
+                                isAboveWindow(IME_WINDOW_NAME, pipApp.defaultWindowName)
+                            }
+                        }
+                    }
+                }
+            }
+
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                baseConfig, testSpec, supportedRotations = listOf(Surface.ROTATION_0),
+                repetitions = 5)
         }
     }
 }

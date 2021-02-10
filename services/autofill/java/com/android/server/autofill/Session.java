@@ -1492,7 +1492,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 final Dataset dataset = (Dataset) result;
                 final Dataset oldDataset = authenticatedResponse.getDatasets().get(datasetIdx);
-                if (!isPinnedDataset(oldDataset)) {
+                if (!isAuthResultDatasetEphemeral(oldDataset, data)) {
                     authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 }
                 autoFill(requestId, datasetIdx, dataset, false);
@@ -1510,6 +1510,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
             processNullResponseLocked(requestId, 0);
         }
+    }
+
+    /**
+     * Returns whether the dataset returned from the authentication result is ephemeral or not.
+     * See {@link AutofillManager#EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET} for more
+     * information.
+     */
+    private static boolean isAuthResultDatasetEphemeral(@Nullable Dataset oldDataset,
+            @NonNull Bundle authResultData) {
+        if (authResultData.containsKey(
+                AutofillManager.EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET)) {
+            return authResultData.getBoolean(
+                    AutofillManager.EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET);
+        }
+        return isPinnedDataset(oldDataset);
     }
 
     /**

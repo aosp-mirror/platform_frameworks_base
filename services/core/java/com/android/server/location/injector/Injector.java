@@ -56,7 +56,4 @@ public interface Injector {
 
     /** Returns a LocationUsageLogger. */
     LocationUsageLogger getLocationUsageLogger();
-
-    /** Returns a LocationEventLog. */
-    LocationEventLog getLocationEventLog();
 }

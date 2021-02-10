@@ -16,12 +16,13 @@
 
 package com.android.server.location.eventlog;
 
+import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.util.TimeUtils;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.ListIterator;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
@@ -35,6 +36,7 @@ public abstract class LocalEventLog {
         boolean isFiller();
         long getTimeDeltaMs();
         String getLogString();
+        boolean filter(@Nullable String filter);
     }
 
     private static final class FillerEvent implements Log {
@@ -62,6 +64,11 @@ public abstract class LocalEventLog {
         public String getLogString() {
             throw new AssertionError();
         }
+
+        @Override
+        public boolean filter(String filter) {
+            return false;
+        }
     }
 
     /**
@@ -86,6 +93,11 @@ public abstract class LocalEventLog {
         @Override
         public final long getTimeDeltaMs() {
             return Integer.toUnsignedLong(mTimeDelta);
+        }
+
+        @Override
+        public boolean filter(String filter) {
+            return false;
         }
     }
 
@@ -198,6 +210,17 @@ public abstract class LocalEventLog {
         }
     }
 
+    /**
+     * Iterates over the event log, passing each filter-matching log string to the given
+     * consumer.
+     */
+    public synchronized void iterate(String filter, Consumer<String> consumer) {
+        LogIterator it = new LogIterator(filter);
+        while (it.hasNext()) {
+            consumer.accept(it.next());
+        }
+    }
+
     // returns the index of the first element
     private int startIndex() {
         return wrapIndex(mLogEndIndex - mLogSize);
@@ -205,12 +228,13 @@ public abstract class LocalEventLog {
 
     // returns the index after this one
     private int incrementIndex(int index) {
-        return wrapIndex(index + 1);
-    }
-
-    // returns the index before this one
-    private int decrementIndex(int index) {
-        return wrapIndex(index - 1);
+        if (index == -1) {
+            return startIndex();
+        } else if (index >= 0) {
+            return wrapIndex(index + 1);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     // rolls over the given index if necessary
@@ -219,7 +243,9 @@ public abstract class LocalEventLog {
         return (index % mLog.length + mLog.length) % mLog.length;
     }
 
-    private class LogIterator implements ListIterator<String> {
+    private class LogIterator implements Iterator<String> {
+
+        private final @Nullable String mFilter;
 
         private final long mSystemTimeDeltaMs;
 
@@ -228,10 +254,17 @@ public abstract class LocalEventLog {
         private int mCount;
 
         LogIterator() {
+            this(null);
+        }
+
+        LogIterator(@Nullable String filter) {
+            mFilter = filter;
             mSystemTimeDeltaMs = System.currentTimeMillis() - SystemClock.elapsedRealtime();
             mCurrentRealtimeMs = mStartRealtimeMs;
-            mIndex = startIndex();
-            mCount = 0;
+            mIndex = -1;
+            mCount = -1;
+
+            increment();
         }
 
         @Override
@@ -239,75 +272,17 @@ public abstract class LocalEventLog {
             return mCount < mLogSize;
         }
 
-        @Override
-        public boolean hasPrevious() {
-            return mCount > 0;
-        }
-
-        @Override
-        // return then increment
         public String next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
 
             Log log = mLog[mIndex];
-            long nextDeltaMs = log.getTimeDeltaMs();
-            long realtimeMs = mCurrentRealtimeMs + nextDeltaMs;
+            long timeMs = mCurrentRealtimeMs + log.getTimeDeltaMs() + mSystemTimeDeltaMs;
 
-            // calculate next index, skipping filler events
-            do {
-                mCurrentRealtimeMs += nextDeltaMs;
-                mIndex = incrementIndex(mIndex);
-                if (++mCount < mLogSize) {
-                    nextDeltaMs = mLog[mIndex].getTimeDeltaMs();
-                }
-            } while (mCount < mLogSize && mLog[mIndex].isFiller());
+            increment();
 
-            return getTimePrefix(realtimeMs + mSystemTimeDeltaMs) + log.getLogString();
-        }
-
-        @Override
-        // decrement then return
-        public String previous() {
-            Log log;
-            long currentDeltaMs;
-            long realtimeMs;
-
-            // calculate previous index, skipping filler events with MAX_TIME_DELTA
-            do {
-                if (!hasPrevious()) {
-                    throw new NoSuchElementException();
-                }
-
-                mIndex = decrementIndex(mIndex);
-                mCount--;
-
-                log = mLog[mIndex];
-                realtimeMs = mCurrentRealtimeMs;
-
-                if (mCount > 0) {
-                    currentDeltaMs = log.getTimeDeltaMs();
-                    mCurrentRealtimeMs -= currentDeltaMs;
-                }
-            } while (mCount >= 0 && log.isFiller());
-
-            return getTimePrefix(realtimeMs + mSystemTimeDeltaMs) + log.getLogString();
-        }
-
-        @Override
-        public int nextIndex() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int previousIndex() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void add(String s) {
-            throw new UnsupportedOperationException();
+            return getTimePrefix(timeMs) + log.getLogString();
         }
 
         @Override
@@ -315,9 +290,16 @@ public abstract class LocalEventLog {
             throw new UnsupportedOperationException();
         }
 
-        @Override
-        public void set(String s) {
-            throw new UnsupportedOperationException();
+        private void increment() {
+            long nextDeltaMs = mIndex == -1 ? 0 : mLog[mIndex].getTimeDeltaMs();
+            do {
+                mCurrentRealtimeMs += nextDeltaMs;
+                mIndex = incrementIndex(mIndex);
+                if (++mCount < mLogSize) {
+                    nextDeltaMs = mLog[mIndex].getTimeDeltaMs();
+                }
+            } while (mCount < mLogSize && (mLog[mIndex].isFiller() || (mFilter != null
+                    && !mLog[mIndex].filter(mFilter))));
         }
     }
 }

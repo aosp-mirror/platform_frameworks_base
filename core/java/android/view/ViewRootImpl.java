@@ -1675,7 +1675,8 @@ public final class ViewRootImpl implements ViewParent,
         requestLayout();
 
         // See comment for View.sForceLayoutWhenInsetsChanged
-        if (View.sForceLayoutWhenInsetsChanged && mView != null) {
+        if (View.sForceLayoutWhenInsetsChanged && mView != null
+                && mWindowAttributes.softInputMode == SOFT_INPUT_ADJUST_RESIZE) {
             forceLayout(mView);
         }
 
@@ -3063,11 +3064,14 @@ public final class ViewRootImpl implements ViewParent,
                 if (!mTransparentRegion.equals(mPreviousTransparentRegion)) {
                     mPreviousTransparentRegion.set(mTransparentRegion);
                     mFullRedrawNeeded = true;
-                    // reconfigure window manager
-                    try {
-                        mWindowSession.setTransparentRegion(mWindow, mTransparentRegion);
-                    } catch (RemoteException e) {
-                    }
+                    // TODO: Ideally we would do this in prepareSurfaces,
+                    // but prepareSurfaces is currently working under
+                    // the assumption that we paused the render thread
+                    // via the WM relayout code path. We probably eventually
+                    // want to synchronize transparent region hint changes
+                    // with draws.
+                    mTransaction.setTransparentRegionHint(getSurfaceControl(),
+                        mTransparentRegion).apply();
                 }
             }
 
@@ -10137,9 +10141,11 @@ public final class ViewRootImpl implements ViewParent,
      * Merges the transaction passed in with the next transaction in BLASTBufferQueue. This ensures
      * you can add transactions to the upcoming frame.
      */
-    void mergeWithNextTransaction(Transaction t, long frameNumber) {
+    public void mergeWithNextTransaction(Transaction t, long frameNumber) {
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.mergeWithNextTransaction(t, frameNumber);
+        } else {
+            t.apply();
         }
     }
 }

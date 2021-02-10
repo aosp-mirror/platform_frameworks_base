@@ -46,7 +46,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
@@ -1148,24 +1147,14 @@ public class HardwareRenderer {
                             // Default to SRGB if the display doesn't support wide color
                             .orElse(Dataspace.SRGB);
 
-            float maxRefreshRate =
-                    (float) Arrays.stream(display.getSupportedModes())
-                            .mapToDouble(Mode::getRefreshRate)
-                            .max()
-                            .orElseGet(() -> {
-                                Log.i(LOG_TAG, "Failed to find the maximum display refresh rate");
-                                // Assume that the max refresh rate is 60hz if we can't find one.
-                                return 60.0;
-                            });
             // Grab the physical screen dimensions from the active display mode
             // Strictly speaking the screen resolution may not always be constant - it is for
             // sizing the font cache for the underlying rendering thread. Since it's a
             // heuristic we don't need to be always 100% correct.
             Mode activeMode = display.getMode();
             nInitDisplayInfo(activeMode.getPhysicalWidth(), activeMode.getPhysicalHeight(),
-                    display.getRefreshRate(), maxRefreshRate,
-                    wideColorDataspace.mNativeDataspace, display.getAppVsyncOffsetNanos(),
-                    display.getPresentationDeadlineNanos());
+                    display.getRefreshRate(), wideColorDataspace.mNativeDataspace,
+                    display.getAppVsyncOffsetNanos(), display.getPresentationDeadlineNanos());
 
             // Defensively clear out the context
             mContext = null;
@@ -1324,6 +1313,5 @@ public class HardwareRenderer {
     private static native void nSetDisplayDensityDpi(int densityDpi);
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
-            float maxRefreshRate, int wideColorDataspace, long appVsyncOffsetNanos,
-            long presentationDeadlineNanos);
+            int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos);
 }

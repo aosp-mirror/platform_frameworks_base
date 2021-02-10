@@ -15,6 +15,7 @@
  */
 package android.media;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -30,6 +31,16 @@ import com.android.modules.utils.build.SdkLevel;
 public class MediaCommunicationManager {
     private static final String TAG = "MediaCommunicationManager";
 
+    /**
+     * The manager version used from beginning.
+     */
+    private static final int VERSION_1 = 1;
+
+    /**
+     * Current manager version.
+     */
+    private static final int CURRENT_VERSION = VERSION_1;
+
     private final Context mContext;
     private final IMediaCommunicationService mService;
 
@@ -43,7 +54,14 @@ public class MediaCommunicationManager {
         mContext = context;
         mService = IMediaCommunicationService.Stub.asInterface(
                 MediaFrameworkInitializer.getMediaServiceManager()
-                .getMediaCommunicationServiceRegisterer()
-                .get());
+                        .getMediaCommunicationServiceRegisterer()
+                        .get());
+    }
+
+    /**
+     * Gets the version of this {@link MediaCommunicationManager}.
+     */
+    public @IntRange(from = 1) int getVersion() {
+        return CURRENT_VERSION;
     }
 }

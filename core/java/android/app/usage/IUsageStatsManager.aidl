@@ -30,7 +30,7 @@ import java.util.Map;
 interface IUsageStatsManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     ParceledListSlice queryUsageStats(int bucketType, long beginTime, long endTime,
-            String callingPackage);
+            String callingPackage, int userId);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);

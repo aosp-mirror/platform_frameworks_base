@@ -726,4 +726,43 @@ public interface ServiceConnector<I extends IInterface> {
             }
         }
     }
+
+    /**
+     * A {@link ServiceConnector} that doesn't connect to anything.
+     *
+     * @param <T> the type of the {@link IInterface ipc interface} for the remote service
+     */
+    class NoOp<T extends IInterface> extends AndroidFuture<Object> implements ServiceConnector<T> {
+        {
+            completeExceptionally(new IllegalStateException("ServiceConnector is a no-op"));
+        }
+
+        @Override
+        public boolean run(@NonNull VoidJob<T> job) {
+            return false;
+        }
+
+        @Override
+        public AndroidFuture<Void> post(@NonNull VoidJob<T> job) {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public <R> AndroidFuture<R> postForResult(@NonNull Job<T, R> job) {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public <R> AndroidFuture<R> postAsync(@NonNull Job<T, CompletableFuture<R>> job) {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public AndroidFuture<T> connect() {
+            return (AndroidFuture) this;
+        }
+
+        @Override
+        public void unbind() {}
+    }
 }

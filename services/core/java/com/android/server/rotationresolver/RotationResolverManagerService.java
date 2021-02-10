@@ -66,7 +66,7 @@ public class RotationResolverManagerService extends
     private static final String KEY_SERVICE_ENABLED = "service_enabled";
 
     /** Default value in absence of {@link DeviceConfig} override. */
-    private static final boolean DEFAULT_SERVICE_ENABLED = false;
+    private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
     static final int ORIENTATION_UNKNOWN =
             FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__UNKNOWN;
@@ -150,7 +150,7 @@ public class RotationResolverManagerService extends
         @Override
         public void resolveRotation(
                 @NonNull RotationResolverCallbackInternal callbackInternal, int proposedRotation,
-                int currentRotation, String packageName, long timeout,
+                int currentRotation, long timeout,
                 @NonNull CancellationSignal cancellationSignalInternal) {
             Objects.requireNonNull(callbackInternal);
             Objects.requireNonNull(cancellationSignalInternal);
@@ -159,7 +159,8 @@ public class RotationResolverManagerService extends
                     final RotationResolverManagerPerUserService service = getServiceForUserLocked(
                             UserHandle.getCallingUserId());
                     service.resolveRotationLocked(callbackInternal, proposedRotation,
-                            currentRotation, packageName, timeout, cancellationSignalInternal);
+                            currentRotation, /* packageName */ "", timeout,
+                            cancellationSignalInternal);
                 } else {
                     Slog.w(TAG, "Rotation Resolver service is disabled.");
                     callbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);

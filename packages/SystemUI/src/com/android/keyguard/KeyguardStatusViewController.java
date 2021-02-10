@@ -134,7 +134,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Get the height of the logout button.
+     * Get the height of the owner information view.
      */
     public int getOwnerInfoHeight() {
         return mView.getOwnerInfoHeight();
@@ -335,9 +335,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 // of the top of the view
                 mKeyguardSliceViewController.updateTopMargin(
                         mKeyguardClockSwitchController.getClockTextTopPadding());
+                mView.setCanShowOwnerInfo(false);
+                mView.setCanShowLogout(false);
             } else {
                 // reset margin
                 mKeyguardSliceViewController.updateTopMargin(0);
+                mView.setCanShowOwnerInfo(true);
+                mView.setCanShowLogout(false);
             }
             updateAodIcons();
         }

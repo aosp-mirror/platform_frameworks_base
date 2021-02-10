@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.os.Bundle
 import android.os.SystemClock
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -46,7 +45,6 @@ import org.junit.runners.Parameterized
  * Test open apps to app pairs and rotate.
  * To run this test: `atest WMShellFlickerTests:RotateTwoLaunchedAppsInAppPairsMode`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -60,7 +58,7 @@ class RotateTwoLaunchedAppsInAppPairsMode(
         fun getParams(): Collection<Array<Any>> {
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
-                    buildTestTag("testRotateTwoLaunchedAppsInAppPairsMode", configuration)
+                    buildTestTag(configuration)
                 }
                 transitions {
                     executeShellCommand(composePairsCommand(
@@ -69,23 +67,28 @@ class RotateTwoLaunchedAppsInAppPairsMode(
                     setRotation(configuration.endRotation)
                 }
                 assertions {
-                    layersTrace {
-                        navBarLayerRotatesAndScales(Surface.ROTATION_0, configuration.endRotation,
-                            enabled = false)
-                        statusBarLayerRotatesScales(Surface.ROTATION_0, configuration.endRotation,
-                            enabled = false)
-                        appPairsDividerIsVisible(enabled = false)
-                        appPairsPrimaryBoundsIsVisible(configuration.endRotation,
-                            primaryApp.defaultWindowName, bugId = 172776659)
-                        appPairsSecondaryBoundsIsVisible(configuration.endRotation,
-                            secondaryApp.defaultWindowName, bugId = 172776659)
+                    presubmit {
+                        windowManagerTrace {
+                            navBarWindowIsAlwaysVisible()
+                            statusBarWindowIsAlwaysVisible()
+                            end("bothAppWindowsVisible") {
+                                isVisible(primaryApp.defaultWindowName)
+                                    .isVisible(secondaryApp.defaultWindowName)
+                            }
+                        }
                     }
-                    windowManagerTrace {
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        end("bothAppWindowsVisible") {
-                            isVisible(primaryApp.defaultWindowName)
-                                .isVisible(secondaryApp.defaultWindowName)
+
+                    flaky {
+                        layersTrace {
+                            appPairsDividerIsVisible()
+                            navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                configuration.endRotation)
+                            statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                configuration.endRotation)
+                            appPairsPrimaryBoundsIsVisible(configuration.endRotation,
+                                primaryApp.defaultWindowName, bugId = 172776659)
+                            appPairsSecondaryBoundsIsVisible(configuration.endRotation,
+                                secondaryApp.defaultWindowName, bugId = 172776659)
                         }
                     }
                 }

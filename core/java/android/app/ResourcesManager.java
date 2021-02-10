@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -60,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -174,8 +176,8 @@ public class ResourcesManager {
          * based on.
          *
          * @see #activityResources
-         * @see #getResources(IBinder, String, String[], String[], String[], Integer, Configuration,
-         * CompatibilityInfo, ClassLoader, List)
+         * @see #getResources(IBinder, String, String[], String[], String[], String[], Integer,
+         * Configuration, CompatibilityInfo, ClassLoader, List)
          */
         public final Configuration overrideConfig = new Configuration();
 
@@ -482,8 +484,8 @@ public class ResourcesManager {
             }
         }
 
-        if (key.mOverlayDirs != null) {
-            for (final String idmapPath : key.mOverlayDirs) {
+        if (key.mOverlayPaths != null) {
+            for (final String idmapPath : key.mOverlayPaths) {
                 apkKeys.add(new ApkKey(idmapPath, false /*sharedLib*/, true /*overlay*/));
             }
         }
@@ -783,14 +785,16 @@ public class ResourcesManager {
 
     /**
      * Creates base resources for a binder token. Calls to
-     * {@link #getResources(IBinder, String, String[], String[], String[], Integer, Configuration,
-     * CompatibilityInfo, ClassLoader, List)} with the same binder token will have their override
-     * configurations merged with the one specified here.
+     *
+     * {@link #getResources(IBinder, String, String[], String[], String[], String[], Integer,
+     * Configuration, CompatibilityInfo, ClassLoader, List)} with the same binder token will have
+     * their override configurations merged with the one specified here.
      *
      * @param token Represents an {@link Activity} or {@link WindowContext}.
      * @param resDir The base resource path. Can be null (only framework resources will be loaded).
      * @param splitResDirs An array of split resource paths. Can be null.
-     * @param overlayDirs An array of overlay paths. Can be null.
+     * @param legacyOverlayDirs An array of overlay APK paths. Can be null.
+     * @param overlayPaths An array of overlay APK and non-APK paths. Can be null.
      * @param libDirs An array of resource library paths. Can be null.
      * @param displayId The ID of the display for which to create the resources.
      * @param overrideConfig The configuration to apply on top of the base configuration. Can be
@@ -804,7 +808,8 @@ public class ResourcesManager {
     public @Nullable Resources createBaseTokenResources(@NonNull IBinder token,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
-            @Nullable String[] overlayDirs,
+            @Nullable String[] legacyOverlayDirs,
+            @Nullable String[] overlayPaths,
             @Nullable String[] libDirs,
             int displayId,
             @Nullable Configuration overrideConfig,
@@ -817,7 +822,7 @@ public class ResourcesManager {
             final ResourcesKey key = new ResourcesKey(
                     resDir,
                     splitResDirs,
-                    overlayDirs,
+                    combinedOverlayPaths(legacyOverlayDirs, overlayPaths),
                     libDirs,
                     displayId,
                     overrideConfig,
@@ -1043,7 +1048,8 @@ public class ResourcesManager {
      * @param activityToken Represents an Activity. If null, global resources are assumed.
      * @param resDir The base resource path. Can be null (only framework resources will be loaded).
      * @param splitResDirs An array of split resource paths. Can be null.
-     * @param overlayDirs An array of overlay paths. Can be null.
+     * @param legacyOverlayDirs An array of overlay APK paths. Can be null.
+     * @param overlayPaths An array of overlay APK and non-APK paths. Can be null.
      * @param libDirs An array of resource library paths. Can be null.
      * @param overrideDisplayId The ID of the display for which the returned Resources should be
      * based. This will cause display-based configuration properties to override those of the base
@@ -1063,7 +1069,8 @@ public class ResourcesManager {
             @Nullable IBinder activityToken,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
-            @Nullable String[] overlayDirs,
+            @Nullable String[] legacyOverlayDirs,
+            @Nullable String[] overlayPaths,
             @Nullable String[] libDirs,
             @Nullable Integer overrideDisplayId,
             @Nullable Configuration overrideConfig,
@@ -1075,7 +1082,7 @@ public class ResourcesManager {
             final ResourcesKey key = new ResourcesKey(
                     resDir,
                     splitResDirs,
-                    overlayDirs,
+                    combinedOverlayPaths(legacyOverlayDirs, overlayPaths),
                     libDirs,
                     overrideDisplayId != null ? overrideDisplayId : INVALID_DISPLAY,
                     overrideConfig,
@@ -1250,7 +1257,7 @@ public class ResourcesManager {
 
         // Create the new ResourcesKey with the rebased override config.
         final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir,
-                oldKey.mSplitResDirs, oldKey.mOverlayDirs, oldKey.mLibDirs,
+                oldKey.mSplitResDirs, oldKey.mOverlayPaths, oldKey.mLibDirs,
                 displayId, rebasedOverrideConfig, oldKey.mCompatInfo, oldKey.mLoaders);
 
         if (DEBUG) {
@@ -1393,7 +1400,7 @@ public class ResourcesManager {
                         updatedResourceKeys.put(impl, new ResourcesKey(
                                 key.mResDir,
                                 key.mSplitResDirs,
-                                key.mOverlayDirs,
+                                key.mOverlayPaths,
                                 newLibAssets,
                                 key.mDisplayId,
                                 key.mOverrideConfiguration,
@@ -1423,7 +1430,8 @@ public class ResourcesManager {
 
             // ApplicationInfo is mutable, so clone the arrays to prevent outside modification
             String[] copiedSplitDirs = ArrayUtils.cloneOrNull(newSplitDirs);
-            String[] copiedResourceDirs = ArrayUtils.cloneOrNull(appInfo.resourceDirs);
+            String[] copiedResourceDirs = combinedOverlayPaths(appInfo.resourceDirs,
+                    appInfo.overlayPaths);
 
             final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
             final int implCount = mResourceImpls.size();
@@ -1455,6 +1463,39 @@ public class ResourcesManager {
             redirectResourcesToNewImplLocked(updatedResourceKeys);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    /**
+     * Creates an array with the contents of {@param overlayPaths} and the unique elements of
+     * {@param resourceDirs}.
+     *
+     * {@link ApplicationInfo#resourceDirs} only contains paths of overlays APKs.
+     * {@link ApplicationInfo#overlayPaths} was created to contain paths of overlay of varying file
+     * formats. It also contains the contents of {@code resourceDirs} because the order of loaded
+     * overlays matter. In case {@code resourceDirs} contains overlay APK paths that are not present
+     * in overlayPaths (perhaps an app inserted an additional overlay path into a
+     * {@code resourceDirs}), this method is used to combine the contents of {@code resourceDirs}
+     * that do not exist in {@code overlayPaths}} and {@code overlayPaths}}.
+     */
+    @Nullable
+    private static String[] combinedOverlayPaths(@Nullable String[] resourceDirs,
+            @Nullable String[] overlayPaths) {
+        if (resourceDirs == null) {
+            return ArrayUtils.cloneOrNull(overlayPaths);
+        } else if(overlayPaths == null) {
+            return ArrayUtils.cloneOrNull(resourceDirs);
+        } else {
+            final ArrayList<String> paths = new ArrayList<>();
+            for (final String path : overlayPaths) {
+                paths.add(path);
+            }
+            for (final String path : resourceDirs) {
+                if (!paths.contains(path)) {
+                    paths.add(path);
+                }
+            }
+            return paths.toArray(new String[0]);
         }
     }
 
@@ -1559,7 +1600,7 @@ public class ResourcesManager {
                 final ResourcesKey newKey = new ResourcesKey(
                         oldKey.mResDir,
                         oldKey.mSplitResDirs,
-                        oldKey.mOverlayDirs,
+                        oldKey.mOverlayPaths,
                         oldKey.mLibDirs,
                         oldKey.mDisplayId,
                         oldKey.mOverrideConfiguration,

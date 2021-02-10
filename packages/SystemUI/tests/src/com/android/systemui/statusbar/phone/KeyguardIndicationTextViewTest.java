@@ -51,21 +51,21 @@ public class KeyguardIndicationTextViewTest extends SysuiTestCase {
 
     @Test
     public void switchIndication_null_hideIndication() {
-        mKeyguardIndicationTextView.switchIndication(null /* text */);
+        mKeyguardIndicationTextView.switchIndication(null /* text */, null);
 
         assertThat(mKeyguardIndicationTextView.getText()).isEqualTo("");
     }
 
     @Test
     public void switchIndication_emptyText_hideIndication() {
-        mKeyguardIndicationTextView.switchIndication("" /* text */);
+        mKeyguardIndicationTextView.switchIndication("" /* text */, null);
 
         assertThat(mKeyguardIndicationTextView.getText()).isEqualTo("");
     }
 
     @Test
     public void switchIndication_newText_updateProperly() {
-        mKeyguardIndicationTextView.switchIndication("test_indication" /* text */);
+        mKeyguardIndicationTextView.switchIndication("test_indication" /* text */, null);
 
         assertThat(mKeyguardIndicationTextView.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mKeyguardIndicationTextView.getText()).isEqualTo("test_indication");

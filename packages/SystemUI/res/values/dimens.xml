@@ -199,6 +199,9 @@
     <!-- The amount the content shifts upwards when transforming into the shelf -->
     <dimen name="shelf_transform_content_shift">32dp</dimen>
 
+    <!-- The y translation for keyguard indication text animation for rotating text in/out -->
+    <dimen name="keyguard_indication_y_translation">24dp</dimen>
+
     <!-- The padding on the bottom of the notifications on the keyguard -->
     <dimen name="keyguard_indication_bottom_padding">12sp</dimen>
 
@@ -1157,7 +1160,7 @@
     <dimen name="logout_button_layout_height">32dp</dimen>
     <dimen name="logout_button_padding_horizontal">16dp</dimen>
     <dimen name="logout_button_margin_bottom">12dp</dimen>
-    <dimen name="logout_button_corner_radius">2dp</dimen>
+    <dimen name="logout_button_corner_radius">4dp</dimen>
 
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>

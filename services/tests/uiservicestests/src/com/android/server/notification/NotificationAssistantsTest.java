@@ -15,6 +15,9 @@
  */
 package com.android.server.notification;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
@@ -135,6 +138,30 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         verify(mNm, never()).setDefaultAssistantForUser(anyInt());
         verify(mAssistants, times(1)).addApprovedList(
                 new ComponentName("b", "b").flattenToString(), 10, true, null);
+    }
+
+    @Test
+    public void testXmlMigratingAllowedAdjustments() throws Exception {
+        // Old tag, need migration
+        String xml = "<q_allowed_adjustments types=\"adj_1\"/>";
+
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        parser.nextTag();
+        mAssistants.readExtraTag("q_allowed_adjustments", parser);
+        assertTrue(mAssistants.isAdjustmentAllowed("adj_1"));
+        assertEquals(mNm.DEFAULT_ALLOWED_ADJUSTMENTS.length + 1,
+                mAssistants.getAllowedAssistantAdjustments().size());
+
+        // New TAG
+        xml = "<s_allowed_adjustments types=\"adj_2\"/>";
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        parser.nextTag();
+        mAssistants.readExtraTag("s_allowed_adjustments", parser);
+        assertTrue(mAssistants.isAdjustmentAllowed("adj_2"));
+        assertEquals(1, mAssistants.getAllowedAssistantAdjustments().size());
     }
 
     @Test

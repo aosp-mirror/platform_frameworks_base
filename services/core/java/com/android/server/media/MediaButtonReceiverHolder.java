@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,6 +62,13 @@ final class MediaButtonReceiverHolder {
     // Filter apps regardless of the phone's locked/unlocked state.
     private static final int PACKAGE_MANAGER_COMMON_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
+    /**
+     * Denotes the duration during which a media button receiver will be exempted from
+     * FGS-from-BG restriction and so will be allowed to start an FGS even if it is in the
+     * background state while it receives a media key event.
+     */
+    private static final long FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS = 10_000;
 
     private final int mUserId;
     private final PendingIntent mPendingIntent;
@@ -186,6 +194,9 @@ final class MediaButtonReceiverHolder {
         // TODO: Find a way to also send PID/UID in secure way.
         mediaButtonIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackageName);
 
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setTemporaryAppWhitelistDuration(
+                FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS);
         if (mPendingIntent != null) {
             if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "Sending " + keyEvent + " to the last known PendingIntent "
@@ -193,7 +204,8 @@ final class MediaButtonReceiverHolder {
             }
             try {
                 mPendingIntent.send(
-                        context, resultCode, mediaButtonIntent, onFinishedListener, handler);
+                        context, resultCode, mediaButtonIntent, onFinishedListener, handler,
+                        /* requiredPermission= */ null, options.toBundle());
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Error sending key event to media button receiver " + mPendingIntent, e);
                 return false;
@@ -216,7 +228,8 @@ final class MediaButtonReceiverHolder {
                         break;
                     default:
                         // Legacy behavior for other cases.
-                        context.sendBroadcastAsUser(mediaButtonIntent, userHandle);
+                        context.sendBroadcastAsUser(mediaButtonIntent, userHandle,
+                                /* receiverPermission= */ null, options.toBundle());
                 }
             } catch (Exception e) {
                 Log.w(TAG, "Error sending media button to the restored intent "

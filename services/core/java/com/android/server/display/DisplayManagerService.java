@@ -2579,14 +2579,14 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void setTemporaryBrightness(float brightness) {
+        public void setTemporaryBrightness(int displayId, float brightness) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
                     "Permission required to set the display's brightness");
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                    mDisplayPowerControllers.get(displayId)
                             .setTemporaryBrightness(brightness);
                 }
             } finally {
