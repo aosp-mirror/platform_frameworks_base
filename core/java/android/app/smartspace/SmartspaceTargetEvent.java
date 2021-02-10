@@ -138,6 +138,15 @@ public final class SmartspaceTargetEvent implements Parcelable {
         dest.writeInt(mEventType);
     }
 
+    @Override
+    public String toString() {
+        return "SmartspaceTargetEvent{"
+                + "mSmartspaceTarget=" + mSmartspaceTarget
+                + ", mSmartspaceActionId='" + mSmartspaceActionId + '\''
+                + ", mEventType=" + mEventType
+                + '}';
+    }
+
     /**
      * @hide
      */
