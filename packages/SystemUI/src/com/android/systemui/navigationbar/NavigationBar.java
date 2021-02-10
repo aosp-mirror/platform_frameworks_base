@@ -1116,7 +1116,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         // If an incoming call is ringing, HOME is totally disabled.
         // (The user is already on the InCallUI at this point,
-        // and his ONLY options are to answer or reject the call.)
+        // and their ONLY options are to answer or reject the call.)
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mHomeBlockedThisTouch = false;
