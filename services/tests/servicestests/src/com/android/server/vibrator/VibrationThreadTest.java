@@ -107,7 +107,8 @@ public class VibrationThreadTest {
         waitForCompletion(thread);
 
         verify(mControllerCallbacks, never()).onComplete(anyInt(), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.IGNORED));
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
+                eq(Vibration.Status.IGNORED_UNSUPPORTED));
     }
 
     @Test
@@ -121,7 +122,8 @@ public class VibrationThreadTest {
         waitForCompletion(thread);
 
         verify(mControllerCallbacks, never()).onComplete(anyInt(), eq(vibrationId));
-        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.IGNORED));
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId),
+                eq(Vibration.Status.IGNORED_UNSUPPORTED));
     }
 
     @Test
@@ -206,8 +208,8 @@ public class VibrationThreadTest {
         thread.cancel();
         waitForCompletion(thread);
 
-        verify(mIBatteryStatsMock, never()).noteVibratorOn(eq(UID), anyLong());
-        verify(mIBatteryStatsMock, never()).noteVibratorOff(eq(UID));
+        verify(mIBatteryStatsMock).noteVibratorOn(eq(UID), anyLong());
+        verify(mIBatteryStatsMock).noteVibratorOff(eq(UID));
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
         assertFalse(thread.getVibrators().get(VIBRATOR_ID).isVibrating());
 
