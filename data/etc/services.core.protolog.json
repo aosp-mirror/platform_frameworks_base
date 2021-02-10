@@ -811,12 +811,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
-    "-1144293044": {
-      "message": "SURFACE SET FREEZE LAYER: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
-    },
     "-1142279614": {
       "message": "Looking for focus: %s, flags=%d, canReceive=%b, reason=%s",
       "level": "VERBOSE",
@@ -1087,12 +1081,6 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
-    "-856025122": {
-      "message": "SURFACE transparentRegionHint=%s: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-855366859": {
       "message": "        merging children in from %s: %s",
       "level": "VERBOSE",
@@ -1261,12 +1249,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
     },
-    "-639305784": {
-      "message": "Could not report config changes to the window token client.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowToken.java"
-    },
     "-639217716": {
       "message": "setFocusedApp %s displayId=%d Callers=%s",
       "level": "INFO",
@@ -1416,12 +1398,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
-    "-477481651": {
-      "message": "SURFACE DESTROY PENDING: %s. %s",
-      "level": "INFO",
-      "group": "WM_SHOW_SURFACE_ALLOC",
-      "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
     "-463348344": {
       "message": "Removing and adding activity %s to root task at top callers=%s",
@@ -1902,12 +1878,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "123161180": {
-      "message": "SEVER CHILDREN",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "140319294": {
       "message": "IME target changed within ActivityRecord",
@@ -2569,12 +2539,6 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "838570988": {
-      "message": "Could not report token removal to the window token client.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowToken.java"
-    },
     "872933199": {
       "message": "Changing focus from %s to %s displayId=%d Callers=%s",
       "level": "DEBUG",
@@ -2850,12 +2814,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1217926207": {
-      "message": "Activity not running, resuming next.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "1219600119": {
       "message": "addWindow: win=%s Callers=%s",
@@ -3351,6 +3309,12 @@
     },
     "1837992242": {
       "message": "Executing finish of activity: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
+    "1847414670": {
+      "message": "Activity not running or entered PiP, resuming next.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
