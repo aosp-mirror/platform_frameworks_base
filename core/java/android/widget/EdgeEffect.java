@@ -25,8 +25,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.animation.AnimationUtils;
@@ -149,6 +153,8 @@ public class EdgeEffect {
     private float mDisplacement = 0.5f;
     private float mTargetDisplacement = 0.5f;
     private @EdgeEffectType int mEdgeEffectType = TYPE_GLOW;
+    private Matrix mTmpMatrix = null;
+    private float[] mTmpPoints = null;
 
     /**
      * Construct a new EdgeEffect with a theme appropriate for the provided context.
@@ -250,11 +256,18 @@ public class EdgeEffect {
     public void onPull(float deltaDistance, float displacement) {
         final long now = AnimationUtils.currentAnimationTimeMillis();
         mTargetDisplacement = displacement;
-        if (mState == STATE_PULL_DECAY && now - mStartTime < mDuration) {
+        if (mState == STATE_PULL_DECAY && now - mStartTime < mDuration
+                && mEdgeEffectType == TYPE_GLOW) {
             return;
         }
         if (mState != STATE_PULL) {
-            mGlowScaleY = Math.max(PULL_GLOW_BEGIN, mGlowScaleY);
+            if (mEdgeEffectType == TYPE_STRETCH) {
+                // Restore the mPullDistance to the fraction it is currently showing -- we want
+                // to "catch" the current stretch value.
+                mPullDistance = mDistance;
+            } else {
+                mGlowScaleY = Math.max(PULL_GLOW_BEGIN, mGlowScaleY);
+            }
         }
         mState = STATE_PULL;
 
@@ -313,6 +326,15 @@ public class EdgeEffect {
     public float onPullDistance(float deltaDistance, float displacement) {
         float finalDistance = Math.max(0f, deltaDistance + mDistance);
         float delta = finalDistance - mDistance;
+        if (delta == 0f && mDistance == 0f) {
+            return 0f; // No pull, don't do anything.
+        }
+
+        if (mState != STATE_PULL && mState != STATE_PULL_DECAY && mEdgeEffectType == TYPE_GLOW) {
+            // Catch the edge glow in the middle of an animation.
+            mPullDistance = mDistance;
+            mState = STATE_PULL;
+        }
         onPull(delta, displacement);
         return delta;
     }
@@ -466,33 +488,59 @@ public class EdgeEffect {
      * Draw into the provided canvas. Assumes that the canvas has been rotated
      * accordingly and the size has been set. The effect will be drawn the full
      * width of X=0 to X=width, beginning from Y=0 and extending to some factor <
-     * 1.f of height.
+     * 1.f of height. The {@link #TYPE_STRETCH} effect will only be visible on a
+     * hardware canvas, e.g. {@link RenderNode#beginRecording()}.
      *
      * @param canvas Canvas to draw into
      * @return true if drawing should continue beyond this frame to continue the
      *         animation
      */
     public boolean draw(Canvas canvas) {
-        update();
+        if (mEdgeEffectType == TYPE_GLOW) {
+            update();
+            final int count = canvas.save();
 
-        final int count = canvas.save();
+            final float centerX = mBounds.centerX();
+            final float centerY = mBounds.height() - mRadius;
 
-        final float centerX = mBounds.centerX();
-        final float centerY = mBounds.height() - mRadius;
+            canvas.scale(1.f, Math.min(mGlowScaleY, 1.f) * mBaseGlowScale, centerX, 0);
 
-        canvas.scale(1.f, Math.min(mGlowScaleY, 1.f) * mBaseGlowScale, centerX, 0);
+            final float displacement = Math.max(0, Math.min(mDisplacement, 1.f)) - 0.5f;
+            float translateX = mBounds.width() * displacement / 2;
 
-        final float displacement = Math.max(0, Math.min(mDisplacement, 1.f)) - 0.5f;
-        float translateX = mBounds.width() * displacement / 2;
+            canvas.clipRect(mBounds);
+            canvas.translate(translateX, 0);
+            mPaint.setAlpha((int) (0xff * mGlowAlpha));
+            canvas.drawCircle(centerX, centerY, mRadius, mPaint);
+            canvas.restoreToCount(count);
+        } else if (canvas instanceof RecordingCanvas) {
+            if (mState != STATE_PULL) {
+                update();
+            }
+            RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+            if (mTmpMatrix == null) {
+                mTmpMatrix = new Matrix();
+                mTmpPoints = new float[4];
+            }
+            //noinspection deprecation
+            recordingCanvas.getMatrix(mTmpMatrix);
+            mTmpPoints[0] = mBounds.width() * mDisplacement;
+            mTmpPoints[1] = mDistance * mBounds.height();
+            mTmpPoints[2] = mTmpPoints[0];
+            mTmpPoints[3] = 0;
+            mTmpMatrix.mapPoints(mTmpPoints);
+            float x = mTmpPoints[0] - mTmpPoints[2];
+            float y = mTmpPoints[1] - mTmpPoints[3];
 
-        canvas.clipRect(mBounds);
-        canvas.translate(translateX, 0);
-        mPaint.setAlpha((int) (0xff * mGlowAlpha));
-        canvas.drawCircle(centerX, centerY, mRadius, mPaint);
-        canvas.restoreToCount(count);
+            RenderNode renderNode = recordingCanvas.mNode;
+
+            // TODO: use stretchy RenderEffect and use internal API when it is ready
+            // TODO: wrap existing RenderEffect
+            renderNode.setRenderEffect(RenderEffect.createOffsetEffect(x, y));
+        }
 
         boolean oneLastFrame = false;
-        if (mState == STATE_RECEDE && mGlowScaleY == 0) {
+        if (mState == STATE_RECEDE && mDistance == 0) {
             mState = STATE_IDLE;
             oneLastFrame = true;
         }
