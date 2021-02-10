@@ -22,7 +22,7 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
       <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
@@ -34,7 +34,7 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
       <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
@@ -46,7 +46,7 @@
         <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
         <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
         <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
         <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
@@ -58,7 +58,7 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
       <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
@@ -70,7 +70,7 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
       <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
@@ -82,7 +82,7 @@
         <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
         <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
         <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
-        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBarGravityStart</item>
         <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
