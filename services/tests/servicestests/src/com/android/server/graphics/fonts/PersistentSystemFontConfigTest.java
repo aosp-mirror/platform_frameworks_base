@@ -18,13 +18,17 @@ package com.android.server.graphics.fonts;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.graphics.FontListParser;
 import android.platform.test.annotations.Presubmit;
+import android.text.FontConfig;
+import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -38,12 +42,18 @@ import java.nio.charset.StandardCharsets;
 public final class PersistentSystemFontConfigTest {
 
     @Test
-    public void testWriteRead() throws IOException, XmlPullParserException {
+    public void testWriteRead() throws Exception {
         long expectedModifiedDate = 1234567890;
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
         config.lastModifiedDate = expectedModifiedDate;
         config.updatedFontDirs.add("~~abc");
         config.updatedFontDirs.add("~~def");
+
+        FontConfig.FontFamily fontFamily = parseFontFamily(
+                "<family name='test'>"
+                + "  <font>test.ttf</font>"
+                + "</family>");
+        config.fontFamilies.add(fontFamily);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PersistentSystemFontConfig.writeToXml(baos, config);
@@ -57,6 +67,7 @@ public final class PersistentSystemFontConfigTest {
 
                 assertThat(another.lastModifiedDate).isEqualTo(expectedModifiedDate);
                 assertThat(another.updatedFontDirs).containsExactly("~~abc", "~~def");
+                assertThat(another.fontFamilies).containsExactly(fontFamily);
             }
         }
     }
@@ -75,4 +86,11 @@ public final class PersistentSystemFontConfigTest {
         }
     }
 
+    private static FontConfig.FontFamily parseFontFamily(String xml) throws Exception {
+        XmlPullParser parser = Xml.newPullParser();
+        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+        parser.setInput(is, "UTF-8");
+        parser.nextTag();
+        return FontListParser.readFamily(parser, "", null);
+    }
 }
