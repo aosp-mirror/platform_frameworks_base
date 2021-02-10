@@ -3797,6 +3797,11 @@
     <permission android:name="android.permission.MOVE_PACKAGE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @TestApi Allows an application to keep uninstalled packages as apks.
+         @hide -->
+    <permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to change whether an application component (other than its own) is
          enabled or not.
          <p>Not for use by third-party applications. -->
