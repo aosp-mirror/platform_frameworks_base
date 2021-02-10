@@ -2573,6 +2573,14 @@ public final class Debug
     public static native long getIonHeapsSizeKb();
 
     /**
+     * Return memory size in kilobytes allocated for DMA-BUF heap pools or -1 if
+     * /sys/kernel/dma_heap/total_pools_kb could not be read.
+     *
+     * @hide
+     */
+    public static native long getDmabufHeapPoolsSizeKb();
+
+    /**
      * Return memory size in kilobytes allocated for ION pools or -1 if
      * /sys/kernel/ion/total_pools_kb could not be read.
      *

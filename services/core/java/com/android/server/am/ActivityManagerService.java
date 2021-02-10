@@ -10726,14 +10726,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.print(" mapped + ");
                     pw.print(stringifyKBSize(dmabufUnmapped));
                     pw.println(" unmapped)");
-                    // TODO(b/167709539): also add pooled memory from DMA-BUF heaps
                     kernelUsed += totalExportedDmabuf;
+                }
+                final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+                if (totalDmabufHeapPool >= 0) {
+                    pw.print("DMA-BUF Heaps pool: ");
+                    pw.println(stringifyKBSize(totalDmabufHeapPool));
                 }
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
                 pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
             }
+
+            /*
+             * Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+             * memInfo.getCachedSizeKb().
+             */
             final long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
