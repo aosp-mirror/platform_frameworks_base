@@ -1140,6 +1140,15 @@
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
 
+        <!-- The type of the edge effect. The default is glow. -->
+        <attr name="edgeEffectType">
+            <!-- Use a colored glow at the edge. -->
+            <enum name="glow" value="0" />
+
+            <!-- Stretch the content. -->
+            <enum name="stretch" value="1" />
+        </attr>
+
         <!-- =================== -->
         <!-- Lighting properties -->
         <!-- =================== -->
@@ -9050,6 +9059,7 @@
     <!-- Used as a filter array on the theme to pull out only the EdgeEffect-relevant bits. -->
     <declare-styleable name="EdgeEffect">
         <attr name="colorEdgeEffect" />
+        <attr name="edgeEffectType" />
     </declare-styleable>
 
     <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes a
