@@ -28,6 +28,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
+import android.os.UserBatteryConsumer;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -113,15 +114,21 @@ public class BatteryUsageStatsRule implements TestRule {
         mMockClocks.uptime = uptimeUs;
     }
 
-    void apply(PowerCalculator calculator) {
+    void apply(PowerCalculator... calculators) {
+        apply(BatteryUsageStatsQuery.DEFAULT, calculators);
+    }
+
+    void apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(0, 0);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));
         }
 
-        calculator.calculate(builder, mBatteryStats, mMockClocks.realtime, mMockClocks.uptime,
-                BatteryUsageStatsQuery.DEFAULT, null);
+        for (PowerCalculator calculator : calculators) {
+            calculator.calculate(builder, mBatteryStats, mMockClocks.realtime, mMockClocks.uptime,
+                    query);
+        }
 
         mBatteryUsageStats = builder.build();
     }
@@ -140,6 +147,15 @@ public class BatteryUsageStatsRule implements TestRule {
         for (SystemBatteryConsumer sbc : mBatteryUsageStats.getSystemBatteryConsumers()) {
             if (sbc.getDrainType() == drainType) {
                 return sbc;
+            }
+        }
+        return null;
+    }
+
+    public UserBatteryConsumer getUserBatteryConsumer(int userId) {
+        for (UserBatteryConsumer ubc : mBatteryUsageStats.getUserBatteryConsumers()) {
+            if (ubc.getUserId() == userId) {
+                return ubc;
             }
         }
         return null;

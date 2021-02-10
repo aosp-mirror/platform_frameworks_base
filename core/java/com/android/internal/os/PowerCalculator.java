@@ -67,17 +67,10 @@ public abstract class PowerCalculator {
      * @param batteryStats  The recorded battery stats.
      * @param rawRealtimeUs The raw system realtime in microseconds.
      * @param rawUptimeUs   The raw system uptime in microseconds.
-     * @param statsType     The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this
-     *                      can only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
-     *                      {@link BatteryStats#STATS_CURRENT} and
-     *                      {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
-     * @param asUsers       An array of users for which the attribution is requested.  It may
-     *                      contain {@link UserHandle#USER_ALL} to indicate that the attribution
-     *                      should be performed for all users.
+     * @param query         The query parameters for the calculator.
      */
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
