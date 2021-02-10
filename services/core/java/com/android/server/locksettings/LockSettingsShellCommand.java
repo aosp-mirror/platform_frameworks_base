@@ -21,8 +21,11 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTE
 
 import android.app.ActivityManager;
 import android.app.admin.PasswordMetrics;
+import android.content.Context;
 import android.os.ShellCommand;
+import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
@@ -43,15 +46,25 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_VERIFY = "verify";
     private static final String COMMAND_GET_DISABLED = "get-disabled";
     private static final String COMMAND_REMOVE_CACHE = "remove-cache";
+    private static final String COMMAND_SET_ROR_PROVIDER_PACKAGE =
+            "set-resume-on-reboot-provider-package";
     private static final String COMMAND_HELP = "help";
 
     private int mCurrentUserId;
     private final LockPatternUtils mLockPatternUtils;
+    private final Context mContext;
+    private final int mCallingPid;
+    private final int mCallingUid;
+
     private String mOld = "";
     private String mNew = "";
 
-    LockSettingsShellCommand(LockPatternUtils lockPatternUtils) {
+    LockSettingsShellCommand(LockPatternUtils lockPatternUtils, Context context, int callingPid,
+            int callingUid) {
         mLockPatternUtils = lockPatternUtils;
+        mCallingPid = callingPid;
+        mCallingUid = callingUid;
+        mContext = context;
     }
 
     @Override
@@ -68,6 +81,7 @@ class LockSettingsShellCommand extends ShellCommand {
                     case COMMAND_HELP:
                     case COMMAND_GET_DISABLED:
                     case COMMAND_SET_DISABLED:
+                    case COMMAND_SET_ROR_PROVIDER_PACKAGE:
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -79,6 +93,9 @@ class LockSettingsShellCommand extends ShellCommand {
                 // Commands that do not require authentication go here.
                 case COMMAND_REMOVE_CACHE:
                     runRemoveCache();
+                    return 0;
+                case COMMAND_SET_ROR_PROVIDER_PACKAGE:
+                    runSetResumeOnRebootProviderPackage();
                     return 0;
                 case COMMAND_HELP:
                     onHelp();
@@ -170,6 +187,9 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  remove-cache [--user USER_ID]");
             pw.println("    Removes cached unified challenge for the managed profile.");
+            pw.println("  set-resume-on-reboot-provider-package <package_name>");
+            pw.println("    Sets the package name for server based resume on reboot service "
+                    + "provider.");
             pw.println("");
         }
     }
@@ -253,6 +273,17 @@ class LockSettingsShellCommand extends ShellCommand {
         }
         mLockPatternUtils.setLockCredential(pin, getOldCredential(), mCurrentUserId);
         getOutPrintWriter().println("Pin set to '" + mNew + "'");
+        return true;
+    }
+
+    private boolean runSetResumeOnRebootProviderPackage() {
+        final String packageName = mNew;
+        String name = ResumeOnRebootServiceProvider.PROP_ROR_PROVIDER_PACKAGE;
+        Slog.i(TAG, "Setting " +  name + " to " + packageName);
+
+        mContext.enforcePermission(android.Manifest.permission.BIND_RESUME_ON_REBOOT_SERVICE,
+                mCallingPid, mCallingUid, TAG);
+        SystemProperties.set(name, packageName);
         return true;
     }
 
