@@ -1354,4 +1354,11 @@
     <dimen name="rounded_slider_icon_size">24dp</dimen>
     <!-- rounded_slider_icon_size / 2 -->
     <dimen name="rounded_slider_icon_inset">12dp</dimen>
+
+    <dimen name="toast_width">296dp</dimen>
+    <item name="toast_icon_alpha" format="float" type="dimen">1</item>
+    <dimen name="toast_text_size">14sp</dimen>
+    <dimen name="toast_y_offset">48dp</dimen>
+    <dimen name="toast_icon_size">48dp</dimen>
+    <dimen name="toast_bg_radius">28dp</dimen>
 </resources>

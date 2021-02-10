@@ -17,6 +17,7 @@
 package com.android.systemui.toast;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 
@@ -26,6 +27,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.ToastPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -40,10 +42,18 @@ import javax.inject.Inject;
 public class ToastFactory implements Dumpable {
     // only one ToastPlugin can be connected at a time.
     private ToastPlugin mPlugin;
+    private final LayoutInflater mLayoutInflater;
+    private final boolean mToastStyleEnabled;
 
     @Inject
-    public ToastFactory(PluginManager pluginManager, DumpManager dumpManager) {
+    public ToastFactory(
+            LayoutInflater layoutInflater,
+            PluginManager pluginManager,
+            DumpManager dumpManager,
+            FeatureFlags featureFlags) {
+        mLayoutInflater = layoutInflater;
         dumpManager.registerDumpable("ToastFactory", this);
+        mToastStyleEnabled = featureFlags.isToastStyleEnabled();
         pluginManager.addPluginListener(
                 new PluginListener<ToastPlugin>() {
                     @Override
@@ -64,11 +74,13 @@ public class ToastFactory implements Dumpable {
      * Create a toast to be shown by ToastUI.
      */
     public SystemUIToast createToast(Context context, CharSequence text, String packageName,
-            int userId) {
+            int userId, int orientation) {
         if (isPluginAvailable()) {
-            return new SystemUIToast(context, text, mPlugin.createToast(text, packageName, userId));
+            return new SystemUIToast(mLayoutInflater, context, text, mPlugin.createToast(text,
+                    packageName, userId), packageName, userId, mToastStyleEnabled, orientation);
         }
-        return new SystemUIToast(context, text);
+        return new SystemUIToast(mLayoutInflater, context, text, packageName, userId,
+                mToastStyleEnabled, orientation);
     }
 
     private boolean isPluginAvailable() {
@@ -79,5 +91,6 @@ public class ToastFactory implements Dumpable {
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ToastFactory:");
         pw.println("    mAttachedPlugin=" + mPlugin);
+        pw.println("    mToastStyleEnabled=" + mToastStyleEnabled);
     }
 }
