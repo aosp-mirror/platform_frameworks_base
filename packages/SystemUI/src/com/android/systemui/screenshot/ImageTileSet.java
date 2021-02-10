@@ -21,6 +21,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 
 import androidx.annotation.UiThread;
 
@@ -32,10 +33,13 @@ import java.util.List;
  * <p>
  * To display on-screen, use {@link #getDrawable()}.
  */
-@UiThread
 class ImageTileSet {
 
     private static final String TAG = "ImageTileSet";
+
+    ImageTileSet(@UiThread Handler handler) {
+        mHandler = handler;
+    }
 
     interface OnBoundsChangedListener {
         /**
@@ -54,6 +58,7 @@ class ImageTileSet {
 
     private final List<ImageTile> mTiles = new ArrayList<>();
     private final Rect mBounds = new Rect();
+    private final Handler mHandler;
 
     private OnContentChangedListener mOnContentChangedListener;
     private OnBoundsChangedListener mOnBoundsChangedListener;
@@ -73,13 +78,32 @@ class ImageTileSet {
         newBounds.union(newRect);
         if (!newBounds.equals(mBounds)) {
             mBounds.set(newBounds);
-            if (mOnBoundsChangedListener != null) {
-                mOnBoundsChangedListener.onBoundsChanged(
-                        newBounds.left, newBounds.top, newBounds.right, newBounds.bottom);
-            }
+            notifyBoundsChanged(mBounds);
         }
-        if (mOnContentChangedListener != null) {
+        notifyContentChanged();
+    }
+
+    void notifyContentChanged() {
+        if (mOnContentChangedListener == null) {
+            return;
+        }
+        if (mHandler.getLooper().isCurrentThread()) {
             mOnContentChangedListener.onContentChanged();
+        } else {
+            mHandler.post(() -> mOnContentChangedListener.onContentChanged());
+        }
+    }
+
+    void notifyBoundsChanged(Rect bounds) {
+        if (mOnBoundsChangedListener == null) {
+            return;
+        }
+        if (mHandler.getLooper().isCurrentThread()) {
+            mOnBoundsChangedListener.onBoundsChanged(
+                    bounds.left, bounds.top, bounds.right, bounds.bottom);
+        } else {
+            mHandler.post(() -> mOnBoundsChangedListener.onBoundsChanged(
+                    bounds.left, bounds.top, bounds.right, bounds.bottom));
         }
     }
 
@@ -162,14 +186,13 @@ class ImageTileSet {
     }
 
     void clear() {
-        mBounds.set(0, 0, 0, 0);
+        if (mBounds.isEmpty()) {
+            return;
+        }
+        mBounds.setEmpty();
         mTiles.forEach(ImageTile::close);
         mTiles.clear();
-        if (mOnBoundsChangedListener != null) {
-            mOnBoundsChangedListener.onBoundsChanged(0, 0, 0, 0);
-        }
-        if (mOnContentChangedListener != null) {
-            mOnContentChangedListener.onContentChanged();
-        }
+        notifyBoundsChanged(mBounds);
+        notifyContentChanged();
     }
 }

@@ -91,7 +91,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mBgExecutor = bgExecutor;
         mImageExporter = exporter;
         mUiEventLogger = uiEventLogger;
-        mImageTileSet = new ImageTileSet();
+        mImageTileSet = new ImageTileSet(context.getMainThreadHandler());
     }
 
     /**
