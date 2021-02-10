@@ -289,7 +289,8 @@ public class KeyguardIndicationRotateTextViewController extends
         if (hasIndications()) {
             pw.println("    All messages:");
             for (int type : mIndicationMessages.keySet()) {
-                pw.println("        type=" + type + " message=" + mIndicationMessages.get(type));
+                pw.println("        type=" + type
+                        + " message=" + mIndicationMessages.get(type).getMessage());
             }
         }
     }

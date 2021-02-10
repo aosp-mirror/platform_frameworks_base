@@ -688,6 +688,11 @@
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
 
+    <!-- Default line spacing multiplier between hours and minutes of the keyguard clock -->
+    <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
+    <!-- Burmese line spacing multiplier between hours and minutes of the keyguard clock -->
+    <item name="keyguard_clock_line_spacing_scale_burmese" type="dimen" format="float">1</item>
+
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
 
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
