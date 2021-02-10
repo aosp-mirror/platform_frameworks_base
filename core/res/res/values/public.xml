@@ -3118,8 +3118,6 @@
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveCluster" />
     <!-- @hide @SystemApi @TestApi -->
-    <public name="config_systemVideoCall" />
-    <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveProjection" />
   </public-group>
 
