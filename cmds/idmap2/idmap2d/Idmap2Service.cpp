@@ -161,6 +161,12 @@ Status Idmap2Service::createIdmap(const std::string& target_path, const std::str
                                     idmap_path.c_str(), uid));
   }
 
+  // idmap files are mapped with mmap in libandroidfw. Deleting and recreating the idmap guarantees
+  // that existing memory maps will continue to be valid and unaffected. The file must be deleted
+  // before attempting to create the idmap, so that if idmap  creation fails, the overlay will no
+  // longer be usable.
+  unlink(idmap_path.c_str());
+
   const auto target = GetTargetContainer(target_path);
   if (!target) {
     return error("failed to load target '%s'" + target_path);
@@ -176,10 +182,6 @@ Status Idmap2Service::createIdmap(const std::string& target_path, const std::str
   if (!idmap) {
     return error(idmap.GetErrorMessage());
   }
-
-  // idmap files are mapped with mmap in libandroidfw. Deleting and recreating the idmap guarantees
-  // that existing memory maps will continue to be valid and unaffected.
-  unlink(idmap_path.c_str());
 
   umask(kIdmapFilePermissionMask);
   std::ofstream fout(idmap_path);
