@@ -813,8 +813,8 @@ static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
     return poolsSizeKb;
 }
 
-static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
-    jlong ionPss = 0;
+static jlong android_os_Debug_getDmabufMappedSizeKb(JNIEnv* env, jobject clazz) {
+    jlong dmabufPss = 0;
     std::vector<dmabufinfo::DmaBuffer> dmabufs;
 
     std::unique_ptr<DIR, int (*)(DIR*)> dir(opendir("/proc"), closedir);
@@ -838,10 +838,10 @@ static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
     }
 
     for (const dmabufinfo::DmaBuffer& buf : dmabufs) {
-        ionPss += buf.size() / 1024;
+        dmabufPss += buf.size() / 1024;
     }
 
-    return ionPss;
+    return dmabufPss;
 }
 
 static jlong android_os_Debug_getGpuTotalUsageKb(JNIEnv* env, jobject clazz) {
@@ -921,8 +921,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonHeapsSizeKb },
     { "getIonPoolsSizeKb", "()J",
             (void*)android_os_Debug_getIonPoolsSizeKb },
-    { "getIonMappedSizeKb", "()J",
-            (void*)android_os_Debug_getIonMappedSizeKb },
+    { "getDmabufMappedSizeKb", "()J",
+            (void*)android_os_Debug_getDmabufMappedSizeKb },
     { "getGpuTotalUsageKb", "()J",
             (void*)android_os_Debug_getGpuTotalUsageKb },
     { "isVmapStack", "()Z",

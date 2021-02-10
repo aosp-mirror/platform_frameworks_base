@@ -13721,7 +13721,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long ionHeap = Debug.getIonHeapsSizeKb();
             final long ionPool = Debug.getIonPoolsSizeKb();
             if (ionHeap >= 0 && ionPool >= 0) {
-                final long ionMapped = Debug.getIonMappedSizeKb();
+                final long ionMapped = Debug.getDmabufMappedSizeKb();
                 final long ionUnmapped = ionHeap - ionMapped;
                 pw.print("      ION: ");
                         pw.print(stringifyKBSize(ionHeap + ionPool));
@@ -14539,7 +14539,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long ionHeap = Debug.getIonHeapsSizeKb();
         final long ionPool = Debug.getIonPoolsSizeKb();
         if (ionHeap >= 0 && ionPool >= 0) {
-            final long ionMapped = Debug.getIonMappedSizeKb();
+            final long ionMapped = Debug.getDmabufMappedSizeKb();
             final long ionUnmapped = ionHeap - ionMapped;
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
