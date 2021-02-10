@@ -2381,10 +2381,17 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         enforceShell();
+        final int origPid = Binder.getCallingPid();
+        final int origUid = Binder.getCallingUid();
+
+        // The original identity is an opaque integer.
         final long origId = Binder.clearCallingIdentity();
+        Slog.e(TAG, "Caller pid " + origPid + " Caller uid " + origUid);
         try {
-            (new LockSettingsShellCommand(new LockPatternUtils(mContext))).exec(
-                    this, in, out, err, args, callback, resultReceiver);
+            final LockSettingsShellCommand command =
+                    new LockSettingsShellCommand(new LockPatternUtils(mContext), mContext, origPid,
+                            origUid);
+            command.exec(this, in, out, err, args, callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
