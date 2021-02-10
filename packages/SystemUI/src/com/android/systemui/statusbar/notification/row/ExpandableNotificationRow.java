@@ -71,6 +71,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
+import com.android.internal.widget.CallLayout;
 import com.android.internal.widget.MessagingLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -165,6 +166,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mMaxSmallHeightLarge;
     private int mMaxSmallHeightMedia;
     private int mMaxExpandedHeight;
+    private int mMaxCallHeight;
     private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
     private boolean mMustStayOnScreen;
@@ -645,8 +647,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateLimitsForView(NotificationContentView layout) {
-        boolean customView = layout.getContractedChild() != null
-                && layout.getContractedChild().getId()
+        View contractedView = layout.getContractedChild();
+        boolean customView = contractedView != null
+                && contractedView.getId()
                 != com.android.internal.R.id.status_bar_latest_event_content;
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
         boolean beforeP = mEntry.targetSdk < Build.VERSION_CODES.P;
@@ -661,7 +664,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         View expandedView = layout.getExpandedChild();
         boolean isMediaLayout = expandedView != null
                 && expandedView.findViewById(com.android.internal.R.id.media_actions) != null;
-        boolean isMessagingLayout = layout.getContractedChild() instanceof MessagingLayout;
+        boolean isMessagingLayout = contractedView instanceof MessagingLayout;
+        boolean isCallLayout = contractedView instanceof CallLayout;
         boolean showCompactMediaSeekbar = mMediaManager.getShowCompactMediaSeekbar();
 
         if (customView && beforeS && !mIsSummaryWithChildren) {
@@ -684,6 +688,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             //  make sure we don't crop them terribly.  We actually need to revisit this and give
             //  them a headerless design, then remove this hack.
             smallHeight = mMaxSmallHeightLarge;
+        } else if (isCallLayout) {
+            smallHeight = mMaxCallHeight;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
             smallHeight = mMaxSmallHeightLarge;
         } else {
@@ -1645,6 +1651,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height_media);
         mMaxExpandedHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
+        mMaxCallHeight = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.call_notification_full_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
