@@ -18,17 +18,18 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.RegistrationManager;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.util.RemoteCallbackListExt;
 import com.android.internal.util.ArrayUtils;
 
@@ -89,7 +90,10 @@ public class ImsRegistrationImplBase {
 
         @Override
         public @ImsRegistrationTech int getRegistrationTechnology() throws RemoteException {
-            return getConnectionType();
+            synchronized (mLock) {
+                return (mRegistrationAttributes == null) ? REGISTRATION_TECH_NONE
+                        : mRegistrationAttributes.getRegistrationTechnology();
+            }
         }
 
         @Override
@@ -122,8 +126,7 @@ public class ImsRegistrationImplBase {
             new RemoteCallbackListExt<>();
     private final Object mLock = new Object();
     // Locked on mLock
-    private @ImsRegistrationTech
-    int mConnectionType = REGISTRATION_TECH_NONE;
+    private ImsRegistrationAttributes mRegistrationAttributes;
     // Locked on mLock
     private int mRegistrationState = REGISTRATION_STATE_UNKNOWN;
     // Locked on mLock, create unspecified disconnect cause.
@@ -201,18 +204,24 @@ public class ImsRegistrationImplBase {
     /**
      * Notify the framework that the device is connected to the IMS network.
      *
-     * @param imsRadioTech the radio access technology. Valid values are defined as
-     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
-     * {@link #REGISTRATION_TECH_CROSS_SIM}.
+     * @param imsRadioTech the radio access technology.
      */
     public final void onRegistered(@ImsRegistrationTech int imsRadioTech) {
-        updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERED);
+        onRegistered(new ImsRegistrationAttributes.Builder(imsRadioTech).build());
+    }
+
+    /**
+     * Notify the framework that the device is connected to the IMS network.
+     *
+     * @param attributes The attributes associated with the IMS registration.
+     */
+    public final void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
+        updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
         mCallbacks.broadcastAction((c) -> {
             try {
-                c.onRegistered(imsRadioTech);
+                c.onRegistered(attributes);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " " + "onRegistrationConnected() - Skipping " +
-                        "callback.");
+                Log.w(LOG_TAG, e + "onRegistered(int, Set) - Skipping callback.");
             }
         });
     }
@@ -220,18 +229,24 @@ public class ImsRegistrationImplBase {
     /**
      * Notify the framework that the device is trying to connect the IMS network.
      *
-     * @param imsRadioTech the radio access technology. Valid values are defined as
-     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
-     * {@link #REGISTRATION_TECH_CROSS_SIM}.
+     * @param imsRadioTech the radio access technology.
      */
     public final void onRegistering(@ImsRegistrationTech int imsRadioTech) {
-        updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERING);
+        onRegistering(new ImsRegistrationAttributes.Builder(imsRadioTech).build());
+    }
+
+    /**
+     * Notify the framework that the device is trying to connect the IMS network.
+     *
+     * @param attributes The attributes associated with the IMS registration.
+     */
+    public final void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
+        updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
         mCallbacks.broadcastAction((c) -> {
             try {
-                c.onRegistering(imsRadioTech);
+                c.onRegistering(attributes);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " " + "onRegistrationProcessing() - Skipping " +
-                        "callback.");
+                Log.w(LOG_TAG, e + "onRegistering(int, Set) - Skipping callback.");
             }
         });
     }
@@ -260,8 +275,7 @@ public class ImsRegistrationImplBase {
             try {
                 c.onDeregistered(reasonInfo);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " " + "onRegistrationDisconnected() - Skipping " +
-                        "callback.");
+                Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }
         });
     }
@@ -281,8 +295,7 @@ public class ImsRegistrationImplBase {
             try {
                 c.onTechnologyChangeFailed(imsRadioTech, reasonInfo);
             } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " " + "onRegistrationChangeFailed() - Skipping " +
-                        "callback.");
+                Log.w(LOG_TAG, e + "onTechnologyChangeFailed() - Skipping callback.");
             }
         });
     }
@@ -306,14 +319,13 @@ public class ImsRegistrationImplBase {
         try {
             callback.onSubscriberAssociatedUriChanged(uris);
         } catch (RemoteException e) {
-            Log.w(LOG_TAG, e + " " + "onSubscriberAssociatedUriChanged() - Skipping "
-                    + "callback.");
+            Log.w(LOG_TAG, e + "onSubscriberAssociatedUriChanged() - Skipping callback.");
         }
     }
 
-    private void updateToState(@ImsRegistrationTech int connType, int newState) {
+    private void updateToState(ImsRegistrationAttributes attributes, int newState) {
         synchronized (mLock) {
-            mConnectionType = connType;
+            mRegistrationAttributes = attributes;
             mRegistrationState = newState;
             mLastDisconnectCause = null;
         }
@@ -325,7 +337,7 @@ public class ImsRegistrationImplBase {
             mUrisSet = false;
             mUris = null;
 
-            updateToState(REGISTRATION_TECH_NONE,
+            updateToState(new ImsRegistrationAttributes.Builder(REGISTRATION_TECH_NONE).build(),
                     RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
             if (info != null) {
                 mLastDisconnectCause = info;
@@ -337,30 +349,19 @@ public class ImsRegistrationImplBase {
     }
 
     /**
-     * @return the current registration connection type. Valid values are
-     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
-     * {@link #REGISTRATION_TECH_CROSS_SIM}.
-     * @hide
-     */
-    @VisibleForTesting
-    public final @ImsRegistrationTech int getConnectionType() {
-        synchronized (mLock) {
-            return mConnectionType;
-        }
-    }
-
-    /**
      * @param c the newly registered callback that will be updated with the current registration
      *         state.
      */
     private void updateNewCallbackWithState(IImsRegistrationCallback c)
             throws RemoteException {
         int state;
+        ImsRegistrationAttributes attributes;
         ImsReasonInfo disconnectInfo;
         boolean urisSet;
         Uri[] uris;
         synchronized (mLock) {
             state = mRegistrationState;
+            attributes = mRegistrationAttributes;
             disconnectInfo = mLastDisconnectCause;
             urisSet = mUrisSet;
             uris = mUris;
@@ -371,11 +372,11 @@ public class ImsRegistrationImplBase {
                 break;
             }
             case RegistrationManager.REGISTRATION_STATE_REGISTERING: {
-                c.onRegistering(getConnectionType());
+                c.onRegistering(attributes);
                 break;
             }
             case RegistrationManager.REGISTRATION_STATE_REGISTERED: {
-                c.onRegistered(getConnectionType());
+                c.onRegistered(attributes);
                 break;
             }
             case REGISTRATION_STATE_UNKNOWN: {
