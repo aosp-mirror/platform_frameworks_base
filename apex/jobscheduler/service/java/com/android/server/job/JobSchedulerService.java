@@ -3183,7 +3183,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     TimeUtils.formatDuration(jsc.getTimeoutElapsed() - nowElapsed, pw);
                     pw.println();
                     job.dump(pw, "    ", false, nowElapsed);
-                    int priority = evaluateJobPriorityLocked(jsc.getRunningJobLocked());
+                    int priority = evaluateJobPriorityLocked(job);
                     pw.print("    Evaluated priority: ");
                     pw.println(JobInfo.getPriorityString(priority));
 
@@ -3349,7 +3349,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     job.dump(proto, ActiveJob.RunningJob.DUMP, false, nowElapsed);
 
                     proto.write(ActiveJob.RunningJob.EVALUATED_PRIORITY,
-                            evaluateJobPriorityLocked(jsc.getRunningJobLocked()));
+                            evaluateJobPriorityLocked(job));
 
                     proto.write(ActiveJob.RunningJob.TIME_SINCE_MADE_ACTIVE_MS,
                             nowUptime - job.madeActive);
