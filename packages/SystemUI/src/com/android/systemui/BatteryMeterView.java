@@ -49,7 +49,6 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.graph.ThemedBatteryDrawable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -104,11 +103,6 @@ public class BatteryMeterView extends LinearLayout implements
 
     private DualToneHandler mDualToneHandler;
     private int mUser;
-
-    /**
-     * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
-     */
-    private boolean mUseWallpaperTextColors;
 
     private int mNonAdaptedSingleToneColor;
     private int mNonAdaptedForegroundColor;
@@ -240,31 +234,6 @@ public class BatteryMeterView extends LinearLayout implements
 
         Dependency.get(TunerService.class).removeTunable(this);
         mIsSubscribedForTunerUpdates = false;
-    }
-
-    /**
-     * Sets whether the battery meter view uses the wallpaperTextColor. If we're not using it, we'll
-     * revert back to dark-mode-based/tinted colors.
-     *
-     * @param shouldUseWallpaperTextColor whether we should use wallpaperTextColor for all
-     *                                    components
-     */
-    public void useWallpaperTextColor(boolean shouldUseWallpaperTextColor) {
-        if (shouldUseWallpaperTextColor == mUseWallpaperTextColors) {
-            return;
-        }
-
-        mUseWallpaperTextColors = shouldUseWallpaperTextColor;
-
-        if (mUseWallpaperTextColors) {
-            updateColors(
-                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor),
-                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColorSecondary),
-                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor));
-        } else {
-            updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
-                    mNonAdaptedSingleToneColor);
-        }
     }
 
     public void setColorsFromContext(Context context) {
@@ -476,13 +445,19 @@ public class BatteryMeterView extends LinearLayout implements
         mNonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
         mNonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
 
-        if (!mUseWallpaperTextColors) {
-            updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
-                    mNonAdaptedSingleToneColor);
-        }
+        updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
+                mNonAdaptedSingleToneColor);
     }
 
-    private void updateColors(int foregroundColor, int backgroundColor, int singleToneColor) {
+    /**
+     * Sets icon and text colors. This will be overridden by {@code onDarkChanged} events,
+     * if registered.
+     *
+     * @param foregroundColor
+     * @param backgroundColor
+     * @param singleToneColor
+     */
+    public void updateColors(int foregroundColor, int backgroundColor, int singleToneColor) {
         mDrawable.setColors(foregroundColor, backgroundColor, singleToneColor);
         mTextColor = singleToneColor;
         if (mBatteryPercentView != null) {
