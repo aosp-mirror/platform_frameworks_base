@@ -70,11 +70,14 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new PhonePowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new SystemServicePowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new CustomMeasuredPowerCalculator(mPowerProfile));
-
                 mPowerCalculators.add(new UserPowerCalculator());
+
+                // It is important that SystemServicePowerCalculator be applied last,
+                // because it re-attributes some of the power estimated by the other
+                // calculators.
+                mPowerCalculators.add(new SystemServicePowerCalculator(mPowerProfile));
             }
         }
         return mPowerCalculators;
@@ -128,7 +131,8 @@ public class BatteryUsageStatsProvider {
         final long uptimeUs = SystemClock.uptimeMillis() * 1000;
 
         final List<PowerCalculator> powerCalculators = getPowerCalculators();
-        for (PowerCalculator powerCalculator : powerCalculators) {
+        for (int i = 0, count = powerCalculators.size(); i < count; i++) {
+            PowerCalculator powerCalculator = powerCalculators.get(i);
             powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs,
                     query);
         }
