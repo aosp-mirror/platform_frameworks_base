@@ -18,6 +18,7 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.AppGlobals;
@@ -836,6 +837,21 @@ public class Environment {
     public static String DIRECTORY_AUDIOBOOKS = "Audiobooks";
 
     /**
+     * Standard directory in which to place any audio files which are
+     * recordings.
+     */
+    @NonNull
+    // The better way is that expose a static method getRecordingDirectories.
+    // But since it's an existing API surface and developers already
+    // used to DIRECTORY_* constants, we should keep using this pattern
+    // for consistency. We use SuppressLint here to avoid exposing a final
+    // field. A final field will prevent us from ever changing the value of
+    // DIRECTORY_RECORDINGS. Not that it's likely that we will ever need to
+    // change it, but it's better to have such option.
+    @SuppressLint({"MutableBareField", "AllUpper"})
+    public static String DIRECTORY_RECORDINGS = "Recordings";
+
+    /**
      * List of standard storage directories.
      * <p>
      * Each of its values have its own constant:
@@ -851,6 +867,7 @@ public class Environment {
      *   <li>{@link #DIRECTORY_DCIM}
      *   <li>{@link #DIRECTORY_DOCUMENTS}
      *   <li>{@link #DIRECTORY_AUDIOBOOKS}
+     *   <li>{@link #DIRECTORY_RECORDINGS}
      * </ul>
      * @hide
      */
@@ -866,6 +883,7 @@ public class Environment {
             DIRECTORY_DCIM,
             DIRECTORY_DOCUMENTS,
             DIRECTORY_AUDIOBOOKS,
+            DIRECTORY_RECORDINGS,
     };
 
     /**
@@ -891,6 +909,7 @@ public class Environment {
     /** {@hide} */ public static final int HAS_DCIM = 1 << 8;
     /** {@hide} */ public static final int HAS_DOCUMENTS = 1 << 9;
     /** {@hide} */ public static final int HAS_AUDIOBOOKS = 1 << 10;
+    /** {@hide} */ public static final int HAS_RECORDINGS = 1 << 11;
 
     /** {@hide} */ public static final int HAS_ANDROID = 1 << 16;
     /** {@hide} */ public static final int HAS_OTHER = 1 << 17;
@@ -921,6 +940,7 @@ public class Environment {
                 else if (DIRECTORY_DCIM.equals(name)) res |= HAS_DCIM;
                 else if (DIRECTORY_DOCUMENTS.equals(name)) res |= HAS_DOCUMENTS;
                 else if (DIRECTORY_AUDIOBOOKS.equals(name)) res |= HAS_AUDIOBOOKS;
+                else if (DIRECTORY_RECORDINGS.equals(name)) res |= HAS_RECORDINGS;
                 else if (DIRECTORY_ANDROID.equals(name)) res |= HAS_ANDROID;
                 else res |= HAS_OTHER;
             }

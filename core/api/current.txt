@@ -30609,6 +30609,7 @@ package android.os {
     field public static String DIRECTORY_NOTIFICATIONS;
     field public static String DIRECTORY_PICTURES;
     field public static String DIRECTORY_PODCASTS;
+    field @NonNull public static String DIRECTORY_RECORDINGS;
     field public static String DIRECTORY_RINGTONES;
     field public static String DIRECTORY_SCREENSHOTS;
     field public static final String MEDIA_BAD_REMOVAL = "bad_removal";
