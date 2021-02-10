@@ -90,6 +90,7 @@ import android.net.NetworkTemplate;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
+import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -152,6 +153,7 @@ import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
+import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.role.RoleManagerLocal;
@@ -457,6 +459,8 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mCpuTimePerUidFreqLock) {
                             return pullCpuTimePerUidFreqLocked(atomTag, data);
                         }
+                    case FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER:
+                        return pullCpuCyclesPerThreadGroupCluster(atomTag, data);
                     case FrameworkStatsLog.CPU_ACTIVE_TIME:
                         synchronized (mCpuActiveTimeLock) {
                             return pullCpuActiveTimeLocked(atomTag, data);
@@ -781,6 +785,7 @@ public class StatsPullAtomService extends SystemService {
         registerCpuTimePerUid();
         registerCpuCyclesPerUidCluster();
         registerCpuTimePerUidFreq();
+        registerCpuCyclesPerThreadGroupCluster();
         registerCpuActiveTime();
         registerCpuClusterTime();
         registerWifiActivityInfo();
@@ -1510,6 +1515,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuCyclesPerUidClusterLocked(int atomTag, List<StatsEvent> pulledData) {
+        // TODO(b/179485697): Remove power profile dependency.
         PowerProfile powerProfile = new PowerProfile(mContext);
         // Frequency index to frequency mapping.
         long[] freqs = mCpuUidFreqTimeReader.readFreqs(powerProfile);
@@ -1651,6 +1657,81 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerCpuCyclesPerThreadGroupCluster() {
+        // TODO(b/173227907): Register only when supported.
+        int tagId = FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER;
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                .setAdditiveFields(new int[] {3, 4})
+                .build();
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                metadata,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullCpuCyclesPerThreadGroupCluster(int atomTag, List<StatsEvent> pulledData) {
+        // TODO(b/179485697): Remove power profile dependency.
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        // Frequency index to frequency mapping.
+        long[] freqs = mCpuUidFreqTimeReader.readFreqs(powerProfile);
+        if (freqs == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        // Frequency index to cluster mapping.
+        int[] freqClusters = new int[freqs.length];
+        // Number of clusters.
+        int clusters;
+
+        // Initialize frequency mappings.
+        {
+            int cluster = 0;
+            long lastFreq = -1;
+            for (int freqIndex = 0; freqIndex < freqs.length; ++freqIndex) {
+                long currFreq = freqs[freqIndex];
+                if (currFreq <= lastFreq) {
+                    cluster++;
+                }
+                freqClusters[freqIndex] = cluster;
+                lastFreq = currFreq;
+            }
+
+            clusters = cluster + 1;
+        }
+
+        SystemServiceCpuThreadTimes times = LocalServices.getService(BatteryStatsInternal.class)
+                .getSystemServiceCpuThreadTimes();
+        if (times == null) {
+            return StatsManager.PULL_SKIP;
+        }
+
+        addCpuCyclesPerThreadGroupClusterAtoms(atomTag, pulledData,
+                FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER__THREAD_GROUP__SYSTEM_SERVER,
+                times.threadCpuTimesUs, clusters, freqs, freqClusters);
+        addCpuCyclesPerThreadGroupClusterAtoms(atomTag, pulledData,
+                FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER__THREAD_GROUP__SYSTEM_SERVER_BINDER,
+                times.binderThreadCpuTimesUs, clusters, freqs, freqClusters);
+
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private static void addCpuCyclesPerThreadGroupClusterAtoms(
+            int atomTag, List<StatsEvent> pulledData, int threadGroup, long[] cpuTimesUs,
+            int clusters, long[] freqs, int[] freqClusters) {
+        long[] aggregatedCycles = new long[clusters];
+        long[] aggregatedTimesUs = new long[clusters];
+        for (int i = 0; i < cpuTimesUs.length; ++i) {
+            aggregatedCycles[freqClusters[i]] += freqs[i] * cpuTimesUs[i] / 1_000;
+            aggregatedTimesUs[freqClusters[i]] += cpuTimesUs[i];
+        }
+        for (int cluster = 0; cluster < clusters; ++cluster) {
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    atomTag, threadGroup, cluster, aggregatedCycles[cluster],
+                    aggregatedTimesUs[cluster] / 1_000));
+        }
     }
 
     private void registerCpuActiveTime() {
