@@ -1253,7 +1253,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         ArrayMap<String, ArrayMap<String, LocationEventLog.AggregateStats>> aggregateStats =
                 mEventLog.copyAggregateStats();
         for (int i = 0; i < aggregateStats.size(); i++) {
-            ipw.println(aggregateStats.keyAt(i));
+            ipw.print(aggregateStats.keyAt(i));
+            ipw.println(":");
             ipw.increaseIndent();
             ArrayMap<String, LocationEventLog.AggregateStats> providerStats =
                     aggregateStats.valueAt(i);
