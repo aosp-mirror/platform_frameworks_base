@@ -7044,11 +7044,15 @@ package android.net {
     method public long getExpiryTimeMillis();
     method public long getRefreshTimeMillis();
     method @Nullable public android.net.Uri getUserPortalUrl();
+    method public int getUserPortalUrlSource();
     method @Nullable public String getVenueFriendlyName();
     method @Nullable public android.net.Uri getVenueInfoUrl();
+    method public int getVenueInfoUrlSource();
     method public boolean isCaptive();
     method public boolean isSessionExtendable();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CAPTIVE_PORTAL_DATA_SOURCE_OTHER = 0; // 0x0
+    field public static final int CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.net.CaptivePortalData> CREATOR;
   }
 
@@ -7062,8 +7066,10 @@ package android.net {
     method @NonNull public android.net.CaptivePortalData.Builder setRefreshTime(long);
     method @NonNull public android.net.CaptivePortalData.Builder setSessionExtendable(boolean);
     method @NonNull public android.net.CaptivePortalData.Builder setUserPortalUrl(@Nullable android.net.Uri);
+    method @NonNull public android.net.CaptivePortalData.Builder setUserPortalUrl(@Nullable android.net.Uri, int);
     method @NonNull public android.net.CaptivePortalData.Builder setVenueFriendlyName(@Nullable String);
     method @NonNull public android.net.CaptivePortalData.Builder setVenueInfoUrl(@Nullable android.net.Uri);
+    method @NonNull public android.net.CaptivePortalData.Builder setVenueInfoUrl(@Nullable android.net.Uri, int);
   }
 
   public class ConnectivityManager {

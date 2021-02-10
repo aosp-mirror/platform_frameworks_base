@@ -67,6 +67,8 @@ import java.util.List;
 @SmallTest
 public class NetworkNotificationManagerTest {
 
+    private static final String TEST_SSID = "Test SSID";
+    private static final String TEST_EXTRA_INFO = "extra";
     static final NetworkCapabilities CELL_CAPABILITIES = new NetworkCapabilities();
     static final NetworkCapabilities WIFI_CAPABILITIES = new NetworkCapabilities();
     static final NetworkCapabilities VPN_CAPABILITIES = new NetworkCapabilities();
@@ -76,6 +78,7 @@ public class NetworkNotificationManagerTest {
 
         WIFI_CAPABILITIES.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
         WIFI_CAPABILITIES.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        WIFI_CAPABILITIES.setSSID(TEST_SSID);
 
         // Set the underyling network to wifi.
         VPN_CAPABILITIES.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
@@ -129,7 +132,7 @@ public class NetworkNotificationManagerTest {
         when(mCtx.createContextAsUser(eq(UserHandle.ALL), anyInt())).thenReturn(asUserCtx);
         when(mCtx.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
-        when(mNetworkInfo.getExtraInfo()).thenReturn("extra");
+        when(mNetworkInfo.getExtraInfo()).thenReturn(TEST_EXTRA_INFO);
         when(mResources.getColor(anyInt(), any())).thenReturn(0xFF607D8B);
         when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
 
@@ -143,11 +146,11 @@ public class NetworkNotificationManagerTest {
                 .notify(eq(tag), eq(PRIVATE_DNS_BROKEN.eventId), any());
         final int transportType = NetworkNotificationManager.approximateTransportType(nai);
         if (transportType == NetworkCapabilities.TRANSPORT_WIFI) {
-            verify(mResources, times(1)).getString(title, eq(any()));
+            verify(mResources, times(1)).getString(eq(title), eq(TEST_EXTRA_INFO));
         } else {
             verify(mResources, times(1)).getString(title);
         }
-        verify(mResources, times(1)).getString(R.string.private_dns_broken_detailed);
+        verify(mResources, times(1)).getString(eq(R.string.private_dns_broken_detailed));
     }
 
     @Test
