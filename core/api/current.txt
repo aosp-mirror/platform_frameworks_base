@@ -42079,7 +42079,7 @@ package android.telephony {
     method @Deprecated public int getPhoneCount();
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telephony.ServiceState getServiceState();
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
     method public int getSimCarrierId();
     method @Nullable public CharSequence getSimCarrierIdName();
