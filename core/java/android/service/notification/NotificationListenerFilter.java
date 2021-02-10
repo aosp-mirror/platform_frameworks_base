@@ -32,6 +32,7 @@ import android.util.ArraySet;
  */
 public class NotificationListenerFilter implements Parcelable {
     private int mAllowedNotificationTypes;
+    // VersionedPackage is holding the pkg name and pkg uid
     private ArraySet<VersionedPackage> mDisallowedPackages;
 
     public NotificationListenerFilter() {

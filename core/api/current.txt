@@ -38076,6 +38076,10 @@ package android.service.notification {
     method public final void setNotificationsShown(String[]);
     method public final void snoozeNotification(String, long);
     method public final void updateNotificationChannel(@NonNull String, @NonNull android.os.UserHandle, @NonNull android.app.NotificationChannel);
+    field public static final int FLAG_FILTER_TYPE_ALERTING = 2; // 0x2
+    field public static final int FLAG_FILTER_TYPE_CONVERSATIONS = 1; // 0x1
+    field public static final int FLAG_FILTER_TYPE_ONGOING = 8; // 0x8
+    field public static final int FLAG_FILTER_TYPE_SILENT = 4; // 0x4
     field public static final int HINT_HOST_DISABLE_CALL_EFFECTS = 4; // 0x4
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1
     field public static final int HINT_HOST_DISABLE_NOTIFICATION_EFFECTS = 2; // 0x2
@@ -38084,6 +38088,7 @@ package android.service.notification {
     field public static final int INTERRUPTION_FILTER_NONE = 3; // 0x3
     field public static final int INTERRUPTION_FILTER_PRIORITY = 2; // 0x2
     field public static final int INTERRUPTION_FILTER_UNKNOWN = 0; // 0x0
+    field public static final String META_DATA_DEFAULT_FILTER_TYPES = "android.service.notification.default_filter_types";
     field public static final int NOTIFICATION_CHANNEL_OR_GROUP_ADDED = 1; // 0x1
     field public static final int NOTIFICATION_CHANNEL_OR_GROUP_DELETED = 3; // 0x3
     field public static final int NOTIFICATION_CHANNEL_OR_GROUP_UPDATED = 2; // 0x2

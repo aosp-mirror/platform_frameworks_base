@@ -189,6 +189,8 @@ abstract public class ManagedServices {
 
     abstract protected void onServiceAdded(ManagedServiceInfo info);
 
+    abstract protected void ensureFilters(ServiceInfo si, int userId);
+
     protected List<ManagedServiceInfo> getServices() {
         synchronized (mMutex) {
             List<ManagedServiceInfo> services = new ArrayList<>(mServices);
@@ -1342,8 +1344,10 @@ abstract public class ManagedServices {
             for (ComponentName component : add) {
                 try {
                     ServiceInfo info = mPm.getServiceInfo(component,
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                            PackageManager.GET_META_DATA
+                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            userId);
                     if (info == null) {
                         Slog.w(TAG, "Not binding " + getCaption() + " service " + component
                                 + ": service not found");
@@ -1356,7 +1360,7 @@ abstract public class ManagedServices {
                     }
                     Slog.v(TAG,
                             "enabling " + getCaption() + " for " + userId + ": " + component);
-                    registerService(component, userId);
+                    registerService(info, userId);
                 } catch (RemoteException e) {
                     e.rethrowFromSystemServer();
                 }
@@ -1368,9 +1372,15 @@ abstract public class ManagedServices {
      * Version of registerService that takes the name of a service component to bind to.
      */
     @VisibleForTesting
-    void registerService(final ComponentName name, final int userid) {
+    void registerService(final ServiceInfo si, final int userId) {
+        ensureFilters(si, userId);
+        registerService(si.getComponentName(), userId);
+    }
+
+    @VisibleForTesting
+    void registerService(final ComponentName cn, final int userId) {
         synchronized (mMutex) {
-            registerServiceLocked(name, userid);
+            registerServiceLocked(cn, userId);
         }
     }
 
