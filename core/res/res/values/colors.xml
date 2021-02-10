@@ -153,6 +153,11 @@
 
     <color name="notification_action_list_background_color">@null</color>
 
+    <!-- The color of the Decline and Hang Up actions on a CallStyle notification -->
+    <color name="call_notification_decline_color">#d93025</color>
+    <!-- The color of the Answer action on a CallStyle notification -->
+    <color name="call_notification_answer_color">#1e8e3e</color>
+
     <!-- Keyguard colors -->
     <color name="keyguard_avatar_frame_color">#ffffffff</color>
     <color name="keyguard_avatar_frame_shadow_color">#80000000</color>

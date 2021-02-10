@@ -36,7 +36,6 @@ import android.widget.TextView;
 
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
-import com.android.settingslib.Utils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
@@ -60,6 +59,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private CachingIconView mIcon;
     private NotificationExpandButton mExpandButton;
     private View mAltExpandTarget;
+    private View mIconContainer;
     protected NotificationHeaderView mNotificationHeader;
     protected NotificationTopLineView mNotificationTopLine;
     private TextView mHeaderText;
@@ -112,6 +112,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mAppNameText = mView.findViewById(com.android.internal.R.id.app_name_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mAltExpandTarget = mView.findViewById(com.android.internal.R.id.alternate_expand_target);
+        mIconContainer = mView.findViewById(com.android.internal.R.id.conversation_icon_container);
         mLeftIcon = mView.findViewById(com.android.internal.R.id.left_icon);
         mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
@@ -203,11 +204,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void clearConversationSkin() {
         if (mAppNameText != null) {
             final ColorStateList colors = mAppNameText.getTextColors();
-            final int textAppearance = Utils.getThemeAttr(
-                    mAppNameText.getContext(),
-                    com.android.internal.R.attr.notificationHeaderTextAppearance,
+            mAppNameText.setTextAppearance(
                     com.android.internal.R.style.TextAppearance_DeviceDefault_Notification_Info);
-            mAppNameText.setTextAppearance(textAppearance);
             mAppNameText.setTextColor(colors);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             final int marginStart = mAppNameText.getResources().getDimensionPixelSize(
@@ -265,19 +263,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
         mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_EXPANDER,
                 mExpandButton);
-        if (mWorkProfileImage != null) {
-            mTransformationHelper.addViewTransformingToSimilar(mWorkProfileImage);
-        }
         if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);
         }
-        if (mAudiblyAlertedIcon != null) {
-            mTransformationHelper.addViewTransformingToSimilar(mAudiblyAlertedIcon);
-        }
-        if (mFeedbackIcon != null) {
-            mTransformationHelper.addViewTransformingToSimilar(mFeedbackIcon);
-        }
+        addViewsTransformingToSimilar(mWorkProfileImage, mAudiblyAlertedIcon, mFeedbackIcon);
     }
 
     @Override
@@ -286,6 +276,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton.setOnClickListener(expandable ? onClickListener : null);
         if (mAltExpandTarget != null) {
             mAltExpandTarget.setOnClickListener(expandable ? onClickListener : null);
+        }
+        if (mIconContainer != null) {
+            mIconContainer.setOnClickListener(expandable ? onClickListener : null);
         }
         if (mNotificationHeader != null) {
             mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
@@ -370,5 +363,21 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         mTransformationHelper.setVisible(visible);
+    }
+
+    protected void addTransformedViews(View... views) {
+        for (View view : views) {
+            if (view != null) {
+                mTransformationHelper.addTransformedView(view);
+            }
+        }
+    }
+
+    protected void addViewsTransformingToSimilar(View... views) {
+        for (View view : views) {
+            if (view != null) {
+                mTransformationHelper.addViewTransformingToSimilar(view);
+            }
+        }
     }
 }

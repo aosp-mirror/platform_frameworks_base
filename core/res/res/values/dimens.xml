@@ -236,8 +236,19 @@
          value is calculated in ConversationLayout#updateActionListPadding() -->
     <dimen name="notification_actions_padding_start">36dp</dimen>
 
+    <!-- The start padding to optionally use (e.g. if there's extra space) for CallStyle
+         notification actions.
+         this = conversation_content_start (80dp) - button inset (4dp) - action padding (12dp) -->
+    <dimen name="call_notification_collapsible_indent">64dp</dimen>
+
     <!-- The size of icons for visual actions in the notification_material_action_list -->
     <dimen name="notification_actions_icon_size">48dp</dimen>
+
+    <!-- The size of icons for visual actions in the notification_material_action_list -->
+    <dimen name="notification_actions_icon_drawable_size">20dp</dimen>
+
+    <!-- The corner radius if the emphasized action buttons in a notification -->
+    <dimen name="notification_action_button_radius">8dp</dimen>
 
     <!-- Size of the stroke with for the emphasized notification button style -->
     <dimen name="emphasized_button_stroke_width">1dp</dimen>
