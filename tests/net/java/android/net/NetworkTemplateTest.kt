@@ -35,7 +35,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 import kotlin.test.assertFalse
@@ -60,16 +59,13 @@ class NetworkTemplateTest {
         subscriberId: String? = null,
         ssid: String? = null
     ): NetworkState {
-        val info = mock(NetworkInfo::class.java)
-        doReturn(type).`when`(info).type
-        doReturn(NetworkInfo.State.CONNECTED).`when`(info).state
         val lp = LinkProperties()
         val caps = NetworkCapabilities().apply {
             setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false)
             setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true)
             setSSID(ssid)
         }
-        return NetworkState(info, lp, caps, mock(Network::class.java), subscriberId, ssid)
+        return NetworkState(type, lp, caps, mock(Network::class.java), subscriberId, ssid)
     }
 
     private fun NetworkTemplate.assertMatches(ident: NetworkIdentity) =

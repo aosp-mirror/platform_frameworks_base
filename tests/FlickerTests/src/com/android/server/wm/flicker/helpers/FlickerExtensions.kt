@@ -43,7 +43,7 @@ fun Flicker.setRotation(rotation: Int) {
         wmHelper.waitForAppTransitionIdle()
 
         // Ensure WindowManagerService wait until all animations have completed
-        instrumentation.getUiAutomation().syncInputTransactions()
+        instrumentation.uiAutomation.syncInputTransactions()
     } catch (e: RemoteException) {
         throw RuntimeException(e)
     }
@@ -71,8 +71,8 @@ fun buildTestTag(
 /**
  * Build a test tag for the test
  * @param testName Name of the transition(s) being tested
- * @param app App being launcher
  * @param configuration Configuration for the test
+ * @param extraInfo Additional information to append to the tag
  *
  * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
 </END_ROTATION></BEGIN_ROTATION></APP></NAME> */
@@ -92,9 +92,30 @@ fun buildTestTag(
 
 /**
  * Build a test tag for the test
+ * @param configuration Configuration for the test
+ * @param extraInfo Additional information to append to the tag
+ *
+ * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
+</END_ROTATION></BEGIN_ROTATION></APP></NAME> */
+@JvmOverloads
+fun buildTestTag(
+    configuration: Bundle,
+    extraInfo: String = ""
+): String {
+    return buildTestTag(testName = null,
+        app = null,
+        beginRotation = configuration.startRotation,
+        endRotation = configuration.endRotation,
+        app2 = null,
+        extraInfo = extraInfo)
+}
+
+/**
+ * Build a test tag for the test
  * @param testName Name of the transition(s) being tested
  * @param app App being launcher
  * @param configuration Configuration for the test
+ * @param extraInfo Additional information to append to the tag
  *
  * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
 </END_ROTATION></BEGIN_ROTATION></APP></NAME> */
@@ -121,14 +142,17 @@ fun buildTestTag(
  * @return test tag with pattern <NAME>__<APP></APP>(S)>__<ROTATION></ROTATION>(S)>[__<EXTRA>]
 </EXTRA></NAME> */
 fun buildTestTag(
-    testName: String,
+    testName: String?,
     app: String?,
     beginRotation: Int,
     endRotation: Int,
     app2: String?,
     extraInfo: String
 ): String {
-    var testTag = testName
+    var testTag = ""
+    if (testName != null) {
+        testTag += testName
+    }
     if (app != null) {
         testTag += "__$app"
     }
@@ -141,6 +165,10 @@ fun buildTestTag(
     }
     if (extraInfo.isNotEmpty()) {
         testTag += "__$extraInfo"
+    }
+
+    if (testTag.startsWith("__")) {
+        testTag = testTag.drop(2)
     }
     return testTag
 }

@@ -49,4 +49,6 @@ interface ICompanionDeviceManager {
     void registerDevicePresenceListenerService(in String packageName, in String deviceAddress);
 
     void unregisterDevicePresenceListenerService(in String packageName, in String deviceAddress);
+
+    boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
 }

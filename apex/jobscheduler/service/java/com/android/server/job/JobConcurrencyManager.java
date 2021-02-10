@@ -16,33 +16,43 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.UserSwitchObserver;
 import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.StatLogger;
 import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
+import com.android.server.pm.UserManagerInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -65,13 +75,18 @@ class JobConcurrencyManager {
     // Try to give higher priority types lower values.
     static final int WORK_TYPE_NONE = 0;
     static final int WORK_TYPE_TOP = 1 << 0;
-    static final int WORK_TYPE_BG = 1 << 1;
-    private static final int NUM_WORK_TYPES = 2;
+    static final int WORK_TYPE_EJ = 1 << 1;
+    static final int WORK_TYPE_BG = 1 << 2;
+    static final int WORK_TYPE_BGUSER = 1 << 3;
+    @VisibleForTesting
+    static final int NUM_WORK_TYPES = 4;
 
     @IntDef(prefix = {"WORK_TYPE_"}, flag = true, value = {
             WORK_TYPE_NONE,
             WORK_TYPE_TOP,
-            WORK_TYPE_BG
+            WORK_TYPE_EJ,
+            WORK_TYPE_BG,
+            WORK_TYPE_BGUSER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WorkType {
@@ -94,49 +109,63 @@ class JobConcurrencyManager {
 
     private static final WorkConfigLimitsPerMemoryTrimLevel CONFIG_LIMITS_SCREEN_ON =
             new WorkConfigLimitsPerMemoryTrimLevel(
-                    new WorkTypeConfig("screen_on_normal", 8,
+                    new WorkTypeConfig("screen_on_normal", 11,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_EJ, 3),
+                                    Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 6))),
-                    new WorkTypeConfig("screen_on_moderate", 8,
+                            List.of(Pair.create(WORK_TYPE_BG, 6), Pair.create(WORK_TYPE_BGUSER, 4))
+                    ),
+                    new WorkTypeConfig("screen_on_moderate", 9,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 2),
+                                    Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 4))),
-                    new WorkTypeConfig("screen_on_low", 5,
+                            List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2))
+                    ),
+                    new WorkTypeConfig("screen_on_low", 6,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 1),
+                                    Pair.create(WORK_TYPE_BG, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1))),
+                            List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
+                    ),
                     new WorkTypeConfig("screen_on_critical", 5,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1)))
+                            List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
+                    )
             );
     private static final WorkConfigLimitsPerMemoryTrimLevel CONFIG_LIMITS_SCREEN_OFF =
             new WorkConfigLimitsPerMemoryTrimLevel(
-                    new WorkTypeConfig("screen_off_normal", 10,
+                    new WorkTypeConfig("screen_off_normal", 13,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 3),
+                                    Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 6))),
-                    new WorkTypeConfig("screen_off_moderate", 10,
+                            List.of(Pair.create(WORK_TYPE_BG, 6), Pair.create(WORK_TYPE_BGUSER, 4))
+                    ),
+                    new WorkTypeConfig("screen_off_moderate", 13,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 2)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_EJ, 3),
+                                    Pair.create(WORK_TYPE_BG, 2)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 4))),
-                    new WorkTypeConfig("screen_off_low", 5,
+                            List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2))
+                    ),
+                    new WorkTypeConfig("screen_off_low", 7,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 2),
+                                    Pair.create(WORK_TYPE_BG, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1))),
+                            List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
+                    ),
                     new WorkTypeConfig("screen_off_critical", 5,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_EJ, 1)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1)))
+                            List.of(Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 1))
+                    )
             );
 
     /**
@@ -171,6 +200,10 @@ class JobConcurrencyManager {
             "assignJobsToContexts",
             "refreshSystemState",
     });
+    @VisibleForTesting
+    GracePeriodObserver mGracePeriodObserver;
+    @VisibleForTesting
+    boolean mShouldRestrictBgUser;
 
     interface Stats {
         int ASSIGN_JOBS_TO_CONTEXTS = 0;
@@ -182,9 +215,13 @@ class JobConcurrencyManager {
     JobConcurrencyManager(JobSchedulerService service) {
         mService = service;
         mLock = mService.mLock;
-        mContext = service.getContext();
+        mContext = service.getTestableContext();
 
         mHandler = JobSchedulerBackgroundThread.getHandler();
+
+        mGracePeriodObserver = new GracePeriodObserver(mContext);
+        mShouldRestrictBgUser = mContext.getResources().getBoolean(
+                R.bool.config_jobSchedulerRestrictBackgroundUser);
     }
 
     public void onSystemReady() {
@@ -193,8 +230,16 @@ class JobConcurrencyManager {
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mReceiver, filter);
+        try {
+            ActivityManager.getService().registerUserSwitchObserver(mGracePeriodObserver, TAG);
+        } catch (RemoteException e) {
+        }
 
         onInteractiveStateChanged(mPowerManager.isInteractive());
+    }
+
+    void onUserRemoved(int userId) {
+        mGracePeriodObserver.onUserRemoved(userId);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -224,7 +269,7 @@ class JobConcurrencyManager {
                 Slog.d(TAG, "Interactive: " + interactive);
             }
 
-            final long nowRealtime = JobSchedulerService.sElapsedRealtimeClock.millis();
+            final long nowRealtime = sElapsedRealtimeClock.millis();
             if (interactive) {
                 mLastScreenOnRealtime = nowRealtime;
                 mEffectiveInteractiveState = true;
@@ -261,7 +306,7 @@ class JobConcurrencyManager {
             if (mLastScreenOnRealtime > mLastScreenOffRealtime) {
                 return;
             }
-            final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+            final long now = sElapsedRealtimeClock.millis();
             if ((mLastScreenOffRealtime + mScreenOffAdjustmentDelayMs) > now) {
                 return;
             }
@@ -723,6 +768,10 @@ class JobConcurrencyManager {
             pw.print(mLastMemoryTrimLevel);
             pw.println();
 
+            pw.print("User Grace Period: ");
+            pw.print(mGracePeriodObserver.mGracePeriodExpiration);
+            pw.println();
+
             mStatLogger.dump(pw);
         } finally {
             pw.decreaseIndent();
@@ -748,15 +797,52 @@ class JobConcurrencyManager {
         proto.end(token);
     }
 
+    /**
+     * Decides whether a job is from the current foreground user or the equivalent.
+     */
+    @VisibleForTesting
+    boolean shouldRunAsFgUserJob(JobStatus job) {
+        if (!mShouldRestrictBgUser) return true;
+        int userId = job.getSourceUserId();
+        UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
+        UserInfo userInfo = um.getUserInfo(userId);
+
+        // If the user has a parent user (e.g. a work profile of another user), the user should be
+        // treated equivalent as its parent user.
+        if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                && userInfo.profileGroupId != userId) {
+            userId = userInfo.profileGroupId;
+            userInfo = um.getUserInfo(userId);
+        }
+
+        int currentUser = LocalServices.getService(ActivityManagerInternal.class)
+                .getCurrentUserId();
+        // A user is treated as foreground user if any of the followings is true:
+        // 1. The user is current user
+        // 2. The user is primary user
+        // 3. The user's grace period has not expired
+        return currentUser == userId || userInfo.isPrimary()
+                || mGracePeriodObserver.isWithinGracePeriodForUser(userId);
+    }
+
     int getJobWorkTypes(@NonNull JobStatus js) {
         int classification = 0;
-        // TODO(171305774): create dedicated work type for EJ and FGS
-        if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP
-                || js.shouldTreatAsExpeditedJob()) {
-            classification |= WORK_TYPE_TOP;
+        // TODO: create dedicated work type for FGS
+        if (shouldRunAsFgUserJob(js)) {
+            if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
+                classification |= WORK_TYPE_TOP;
+            } else {
+                classification |= WORK_TYPE_BG;
+            }
+
+            if (js.shouldTreatAsExpeditedJob()) {
+                classification |= WORK_TYPE_EJ;
+            }
         } else {
-            classification |= WORK_TYPE_BG;
+            // TODO(171305774): create dedicated slots for EJs of bg user
+            classification |= WORK_TYPE_BGUSER;
         }
+
         return classification;
     }
 
@@ -765,9 +851,15 @@ class JobConcurrencyManager {
         private static final String KEY_PREFIX_MAX_TOTAL =
                 CONFIG_KEY_PREFIX_CONCURRENCY + "max_total_";
         private static final String KEY_PREFIX_MAX_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "max_top_";
+        private static final String KEY_PREFIX_MAX_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "max_ej_";
         private static final String KEY_PREFIX_MAX_BG = CONFIG_KEY_PREFIX_CONCURRENCY + "max_bg_";
+        private static final String KEY_PREFIX_MAX_BGUSER =
+                CONFIG_KEY_PREFIX_CONCURRENCY + "max_bguser_";
         private static final String KEY_PREFIX_MIN_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "min_top_";
+        private static final String KEY_PREFIX_MIN_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "min_ej_";
         private static final String KEY_PREFIX_MIN_BG = CONFIG_KEY_PREFIX_CONCURRENCY + "min_bg_";
+        private static final String KEY_PREFIX_MIN_BGUSER =
+                CONFIG_KEY_PREFIX_CONCURRENCY + "min_bguser_";
         private final String mConfigIdentifier;
 
         private int mMaxTotal;
@@ -811,10 +903,18 @@ class JobConcurrencyManager {
                     properties.getInt(KEY_PREFIX_MAX_TOP + mConfigIdentifier,
                             mDefaultMaxAllowedSlots.get(WORK_TYPE_TOP, mMaxTotal))));
             mMaxAllowedSlots.put(WORK_TYPE_TOP, maxTop);
+            final int maxEj = Math.max(1, Math.min(mMaxTotal,
+                    properties.getInt(KEY_PREFIX_MAX_EJ + mConfigIdentifier,
+                            mDefaultMaxAllowedSlots.get(WORK_TYPE_EJ, mMaxTotal))));
+            mMaxAllowedSlots.put(WORK_TYPE_EJ, maxEj);
             final int maxBg = Math.max(1, Math.min(mMaxTotal,
                     properties.getInt(KEY_PREFIX_MAX_BG + mConfigIdentifier,
                             mDefaultMaxAllowedSlots.get(WORK_TYPE_BG, mMaxTotal))));
             mMaxAllowedSlots.put(WORK_TYPE_BG, maxBg);
+            final int maxBgUser = Math.max(1, Math.min(mMaxTotal,
+                    properties.getInt(KEY_PREFIX_MAX_BGUSER + mConfigIdentifier,
+                            mDefaultMaxAllowedSlots.get(WORK_TYPE_BGUSER, mMaxTotal))));
+            mMaxAllowedSlots.put(WORK_TYPE_BGUSER, maxBgUser);
 
             int remaining = mMaxTotal;
             mMinReservedSlots.clear();
@@ -824,11 +924,23 @@ class JobConcurrencyManager {
                             mDefaultMinReservedSlots.get(WORK_TYPE_TOP))));
             mMinReservedSlots.put(WORK_TYPE_TOP, minTop);
             remaining -= minTop;
+            // Ensure ej is in the range [0, min(maxEj, remaining)]
+            final int minEj = Math.max(0, Math.min(Math.min(maxEj, remaining),
+                    properties.getInt(KEY_PREFIX_MIN_EJ + mConfigIdentifier,
+                            mDefaultMinReservedSlots.get(WORK_TYPE_EJ))));
+            mMinReservedSlots.put(WORK_TYPE_EJ, minEj);
+            remaining -= minEj;
             // Ensure bg is in the range [0, min(maxBg, remaining)]
             final int minBg = Math.max(0, Math.min(Math.min(maxBg, remaining),
                     properties.getInt(KEY_PREFIX_MIN_BG + mConfigIdentifier,
                             mDefaultMinReservedSlots.get(WORK_TYPE_BG))));
             mMinReservedSlots.put(WORK_TYPE_BG, minBg);
+            remaining -= minBg;
+            // Ensure bg user is in the range [0, min(maxBgUser, remaining)]
+            final int minBgUser = Math.max(0, Math.min(Math.min(maxBgUser, remaining),
+                    properties.getInt(KEY_PREFIX_MIN_BGUSER + mConfigIdentifier,
+                            mDefaultMinReservedSlots.get(WORK_TYPE_BGUSER, 0))));
+            mMinReservedSlots.put(WORK_TYPE_BGUSER, minBgUser);
         }
 
         int getMaxTotal() {
@@ -849,10 +961,18 @@ class JobConcurrencyManager {
                     .println();
             pw.print(KEY_PREFIX_MAX_TOP + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_TOP))
                     .println();
+            pw.print(KEY_PREFIX_MIN_EJ + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_EJ))
+                    .println();
+            pw.print(KEY_PREFIX_MAX_EJ + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_EJ))
+                    .println();
             pw.print(KEY_PREFIX_MIN_BG + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_BG))
                     .println();
             pw.print(KEY_PREFIX_MAX_BG + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_BG))
                     .println();
+            pw.print(KEY_PREFIX_MIN_BGUSER + mConfigIdentifier,
+                    mMinReservedSlots.get(WORK_TYPE_BGUSER)).println();
+            pw.print(KEY_PREFIX_MAX_BGUSER + mConfigIdentifier,
+                    mMaxAllowedSlots.get(WORK_TYPE_BGUSER)).println();
         }
     }
 
@@ -869,6 +989,58 @@ class JobConcurrencyManager {
             this.moderate = moderate;
             this.low = low;
             this.critical = critical;
+        }
+    }
+
+    /**
+     * This class keeps the track of when a user's grace period expires.
+     */
+    @VisibleForTesting
+    static class GracePeriodObserver extends UserSwitchObserver {
+        // Key is UserId and Value is the time when grace period expires
+        @VisibleForTesting
+        final SparseLongArray mGracePeriodExpiration = new SparseLongArray();
+        private int mCurrentUserId;
+        @VisibleForTesting
+        int mGracePeriod;
+        private final UserManagerInternal mUserManagerInternal;
+        final Object mLock = new Object();
+
+
+        GracePeriodObserver(Context context) {
+            mCurrentUserId = LocalServices.getService(ActivityManagerInternal.class)
+                    .getCurrentUserId();
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+            mGracePeriod = Math.max(0, context.getResources().getInteger(
+                    R.integer.config_jobSchedulerUserGracePeriod));
+        }
+
+        @Override
+        public void onUserSwitchComplete(int newUserId) {
+            final long expiration = sElapsedRealtimeClock.millis() + mGracePeriod;
+            synchronized (mLock) {
+                if (mCurrentUserId != UserHandle.USER_NULL
+                        && mUserManagerInternal.exists(mCurrentUserId)) {
+                    mGracePeriodExpiration.append(mCurrentUserId, expiration);
+                }
+                mGracePeriodExpiration.delete(newUserId);
+                mCurrentUserId = newUserId;
+            }
+        }
+
+        void onUserRemoved(int userId) {
+            synchronized (mLock) {
+                mGracePeriodExpiration.delete(userId);
+            }
+        }
+
+        @VisibleForTesting
+        public boolean isWithinGracePeriodForUser(int userId) {
+            synchronized (mLock) {
+                return userId == mCurrentUserId
+                        || sElapsedRealtimeClock.millis()
+                        < mGracePeriodExpiration.get(userId, Long.MAX_VALUE);
+            }
         }
     }
 
@@ -892,20 +1064,21 @@ class JobConcurrencyManager {
         private final SparseIntArray mNumPendingJobs = new SparseIntArray(NUM_WORK_TYPES);
         private final SparseIntArray mNumRunningJobs = new SparseIntArray(NUM_WORK_TYPES);
         private final SparseIntArray mNumStartingJobs = new SparseIntArray(NUM_WORK_TYPES);
-        private int mNumUnspecialized = 0;
         private int mNumUnspecializedRemaining = 0;
 
         void setConfig(@NonNull WorkTypeConfig workTypeConfig) {
             mConfigMaxTotal = workTypeConfig.getMaxTotal();
             mConfigNumReservedSlots.put(WORK_TYPE_TOP,
                     workTypeConfig.getMinReserved(WORK_TYPE_TOP));
+            mConfigNumReservedSlots.put(WORK_TYPE_EJ, workTypeConfig.getMinReserved(WORK_TYPE_EJ));
             mConfigNumReservedSlots.put(WORK_TYPE_BG, workTypeConfig.getMinReserved(WORK_TYPE_BG));
+            mConfigNumReservedSlots.put(WORK_TYPE_BGUSER,
+                    workTypeConfig.getMinReserved(WORK_TYPE_BGUSER));
             mConfigAbsoluteMaxSlots.put(WORK_TYPE_TOP, workTypeConfig.getMax(WORK_TYPE_TOP));
+            mConfigAbsoluteMaxSlots.put(WORK_TYPE_EJ, workTypeConfig.getMax(WORK_TYPE_EJ));
             mConfigAbsoluteMaxSlots.put(WORK_TYPE_BG, workTypeConfig.getMax(WORK_TYPE_BG));
+            mConfigAbsoluteMaxSlots.put(WORK_TYPE_BGUSER, workTypeConfig.getMax(WORK_TYPE_BGUSER));
 
-            mNumUnspecialized = mConfigMaxTotal;
-            mNumUnspecialized -= mConfigNumReservedSlots.get(WORK_TYPE_TOP);
-            mNumUnspecialized -= mConfigNumReservedSlots.get(WORK_TYPE_BG);
             mNumUnspecializedRemaining = mConfigMaxTotal;
             for (int i = mNumRunningJobs.size() - 1; i >= 0; --i) {
                 mNumUnspecializedRemaining -= Math.max(mNumRunningJobs.valueAt(i),
@@ -934,8 +1107,14 @@ class JobConcurrencyManager {
             if ((workTypes & WORK_TYPE_TOP) == WORK_TYPE_TOP) {
                 mNumPendingJobs.put(WORK_TYPE_TOP, mNumPendingJobs.get(WORK_TYPE_TOP) + 1);
             }
+            if ((workTypes & WORK_TYPE_EJ) == WORK_TYPE_EJ) {
+                mNumPendingJobs.put(WORK_TYPE_EJ, mNumPendingJobs.get(WORK_TYPE_EJ) + 1);
+            }
             if ((workTypes & WORK_TYPE_BG) == WORK_TYPE_BG) {
                 mNumPendingJobs.put(WORK_TYPE_BG, mNumPendingJobs.get(WORK_TYPE_BG) + 1);
+            }
+            if ((workTypes & WORK_TYPE_BGUSER) == WORK_TYPE_BGUSER) {
+                mNumPendingJobs.put(WORK_TYPE_BGUSER, mNumPendingJobs.get(WORK_TYPE_BGUSER) + 1);
             }
         }
 
@@ -1018,47 +1197,75 @@ class JobConcurrencyManager {
 
         void onCountDone() {
             // Calculate how many slots to reserve for each work type. "Unspecialized" slots will
-            // be reserved for higher importance types first (ie. top before bg).
-            mNumUnspecialized = mConfigMaxTotal;
-            final int numTop = mNumRunningJobs.get(WORK_TYPE_TOP)
-                    + mNumPendingJobs.get(WORK_TYPE_TOP);
-            int resTop = Math.min(mConfigNumReservedSlots.get(WORK_TYPE_TOP), numTop);
-            mNumActuallyReservedSlots.put(WORK_TYPE_TOP, resTop);
-            mNumUnspecialized -= resTop;
-            final int numBg = mNumRunningJobs.get(WORK_TYPE_BG) + mNumPendingJobs.get(WORK_TYPE_BG);
-            int resBg = Math.min(mConfigNumReservedSlots.get(WORK_TYPE_BG), numBg);
-            mNumActuallyReservedSlots.put(WORK_TYPE_BG, resBg);
-            mNumUnspecialized -= resBg;
+            // be reserved for higher importance types first (ie. top before ej before bg).
+            // Steps:
+            //   1. Account for slots for already running jobs
+            //   2. Use remaining unaccounted slots to try and ensure minimum reserved slots
+            //   3. Allocate remaining up to max, based on importance
 
-            mNumUnspecializedRemaining = mNumUnspecialized;
-            // Account for already running jobs after we've assigned the minimum number of slots.
-            int unspecializedAssigned;
-            int extraRunning = (mNumRunningJobs.get(WORK_TYPE_TOP) - resTop);
-            if (extraRunning > 0) {
-                unspecializedAssigned = Math.max(0,
-                        Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP) - resTop,
-                                extraRunning));
-                resTop += unspecializedAssigned;
-                mNumUnspecializedRemaining -= extraRunning;
-            }
-            extraRunning = (mNumRunningJobs.get(WORK_TYPE_BG) - resBg);
-            if (extraRunning > 0) {
-                unspecializedAssigned = Math.max(0,
-                        Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG) - resBg, extraRunning));
-                resBg += unspecializedAssigned;
-                mNumUnspecializedRemaining -= extraRunning;
-            }
+            mNumUnspecializedRemaining = mConfigMaxTotal;
 
-            // Assign remaining unspecialized based on ranking.
-            unspecializedAssigned = Math.max(0,
+            // Step 1
+            int runTop = mNumRunningJobs.get(WORK_TYPE_TOP);
+            int resTop = runTop;
+            mNumUnspecializedRemaining -= resTop;
+            int runEj = mNumRunningJobs.get(WORK_TYPE_EJ);
+            int resEj = runEj;
+            mNumUnspecializedRemaining -= resEj;
+            int runBg = mNumRunningJobs.get(WORK_TYPE_BG);
+            int resBg = runBg;
+            mNumUnspecializedRemaining -= resBg;
+            int runBgUser = mNumRunningJobs.get(WORK_TYPE_BGUSER);
+            int resBgUser = runBgUser;
+            mNumUnspecializedRemaining -= resBgUser;
+
+            // Step 2
+            final int numTop = runTop + mNumPendingJobs.get(WORK_TYPE_TOP);
+            int fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
+                    Math.min(numTop, mConfigNumReservedSlots.get(WORK_TYPE_TOP) - resTop)));
+            resTop += fillUp;
+            mNumUnspecializedRemaining -= fillUp;
+            final int numEj = runEj + mNumPendingJobs.get(WORK_TYPE_EJ);
+            fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
+                    Math.min(numEj, mConfigNumReservedSlots.get(WORK_TYPE_EJ) - resEj)));
+            resEj += fillUp;
+            mNumUnspecializedRemaining -= fillUp;
+            final int numBg = runBg + mNumPendingJobs.get(WORK_TYPE_BG);
+            fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
+                    Math.min(numBg, mConfigNumReservedSlots.get(WORK_TYPE_BG) - resBg)));
+            resBg += fillUp;
+            mNumUnspecializedRemaining -= fillUp;
+            final int numBgUser = runBgUser + mNumPendingJobs.get(WORK_TYPE_BGUSER);
+            fillUp = Math.max(0, Math.min(mNumUnspecializedRemaining,
+                    Math.min(numBgUser,
+                            mConfigNumReservedSlots.get(WORK_TYPE_BGUSER) - resBgUser)));
+            resBgUser += fillUp;
+            mNumUnspecializedRemaining -= fillUp;
+
+            // Step 3
+            int unspecializedAssigned = Math.max(0,
                     Math.min(mNumUnspecializedRemaining,
                             Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP), numTop) - resTop));
             mNumActuallyReservedSlots.put(WORK_TYPE_TOP, resTop + unspecializedAssigned);
             mNumUnspecializedRemaining -= unspecializedAssigned;
+
+            unspecializedAssigned = Math.max(0,
+                    Math.min(mNumUnspecializedRemaining,
+                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_EJ), numEj) - resEj));
+            mNumActuallyReservedSlots.put(WORK_TYPE_EJ, resEj + unspecializedAssigned);
+            mNumUnspecializedRemaining -= unspecializedAssigned;
+
             unspecializedAssigned = Math.max(0,
                     Math.min(mNumUnspecializedRemaining,
                             Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG), numBg) - resBg));
             mNumActuallyReservedSlots.put(WORK_TYPE_BG, resBg + unspecializedAssigned);
+            mNumUnspecializedRemaining -= unspecializedAssigned;
+
+            unspecializedAssigned = Math.max(0,
+                    Math.min(mNumUnspecializedRemaining,
+                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BGUSER), numBgUser)
+                                    - resBgUser));
+            mNumActuallyReservedSlots.put(WORK_TYPE_BGUSER, resBgUser + unspecializedAssigned);
             mNumUnspecializedRemaining -= unspecializedAssigned;
         }
 
@@ -1072,6 +1279,15 @@ class JobConcurrencyManager {
                     return WORK_TYPE_TOP;
                 }
             }
+            if ((workTypes & WORK_TYPE_EJ) == WORK_TYPE_EJ) {
+                final int maxAllowed = Math.min(
+                        mConfigAbsoluteMaxSlots.get(WORK_TYPE_EJ),
+                        mNumActuallyReservedSlots.get(WORK_TYPE_EJ) + mNumUnspecializedRemaining);
+                if (mNumRunningJobs.get(WORK_TYPE_EJ) + mNumStartingJobs.get(WORK_TYPE_EJ)
+                        < maxAllowed) {
+                    return WORK_TYPE_EJ;
+                }
+            }
             if ((workTypes & WORK_TYPE_BG) == WORK_TYPE_BG) {
                 final int maxAllowed = Math.min(
                         mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG),
@@ -1079,6 +1295,16 @@ class JobConcurrencyManager {
                 if (mNumRunningJobs.get(WORK_TYPE_BG) + mNumStartingJobs.get(WORK_TYPE_BG)
                         < maxAllowed) {
                     return WORK_TYPE_BG;
+                }
+            }
+            if ((workTypes & WORK_TYPE_BGUSER) == WORK_TYPE_BGUSER) {
+                final int maxAllowed = Math.min(
+                        mConfigAbsoluteMaxSlots.get(WORK_TYPE_BGUSER),
+                        mNumActuallyReservedSlots.get(WORK_TYPE_BGUSER)
+                                + mNumUnspecializedRemaining);
+                if (mNumRunningJobs.get(WORK_TYPE_BGUSER) + mNumStartingJobs.get(WORK_TYPE_BGUSER)
+                        < maxAllowed) {
+                    return WORK_TYPE_BGUSER;
                 }
             }
             return WORK_TYPE_NONE;

@@ -372,12 +372,11 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
-        final boolean isTouchableDisplay = mWindowManagerService.isTouchableDisplay(displayId);
         synchronized (mLock) {
             if (mSecurityPolicy.canPerformGestures(this)) {
                 MotionEventInjector motionEventInjector =
                         mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
-                if (motionEventInjector != null && isTouchableDisplay) {
+                if (mWindowManagerService.isTouchOrFaketouchDevice()) {
                     motionEventInjector.injectEvents(
                             gestureSteps.getList(), mServiceInterface, sequence, displayId);
                 } else {

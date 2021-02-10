@@ -75,6 +75,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         mFakeSettings = new FakeSettings();
 
         mTile = new ReduceBrightColorsTile(
+                true,
                 mHost,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
@@ -95,7 +96,6 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         assertEquals(Tile.STATE_INACTIVE, mTile.getState().state);
         assertEquals(mTile.getState().label.toString(),
                 mContext.getString(R.string.quick_settings_reduce_bright_colors_label));
-        assertEquals(mTile.getState().secondaryLabel.toString(), "");
     }
 
     @Test
@@ -128,13 +128,5 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
         assertEquals(Tile.STATE_ACTIVE, mTile.getState().state);
         assertEquals(mTile.getState().label.toString(),
                 mContext.getString(R.string.quick_settings_reduce_bright_colors_label));
-
-        final int intensity = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0, mUserTracker.getUserId());
-
-        assertEquals(
-                mContext.getString(
-                        R.string.quick_settings_reduce_bright_colors_secondary_label, intensity),
-                mTile.getState().secondaryLabel.toString());
     }
 }

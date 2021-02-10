@@ -247,10 +247,27 @@ public class AppWidgetProviderInfo implements Parcelable {
      * A preview of what the AppWidget will look like after it's configured.
      * If not supplied, the AppWidget's icon will be used.
      *
-     * <p>This field corresponds to the <code>android:previewImage</code> attribute in
-     * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
+     * <p>This field corresponds to the <code>android:previewImage</code> attribute in the AppWidget
+     * meta-data file.
      */
     public int previewImage;
+
+    /**
+     * The layout resource id of a preview of what the AppWidget will look like after it's
+     * configured.
+     *
+     * <p>Unlike previewImage, previewLayout can better showcase AppWidget in different locales,
+     * system themes, display sizes & density etc.
+     *
+     * <p>If supplied, this will take precedence over the previewImage on supported widget hosts.
+     * Otherwise, previewImage will be used.
+     *
+     * <p>This field corresponds to the <code>android:previewLayout</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    @IdRes
+    public int previewLayout;
 
     /**
      * The rules by which a widget can be resized. See {@link #RESIZE_NONE},
@@ -320,6 +337,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.label = in.readString();
         this.icon = in.readInt();
         this.previewImage = in.readInt();
+        this.previewLayout = in.readInt();
         this.autoAdvanceViewId = in.readInt();
         this.resizeMode = in.readInt();
         this.widgetCategory = in.readInt();
@@ -429,6 +447,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeString(this.label);
         out.writeInt(this.icon);
         out.writeInt(this.previewImage);
+        out.writeInt(this.previewLayout);
         out.writeInt(this.autoAdvanceViewId);
         out.writeInt(this.resizeMode);
         out.writeInt(this.widgetCategory);
@@ -453,6 +472,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.label = this.label;
         that.icon = this.icon;
         that.previewImage = this.previewImage;
+        that.previewLayout = this.previewLayout;
         that.autoAdvanceViewId = this.autoAdvanceViewId;
         that.resizeMode = this.resizeMode;
         that.widgetCategory = this.widgetCategory;

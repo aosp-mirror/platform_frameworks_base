@@ -52,7 +52,6 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
-import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -664,7 +663,7 @@ class WindowStateAnimator {
 
         if (w.getOrientationChanging()) {
             if (!w.isDrawn()) {
-                mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
+                w.mWmService.mRoot.mOrientationChangeComplete = false;
                 mAnimator.mLastWindowFreezeSource = w;
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Orientation continue waiting for draw in %s", w);
@@ -677,14 +676,6 @@ class WindowStateAnimator {
         if (displayed) {
             w.mToken.hasVisible = true;
         }
-    }
-
-    void setTransparentRegionHintLocked(final Region region) {
-        if (mSurfaceController == null) {
-            Slog.w(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
-            return;
-        }
-        mSurfaceController.setTransparentRegionHint(region);
     }
 
     boolean setWallpaperOffset(int dx, int dy, float scale) {

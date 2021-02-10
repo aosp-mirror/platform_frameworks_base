@@ -2345,6 +2345,7 @@ class ContextImpl extends Context {
                 pi.getResDir(),
                 splitResDirs,
                 pi.getOverlayDirs(),
+                pi.getOverlayPaths(),
                 pi.getApplicationInfo().sharedLibraryFiles,
                 overrideDisplayId,
                 overrideConfig,
@@ -2442,6 +2443,7 @@ class ContextImpl extends Context {
                 mPackageInfo.getResDir(),
                 paths,
                 mPackageInfo.getOverlayDirs(),
+                mPackageInfo.getOverlayPaths(),
                 mPackageInfo.getApplicationInfo().sharedLibraryFiles,
                 mForceDisplayOverrideInResources ? getDisplayId() : null,
                 null,
@@ -2558,7 +2560,8 @@ class ContextImpl extends Context {
     Resources createWindowContextResources() {
         final String resDir = mPackageInfo.getResDir();
         final String[] splitResDirs = mPackageInfo.getSplitResDirs();
-        final String[] overlayDirs = mPackageInfo.getOverlayDirs();
+        final String[] legacyOverlayDirs = mPackageInfo.getOverlayDirs();
+        final String[] overlayPaths = mPackageInfo.getOverlayPaths();
         final String[] libDirs = mPackageInfo.getApplicationInfo().sharedLibraryFiles;
         final int displayId = getDisplayId();
         final CompatibilityInfo compatInfo = (displayId == Display.DEFAULT_DISPLAY)
@@ -2567,7 +2570,7 @@ class ContextImpl extends Context {
         final List<ResourcesLoader> loaders = mResources.getLoaders();
 
         return mResourcesManager.createBaseTokenResources(mToken, resDir, splitResDirs,
-                overlayDirs, libDirs, displayId, null /* overrideConfig */,
+                legacyOverlayDirs, overlayPaths, libDirs, displayId, null /* overrideConfig */,
                 compatInfo, mClassLoader, loaders);
     }
 
@@ -2855,6 +2858,7 @@ class ContextImpl extends Context {
                 packageInfo.getResDir(),
                 splitDirs,
                 packageInfo.getOverlayDirs(),
+                packageInfo.getOverlayPaths(),
                 packageInfo.getApplicationInfo().sharedLibraryFiles,
                 displayId,
                 overrideConfiguration,

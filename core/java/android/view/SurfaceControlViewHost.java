@@ -162,7 +162,6 @@ public class SurfaceControlViewHost {
             @NonNull WindowlessWindowManager wwm, boolean useSfChoreographer) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, useSfChoreographer);
-        mViewRoot.forceDisableBLAST();
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
@@ -188,7 +187,6 @@ public class SurfaceControlViewHost {
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
         mViewRoot = new ViewRootImpl(context, display, mWm);
-        mViewRoot.forceDisableBLAST();
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 

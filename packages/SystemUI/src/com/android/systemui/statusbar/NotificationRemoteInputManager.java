@@ -388,7 +388,28 @@ public class NotificationRemoteInputManager implements Dumpable {
      */
     public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
             PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo) {
+        return activateRemoteInput(view, inputs, input, pendingIntent, editedSuggestionInfo,
+                null /* userMessageContent */, null /* authBypassCheck */);
+    }
 
+    /**
+     * Activates a given {@link RemoteInput}
+     *
+     * @param view The view of the action button or suggestion chip that was tapped.
+     * @param inputs The remote inputs that need to be sent to the app.
+     * @param input The remote input that needs to be activated.
+     * @param pendingIntent The pending intent to be sent to the app.
+     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
+     *         {@code null} if the user is not editing a smart reply.
+     * @param userMessageContent User-entered text with which to initialize the remote input view.
+     * @param authBypassCheck Optional auth bypass check associated with this remote input
+     *         activation. If {@code null}, we never bypass.
+     * @return Whether the {@link RemoteInput} was activated.
+     */
+    public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
+            PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo,
+            @Nullable String userMessageContent,
+            @Nullable AuthBypassPredicate authBypassCheck) {
         ViewParent p = view.getParent();
         RemoteInputView riv = null;
         ExpandableNotificationRow row = null;
@@ -410,40 +431,9 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         row.setUserExpanded(true);
 
-        if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
-            final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
-
-            final boolean isLockedManagedProfile =
-                    mUserManager.getUserInfo(userId).isManagedProfile()
-                    && mKeyguardManager.isDeviceLocked(userId);
-
-            final boolean isParentUserLocked;
-            if (isLockedManagedProfile) {
-                final UserInfo profileParent = mUserManager.getProfileParent(userId);
-                isParentUserLocked = (profileParent != null)
-                        && mKeyguardManager.isDeviceLocked(profileParent.id);
-            } else {
-                isParentUserLocked = false;
-            }
-
-            if (mLockscreenUserManager.isLockscreenPublicMode(userId)
-                    || mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
-                // If the parent user is no longer locked, and the user to which the remote input
-                // is destined is a locked, managed profile, then onLockedWorkRemoteInput should be
-                // called to unlock it.
-                if (isLockedManagedProfile && !isParentUserLocked) {
-                    mCallback.onLockedWorkRemoteInput(userId, row, view);
-                } else {
-                    // Even if we don't have security we should go through this flow, otherwise
-                    // we won't go to the shade.
-                    mCallback.onLockedRemoteInput(row, view);
-                }
-                return true;
-            }
-            if (isLockedManagedProfile) {
-                mCallback.onLockedWorkRemoteInput(userId, row, view);
-                return true;
-            }
+        final boolean deferBouncer = authBypassCheck != null;
+        if (!deferBouncer && showBouncerForRemoteInput(view, pendingIntent, row)) {
+            return true;
         }
 
         if (riv != null && !riv.isAttachedToWindow()) {
@@ -461,7 +451,10 @@ public class NotificationRemoteInputManager implements Dumpable {
                 && !row.getPrivateLayout().getExpandedChild().isShown()) {
             // The expanded layout is selected, but it's not shown yet, let's wait on it to
             // show before we do the animation.
-            mCallback.onMakeExpandedVisibleForRemoteInput(row, view);
+            mCallback.onMakeExpandedVisibleForRemoteInput(row, view, deferBouncer, () -> {
+                activateRemoteInput(view, inputs, input, pendingIntent, editedSuggestionInfo,
+                        userMessageContent, authBypassCheck);
+            });
             return true;
         }
 
@@ -491,8 +484,60 @@ public class NotificationRemoteInputManager implements Dumpable {
         riv.setPendingIntent(pendingIntent);
         riv.setRemoteInput(inputs, input, editedSuggestionInfo);
         riv.focusAnimated();
+        if (userMessageContent != null) {
+            riv.setEditTextContent(userMessageContent);
+        }
+        if (deferBouncer) {
+            final ExpandableNotificationRow finalRow = row;
+            riv.setBouncerChecker(() -> !authBypassCheck.canSendRemoteInputWithoutBouncer()
+                    && showBouncerForRemoteInput(view, pendingIntent, finalRow));
+        }
 
         return true;
+    }
+
+    private boolean showBouncerForRemoteInput(View view, PendingIntent pendingIntent,
+            ExpandableNotificationRow row) {
+        if (mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
+            return false;
+        }
+
+        final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
+
+        final boolean isLockedManagedProfile =
+                mUserManager.getUserInfo(userId).isManagedProfile()
+                        && mKeyguardManager.isDeviceLocked(userId);
+
+        final boolean isParentUserLocked;
+        if (isLockedManagedProfile) {
+            final UserInfo profileParent = mUserManager.getProfileParent(userId);
+            isParentUserLocked = (profileParent != null)
+                    && mKeyguardManager.isDeviceLocked(profileParent.id);
+        } else {
+            isParentUserLocked = false;
+        }
+
+        if ((mLockscreenUserManager.isLockscreenPublicMode(userId)
+                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD)) {
+            // If the parent user is no longer locked, and the user to which the remote
+            // input
+            // is destined is a locked, managed profile, then onLockedWorkRemoteInput
+            // should be
+            // called to unlock it.
+            if (isLockedManagedProfile && !isParentUserLocked) {
+                mCallback.onLockedWorkRemoteInput(userId, row, view);
+            } else {
+                // Even if we don't have security we should go through this flow, otherwise
+                // we won't go to the shade.
+                mCallback.onLockedRemoteInput(row, view);
+            }
+            return true;
+        }
+        if (isLockedManagedProfile) {
+            mCallback.onLockedWorkRemoteInput(userId, row, view);
+            return true;
+        }
+        return false;
     }
 
     private RemoteInputView findRemoteInputView(View v) {
@@ -807,8 +852,11 @@ public class NotificationRemoteInputManager implements Dumpable {
          *
          * @param row
          * @param clickedView
+         * @param deferBouncer
+         * @param runnable
          */
-        void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row, View clickedView);
+        void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row, View clickedView,
+                boolean deferBouncer, Runnable runnable);
 
         /**
          * Return whether or not remote input should be handled for this view.
@@ -844,5 +892,29 @@ public class NotificationRemoteInputManager implements Dumpable {
          * @return true iff the click was handled
          */
         boolean handleClick();
+    }
+
+    /**
+     * Predicate that is associated with a specific {@link #activateRemoteInput(View, RemoteInput[],
+     * RemoteInput, PendingIntent, EditedSuggestionInfo, String, AuthBypassPredicate)}
+     * invocation that determines whether or not the bouncer can be bypassed when sending the
+     * RemoteInput.
+     */
+    public interface AuthBypassPredicate {
+        /**
+         * Determines if the RemoteInput can be sent without the bouncer. Should be checked the
+         * same frame that the RemoteInput is to be sent.
+         */
+        boolean canSendRemoteInputWithoutBouncer();
+    }
+
+    /** Shows the bouncer if necessary */
+    public interface BouncerChecker {
+        /**
+         * Shows the bouncer if necessary in order to send a RemoteInput.
+         *
+         * @return {@code true} if the bouncer was shown, {@code false} otherwise
+         */
+        boolean showBouncerIfNecessary();
     }
 }

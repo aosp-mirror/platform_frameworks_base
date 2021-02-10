@@ -17,17 +17,20 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
+import android.graphics.Point
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.SystemClock
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
+import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
 import com.android.server.wm.flicker.helpers.closePipWindow
-import com.android.server.wm.flicker.helpers.hasPipWindow
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
 import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
+import com.android.wm.shell.flicker.pip.waitPipWindowGone
+import com.android.wm.shell.flicker.pip.waitPipWindowShown
 import com.android.wm.shell.flicker.testapp.Components
-import org.junit.Assert.fail
 
 class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     instrumentation,
@@ -55,6 +58,17 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
     }
 
+    /** {@inheritDoc}  */
+    override fun launchViaIntent(
+        wmHelper: WindowManagerStateHelper,
+        expectedWindowName: String,
+        action: String?,
+        stringExtras: Map<String, String>
+    ) {
+        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
+        wmHelper.waitPipWindowShown()
+    }
+
     private fun focusOnObject(selector: BySelector): Boolean {
         // We expect all the focusable UI elements to be arranged in a way so that it is possible
         // to "cycle" over all them by clicking the D-Pad DOWN button, going back up to "the top"
@@ -69,16 +83,12 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         return false
     }
 
-    fun clickEnterPipButton() {
+    @JvmOverloads
+    fun clickEnterPipButton(wmHelper: WindowManagerStateHelper? = null) {
         clickObject(ENTER_PIP_BUTTON_ID)
 
-        // TODO(b/172321238): remove this check once hasPipWindow is fixed on TVs
-        if (!isTelevision) {
-            uiDevice.hasPipWindow()
-        } else {
-            // Simply wait for 3 seconds
-            SystemClock.sleep(3_000)
-        }
+        // Wait on WMHelper or simply wait for 3 seconds
+        wmHelper?.waitPipWindowShown() ?: SystemClock.sleep(3_000)
     }
 
     fun clickStartMediaSessionButton() {
@@ -97,16 +107,75 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     fun stopMedia() = mediaController?.transportControls?.stop()
             ?: error("No active media session found")
 
+    @Deprecated("Use PipAppHelper.closePipWindow(wmHelper) instead",
+        ReplaceWith("closePipWindow(wmHelper)"))
     fun closePipWindow() {
         if (isTelevision) {
             uiDevice.closeTvPipWindow()
         } else {
             uiDevice.closePipWindow()
         }
+    }
 
-        if (!waitUntilClosed()) {
-            fail("Couldn't close Pip")
+    /**
+     * Expands the pip window and dismisses it by clicking on the X button.
+     *
+     * Note, currently the View coordinates reported by the accessibility are relative to
+     * the window, so the correct coordinates need to be calculated
+     *
+     * For example, in a PIP window located at Rect(508, 1444 - 1036, 1741), the
+     * dismiss button coordinates are shown as Rect(650, 0 - 782, 132), with center in
+     * Point(716, 66), instead of Point(970, 1403)
+     *
+     * See b/179337864
+     */
+    fun closePipWindow(wmHelper: WindowManagerStateHelper) {
+        if (isTelevision) {
+            uiDevice.closeTvPipWindow()
+        } else {
+            expandPipWindow(wmHelper)
+            val exitPipObject = uiDevice.findObject(By.res(SYSTEMUI_PACKAGE, "dismiss"))
+            requireNotNull(exitPipObject) { "PIP window dismiss button not found" }
+            val coordinatesInWindow = exitPipObject.visibleBounds
+            val windowOffset = wmHelper.getWindowRegion(component).bounds
+            val newCoordinates = Point(windowOffset.left + coordinatesInWindow.centerX(),
+                windowOffset.top + coordinatesInWindow.centerY())
+            uiDevice.click(newCoordinates.x, newCoordinates.y)
         }
+
+        // Wait for animation to complete.
+        wmHelper.waitPipWindowGone()
+        wmHelper.waitForHomeActivityVisible()
+    }
+
+    /**
+     * Click once on the PIP window to expand it
+     */
+    fun expandPipWindow(wmHelper: WindowManagerStateHelper) {
+        val windowRegion = wmHelper.getWindowRegion(component)
+        require(!windowRegion.isEmpty) {
+            "Unable to find a PIP window in the current state"
+        }
+        val windowRect = windowRegion.bounds
+        uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        // Ensure WindowManagerService wait until all animations have completed
+        wmHelper.waitForAppTransitionIdle()
+        mInstrumentation.uiAutomation.syncInputTransactions()
+    }
+
+    /**
+     * Double click on the PIP window to reopen to app
+     */
+    fun expandPipWindowToApp(wmHelper: WindowManagerStateHelper) {
+        val windowRegion = wmHelper.getWindowRegion(component)
+        require(!windowRegion.isEmpty) {
+            "Unable to find a PIP window in the current state"
+        }
+        val windowRect = windowRegion.bounds
+        uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        wmHelper.waitPipWindowGone()
+        wmHelper.waitForAppTransitionIdle()
     }
 
     companion object {

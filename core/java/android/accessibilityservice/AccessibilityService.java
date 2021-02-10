@@ -445,8 +445,8 @@ public abstract class AccessibilityService extends Service {
     /** The user has performed a three-finger double tap and hold gesture on the touch screen. */
     public static final int GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD = 41;
 
-    /** The user has performed a two-finger  single-tap and hold gesture on the touch screen. */
-    public static final int GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD = 43;
+    /** The user has performed a two-finger  triple-tap and hold gesture on the touch screen. */
+    public static final int GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD = 43;
 
     /** The user has performed a three-finger  single-tap and hold gesture on the touch screen. */
     public static final int GESTURE_3_FINGER_SINGLE_TAP_AND_HOLD = 44;

@@ -267,5 +267,8 @@ class DomainVerificationSettingsMutationTest {
             whenever(getPackageLocked(TEST_PKG)) { mockPkg() }
             whenever(schedule(anyInt(), any()))
             whenever(scheduleWriteSettings())
+
+            // This doesn't check for visibility; that's done in the enforcer test
+            whenever(filterAppAccess(anyString(), anyInt(), anyInt())) { false }
         }
 }

@@ -50,6 +50,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
@@ -1376,18 +1377,18 @@ public final class OverlayManagerService extends SystemService {
                 targetPackageNames = pm.getTargetPackageNames(userId);
             }
 
-            final Map<String, List<String>> pendingChanges =
+            final Map<String, OverlayPaths> pendingChanges =
                     new ArrayMap<>(targetPackageNames.size());
             synchronized (mLock) {
-                final List<String> frameworkOverlays =
-                        mImpl.getEnabledOverlayPackageNames("android", userId);
+                final OverlayPaths frameworkOverlays =
+                        mImpl.getEnabledOverlayPaths("android", userId);
                 for (final String targetPackageName : targetPackageNames) {
-                    List<String> list = new ArrayList<>();
+                    final OverlayPaths.Builder list = new OverlayPaths.Builder();
                     if (!"android".equals(targetPackageName)) {
                         list.addAll(frameworkOverlays);
                     }
-                    list.addAll(mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
-                    pendingChanges.put(targetPackageName, list);
+                    list.addAll(mImpl.getEnabledOverlayPaths(targetPackageName, userId));
+                    pendingChanges.put(targetPackageName, list.build());
                 }
             }
 
@@ -1395,7 +1396,7 @@ public final class OverlayManagerService extends SystemService {
             for (final String targetPackageName : targetPackageNames) {
                 if (DEBUG) {
                     Slog.d(TAG, "-> Updating overlay: target=" + targetPackageName + " overlays=["
-                            + TextUtils.join(",", pendingChanges.get(targetPackageName))
+                            + pendingChanges.get(targetPackageName)
                             + "] userId=" + userId);
                 }
 

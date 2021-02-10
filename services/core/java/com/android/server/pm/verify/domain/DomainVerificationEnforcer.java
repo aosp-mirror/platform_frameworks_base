@@ -18,8 +18,10 @@ package com.android.server.pm.verify.domain;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Process;
 
@@ -30,8 +32,15 @@ public class DomainVerificationEnforcer {
     @NonNull
     private final Context mContext;
 
+    @NonNull
+    private Callback mCallback;
+
     public DomainVerificationEnforcer(@NonNull Context context) {
         mContext = context;
+    }
+
+    public void setCallback(@NonNull Callback callback) {
+        mCallback = callback;
     }
 
     /**
@@ -67,6 +76,11 @@ public class DomainVerificationEnforcer {
                             "Caller " + callingUid
                                     + " is not allowed to query domain verification state");
                 }
+
+                mContext.enforcePermission(android.Manifest.permission.QUERY_ALL_PACKAGES,
+                        Binder.getCallingPid(), callingUid,
+                        "Caller " + callingUid + " does not hold "
+                                + android.Manifest.permission.QUERY_ALL_PACKAGES);
                 break;
         }
     }
@@ -84,28 +98,42 @@ public class DomainVerificationEnforcer {
                 isAllowed = true;
                 break;
             default:
-                // TODO(b/159952358): Remove permission check? The component package should
-                //  have been checked when the verifier component was first scanned in PMS.
-                mContext.enforcePermission(
-                        android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
-                        Binder.getCallingPid(), callingUid,
-                        "Caller " + callingUid + " does not hold DOMAIN_VERIFICATION_AGENT");
+                final int callingPid = Binder.getCallingPid();
+                boolean isLegacyVerificationAgent = false;
+                if (mContext.checkPermission(
+                        android.Manifest.permission.DOMAIN_VERIFICATION_AGENT, callingPid,
+                        callingUid) != PackageManager.PERMISSION_GRANTED) {
+                    isLegacyVerificationAgent = mContext.checkPermission(
+                            android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT,
+                            callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
+                    if (!isLegacyVerificationAgent) {
+                        throw new SecurityException("Caller " + callingUid + " does not hold "
+                                + android.Manifest.permission.DOMAIN_VERIFICATION_AGENT);
+                    }
+                }
+
+                // If the caller isn't a legacy verifier, it needs the QUERY_ALL permission
+                if (!isLegacyVerificationAgent) {
+                    mContext.enforcePermission(android.Manifest.permission.QUERY_ALL_PACKAGES,
+                            callingPid, callingUid, "Caller " + callingUid + " does not hold "
+                                    + android.Manifest.permission.QUERY_ALL_PACKAGES);
+                }
+
                 isAllowed = proxy.isCallerVerifier(callingUid);
                 break;
         }
 
         if (!isAllowed) {
             throw new SecurityException("Caller " + callingUid
-                    + " is not the approved domain verification agent, isVerifier = "
-                    + proxy.isCallerVerifier(callingUid));
+                    + " is not the approved domain verification agent");
         }
     }
 
     /**
      * Enforced when mutating user selection state inside an exposed API method.
      */
-    public void assertApprovedUserSelector(int callingUid, @UserIdInt int callingUserId,
-            @UserIdInt int targetUserId) throws SecurityException {
+    public boolean assertApprovedUserSelector(int callingUid, @UserIdInt int callingUserId,
+            @Nullable String packageName, @UserIdInt int targetUserId) throws SecurityException {
         if (callingUserId != targetUserId) {
             mContext.enforcePermission(
                     Manifest.permission.INTERACT_ACROSS_USERS,
@@ -117,12 +145,51 @@ public class DomainVerificationEnforcer {
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION,
                 Binder.getCallingPid(), callingUid,
                 "Caller is not allowed to edit user selections");
+
+        if (packageName == null) {
+            return true;
+        }
+
+        return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
     }
 
-    public void callerIsLegacyUserSelector(int callingUid) {
+    public boolean callerIsLegacyUserSelector(int callingUid, @UserIdInt int callingUserId,
+            @NonNull String packageName, @UserIdInt int targetUserId) {
         mContext.enforcePermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS,
                 Binder.getCallingPid(), callingUid,
                 "Caller is not allowed to edit user state");
+
+        if (callingUserId != targetUserId) {
+            if (mContext.checkPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS,
+                    Binder.getCallingPid(), callingUid) != PackageManager.PERMISSION_GRANTED) {
+                // Legacy API did not enforce this, so for backwards compatibility, fail silently
+                return false;
+            }
+        }
+
+        return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
+    }
+
+    public boolean callerIsLegacyUserQuerent(int callingUid, @UserIdInt int callingUserId,
+            @NonNull String packageName, @UserIdInt int targetUserId) {
+        if (callingUserId != targetUserId) {
+            // The legacy API enforces the _FULL variant, so maintain that here
+            mContext.enforcePermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    Binder.getCallingPid(), callingUid,
+                    "Caller is not allowed to edit other users");
+        }
+
+        return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
+    }
+
+    public interface Callback {
+        /**
+         * @return true if access to the given package should be filtered and the method failed as
+         * if the package was not installed
+         */
+        boolean filterAppAccess(@NonNull String packageName, int callingUid, @UserIdInt int userId);
     }
 }

@@ -153,11 +153,6 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     proxy->resetProfileInfo();
     proxy->fence();
 
-    if (opts.renderAhead) {
-        usleep(33000);
-    }
-    proxy->setRenderAheadDepth(opts.renderAhead);
-
     ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
     nsecs_t start = systemTime(SYSTEM_TIME_MONOTONIC);

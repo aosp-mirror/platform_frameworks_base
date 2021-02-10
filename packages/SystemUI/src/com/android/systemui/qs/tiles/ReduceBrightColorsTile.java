@@ -16,12 +16,13 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
+
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.text.TextUtils;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -39,6 +40,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /** Quick settings tile: Reduce Bright Colors **/
 public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState> {
@@ -46,9 +48,11 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState> {
     //TODO(b/170973645): get icon drawable
     private final Icon mIcon = null;
     private final SecureSetting mActivatedSetting;
+    private final boolean mIsAvailable;
 
     @Inject
     public ReduceBrightColorsTile(
+            @Named(RBC_AVAILABLE) boolean isAvailable,
             QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
@@ -69,11 +73,12 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState> {
                 refreshState();
             }
         };
+        mIsAvailable = isAvailable;
+
     }
     @Override
     public boolean isAvailable() {
-        // TODO(b/170970675): Call into ColorDisplayService to get availability/config status
-        return true;
+        return mIsAvailable;
     }
 
     @Override
@@ -121,15 +126,6 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState> {
         state.label = mContext.getString(R.string.quick_settings_reduce_bright_colors_label);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
-
-        final int intensity = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0, mActivatedSetting.getCurrentUser());
-        state.secondaryLabel = state.value ? mContext.getString(
-                R.string.quick_settings_reduce_bright_colors_secondary_label, intensity) : "";
-
-        state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
-                ? state.label
-                : TextUtils.concat(state.label, ", ", state.secondaryLabel);
     }
 
     @Override
