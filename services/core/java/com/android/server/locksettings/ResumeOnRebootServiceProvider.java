@@ -120,6 +120,7 @@ public class ResumeOnRebootServiceProvider {
             if (mServiceConnection != null) {
                 mContext.unbindService(mServiceConnection);
             }
+            mBinder = null;
         }
 
         /** Bind to the service */
