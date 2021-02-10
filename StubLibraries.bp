@@ -303,6 +303,7 @@ java_library_static {
     name: "android_stubs_current",
     srcs: [ ":api-stubs-docs-non-updatable" ],
     static_libs: [
+        "android.net.ipsec.ike.stubs",
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-media.stubs",
@@ -322,6 +323,7 @@ java_library_static {
     name: "android_system_stubs_current",
     srcs: [ ":system-api-stubs-docs-non-updatable" ],
     static_libs: [
+        "android.net.ipsec.ike.stubs.system",
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-media.stubs.system",
@@ -357,6 +359,7 @@ java_library_static {
     static_libs: [
         // Modules do not have test APIs, but we want to include their SystemApis, like we include
         // the SystemApi of framework-non-updatable-sources.
+        "android.net.ipsec.ike.stubs.system",
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-media.stubs.system",
