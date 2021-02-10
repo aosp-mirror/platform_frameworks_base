@@ -25949,6 +25949,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public String getModuleMetadataPackageName() throws RemoteException {
             return PackageManagerService.this.mModuleInfoProvider.getPackageName();
         }
+
+        @Override
+        public boolean hasSha256SigningCertificate(String packageName, byte[] certificate)
+                throws RemoteException {
+            return PackageManagerService.this.hasSigningCertificate(
+                packageName, certificate, CERT_INPUT_SHA256);
+        }
     }
 
     private AndroidPackage getPackage(String packageName) {
