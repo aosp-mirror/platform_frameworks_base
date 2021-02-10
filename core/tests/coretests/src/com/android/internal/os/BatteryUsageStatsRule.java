@@ -77,6 +77,26 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
+    public BatteryUsageStatsRule setNumCpuClusters(int number) {
+        when(mPowerProfile.getNumCpuClusters()).thenReturn(number);
+        return this;
+    }
+
+    public BatteryUsageStatsRule setNumSpeedStepsInCpuCluster(int cluster, int speeds) {
+        when(mPowerProfile.getNumSpeedStepsInCpuCluster(cluster)).thenReturn(speeds);
+        return this;
+    }
+
+    public BatteryUsageStatsRule setAveragePowerForCpuCluster(int cluster, double value) {
+        when(mPowerProfile.getAveragePowerForCpuCluster(cluster)).thenReturn(value);
+        return this;
+    }
+
+    public BatteryUsageStatsRule setAveragePowerForCpuCore(int cluster, int step, double value) {
+        when(mPowerProfile.getAveragePowerForCpuCore(cluster, step)).thenReturn(value);
+        return this;
+    }
+
     public void setNetworkStats(NetworkStats networkStats) {
         mBatteryStats.setNetworkStats(networkStats);
     }
