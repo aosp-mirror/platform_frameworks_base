@@ -788,7 +788,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean sizeCompatFreeform = Settings.Global.getInt(
                 resolver, DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
         final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(
-                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
+                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1) != 0;
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         DisplayProperties.debug_force_rtl(forceRtl);
