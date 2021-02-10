@@ -34,6 +34,7 @@ import android.widget.ImageView;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
 import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
@@ -44,13 +45,20 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * Interaction controller between the UI and ScrollCaptureClient.
  */
 public class ScrollCaptureController implements OnComputeInternalInsetsListener {
     private static final String TAG = "ScrollCaptureController";
+
+    private static final int UP = -1;
+    private static final int DOWN = 1;
+
+    private int mDirection = DOWN;
+    private boolean mAtBottomEdge;
+    private boolean mAtTopEdge;
+    private Session mSession;
 
     // TODO: Support saving without additional action.
     private enum PendingAction {
@@ -232,41 +240,82 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         return mWindow.findViewById(res);
     }
 
+
+    private void onCaptureResult(CaptureResult result) {
+        Log.d(TAG, "onCaptureResult: " + result);
+        boolean emptyResult = result.captured.height() == 0;
+        boolean partialResult = !emptyResult
+                && result.captured.height() < result.requested.height();
+        boolean finish = false;
+
+        if (partialResult) {
+            // Potentially reached a vertical boundary. Extend in the other direction.
+            switch (mDirection) {
+                case DOWN:
+                    Log.d(TAG, "Reached bottom edge.");
+                    mAtBottomEdge = true;
+                    mDirection = UP;
+                    break;
+                case UP:
+                    Log.d(TAG, "Reached top edge.");
+                    mAtTopEdge = true;
+                    mDirection = DOWN;
+                    break;
+            }
+
+            if (mAtTopEdge && mAtBottomEdge) {
+                Log.d(TAG, "Reached both top and bottom edge, ending.");
+                finish = true;
+            } else {
+                // only reverse if the edge was relatively close to the starting point
+                if (mImageTileSet.getHeight() < mSession.getPageHeight() * 3) {
+                    Log.d(TAG, "Restarting in reverse direction.");
+
+                    // Because of temporary limitations, we cannot just jump to the opposite edge
+                    // and continue there. Instead, clear the results and start over capturing from
+                    // here in the other direction.
+                    mImageTileSet.clear();
+                } else {
+                    Log.d(TAG, "Capture is tall enough, stopping here.");
+                    finish = true;
+                }
+            }
+        }
+
+        if (!emptyResult) {
+            mImageTileSet.addTile(new ImageTile(result.image, result.captured));
+        }
+
+        Log.d(TAG, "bounds: " + mImageTileSet.getLeft() + "," + mImageTileSet.getTop()
+                + " - " +  mImageTileSet.getRight() + "," + mImageTileSet.getBottom()
+                + " (" + mImageTileSet.getWidth() + "x" + mImageTileSet.getHeight() + ")");
+
+
+        // Stop when "too tall"
+        if (mImageTileSet.size() >= mSession.getMaxTiles()
+                || mImageTileSet.getHeight() > MAX_HEIGHT) {
+            Log.d(TAG, "Max height and/or tile count reached.");
+            finish = true;
+        }
+
+        if (finish) {
+            Session session = mSession;
+            mSession = null;
+            Log.d(TAG, "Stop.");
+            mUiExecutor.execute(() -> afterCaptureComplete(session));
+            return;
+        }
+
+        int nextTop = (mDirection == DOWN) ? result.captured.bottom
+                : result.captured.top - mSession.getTileHeight();
+        Log.d(TAG, "requestTile: " + nextTop);
+        mSession.requestTile(nextTop, /* consumer */ this::onCaptureResult);
+    }
+
     private void startCapture(Session session) {
-        Log.d(TAG, "startCapture");
-        Consumer<ScrollCaptureClient.CaptureResult> consumer =
-                new Consumer<ScrollCaptureClient.CaptureResult>() {
-
-                    int mFrameCount = 0;
-                    int mTop = 0;
-
-                    @Override
-                    public void accept(ScrollCaptureClient.CaptureResult result) {
-                        mFrameCount++;
-
-                        boolean emptyFrame = result.captured.height() == 0;
-                        if (!emptyFrame) {
-                            ImageTile tile = new ImageTile(result.image, result.captured);
-                            Log.d(TAG, "Adding tile: " + tile);
-                            mImageTileSet.addTile(tile);
-                            Log.d(TAG, "New dimens: w=" + mImageTileSet.getWidth() + ", "
-                                    + "h=" + mImageTileSet.getHeight());
-                        }
-
-                        if (emptyFrame || mFrameCount >= MAX_PAGES
-                                || mTop + session.getTileHeight() > MAX_HEIGHT) {
-
-                            mUiExecutor.execute(() -> afterCaptureComplete(session));
-                            return;
-                        }
-                        mTop += result.captured.height();
-                        session.requestTile(mTop, /* consumer */ this);
-                    }
-                };
-
-        // fire it up!
-        session.requestTile(0, consumer);
-    };
+        mSession = session;
+        session.requestTile(0, this::onCaptureResult);
+    }
 
     @UiThread
     void afterCaptureComplete(Session session) {
