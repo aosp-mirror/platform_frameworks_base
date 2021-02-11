@@ -1898,11 +1898,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void setBoundsLayerCrop(Transaction t) {
-        // mWinFrame is already adjusted for surface insets. So offset it and use it as
-        // the cropping bounds.
-        mTempBoundsRect.set(mWinFrame);
-        mTempBoundsRect.offsetTo(mWindowAttributes.surfaceInsets.left,
-                mWindowAttributes.surfaceInsets.top);
+        // Adjust of insets and update the bounds layer so child surfaces do not draw into
+        // the surface inset region.
+        mTempBoundsRect.set(0, 0, mSurfaceSize.x, mSurfaceSize.y);
+        mTempBoundsRect.inset(mWindowAttributes.surfaceInsets.left,
+                mWindowAttributes.surfaceInsets.top,
+                mWindowAttributes.surfaceInsets.right, mWindowAttributes.surfaceInsets.bottom);
         t.setWindowCrop(mBoundsLayer, mTempBoundsRect);
     }
 
