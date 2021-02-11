@@ -1612,9 +1612,6 @@ public class StatsPullAtomService extends SystemService {
         // Aggregate times for the same uids.
         SparseArray<long[]> aggregated = new SparseArray<>();
         mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
-            // For uids known to be aggregated from many entries allow mutating in place to avoid
-            // many copies. Otherwise, copy before aggregating.
-            boolean mutateInPlace = false;
             if (UserHandle.isIsolated(uid)) {
                 // Skip individual isolated uids because they are recycled and quickly removed from
                 // the underlying data source.
@@ -1622,26 +1619,18 @@ public class StatsPullAtomService extends SystemService {
             } else if (UserHandle.isSharedAppGid(uid)) {
                 // All shared app gids are accounted together.
                 uid = LAST_SHARED_APPLICATION_GID;
-                mutateInPlace = true;
             } else {
                 // Everything else is accounted under their base uid.
                 uid = UserHandle.getAppId(uid);
             }
 
             long[] aggCpuFreqTimeMs = aggregated.get(uid);
-            if (aggCpuFreqTimeMs != null) {
-                if (!mutateInPlace) {
-                    aggCpuFreqTimeMs = Arrays.copyOf(aggCpuFreqTimeMs, cpuFreqTimeMs.length);
-                    aggregated.put(uid, aggCpuFreqTimeMs);
-                }
-                for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                    aggCpuFreqTimeMs[freqIndex] += cpuFreqTimeMs[freqIndex];
-                }
-            } else {
-                if (mutateInPlace) {
-                    cpuFreqTimeMs = Arrays.copyOf(cpuFreqTimeMs, cpuFreqTimeMs.length);
-                }
-                aggregated.put(uid, cpuFreqTimeMs);
+            if (aggCpuFreqTimeMs == null) {
+                aggCpuFreqTimeMs = new long[cpuFreqTimeMs.length];
+                aggregated.put(uid, aggCpuFreqTimeMs);
+            }
+            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                aggCpuFreqTimeMs[freqIndex] += cpuFreqTimeMs[freqIndex];
             }
         });
 
