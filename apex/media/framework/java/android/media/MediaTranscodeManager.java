@@ -1062,14 +1062,8 @@ public final class MediaTranscodeManager {
                             "Source video format hint must be set!");
                 }
 
-                boolean supportHevc = false;
-                try {
-                    supportHevc = mClientCaps.isVideoMimeTypeSupported(
-                            MediaFormat.MIMETYPE_VIDEO_HEVC);
-                } catch (ApplicationMediaCapabilities.FormatNotFoundException ex) {
-                    // Set to false if application did not specify.
-                    supportHevc = false;
-                }
+                boolean supportHevc = mClientCaps.isVideoMimeTypeSupported(
+                        MediaFormat.MIMETYPE_VIDEO_HEVC);
                 if (!supportHevc && MediaFormat.MIMETYPE_VIDEO_HEVC.equals(
                         mSrcVideoFormatHint.getString(MediaFormat.KEY_MIME))) {
                     return true;
