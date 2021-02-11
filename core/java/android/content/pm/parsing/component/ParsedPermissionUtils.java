@@ -25,6 +25,7 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -32,6 +33,8 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.Set;
 
 /** @hide */
 public class ParsedPermissionUtils {
@@ -89,6 +92,43 @@ public class ParsedPermissionUtils {
 
             permission.flags = sa.getInt(
                     R.styleable.AndroidManifestPermission_permissionFlags, 0);
+
+            final int knownCertsResource = sa.getResourceId(
+                    R.styleable.AndroidManifestPermission_knownCerts, 0);
+            if (knownCertsResource != 0) {
+                // The knownCerts attribute supports both a string array resource as well as a
+                // string resource for the case where the permission should only be granted to a
+                // single known signer.
+                final String resourceType = res.getResourceTypeName(knownCertsResource);
+                if (resourceType.equals("array")) {
+                    final String[] knownCerts = res.getStringArray(knownCertsResource);
+                    if (knownCerts != null) {
+                        // Convert the provided digest to upper case for consistent Set membership
+                        // checks when verifying the signing certificate digests of requesting apps.
+                        permission.knownCerts = new ArraySet<>();
+                        for (String knownCert : knownCerts) {
+                            permission.knownCerts.add(knownCert.toUpperCase(Locale.US));
+                        }
+                    }
+                } else {
+                    final String knownCert = res.getString(knownCertsResource);
+                    if (knownCert != null) {
+                        permission.knownCerts = Set.of(knownCert.toUpperCase(Locale.US));
+                    }
+                }
+                if (permission.knownCerts == null) {
+                    Slog.w(TAG, packageName + " defines a knownSigner permission but"
+                            + " the provided knownCerts resource is null");
+                }
+            } else {
+                // If the knownCerts resource ID is null check if the app specified a string
+                // value for the attribute representing a single trusted signer.
+                final String knownCert = sa.getString(
+                        R.styleable.AndroidManifestPermission_knownCerts);
+                if (knownCert != null) {
+                    permission.knownCerts = Set.of(knownCert.toUpperCase(Locale.US));
+                }
+            }
 
             // For now only platform runtime permissions can be restricted
             if (!permission.isRuntime() || !"android".equals(permission.getPackageName())) {
