@@ -41,6 +41,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.settings.brightness.ToggleSlider;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -93,6 +94,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
     QSTileView mQSTileView;
     @Mock
     PagedTileLayout mPagedTileLayout;
+    @Mock
+    FeatureFlags mFeatureFlags;
 
     private QSPanelController mController;
 
@@ -118,7 +121,9 @@ public class QSPanelControllerTest extends SysuiTestCase {
                 mQSTileHost, mQSCustomizerController, true, mMediaHost,
                 mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
                 mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory,
-                /* labelsFlag */ false);
+                /* labelsFlag */ false,
+                mFeatureFlags
+        );
 
         mController.init();
     }

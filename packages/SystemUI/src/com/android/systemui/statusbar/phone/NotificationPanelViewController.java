@@ -134,6 +134,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.util.Utils;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -783,16 +784,11 @@ public class NotificationPanelViewController extends PanelViewController {
             mNotificationStackScrollLayoutController.setLayoutParams(lp);
         }
 
-        if (shouldUseSplitNotificationShade()) {
+        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
             // In order to change the constraints at runtime, all children of the Constraint Layout
             // must have ids.
             ensureAllViewsHaveIds(mNotificationContainerParent);
         }
-    }
-
-    private boolean shouldUseSplitNotificationShade() {
-        return mFeatureFlags.isTwoColumnNotificationShadeEnabled()
-                && mResources.getBoolean(R.bool.config_use_split_notification_shade);
     }
 
     private static void ensureAllViewsHaveIds(ViewGroup parentView) {
