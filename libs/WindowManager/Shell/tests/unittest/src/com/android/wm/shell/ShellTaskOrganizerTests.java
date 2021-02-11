@@ -51,7 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.sizecompatui.SizeCompatUI;
+import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +76,7 @@ public class ShellTaskOrganizerTests {
     @Mock
     private Context mContext;
     @Mock
-    private SizeCompatUI mSizeCompatUI;
+    private SizeCompatUIController mSizeCompatUI;
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
