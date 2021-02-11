@@ -208,8 +208,9 @@ public:
         EXPECT_TRUE(mDataLoaderHolder != nullptr);
     }
 
-    MOCK_CONST_METHOD4(bindToDataLoader,
+    MOCK_CONST_METHOD5(bindToDataLoader,
                        binder::Status(int32_t mountId, const DataLoaderParamsParcel& params,
+                                      int bindDelayMs,
                                       const sp<IDataLoaderStatusListener>& listener,
                                       bool* _aidl_return));
     MOCK_CONST_METHOD2(getDataLoader,
@@ -217,11 +218,11 @@ public:
     MOCK_CONST_METHOD1(unbindFromDataLoader, binder::Status(int32_t mountId));
 
     void bindToDataLoaderSuccess() {
-        ON_CALL(*this, bindToDataLoader(_, _, _, _))
+        ON_CALL(*this, bindToDataLoader(_, _, _, _, _))
                 .WillByDefault(Invoke(this, &MockDataLoaderManager::bindToDataLoaderOk));
     }
     void bindToDataLoaderFails() {
-        ON_CALL(*this, bindToDataLoader(_, _, _, _))
+        ON_CALL(*this, bindToDataLoader(_, _, _, _, _))
                 .WillByDefault(Return(
                         (binder::Status::fromExceptionCode(1, String8("failed to prepare")))));
     }
@@ -234,6 +235,7 @@ public:
                 .WillByDefault(Invoke(this, &MockDataLoaderManager::unbindFromDataLoaderOk));
     }
     binder::Status bindToDataLoaderOk(int32_t mountId, const DataLoaderParamsParcel& params,
+                                      int bindDelayMs,
                                       const sp<IDataLoaderStatusListener>& listener,
                                       bool* _aidl_return) {
         mId = mountId;
@@ -245,6 +247,40 @@ public:
         }
         return binder::Status::ok();
     }
+    binder::Status bindToDataLoaderOkWith10sDelay(int32_t mountId,
+                                                  const DataLoaderParamsParcel& params,
+                                                  int bindDelayMs,
+                                                  const sp<IDataLoaderStatusListener>& listener,
+                                                  bool* _aidl_return) {
+        CHECK(1000 * 9 <= bindDelayMs && bindDelayMs <= 1000 * 11) << bindDelayMs;
+        return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
+    }
+    binder::Status bindToDataLoaderOkWith100sDelay(int32_t mountId,
+                                                   const DataLoaderParamsParcel& params,
+                                                   int bindDelayMs,
+                                                   const sp<IDataLoaderStatusListener>& listener,
+                                                   bool* _aidl_return) {
+        CHECK(1000 * 9 * 9 < bindDelayMs && bindDelayMs < 1000 * 11 * 11) << bindDelayMs;
+        return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
+    }
+    binder::Status bindToDataLoaderOkWith1000sDelay(int32_t mountId,
+                                                    const DataLoaderParamsParcel& params,
+                                                    int bindDelayMs,
+                                                    const sp<IDataLoaderStatusListener>& listener,
+                                                    bool* _aidl_return) {
+        CHECK(1000 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 1000 * 11 * 11 * 11) << bindDelayMs;
+        return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
+    }
+    binder::Status bindToDataLoaderOkWith10000sDelay(int32_t mountId,
+                                                     const DataLoaderParamsParcel& params,
+                                                     int bindDelayMs,
+                                                     const sp<IDataLoaderStatusListener>& listener,
+                                                     bool* _aidl_return) {
+        CHECK(1000 * 9 * 9 * 9 * 9 < bindDelayMs && bindDelayMs < 1000 * 11 * 11 * 11 * 11)
+                << bindDelayMs;
+        return bindToDataLoaderOk(mountId, params, bindDelayMs, listener, _aidl_return);
+    }
+
     binder::Status getDataLoaderOk(int32_t mountId, sp<IDataLoader>* _aidl_return) {
         *_aidl_return = mDataLoader;
         return binder::Status::ok();
@@ -260,6 +296,9 @@ public:
     }
     void setDataLoaderStatusUnavailable() {
         mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE);
+    }
+    void setDataLoaderStatusUnrecoverable() {
+        mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE);
     }
     binder::Status unbindFromDataLoaderOk(int32_t id) {
         if (mDataLoader) {
@@ -676,7 +715,7 @@ protected:
 
 TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsFails) {
     mVold->mountIncFsFails();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(0);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
@@ -686,7 +725,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsFails) {
 
 TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsInvalidControlParcel) {
     mVold->mountIncFsInvalidControlParcel();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(0);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     TemporaryDir tempDir;
     int storageId =
@@ -698,7 +737,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsInvalidControlParcel) 
 TEST_F(IncrementalServiceTest, testCreateStorageMakeFileFails) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileFails();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(0);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
@@ -712,7 +751,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageBindMountFails) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountFails();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(0);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
@@ -727,7 +766,7 @@ TEST_F(IncrementalServiceTest, testCreateStoragePrepareDataLoaderFails) {
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
     mDataLoaderManager->bindToDataLoaderFails();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(0);
     EXPECT_CALL(*mDataLoader, start(_)).Times(0);
@@ -755,11 +794,11 @@ TEST_F(IncrementalServiceTest, testDeleteStorageSuccess) {
     mIncrementalService->deleteStorage(storageId);
 }
 
-TEST_F(IncrementalServiceTest, testDataLoaderDestroyed) {
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(2);
+TEST_F(IncrementalServiceTest, testDataLoaderDestroyedAndDelayed) {
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(6);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
-    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(2);
-    EXPECT_CALL(*mDataLoader, start(_)).Times(2);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(6);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(6);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
@@ -768,13 +807,38 @@ TEST_F(IncrementalServiceTest, testDataLoaderDestroyed) {
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
     mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {}, {});
+
     // Simulated crash/other connection breakage.
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith100sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith1000sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10000sDelay));
+    mDataLoaderManager->setDataLoaderStatusDestroyed();
+
+    ON_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _))
+            .WillByDefault(Invoke(mDataLoaderManager,
+                                  &MockDataLoaderManager::bindToDataLoaderOkWith10000sDelay));
     mDataLoaderManager->setDataLoaderStatusDestroyed();
 }
 
 TEST_F(IncrementalServiceTest, testStartDataLoaderCreate) {
     mDataLoader->initializeCreateOkNoStatus();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
@@ -793,7 +857,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderCreate) {
 
 TEST_F(IncrementalServiceTest, testStartDataLoaderPendingStart) {
     mDataLoader->initializeCreateOkNoStatus();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
@@ -811,7 +875,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderPendingStart) {
 
 TEST_F(IncrementalServiceTest, testStartDataLoaderCreateUnavailable) {
     mDataLoader->initializeCreateOkNoStatus();
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoader, start(_)).Times(0);
@@ -827,12 +891,30 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderCreateUnavailable) {
     mDataLoaderManager->setDataLoaderStatusUnavailable();
 }
 
+TEST_F(IncrementalServiceTest, testStartDataLoaderCreateUnrecoverable) {
+    mDataLoader->initializeCreateOkNoStatus();
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(0);
+    EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    TemporaryDir tempDir;
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
+    mDataLoaderManager->setDataLoaderStatusUnrecoverable();
+}
+
 TEST_F(IncrementalServiceTest, testStartDataLoaderRecreateOnPendingReads) {
     mIncFs->waitForPendingReadsSuccess();
     mIncFs->openMountSuccess();
     mDataLoader->initializeCreateOkNoStatus();
 
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(2);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(2);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(2);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(2);
     EXPECT_CALL(*mDataLoader, start(_)).Times(0);
@@ -856,7 +938,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderRecreateOnPendingReads) {
 TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
     mIncFs->openMountSuccess();
 
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
@@ -1406,7 +1488,7 @@ static ErrorCode checkPerUidTimeoutsEmpty(
 }
 
 TEST_F(IncrementalServiceTest, testPerUidTimeoutsTooShort) {
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
+    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
