@@ -851,8 +851,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.openSurfaceTransaction();
         try {
             applySurfaceChangesTransaction();
-            // Send any pending task-info changes that were queued-up during a layout deferment
-            mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
             mWmService.mSyncEngine.onSurfacePlacement();
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
@@ -865,6 +863,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
+        // Send any pending task-info changes that were queued-up during a layout deferment
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         checkAppTransitionReady(surfacePlacer);
