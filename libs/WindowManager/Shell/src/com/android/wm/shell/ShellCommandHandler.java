@@ -16,24 +16,16 @@
 
 package com.android.wm.shell;
 
-import android.util.Slog;
-
-import com.android.wm.shell.apppairs.AppPairs;
-import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.common.annotations.ExternalThread;
 
 import java.io.PrintWriter;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * An entry point into the shell for dumping shell internal state and running adb commands.
  *
  * Use with {@code adb shell dumpsys activity service SystemUIService WMShell ...}.
  */
+@ExternalThread
 public interface ShellCommandHandler {
     /**
      * Dumps the shell state.

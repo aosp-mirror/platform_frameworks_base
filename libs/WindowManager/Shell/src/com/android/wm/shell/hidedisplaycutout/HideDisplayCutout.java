@@ -31,12 +31,6 @@ import java.io.PrintWriter;
 public interface HideDisplayCutout {
     /**
      * Notifies {@link Configuration} changed.
-     * @param newConfig
      */
     void onConfigurationChanged(Configuration newConfig);
-
-    /**
-     * Dumps hide display cutout status.
-     */
-    void dump(@NonNull PrintWriter pw);
 }
