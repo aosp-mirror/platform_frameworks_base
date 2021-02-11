@@ -25,6 +25,7 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.stats.devicepolicy.DevicePolicyEnums;
 
 import java.util.Locale;
 
@@ -35,6 +36,13 @@ import java.util.Locale;
  */
 @TestApi
 public final class FullyManagedDeviceProvisioningParams implements Parcelable {
+    private static final String LEAVE_ALL_SYSTEM_APPS_ENABLED_PARAM =
+            "LEAVE_ALL_SYSTEM_APPS_ENABLED";
+    private static final String CAN_DEVICE_OWNER_GRANT_SENSOR_PERMISSIONS_PARAM =
+            "CAN_DEVICE_OWNER_GRANT_SENSOR_PERMISSIONS";
+    private static final String TIME_ZONE_PROVIDED_PARAM = "TIME_ZONE_PROVIDED";
+    private static final String LOCALE_PROVIDED_PARAM = "LOCALE_PROVIDED";
+
     @NonNull private final ComponentName mDeviceAdminComponentName;
     @NonNull private final String mOwnerName;
     private final boolean mLeaveAllSystemAppsEnabled;
@@ -118,6 +126,29 @@ public final class FullyManagedDeviceProvisioningParams implements Parcelable {
      */
     public boolean canDeviceOwnerGrantSensorsPermissions() {
         return mDeviceOwnerCanGrantSensorsPermissions;
+    }
+
+    /**
+     * Logs the provisioning params using {@link DevicePolicyEventLogger}.
+     */
+    public void logParams(@NonNull String callerPackage) {
+        requireNonNull(callerPackage);
+
+        logParam(callerPackage, LEAVE_ALL_SYSTEM_APPS_ENABLED_PARAM, mLeaveAllSystemAppsEnabled);
+        logParam(callerPackage, CAN_DEVICE_OWNER_GRANT_SENSOR_PERMISSIONS_PARAM,
+                mDeviceOwnerCanGrantSensorsPermissions);
+        logParam(callerPackage, TIME_ZONE_PROVIDED_PARAM, /* value= */ mTimeZone != null);
+        logParam(callerPackage, LOCALE_PROVIDED_PARAM, /* value= */ mLocale != null);
+    }
+
+    private void logParam(String callerPackage, String param, boolean value) {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_PARAM)
+                .setStrings(callerPackage)
+                .setAdmin(mDeviceAdminComponentName)
+                .setStrings(param)
+                .setBoolean(value)
+                .write();
     }
 
     /**

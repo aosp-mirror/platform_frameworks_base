@@ -205,6 +205,7 @@ import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
 import android.net.VpnManager;
+import android.net.VpnTransportInfo;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
@@ -361,8 +362,15 @@ public class ConnectivityServiceTest {
 
     private static final String INTERFACE_NAME = "interface";
 
-    private static final String TEST_VENUE_URL_NA = "https://android.com/";
+    private static final String TEST_VENUE_URL_NA_PASSPOINT = "https://android.com/";
+    private static final String TEST_VENUE_URL_NA_OTHER = "https://example.com/";
+    private static final String TEST_TERMS_AND_CONDITIONS_URL_NA_PASSPOINT =
+            "https://android.com/terms/";
+    private static final String TEST_TERMS_AND_CONDITIONS_URL_NA_OTHER =
+            "https://example.com/terms/";
     private static final String TEST_VENUE_URL_CAPPORT = "https://android.com/capport/";
+    private static final String TEST_USER_PORTAL_API_URL_CAPPORT =
+            "https://android.com/user/api/capport/";
     private static final String TEST_FRIENDLY_NAME = "Network friendly name";
     private static final String TEST_REDIRECT_URL = "http://example.com/firstPath";
 
@@ -1110,7 +1118,7 @@ public class ConnectivityServiceTest {
         }
 
         @Override
-        public int getActiveAppVpnType() {
+        public int getActiveVpnType() {
             return mVpnType;
         }
 
@@ -1123,10 +1131,12 @@ public class ConnectivityServiceTest {
         private void registerAgent(boolean isAlwaysMetered, Set<UidRange> uids, LinkProperties lp)
                 throws Exception {
             if (mAgentRegistered) throw new IllegalStateException("already registered");
+            updateState(NetworkInfo.DetailedState.CONNECTING, "registerAgent");
             mConfig = new VpnConfig();
             setUids(uids);
             if (!isAlwaysMetered) mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
             mInterface = VPN_IFNAME;
+            mNetworkCapabilities.setTransportInfo(new VpnTransportInfo(getActiveVpnType()));
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
@@ -3286,39 +3296,68 @@ public class ConnectivityServiceTest {
     }
 
     private class CaptivePortalTestData {
-        CaptivePortalTestData(CaptivePortalData naData, CaptivePortalData capportData,
-                CaptivePortalData expectedMergedData) {
-            mNaData = naData;
+        CaptivePortalTestData(CaptivePortalData naPasspointData, CaptivePortalData capportData,
+                CaptivePortalData naOtherData, CaptivePortalData expectedMergedPasspointData,
+                CaptivePortalData expectedMergedOtherData) {
+            mNaPasspointData = naPasspointData;
             mCapportData = capportData;
-            mExpectedMergedData = expectedMergedData;
+            mNaOtherData = naOtherData;
+            mExpectedMergedPasspointData = expectedMergedPasspointData;
+            mExpectedMergedOtherData = expectedMergedOtherData;
         }
 
-        public final CaptivePortalData mNaData;
+        public final CaptivePortalData mNaPasspointData;
         public final CaptivePortalData mCapportData;
-        public final CaptivePortalData mExpectedMergedData;
+        public final CaptivePortalData mNaOtherData;
+        public final CaptivePortalData mExpectedMergedPasspointData;
+        public final CaptivePortalData mExpectedMergedOtherData;
+
     }
 
     private CaptivePortalTestData setupCaptivePortalData() {
         final CaptivePortalData capportData = new CaptivePortalData.Builder()
                 .setUserPortalUrl(Uri.parse(TEST_REDIRECT_URL))
                 .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_CAPPORT))
+                .setUserPortalUrl(Uri.parse(TEST_USER_PORTAL_API_URL_CAPPORT))
                 .setExpiryTime(1000000L)
                 .setBytesRemaining(12345L)
                 .build();
 
-        final CaptivePortalData naData = new CaptivePortalData.Builder()
+        final CaptivePortalData naPasspointData = new CaptivePortalData.Builder()
                 .setBytesRemaining(80802L)
-                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA))
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
+                .setUserPortalUrl(Uri.parse(TEST_TERMS_AND_CONDITIONS_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
                 .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
 
-        final CaptivePortalData expectedMergedData = new CaptivePortalData.Builder()
+        final CaptivePortalData naOtherData = new CaptivePortalData.Builder()
+                .setBytesRemaining(80802L)
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA_OTHER),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER)
+                .setUserPortalUrl(Uri.parse(TEST_TERMS_AND_CONDITIONS_URL_NA_OTHER),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER)
+                .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
+
+        final CaptivePortalData expectedMergedPasspointData = new CaptivePortalData.Builder()
                 .setUserPortalUrl(Uri.parse(TEST_REDIRECT_URL))
                 .setBytesRemaining(12345L)
                 .setExpiryTime(1000000L)
-                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA))
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
+                .setUserPortalUrl(Uri.parse(TEST_TERMS_AND_CONDITIONS_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
                 .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
 
-        return new CaptivePortalTestData(naData, capportData, expectedMergedData);
+        final CaptivePortalData expectedMergedOtherData = new CaptivePortalData.Builder()
+                .setUserPortalUrl(Uri.parse(TEST_REDIRECT_URL))
+                .setBytesRemaining(12345L)
+                .setExpiryTime(1000000L)
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_CAPPORT))
+                .setUserPortalUrl(Uri.parse(TEST_USER_PORTAL_API_URL_CAPPORT))
+                .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
+        return new CaptivePortalTestData(naPasspointData, capportData, naOtherData,
+                expectedMergedPasspointData, expectedMergedOtherData);
     }
 
     @Test
@@ -3332,15 +3371,26 @@ public class ConnectivityServiceTest {
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
                 lp -> captivePortalTestData.mCapportData.equals(lp.getCaptivePortalData()));
 
-        // Venue URL and friendly name from Network agent, confirm that API data gets precedence
-        // on the bytes remaining.
+        // Venue URL, T&C URL and friendly name from Network agent with Passpoint source, confirm
+        // that API data gets precedence on the bytes remaining.
         final LinkProperties linkProperties = new LinkProperties();
-        linkProperties.setCaptivePortalData(captivePortalTestData.mNaData);
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaPasspointData);
         mWiFiNetworkAgent.sendLinkProperties(linkProperties);
 
         // Make sure that the capport data is merged
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mExpectedMergedData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mExpectedMergedPasspointData
+                        .equals(lp.getCaptivePortalData()));
+
+        // Now send this information from non-Passpoint source, confirm that Capport data takes
+        // precedence
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaOtherData);
+        mWiFiNetworkAgent.sendLinkProperties(linkProperties);
+
+        // Make sure that the capport data is merged
+        captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
+                lp -> captivePortalTestData.mExpectedMergedOtherData
+                        .equals(lp.getCaptivePortalData()));
 
         // Create a new LP with no Network agent capport data
         final LinkProperties newLps = new LinkProperties();
@@ -3357,12 +3407,12 @@ public class ConnectivityServiceTest {
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
                 lp -> lp.getCaptivePortalData() == null);
 
-        newLps.setCaptivePortalData(captivePortalTestData.mNaData);
+        newLps.setCaptivePortalData(captivePortalTestData.mNaPasspointData);
         mWiFiNetworkAgent.sendLinkProperties(newLps);
 
         // Make sure that only the network agent capport data is available
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mNaData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mNaPasspointData.equals(lp.getCaptivePortalData()));
     }
 
     @Test
@@ -3373,12 +3423,12 @@ public class ConnectivityServiceTest {
         // Venue URL and friendly name from Network agent, confirm that API data gets precedence
         // on the bytes remaining.
         final LinkProperties linkProperties = new LinkProperties();
-        linkProperties.setCaptivePortalData(captivePortalTestData.mNaData);
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaPasspointData);
         mWiFiNetworkAgent.sendLinkProperties(linkProperties);
 
         // Make sure that the data is saved correctly
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mNaData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mNaPasspointData.equals(lp.getCaptivePortalData()));
 
         // Expected merged data: Network agent data is preferred, and values that are not used by
         // it are merged from capport data
@@ -3386,7 +3436,8 @@ public class ConnectivityServiceTest {
 
         // Make sure that the Capport data is merged correctly
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mExpectedMergedData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mExpectedMergedPasspointData.equals(
+                        lp.getCaptivePortalData()));
 
         // Now set the naData to null
         linkProperties.setCaptivePortalData(null);
@@ -3395,6 +3446,32 @@ public class ConnectivityServiceTest {
         // Make sure that the Capport data is retained correctly
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
                 lp -> captivePortalTestData.mCapportData.equals(lp.getCaptivePortalData()));
+    }
+
+    @Test
+    public void testMergeCaptivePortalDataFromNetworkAgentOtherSourceFirstThenCapport()
+            throws Exception {
+        final TestNetworkCallback captivePortalCallback = setupNetworkCallbackAndConnectToWifi();
+        final CaptivePortalTestData captivePortalTestData = setupCaptivePortalData();
+
+        // Venue URL and friendly name from Network agent, confirm that API data gets precedence
+        // on the bytes remaining.
+        final LinkProperties linkProperties = new LinkProperties();
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaOtherData);
+        mWiFiNetworkAgent.sendLinkProperties(linkProperties);
+
+        // Make sure that the data is saved correctly
+        captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
+                lp -> captivePortalTestData.mNaOtherData.equals(lp.getCaptivePortalData()));
+
+        // Expected merged data: Network agent data is preferred, and values that are not used by
+        // it are merged from capport data
+        mWiFiNetworkAgent.notifyCapportApiDataChanged(captivePortalTestData.mCapportData);
+
+        // Make sure that the Capport data is merged correctly
+        captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
+                lp -> captivePortalTestData.mExpectedMergedOtherData.equals(
+                        lp.getCaptivePortalData()));
     }
 
     private NetworkRequest.Builder newWifiRequestBuilder() {
@@ -3649,9 +3726,18 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testRegisterDefaultNetworkCallback() throws Exception {
+        // NETWORK_SETTINGS is necessary to call registerSystemDefaultNetworkCallback.
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_GRANTED);
+
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultNetworkCallback);
         defaultNetworkCallback.assertNoCallback();
+
+        final Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        final TestNetworkCallback systemDefaultCallback = new TestNetworkCallback();
+        mCm.registerSystemDefaultNetworkCallback(systemDefaultCallback, handler);
+        systemDefaultCallback.assertNoCallback();
 
         // Create a TRANSPORT_CELLULAR request to keep the mobile interface up
         // whenever Wi-Fi is up. Without this, the mobile network agent is
@@ -3667,27 +3753,35 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(true);
         cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         defaultNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        systemDefaultCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         assertEquals(defaultNetworkCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+        assertEquals(systemDefaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
         // Bring up wifi and expect CALLBACK_AVAILABLE.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true);
         cellNetworkCallback.assertNoCallback();
         defaultNetworkCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+        systemDefaultCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
         assertEquals(defaultNetworkCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+        assertEquals(systemDefaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
         // Bring down cell. Expect no default network callback, since it wasn't the default.
         mCellNetworkAgent.disconnect();
         cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         defaultNetworkCallback.assertNoCallback();
+        systemDefaultCallback.assertNoCallback();
         assertEquals(defaultNetworkCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+        assertEquals(systemDefaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
         // Bring up cell. Expect no default network callback, since it won't be the default.
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(true);
         cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         defaultNetworkCallback.assertNoCallback();
+        systemDefaultCallback.assertNoCallback();
         assertEquals(defaultNetworkCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+        assertEquals(systemDefaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
         // Bring down wifi. Expect the default network callback to notified of LOST wifi
         // followed by AVAILABLE cell.
@@ -3695,19 +3789,25 @@ public class ConnectivityServiceTest {
         cellNetworkCallback.assertNoCallback();
         defaultNetworkCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         defaultNetworkCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
+        systemDefaultCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        systemDefaultCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
         mCellNetworkAgent.disconnect();
         cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         defaultNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+        systemDefaultCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         waitForIdle();
         assertEquals(null, mCm.getActiveNetwork());
 
         mMockVpn.establishForMyUid();
         assertUidRangesUpdatedForMyUid(true);
         defaultNetworkCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        systemDefaultCallback.assertNoCallback();
         assertEquals(defaultNetworkCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+        assertEquals(null, systemDefaultCallback.getLastAvailableNetwork());
 
         mMockVpn.disconnect();
         defaultNetworkCallback.expectCallback(CallbackEntry.LOST, mMockVpn);
+        systemDefaultCallback.assertNoCallback();
         waitForIdle();
         assertEquals(null, mCm.getActiveNetwork());
     }
@@ -6134,6 +6234,10 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testVpnNetworkActive() throws Exception {
+        // NETWORK_SETTINGS is necessary to call registerSystemDefaultNetworkCallback.
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_GRANTED);
+
         final int uid = Process.myUid();
 
         final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
@@ -6141,6 +6245,7 @@ public class ConnectivityServiceTest {
         final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
         final TestNetworkCallback vpnNetworkCallback = new TestNetworkCallback();
         final TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        final TestNetworkCallback systemDefaultCallback = new TestNetworkCallback();
         final NetworkRequest genericNotVpnRequest = new NetworkRequest.Builder().build();
         final NetworkRequest genericRequest = new NetworkRequest.Builder()
                 .removeCapability(NET_CAPABILITY_NOT_VPN).build();
@@ -6154,6 +6259,8 @@ public class ConnectivityServiceTest {
         mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
         mCm.registerNetworkCallback(vpnNetworkRequest, vpnNetworkCallback);
         mCm.registerDefaultNetworkCallback(defaultCallback);
+        mCm.registerSystemDefaultNetworkCallback(systemDefaultCallback,
+                new Handler(ConnectivityThread.getInstanceLooper()));
         defaultCallback.assertNoCallback();
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
@@ -6163,6 +6270,7 @@ public class ConnectivityServiceTest {
         genericNotVpnNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         wifiNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         defaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        systemDefaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         vpnNetworkCallback.assertNoCallback();
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
@@ -6183,7 +6291,10 @@ public class ConnectivityServiceTest {
         wifiNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        systemDefaultCallback.assertNoCallback();
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
+        assertEquals(mWiFiNetworkAgent.getNetwork(),
+                systemDefaultCallback.getLastAvailableNetwork());
 
         ranges.clear();
         mMockVpn.setUids(ranges);
@@ -6200,6 +6311,7 @@ public class ConnectivityServiceTest {
         // much, but that is the reason the test here has to check for an update to the
         // capabilities instead of the expected LOST then AVAILABLE.
         defaultCallback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, mMockVpn);
+        systemDefaultCallback.assertNoCallback();
 
         ranges.add(new UidRange(uid, uid));
         mMockVpn.setUids(ranges);
@@ -6211,6 +6323,7 @@ public class ConnectivityServiceTest {
         // TODO : Here like above, AVAILABLE would be correct, but because this can't actually
         // happen outside of the test, ConnectivityService does not rematch callbacks.
         defaultCallback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, mMockVpn);
+        systemDefaultCallback.assertNoCallback();
 
         mWiFiNetworkAgent.disconnect();
 
@@ -6219,6 +6332,7 @@ public class ConnectivityServiceTest {
         wifiNetworkCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         vpnNetworkCallback.assertNoCallback();
         defaultCallback.assertNoCallback();
+        systemDefaultCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
 
         mMockVpn.disconnect();
 
@@ -6227,12 +6341,14 @@ public class ConnectivityServiceTest {
         wifiNetworkCallback.assertNoCallback();
         vpnNetworkCallback.expectCallback(CallbackEntry.LOST, mMockVpn);
         defaultCallback.expectCallback(CallbackEntry.LOST, mMockVpn);
+        systemDefaultCallback.assertNoCallback();
         assertEquals(null, mCm.getActiveNetwork());
 
         mCm.unregisterNetworkCallback(genericNetworkCallback);
         mCm.unregisterNetworkCallback(wifiNetworkCallback);
         mCm.unregisterNetworkCallback(vpnNetworkCallback);
         mCm.unregisterNetworkCallback(defaultCallback);
+        mCm.unregisterNetworkCallback(systemDefaultCallback);
     }
 
     @Test
@@ -7283,6 +7399,7 @@ public class ConnectivityServiceTest {
     }
 
     private void establishLegacyLockdownVpn() throws Exception {
+        mMockVpn.setVpnType(VpnManager.TYPE_VPN_LEGACY);
         // The legacy lockdown VPN only supports userId 0.
         final Set<UidRange> ranges = Collections.singleton(UidRange.createForUser(PRIMARY_USER));
         mMockVpn.registerAgent(ranges);
@@ -7395,6 +7512,9 @@ public class ConnectivityServiceTest {
         assertTrue(vpnNc.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(vpnNc.hasTransport(TRANSPORT_WIFI));
         assertFalse(vpnNc.hasCapability(NET_CAPABILITY_NOT_METERED));
+        VpnTransportInfo ti = (VpnTransportInfo) vpnNc.getTransportInfo();
+        assertNotNull(ti);
+        assertEquals(VpnManager.TYPE_VPN_LEGACY, ti.type);
 
         // Switch default network from cell to wifi. Expect VPN to disconnect and reconnect.
         final LinkProperties wifiLp = new LinkProperties();
@@ -8521,11 +8641,7 @@ public class ConnectivityServiceTest {
         final int myUid = Process.myUid();
         setupConnectionOwnerUidAsVpnApp(myUid, VpnManager.TYPE_VPN_PLATFORM);
 
-        try {
-            mService.getConnectionOwnerUid(getTestConnectionInfo());
-            fail("Expected SecurityException for non-VpnService app");
-        } catch (SecurityException expected) {
-        }
+        assertEquals(INVALID_UID, mService.getConnectionOwnerUid(getTestConnectionInfo()));
     }
 
     @Test
@@ -8533,11 +8649,7 @@ public class ConnectivityServiceTest {
         final int myUid = Process.myUid();
         setupConnectionOwnerUidAsVpnApp(myUid + 1, VpnManager.TYPE_VPN_SERVICE);
 
-        try {
-            mService.getConnectionOwnerUid(getTestConnectionInfo());
-            fail("Expected SecurityException for non-VpnService app");
-        } catch (SecurityException expected) {
-        }
+        assertEquals(INVALID_UID, mService.getConnectionOwnerUid(getTestConnectionInfo()));
     }
 
     @Test

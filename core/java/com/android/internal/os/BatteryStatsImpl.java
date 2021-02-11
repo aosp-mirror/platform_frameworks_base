@@ -104,6 +104,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeRead
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
+import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.power.MeasuredEnergyStats.StandardEnergyBucket;
 import com.android.internal.util.ArrayUtils;
@@ -10840,6 +10841,10 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void startTrackingSystemServerCpuTime() {
         mSystemServerCpuThreadReader.startTrackingThreadCpuTime();
+    }
+
+    public SystemServiceCpuThreadTimes getSystemServiceCpuThreadTimes() {
+        return mSystemServerCpuThreadReader.readAbsolute();
     }
 
     public void setCallback(BatteryCallback cb) {

@@ -26,4 +26,9 @@
     <color name="secondary_text_leanback_light">#99222222</color>
 
     <color name="primary_text_leanback_formwizard_default_dark">#ffeeeeee</color>
+
+    <color name="btn_leanback_focused">#E8EAED</color>
+    <color name="btn_leanback_unfocused">#1AFFFFFF</color>
+    <color name="btn_text_leanback_focused">#0E0E0E</color>
+    <color name="btn_text_leanback_unfocused">#E8EAED</color>
 </resources>

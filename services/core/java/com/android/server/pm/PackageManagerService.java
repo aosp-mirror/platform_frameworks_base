@@ -4686,7 +4686,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // The snapshot disable/enable switch.  An image with the flag set true uses snapshots
     // and an image with the flag set false does not use snapshots.
-    private static final boolean SNAPSHOT_ENABLED = false;
+    private static final boolean SNAPSHOT_ENABLED = true;
 
     /**
      * Return the live computer.
@@ -25949,6 +25949,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public String getModuleMetadataPackageName() throws RemoteException {
             return PackageManagerService.this.mModuleInfoProvider.getPackageName();
         }
+
+        @Override
+        public boolean hasSha256SigningCertificate(String packageName, byte[] certificate)
+                throws RemoteException {
+            return PackageManagerService.this.hasSigningCertificate(
+                packageName, certificate, CERT_INPUT_SHA256);
+        }
     }
 
     private AndroidPackage getPackage(String packageName) {
@@ -27026,6 +27033,28 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
             return PackageManagerService.this.isSuspendingAnyPackages(suspendingPackage, userId);
+        }
+
+        @Override
+        public boolean registerInstalledLoadingProgressCallback(String packageName,
+                PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
+            final PackageSetting ps = getPackageSettingForUser(packageName, Binder.getCallingUid(),
+                    userId);
+            if (ps == null) {
+                return false;
+            }
+            if (!ps.isPackageLoading()) {
+                Slog.w(TAG,
+                        "Failed registering loading progress callback. Package is fully loaded.");
+                return false;
+            }
+            if (mIncrementalManager == null) {
+                Slog.w(TAG,
+                        "Failed registering loading progress callback. Incremental is not enabled");
+                return false;
+            }
+            return mIncrementalManager.registerLoadingProgressCallback(ps.getPathString(),
+                    (IPackageLoadingProgressCallback) callback.getBinder());
         }
 
         @Override

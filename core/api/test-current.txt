@@ -472,6 +472,7 @@ package android.app.admin {
     method @NonNull public String getOwnerName();
     method @Nullable public String getTimeZone();
     method public boolean isLeaveAllSystemAppsEnabled();
+    method public void logParams(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FullyManagedDeviceProvisioningParams> CREATOR;
   }
@@ -495,6 +496,7 @@ package android.app.admin {
     method public boolean isKeepAccountMigrated();
     method public boolean isLeaveAllSystemAppsEnabled();
     method public boolean isOrganizationOwnedProvisioning();
+    method public void logParams(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedProfileProvisioningParams> CREATOR;
   }

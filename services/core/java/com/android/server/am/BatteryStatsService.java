@@ -72,6 +72,7 @@ import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
+import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
@@ -354,6 +355,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         @Override
         public String[] getMobileIfaces() {
             return mStats.getMobileIfaces().clone();
+        }
+
+        @Override
+        public SystemServiceCpuThreadTimes getSystemServiceCpuThreadTimes() {
+            return mStats.getSystemServiceCpuThreadTimes();
         }
 
         @Override
