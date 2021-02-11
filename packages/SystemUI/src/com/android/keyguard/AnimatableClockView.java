@@ -44,12 +44,13 @@ public class AnimatableClockView extends TextView {
 
     private final Calendar mTime = Calendar.getInstance();
 
-    private CharSequence mFormat;
-    private CharSequence mDescFormat;
-    private int[] mDozingColors;
-    private int[] mLockScreenColors;
     private final int mDozingWeight;
     private final int mLockScreenWeight;
+    private CharSequence mFormat;
+    private CharSequence mDescFormat;
+    private int mDozingColor;
+    private int mLockScreenColor;
+    private float mLineSpacingScale = 1f;
 
     private TextAnimator mTextAnimator = null;
     private Runnable mOnTextAnimatorInitialized;
@@ -111,8 +112,7 @@ public class AnimatableClockView extends TextView {
                     () -> {
                         invalidate();
                         return Unit.INSTANCE;
-                    },
-                    2 /* number of lines (each can have a unique Paint) */);
+                    });
             if (mOnTextAnimatorInitialized != null) {
                 mOnTextAnimatorInitialized.run();
                 mOnTextAnimatorInitialized = null;
@@ -127,15 +127,20 @@ public class AnimatableClockView extends TextView {
         mTextAnimator.draw(canvas);
     }
 
-    void setColors(int[] dozingColors, int[] lockScreenColors) {
-        mDozingColors = dozingColors;
-        mLockScreenColors = lockScreenColors;
+    void setLineSpacingScale(float scale) {
+        mLineSpacingScale = scale;
+        setLineSpacing(0, mLineSpacingScale);
+    }
+
+    void setColors(int dozingColor, int lockScreenColor) {
+        mDozingColor = dozingColor;
+        mLockScreenColor = lockScreenColor;
     }
 
     void animateDoze(boolean isDozing, boolean animate) {
         setTextStyle(isDozing ? mDozingWeight : mLockScreenWeight /* weight */,
                 -1,
-                isDozing ? mDozingColors : mLockScreenColors,
+                isDozing ? mDozingColor : mLockScreenColor,
                 animate);
     }
 
@@ -152,15 +157,15 @@ public class AnimatableClockView extends TextView {
     private void setTextStyle(
             @IntRange(from = 0, to = 1000) int weight,
             @FloatRange(from = 0) float textSize,
-            int[] colors,
+            int color,
             boolean animate) {
         if (mTextAnimator != null) {
-            mTextAnimator.setTextStyle(weight, textSize, colors, animate, ANIM_DURATION, null);
+            mTextAnimator.setTextStyle(weight, textSize, color, animate, ANIM_DURATION, null);
         } else {
             // when the text animator is set, update its start values
             mOnTextAnimatorInitialized =
                     () -> mTextAnimator.setTextStyle(
-                            weight, textSize, colors, false, ANIM_DURATION, null);
+                            weight, textSize, color, false, ANIM_DURATION, null);
         }
     }
 

@@ -82,10 +82,16 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     @NonNull protected Callback mCallback;
 
     /**
-     * Returns a ClientMonitorEnum constant defined in biometrics.proto
-     * @return
+     * @return A ClientMonitorEnum constant defined in biometrics.proto
      */
     public abstract int getProtoEnum();
+
+    /**
+     * @return True if the ClientMonitor should cancel any current and pending interruptable clients
+     */
+    public boolean interruptsPrecedingClients() {
+        return false;
+    }
 
     /**
      * @param context    system_server context

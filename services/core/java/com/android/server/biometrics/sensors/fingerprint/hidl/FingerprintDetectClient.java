@@ -130,4 +130,9 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     public int getProtoEnum() {
         return BiometricsProto.CM_DETECT_INTERACTION;
     }
+
+    @Override
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
 }

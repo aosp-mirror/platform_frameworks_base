@@ -72,30 +72,6 @@ public interface RegistrationManager {
      */
     int REGISTRATION_STATE_REGISTERED = 2;
 
-    /**
-     * @hide
-     */
-    // Defines the underlying radio technology type that we have registered for IMS over.
-    @IntDef(prefix = "ATTR_",
-            value = {
-                    ATTR_EPDG_OVER_CELL_INTERNET,
-            },
-            flag = true)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ImsAttributes {}
-
-    /**
-     * Attribute to specify if EPDG tunnel is setup over cellular internet.
-     * if EPDG tunnel is setup over cellular internet then this bit will be set else the same will
-     * not be set.
-     */
-    int ATTR_EPDG_OVER_CELL_INTERNET = 0x00000001;
-
-    //******************************************************************************************
-    // Next attribute value: 0x00000002
-    //******************************************************************************************
-
-
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
     // and WWAN are more accurate constants.
@@ -103,7 +79,8 @@ public interface RegistrationManager {
             new HashMap<Integer, Integer>() {{
                 // Map NONE to -1 to make sure that we handle the REGISTRATION_TECH_NONE
                 // case, since it is defined.
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE,
+                        AccessNetworkConstants.TRANSPORT_TYPE_INVALID);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
@@ -132,6 +109,20 @@ public interface RegistrationManager {
     }
 
     /**
+     * @param regtech The registration technology.
+     * @return The Access Network type from registration technology.
+     * @hide
+     */
+    static int getAccessType(int regtech) {
+        if (!RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.containsKey(regtech)) {
+            Log.w("RegistrationManager", "getAccessType - invalid regType returned: "
+                    + regtech);
+            return AccessNetworkConstants.TRANSPORT_TYPE_INVALID;
+        }
+        return RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.get(regtech);
+    }
+
+    /**
      * Callback class for receiving IMS network Registration callback events.
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
@@ -149,45 +140,24 @@ public interface RegistrationManager {
             }
 
             @Override
-            public void onRegistered(int imsRadioTech) {
+            public void onRegistered(ImsRegistrationAttributes attr) {
                 if (mLocalCallback == null) return;
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> {
-                        mLocalCallback.onRegistered(getAccessType(imsRadioTech));
-                    });
-                    int attributes = 0;
-                    if (imsRadioTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
-                        attributes = changeBitmask(attributes, ATTR_EPDG_OVER_CELL_INTERNET,
-                                true);
-                    }
-                    final int finalattributes = attributes;
-                    mExecutor.execute(() ->
-                            mLocalCallback.onRegistered(getAccessType(imsRadioTech),
-                                    finalattributes));
+                    mExecutor.execute(() -> mLocalCallback.onRegistered(attr));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
             }
 
             @Override
-            public void onRegistering(int imsRadioTech) {
+            public void onRegistering(ImsRegistrationAttributes attr) {
                 if (mLocalCallback == null) return;
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() ->
-                            mLocalCallback.onRegistering(getAccessType(imsRadioTech)));
-                    int attributes = 0;
-                    if (imsRadioTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
-                        attributes = changeBitmask(attributes, ATTR_EPDG_OVER_CELL_INTERNET,
-                                true);
-                    }
-                    final int finalattributes = attributes;
-                    mExecutor.execute(() ->
-                            mLocalCallback.onRegistering(getAccessType(imsRadioTech),
-                                    finalattributes));
+                    mExecutor.execute(() -> mLocalCallback.onRegistering(attr));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -232,31 +202,6 @@ public interface RegistrationManager {
             private void setExecutor(Executor executor) {
                 mExecutor = executor;
             }
-
-            private static int getAccessType(int regType) {
-                if (!RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.containsKey(regType)) {
-                    Log.w("RegistrationManager", "RegistrationBinder - invalid regType returned: "
-                            + regType);
-                    return -1;
-                }
-                return RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.get(regType);
-            }
-
-            /**
-             * Changes a attribute bit-mask to add or remove an attribute.
-             *
-             * @param bitmask The bit-mask.
-             * @param bitfield The bit-field to change.
-             * @param enabled Whether the bit-field should be set or removed.
-             * @return The bit-mask with the bit-field changed.
-             */
-            private int changeBitmask(int bitmask, int bitfield, boolean enabled) {
-                if (enabled) {
-                    return bitmask | bitfield;
-                } else {
-                    return bitmask & ~bitfield;
-                }
-            }
         }
 
         private final RegistrationBinder mBinder = new RegistrationBinder(this);
@@ -265,7 +210,7 @@ public interface RegistrationManager {
          * Notifies the framework when the IMS Provider is registered to the IMS network.
          *
          * @param imsTransportType the radio access technology.
-         * @deprecated Use {@link #onRegistered(int, int)} instead.
+         * @deprecated Use {@link #onRegistered(ImsRegistrationAttributes)} instead.
          */
         @Deprecated
         public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
@@ -273,25 +218,20 @@ public interface RegistrationManager {
 
         /**
          * Notifies the framework when the IMS Provider is registered to the IMS network
-         * with corresponding attributes
+         * with corresponding attributes.
          *
-         * @param imsTransportType the radio access technology.
-         * @param registrationAttributes IMS registration attributes as a bitmap of attributes.
-         * Possible attributes are following
-         * <ul>
-         *     <li>{@link #ATTR_EPDG_OVER_CELL_INTERNET}</li>
-         * </ul>
-         *
+         * @param attributes The attributes associated with this IMS registration.
          */
-        public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType,
-                @ImsAttributes int registrationAttributes) {
+        public void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
+            // Default impl to keep backwards compatibility with old implementations
+            onRegistered(attributes.getTransportType());
         }
 
         /**
          * Notifies the framework when the IMS Provider is trying to register the IMS network.
          *
          * @param imsTransportType the radio access technology.
-         * @deprecated Use {@link #onRegistering(int, int)} instead.
+         * @deprecated Use {@link #onRegistering(ImsRegistrationAttributes)} instead.
          */
         public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType) {
         }
@@ -299,12 +239,11 @@ public interface RegistrationManager {
         /**
          * Notifies the framework when the IMS Provider is trying to register the IMS network.
          *
-         * @param imsTransportType the radio access technology.
-         * @param registrationAttributes IMS registration attributes as a bitmap of attributes.
-         * Possible attributes are following
+         * @param attributes The attributes associated with this IMS registration.
          */
-        public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType,
-                @ImsAttributes int registrationAttributes) {
+        public void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
+            // Default impl to keep backwards compatibility with old implementations
+            onRegistering(attributes.getTransportType());
         }
 
         /**

@@ -51,10 +51,9 @@ public class SystemServicePowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         calculateSystemServicePower(batteryStats);
-        super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query, asUsers);
+        super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
     }
 
     @Override

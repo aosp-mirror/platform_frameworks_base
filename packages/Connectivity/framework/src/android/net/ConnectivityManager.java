@@ -21,6 +21,7 @@ import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
+import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
 
 import android.annotation.CallbackExecutor;
@@ -3721,7 +3722,8 @@ public class ConnectivityManager {
         printStackTrace();
         checkCallbackNotNull(callback);
         Preconditions.checkArgument(
-                reqType == TRACK_DEFAULT || need != null, "null NetworkCapabilities");
+                reqType == TRACK_DEFAULT || reqType == TRACK_SYSTEM_DEFAULT || need != null,
+                "null NetworkCapabilities");
         final NetworkRequest request;
         final String callingPackageName = mContext.getOpPackageName();
         try {
@@ -4192,8 +4194,9 @@ public class ConnectivityManager {
     }
 
     /**
-     * Registers to receive notifications about changes in the system default network. The callbacks
-     * will continue to be called until either the application exits or
+     * Registers to receive notifications about changes in the application's default network. This
+     * may be a physical network or a virtual network, such as a VPN that applies to the
+     * application. The callbacks will continue to be called until either the application exits or
      * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
      *
      * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
@@ -4206,7 +4209,7 @@ public class ConnectivityManager {
      * {@link #unregisterNetworkCallback(NetworkCallback)}.
      *
      * @param networkCallback The {@link NetworkCallback} that the system will call as the
-     *                        system default network changes.
+     *                        application's default network changes.
      *                        The callback is invoked on the default internal Handler.
      * @throws RuntimeException if the app already has too many callbacks registered.
      */
@@ -4216,9 +4219,45 @@ public class ConnectivityManager {
     }
 
     /**
+     * Registers to receive notifications about changes in the application's default network. This
+     * may be a physical network or a virtual network, such as a VPN that applies to the
+     * application. The callbacks will continue to be called until either the application exits or
+     * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * all variants of this method, of {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     * @param networkCallback The {@link NetworkCallback} that the system will call as the
+     *                        application's default network changes.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
+            @NonNull Handler handler) {
+        CallbackHandler cbHandler = new CallbackHandler(handler);
+        sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
+                TRACK_DEFAULT, TYPE_NONE, cbHandler);
+    }
+
+    /**
      * Registers to receive notifications about changes in the system default network. The callbacks
      * will continue to be called until either the application exits or
      * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
+     *
+     * This method should not be used to determine networking state seen by applications, because in
+     * many cases, most or even all application traffic may not use the default network directly,
+     * and traffic from different applications may go on different networks by default. As an
+     * example, if a VPN is connected, traffic from all applications might be sent through the VPN
+     * and not onto the system default network. Applications or system components desiring to do
+     * determine network state as seen by applications should use other methods such as
+     * {@link #registerDefaultNetworkCallback(NetworkCallback, Handler)}.
      *
      * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
      * number of outstanding requests to 100 per app (identified by their UID), shared with
@@ -4233,20 +4272,19 @@ public class ConnectivityManager {
      *                        system default network changes.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      * @throws RuntimeException if the app already has too many callbacks registered.
+     *
+     * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
+    @SystemApi(client = MODULE_LIBRARIES)
+    @SuppressLint({"ExecutorRegistration", "PairedRegistration"})
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    public void registerSystemDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
             @NonNull Handler handler) {
-        // This works because if the NetworkCapabilities are null,
-        // ConnectivityService takes them from the default request.
-        //
-        // Since the capabilities are exactly the same as the default request's
-        // capabilities, this request is guaranteed, at all times, to be
-        // satisfied by the same network, if any, that satisfies the default
-        // request, i.e., the system default network.
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
-                TRACK_DEFAULT, TYPE_NONE, cbHandler);
+                TRACK_SYSTEM_DEFAULT, TYPE_NONE, cbHandler);
     }
 
     /**

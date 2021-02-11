@@ -109,12 +109,13 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
      */
     void setBaseSettingsFilePath(@Nullable String path) {
         AtomicFile settingsFile;
-        if (path != null) {
-            settingsFile = new AtomicFile(new File(path), WM_DISPLAY_COMMIT_TAG);
+        File file = path != null ? new File(path) : null;
+        if (file != null && file.exists()) {
+            settingsFile = new AtomicFile(file, WM_DISPLAY_COMMIT_TAG);
         } else {
+            Slog.w(TAG, "display settings " + path + " does not exist, using vendor defaults");
             settingsFile = getVendorSettingsFile();
         }
-
         setBaseSettingsStorage(new AtomicFileStorage(settingsFile));
     }
 

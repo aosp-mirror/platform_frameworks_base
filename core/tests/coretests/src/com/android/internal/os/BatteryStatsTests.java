@@ -45,6 +45,7 @@ import org.junit.runners.Suite;
         BluetoothPowerCalculatorTest.class,
         BstatsCpuTimesValidationTest.class,
         CameraPowerCalculatorTest.class,
+        CpuPowerCalculatorTest.class,
         FlashlightPowerCalculatorTest.class,
         GnssPowerCalculatorTest.class,
         IdlePowerCalculatorTest.class,
@@ -65,6 +66,7 @@ import org.junit.runners.Suite;
         ScreenPowerCalculatorTest.class,
         SensorPowerCalculatorTest.class,
         SystemServicePowerCalculatorTest.class,
+        UserPowerCalculatorTest.class,
         VideoPowerCalculatorTest.class,
 
         com.android.internal.power.MeasuredEnergyStatsTest.class

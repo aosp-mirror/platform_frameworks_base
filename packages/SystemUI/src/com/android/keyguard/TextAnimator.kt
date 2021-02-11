@@ -54,11 +54,10 @@ private const val DEFAULT_ANIMATION_DURATION: Long = 300
  */
 class TextAnimator(
     layout: Layout,
-    private val invalidateCallback: () -> Unit,
-    private val numLines: Int = 1
+    private val invalidateCallback: () -> Unit
 ) {
     // Following two members are for mutable for testing purposes.
-    internal var textInterpolator: TextInterpolator = TextInterpolator(layout, numLines)
+    internal var textInterpolator: TextInterpolator = TextInterpolator(layout)
     internal var animator: ValueAnimator = ValueAnimator.ofFloat(1f).apply {
         duration = DEFAULT_ANIMATION_DURATION
         addUpdateListener {
@@ -99,7 +98,7 @@ class TextAnimator(
     fun setTextStyle(
         weight: Int = -1,
         textSize: Float = -1f,
-        colors: IntArray? = null,
+        color: Int? = null,
         animate: Boolean = true,
         duration: Long = -1L,
         interpolator: TimeInterpolator? = null
@@ -110,21 +109,13 @@ class TextAnimator(
         }
 
         if (textSize >= 0) {
-            for (targetPaint in textInterpolator.targetPaint)
-                targetPaint.textSize = textSize
+            textInterpolator.targetPaint.textSize = textSize
         }
         if (weight >= 0) {
-            for (targetPaint in textInterpolator.targetPaint)
-                targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
+            textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
         }
-        if (colors != null) {
-            require(colors.size == textInterpolator.targetPaint.size) {
-                "colors size (${colors.size}) must be the same size as" +
-                    " targetPaints size (${textInterpolator.targetPaint.size})," +
-                    " which was initialized as numLines ($numLines)"
-            }
-            for ((index, targetPaint) in textInterpolator.targetPaint.withIndex())
-                targetPaint.color = colors[index]
+        if (color != null) {
+            textInterpolator.targetPaint.color = color
         }
         textInterpolator.onTargetPaintModified()
 

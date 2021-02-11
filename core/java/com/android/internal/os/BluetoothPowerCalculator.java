@@ -50,8 +50,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         if (!mHasBluetoothPowerController || !batteryStats.hasBluetoothActivityReporting()) {
             return;
         }
@@ -68,7 +67,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(app, total);
             if (app.getUid() == Process.BLUETOOTH_UID) {
-                app.setSystemComponent(true);
+                app.excludeFromBatteryUsageStats();
                 systemBatteryConsumerBuilder.addUidBatteryConsumer(app);
             }
         }

@@ -28,6 +28,7 @@ import android.widget.FrameLayout;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ClockPlugin;
@@ -56,6 +57,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ClockManager mClockManager;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
     private final NotificationIconAreaController mNotificationIconAreaController;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     /**
      * Gradient clock for usage when mode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL.
@@ -101,7 +103,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             SysuiColorExtractor colorExtractor, ClockManager clockManager,
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
-            ContentResolver contentResolver) {
+            ContentResolver contentResolver,
+            BroadcastDispatcher broadcastDispatcher) {
         super(keyguardClockSwitch);
         mResources = resources;
         mStatusBarStateController = statusBarStateController;
@@ -109,6 +112,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockManager = clockManager;
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mBroadcastDispatcher = broadcastDispatcher;
         mTimeFormat = Settings.System.getString(contentResolver, Settings.System.TIME_12_24);
     }
 
@@ -231,12 +235,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mNewLockScreenClockViewController =
                         new AnimatableClockController(
                                 mView.findViewById(R.id.animatable_clock_view),
-                                mStatusBarStateController);
+                                mStatusBarStateController,
+                                mBroadcastDispatcher);
                 mNewLockScreenClockViewController.init();
                 mNewLockScreenLargeClockViewController =
                         new AnimatableClockController(
                                 mView.findViewById(R.id.animatable_clock_view_large),
-                                mStatusBarStateController);
+                                mStatusBarStateController,
+                                mBroadcastDispatcher);
                 mNewLockScreenLargeClockViewController.init();
             }
         } else {

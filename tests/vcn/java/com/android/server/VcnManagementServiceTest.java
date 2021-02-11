@@ -16,6 +16,10 @@
 
 package com.android.server;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
 import static com.android.server.vcn.VcnTestUtils.setupSystemService;
@@ -106,6 +110,7 @@ public class VcnManagementServiceTest {
             Collections.unmodifiableMap(Collections.singletonMap(TEST_UUID_1, TEST_VCN_CONFIG));
 
     private static final int TEST_SUBSCRIPTION_ID = 1;
+    private static final int TEST_SUBSCRIPTION_ID_2 = 2;
     private static final SubscriptionInfo TEST_SUBSCRIPTION_INFO =
             new SubscriptionInfo(
                     TEST_SUBSCRIPTION_ID /* id */,
@@ -537,59 +542,121 @@ public class VcnManagementServiceTest {
                 Collections.singleton(subGroup), Collections.singletonMap(subId, subGroup));
     }
 
-    private void verifyMergedNetworkCapabilitiesIsVcnManaged(
-            NetworkCapabilities mergedCapabilities, @Transport int transportType) {
+    private void verifyMergedNetworkCapabilities(
+            NetworkCapabilities mergedCapabilities,
+            @Transport int transportType,
+            boolean isVcnManaged,
+            boolean isRestricted) {
         assertTrue(mergedCapabilities.hasTransport(transportType));
-        assertFalse(
+        assertEquals(
+                !isVcnManaged,
                 mergedCapabilities.hasCapability(
                         NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED));
+        assertEquals(
+                !isRestricted,
+                mergedCapabilities.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED));
+    }
+
+    private void setupSubscriptionAndStartVcn(int subId, ParcelUuid subGrp, boolean isVcnActive) {
+        setUpVcnSubscription(subId, subGrp);
+        final Vcn vcn = startAndGetVcnInstance(subGrp);
+        doReturn(isVcnActive).when(vcn).isActive();
+    }
+
+    private VcnUnderlyingNetworkPolicy startVcnAndGetPolicyForTransport(
+            int subId, ParcelUuid subGrp, boolean isVcnActive, int transport) {
+        setupSubscriptionAndStartVcn(subId, subGrp, isVcnActive);
+
+        final NetworkCapabilities.Builder ncBuilder = new NetworkCapabilities.Builder();
+        ncBuilder.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
+        if (transport == TRANSPORT_CELLULAR) {
+            ncBuilder
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID));
+        } else if (transport == TRANSPORT_WIFI) {
+            WifiInfo wifiInfo = mock(WifiInfo.class);
+            when(wifiInfo.makeCopy(anyBoolean())).thenReturn(wifiInfo);
+            when(mMockDeps.getSubIdForWifiInfo(eq(wifiInfo))).thenReturn(TEST_SUBSCRIPTION_ID);
+
+            ncBuilder
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .setTransportInfo(wifiInfo);
+        } else {
+            throw new IllegalArgumentException("Unknown transport");
+        }
+
+        return mVcnMgmtSvc.getUnderlyingNetworkPolicy(ncBuilder.build(), new LinkProperties());
     }
 
     @Test
     public void testGetUnderlyingNetworkPolicyCellular() throws Exception {
-        setUpVcnSubscription(TEST_SUBSCRIPTION_ID, TEST_UUID_2);
-
-        NetworkCapabilities nc =
-                new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID))
-                        .build();
-
-        VcnUnderlyingNetworkPolicy policy =
-                mVcnMgmtSvc.getUnderlyingNetworkPolicy(nc, new LinkProperties());
+        final VcnUnderlyingNetworkPolicy policy =
+                startVcnAndGetPolicyForTransport(
+                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, true /* isActive */, TRANSPORT_CELLULAR);
 
         assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilitiesIsVcnManaged(
-                policy.getMergedNetworkCapabilities(), NetworkCapabilities.TRANSPORT_CELLULAR);
+        verifyMergedNetworkCapabilities(
+                policy.getMergedNetworkCapabilities(),
+                TRANSPORT_CELLULAR,
+                true /* isVcnManaged */,
+                false /* isRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicyCellular_safeMode() throws Exception {
+        final VcnUnderlyingNetworkPolicy policy =
+                startVcnAndGetPolicyForTransport(
+                        TEST_SUBSCRIPTION_ID,
+                        TEST_UUID_2,
+                        false /* isActive */,
+                        TRANSPORT_CELLULAR);
+
+        assertFalse(policy.isTeardownRequested());
+        verifyMergedNetworkCapabilities(
+                policy.getMergedNetworkCapabilities(),
+                NetworkCapabilities.TRANSPORT_CELLULAR,
+                false /* isVcnManaged */,
+                false /* isRestricted */);
     }
 
     @Test
     public void testGetUnderlyingNetworkPolicyWifi() throws Exception {
-        setUpVcnSubscription(TEST_SUBSCRIPTION_ID, TEST_UUID_2);
-
-        WifiInfo wifiInfo = mock(WifiInfo.class);
-        when(wifiInfo.makeCopy(anyBoolean())).thenReturn(wifiInfo);
-        when(mMockDeps.getSubIdForWifiInfo(eq(wifiInfo))).thenReturn(TEST_SUBSCRIPTION_ID);
-        NetworkCapabilities nc =
-                new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .setTransportInfo(wifiInfo)
-                        .build();
-
-        VcnUnderlyingNetworkPolicy policy =
-                mVcnMgmtSvc.getUnderlyingNetworkPolicy(nc, new LinkProperties());
+        final VcnUnderlyingNetworkPolicy policy =
+                startVcnAndGetPolicyForTransport(
+                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, true /* isActive */, TRANSPORT_WIFI);
 
         assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilitiesIsVcnManaged(
-                policy.getMergedNetworkCapabilities(), NetworkCapabilities.TRANSPORT_WIFI);
+        verifyMergedNetworkCapabilities(
+                policy.getMergedNetworkCapabilities(),
+                NetworkCapabilities.TRANSPORT_WIFI,
+                true /* isVcnManaged */,
+                true /* isRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicyVcnWifi_safeMode() throws Exception {
+        final VcnUnderlyingNetworkPolicy policy =
+                startVcnAndGetPolicyForTransport(
+                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, false /* isActive */, TRANSPORT_WIFI);
+
+        assertFalse(policy.isTeardownRequested());
+        verifyMergedNetworkCapabilities(
+                policy.getMergedNetworkCapabilities(),
+                NetworkCapabilities.TRANSPORT_WIFI,
+                false /* isVcnManaged */,
+                true /* isRestricted */);
     }
 
     @Test
     public void testGetUnderlyingNetworkPolicyNonVcnNetwork() throws Exception {
+        setupSubscriptionAndStartVcn(TEST_SUBSCRIPTION_ID, TEST_UUID_1, true /* isActive */);
+
         NetworkCapabilities nc =
                 new NetworkCapabilities.Builder()
                         .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID))
+                        .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
+                        .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID_2))
                         .build();
 
         VcnUnderlyingNetworkPolicy policy =

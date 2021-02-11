@@ -475,14 +475,17 @@ public class BiometricScheduler {
      */
     public void scheduleClientMonitor(@NonNull BaseClientMonitor clientMonitor,
             @Nullable BaseClientMonitor.Callback clientCallback) {
-        // Mark any interruptable pending clients as canceling. Once they reach the head of the
-        // queue, the scheduler will send ERROR_CANCELED and skip the operation.
-        for (Operation operation : mPendingOperations) {
-            if (operation.mClientMonitor instanceof Interruptable
-                    && operation.mState != Operation.STATE_WAITING_IN_QUEUE_CANCELING) {
-                Slog.d(getTag(), "New client incoming, marking pending client as canceling: "
-                        + operation.mClientMonitor);
-                operation.mState = Operation.STATE_WAITING_IN_QUEUE_CANCELING;
+        // If the incoming operation should interrupt preceding clients, mark any interruptable
+        // pending clients as canceling. Once they reach the head of the queue, the scheduler will
+        // send ERROR_CANCELED and skip the operation.
+        if (clientMonitor.interruptsPrecedingClients()) {
+            for (Operation operation : mPendingOperations) {
+                if (operation.mClientMonitor instanceof Interruptable
+                        && operation.mState != Operation.STATE_WAITING_IN_QUEUE_CANCELING) {
+                    Slog.d(getTag(), "New client incoming, marking pending client as canceling: "
+                            + operation.mClientMonitor);
+                    operation.mState = Operation.STATE_WAITING_IN_QUEUE_CANCELING;
+                }
             }
         }
 
@@ -490,8 +493,11 @@ public class BiometricScheduler {
         Slog.d(getTag(), "[Added] " + clientMonitor
                 + ", new queue size: " + mPendingOperations.size());
 
-        // If the current operation is cancellable, start the cancellation process.
-        if (mCurrentOperation != null && mCurrentOperation.mClientMonitor instanceof Interruptable
+        // If the new operation should interrupt preceding clients, and if the current operation is
+        // cancellable, start the cancellation process.
+        if (clientMonitor.interruptsPrecedingClients()
+                && mCurrentOperation != null
+                && mCurrentOperation.mClientMonitor instanceof Interruptable
                 && mCurrentOperation.mState == Operation.STATE_STARTED) {
             Slog.d(getTag(), "[Cancelling Interruptable]: " + mCurrentOperation);
             cancelInternal(mCurrentOperation);

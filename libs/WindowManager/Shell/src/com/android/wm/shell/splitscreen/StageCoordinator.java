@@ -156,7 +156,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     void setSideStageVisibility(boolean visible) {
-        if (!mSideStageListener.mVisible == visible) return;
+        if (mSideStageListener.mVisible == visible) return;
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         mSideStage.setVisibility(visible, wct);
