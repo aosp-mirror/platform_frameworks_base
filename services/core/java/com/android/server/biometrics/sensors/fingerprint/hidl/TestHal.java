@@ -21,11 +21,14 @@ import android.hardware.biometrics.fingerprint.V2_1.FingerprintError;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
 import android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint;
 import android.os.RemoteException;
+import android.util.Slog;
 
 /**
  * Test HAL that provides only provides no-ops.
  */
 public class TestHal extends IBiometricsFingerprint.Stub {
+    private static final String TAG = "fingerprint.hidl.TestHal";
+
     @Nullable
     private IBiometricsFingerprintClientCallback mCallback;
 
@@ -57,6 +60,7 @@ public class TestHal extends IBiometricsFingerprint.Stub {
 
     @Override
     public int enroll(byte[] hat, int gid, int timeoutSec) {
+        Slog.w(TAG, "enroll");
         return 0;
     }
 
@@ -80,11 +84,13 @@ public class TestHal extends IBiometricsFingerprint.Stub {
 
     @Override
     public int enumerate() {
+        Slog.w(TAG, "Enumerate");
         return 0;
     }
 
     @Override
     public int remove(int gid, int fid) {
+        Slog.w(TAG, "Remove");
         return 0;
     }
 
@@ -95,6 +101,7 @@ public class TestHal extends IBiometricsFingerprint.Stub {
 
     @Override
     public int authenticate(long operationId, int gid) {
+        Slog.w(TAG, "Authenticate");
         return 0;
     }
 }
