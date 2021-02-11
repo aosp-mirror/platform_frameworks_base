@@ -53591,16 +53591,19 @@ package android.widget {
 
   public class EdgeEffect {
     ctor public EdgeEffect(android.content.Context);
+    ctor public EdgeEffect(@NonNull android.content.Context, @Nullable android.util.AttributeSet);
     method public boolean draw(android.graphics.Canvas);
     method public void finish();
     method @Nullable public android.graphics.BlendMode getBlendMode();
     method @ColorInt public int getColor();
+    method public float getDistance();
     method public int getMaxHeight();
     method public int getType();
     method public boolean isFinished();
     method public void onAbsorb(int);
     method public void onPull(float);
     method public void onPull(float, float);
+    method public float onPullDistance(float, float);
     method public void onRelease();
     method public void setBlendMode(@Nullable android.graphics.BlendMode);
     method public void setColor(@ColorInt int);
