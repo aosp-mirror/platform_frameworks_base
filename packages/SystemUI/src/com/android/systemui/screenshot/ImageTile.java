@@ -70,7 +70,7 @@ class ImageTile implements AutoCloseable {
 
         RecordingCanvas canvas = mNode.beginRecording(w, h);
         canvas.save();
-        canvas.clipRect(0, 0, mLocation.right, mLocation.bottom);
+        canvas.clipRect(0, 0, mLocation.width(), mLocation.height());
         canvas.drawBitmap(Bitmap.wrapHardwareBuffer(mImage.getHardwareBuffer(), COLOR_SPACE),
                 0, 0, null);
         canvas.restore();
