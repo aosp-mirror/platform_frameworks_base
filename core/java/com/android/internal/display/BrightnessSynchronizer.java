@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal;
+package com.android.internal.display;
 
 
 import android.content.ContentResolver;
