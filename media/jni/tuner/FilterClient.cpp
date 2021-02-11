@@ -261,14 +261,14 @@ Result FilterClient::close() {
     if (mTunerFilter != NULL) {
         Status s = mTunerFilter->close();
         closeAvSharedMemory();
+        mTunerFilter = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFilter != NULL) {
         Result res = mFilter->close();
-        if (res == Result::SUCCESS) {
-            mFilter = NULL;
-        }
+        mFilter = NULL;
+        mFilter_1_1 = NULL;
         closeAvSharedMemory();
         return res;
     }

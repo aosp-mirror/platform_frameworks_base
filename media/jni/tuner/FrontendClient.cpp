@@ -311,15 +311,14 @@ Result FrontendClient::unlinkCiCamToFrontend(int ciCamId) {
 Result FrontendClient::close() {
     if (mTunerFrontend != NULL) {
         Status s = mTunerFrontend->close();
+        mTunerFrontend = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend != NULL) {
         Result result = mFrontend->close();
-        if (result == Result::SUCCESS) {
-            mFrontend = NULL;
-            mFrontend_1_1 = NULL;
-        }
+        mFrontend = NULL;
+        mFrontend_1_1 = NULL;
         return result;
     }
 
