@@ -73,6 +73,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new SystemServicePowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new CustomMeasuredPowerCalculator(mPowerProfile));
 
                 mPowerCalculators.add(new UserPowerCalculator());
             }
