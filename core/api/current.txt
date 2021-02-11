@@ -5585,10 +5585,10 @@ package android.app {
     field public static final String EXTRA_PROGRESS = "android.progress";
     field public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
     field public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
-    field public static final String EXTRA_PROMOTE_PICTURE = "android.promotePicture";
     field public static final String EXTRA_REMOTE_INPUT_DRAFT = "android.remoteInputDraft";
     field public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
     field @Deprecated public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
+    field public static final String EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED = "android.showBigPictureWhenCollapsed";
     field public static final String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
     field public static final String EXTRA_SHOW_WHEN = "android.showWhen";
     field @Deprecated public static final String EXTRA_SMALL_ICON = "android.icon";
