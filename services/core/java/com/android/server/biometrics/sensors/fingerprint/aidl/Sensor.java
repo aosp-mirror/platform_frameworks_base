@@ -476,6 +476,7 @@ class Sensor {
     }
 
     void setTestHalEnabled(boolean enabled) {
+        Slog.w(mTag, "setTestHalEnabled, enabled");
         mTestHalEnabled = enabled;
     }
 
