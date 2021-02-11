@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.util.Log;
 
 import androidx.annotation.UiThread;
 
@@ -141,22 +142,16 @@ class ImageTileSet {
      *               getHeight()).
      */
     Bitmap toBitmap(Rect bounds) {
+        Log.d(TAG, "exporting with bounds: " + bounds);
         if (mTiles.isEmpty()) {
             return null;
         }
         final RenderNode output = new RenderNode("Bitmap Export");
-        output.setPosition(0, 0, getWidth(), getHeight());
+        output.setPosition(0, 0, bounds.width(), bounds.height());
         RecordingCanvas canvas = output.beginRecording();
-        canvas.translate(-getLeft(), -getTop());
-        // Additional translation to account for the requested bounds
-        canvas.translate(-bounds.left, -bounds.top);
-        canvas.clipRect(bounds);
-        for (ImageTile tile : mTiles) {
-            canvas.save();
-            canvas.translate(tile.getLeft(), tile.getTop());
-            canvas.drawRenderNode(tile.getDisplayList());
-            canvas.restore();
-        }
+        Drawable drawable = getDrawable();
+        drawable.setBounds(bounds);
+        drawable.draw(canvas);
         output.endRecording();
         return HardwareRenderer.createHardwareBitmap(output, bounds.width(), bounds.height());
     }

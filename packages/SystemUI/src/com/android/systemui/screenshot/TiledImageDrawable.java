@@ -56,7 +56,7 @@ public class TiledImageDrawable extends Drawable {
             mNode = new RenderNode("TiledImageDrawable");
         }
         mNode.setPosition(0, 0, mTiles.getWidth(), mTiles.getHeight());
-        Canvas canvas = mNode.beginRecording(mTiles.getWidth(), mTiles.getHeight());
+        Canvas canvas = mNode.beginRecording();
         // Align content (virtual) top/left with 0,0, within the render node
         canvas.translate(-mTiles.getLeft(), -mTiles.getTop());
         for (int i = 0; i < mTiles.size(); i++) {
@@ -79,8 +79,8 @@ public class TiledImageDrawable extends Drawable {
         if (canvas.isHardwareAccelerated()) {
             Rect bounds = getBounds();
             canvas.save();
-            canvas.clipRect(bounds);
-            canvas.translate(bounds.left, bounds.top);
+            canvas.clipRect(0, 0, bounds.width(), bounds.height());
+            canvas.translate(-bounds.left, -bounds.top);
             canvas.drawRenderNode(mNode);
             canvas.restore();
         } else {
