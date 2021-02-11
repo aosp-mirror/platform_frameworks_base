@@ -591,5 +591,5 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"ဒေတာသုံးဘား။"</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"ဒေတာထုတ်လွှင့်မှုအပြည့်ဖမ်းမိခြင်း"</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet နှင့်ချိတ်ဆက်မှုပြတ်တောက်"</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Ethernet ချိတ်ဆက်ထား။"</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"အီသာနက်။"</string>
 </resources>
