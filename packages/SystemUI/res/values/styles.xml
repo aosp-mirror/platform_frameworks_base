@@ -764,6 +764,7 @@
     <style name="TextAppearance.PrivacyDialog">
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="UdfpsProgressBarStyle"
