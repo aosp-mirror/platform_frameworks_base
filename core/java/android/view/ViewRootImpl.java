@@ -3064,8 +3064,10 @@ public final class ViewRootImpl implements ViewParent,
                     // via the WM relayout code path. We probably eventually
                     // want to synchronize transparent region hint changes
                     // with draws.
-                    mTransaction.setTransparentRegionHint(getSurfaceControl(),
-                        mTransparentRegion).apply();
+                    SurfaceControl sc = getSurfaceControl();
+                    if (sc.isValid()) {
+                        mTransaction.setTransparentRegionHint(sc, mTransparentRegion).apply();
+                    }
                 }
             }
 
