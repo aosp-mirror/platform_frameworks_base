@@ -2590,7 +2590,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
 
-        ArraySet<String> isPrivilegedPermissionAllowlisted = null;
         ArraySet<String> shouldGrantSignaturePermission = null;
         ArraySet<String> shouldGrantInternalPermission = null;
         final List<String> requestedPermissions = pkg.getRequestedPermissions();
@@ -2605,14 +2604,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (permission == null) {
                 continue;
             }
-            if (permission.isPrivileged()
-                    && checkPrivilegedPermissionAllowlist(pkg, ps, permission)) {
-                if (isPrivilegedPermissionAllowlisted == null) {
-                    isPrivilegedPermissionAllowlisted = new ArraySet<>();
-                }
-                isPrivilegedPermissionAllowlisted.add(permissionName);
-            }
-            if (permission.isSignature() && (shouldGrantPermissionBySignature(pkg, permission)
+            if (permission.isSignature() && (shouldGrantSignaturePermission(pkg, permission)
                     || shouldGrantPermissionByProtectionFlags(pkg, ps, permission))) {
                 if (shouldGrantSignaturePermission == null) {
                     shouldGrantSignaturePermission = new ArraySet<>();
@@ -2838,17 +2830,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                     if ((bp.isNormal() && shouldGrantNormalPermission)
                             || (bp.isSignature()
-                                    && (!bp.isPrivileged() || CollectionUtils.contains(
-                                            isPrivilegedPermissionAllowlisted, permName))
-                                    && (CollectionUtils.contains(shouldGrantSignaturePermission,
-                                            permName)
+                                    && ((shouldGrantSignaturePermission != null
+                                            && shouldGrantSignaturePermission.contains(permName))
                                             || ((bp.isDevelopment() || bp.isRole())
                                                     && origState.isPermissionGranted(permName))))
                             || (bp.isInternal()
-                                    && (!bp.isPrivileged() || CollectionUtils.contains(
-                                            isPrivilegedPermissionAllowlisted, permName))
-                                    && (CollectionUtils.contains(shouldGrantInternalPermission,
-                                            permName)
+                                    && ((shouldGrantInternalPermission != null
+                                            && shouldGrantInternalPermission.contains(permName))
                                             || ((bp.isDevelopment() || bp.isRole())
                                                     && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
@@ -3355,92 +3343,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return allowed;
     }
 
-    private boolean checkPrivilegedPermissionAllowlist(@NonNull AndroidPackage pkg,
-            @NonNull PackageSetting packageSetting, @NonNull Permission permission) {
-        if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_DISABLE) {
-            return true;
-        }
-        final String packageName = pkg.getPackageName();
-        if (Objects.equals(packageName, PLATFORM_PACKAGE_NAME)) {
-            return true;
-        }
-        if (!pkg.isPrivileged()) {
-            return true;
-        }
-        if (!Objects.equals(permission.getPackageName(), PLATFORM_PACKAGE_NAME)) {
-            return true;
-        }
-        final String permissionName = permission.getName();
-        if (isInSystemConfigPrivAppPermissions(pkg, permissionName)) {
-            return true;
-        }
-        // Only enforce the allowlist on boot
-        if (!mSystemReady
-                // Updated system apps do not need to be allowlisted
-                && !packageSetting.getPkgState().isUpdatedSystemApp()) {
-            final ApexManager apexManager = ApexManager.getInstance();
-            final String containingApexPackageName =
-                    apexManager.getActiveApexPackageNameContainingPackage(packageName);
-            final boolean isInUpdatedApex = containingApexPackageName != null
-                    && !apexManager.isFactory(apexManager.getPackageInfo(containingApexPackageName,
-                    MATCH_ACTIVE_PACKAGE));
-            // Apps that are in updated apexs' do not need to be allowlisted
-            if (!isInUpdatedApex) {
-                // it's only a reportable violation if the permission isn't explicitly
-                // denied
-                if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName)) {
-                    return false;
-                }
-                Slog.w(TAG, "Privileged permission " + permissionName + " for package "
-                        + packageName + " (" + pkg.getPath()
-                        + ") not in privapp-permissions allowlist");
-                if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
-                    synchronized (mLock) {
-                        if (mPrivappPermissionsViolations == null) {
-                            mPrivappPermissionsViolations = new ArraySet<>();
-                        }
-                        mPrivappPermissionsViolations.add(packageName + " (" + pkg.getPath() + "): "
-                                + permissionName);
-                    }
-                }
-            }
-        }
-        return !RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE;
-    }
-
-    private boolean isInSystemConfigPrivAppPermissions(@NonNull AndroidPackage pkg,
-            @NonNull String permission) {
-        final SystemConfig systemConfig = SystemConfig.getInstance();
-        final Set<String> permissions;
-        if (pkg.isVendor()) {
-            permissions = systemConfig.getVendorPrivAppPermissions(pkg.getPackageName());
-        } else if (pkg.isProduct()) {
-            permissions = systemConfig.getProductPrivAppPermissions(pkg.getPackageName());
-        } else if (pkg.isSystemExt()) {
-            permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
-        } else {
-            permissions = systemConfig.getPrivAppPermissions(pkg.getPackageName());
-        }
-        return CollectionUtils.contains(permissions, permission);
-    }
-
-    private boolean isInSystemConfigPrivAppDenyPermissions(@NonNull AndroidPackage pkg,
-            @NonNull String permission) {
-        final SystemConfig systemConfig = SystemConfig.getInstance();
-        final Set<String> permissions;
-        if (pkg.isVendor()) {
-            permissions = systemConfig.getVendorPrivAppDenyPermissions(pkg.getPackageName());
-        } else if (pkg.isProduct()) {
-            permissions = systemConfig.getProductPrivAppDenyPermissions(pkg.getPackageName());
-        } else if (pkg.isSystemExt()) {
-            permissions = systemConfig.getSystemExtPrivAppDenyPermissions(pkg.getPackageName());
-        } else {
-            permissions = systemConfig.getPrivAppDenyPermissions(pkg.getPackageName());
-        }
-        return CollectionUtils.contains(permissions, permission);
-    }
-
-    private boolean shouldGrantPermissionBySignature(@NonNull AndroidPackage pkg,
+    private boolean shouldGrantSignaturePermission(@NonNull AndroidPackage pkg,
             @NonNull Permission bp) {
         // expect single system package
         String systemPackageName = ArrayUtils.firstOrNull(mPackageManagerInt.getKnownPackageNames(
@@ -3470,7 +3373,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private boolean shouldGrantPermissionByProtectionFlags(@NonNull AndroidPackage pkg,
             @NonNull PackageSetting pkgSetting, @NonNull Permission bp) {
         boolean allowed = false;
-        final boolean isPrivilegedPermission = bp.isPrivileged();
+        final boolean isVendorPrivilegedPermission = bp.isVendorPrivileged();
+        final boolean isPrivilegedPermission = bp.isPrivileged() || isVendorPrivilegedPermission;
         final boolean isOemPermission = bp.isOem();
         if (!allowed && (isPrivilegedPermission || isOemPermission) && pkg.isSystem()) {
             final String permissionName = bp.getName();
@@ -3482,18 +3386,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.pkg;
                 if (disabledPkg != null && disabledPkg.getRequestedPermissions().contains(
                         permissionName)) {
-                    allowed = (isPrivilegedPermission && disabledPkg.isPrivileged())
-                            || (isOemPermission && canGrantOemPermission(disabledPkg,
+                    allowed = (isPrivilegedPermission && canGrantPrivilegedPermission(disabledPkg,
+                            true, bp)) || (isOemPermission && canGrantOemPermission(disabledPkg,
                             permissionName));
                 }
             } else {
-                allowed = (isPrivilegedPermission && pkg.isPrivileged())
+                allowed = (isPrivilegedPermission && canGrantPrivilegedPermission(pkg, false, bp))
                         || (isOemPermission && canGrantOemPermission(pkg, permissionName));
             }
             // In any case, don't grant a privileged permission to privileged vendor apps, if
             // the permission's protectionLevel does not have the extra 'vendorPrivileged'
             // flag.
-            if (allowed && isPrivilegedPermission && !bp.isVendorPrivileged() && pkg.isVendor()) {
+            if (allowed && isPrivilegedPermission && !isVendorPrivilegedPermission
+                    && pkg.isVendor()) {
                 Slog.w(TAG, "Permission " + permissionName
                         + " cannot be granted to privileged vendor apk " + pkg.getPackageName()
                         + " because it isn't a 'vendorPrivileged' permission.");
@@ -3634,6 +3539,90 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private PackageSetting getSourcePackageSetting(@NonNull Permission bp) {
         final String sourcePackageName = bp.getPackageName();
         return mPackageManagerInt.getPackageSetting(sourcePackageName);
+    }
+
+    private boolean canGrantPrivilegedPermission(@NonNull AndroidPackage pkg,
+            boolean isUpdatedSystemApp, @NonNull Permission permission) {
+        if (!pkg.isPrivileged()) {
+            return false;
+        }
+        final boolean isPlatformPermission = PLATFORM_PACKAGE_NAME.equals(
+                permission.getPackageName());
+        if (!isPlatformPermission) {
+            return true;
+        }
+        if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_DISABLE) {
+            return true;
+        }
+        final String permissionName = permission.getName();
+        if (isInSystemConfigPrivAppPermissions(pkg, permissionName)) {
+            return true;
+        }
+        // Only enforce the allowlist on boot
+        if (!mSystemReady
+                // Updated system apps do not need to be allowlisted
+                && !isUpdatedSystemApp) {
+            final ApexManager apexManager = ApexManager.getInstance();
+            final String packageName = pkg.getPackageName();
+            final String containingApexPackageName =
+                    apexManager.getActiveApexPackageNameContainingPackage(packageName);
+            final boolean isInUpdatedApex = containingApexPackageName != null
+                    && !apexManager.isFactory(apexManager.getPackageInfo(containingApexPackageName,
+                    MATCH_ACTIVE_PACKAGE));
+            // Apps that are in updated apexs' do not need to be allowlisted
+            if (!isInUpdatedApex) {
+                // it's only a reportable violation if the permission isn't explicitly
+                // denied
+                if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName)) {
+                    return false;
+                }
+                Slog.w(TAG, "Privileged permission " + permissionName + " for package "
+                        + packageName + " (" + pkg.getPath()
+                        + ") not in privapp-permissions allowlist");
+                if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
+                    synchronized (mLock) {
+                        if (mPrivappPermissionsViolations == null) {
+                            mPrivappPermissionsViolations = new ArraySet<>();
+                        }
+                        mPrivappPermissionsViolations.add(packageName + " (" + pkg.getPath() + "): "
+                                + permissionName);
+                    }
+                }
+            }
+        }
+        return !RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE;
+    }
+
+    private boolean isInSystemConfigPrivAppPermissions(@NonNull AndroidPackage pkg,
+            @NonNull String permission) {
+        final SystemConfig systemConfig = SystemConfig.getInstance();
+        final Set<String> permissions;
+        if (pkg.isVendor()) {
+            permissions = systemConfig.getVendorPrivAppPermissions(pkg.getPackageName());
+        } else if (pkg.isProduct()) {
+            permissions = systemConfig.getProductPrivAppPermissions(pkg.getPackageName());
+        } else if (pkg.isSystemExt()) {
+            permissions = systemConfig.getSystemExtPrivAppPermissions(pkg.getPackageName());
+        } else {
+            permissions = systemConfig.getPrivAppPermissions(pkg.getPackageName());
+        }
+        return permissions != null && permissions.contains(permission);
+    }
+
+    private boolean isInSystemConfigPrivAppDenyPermissions(@NonNull AndroidPackage pkg,
+            @NonNull String permission) {
+        final SystemConfig systemConfig = SystemConfig.getInstance();
+        final Set<String> permissions;
+        if (pkg.isVendor()) {
+            permissions = systemConfig.getVendorPrivAppDenyPermissions(pkg.getPackageName());
+        } else if (pkg.isProduct()) {
+            permissions = systemConfig.getProductPrivAppDenyPermissions(pkg.getPackageName());
+        } else if (pkg.isSystemExt()) {
+            permissions = systemConfig.getSystemExtPrivAppDenyPermissions(pkg.getPackageName());
+        } else {
+            permissions = systemConfig.getPrivAppDenyPermissions(pkg.getPackageName());
+        }
+        return permissions != null && permissions.contains(permission);
     }
 
     private static boolean canGrantOemPermission(AndroidPackage pkg, String permission) {
