@@ -40,6 +40,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 public class WifiSignalController extends
@@ -223,6 +224,12 @@ public class WifiSignalController extends
         mCurrentState.activityOut = wifiActivity == DATA_ACTIVITY_INOUT
                 || wifiActivity == DATA_ACTIVITY_OUT;
         notifyListenersIfNecessary();
+    }
+
+    @Override
+    public void dump(PrintWriter pw) {
+        super.dump(pw);
+        mWifiTracker.dump(pw);
     }
 
     /**
