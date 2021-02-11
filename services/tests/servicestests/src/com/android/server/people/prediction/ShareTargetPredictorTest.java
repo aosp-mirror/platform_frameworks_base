@@ -22,13 +22,17 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.prediction.AppPredictionContext;
+import android.app.prediction.AppPredictionManager;
 import android.app.prediction.AppTarget;
+import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,9 +42,11 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager.ShareShortcutInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.Range;
 
 import com.android.internal.app.ChooserActivity;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.server.people.data.ConversationInfo;
 import com.android.server.people.data.DataManager;
 import com.android.server.people.data.EventHistory;
@@ -71,6 +77,14 @@ public final class ShareTargetPredictorTest {
     private static final String PACKAGE_3 = "pkg3";
     private static final String CLASS_1 = "cls1";
     private static final String CLASS_2 = "cls2";
+    private static final AppTargetEvent APP_TARGET_EVENT =
+            new AppTargetEvent.Builder(
+                    new AppTarget.Builder(
+                        new AppTargetId("cls1#pkg1"), PACKAGE_1, UserHandle.of(USER_ID)).build(),
+                        AppTargetEvent.ACTION_LAUNCH)
+                    .setLaunchLocation(ChooserActivity.LAUNCH_LOCATION_DIRECT_SHARE)
+                    .build();
+    private static final IntentFilter INTENT_FILTER = IntentFilter.create("SEND", "text/plain");
 
     @Mock private Context mContext;
     @Mock private DataManager mDataManager;
@@ -102,17 +116,33 @@ public final class ShareTargetPredictorTest {
         when(mDataManager.getShareShortcuts(any(), anyInt())).thenReturn(mShareShortcuts);
         when(mDataManager.getPackage(PACKAGE_1, USER_ID)).thenReturn(mPackageData1);
         when(mDataManager.getPackage(PACKAGE_2, USER_ID)).thenReturn(mPackageData2);
+        when(mContext.createContextAsUser(any(), any())).thenReturn(mContext);
+        when(mContext.getSystemServiceName(AppPredictionManager.class)).thenReturn(
+                Context.APP_PREDICTION_SERVICE);
+        when(mContext.getSystemService(AppPredictionManager.class))
+                .thenReturn(new AppPredictionManager(mContext));
 
         Bundle bundle = new Bundle();
-        bundle.putObject(ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY,
-                IntentFilter.create("SEND", "text/plain"));
+        bundle.putObject(ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY, INTENT_FILTER);
         AppPredictionContext predictionContext = new AppPredictionContext.Builder(mContext)
                 .setUiSurface(UI_SURFACE_SHARE)
                 .setPredictedTargetCount(NUM_PREDICTED_TARGETS)
                 .setExtras(bundle)
                 .build();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED,
+                Boolean.toString(true),
+                true /* makeDefault*/);
         mPredictor = new ShareTargetPredictor(
-                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID);
+                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID, mContext);
+    }
+
+    @Test
+    public void testReportAppTargetEvent() {
+        mPredictor.reportAppTargetEvent(APP_TARGET_EVENT);
+
+        verify(mDataManager, times(1))
+                .reportShareTargetEvent(eq(APP_TARGET_EVENT), eq(INTENT_FILTER));
     }
 
     @Test
@@ -240,7 +270,7 @@ public final class ShareTargetPredictorTest {
                 .setExtras(new Bundle())
                 .build();
         mPredictor = new ShareTargetPredictor(
-                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID);
+                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID, mContext);
 
         mPredictor.predictTargets();
 
@@ -349,7 +379,7 @@ public final class ShareTargetPredictorTest {
                 .setExtras(new Bundle())
                 .build();
         mPredictor = new ShareTargetPredictor(
-                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID);
+                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID, mContext);
         AppTarget appTarget1 = new AppTarget.Builder(
                 new AppTargetId("cls1#pkg1"), PACKAGE_1, UserHandle.of(USER_ID))
                 .build();

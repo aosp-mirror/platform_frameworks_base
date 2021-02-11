@@ -415,6 +415,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
 
     /**
+     * (boolean) Whether dark launch of remote prediction service is enabled.
+     */
+    public static final String DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED =
+            "dark_launch_remote_prediction_service_enabled";
+
+    /**
      * (boolean) Whether to enable pinch resizing for PIP.
      */
     public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
