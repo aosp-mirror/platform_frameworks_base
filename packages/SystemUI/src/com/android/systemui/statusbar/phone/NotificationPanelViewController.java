@@ -2722,12 +2722,12 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     /**
-     * Updates the vertical position of the panel so it is positioned closer to the touch
+     * Updates the horizontal position of the panel so it is positioned closer to the touch
      * responsible for opening the panel.
      *
      * @param x the x-coordinate the touch event
      */
-    protected void updateVerticalPanelPosition(float x) {
+    protected void updateHorizontalPanelPosition(float x) {
         if (mNotificationStackScrollLayoutController.getWidth() * 1.75f > mView.getWidth()) {
             resetHorizontalPanelPosition();
             return;
@@ -3297,7 +3297,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
-                    updateVerticalPanelPosition(event.getX());
+                    updateHorizontalPanelPosition(event.getX());
                     handled = true;
                 }
                 handled |= super.onTouch(v, event);
