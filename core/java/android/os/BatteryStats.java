@@ -994,6 +994,19 @@ public abstract class BatteryStats implements Parcelable {
          */
         public abstract long getScreenOnEnergy();
 
+        /**
+         * Returns the energies used by this uid for each
+         * {@link android.hardware.power.stats.EnergyConsumer.ordinal} of (custom) energy consumer
+         * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
+         *
+         * @return energies (in microjoules) used since boot for each (custom) energy consumer of
+         *         type OTHER, indexed by their ordinal. Returns null if no energy reporting is
+         *         supported.
+         *
+         * {@hide}
+         */
+        public abstract @Nullable long[] getCustomMeasuredEnergiesMicroJoules();
+
         public static abstract class Sensor {
 
             @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -2510,6 +2523,19 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getScreenDozeEnergy();
+
+    /**
+     * Returns the energies used for each
+     * {@link android.hardware.power.stats.EnergyConsumer.ordinal} of (custom) energy consumer
+     * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
+     *
+     * @return energies (in microjoules) used since boot for each (custom) energy consumer of
+     *         type OTHER, indexed by their ordinal. Returns null if no energy reporting is
+     *         supported.
+     *
+     * {@hide}
+     */
+    public abstract @Nullable long[] getCustomMeasuredEnergiesMicroJoules();
 
     public static final BitDescription[] HISTORY_STATE_DESCRIPTIONS = new BitDescription[] {
         new BitDescription(HistoryItem.STATE_CPU_RUNNING_FLAG, "running", "r"),
