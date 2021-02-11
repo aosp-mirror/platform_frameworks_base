@@ -24,26 +24,31 @@ import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
 import android.hardware.power.stats.StateResidencyResult;
+import android.power.PowerStatsInternal;
+import android.util.Slog;
 import android.util.StatsEvent;
 
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * StatsPullAtomCallbackImpl is responsible implementing the stats pullers for
  * SUBSYSTEM_SLEEP_STATE and ON_DEVICE_POWER_MEASUREMENT statsd atoms.
  */
 public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+    private static final String TAG = StatsPullAtomCallbackImpl.class.getSimpleName();
     private Context mContext;
-    private IPowerStatsHALWrapper mPowerStatsHALWrapper;
+    private PowerStatsInternal mPowerStatsInternal;
     private Map<Integer, Channel> mChannels = new HashMap();
     private Map<Integer, String> mEntityNames = new HashMap();
-    private Map<Integer, Map<Integer, String>> mStateNames = new HashMap();;
+    private Map<Integer, Map<Integer, String>> mStateNames = new HashMap();
+    private static final int STATS_PULL_TIMEOUT_MILLIS = 2000;
+    private static final boolean DEBUG = false;
 
     @Override
     public int onPullAtom(int atomTag, List<StatsEvent> data) {
@@ -57,21 +62,28 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
         }
     }
 
-    private void initPullOnDevicePowerMeasurement() {
-        Channel[] channels = mPowerStatsHALWrapper.getEnergyMeterInfo();
-        if (channels == null) {
-            return;
+    private boolean initPullOnDevicePowerMeasurement() {
+        Channel[] channels = mPowerStatsInternal.getEnergyMeterInfo();
+        if (channels == null || channels.length == 0) {
+            Slog.e(TAG, "Failed to init OnDevicePowerMeasurement puller");
+            return false;
         }
 
         for (int i = 0; i < channels.length; i++) {
             final Channel channel = channels[i];
             mChannels.put(channel.id, channel);
         }
+
+        return true;
     }
 
     private int pullOnDevicePowerMeasurement(int atomTag, List<StatsEvent> events) {
-        EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.readEnergyMeter(new int[0]);
-        if (energyMeasurements == null) {
+        final EnergyMeasurement[] energyMeasurements;
+        try {
+            energyMeasurements = mPowerStatsInternal.readEnergyMeterAsync(new int[0])
+                    .get(STATS_PULL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to readEnergyMeterAsync", e);
             return StatsManager.PULL_SKIP;
         }
 
@@ -91,10 +103,11 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
         return StatsManager.PULL_SUCCESS;
     }
 
-    private void initSubsystemSleepState() {
-        PowerEntity[] entities = mPowerStatsHALWrapper.getPowerEntityInfo();
-        if (entities == null) {
-            return;
+    private boolean initSubsystemSleepState() {
+        PowerEntity[] entities = mPowerStatsInternal.getPowerEntityInfo();
+        if (entities == null || entities.length == 0) {
+            Slog.e(TAG, "Failed to init SubsystemSleepState puller");
+            return false;
         }
 
         for (int i = 0; i < entities.length; i++) {
@@ -108,13 +121,20 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
             mEntityNames.put(entity.id, entity.name);
             mStateNames.put(entity.id, states);
         }
+
+        return true;
     }
 
     private int pullSubsystemSleepState(int atomTag, List<StatsEvent> events) {
-        StateResidencyResult[] results =  mPowerStatsHALWrapper.getStateResidency(new int[0]);
-        if (results == null) {
+        final StateResidencyResult[] results;
+        try {
+            results = mPowerStatsInternal.getStateResidencyAsync(new int[0])
+                    .get(STATS_PULL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to getStateResidencyAsync", e);
             return StatsManager.PULL_SKIP;
         }
+
         for (int i = 0; i < results.length; i++) {
             final StateResidencyResult result = results[i];
             for (int j = 0; j < result.stateResidencyData.length; j++) {
@@ -131,22 +151,33 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
         return StatsManager.PULL_SUCCESS;
     }
 
-    public StatsPullAtomCallbackImpl(Context context, IPowerStatsHALWrapper powerStatsHALWrapper) {
+    public StatsPullAtomCallbackImpl(Context context, PowerStatsInternal powerStatsInternal) {
+        if (DEBUG) Slog.d(TAG, "Starting PowerStatsService statsd pullers");
+
         mContext = context;
-        mPowerStatsHALWrapper = powerStatsHALWrapper;
-        initPullOnDevicePowerMeasurement();
-        initSubsystemSleepState();
+        mPowerStatsInternal = powerStatsInternal;
+
+        if (powerStatsInternal == null) {
+            Slog.e(TAG, "Failed to start PowerStatsService statsd pullers");
+            return;
+        }
 
         StatsManager manager = mContext.getSystemService(StatsManager.class);
-        manager.setPullAtomCallback(
-                FrameworkStatsLog.SUBSYSTEM_SLEEP_STATE,
-                null, // use default PullAtomMetadata values
-                ConcurrentUtils.DIRECT_EXECUTOR,
-                this);
-        manager.setPullAtomCallback(
-                FrameworkStatsLog.ON_DEVICE_POWER_MEASUREMENT,
-                null, // use default PullAtomMetadata values
-                ConcurrentUtils.DIRECT_EXECUTOR,
-                this);
+
+        if (initPullOnDevicePowerMeasurement()) {
+            manager.setPullAtomCallback(
+                    FrameworkStatsLog.ON_DEVICE_POWER_MEASUREMENT,
+                    null, // use default PullAtomMetadata values
+                    ConcurrentUtils.DIRECT_EXECUTOR,
+                    this);
+        }
+
+        if (initSubsystemSleepState()) {
+            manager.setPullAtomCallback(
+                    FrameworkStatsLog.SUBSYSTEM_SLEEP_STATE,
+                    null, // use default PullAtomMetadata values
+                    ConcurrentUtils.DIRECT_EXECUTOR,
+                    this);
+        }
     }
 }
