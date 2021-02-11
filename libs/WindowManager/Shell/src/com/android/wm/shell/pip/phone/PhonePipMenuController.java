@@ -375,17 +375,29 @@ public class PhonePipMenuController implements PipMenuController {
     }
 
     /**
-     * Hides the menu activity.
+     * Hides the menu view.
      */
     public void hideMenu() {
+        hideMenu(true /* animate */, true /* resize */);
+    }
+
+    /**
+     * Hides the menu view.
+     *
+     * @param animate whether to animate the menu fadeout
+     * @param resize whether or not to resize the PiP with the state change
+     */
+    public void hideMenu(boolean animate, boolean resize) {
         final boolean isMenuVisible = isMenuVisible();
         if (DEBUG) {
             Log.d(TAG, "hideMenu() state=" + mMenuState
                     + " isMenuVisible=" + isMenuVisible
+                    + " animate=" + animate
+                    + " resize=" + resize
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (isMenuVisible) {
-            mPipMenuView.hideMenu();
+            mPipMenuView.hideMenu(animate, resize);
         }
     }
 
