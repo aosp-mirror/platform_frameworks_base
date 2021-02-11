@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.media.MediaDrm;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -94,9 +95,9 @@ public abstract class DrmInitData {
          * @param data The initialization data.
          */
         public SchemeInitData(@NonNull UUID uuid, @NonNull String mimeType, @NonNull byte[] data) {
-            this.uuid = uuid;
-            this.mimeType = mimeType;
-            this.data = data;
+            this.uuid = Objects.requireNonNull(uuid);
+            this.mimeType = Objects.requireNonNull(mimeType);
+            this.data = Objects.requireNonNull(data);
         }
 
         @Override
