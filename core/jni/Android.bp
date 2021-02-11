@@ -184,6 +184,7 @@ cc_library_shared {
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
+                "com_android_internal_os_KernelCpuBpfTracking.cpp",
                 "com_android_internal_os_KernelCpuTotalBpfMapReader.cpp",
                 "com_android_internal_os_KernelCpuUidBpfMapReader.cpp",
                 "com_android_internal_os_KernelSingleProcessCpuThreadReader.cpp",
