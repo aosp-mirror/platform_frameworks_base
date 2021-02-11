@@ -16,18 +16,23 @@
 
 package com.android.server.am;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static com.android.server.am.MeasuredEnergySnapshot.UNAVAILABLE;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import android.hardware.power.stats.EnergyConsumer;
+import android.hardware.power.stats.EnergyConsumerAttribution;
+import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyConsumerType;
+import android.util.SparseArray;
 import android.util.SparseLongArray;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.power.MeasuredEnergyArray;
+import com.android.server.am.MeasuredEnergySnapshot.MeasuredEnergyDeltaData;
 
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -38,134 +43,198 @@ import org.junit.Test;
  */
 @SmallTest
 public final class MeasuredEnergySnapshotTest {
-    private static final int NUMBER_SUBSYSTEMS = 3;
-    private static final int SUBSYSTEM_DISPLAY = 0;
-    private static final int SUBSYSTEM_NEVER_USED = 1;
-    private static final int SUBSYSTEM_CATAPULT = 2;
+    private static final EnergyConsumer CONSUMER_DISPLAY = createEnergyConsumer(
+            0, 0, EnergyConsumerType.DISPLAY, "Display");
+    private static final  EnergyConsumer CONSUMER_OTHER_0 = createEnergyConsumer(
+            47, 0, EnergyConsumerType.OTHER, "GPU");
+    private static final  EnergyConsumer CONSUMER_OTHER_1 = createEnergyConsumer(
+            1, 1, EnergyConsumerType.OTHER, "HPU");
+    private static final  EnergyConsumer CONSUMER_OTHER_2 = createEnergyConsumer(
+            436, 2, EnergyConsumerType.OTHER, "IPU");
 
-    private MeasuredEnergySnapshot mSnapshot;
+    private static final SparseArray<EnergyConsumer> ALL_ID_CONSUMER_MAP = createIdToConsumerMap(
+            CONSUMER_DISPLAY, CONSUMER_OTHER_0, CONSUMER_OTHER_1, CONSUMER_OTHER_2);
+    private static final SparseArray<EnergyConsumer> SOME_ID_CONSUMER_MAP = createIdToConsumerMap(
+            CONSUMER_DISPLAY);
 
-    // Basic MeasuredEnergyArray that supports all the subsystems. Out of order on purpose.
-    private final int[] mAllSubsystems =
-            {SUBSYSTEM_DISPLAY, SUBSYSTEM_CATAPULT, SUBSYSTEM_NEVER_USED};
-    // E.g. mAllSubsystems[mSubsystemIndices[SUBSYSTEM_CATAPULT]]=SUBSYSTEM_CATAPULT
-    private final int[] mSubsystemIndices = {0, 2, 1};
-    private final long[] mCurrentSubsystemEnergyUJ = {111, 0, 0};
-    private final MeasuredEnergyArray mOmniEnergyArray = new MeasuredEnergyArray() {
-        @Override
-        public int getSubsystem(int index) {
-            return mAllSubsystems[index];
-        }
-
-        @Override
-        public long getEnergy(int index) {
-            return mCurrentSubsystemEnergyUJ[index];
-        }
-
-        @Override
-        public int size() {
-            return mAllSubsystems.length;
-        }
+    // Elements in each results are purposefully out of order.
+    private static final  EnergyConsumerResult[] RESULTS_0 = new EnergyConsumerResult[] {
+        createEnergyConsumerResult(CONSUMER_OTHER_0.id, 90, new int[] {47, 3}, new long[] {14, 13}),
+        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 14, null, null),
+        createEnergyConsumerResult(CONSUMER_OTHER_1.id, 0, null, null),
+        // No CONSUMER_OTHER_2
     };
-    private final MeasuredEnergyArray mJustDisplayEnergyArray = new MeasuredEnergyArray() {
-        @Override
-        public int getSubsystem(int index) {
-            return mAllSubsystems[0];
-        }
-
-        @Override
-        public long getEnergy(int index) {
-            return mCurrentSubsystemEnergyUJ[0];
-        }
-
-        @Override
-        public int size() {
-            return 1;
-        }
+    private static final  EnergyConsumerResult[] RESULTS_1 = new EnergyConsumerResult[] {
+        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 24, null, null),
+        createEnergyConsumerResult(CONSUMER_OTHER_0.id, 90, new int[] {47, 3}, new long[] {14, 13}),
+        createEnergyConsumerResult(CONSUMER_OTHER_2.id, 12, new int[] {6}, new long[] {10}),
+        createEnergyConsumerResult(CONSUMER_OTHER_1.id, 12_000, null, null),
+    };
+    private static final  EnergyConsumerResult[] RESULTS_2 = new EnergyConsumerResult[] {
+        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 36, null, null),
+        // No CONSUMER_OTHER_0
+        // No CONSUMER_OTHER_1
+        // No CONSUMER_OTHER_2
+    };
+    private static final  EnergyConsumerResult[] RESULTS_3 = new EnergyConsumerResult[] {
+        // No CONSUMER_DISPLAY
+        createEnergyConsumerResult(CONSUMER_OTHER_2.id, 13, new int[] {6}, new long[] {10}),
+        createEnergyConsumerResult(
+                CONSUMER_OTHER_0.id, 190, new int[] {2, 3, 47, 7}, new long[] {9, 18, 14, 6}),
+        createEnergyConsumerResult(CONSUMER_OTHER_1.id, 12_000, null, null),
+    };
+    private static final  EnergyConsumerResult[] RESULTS_4 = new EnergyConsumerResult[] {
+        createEnergyConsumerResult(CONSUMER_DISPLAY.id, 43, null, null),
+        createEnergyConsumerResult(
+                CONSUMER_OTHER_0.id, 290, new int[] {7, 47, 3, 2}, new long[] {6, 14, 18, 11}),
+        // No CONSUMER_OTHER_1
+        createEnergyConsumerResult(CONSUMER_OTHER_2.id, 165, new int[] {6, 47}, new long[] {10, 8}),
     };
 
-    @Before
-    public void setUp() {
-        mSnapshot = new MeasuredEnergySnapshot(NUMBER_SUBSYSTEMS, mOmniEnergyArray);
+    @Test
+    public void testUpdateAndGetDelta_empty() {
+        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        assertNull(snapshot.updateAndGetDelta(null));
+        assertNull(snapshot.updateAndGetDelta(new EnergyConsumerResult[0]));
     }
 
     @Test
     public void testUpdateAndGetDelta() {
-        SparseLongArray result;
+        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
 
-        // Increment DISPLAY by 15
-        incrementEnergyOfSubsystem(SUBSYSTEM_DISPLAY, 15);
-        result = mSnapshot.updateAndGetDelta(mOmniEnergyArray);
-        assertEquals(1, result.size());
-        assertEquals(15, result.get(SUBSYSTEM_DISPLAY));
+        // results0
+        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0);
+        if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
+            assertEquals(UNAVAILABLE, delta.displayEnergyUJ);
+            assertNull(delta.otherTotalEnergyUJ);
+            assertNull(delta.otherUidEnergiesUJ);
+        }
 
-        // Increment DISPLAY by 7
-        // Increment CATAPULT by 5. But do NOT include (pull) it in the passed in energy array.
-        incrementEnergyOfSubsystem(SUBSYSTEM_DISPLAY, 7);
-        incrementEnergyOfSubsystem(SUBSYSTEM_CATAPULT, 5);
-        result = mSnapshot.updateAndGetDelta(mJustDisplayEnergyArray); // Just pull display.
-        assertEquals(1, result.size());
-        assertEquals(7, result.get(SUBSYSTEM_DISPLAY));
+        // results1
+        delta = snapshot.updateAndGetDelta(RESULTS_1);
+        assertNotNull(delta);
+        assertEquals(24 - 14, delta.displayEnergyUJ);
 
-        // Increment CATAPULT by 64 (in addition to the previous increase of 5)
-        incrementEnergyOfSubsystem(SUBSYSTEM_CATAPULT, 64);
-        result = mSnapshot.updateAndGetDelta(mOmniEnergyArray);
-        assertEquals(1, result.size());
-        assertEquals(5 + 64, result.get(SUBSYSTEM_CATAPULT));
+        assertNotNull(delta.otherTotalEnergyUJ);
+        assertEquals(90 - 90, delta.otherTotalEnergyUJ[0]);
+        assertEquals(12_000 - 0, delta.otherTotalEnergyUJ[1]);
+        assertEquals(0, delta.otherTotalEnergyUJ[2]); // First good pull. Treat delta as 0.
 
-        // Do nothing
-        result = mSnapshot.updateAndGetDelta(mOmniEnergyArray);
-        assertEquals("0 results should not appear at all", 0, result.size());
+        assertNotNull(delta.otherUidEnergiesUJ);
+        assertNullOrEmpty(delta.otherUidEnergiesUJ[0]); // No change in uid energies
+        assertNullOrEmpty(delta.otherUidEnergiesUJ[1]);
+        assertNullOrEmpty(delta.otherUidEnergiesUJ[2]);
 
-        // Increment DISPLAY by 42
-        incrementEnergyOfSubsystem(SUBSYSTEM_DISPLAY, 42);
-        result = mSnapshot.updateAndGetDelta(mOmniEnergyArray);
-        assertEquals(1, result.size());
-        assertEquals(42, result.get(SUBSYSTEM_DISPLAY));
+        // results2
+        delta = snapshot.updateAndGetDelta(RESULTS_2);
+        assertNotNull(delta);
+        assertEquals(36 - 24, delta.displayEnergyUJ);
+        assertNull(delta.otherUidEnergiesUJ);
+        assertNull(delta.otherTotalEnergyUJ);
 
-        // Increment DISPLAY by 106 and CATAPULT by 13
-        incrementEnergyOfSubsystem(SUBSYSTEM_DISPLAY, 106);
-        incrementEnergyOfSubsystem(SUBSYSTEM_CATAPULT, 13);
-        result = mSnapshot.updateAndGetDelta(mOmniEnergyArray);
-        assertEquals(2, result.size());
-        assertEquals(106, result.get(SUBSYSTEM_DISPLAY));
-        assertEquals(13, result.get(SUBSYSTEM_CATAPULT));
+        // results3
+        delta = snapshot.updateAndGetDelta(RESULTS_3);
+        assertNotNull(delta);
+        assertEquals(UNAVAILABLE, delta.displayEnergyUJ);
+
+        assertNotNull(delta.otherTotalEnergyUJ);
+        assertEquals(190 - 90, delta.otherTotalEnergyUJ[0]);
+        assertEquals(12_000 - 12_000, delta.otherTotalEnergyUJ[1]);
+        assertEquals(13 - 12, delta.otherTotalEnergyUJ[2]);
+
+        assertNotNull(delta.otherUidEnergiesUJ);
+        assertEquals(3, delta.otherUidEnergiesUJ[0].size());
+        assertEquals(9 - 0, delta.otherUidEnergiesUJ[0].get(2));
+        assertEquals(18 - 13, delta.otherUidEnergiesUJ[0].get(3));
+        assertEquals(6 - 0, delta.otherUidEnergiesUJ[0].get(7));
+        assertNullOrEmpty(delta.otherUidEnergiesUJ[1]);
+        assertNullOrEmpty(delta.otherUidEnergiesUJ[2]);
+
+        // results4
+        delta = snapshot.updateAndGetDelta(RESULTS_4);
+        assertNotNull(delta);
+        assertEquals(43 - 36, delta.displayEnergyUJ);
+
+        assertNotNull(delta.otherTotalEnergyUJ);
+        assertEquals(290 - 190, delta.otherTotalEnergyUJ[0]);
+        assertEquals(0, delta.otherTotalEnergyUJ[1]); // Not present (e.g. missing data)
+        assertEquals(165 - 13, delta.otherTotalEnergyUJ[2]);
+
+        assertNotNull(delta.otherUidEnergiesUJ);
+        assertEquals(1, delta.otherUidEnergiesUJ[0].size());
+        assertEquals(11 - 9, delta.otherUidEnergiesUJ[0].get(2));
+        assertNullOrEmpty(delta.otherUidEnergiesUJ[1]); // Not present
+        assertEquals(1, delta.otherUidEnergiesUJ[2].size());
+        assertEquals(8, delta.otherUidEnergiesUJ[2].get(47));
     }
 
-    private void incrementEnergyOfSubsystem(int subsystem, long energy) {
-        mCurrentSubsystemEnergyUJ[mSubsystemIndices[subsystem]] += energy;
+    /** Test updateAndGetDelta() when the results have consumers absent from idToConsumerMap. */
+    @Test
+    public void testUpdateAndGetDelta_some() {
+        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
+
+        // results0
+        MeasuredEnergyDeltaData delta = snapshot.updateAndGetDelta(RESULTS_0);
+        if (delta != null) { // null is fine here. If non-null, it better be uninteresting though.
+            assertEquals(UNAVAILABLE, delta.displayEnergyUJ);
+            assertNull(delta.otherTotalEnergyUJ);
+            assertNull(delta.otherUidEnergiesUJ);
+        }
+
+        // results1
+        delta = snapshot.updateAndGetDelta(RESULTS_1);
+        assertNotNull(delta);
+        assertEquals(24 - 14, delta.displayEnergyUJ);
+        assertNull(delta.otherTotalEnergyUJ); // Although in the results, they're not in the idMap
+        assertNull(delta.otherUidEnergiesUJ);
     }
 
     @Test
-    public void testUpdateAndGetDelta_null() {
-        assertNull(mSnapshot.updateAndGetDelta(null));
+    public void testGetNumOtherOrdinals() {
+        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(ALL_ID_CONSUMER_MAP);
+        assertEquals(3, snapshot.getNumOtherOrdinals());
     }
 
     @Test
-    public void testHasSubsystem() {
-        // Setup MeasuredEnergySnapshot which reported some of the subsystems.
-        final int[] subsystems = {SUBSYSTEM_DISPLAY, SUBSYSTEM_CATAPULT};
-        MeasuredEnergyArray measuredEnergyArray = new MeasuredEnergyArray() {
-            @Override
-            public int getSubsystem(int index) {
-                return subsystems[index];
-            }
+    public void testGetNumOtherOrdinals_none() {
+        final MeasuredEnergySnapshot snapshot = new MeasuredEnergySnapshot(SOME_ID_CONSUMER_MAP);
+        assertEquals(0, snapshot.getNumOtherOrdinals());
+    }
 
-            @Override
-            public long getEnergy(int index) {
-                return 0; // Irrelevant for this test.
-            }
+    private static EnergyConsumer createEnergyConsumer(int id, int ord, byte type, String name) {
+        final EnergyConsumer ec = new EnergyConsumer();
+        ec.id = id;
+        ec.ordinal = ord;
+        ec.type = type;
+        ec.name = name;
+        return ec;
+    }
 
-            @Override
-            public int size() {
-                return subsystems.length;
-            }
-        };
-        final MeasuredEnergySnapshot snapshot =
-                new MeasuredEnergySnapshot(NUMBER_SUBSYSTEMS, measuredEnergyArray);
+    private static SparseArray<EnergyConsumer> createIdToConsumerMap(EnergyConsumer ... ecs) {
+        final SparseArray<EnergyConsumer> map = new SparseArray<>();
+        for (EnergyConsumer ec : ecs) {
+            map.put(ec.id, ec);
+        }
+        return map;
+    }
 
-        assertTrue(snapshot.hasSubsystem(SUBSYSTEM_DISPLAY));
-        assertTrue(snapshot.hasSubsystem(SUBSYSTEM_CATAPULT));
-        assertFalse(snapshot.hasSubsystem(SUBSYSTEM_NEVER_USED));
+    private static EnergyConsumerResult createEnergyConsumerResult(
+            int id, long energyUWs, int[] uids, long[] uidEnergies) {
+        final EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.id = id;
+        ecr.energyUWs = energyUWs;
+        if (uids != null) {
+            ecr.attribution = new EnergyConsumerAttribution[uids.length];
+            for (int i = 0; i < uids.length; i++) {
+                ecr.attribution[i] = new EnergyConsumerAttribution();
+                ecr.attribution[i].uid = uids[i];
+                ecr.attribution[i].energyUWs = uidEnergies[i];
+            }
+        }
+        return ecr;
+    }
+
+    private void assertNullOrEmpty(SparseLongArray a) {
+        if (a != null) assertEquals("Array should be null or empty", 0, a.size());
     }
 }

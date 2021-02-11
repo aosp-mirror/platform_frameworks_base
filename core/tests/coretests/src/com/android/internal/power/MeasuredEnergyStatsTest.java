@@ -387,6 +387,24 @@ public class MeasuredEnergyStatsTest {
     }
 
     @Test
+    public void testIsValidCustomBucket() {
+        final MeasuredEnergyStats stats
+                = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 3);
+        assertFalse(stats.isValidCustomBucket(-1));
+        assertTrue(stats.isValidCustomBucket(0));
+        assertTrue(stats.isValidCustomBucket(1));
+        assertTrue(stats.isValidCustomBucket(2));
+        assertFalse(stats.isValidCustomBucket(3));
+        assertFalse(stats.isValidCustomBucket(4));
+
+        final MeasuredEnergyStats boringStats
+                = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 0);
+        assertFalse(boringStats.isValidCustomBucket(-1));
+        assertFalse(boringStats.isValidCustomBucket(0));
+        assertFalse(boringStats.isValidCustomBucket(1));
+    }
+
+    @Test
     public void testReset() {
         final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_ENERGY_BUCKETS];
         final int numCustomBuckets = 2;

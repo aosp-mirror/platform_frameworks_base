@@ -24,6 +24,7 @@ import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.Uid.Sensor;
 import android.os.WorkSource;
+import android.util.SparseLongArray;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
@@ -583,6 +584,95 @@ public class BatteryStatsNoteTest extends TestCase {
         checkMeasuredEnergy("H", uid1, blame1, uid2, blame2, globalDoze, bi);
     }
 
+    @SmallTest
+    public void testUpdateCustomMeasuredEnergyDataLocked_neverCalled() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setOnBatteryInternal(true);
+
+        final int uid1 = 11500;
+        final int uid2 = 11501;
+
+        // Initially, all custom buckets report energy of 0.
+        checkCustomMeasuredEnergy("0", 0, 0, uid1, 0, 0, uid2, 0, 0, bi);
+    }
+
+    @SmallTest
+    public void testUpdateCustomMeasuredEnergyDataLocked() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        final int bucketA = 0; // Custom bucket 0
+        final int bucketB = 1; // Custom bucket 1
+
+        long totalBlameA = 0; // Total energy consumption for bucketA (may exceed sum of uids)
+        long totalBlameB = 0; // Total energy consumption for bucketB (may exceed sum of uids)
+
+        final int uid1 = 10500;
+        long blame1A = 0; // Blame for uid1 in bucketA
+        long blame1B = 0; // Blame for uid1 in bucketB
+
+        final int uid2 = 10501;
+        long blame2A = 0; // Blame for uid2 in bucketA
+        long blame2B = 0; // Blame for uid2 in bucketB
+
+        final SparseLongArray newEnergiesA = new SparseLongArray(2);
+        final SparseLongArray newEnergiesB = new SparseLongArray(2);
+
+
+        // ----- Case A: battery off (so blame does not increase)
+        bi.setOnBatteryInternal(false);
+
+        newEnergiesA.put(uid1, 20_000);
+        // Implicit newEnergiesA.put(uid2, 0);
+        bi.updateCustomMeasuredEnergyDataLocked(bucketA, 500_000, newEnergiesA);
+
+        newEnergiesB.put(uid1, 60_000);
+        // Implicit newEnergiesB.put(uid2, 0);
+        bi.updateCustomMeasuredEnergyDataLocked(bucketB, 700_000, newEnergiesB);
+
+        checkCustomMeasuredEnergy(
+                "A", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+
+
+        // ----- Case B: battery on
+        bi.setOnBatteryInternal(true);
+
+        newEnergiesA.put(uid1, 7_000); blame1A += 7_000;
+        // Implicit newEnergiesA.put(uid2, 0); blame2A += 0;
+        bi.updateCustomMeasuredEnergyDataLocked(bucketA, 310_000, newEnergiesA);
+        totalBlameA += 310_000;
+
+        newEnergiesB.put(uid1, 63_000); blame1B += 63_000;
+        newEnergiesB.put(uid2, 15_000); blame2B += 15_000;
+        bi.updateCustomMeasuredEnergyDataLocked(bucketB, 790_000, newEnergiesB);
+        totalBlameB += 790_000;
+
+        checkCustomMeasuredEnergy(
+                "B", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+
+
+        // ----- Case C: battery still on
+        newEnergiesA.delete(uid1); blame1A += 0;
+        newEnergiesA.put(uid2, 16_000); blame2A += 16_000;
+        bi.updateCustomMeasuredEnergyDataLocked(bucketA, 560_000, newEnergiesA);
+        totalBlameA += 560_000;
+
+        bi.updateCustomMeasuredEnergyDataLocked(bucketB, 10_000, null);
+        totalBlameB += 10_000;
+
+        checkCustomMeasuredEnergy(
+                "C", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+
+
+        // ----- Case D: battery still on
+        bi.updateCustomMeasuredEnergyDataLocked(bucketA, 0, newEnergiesA);
+        bi.updateCustomMeasuredEnergyDataLocked(bucketB, 15_000, new SparseLongArray(1));
+        totalBlameB += 15_000;
+        checkCustomMeasuredEnergy(
+                "D", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
+    }
+
     private void setFgState(int uid, boolean fgOn, MockBatteryStatsImpl bi) {
         // Note that noteUidProcessStateLocked uses ActivityManager process states.
         if (fgOn) {
@@ -609,5 +699,30 @@ public class BatteryStatsNoteTest extends TestCase {
 
         assertEquals("Wrong doze for Case " + caseName, globalDoze,
                 bi.getScreenDozeEnergy());
+    }
+
+    private void checkCustomMeasuredEnergy(String caseName,
+            long totalBlameA, long totalBlameB,
+            int uid1, long blame1A, long blame1B,
+            int uid2, long blame2A, long blame2B,
+            MockBatteryStatsImpl bi) {
+
+        assertEquals("Wrong total blame in bucket 0 for Case " + caseName, totalBlameA,
+                bi.getCustomMeasuredEnergyMicroJoules(0));
+
+        assertEquals("Wrong total blame in bucket 1 for Case " + caseName, totalBlameB,
+                bi.getCustomMeasuredEnergyMicroJoules(1));
+
+        assertEquals("Wrong uid1 blame in bucket 0 for Case " + caseName, blame1A,
+                bi.getUidStatsLocked(uid1).getCustomMeasuredEnergyMicroJoules(0));
+
+        assertEquals("Wrong uid1 blame in bucket 1 for Case " + caseName, blame1B,
+                bi.getUidStatsLocked(uid1).getCustomMeasuredEnergyMicroJoules(1));
+
+        assertEquals("Wrong uid2 blame in bucket 0 for Case " + caseName, blame2A,
+                bi.getUidStatsLocked(uid2).getCustomMeasuredEnergyMicroJoules(0));
+
+        assertEquals("Wrong uid2 blame in bucket 1 for Case " + caseName, blame2B,
+                bi.getUidStatsLocked(uid2).getCustomMeasuredEnergyMicroJoules(1));
     }
 }
