@@ -106,9 +106,9 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
-import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.AnimationThread;
