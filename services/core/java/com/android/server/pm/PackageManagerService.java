@@ -678,17 +678,18 @@ public class PackageManagerService extends IPackageManager.Stub
     // Compilation reasons.
     public static final int REASON_UNKNOWN = -1;
     public static final int REASON_FIRST_BOOT = 0;
-    public static final int REASON_BOOT = 1;
-    public static final int REASON_INSTALL = 2;
-    public static final int REASON_INSTALL_FAST = 3;
-    public static final int REASON_INSTALL_BULK = 4;
-    public static final int REASON_INSTALL_BULK_SECONDARY = 5;
-    public static final int REASON_INSTALL_BULK_DOWNGRADED = 6;
-    public static final int REASON_INSTALL_BULK_SECONDARY_DOWNGRADED = 7;
-    public static final int REASON_BACKGROUND_DEXOPT = 8;
-    public static final int REASON_AB_OTA = 9;
-    public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 10;
-    public static final int REASON_SHARED = 11;
+    public static final int REASON_BOOT_AFTER_OTA = 1;
+    public static final int REASON_POST_BOOT = 2;
+    public static final int REASON_INSTALL = 3;
+    public static final int REASON_INSTALL_FAST = 4;
+    public static final int REASON_INSTALL_BULK = 5;
+    public static final int REASON_INSTALL_BULK_SECONDARY = 6;
+    public static final int REASON_INSTALL_BULK_DOWNGRADED = 7;
+    public static final int REASON_INSTALL_BULK_SECONDARY_DOWNGRADED = 8;
+    public static final int REASON_BACKGROUND_DEXOPT = 9;
+    public static final int REASON_AB_OTA = 10;
+    public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
+    public static final int REASON_SHARED = 12;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -9673,10 +9674,7 @@ public class PackageManagerService extends IPackageManager.Stub
         //       first boot, as they do not have profile data.
         boolean causeFirstBoot = isFirstBoot() || mIsPreNUpgrade;
 
-        // We need to re-extract after a pruned cache, as AoT-ed files will be out of date.
-        boolean causePrunedCache = VMRuntime.didPruneDalvikCache();
-
-        if (!causeUpgrade && !causeFirstBoot && !causePrunedCache) {
+        if (!causeUpgrade && !causeFirstBoot) {
             return;
         }
 
@@ -9693,7 +9691,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long startTime = System.nanoTime();
         final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
+                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
                     false /* bootComplete */);
 
         final int elapsedTimeSeconds =
