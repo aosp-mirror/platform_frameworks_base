@@ -25,6 +25,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
+import com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsDialog
 import com.android.systemui.dagger.qualifiers.Background
@@ -91,7 +92,7 @@ class DeviceControlsTile @Inject constructor(
     override fun isAvailable(): Boolean {
         return featureFlags.isKeyguardLayoutEnabled &&
                 controlsLockscreen &&
-                controlsComponent.getControlsUiController().isPresent
+                controlsComponent.getVisibility() != UNAVAILABLE
     }
 
     override fun newTileState(): QSTile.State {
