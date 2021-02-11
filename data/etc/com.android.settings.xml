@@ -58,6 +58,5 @@
         <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>
         <permission name="android.permission.READ_DREAM_STATE"/>
         <permission name="android.permission.READ_DREAM_SUPPRESSION"/>
-        <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
     </privapp-permissions>
 </permissions>
