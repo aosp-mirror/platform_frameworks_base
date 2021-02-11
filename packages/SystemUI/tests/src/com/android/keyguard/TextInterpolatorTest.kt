@@ -21,9 +21,9 @@ import android.graphics.Canvas
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
-import android.text.TextPaint
 import android.text.TextDirectionHeuristic
 import android.text.TextDirectionHeuristics
+import android.text.TextPaint
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -40,13 +40,13 @@ private val PAINT = TextPaint().apply {
     textSize = 32f
 }
 
-private val START_PAINT = arrayListOf(TextPaint(PAINT).apply {
+private val START_PAINT = TextPaint(PAINT).apply {
     fontVariationSettings = "'wght' 400"
-})
+}
 
-private val END_PAINT = arrayListOf(TextPaint(PAINT).apply {
+private val END_PAINT = TextPaint(PAINT).apply {
     fontVariationSettings = "'wght' 700"
-})
+}
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -67,16 +67,16 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
-        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.targetPaint.set(END_PAINT)
         interp.onTargetPaintModified()
 
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(TEXT, START_PAINT[0]).toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(TEXT, START_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
@@ -86,15 +86,15 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
-        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.targetPaint.set(END_PAINT)
         interp.onTargetPaintModified()
 
         interp.progress = 1f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(TEXT, END_PAINT[0]).toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(TEXT, END_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
@@ -104,10 +104,10 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
-        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.targetPaint.set(END_PAINT)
         interp.onTargetPaintModified()
 
         // We cannot expect exact text layout of the middle position since we don't use text shaping
@@ -115,9 +115,9 @@ class TextInterpolatorTest : SysuiTestCase() {
         // end state.
         interp.progress = 0.5f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT[0])
+        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT)
             .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
-        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT[0])
+        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT)
             .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
     }
 
@@ -126,10 +126,10 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
-        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.targetPaint.set(END_PAINT)
         interp.onTargetPaintModified()
 
         interp.progress = 0.5f
@@ -148,16 +148,16 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.LTR)
 
         val interp = TextInterpolator(layout)
-        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
-        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.targetPaint.set(END_PAINT)
         interp.onTargetPaintModified()
 
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT[0], TextDirectionHeuristics.LTR)
+        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.LTR)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
@@ -168,16 +168,16 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
         val interp = TextInterpolator(layout)
-        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
-        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.targetPaint.set(END_PAINT)
         interp.onTargetPaintModified()
 
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(BIDI_TEXT, START_PAINT[0], TextDirectionHeuristics.RTL)
+        val expected = makeLayout(BIDI_TEXT, START_PAINT, TextDirectionHeuristics.RTL)
                 .toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()

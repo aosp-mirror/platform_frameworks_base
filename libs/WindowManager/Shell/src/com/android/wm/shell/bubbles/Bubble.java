@@ -398,6 +398,14 @@ public class Bubble implements BubbleViewProvider {
         }
     }
 
+    @Override
+    public void setExpandedContentAlpha(float alpha) {
+        if (mExpandedView != null) {
+            mExpandedView.setAlpha(alpha);
+            mExpandedView.setTaskViewAlpha(alpha);
+        }
+    }
+
     /**
      * Set visibility of bubble in the expanded state.
      *
@@ -407,7 +415,7 @@ public class Bubble implements BubbleViewProvider {
      * and setting {@code false} actually means rendering the expanded view in transparent.
      */
     @Override
-    public void setContentVisibility(boolean visibility) {
+    public void setTaskViewVisibility(boolean visibility) {
         if (mExpandedView != null) {
             mExpandedView.setContentVisibility(visibility);
         }

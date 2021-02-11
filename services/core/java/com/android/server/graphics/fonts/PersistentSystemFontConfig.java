@@ -17,6 +17,8 @@
 package com.android.server.graphics.fonts;
 
 import android.annotation.NonNull;
+import android.graphics.FontListParser;
+import android.text.FontConfig;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -30,6 +32,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /* package */ class PersistentSystemFontConfig {
@@ -38,11 +42,13 @@ import java.util.Set;
     private static final String TAG_ROOT = "fontConfig";
     private static final String TAG_LAST_MODIFIED_DATE = "lastModifiedDate";
     private static final String TAG_UPDATED_FONT_DIR = "updatedFontDir";
+    private static final String TAG_FAMILY = "family";
     private static final String ATTR_VALUE = "value";
 
     /* package */ static class Config {
         public long lastModifiedDate;
         public final Set<String> updatedFontDirs = new ArraySet<>();
+        public final List<FontConfig.FontFamily> fontFamilies = new ArrayList<>();
     }
 
     /**
@@ -72,6 +78,11 @@ import java.util.Set;
                     case TAG_UPDATED_FONT_DIR:
                         out.updatedFontDirs.add(getAttribute(parser, ATTR_VALUE));
                         break;
+                    case TAG_FAMILY:
+                        // updatableFontMap is not ready here. We get the base file names by passing
+                        // empty fontDir, and resolve font paths later.
+                        out.fontFamilies.add(FontListParser.readFamily(
+                                parser, "" /* fontDir */, null /* updatableFontMap */));
                     default:
                         Slog.w(TAG, "Skipping unknown tag: " + tag);
                 }
@@ -96,6 +107,13 @@ import java.util.Set;
             out.startTag(null, TAG_UPDATED_FONT_DIR);
             out.attribute(null, ATTR_VALUE, dir);
             out.endTag(null, TAG_UPDATED_FONT_DIR);
+        }
+        List<FontConfig.FontFamily> fontFamilies = config.fontFamilies;
+        for (int i = 0; i < fontFamilies.size(); i++) {
+            FontConfig.FontFamily fontFamily = fontFamilies.get(i);
+            out.startTag(null, TAG_FAMILY);
+            FontListParser.writeFamily(out, fontFamily);
+            out.endTag(null, TAG_FAMILY);
         }
         out.endTag(null, TAG_ROOT);
 

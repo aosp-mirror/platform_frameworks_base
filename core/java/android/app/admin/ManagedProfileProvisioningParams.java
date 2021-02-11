@@ -25,6 +25,7 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.stats.devicepolicy.DevicePolicyEnums;
 
 /**
  * Params required to provision a managed profile, see
@@ -34,6 +35,13 @@ import android.os.Parcelable;
  */
 @TestApi
 public final class ManagedProfileProvisioningParams implements Parcelable {
+    private static final String LEAVE_ALL_SYSTEM_APPS_ENABLED_PARAM =
+            "LEAVE_ALL_SYSTEM_APPS_ENABLED";
+    private static final String ORGANIZATION_OWNED_PROVISIONING_PARAM =
+            "ORGANIZATION_OWNED_PROVISIONING";
+    private static final String ACCOUNT_TO_MIGRATE_PROVIDED_PARAM = "ACCOUNT_TO_MIGRATE_PROVIDED";
+    private static final String KEEP_MIGRATED_ACCOUNT_PARAM = "KEEP_MIGRATED_ACCOUNT";
+
     @NonNull private final ComponentName mProfileAdminComponentName;
     @NonNull private final String mOwnerName;
     @Nullable private final String mProfileName;
@@ -90,6 +98,30 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
 
     public boolean isKeepAccountMigrated() {
         return mKeepAccountMigrated;
+    }
+
+    /**
+     * Logs the provisioning params using {@link DevicePolicyEventLogger}.
+     */
+    public void logParams(@NonNull String callerPackage) {
+        requireNonNull(callerPackage);
+
+        logParam(callerPackage, LEAVE_ALL_SYSTEM_APPS_ENABLED_PARAM, mLeaveAllSystemAppsEnabled);
+        logParam(callerPackage, ORGANIZATION_OWNED_PROVISIONING_PARAM,
+                mOrganizationOwnedProvisioning);
+        logParam(callerPackage, KEEP_MIGRATED_ACCOUNT_PARAM, mKeepAccountMigrated);
+        logParam(callerPackage, ACCOUNT_TO_MIGRATE_PROVIDED_PARAM,
+                /* value= */ mAccountToMigrate != null);
+    }
+
+    private void logParam(String callerPackage, String param, boolean value) {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_PARAM)
+                .setStrings(callerPackage)
+                .setAdmin(mProfileAdminComponentName)
+                .setStrings(param)
+                .setBoolean(value)
+                .write();
     }
 
     /**
