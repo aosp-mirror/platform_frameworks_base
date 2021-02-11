@@ -20,12 +20,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 
 import java.util.HashSet;
 import java.util.List;
@@ -163,4 +166,15 @@ public class Utils {
         }
         return apps;
     }
+
+    /**
+     * Returns true if the device should use the split notification shade, based on feature flags,
+     * orientation and screen width.
+     */
+    public static boolean shouldUseSplitNotificationShade(FeatureFlags featureFlags,
+            Resources resources) {
+        return featureFlags.isTwoColumnNotificationShadeEnabled()
+                && resources.getBoolean(R.bool.config_use_split_notification_shade);
+    }
+
 }
