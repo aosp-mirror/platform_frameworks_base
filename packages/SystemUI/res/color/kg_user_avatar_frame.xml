@@ -14,14 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.keyguard.AlphaOptimizedLinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/keyguard_user_switcher_inner"
-    android:orientation="vertical"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
-    android:layout_gravity="end"
-    android:gravity="end"
-    android:paddingTop="4dp">
-</com.android.keyguard.AlphaOptimizedLinearLayout>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_activated="true"
+        android:color="@color/kg_user_switcher_avatar_background" />
+    <item android:color="@color/kg_user_switcher_avatar_background" />
+</selector>
