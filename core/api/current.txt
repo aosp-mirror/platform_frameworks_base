@@ -29604,8 +29604,8 @@ package android.os {
   }
 
   public final class BugreportManager {
-    method public void cancelBugreport();
-    method public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+    method @WorkerThread public void cancelBugreport();
+    method @WorkerThread public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
 
   public abstract static class BugreportManager.BugreportCallback {
