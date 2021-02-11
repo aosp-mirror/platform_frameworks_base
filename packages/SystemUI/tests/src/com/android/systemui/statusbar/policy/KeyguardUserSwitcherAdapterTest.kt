@@ -60,9 +60,9 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     @Mock
     private lateinit var layoutInflater: LayoutInflater
     @Mock
-    private lateinit var keyguardUserSwitcher: KeyguardUserSwitcher
+    private lateinit var keyguardUserSwitcherController: KeyguardUserSwitcherController
 
-    private lateinit var adapter: KeyguardUserSwitcher.KeyguardUserAdapter
+    private lateinit var adapter: KeyguardUserSwitcherController.KeyguardUserAdapter
     private lateinit var picture: Bitmap
 
     @Before
@@ -72,8 +72,11 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE, layoutInflater)
         `when`(layoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
                 .thenReturn(inflatedUserDetailItemView)
-        adapter = KeyguardUserSwitcher.KeyguardUserAdapter(mContext, userSwitcherController,
-                keyguardUserSwitcher)
+        adapter = KeyguardUserSwitcherController.KeyguardUserAdapter(
+                mContext,
+                mContext.resources,
+                LayoutInflater.from(mContext),
+                userSwitcherController, keyguardUserSwitcherController)
         picture = UserIcons.convertToBitmap(mContext.getDrawable(R.drawable.ic_avatar_user))
     }
 
@@ -118,11 +121,11 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun shouldRemoveOnClickListener_currentUser_notGuestUser_oldViewIsSameType() {
+    fun shouldSetOnOnClickListener_currentUser_notGuestUser_oldViewIsSameType() {
         val v: UserDetailItemView? = createViewFromSameType(
                 isCurrentUser = true, isGuestUser = false)
         assertNotNull(v)
-        verify(v)!!.setOnClickListener(null)
+        verify(v)!!.setOnClickListener(adapter)
     }
 
     @Test
@@ -150,11 +153,11 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun shouldRemoveOnClickListener_currentUser_notGuestUser_oldViewIsDifferentType() {
+    fun shouldSetOnOnClickListener_currentUser_notGuestUser_oldViewIsDifferentType() {
         val v: UserDetailItemView? = createViewFromDifferentType(
                 isCurrentUser = true, isGuestUser = false)
         assertNotNull(v)
-        verify(v)!!.setOnClickListener(null)
+        verify(v)!!.setOnClickListener(adapter)
     }
 
     @Test
