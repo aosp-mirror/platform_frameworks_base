@@ -27,6 +27,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
@@ -159,8 +161,8 @@ public class BiometricSchedulerTest {
 
         // Client 1 cleans up properly
         verify(listener1).onError(eq(TEST_SENSOR_ID), anyInt(),
-                eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED), eq(0));
-        verify(callback1).onClientFinished(eq(client1), eq(true) /* success */);
+                eq(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE), eq(0));
+        verify(callback1).onClientFinished(eq(client1), eq(false) /* success */);
         verify(callback1, never()).onClientStarted(any());
 
         // Client 2 was able to start
@@ -308,6 +310,37 @@ public class BiometricSchedulerTest {
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
                 eq(0) /* vendorCode */);
         assertNull(mScheduler.getCurrentClient());
+    }
+
+    @Test
+    public void testInterruptPrecedingClients_whenExpected() {
+        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class,
+                withSettings().extraInterfaces(Interruptable.class));
+
+        final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
+        when(interrupter.interruptsPrecedingClients()).thenReturn(true);
+
+        mScheduler.scheduleClientMonitor(interruptableMonitor);
+        mScheduler.scheduleClientMonitor(interrupter);
+        waitForIdle();
+
+        verify((Interruptable) interruptableMonitor).cancel();
+        mScheduler.getInternalCallback().onClientFinished(interruptableMonitor, true /* success */);
+    }
+
+    @Test
+    public void testDoesNotInterruptPrecedingClients_whenNotExpected() {
+        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class,
+                withSettings().extraInterfaces(Interruptable.class));
+
+        final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
+        when(interrupter.interruptsPrecedingClients()).thenReturn(false);
+
+        mScheduler.scheduleClientMonitor(interruptableMonitor);
+        mScheduler.scheduleClientMonitor(interrupter);
+        waitForIdle();
+
+        verify((Interruptable) interruptableMonitor, never()).cancel();
     }
 
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {

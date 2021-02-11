@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.RootPermissionTest;
 
+import com.android.blockdevicewriter.BlockDeviceWriter;
 import com.android.fsverity.AddFsVerityCertRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
@@ -334,22 +335,23 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         long offsetFirstByte = 0;
 
         // The first two pages should be both readable at first.
-        assertTrue(canReadByte(apkPath, offsetFirstByte));
+        assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetFirstByte));
         if (apkSize > offsetFirstByte + FSVERITY_PAGE_SIZE) {
-            assertTrue(canReadByte(apkPath, offsetFirstByte + FSVERITY_PAGE_SIZE));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath,
+                    offsetFirstByte + FSVERITY_PAGE_SIZE));
         }
 
         // Damage the file directly against the block device.
         damageFileAgainstBlockDevice(apkPath, offsetFirstByte);
 
         // Expect actual read from disk to fail but only at damaged page.
-        dropCaches();
-        assertFalse(canReadByte(apkPath, offsetFirstByte));
+        BlockDeviceWriter.dropCaches(mDevice);
+        assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetFirstByte));
         if (apkSize > offsetFirstByte + FSVERITY_PAGE_SIZE) {
             long lastByteOfTheSamePage =
                     offsetFirstByte % FSVERITY_PAGE_SIZE + FSVERITY_PAGE_SIZE - 1;
-            assertFalse(canReadByte(apkPath, lastByteOfTheSamePage));
-            assertTrue(canReadByte(apkPath, lastByteOfTheSamePage + 1));
+            assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, lastByteOfTheSamePage));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, lastByteOfTheSamePage + 1));
         }
     }
 
@@ -362,21 +364,22 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         long offsetOfLastByte = apkSize - 1;
 
         // The first two pages should be both readable at first.
-        assertTrue(canReadByte(apkPath, offsetOfLastByte));
+        assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetOfLastByte));
         if (offsetOfLastByte - FSVERITY_PAGE_SIZE > 0) {
-            assertTrue(canReadByte(apkPath, offsetOfLastByte - FSVERITY_PAGE_SIZE));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath,
+                    offsetOfLastByte - FSVERITY_PAGE_SIZE));
         }
 
         // Damage the file directly against the block device.
         damageFileAgainstBlockDevice(apkPath, offsetOfLastByte);
 
         // Expect actual read from disk to fail but only at damaged page.
-        dropCaches();
-        assertFalse(canReadByte(apkPath, offsetOfLastByte));
+        BlockDeviceWriter.dropCaches(mDevice);
+        assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetOfLastByte));
         if (offsetOfLastByte - FSVERITY_PAGE_SIZE > 0) {
             long firstByteOfTheSamePage = offsetOfLastByte - offsetOfLastByte % FSVERITY_PAGE_SIZE;
-            assertFalse(canReadByte(apkPath, firstByteOfTheSamePage));
-            assertTrue(canReadByte(apkPath, firstByteOfTheSamePage - 1));
+            assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, firstByteOfTheSamePage));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, firstByteOfTheSamePage - 1));
         }
     }
 
@@ -395,8 +398,8 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 // from filesystem cache. Forcing GC workarounds the problem.
                 int retry = 5;
                 for (; retry > 0; retry--) {
-                    dropCaches();
-                    if (!canReadByte(path, kTargetOffset)) {
+                    BlockDeviceWriter.dropCaches(mDevice);
+                    if (!BlockDeviceWriter.canReadByte(mDevice, path, kTargetOffset)) {
                         break;
                     }
                     try {
@@ -449,16 +452,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
 
     private long getFileSizeInBytes(String packageName) throws DeviceNotAvailableException {
         return Long.parseLong(expectRemoteCommandToSucceed("stat -c '%s' " + packageName).trim());
-    }
-
-    private void dropCaches() throws DeviceNotAvailableException {
-        expectRemoteCommandToSucceed("sync && echo 1 > /proc/sys/vm/drop_caches");
-    }
-
-    private boolean canReadByte(String filePath, long offset) throws DeviceNotAvailableException {
-        CommandResult result = mDevice.executeShellV2Command(
-                "dd if=" + filePath + " bs=1 count=1 skip=" + Long.toString(offset));
-        return result.getStatus() == CommandStatus.SUCCESS;
     }
 
     private String expectRemoteCommandToSucceed(String cmd) throws DeviceNotAvailableException {

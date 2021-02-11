@@ -113,4 +113,9 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
     public int getProtoEnum() {
         return BiometricsProto.CM_ENROLL;
     }
+
+    @Override
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
 }

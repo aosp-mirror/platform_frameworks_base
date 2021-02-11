@@ -16,37 +16,72 @@
 
 package com.android.keyguard;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.icu.text.NumberFormat;
 import android.util.MathUtils;
 
 import com.android.settingslib.Utils;
+import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.util.ViewController;
 
+import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
- * Controls the color of a GradientTextClock.
+ * Controller for an AnimatableClockView.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
+    private static final int FORMAT_NUMBER = 1234567890;
 
     private final StatusBarStateController mStatusBarStateController;
-    private final int[] mDozingColors = new int[] {Color.WHITE, Color.WHITE};
-    private int[] mLockScreenColors = new int[2];
+    private final BroadcastDispatcher mBroadcastDispatcher;
+    private final int mDozingColor = Color.WHITE;
+    private int mLockScreenColor;
 
     private boolean mIsDozing;
+    private Locale mLocale;
+
+    private final NumberFormat mBurmeseNf = NumberFormat.getInstance(Locale.forLanguageTag("my"));
+    private final String mBurmeseNumerals;
+    private final float mBurmeseLineSpacing;
+    private final float mDefaultLineSpacing;
 
     public AnimatableClockController(
             AnimatableClockView view,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            BroadcastDispatcher broadcastDispatcher) {
         super(view);
         mStatusBarStateController = statusBarStateController;
         mIsDozing = mStatusBarStateController.isDozing();
+        mBroadcastDispatcher = broadcastDispatcher;
+
+        mBurmeseNumerals = mBurmeseNf.format(FORMAT_NUMBER);
+        mBurmeseLineSpacing = getContext().getResources().getFloat(
+                R.dimen.keyguard_clock_line_spacing_scale_burmese);
+        mDefaultLineSpacing = getContext().getResources().getFloat(
+                R.dimen.keyguard_clock_line_spacing_scale);
     }
+
+    private BroadcastReceiver mLocaleBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateLocale();
+        }
+    };
 
     @Override
     protected void onViewAttached() {
+        updateLocale();
+        mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
+                new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mIsDozing = mStatusBarStateController.isDozing();
         refreshTime();
@@ -55,6 +90,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     @Override
     protected void onViewDetached() {
+        mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
     }
 
@@ -84,11 +120,23 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mView.refreshFormat();
     }
 
+    private void updateLocale() {
+        Locale currLocale = Locale.getDefault();
+        if (!Objects.equals(currLocale, mLocale)) {
+            mLocale = currLocale;
+            NumberFormat nf = NumberFormat.getInstance(mLocale);
+            if (nf.format(FORMAT_NUMBER).equals(mBurmeseNumerals)) {
+                mView.setLineSpacingScale(mBurmeseLineSpacing);
+            } else {
+                mView.setLineSpacingScale(mDefaultLineSpacing);
+            }
+        }
+    }
+
     private void initColors() {
-        mLockScreenColors[0] = Utils.getColorAttrDefaultColor(getContext(),
+        mLockScreenColor = Utils.getColorAttrDefaultColor(getContext(),
                 com.android.systemui.R.attr.wallpaperTextColor);
-        mLockScreenColors[1] = mLockScreenColors[0]; // same color
-        mView.setColors(mDozingColors, mLockScreenColors);
+        mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
     }
 

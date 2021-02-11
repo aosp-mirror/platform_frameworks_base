@@ -17,6 +17,7 @@
 package android.os;
 
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import java.util.Collection;
 
@@ -36,6 +37,9 @@ public abstract class BatteryStatsInternal {
      * Returns the mobile data interfaces.
      */
     public abstract String[] getMobileIfaces();
+
+    /** Returns CPU times for system server thread groups. */
+    public abstract SystemServiceCpuThreadTimes getSystemServiceCpuThreadTimes();
 
     /**
      * Inform battery stats how many deferred jobs existed when the app got launched and how

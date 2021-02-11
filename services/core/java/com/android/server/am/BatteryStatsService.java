@@ -72,6 +72,7 @@ import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
+import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
@@ -126,7 +127,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith("?");
-    private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
+    private static final int MAX_LOW_POWER_STATS_SIZE = 8192;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
     private static final String EMPTY = "Empty";
 
@@ -354,6 +355,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         @Override
         public String[] getMobileIfaces() {
             return mStats.getMobileIfaces().clone();
+        }
+
+        @Override
+        public SystemServiceCpuThreadTimes getSystemServiceCpuThreadTimes() {
+            return mStats.getSystemServiceCpuThreadTimes();
         }
 
         @Override

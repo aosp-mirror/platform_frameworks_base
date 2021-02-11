@@ -15985,12 +15985,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams,
             @NonNull String callerPackage) {
+        Objects.requireNonNull(provisioningParams, "provisioningParams is null");
+        Objects.requireNonNull(callerPackage, "callerPackage is null");
+
         final ComponentName admin = provisioningParams.getProfileAdminComponentName();
         Objects.requireNonNull(admin, "admin is null");
 
         final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        provisioningParams.logParams(callerPackage);
 
         UserInfo userInfo = null;
         final long identity = Binder.clearCallingIdentity();
@@ -16291,15 +16296,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void provisionFullyManagedDevice(
-            FullyManagedDeviceProvisioningParams provisioningParams, String callerPackage) {
-        ComponentName deviceAdmin = provisioningParams.getDeviceAdminComponentName();
+            @NonNull FullyManagedDeviceProvisioningParams provisioningParams,
+            @NonNull String callerPackage) {
+        Objects.requireNonNull(provisioningParams, "provisioningParams is null.");
+        Objects.requireNonNull(callerPackage, "callerPackage is null.");
 
+        ComponentName deviceAdmin = provisioningParams.getDeviceAdminComponentName();
         Objects.requireNonNull(deviceAdmin, "admin is null.");
         Objects.requireNonNull(provisioningParams.getOwnerName(), "owner name is null.");
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        provisioningParams.logParams(callerPackage);
 
         final long identity = Binder.clearCallingIdentity();
         try {
