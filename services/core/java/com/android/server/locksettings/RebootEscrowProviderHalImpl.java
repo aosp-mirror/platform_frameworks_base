@@ -33,7 +33,7 @@ import javax.crypto.SecretKey;
  * An implementation of the {@link RebootEscrowProviderInterface} by calling the RebootEscrow HAL.
  */
 class RebootEscrowProviderHalImpl implements RebootEscrowProviderInterface {
-    private static final String TAG = "RebootEscrowProvider";
+    private static final String TAG = "RebootEscrowProviderHal";
 
     private final Injector mInjector;
 
