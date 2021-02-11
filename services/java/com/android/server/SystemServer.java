@@ -302,6 +302,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.power.WearPowerService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
             "com.google.android.clockwork.sidekick.SidekickService";
+    private static final String WEAR_DISPLAYOFFLOAD_SERVICE_CLASS =
+            "com.google.android.clockwork.displayoffload.DisplayOffloadService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.google.android.clockwork.display.WearDisplayService";
     private static final String WEAR_LEFTY_SERVICE_CLASS =
@@ -1116,6 +1118,13 @@ public final class SystemServer implements Dumpable {
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
         mSystemServiceManager.startService(LightsService.class);
+        t.traceEnd();
+
+        t.traceBegin("StartDisplayOffloadService");
+        // Package manager isn't started yet; need to use SysProp not hardware feature
+        if (SystemProperties.getBoolean("config.enable_display_offload", false)) {
+            mSystemServiceManager.startService(WEAR_DISPLAYOFFLOAD_SERVICE_CLASS);
+        }
         t.traceEnd();
 
         t.traceBegin("StartSidekickService");
