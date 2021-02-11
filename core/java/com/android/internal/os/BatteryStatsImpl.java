@@ -7157,34 +7157,34 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override
     public long getScreenOnEnergy() {
-        if (mGlobalMeasuredEnergyStats == null) {
-            return ENERGY_DATA_UNAVAILABLE;
-        }
-        return mGlobalMeasuredEnergyStats
-                .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
+        return getMeasuredEnergyMicroJoules(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
     }
 
     @Override
     public long getScreenDozeEnergy() {
-        if (mGlobalMeasuredEnergyStats == null) {
-            return ENERGY_DATA_UNAVAILABLE;
-        }
-        return mGlobalMeasuredEnergyStats
-                .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
+        return getMeasuredEnergyMicroJoules(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
     }
 
     /**
-     * Returns the energy in microjoules that the given custom energy bucket consumed.
+     * Returns the energy in microjoules that the given standard energy bucket consumed.
      * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
      *
-     * @param customEnergyBucket custom energy bucket of interest
-     * @return energy (in microjoules) used by this uid for this energy bucket
+     * @param bucket standard energy bucket of interest
+     * @return energy (in microjoules) used for this energy bucket
      */
-    public long getCustomMeasuredEnergyMicroJoules(int customEnergyBucket) {
+    private long getMeasuredEnergyMicroJoules(@StandardEnergyBucket int bucket) {
         if (mGlobalMeasuredEnergyStats == null) {
             return ENERGY_DATA_UNAVAILABLE;
         }
-        return mGlobalMeasuredEnergyStats.getAccumulatedCustomBucketEnergy(customEnergyBucket);
+        return mGlobalMeasuredEnergyStats.getAccumulatedStandardBucketEnergy(bucket);
+    }
+
+    @Override
+    public @Nullable long[] getCustomMeasuredEnergiesMicroJoules() {
+        if (mGlobalMeasuredEnergyStats == null) {
+            return null;
+        }
+        return mGlobalMeasuredEnergyStats.getAccumulatedCustomBucketEnergies();
     }
 
     @Override public long getStartClockTime() {
@@ -7978,20 +7978,16 @@ public class BatteryStatsImpl extends BatteryStats {
             return mUidMeasuredEnergyStats.getAccumulatedStandardBucketEnergy(bucket);
         }
 
-        /**
-         * Returns the energy used by this uid for a custom energy bucket of interest.
-         * @param customEnergyBucket custom energy bucket of interest
-         * @return energy (in microjoules) used by this uid for this energy bucket
-         */
-        public long getCustomMeasuredEnergyMicroJoules(int customEnergyBucket) {
-            if (mBsi.mGlobalMeasuredEnergyStats == null
-                    || !mBsi.mGlobalMeasuredEnergyStats.isValidCustomBucket(customEnergyBucket)) {
-                return ENERGY_DATA_UNAVAILABLE;
+        @Override
+        public long[] getCustomMeasuredEnergiesMicroJoules() {
+            if (mBsi.mGlobalMeasuredEnergyStats == null) {
+                return null;
             }
             if (mUidMeasuredEnergyStats == null) {
-                return 0L; // It is supported, but was never filled, so it must be 0
+                // Custom buckets may exist. But all values for this uid are 0 so we report all 0s.
+                return new long[mBsi.mGlobalMeasuredEnergyStats.getNumberCustomEnergyBuckets()];
             }
-            return mUidMeasuredEnergyStats.getAccumulatedCustomBucketEnergy(customEnergyBucket);
+            return mUidMeasuredEnergyStats.getAccumulatedCustomBucketEnergies();
         }
 
         /**
@@ -14527,7 +14523,12 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @GuardedBy("this")
     public void dumpMeasuredEnergyStatsLocked(PrintWriter pw) {
-        if (mGlobalMeasuredEnergyStats == null) return;
+        pw.printf("On battery measured energy stats (microjoules) \n");
+        if (mGlobalMeasuredEnergyStats == null) {
+            pw.printf("    Not supported on this device.\n");
+            return;
+        }
+
         dumpMeasuredEnergyStatsLocked(pw, "non-uid usage", mGlobalMeasuredEnergyStats);
 
         int size = mUidStats.size();
@@ -14545,7 +14546,8 @@ public class BatteryStatsImpl extends BatteryStats {
             MeasuredEnergyStats stats) {
         if (stats == null) return;
         final IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "    ");
-        iPw.printf("On battery measured energy stats for %s:\n", name);
+        iPw.increaseIndent();
+        iPw.printf("%s:\n", name);
         iPw.increaseIndent();
         stats.dump(iPw);
         iPw.decreaseIndent();
