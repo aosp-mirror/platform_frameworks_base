@@ -914,6 +914,8 @@ package android.hardware.devicestate {
     method @NonNull public int[] getSupportedStates();
     method public void removeDeviceStateListener(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateListener);
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
+    field public static final int MAXIMUM_DEVICE_STATE = 255; // 0xff
+    field public static final int MINIMUM_DEVICE_STATE = 0; // 0x0
   }
 
   public static interface DeviceStateManager.DeviceStateListener {

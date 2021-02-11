@@ -16,8 +16,13 @@
 
 package com.android.server.devicestate;
 
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
@@ -35,24 +40,25 @@ import java.util.Objects;
  */
 public final class DeviceState {
     /** Unique identifier for the device state. */
-    @IntRange(from = 0)
+    @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE)
     private final int mIdentifier;
 
     /** String description of the device state. */
     @NonNull
     private final String mName;
 
-    public DeviceState(@IntRange(from = 0) int identifier,
+    public DeviceState(
+            @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
             @NonNull String name) {
-        if (identifier < 0) {
-            throw new IllegalArgumentException("Identifier must be greater than or equal to zero.");
-        }
+        Preconditions.checkArgumentInRange(identifier, MINIMUM_DEVICE_STATE, MAXIMUM_DEVICE_STATE,
+                "identifier");
+
         mIdentifier = identifier;
         mName = name;
     }
 
     /** Returns the unique identifier for the device state. */
-    @IntRange(from = 0)
+    @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE)
     public int getIdentifier() {
         return mIdentifier;
     }
