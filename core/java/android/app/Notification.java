@@ -1604,6 +1604,14 @@ public class Notification implements Parcelable
         @SystemApi
         public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11;
 
+        /**
+         * {@code SemanticAction}: Mark content as a potential phishing attempt.
+         * Note that this is only for use by the notification assistant services.
+         * @hide
+         */
+        @SystemApi
+        public static final int SEMANTIC_ACTION_CONVERSATION_IS_PHISHING = 12;
+
         private final Bundle mExtras;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
@@ -2315,7 +2323,8 @@ public class Notification implements Parcelable
                 SEMANTIC_ACTION_THUMBS_UP,
                 SEMANTIC_ACTION_THUMBS_DOWN,
                 SEMANTIC_ACTION_CALL,
-                SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY
+                SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY,
+                SEMANTIC_ACTION_CONVERSATION_IS_PHISHING
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface SemanticAction {}
