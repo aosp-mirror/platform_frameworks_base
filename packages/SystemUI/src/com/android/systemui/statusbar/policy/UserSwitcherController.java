@@ -423,7 +423,7 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    private void showExitGuestDialog(int id) {
+    protected void showExitGuestDialog(int id) {
         int newId = UserHandle.USER_SYSTEM;
         if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
