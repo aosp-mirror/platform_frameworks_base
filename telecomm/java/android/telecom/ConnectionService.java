@@ -1992,7 +1992,7 @@ public abstract class ConnectionService extends Service {
         boolean isHandover = request.getExtras() != null && request.getExtras().getBoolean(
                 TelecomManager.EXTRA_IS_HANDOVER_CONNECTION, false);
         boolean addSelfManaged = request.getExtras() != null && request.getExtras().getBoolean(
-                PhoneAccount.EXTRA_ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE, false);
+                PhoneAccount.EXTRA_ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE, true);
         Log.i(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, "
                         + "isIncoming: %b, isUnknown: %b, isLegacyHandover: %b, isHandover: %b, "
                         + " addSelfManaged: %b", callManagerAccount, callId, request, isIncoming,
