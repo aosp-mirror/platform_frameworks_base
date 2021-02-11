@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.app.timedetector;
+package android.app.time;
 
 parcelable ExternalTimeSuggestion;
