@@ -5040,7 +5040,7 @@ package android.media {
   }
 
   public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
-    method @RequiresPermission(android.Manifest.permission.BIND_IMS_SERVICE) public void setOnRtpRxNoticeListener(@NonNull android.content.Context, @NonNull android.media.MediaPlayer.OnRtpRxNoticeListener, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.BIND_IMS_SERVICE) public void setOnRtpRxNoticeListener(@NonNull android.content.Context, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaPlayer.OnRtpRxNoticeListener);
   }
 
   public static interface MediaPlayer.OnRtpRxNoticeListener {
