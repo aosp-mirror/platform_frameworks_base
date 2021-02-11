@@ -238,11 +238,23 @@ public class MeasuredEnergyStats {
      * Return accumulated energy (in microjoules) for the a custom energy bucket since last reset.
      * Returns {@link android.os.BatteryStats#ENERGY_DATA_UNAVAILABLE} if this data is unavailable.
      */
+    @VisibleForTesting
     public long getAccumulatedCustomBucketEnergy(int customBucket) {
         if (!isValidCustomBucket(customBucket)) {
             return ENERGY_DATA_UNAVAILABLE;
         }
         return mAccumulatedEnergiesMicroJoules[customBucketToIndex(customBucket)];
+    }
+
+    /**
+     * Return accumulated energies (in microjoules) for all custom energy buckets since last reset.
+     */
+    public @NonNull long[] getAccumulatedCustomBucketEnergies() {
+        final long[] energies = new long[getNumberCustomEnergyBuckets()];
+        for (int bucket = 0; bucket < energies.length; bucket++) {
+            energies[bucket] = mAccumulatedEnergiesMicroJoules[customBucketToIndex(bucket)];
+        }
+        return energies;
     }
 
     /**
@@ -404,7 +416,6 @@ public class MeasuredEnergyStats {
 
     /** Dump debug data. */
     public void dump(PrintWriter pw) {
-        pw.println("Accumulated energy since last reset (microjoules):");
         pw.print("   ");
         for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
             pw.print(getBucketName(index));
@@ -431,6 +442,11 @@ public class MeasuredEnergyStats {
         return "CUSTOM_" + indexToCustomBucket(index);
     }
 
+    /** Get the number of custom energy buckets on this device. */
+    public int getNumberCustomEnergyBuckets() {
+        return mAccumulatedEnergiesMicroJoules.length - NUMBER_STANDARD_ENERGY_BUCKETS;
+    }
+
     private static int customBucketToIndex(int customBucket) {
         return customBucket + NUMBER_STANDARD_ENERGY_BUCKETS;
     }
@@ -450,6 +466,7 @@ public class MeasuredEnergyStats {
     }
 
     /** Returns whether the given custom bucket is valid (exists) on this device. */
+    @VisibleForTesting
     public boolean isValidCustomBucket(int customBucket) {
         return customBucket >= 0
                 && customBucketToIndex(customBucket) < mAccumulatedEnergiesMicroJoules.length;

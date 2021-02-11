@@ -707,22 +707,26 @@ public class BatteryStatsNoteTest extends TestCase {
             int uid2, long blame2A, long blame2B,
             MockBatteryStatsImpl bi) {
 
+        final long[] actualTotal = bi.getCustomMeasuredEnergiesMicroJoules();
+        final long[] actualUid1 = bi.getUidStatsLocked(uid1).getCustomMeasuredEnergiesMicroJoules();
+        final long[] actualUid2 = bi.getUidStatsLocked(uid2).getCustomMeasuredEnergiesMicroJoules();
+
+        assertNotNull(actualTotal);
+        assertNotNull(actualUid1);
+        assertNotNull(actualUid2);
+
         assertEquals("Wrong total blame in bucket 0 for Case " + caseName, totalBlameA,
-                bi.getCustomMeasuredEnergyMicroJoules(0));
+                actualTotal[0]);
 
         assertEquals("Wrong total blame in bucket 1 for Case " + caseName, totalBlameB,
-                bi.getCustomMeasuredEnergyMicroJoules(1));
+                actualTotal[1]);
 
-        assertEquals("Wrong uid1 blame in bucket 0 for Case " + caseName, blame1A,
-                bi.getUidStatsLocked(uid1).getCustomMeasuredEnergyMicroJoules(0));
+        assertEquals("Wrong uid1 blame in bucket 0 for Case " + caseName, blame1A, actualUid1[0]);
 
-        assertEquals("Wrong uid1 blame in bucket 1 for Case " + caseName, blame1B,
-                bi.getUidStatsLocked(uid1).getCustomMeasuredEnergyMicroJoules(1));
+        assertEquals("Wrong uid1 blame in bucket 1 for Case " + caseName, blame1B, actualUid1[1]);
 
-        assertEquals("Wrong uid2 blame in bucket 0 for Case " + caseName, blame2A,
-                bi.getUidStatsLocked(uid2).getCustomMeasuredEnergyMicroJoules(0));
+        assertEquals("Wrong uid2 blame in bucket 0 for Case " + caseName, blame2A, actualUid2[0]);
 
-        assertEquals("Wrong uid2 blame in bucket 1 for Case " + caseName, blame2B,
-                bi.getUidStatsLocked(uid2).getCustomMeasuredEnergyMicroJoules(1));
+        assertEquals("Wrong uid2 blame in bucket 1 for Case " + caseName, blame2B, actualUid2[1]);
     }
 }
