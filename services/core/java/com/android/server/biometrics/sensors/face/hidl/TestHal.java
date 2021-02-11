@@ -98,8 +98,11 @@ public class TestHal extends IBiometricsFace.Stub {
     }
 
     @Override
-    public int enumerate() {
+    public int enumerate() throws RemoteException {
         Slog.w(TAG, "enumerate");
+        if (mCallback != null) {
+            mCallback.onEnumerate(0 /* deviceId */, new ArrayList<>(), 0 /* userId */);
+        }
         return 0;
     }
 

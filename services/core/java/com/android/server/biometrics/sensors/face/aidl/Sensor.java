@@ -436,13 +436,7 @@ public class Sensor implements IBinder.DeathRecipient {
         mScheduler = new BiometricScheduler(tag, null /* gestureAvailabilityDispatcher */);
         mLockoutCache = new LockoutCache();
         mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> {
-            if (mTestHalEnabled) {
-                return new TestSession(mCurrentSession.mHalSessionCallback);
-            } else {
-                return mCurrentSession != null ? mCurrentSession.mSession : null;
-            }
-        };
+        mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
     }
 
     @NonNull HalClientMonitor.LazyDaemon<ISession> getLazySession() {
@@ -499,6 +493,10 @@ public class Sensor implements IBinder.DeathRecipient {
 
     void setTestHalEnabled(boolean enabled) {
         Slog.w(mTag, "setTestHalEnabled: " + enabled);
+        if (enabled != mTestHalEnabled) {
+            // The framework should retrieve a new session from the HAL.
+            mCurrentSession = null;
+        }
         mTestHalEnabled = enabled;
     }
 
