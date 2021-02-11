@@ -43,6 +43,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
@@ -73,7 +74,20 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
- * Proxy in SysUiScope to delegate events to controllers in WM Shell library.
+ * A SystemUI service that starts with the SystemUI application and sets up any bindings between
+ * Shell and SysUI components.  This service starts happens after the {@link WMComponent} has
+ * already been initialized and may only reference Shell components that are explicitly exported to
+ * SystemUI (see {@link WMComponent}.
+ *
+ * eg. SysUI application starts
+ *     -> SystemUIFactory is initialized
+ *       -> WMComponent is created
+ *         -> WMShellBaseModule dependencies are injected
+ *         -> WMShellModule (form-factory specific) dependencies are injected
+ *       -> SysUIComponent is created
+ *         -> WMComponents are explicitly provided to SysUIComponent for injection into SysUI code
+ *     -> SysUI services are started
+ *       -> WMShell starts and binds SysUI with Shell components via exported Shell interfaces
  */
 @SysUISingleton
 public final class WMShell extends SystemUI
@@ -142,6 +156,8 @@ public final class WMShell extends SystemUI
 
     @Override
     public void start() {
+        // TODO: Consider piping config change and other common calls to a shell component to
+        //  delegate internally
         mProtoTracer.add(this);
         mCommandQueue.addCallback(this);
         mPipOptional.ifPresent(this::initPip);
