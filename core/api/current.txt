@@ -849,6 +849,7 @@ package android {
     field public static final int keyboardNavigationCluster = 16844096; // 0x1010540
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
+    field public static final int knownCerts = 16844330; // 0x101062a
     field public static final int label = 16842753; // 0x1010001
     field public static final int labelFor = 16843718; // 0x10103c6
     field @Deprecated public static final int labelTextSize = 16843317; // 0x1010235
