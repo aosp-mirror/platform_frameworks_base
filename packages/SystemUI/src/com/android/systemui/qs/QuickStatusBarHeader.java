@@ -75,7 +75,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     protected QuickQSPanel mHeaderQsPanel;
     private TouchAnimator mStatusIconsAlphaAnimator;
     private TouchAnimator mHeaderTextContainerAlphaAnimator;
-    private TouchAnimator mPrivacyChipAlphaAnimator;
     private DualToneHandler mDualToneHandler;
 
     private View mSystemIconsView;
@@ -284,7 +283,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
-        updatePrivacyChipAlphaAnimator();
     }
 
     private void updateStatusIconAlphaAnimator() {
@@ -296,12 +294,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private void updateHeaderTextContainerAlphaAnimator() {
         mHeaderTextContainerAlphaAnimator = new TouchAnimator.Builder()
                 .addFloat(mHeaderTextContainerView, "alpha", 0, 0, mExpandedHeaderAlpha)
-                .build();
-    }
-
-    private void updatePrivacyChipAlphaAnimator() {
-        mPrivacyChipAlphaAnimator = new TouchAnimator.Builder()
-                .addFloat(mPrivacyChip, "alpha", 1, 0, 1)
                 .build();
     }
 
@@ -343,10 +335,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
             } else {
                 mHeaderTextContainerView.setVisibility(INVISIBLE);
             }
-        }
-        if (mPrivacyChipAlphaAnimator != null) {
-            mPrivacyChip.setExpanded(expansionFraction > 0.5);
-            mPrivacyChipAlphaAnimator.setPosition(keyguardExpansionFraction);
         }
 
         mKeyguardExpansionFraction = keyguardExpansionFraction;

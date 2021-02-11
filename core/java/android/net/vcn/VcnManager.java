@@ -28,8 +28,10 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -67,8 +69,7 @@ import java.util.concurrent.Executor;
 public class VcnManager {
     @NonNull private static final String TAG = VcnManager.class.getSimpleName();
 
-    @VisibleForTesting
-    public static final Map<
+    private static final Map<
                     VcnUnderlyingNetworkPolicyListener, VcnUnderlyingNetworkPolicyListenerBinder>
             REGISTERED_POLICY_LISTENERS = new ConcurrentHashMap<>();
 
@@ -86,6 +87,18 @@ public class VcnManager {
     public VcnManager(@NonNull Context ctx, @NonNull IVcnManagementService service) {
         mContext = requireNonNull(ctx, "missing context");
         mService = requireNonNull(service, "missing service");
+    }
+
+    /**
+     * Get all currently registered VcnUnderlyingNetworkPolicyListeners for testing purposes.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    @NonNull
+    public static Map<VcnUnderlyingNetworkPolicyListener, VcnUnderlyingNetworkPolicyListenerBinder>
+            getAllPolicyListeners() {
+        return Collections.unmodifiableMap(REGISTERED_POLICY_LISTENERS);
     }
 
     // TODO: Make setVcnConfig(), clearVcnConfig() Public API

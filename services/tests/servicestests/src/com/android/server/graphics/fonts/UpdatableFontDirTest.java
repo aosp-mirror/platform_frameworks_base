@@ -22,12 +22,15 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.graphics.FontListParser;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontUpdateRequest;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.Presubmit;
 import android.system.Os;
+import android.text.FontConfig;
+import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -37,7 +40,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -49,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Presubmit
 @SmallTest
@@ -157,7 +163,11 @@ public final class UpdatableFontDirTest {
                 newFontUpdateRequest("foo,1", GOOD_SIGNATURE),
                 newFontUpdateRequest("bar,2", GOOD_SIGNATURE),
                 newFontUpdateRequest("foo,3", GOOD_SIGNATURE),
-                newFontUpdateRequest("bar,4", GOOD_SIGNATURE)));
+                newFontUpdateRequest("bar,4", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='foobar'>"
+                        + "  <font>foo.ttf</font>"
+                        + "  <font>bar.ttf</font>"
+                        + "</family>")));
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
         assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
@@ -173,6 +183,14 @@ public final class UpdatableFontDirTest {
         assertThat(parser.getRevision(dir.getFontFileMap().get("bar.ttf"))).isEqualTo(4);
         // Outdated font dir should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(2);
+        assertNamedFamilyExists(dir.getSystemFontConfig(), "foobar");
+        assertThat(dir.getFontFamilyMap()).containsKey("foobar");
+        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
+        assertThat(foobar.getFontList()).hasSize(2);
+        assertThat(foobar.getFontList().get(0).getFile())
+                .isEqualTo(dir.getFontFileMap().get("foo.ttf"));
+        assertThat(foobar.getFontList().get(1).getFile())
+                .isEqualTo(dir.getFontFileMap().get("bar.ttf"));
     }
 
     @Test
@@ -184,6 +202,7 @@ public final class UpdatableFontDirTest {
                 mConfigFile);
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
+        assertThat(dir.getFontFamilyMap()).isEmpty();
     }
 
     @Test
@@ -198,7 +217,11 @@ public final class UpdatableFontDirTest {
                 newFontUpdateRequest("foo,1", GOOD_SIGNATURE),
                 newFontUpdateRequest("bar,2", GOOD_SIGNATURE),
                 newFontUpdateRequest("foo,3", GOOD_SIGNATURE),
-                newFontUpdateRequest("bar,4", GOOD_SIGNATURE)));
+                newFontUpdateRequest("bar,4", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='foobar'>"
+                        + "  <font>foo.ttf</font>"
+                        + "  <font>bar.ttf</font>"
+                        + "</family>")));
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
 
@@ -211,6 +234,7 @@ public final class UpdatableFontDirTest {
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
+        assertThat(dir.getFontFamilyMap()).isEmpty();
     }
 
     @Test
@@ -225,7 +249,11 @@ public final class UpdatableFontDirTest {
                 newFontUpdateRequest("foo,1", GOOD_SIGNATURE),
                 newFontUpdateRequest("bar,2", GOOD_SIGNATURE),
                 newFontUpdateRequest("foo,3", GOOD_SIGNATURE),
-                newFontUpdateRequest("bar,4", GOOD_SIGNATURE)));
+                newFontUpdateRequest("bar,4", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='foobar'>"
+                        + "  <font>foo.ttf</font>"
+                        + "  <font>bar.ttf</font>"
+                        + "</family>")));
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
 
@@ -239,6 +267,7 @@ public final class UpdatableFontDirTest {
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
+        assertThat(dir.getFontFamilyMap()).isEmpty();
     }
 
     @Test
@@ -253,7 +282,11 @@ public final class UpdatableFontDirTest {
                 newFontUpdateRequest("foo,1", GOOD_SIGNATURE),
                 newFontUpdateRequest("bar,2", GOOD_SIGNATURE),
                 newFontUpdateRequest("foo,3", GOOD_SIGNATURE),
-                newFontUpdateRequest("bar,4", GOOD_SIGNATURE)));
+                newFontUpdateRequest("bar,4", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='foobar'>"
+                        + "  <font>foo.ttf</font>"
+                        + "  <font>bar.ttf</font>"
+                        + "</family>")));
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
 
@@ -274,6 +307,8 @@ public final class UpdatableFontDirTest {
         // We don't delete bar.ttf in this case, because it's normal that OTA updates preinstalled
         // fonts.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(1);
+        // Font family depending on obsoleted font should be removed.
+        assertThat(dir.getFontFamilyMap()).isEmpty();
     }
 
     @Test
@@ -285,6 +320,7 @@ public final class UpdatableFontDirTest {
                 new File("/dev/null"));
         dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
+        assertThat(dir.getFontFamilyMap()).isEmpty();
     }
 
     @Test
@@ -295,12 +331,19 @@ public final class UpdatableFontDirTest {
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
         dirForPreparation.loadFontFileMap();
-        dirForPreparation.update(
-                Collections.singletonList(newFontUpdateRequest("foo,1", GOOD_SIGNATURE)));
+        dirForPreparation.update(Arrays.asList(
+                newFontUpdateRequest("foo,1", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='foobar'>"
+                        + "  <font>foo.ttf</font>"
+                        + "</family>")));
         try {
             dirForPreparation.update(Arrays.asList(
                     newFontUpdateRequest("foo,2", GOOD_SIGNATURE),
-                    newFontUpdateRequest("bar,2", "Invalid signature")));
+                    newFontUpdateRequest("bar,2", "Invalid signature"),
+                    newAddFontFamilyRequest("<family name='foobar'>"
+                            + "  <font>foo.ttf</font>"
+                            + "  <font>bar.ttf</font>"
+                            + "</family>")));
             fail("Batch update with invalid signature should fail");
         } catch (FontManagerService.SystemFontException e) {
             // Expected
@@ -313,6 +356,11 @@ public final class UpdatableFontDirTest {
         // The state should be rolled back as a whole if one of the update requests fail.
         assertThat(dir.getFontFileMap()).containsKey("foo.ttf");
         assertThat(parser.getRevision(dir.getFontFileMap().get("foo.ttf"))).isEqualTo(1);
+        assertThat(dir.getFontFamilyMap()).containsKey("foobar");
+        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
+        assertThat(foobar.getFontList()).hasSize(1);
+        assertThat(foobar.getFontList().get(0).getFile())
+                .isEqualTo(dir.getFontFileMap().get("foo.ttf"));
     }
 
     @Test
@@ -364,7 +412,7 @@ public final class UpdatableFontDirTest {
         dir.update(Collections.singletonList(newFontUpdateRequest("test,2", GOOD_SIGNATURE)));
         try {
             dir.update(Collections.singletonList(newFontUpdateRequest("test,1", GOOD_SIGNATURE)));
-            fail("Expect IllegalArgumentException");
+            fail("Expect SystemFontException");
         } catch (FontManagerService.SystemFontException e) {
             assertThat(e.getErrorCode()).isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
         }
@@ -440,7 +488,7 @@ public final class UpdatableFontDirTest {
 
         try {
             dir.update(Collections.singletonList(newFontUpdateRequest("test,1", GOOD_SIGNATURE)));
-            fail("Expect IllegalArgumentException");
+            fail("Expect SystemFontException");
         } catch (FontManagerService.SystemFontException e) {
             assertThat(e.getErrorCode()).isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
         }
@@ -599,6 +647,127 @@ public final class UpdatableFontDirTest {
         assertThat(parser.getRevision(dir.getFontFileMap().get("foo.ttf"))).isEqualTo(1);
     }
 
+    @Test
+    public void addFontFamily() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+        dir.loadFontFileMap();
+
+        dir.update(Arrays.asList(
+                newFontUpdateRequest("test,1", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='test'>"
+                        + "  <font>test.ttf</font>"
+                        + "</family>")));
+        assertThat(dir.getFontFileMap()).containsKey("test.ttf");
+        assertThat(dir.getFontFamilyMap()).containsKey("test");
+        FontConfig.FontFamily test = dir.getFontFamilyMap().get("test");
+        assertThat(test.getFontList()).hasSize(1);
+        assertThat(test.getFontList().get(0).getFile())
+                .isEqualTo(dir.getFontFileMap().get("test.ttf"));
+    }
+
+    @Test
+    public void addFontFamily_noName() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+        dir.loadFontFileMap();
+
+        try {
+            dir.update(Arrays.asList(
+                    newFontUpdateRequest("test,1", GOOD_SIGNATURE),
+                    newAddFontFamilyRequest("<family lang='en'>"
+                            + "  <font>test.ttf</font>"
+                            + "</family>")));
+            fail("Expect IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // Expect
+        }
+    }
+
+    @Test
+    public void addFontFamily_fontNotAvailable() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+        dir.loadFontFileMap();
+
+        try {
+            dir.update(Arrays.asList(newAddFontFamilyRequest("<family name='test'>"
+                    + "  <font>test.ttf</font>"
+                    + "</family>")));
+            fail("Expect IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // Expect
+        }
+    }
+
+    @Test
+    public void getSystemFontConfig() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+        dir.loadFontFileMap();
+        // We assume we have monospace.
+        assertNamedFamilyExists(dir.getSystemFontConfig(), "monospace");
+
+        dir.update(Arrays.asList(
+                newFontUpdateRequest("test,1", GOOD_SIGNATURE),
+                // Updating an existing font family.
+                newAddFontFamilyRequest("<family name='monospace'>"
+                        + "  <font>test.ttf</font>"
+                        + "</family>"),
+                // Adding a new font family.
+                newAddFontFamilyRequest("<family name='test'>"
+                        + "  <font>test.ttf</font>"
+                        + "</family>")));
+        FontConfig fontConfig = dir.getSystemFontConfig();
+        assertNamedFamilyExists(fontConfig, "monospace");
+        FontConfig.FontFamily monospace = getLastFamily(fontConfig, "monospace");
+        assertThat(monospace.getFontList()).hasSize(1);
+        assertThat(monospace.getFontList().get(0).getFile())
+                .isEqualTo(dir.getFontFileMap().get("test.ttf"));
+        assertNamedFamilyExists(fontConfig, "test");
+        assertThat(getLastFamily(fontConfig, "test").getFontList())
+                .isEqualTo(monospace.getFontList());
+    }
+
+    @Test
+    public void getSystemFontConfig_preserveFirstFontFamily() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+        dir.loadFontFileMap();
+        assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
+        FontConfig.FontFamily firstFontFamily = dir.getSystemFontConfig().getFontFamilies().get(0);
+        assertThat(firstFontFamily.getName()).isNotEmpty();
+
+        dir.update(Arrays.asList(
+                newFontUpdateRequest("test,1", GOOD_SIGNATURE),
+                newAddFontFamilyRequest("<family name='" + firstFontFamily.getName() + "'>"
+                        + "  <font>test.ttf</font>"
+                        + "</family>")));
+        FontConfig fontConfig = dir.getSystemFontConfig();
+        assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
+        assertThat(fontConfig.getFontFamilies().get(0)).isEqualTo(firstFontFamily);
+        FontConfig.FontFamily updated = getLastFamily(fontConfig, firstFontFamily.getName());
+        assertThat(updated.getFontList()).hasSize(1);
+        assertThat(updated.getFontList().get(0).getFile())
+                .isEqualTo(dir.getFontFileMap().get("test.ttf"));
+        assertThat(updated).isNotEqualTo(firstFontFamily);
+    }
+
     private FontUpdateRequest newFontUpdateRequest(String content, String signature)
             throws Exception {
         File file = File.createTempFile("font", "ttf", mCacheDir);
@@ -608,10 +777,36 @@ public final class UpdatableFontDirTest {
                 signature.getBytes());
     }
 
+    private static FontUpdateRequest newAddFontFamilyRequest(String xml) throws Exception {
+        XmlPullParser parser = Xml.newPullParser();
+        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+        parser.setInput(is, "UTF-8");
+        parser.nextTag();
+        FontConfig.FontFamily fontFamily = FontListParser.readFamily(parser, "", null);
+        return new FontUpdateRequest(fontFamily);
+    }
+
     private void writeConfig(PersistentSystemFontConfig.Config config,
             File file) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             PersistentSystemFontConfig.writeToXml(fos, config);
         }
+    }
+
+    // Returns the last family with the given name, which will be used for creating Typeface.
+    private static FontConfig.FontFamily getLastFamily(FontConfig fontConfig, String familyName) {
+        List<FontConfig.FontFamily> fontFamilies = fontConfig.getFontFamilies();
+        for (int i = fontFamilies.size() - 1; i >= 0; i--) {
+            if (familyName.equals(fontFamilies.get(i).getName())) {
+                return fontFamilies.get(i);
+            }
+        }
+        return null;
+    }
+
+    private static void assertNamedFamilyExists(FontConfig fontConfig, String familyName) {
+        assertThat(fontConfig.getFontFamilies().stream()
+                .map(FontConfig.FontFamily::getName)
+                .collect(Collectors.toSet())).contains(familyName);
     }
 }

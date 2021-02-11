@@ -31,12 +31,11 @@ import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkRequest;
+import android.net.VpnManager;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyChain;
@@ -84,7 +83,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
 
     private final Context mContext;
     private final ConnectivityManager mConnectivityManager;
-    private final IConnectivityManager mConnectivityManagerService;
+    private final VpnManager mVpnManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
@@ -116,8 +115,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mConnectivityManagerService = IConnectivityManager.Stub.asInterface(
-                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+        mVpnManager = context.getSystemService(VpnManager.class);
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mBgExecutor = bgExecutor;
@@ -399,25 +397,19 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private void updateState() {
         // Find all users with an active VPN
         SparseArray<VpnConfig> vpns = new SparseArray<>();
-        try {
-            for (UserInfo user : mUserManager.getUsers()) {
-                VpnConfig cfg = mConnectivityManagerService.getVpnConfig(user.id);
-                if (cfg == null) {
+        for (UserInfo user : mUserManager.getUsers()) {
+            VpnConfig cfg = mVpnManager.getVpnConfig(user.id);
+            if (cfg == null) {
+                continue;
+            } else if (cfg.legacy) {
+                // Legacy VPNs should do nothing if the network is disconnected. Third-party
+                // VPN warnings need to continue as traffic can still go to the app.
+                LegacyVpnInfo legacyVpn = mVpnManager.getLegacyVpnInfo(user.id);
+                if (legacyVpn == null || legacyVpn.state != LegacyVpnInfo.STATE_CONNECTED) {
                     continue;
-                } else if (cfg.legacy) {
-                    // Legacy VPNs should do nothing if the network is disconnected. Third-party
-                    // VPN warnings need to continue as traffic can still go to the app.
-                    LegacyVpnInfo legacyVpn = mConnectivityManagerService.getLegacyVpnInfo(user.id);
-                    if (legacyVpn == null || legacyVpn.state != LegacyVpnInfo.STATE_CONNECTED) {
-                        continue;
-                    }
                 }
-                vpns.put(user.id, cfg);
             }
-        } catch (RemoteException rme) {
-            // Roll back to previous state
-            Log.e(TAG, "Unable to list active VPNs", rme);
-            return;
+            vpns.put(user.id, cfg);
         }
         mCurrentVpns = vpns;
     }

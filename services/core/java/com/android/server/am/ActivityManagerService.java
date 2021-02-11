@@ -10700,13 +10700,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             long kernelUsed = memInfo.getKernelUsedSizeKb();
             final long ionHeap = Debug.getIonHeapsSizeKb();
             final long ionPool = Debug.getIonPoolsSizeKb();
+            final long dmabufMapped = Debug.getDmabufMappedSizeKb();
             if (ionHeap >= 0 && ionPool >= 0) {
-                final long ionMapped = Debug.getIonMappedSizeKb();
-                final long ionUnmapped = ionHeap - ionMapped;
+                final long ionUnmapped = ionHeap - dmabufMapped;
                 pw.print("      ION: ");
                         pw.print(stringifyKBSize(ionHeap + ionPool));
                         pw.print(" (");
-                        pw.print(stringifyKBSize(ionMapped));
+                        pw.print(stringifyKBSize(dmabufMapped));
                         pw.print(" mapped + ");
                         pw.print(stringifyKBSize(ionUnmapped));
                         pw.print(" unmapped + ");
@@ -10715,11 +10715,34 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
                 // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
                 kernelUsed += ionHeap;
+            } else {
+                final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
+                if (totalExportedDmabuf >= 0) {
+                    final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
+                    pw.print("DMA-BUF: ");
+                    pw.print(stringifyKBSize(totalExportedDmabuf));
+                    pw.print(" (");
+                    pw.print(stringifyKBSize(dmabufMapped));
+                    pw.print(" mapped + ");
+                    pw.print(stringifyKBSize(dmabufUnmapped));
+                    pw.println(" unmapped)");
+                    kernelUsed += totalExportedDmabuf;
+                }
+                final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+                if (totalDmabufHeapPool >= 0) {
+                    pw.print("DMA-BUF Heaps pool: ");
+                    pw.println(stringifyKBSize(totalDmabufHeapPool));
+                }
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
                 pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
             }
+
+            /*
+             * Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+             * memInfo.getCachedSizeKb().
+             */
             final long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()

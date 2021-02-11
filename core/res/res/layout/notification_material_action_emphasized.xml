@@ -22,6 +22,7 @@
     android:layout_height="match_parent"
     android:layout_marginStart="12dp"
     android:layout_weight="1"
+    android:drawablePadding="6dp"
     android:gravity="center"
     android:textColor="@color/notification_default_color"
     android:singleLine="true"

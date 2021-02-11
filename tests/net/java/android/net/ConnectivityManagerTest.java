@@ -35,6 +35,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
+import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -329,6 +330,9 @@ public class ConnectivityManagerTest {
         mustFail(() -> { manager.registerDefaultNetworkCallback(null, handler); });
         mustFail(() -> { manager.registerDefaultNetworkCallback(callback, null); });
 
+        mustFail(() -> { manager.registerSystemDefaultNetworkCallback(null, handler); });
+        mustFail(() -> { manager.registerSystemDefaultNetworkCallback(callback, null); });
+
         mustFail(() -> { manager.unregisterNetworkCallback(nullCallback); });
         mustFail(() -> { manager.unregisterNetworkCallback(nullIntent); });
         mustFail(() -> { manager.releaseNetworkRequest(nullIntent); });
@@ -375,6 +379,13 @@ public class ConnectivityManagerTest {
         manager.requestBackgroundNetwork(request, null, callback);
         verify(mService).requestNetwork(eq(request.networkCapabilities),
                 eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(testPkgName), eq(testAttributionTag));
+        reset(mService);
+
+        Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        manager.registerSystemDefaultNetworkCallback(callback, handler);
+        verify(mService).requestNetwork(eq(null),
+                eq(TRACK_SYSTEM_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
                 eq(testPkgName), eq(testAttributionTag));
         reset(mService);
     }

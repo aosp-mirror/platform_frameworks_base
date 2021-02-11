@@ -998,6 +998,18 @@ public abstract class PackageManagerInternal {
     public abstract boolean isSuspendingAnyPackages(String suspendingPackage, int userId);
 
     /**
+     * Register to listen for loading progress of an installed package.
+     * The listener is automatically unregistered when the app is fully loaded.
+     * @param packageName The name of the installed package
+     * @param callback To loading reporting progress
+     * @param userId The user under which to check.
+     * @return Whether the registration was successful. It can fail if the package has not been
+     *          installed yet.
+     */
+    public abstract boolean registerInstalledLoadingProgressCallback(@NonNull String packageName,
+            @NonNull InstalledLoadingProgressCallback callback, int userId);
+
+    /**
      * Returns the string representation of a known package. For example,
      * {@link #PACKAGE_SETUP_WIZARD} is represented by the string Setup Wizard.
      *
