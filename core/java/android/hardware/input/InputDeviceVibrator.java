@@ -74,6 +74,11 @@ final class InputDeviceVibrator extends Vibrator {
     }
 
     @Override
+    public int getId() {
+        return mVibratorId;
+    }
+
+    @Override
     public boolean hasVibrator() {
         return true;
     }

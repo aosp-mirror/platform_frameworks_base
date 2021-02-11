@@ -198,6 +198,10 @@ public class VibratorManagerServiceTest {
                         return mVibratorProviders.get(vibratorId)
                                 .newVibratorController(vibratorId, listener);
                     }
+
+                    @Override
+                    void addService(String name, IBinder service) {
+                    }
                 });
         service.systemReady();
         return service;

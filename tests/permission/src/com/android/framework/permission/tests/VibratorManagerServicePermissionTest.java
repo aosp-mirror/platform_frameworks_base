@@ -16,8 +16,11 @@
 
 package com.android.framework.permission.tests;
 
+import android.content.Context;
 import android.os.Binder;
-import android.os.IVibratorService;
+import android.os.CombinedVibrationEffect;
+import android.os.IBinder;
+import android.os.IVibratorManagerService;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -32,27 +35,28 @@ import junit.framework.TestCase;
  * Verify that Hardware apis cannot be called without required permissions.
  */
 @SmallTest
-public class VibratorServicePermissionTest extends TestCase {
+public class VibratorManagerServicePermissionTest extends TestCase {
 
-    private IVibratorService mVibratorService;
+    private IVibratorManagerService mVibratorService;
 
     @Override
     protected void setUp() throws Exception {
-        mVibratorService = IVibratorService.Stub.asInterface(
-                ServiceManager.getService("vibrator"));
+        mVibratorService = IVibratorManagerService.Stub.asInterface(
+                ServiceManager.getService(Context.VIBRATOR_MANAGER_SERVICE));
     }
 
     /**
-     * Test that calling {@link android.os.IVibratorService#vibrate(long)} requires permissions.
+     * Test that calling {@link android.os.IVibratorManagerService#vibrate(int, String,
+     * CombinedVibrationEffect, VibrationAttributes, String, IBinder)} requires permissions.
      * <p>Tests permission:
-     *   {@link android.Manifest.permission#VIBRATE}
-     * @throws RemoteException
+     * {@link android.Manifest.permission#VIBRATE}
      */
     public void testVibrate() throws RemoteException {
         try {
-            final VibrationEffect effect =
-                    VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE);
-            final VibrationAttributes attrs = new VibrationAttributes.Builder()
+            CombinedVibrationEffect effect =
+                    CombinedVibrationEffect.createSynced(
+                            VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+            VibrationAttributes attrs = new VibrationAttributes.Builder()
                     .setUsage(VibrationAttributes.USAGE_ALARM)
                     .build();
             mVibratorService.vibrate(Process.myUid(), null, effect, attrs,
@@ -64,10 +68,10 @@ public class VibratorServicePermissionTest extends TestCase {
     }
 
     /**
-     * Test that calling {@link android.os.IVibratorService#cancelVibrate()} requires permissions.
+     * Test that calling {@link android.os.IVibratorManagerService#cancelVibrate(IBinder)} requires
+     * permissions.
      * <p>Tests permission:
-     *   {@link android.Manifest.permission#VIBRATE}
-     * @throws RemoteException
+     * {@link android.Manifest.permission#VIBRATE}
      */
     public void testCancelVibrate() throws RemoteException {
         try {
