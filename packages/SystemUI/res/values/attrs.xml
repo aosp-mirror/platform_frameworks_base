@@ -139,6 +139,10 @@
     <!-- Size of shadows/elevations on keyguard -->
     <attr name="shadowRadius" format="float" />
 
+    <attr name="handleThickness" format="dimension" />
+    <attr name="handleColor" format="color" />
+    <attr name="scrimColor" format="color" />
+
     <!-- Used display CarrierText in Keyguard or QS Footer -->
     <declare-styleable name="CarrierText">
         <attr name="allCaps" format="boolean" />
@@ -173,15 +177,15 @@
     </declare-styleable>
 
     <declare-styleable name="CropView">
-        <attr name="handleThickness" format="dimension" />
-        <attr name="handleColor" format="color" />
-        <attr name="scrimColor" format="color" />
+        <attr name="handleThickness" />
+        <attr name="handleColor" />
+        <attr name="scrimColor" />
     </declare-styleable>
 
     <declare-styleable name="MagnifierView">
-        <attr name="handleThickness" format="dimension" />
-        <attr name="handleColor" format="color" />
-        <attr name="scrimColor" format="color" />
+        <attr name="handleThickness" />
+        <attr name="handleColor" />
+        <attr name="scrimColor" />
         <attr name="borderThickness" format="dimension" />
         <attr name="borderColor" format="color" />
     </declare-styleable>
