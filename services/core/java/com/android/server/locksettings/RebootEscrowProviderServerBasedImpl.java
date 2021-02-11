@@ -35,7 +35,7 @@ import javax.crypto.SecretKey;
  * encrypt & decrypt the blob.
  */
 class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterface {
-    private static final String TAG = "RebootEscrowProvider";
+    private static final String TAG = "RebootEscrowProviderServerBased";
 
     // Timeout for service binding
     private static final long DEFAULT_SERVICE_TIMEOUT_IN_SECONDS = 10;
@@ -49,6 +49,8 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
     private final LockSettingsStorage mStorage;
 
     private final Injector mInjector;
+
+    private byte[] mServerBlob;
 
     static class Injector {
         private ResumeOnRebootServiceConnection mServiceConnection = null;
@@ -124,17 +126,20 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
     }
 
     @Override
-    public RebootEscrowKey getAndClearRebootEscrowKey(SecretKey decryptionKey) {
-        byte[] serverBlob = mStorage.readRebootEscrowServerBlob();
+    public RebootEscrowKey getAndClearRebootEscrowKey(SecretKey decryptionKey) throws IOException {
+        if (mServerBlob == null) {
+            mServerBlob = mStorage.readRebootEscrowServerBlob();
+        }
         // Delete the server blob in storage.
         mStorage.removeRebootEscrowServerBlob();
-        if (serverBlob == null) {
+        if (mServerBlob == null) {
             Slog.w(TAG, "Failed to read reboot escrow server blob from storage");
             return null;
         }
 
+        Slog.i(TAG, "Loaded reboot escrow server blob from storage");
         try {
-            byte[] escrowKeyBytes = unwrapServerBlob(serverBlob, decryptionKey);
+            byte[] escrowKeyBytes = unwrapServerBlob(mServerBlob, decryptionKey);
             if (escrowKeyBytes == null) {
                 Slog.w(TAG, "Decrypted reboot escrow key bytes should not be null");
                 return null;
@@ -145,7 +150,7 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
             }
 
             return RebootEscrowKey.fromKeyBytes(escrowKeyBytes);
-        } catch (TimeoutException | RemoteException | IOException e) {
+        } catch (TimeoutException | RemoteException e) {
             Slog.w(TAG, "Failed to decrypt the server blob ", e);
             return null;
         }
