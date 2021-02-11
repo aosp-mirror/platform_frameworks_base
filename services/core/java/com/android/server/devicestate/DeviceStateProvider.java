@@ -16,6 +16,9 @@
 
 package com.android.server.devicestate;
 
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+
 import android.annotation.IntRange;
 
 /**
@@ -65,8 +68,10 @@ public interface DeviceStateProvider {
          *
          * @param identifier the identifier of the new device state.
          *
-         * @throws IllegalArgumentException if the state is less than 0.
+         * @throws IllegalArgumentException if the state is less than {@link MINIMUM_DEVICE_STATE}
+         * or greater than {@link MAXIMUM_DEVICE_STATE}.
          */
-        void onStateChanged(@IntRange(from = 0) int identifier);
+        void onStateChanged(
+                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier);
     }
 }
