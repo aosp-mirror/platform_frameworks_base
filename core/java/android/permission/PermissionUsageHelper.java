@@ -693,13 +693,14 @@ public class PermissionUsageHelper {
         for (int usageNum = 0; usageNum < rawUsages.size(); usageNum++) {
             OpUsage usage = rawUsages.get(usageNum);
 
+            // If this attribution is a proxy, remove it
+            if (toRemoveProxies.contains(usage.toPackageAttr())) {
+                continue;
+            }
+
             // If this attribution has a special attribution, do not remove it
             if (specialAttributions.contains(usage.toPackageAttr())) {
                 deDuped.add(usage);
-            }
-
-            // If this attribution is a proxy, remove it
-            if (toRemoveProxies.contains(usage.toPackageAttr())) {
                 continue;
             }
 
