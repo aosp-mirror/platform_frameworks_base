@@ -43,11 +43,13 @@ public class TunerActivity extends Activity implements
     private static final String TAG_TUNER = "tuner";
 
     private final DemoModeController mDemoModeController;
+    private final TunerService mTunerService;
 
     @Inject
-    TunerActivity(DemoModeController demoModeController) {
+    TunerActivity(DemoModeController demoModeController, TunerService tunerService) {
         super();
         mDemoModeController = demoModeController;
+        mTunerService = tunerService;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +69,7 @@ public class TunerActivity extends Activity implements
                     "com.android.settings.action.DEMO_MODE");
             final PreferenceFragment fragment = showDemoMode
                     ? new DemoModeFragment(mDemoModeController)
-                    : new TunerFragment();
+                    : new TunerFragment(mTunerService);
             getFragmentManager().beginTransaction().replace(R.id.content_frame,
                     fragment, TAG_TUNER).commit();
         }
