@@ -26,7 +26,7 @@ import android.view.DisplayEventReceiver;
 import android.view.RoundedCorners;
 import android.view.Surface;
 
-import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.display.BrightnessSynchronizer;
 
 import java.util.Arrays;
 import java.util.Objects;

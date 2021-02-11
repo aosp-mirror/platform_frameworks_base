@@ -41,7 +41,7 @@ import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 import android.util.MathUtils;
 
-import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtilsInternal;

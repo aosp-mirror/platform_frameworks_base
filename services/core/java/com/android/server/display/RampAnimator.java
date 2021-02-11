@@ -20,7 +20,7 @@ import android.animation.ValueAnimator;
 import android.util.FloatProperty;
 import android.view.Choreographer;
 
-import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.display.BrightnessSynchronizer;
 
 /**
  * A custom animator that progressively updates a property value at
