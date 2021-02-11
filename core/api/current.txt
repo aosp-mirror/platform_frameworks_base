@@ -42166,6 +42166,15 @@ package android.telephony.ims {
     field public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2; // 0x2
   }
 
+  public final class ImsRegistrationAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAttributeFlags();
+    method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
+    method public int getTransportType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsRegistrationAttributes> CREATOR;
+  }
+
   public class RcsUceAdapter {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
   }
@@ -42182,8 +42191,10 @@ package android.telephony.ims {
 
   public static class RegistrationManager.RegistrationCallback {
     ctor public RegistrationManager.RegistrationCallback();
-    method public void onRegistered(int);
-    method public void onRegistering(int);
+    method @Deprecated public void onRegistered(int);
+    method public void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
+    method @Deprecated public void onRegistering(int);
+    method public void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public void onTechnologyChangeFailed(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo);
   }

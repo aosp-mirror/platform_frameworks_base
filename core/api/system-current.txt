@@ -11544,6 +11544,8 @@ package android.telephony.ims {
 
   @Deprecated public static class ImsMmTelManager.RegistrationCallback extends android.telephony.ims.RegistrationManager.RegistrationCallback {
     ctor @Deprecated public ImsMmTelManager.RegistrationCallback();
+    method @Deprecated public void onRegistered(int);
+    method @Deprecated public void onRegistering(int);
   }
 
   public class ImsRcsManager {
@@ -11559,6 +11561,16 @@ package android.telephony.ims {
 
   public final class ImsReasonInfo implements android.os.Parcelable {
     field public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED = "Forbidden. Not Authorized for Service";
+  }
+
+  public final class ImsRegistrationAttributes implements android.os.Parcelable {
+    method public int getRegistrationTechnology();
+  }
+
+  public static final class ImsRegistrationAttributes.Builder {
+    ctor public ImsRegistrationAttributes.Builder(int);
+    method @NonNull public android.telephony.ims.ImsRegistrationAttributes build();
+    method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFeatureTags(@NonNull java.util.Set<java.lang.String>);
   }
 
   public class ImsService extends android.app.Service {
@@ -12344,7 +12356,9 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase();
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onRegistered(int);
+    method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onRegistering(int);
+    method public final void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onSubscriberAssociatedUriChanged(android.net.Uri[]);
     method public final void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
