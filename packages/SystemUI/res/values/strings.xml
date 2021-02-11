@@ -1341,6 +1341,9 @@
     <!-- Monitoring dialog: Description of Network Logging. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_management_network_logging">Your admin has turned on network logging, which monitors traffic on your device.</string>
 
+    <!-- Monitoring dialog: Description of Network Logging in the work profile. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_managed_profile_network_logging">Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile.</string>
+
     <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_named_vpn">You\'re connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
 
