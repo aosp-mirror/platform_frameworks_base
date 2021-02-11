@@ -178,6 +178,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
@@ -5229,15 +5230,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        boolean asProto = false;
-        for (int argIndex = 0; argIndex < args.length; argIndex++) {
-            if (args[argIndex].equals(PROTO_ARG)) {
-                asProto = true;
-                break;
-            }
-        }
-
-        if (asProto) {
+        if (ArrayUtils.contains(args, PROTO_ARG)) {
             final ImeTracing imeTracing = ImeTracing.getInstance();
             if (imeTracing.isEnabled()) {
                 imeTracing.stopTrace(null, false /* writeToFile */);
