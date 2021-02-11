@@ -558,8 +558,8 @@ public class PipResizeGestureHandler {
                         || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
                     mLastResizeBounds.set(0, 0, mMaxSize.x, mMaxSize.y);
                 }
-                mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds,
-                        mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds()));
+                final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mLastResizeBounds);
+                mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
                         PINCH_RESIZE_SNAP_DURATION, -mAngle, callback);
             } else {
