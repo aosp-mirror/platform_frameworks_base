@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.sensors;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -83,6 +85,29 @@ public class ProximityCheckTest extends SysuiTestCase {
         assertFalse(mFakeProximitySensor.isRegistered());
         assertEquals(1, mTestableCallback.mNumCalls);
         assertNull(mTestableCallback.mLastResult);
+    }
+
+    @Test
+    public void testNotLoaded() {
+        mFakeProximitySensor.setSensorAvailable(false);
+
+        assertThat(mTestableCallback.mLastResult).isNull();
+        assertThat(mTestableCallback.mNumCalls).isEqualTo(0);
+
+        mProximityCheck.check(100, mTestableCallback);
+
+        assertThat(mTestableCallback.mLastResult).isNull();
+        assertThat(mTestableCallback.mNumCalls).isEqualTo(1);
+
+        mFakeProximitySensor.setSensorAvailable(true);
+
+        mProximityCheck.check(100, mTestableCallback);
+
+        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.alertListeners();
+
+        assertThat(mTestableCallback.mLastResult).isNotNull();
+        assertThat(mTestableCallback.mNumCalls).isEqualTo(2);
     }
 
     @Test
