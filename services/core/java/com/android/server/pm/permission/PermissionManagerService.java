@@ -3438,6 +3438,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Any pre-installed system app is allowed to get this permission.
             allowed = true;
         }
+        if (!allowed && bp.isKnownSigner()) {
+            // If the permission is to be granted to a known signer then check if any of this
+            // app's signing certificates are in the trusted certificate digest Set.
+            allowed = pkg.getSigningDetails().hasAncestorOrSelfWithDigest(bp.getKnownCerts());
+        }
         // Deferred to be checked under permission data lock inside restorePermissionState().
         //if (!allowed && bp.isDevelopment()) {
         //    // For development permissions, a development permission
