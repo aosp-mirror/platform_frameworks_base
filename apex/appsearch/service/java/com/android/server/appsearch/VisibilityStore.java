@@ -332,10 +332,8 @@ public class VisibilityStore {
         for (Map.Entry<String, List<PackageIdentifier>> entry :
                 schemasPackageAccessible.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
-                // TODO(b/169883602): remove the "placeholder" uri once upstream changes to relax
-                // nested document uri rules gets synced down.
                 GenericDocument packageAccessibleDocument =
-                        new GenericDocument.Builder(/*uri=*/ "placeholder", PACKAGE_ACCESSIBLE_TYPE)
+                        new GenericDocument.Builder(/*uri=*/"", PACKAGE_ACCESSIBLE_TYPE)
                                 .setNamespace(NAMESPACE)
                                 .setPropertyString(
                                         PACKAGE_NAME_PROPERTY,
