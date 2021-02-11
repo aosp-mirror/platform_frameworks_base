@@ -17,11 +17,13 @@
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.fingerprint.Error;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.ISessionCallback;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.keymaster.HardwareAuthToken;
+import android.os.RemoteException;
 import android.util.Slog;
 
 /**
@@ -38,58 +40,82 @@ public class TestHal extends IFingerprint.Stub {
 
     @Override
     public ISession createSession(int sensorId, int userId, ISessionCallback cb) {
+        Slog.w(TAG, "createSession, sensorId: " + sensorId + " userId: " + userId);
+
         return new ISession.Stub() {
             @Override
-            public void generateChallenge(int cookie, int timeoutSec) {
+            public void generateChallenge(int cookie, int timeoutSec) throws RemoteException {
                 Slog.w(TAG, "generateChallenge, cookie: " + cookie);
+                cb.onChallengeGenerated(0L);
             }
 
             @Override
-            public void revokeChallenge(int cookie, long challenge) {
+            public void revokeChallenge(int cookie, long challenge) throws RemoteException {
                 Slog.w(TAG, "revokeChallenge: " + challenge + ", cookie: " + cookie);
+                cb.onChallengeRevoked(challenge);
             }
 
             @Override
             public ICancellationSignal enroll(int cookie, HardwareAuthToken hat) {
                 Slog.w(TAG, "enroll, cookie: " + cookie);
-                return null;
+                return new ICancellationSignal.Stub() {
+                    @Override
+                    public void cancel() throws RemoteException {
+                        cb.onError(Error.CANCELED, 0 /* vendorCode */);
+                    }
+                };
             }
 
             @Override
             public ICancellationSignal authenticate(int cookie, long operationId) {
                 Slog.w(TAG, "authenticate, cookie: " + cookie);
-                return null;
+                return new ICancellationSignal.Stub() {
+                    @Override
+                    public void cancel() throws RemoteException {
+                        cb.onError(Error.CANCELED, 0 /* vendorCode */);
+                    }
+                };
             }
 
             @Override
             public ICancellationSignal detectInteraction(int cookie) {
                 Slog.w(TAG, "detectInteraction, cookie: " + cookie);
-                return null;
+                return new ICancellationSignal.Stub() {
+                    @Override
+                    public void cancel() throws RemoteException {
+                        cb.onError(Error.CANCELED, 0 /* vendorCode */);
+                    }
+                };
             }
 
             @Override
-            public void enumerateEnrollments(int cookie) {
+            public void enumerateEnrollments(int cookie) throws RemoteException {
                 Slog.w(TAG, "enumerateEnrollments, cookie: " + cookie);
+                cb.onEnrollmentsEnumerated(new int[0]);
             }
 
             @Override
-            public void removeEnrollments(int cookie, int[] enrollmentIds) {
+            public void removeEnrollments(int cookie, int[] enrollmentIds) throws RemoteException {
                 Slog.w(TAG, "removeEnrollments, cookie: " + cookie);
+                cb.onEnrollmentsRemoved(enrollmentIds);
             }
 
             @Override
-            public void getAuthenticatorId(int cookie) {
+            public void getAuthenticatorId(int cookie) throws RemoteException {
                 Slog.w(TAG, "getAuthenticatorId, cookie: " + cookie);
+                cb.onAuthenticatorIdRetrieved(0L);
             }
 
             @Override
-            public void invalidateAuthenticatorId(int cookie) {
+            public void invalidateAuthenticatorId(int cookie) throws RemoteException {
                 Slog.w(TAG, "invalidateAuthenticatorId, cookie: " + cookie);
+                cb.onAuthenticatorIdInvalidated(0L);
             }
 
             @Override
-            public void resetLockout(int cookie, HardwareAuthToken hat) {
+            public void resetLockout(int cookie, HardwareAuthToken hat) throws RemoteException {
                 Slog.w(TAG, "resetLockout, cookie: " + cookie);
+                cb.onLockoutCleared();
             }
 
             @Override

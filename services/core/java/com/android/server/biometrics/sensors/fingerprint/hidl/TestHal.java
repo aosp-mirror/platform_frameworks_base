@@ -83,8 +83,12 @@ public class TestHal extends IBiometricsFingerprint.Stub {
     }
 
     @Override
-    public int enumerate() {
+    public int enumerate() throws RemoteException {
         Slog.w(TAG, "Enumerate");
+        if (mCallback != null) {
+            mCallback.onEnumerate(0 /* deviceId */, 0 /* fingerId */, 0 /* groupId */,
+                    0 /* remaining */);
+        }
         return 0;
     }
 
