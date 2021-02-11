@@ -92,13 +92,6 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     @GuardedBy("mLock")
     private boolean mForceStop;
 
-    // TODO(b/159207608): Remove this constructor once VibratorService is removed
-    public VibrationThread(Vibration vib, VibratorController vibrator,
-            PowerManager.WakeLock wakeLock, IBatteryStats batteryStatsService,
-            VibrationCallbacks callbacks) {
-        this(vib, toSparseArray(vibrator), wakeLock, batteryStatsService, callbacks);
-    }
-
     public VibrationThread(Vibration vib, SparseArray<VibratorController> availableVibrators,
             PowerManager.WakeLock wakeLock, IBatteryStats batteryStatsService,
             VibrationCallbacks callbacks) {
@@ -284,12 +277,6 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
             }
         }
         return filteredEffects;
-    }
-
-    private static SparseArray<VibratorController> toSparseArray(VibratorController controller) {
-        SparseArray<VibratorController> array = new SparseArray<>(1);
-        array.put(controller.getVibratorInfo().getId(), controller);
-        return array;
     }
 
     /**

@@ -17,6 +17,8 @@
 package android.os;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import static org.testng.Assert.assertThrows;
 
@@ -31,7 +33,6 @@ import java.util.Arrays;
 @Presubmit
 @RunWith(JUnit4.class)
 public class CombinedVibrationEffectTest {
-
     private static final VibrationEffect VALID_EFFECT = VibrationEffect.createOneShot(10, 255);
     private static final VibrationEffect INVALID_EFFECT = new VibrationEffect.OneShot(-1, -1);
 
@@ -169,6 +170,37 @@ public class CombinedVibrationEffectTest {
                         VibrationEffect.createWaveform(new long[]{1, 2, 3}, new int[]{1, 2, 3}, 0))
                 .combine()
                 .getDuration());
+    }
+
+    @Test
+    public void testHasVibratorMono_returnsTrueForAnyVibrator() {
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+        assertTrue(effect.hasVibrator(0));
+        assertTrue(effect.hasVibrator(1));
+    }
+
+    @Test
+    public void testHasVibratorStereo_returnsOnlyTheIdsSet() {
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .combine();
+        assertFalse(effect.hasVibrator(0));
+        assertTrue(effect.hasVibrator(1));
+        assertFalse(effect.hasVibrator(2));
+    }
+
+    @Test
+    public void testHasVibratorSequential_returnsNestedVibrators() {
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSequential()
+                .addNext(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addNext(CombinedVibrationEffect.startSynced()
+                        .addVibrator(2, VibrationEffect.get(VibrationEffect.EFFECT_TICK))
+                        .combine())
+                .combine();
+        assertFalse(effect.hasVibrator(0));
+        assertTrue(effect.hasVibrator(1));
+        assertTrue(effect.hasVibrator(2));
     }
 
     @Test

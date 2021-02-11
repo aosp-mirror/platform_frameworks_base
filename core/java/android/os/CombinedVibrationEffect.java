@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
@@ -86,7 +87,20 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         return 0;
     }
 
-    /** @hide */
+    /**
+     * Gets the estimated duration of the combined vibration in milliseconds.
+     *
+     * <p>For synced combinations this means the maximum duration of any individual {@link
+     * VibrationEffect}. For sequential combinations, this is a sum of each step and delays.
+     *
+     * <p>For combinations of effects without a defined end (e.g. a Waveform with a non-negative
+     * repeat index), this returns Long.MAX_VALUE. For effects with an unknown duration (e.g.
+     * Prebaked effects where the length is device and potentially run-time dependent), this returns
+     * -1.
+     *
+     * @hide
+     */
+    @TestApi
     public abstract long getDuration();
 
     /** @hide */
@@ -256,6 +270,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public static final class Mono extends CombinedVibrationEffect {
         private final VibrationEffect mEffect;
 
@@ -267,6 +282,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             mEffect = effect;
         }
 
+        @NonNull
         public VibrationEffect getEffect() {
             return mEffect;
         }
@@ -282,6 +298,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             mEffect.validate();
         }
 
+        /** @hide */
         @Override
         public boolean hasVibrator(int vibratorId) {
             return true;
@@ -307,7 +324,12 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel out, int flags) {
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
             out.writeInt(PARCEL_TOKEN_MONO);
             mEffect.writeToParcel(out, flags);
         }
@@ -335,6 +357,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public static final class Stereo extends CombinedVibrationEffect {
 
         /** Mapping vibrator ids to effects. */
@@ -357,6 +380,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         }
 
         /** Effects to be performed in sync, where each key represents the vibrator id. */
+        @NonNull
         public SparseArray<VibrationEffect> getEffects() {
             return mEffects;
         }
@@ -394,6 +418,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             }
         }
 
+        /** @hide */
         @Override
         public boolean hasVibrator(int vibratorId) {
             return mEffects.indexOfKey(vibratorId) >= 0;
@@ -418,7 +443,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(mEffects);
+            return mEffects.contentHashCode();
         }
 
         @Override
@@ -427,7 +452,12 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel out, int flags) {
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
             out.writeInt(PARCEL_TOKEN_STEREO);
             out.writeInt(mEffects.size());
             for (int i = 0; i < mEffects.size(); i++) {
@@ -459,6 +489,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public static final class Sequential extends CombinedVibrationEffect {
         private final List<CombinedVibrationEffect> mEffects;
         private final List<Integer> mDelays;
@@ -480,11 +511,13 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         }
 
         /** Effects to be performed in sequence. */
+        @NonNull
         public List<CombinedVibrationEffect> getEffects() {
             return mEffects;
         }
 
         /** Delay to be applied before each effect in {@link #getEffects()}. */
+        @NonNull
         public List<Integer> getDelays() {
             return mDelays;
         }
@@ -542,6 +575,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             }
         }
 
+        /** @hide */
         @Override
         public boolean hasVibrator(int vibratorId) {
             final int effectCount = mEffects.size();
@@ -564,7 +598,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(mEffects);
+            return Objects.hash(mEffects, mDelays);
         }
 
         @Override
@@ -573,7 +607,12 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel out, int flags) {
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel out, int flags) {
             out.writeInt(PARCEL_TOKEN_SEQUENTIAL);
             out.writeInt(mEffects.size());
             for (int i = 0; i < mEffects.size(); i++) {
