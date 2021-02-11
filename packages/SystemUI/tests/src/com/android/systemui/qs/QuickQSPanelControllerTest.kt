@@ -27,6 +27,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.statusbar.FeatureFlags
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -63,6 +64,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var tileLayout: TileLayout
     @Mock
     private lateinit var tileView: QSTileView
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
 
     private lateinit var controller: QuickQSPanelController
 
@@ -84,7 +87,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 qsLogger,
                 dumpManager,
-                false
+                false,
+                featureFlags
         )
 
         controller.init()
