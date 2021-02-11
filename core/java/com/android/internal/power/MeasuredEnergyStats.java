@@ -28,7 +28,6 @@ import android.util.Slog;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.power.MeasuredEnergyArray.MeasuredEnergySubsystem;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -247,7 +246,7 @@ public class MeasuredEnergyStats {
     }
 
     /**
-     * Map {@link MeasuredEnergySubsystem} and device state to Display {@link StandardEnergyBucket}.
+     * Map {@link android.view.Display} STATE_ to corresponding {@link StandardEnergyBucket}.
      */
     public static @StandardEnergyBucket int getDisplayEnergyBucket(int screenState) {
         if (Display.isOnState(screenState)) {
@@ -450,7 +449,8 @@ public class MeasuredEnergyStats {
         return bucket >= 0 && bucket < NUMBER_STANDARD_ENERGY_BUCKETS;
     }
 
-    private boolean isValidCustomBucket(int customBucket) {
+    /** Returns whether the given custom bucket is valid (exists) on this device. */
+    public boolean isValidCustomBucket(int customBucket) {
         return customBucket >= 0
                 && customBucketToIndex(customBucket) < mAccumulatedEnergiesMicroJoules.length;
     }
