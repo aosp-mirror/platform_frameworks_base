@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
@@ -30,15 +28,12 @@ import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.StateResidencyResult;
 import android.power.PowerStatsInternal;
 import android.util.SparseArray;
-import android.util.SparseLongArray;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.power.MeasuredEnergyArray;
 
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -61,44 +56,6 @@ public class BatteryExternalStatsWorkerTest {
         mPowerStatsInternal = new TestPowerStatsInternal();
         mBatteryExternalStatsWorker = new BatteryExternalStatsWorker(new TestInjector(context),
                 mBatteryStatsImpl);
-    }
-
-    @Test
-    public void getEnergyConsumptionData() {
-        SparseLongArray expectSubsystems = new SparseLongArray();
-        // Add some energy consumers used by BatteryExternalStatsWorker.
-        final int displayId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.DISPLAY, 0,
-                "display");
-        mPowerStatsInternal.incrementEnergyConsumption(displayId, 12345);
-        expectSubsystems.put(MeasuredEnergyArray.SUBSYSTEM_DISPLAY, 12345);
-
-        // Add an arbitrary energy consumer unused by BatteryExternalStatsWorker.
-        // Must be changed if '154' ever becomes an EnergyConsumerType used by BESW.
-        final int someId = mPowerStatsInternal.addEnergyConsumer((byte) 154, 0, "some_consumer");
-        mPowerStatsInternal.incrementEnergyConsumption(someId, 34567);
-
-        // Inform BESW that PowerStatsInternal is ready to query
-        mBatteryExternalStatsWorker.systemServicesReady();
-
-        MeasuredEnergyArray energies = mBatteryExternalStatsWorker.getEnergyConsumptionData();
-
-        assertEquals(expectSubsystems.size(), energies.size());
-        final int size = expectSubsystems.size();
-
-        for (int i = 0; i < size; i++) {
-            int subsystem = expectSubsystems.keyAt(i);
-            // find the subsystem in the returned MeasuredEnergyArray
-            int subsystemIndex = -1;
-            for (int j = 0; j < size; j++) {
-                if (subsystem == energies.getSubsystem(i)) {
-                    subsystemIndex = i;
-                    break;
-                }
-            }
-            assertNotEquals("Subsystem " + subsystem + " not found in MeasuredEnergyArray", -1,
-                    subsystemIndex);
-            assertEquals(expectSubsystems.valueAt(i), energies.getEnergy(subsystemIndex));
-        }
     }
 
     public class TestInjector extends BatteryExternalStatsWorker.Injector {

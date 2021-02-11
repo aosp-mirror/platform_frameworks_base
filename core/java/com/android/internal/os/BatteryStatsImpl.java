@@ -7173,6 +7173,20 @@ public class BatteryStatsImpl extends BatteryStats {
                 .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
     }
 
+    /**
+     * Returns the energy in microjoules that the given custom energy bucket consumed.
+     * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+     *
+     * @param customEnergyBucket custom energy bucket of interest
+     * @return energy (in microjoules) used by this uid for this energy bucket
+     */
+    public long getCustomMeasuredEnergyMicroJoules(int customEnergyBucket) {
+        if (mGlobalMeasuredEnergyStats == null) {
+            return ENERGY_DATA_UNAVAILABLE;
+        }
+        return mGlobalMeasuredEnergyStats.getAccumulatedCustomBucketEnergy(customEnergyBucket);
+    }
+
     @Override public long getStartClockTime() {
         final long currentTimeMs = System.currentTimeMillis();
         if ((currentTimeMs > MILLISECONDS_IN_YEAR
@@ -7941,6 +7955,13 @@ public class BatteryStatsImpl extends BatteryStats {
                     .updateStandardBucket(energyBucket, energyDeltaUJ, accumulate);
         }
 
+        /** Adds the given energy to the given custom energy bucket for this uid. */
+        private void addEnergyToCustomBucketLocked(long energyDeltaUJ, int energyBucket,
+                boolean accumulate) {
+            getOrCreateMeasuredEnergyStatsLocked()
+                    .updateCustomBucket(energyBucket, energyDeltaUJ, accumulate);
+        }
+
         /**
          * Returns the energy used by this uid for a standard energy bucket of interest.
          * @param bucket standard energy bucket of interest
@@ -7955,6 +7976,22 @@ public class BatteryStatsImpl extends BatteryStats {
                 return 0L; // It is supported, but was never filled, so it must be 0
             }
             return mUidMeasuredEnergyStats.getAccumulatedStandardBucketEnergy(bucket);
+        }
+
+        /**
+         * Returns the energy used by this uid for a custom energy bucket of interest.
+         * @param customEnergyBucket custom energy bucket of interest
+         * @return energy (in microjoules) used by this uid for this energy bucket
+         */
+        public long getCustomMeasuredEnergyMicroJoules(int customEnergyBucket) {
+            if (mBsi.mGlobalMeasuredEnergyStats == null
+                    || !mBsi.mGlobalMeasuredEnergyStats.isValidCustomBucket(customEnergyBucket)) {
+                return ENERGY_DATA_UNAVAILABLE;
+            }
+            if (mUidMeasuredEnergyStats == null) {
+                return 0L; // It is supported, but was never filled, so it must be 0
+            }
+            return mUidMeasuredEnergyStats.getAccumulatedCustomBucketEnergy(customEnergyBucket);
         }
 
         /**
@@ -12461,6 +12498,42 @@ public class BatteryStatsImpl extends BatteryStats {
             // To mitigate round-off errors, remove this app from numerator & denominator totals
             totalDisplayEnergyMJ -= appDisplayEnergyMJ;
             totalFgTimeMs -= fgTimeMs;
+        }
+    }
+
+    /**
+     * Accumulate Custom energy bucket energy, globally and for each app.
+     *
+     * @param totalEnergyUJ energy (microjoules) used for this bucket since this was last called.
+     * @param uidEnergies map of uid->energy (microjoules) for this bucket since last called.
+     *                    Data inside uidEnergies will not be modified (treated immutable).
+     */
+    public void updateCustomMeasuredEnergyDataLocked(int customEnergyBucket,
+            long totalEnergyUJ, @Nullable SparseLongArray uidEnergies) {
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Updating attributed measured energy stats for custom bucket "
+                    + customEnergyBucket
+                    + " with total energy " + totalEnergyUJ
+                    + " and uid energies " + String.valueOf(uidEnergies));
+        }
+        if (mGlobalMeasuredEnergyStats == null) return;
+        if (!mOnBatteryInternal || mIgnoreNextExternalStats || totalEnergyUJ <= 0) return;
+
+        mGlobalMeasuredEnergyStats.updateCustomBucket(customEnergyBucket, totalEnergyUJ, true);
+
+        if (uidEnergies == null) return;
+        final int numUids = uidEnergies.size();
+        for (int i = 0; i < numUids; i++) {
+            final int uidInt = mapUid(uidEnergies.keyAt(i));
+            final long uidEnergyUJ = uidEnergies.valueAt(i);
+            if (uidEnergyUJ == 0) continue;
+            // TODO: Worry about uids not in BSI currently, including uninstalled uids 'coming back'
+            //  Specifically: What if the uid had been removed? We'll re-create it now.
+            //  And if we instead use getAvailableUidStatsLocked() and chec for null, then we might
+            //  not create a Uid even when we should be (say, the app's first event, somehow, was to
+            //  use GPU). I guess that CPU/kernel data might already have this problem?
+            final Uid uidObj = getUidStatsLocked(uidInt);
+            uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket, true);
         }
     }
 
