@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +52,9 @@ import java.util.concurrent.Executor;
  */
 public class ScrollCaptureController implements OnComputeInternalInsetsListener {
     private static final String TAG = "ScrollCaptureController";
+    private static final float MAX_PAGES_DEFAULT = 3f;
+
+    private static final String SETTING_KEY_MAX_PAGES = "screenshot.scroll_max_pages";
 
     private static final int UP = -1;
     private static final int DOWN = 1;
@@ -136,7 +140,9 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
-        mConnection.start(this::startCapture);
+        float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
+                SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
+        mConnection.start(this::startCapture, maxPages);
     }
 
 
