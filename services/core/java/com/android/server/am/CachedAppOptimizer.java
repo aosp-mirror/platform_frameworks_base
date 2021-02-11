@@ -1114,7 +1114,7 @@ public final class CachedAppOptimizer {
                     }
                     return;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Slog.e(TAG_AM, "Not freezing. Unable to check file locks for " + name + "(" + pid
                         + "): " + e);
                 return;
@@ -1192,7 +1192,7 @@ public final class CachedAppOptimizer {
                         unfreezeAppLocked(proc);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
                 synchronized (mAm) {
                     unfreezeAppLocked(proc);
