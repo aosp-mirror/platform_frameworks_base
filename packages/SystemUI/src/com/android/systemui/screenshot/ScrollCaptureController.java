@@ -277,6 +277,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         } else {
             mPreview.setImageDrawable(mImageTileSet.getDrawable());
             mMagnifierView.setImageTileset(mImageTileSet);
+            mCropView.animateBoundaryTo(CropView.CropBoundary.BOTTOM, 0.5f);
         }
     }
 }
