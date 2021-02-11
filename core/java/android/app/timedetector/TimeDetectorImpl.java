@@ -17,6 +17,7 @@
 package android.app.timedetector;
 
 import android.annotation.NonNull;
+import android.app.time.ExternalTimeSuggestion;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
