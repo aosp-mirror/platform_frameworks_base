@@ -64,7 +64,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.system.Int32Ref;
+import android.system.Int64Ref;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -4040,7 +4040,7 @@ public abstract class ContentResolver implements ContentInterface {
         // Convert to Point, since that's what the API is defined as
         final Bundle opts = new Bundle();
         opts.putParcelable(EXTRA_SIZE, Point.convert(size));
-        final Int32Ref orientation = new Int32Ref(0);
+        final Int64Ref orientation = new Int64Ref(0);
 
         Bitmap bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {
             final AssetFileDescriptor afd = content.openTypedAssetFile(uri, "image/*", opts,
