@@ -32,6 +32,7 @@ import android.view.SurfaceControl;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -718,6 +719,7 @@ final class LogicalDisplay {
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
+        pw.println("mIsEnabled=" + mIsEnabled);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
         pw.println("mRequestedColorMode=" + mRequestedColorMode);
@@ -730,5 +732,12 @@ final class LogicalDisplay {
         pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
         pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
         pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        dumpLocked(new PrintWriter(sw));
+        return sw.toString();
     }
 }

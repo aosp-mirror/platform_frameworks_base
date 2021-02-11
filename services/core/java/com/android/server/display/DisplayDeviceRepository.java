@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.annotation.NonNull;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayAddress;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.display.DisplayManagerService.SyncRoot;
@@ -112,12 +113,11 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
         }
     }
 
-    public DisplayDevice getByIdLocked(@NonNull String uniqueId) {
-        final int count = mDisplayDevices.size();
-        for (int i = 0; i < count; i++) {
-            final DisplayDevice d = mDisplayDevices.get(i);
-            if (uniqueId.equals(d.getUniqueId())) {
-                return d;
+    public DisplayDevice getByAddressLocked(@NonNull DisplayAddress address) {
+        for (int i = mDisplayDevices.size() - 1; i >= 0; i--) {
+            final DisplayDevice device = mDisplayDevices.get(i);
+            if (address.equals(device.getDisplayDeviceInfoLocked().address)) {
+                return device;
             }
         }
         return null;
