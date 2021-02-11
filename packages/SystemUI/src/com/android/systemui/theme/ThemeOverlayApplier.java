@@ -15,11 +15,11 @@
  */
 package com.android.systemui.theme;
 
+import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManager;
 import android.content.om.OverlayManagerTransaction;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -53,13 +53,6 @@ import java.util.stream.Collectors;
 public class ThemeOverlayApplier implements Dumpable {
     private static final String TAG = "ThemeOverlayApplier";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean MONET_ENABLED = SystemProperties
-            .getBoolean("persist.sysui.monet", false);
-
-    @VisibleForTesting
-    static final String MONET_ACCENT_COLOR_PACKAGE = "com.android.theme.accentcolor.color";
-    @VisibleForTesting
-    static final String MONET_SYSTEM_PALETTE_PACKAGE = "com.android.theme.systemcolors.color";
 
     @VisibleForTesting
     static final String ANDROID_PACKAGE = "android";
@@ -68,10 +61,8 @@ public class ThemeOverlayApplier implements Dumpable {
     @VisibleForTesting
     static final String SYSUI_PACKAGE = "com.android.systemui";
 
-    @VisibleForTesting
     static final String OVERLAY_CATEGORY_ACCENT_COLOR =
             "android.theme.customization.accent_color";
-    @VisibleForTesting
     static final String OVERLAY_CATEGORY_SYSTEM_PALETTE =
             "android.theme.customization.system_palette";
     @VisibleForTesting
@@ -120,16 +111,6 @@ public class ThemeOverlayApplier implements Dumpable {
             OVERLAY_CATEGORY_ICON_ANDROID,
             OVERLAY_CATEGORY_ICON_SYSUI);
 
-    /**
-     * List of main colors of Monet themes. These are extracted from overlays installed
-     * on the system.
-     */
-    private final ArrayList<Integer> mMainSystemColors = new ArrayList<>();
-    /**
-     * Same as above, but providing accent colors instead of a system palette.
-     */
-    private final ArrayList<Integer> mAccentColors = new ArrayList<>();
-
     /* Allowed overlay categories for each target package. */
     private final Map<String, Set<String>> mTargetPackageToCategories = new ArrayMap<>();
     /* Target package for each overlay category. */
@@ -165,56 +146,7 @@ public class ThemeOverlayApplier implements Dumpable {
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_LAUNCHER, mLauncherPackage);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_THEME_PICKER, mThemePickerPackage);
 
-        collectMonetSystemOverlays();
         dumpManager.registerDumpable(TAG, this);
-    }
-
-    /**
-     * List of accent colors available as Monet overlays.
-     */
-    List<Integer> getAvailableAccentColors() {
-        return mAccentColors;
-    }
-
-    /**
-     * List of main system colors available as Monet overlays.
-     */
-    List<Integer> getAvailableSystemColors() {
-        return mMainSystemColors;
-    }
-
-    private void collectMonetSystemOverlays() {
-        if (!MONET_ENABLED) {
-            return;
-        }
-        List<OverlayInfo> androidOverlays = mOverlayManager
-                .getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM);
-        for (OverlayInfo overlayInfo : androidOverlays) {
-            String packageName = overlayInfo.packageName;
-            if (DEBUG) {
-                Log.d(TAG, "Processing overlay " + packageName);
-            }
-            if (OVERLAY_CATEGORY_SYSTEM_PALETTE.equals(overlayInfo.category)
-                    && packageName.startsWith(MONET_SYSTEM_PALETTE_PACKAGE)) {
-                try {
-                    String color = packageName.replace(MONET_SYSTEM_PALETTE_PACKAGE, "");
-                    mMainSystemColors.add(Integer.parseInt(color, 16));
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "Invalid package name for overlay " + packageName, e);
-                }
-            } else if (OVERLAY_CATEGORY_ACCENT_COLOR.equals(overlayInfo.category)
-                    && packageName.startsWith(MONET_ACCENT_COLOR_PACKAGE)) {
-                try {
-                    String color = packageName.replace(MONET_ACCENT_COLOR_PACKAGE, "");
-                    mAccentColors.add(Integer.parseInt(color, 16));
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "Invalid package name for overlay " + packageName, e);
-                }
-            } else if (DEBUG) {
-                Log.d(TAG, "Unknown overlay: " + packageName + " category: "
-                        + overlayInfo.category);
-            }
-        }
     }
 
     /**
@@ -222,7 +154,9 @@ public class ThemeOverlayApplier implements Dumpable {
      * affect sysui will also be applied to the system user.
      */
     void applyCurrentUserOverlays(
-            Map<String, String> categoryToPackage, Set<UserHandle> userHandles) {
+            Map<String, OverlayIdentifier> categoryToPackage,
+            FabricatedOverlay[] pendingCreation,
+            Set<UserHandle> userHandles) {
         // Disable all overlays that have not been specified in the user setting.
         final Set<String> overlayCategoriesToDisable = new HashSet<>(THEME_CATEGORIES);
         overlayCategoriesToDisable.removeAll(categoryToPackage.keySet());
@@ -241,11 +175,16 @@ public class ThemeOverlayApplier implements Dumpable {
                 .collect(Collectors.toList());
 
         OverlayManagerTransaction.Builder transaction = getTransactionBuilder();
+        if (pendingCreation != null) {
+            for (FabricatedOverlay overlay : pendingCreation) {
+                transaction.registerFabricatedOverlay(overlay);
+            }
+        }
+
         // Toggle overlays in the order of THEME_CATEGORIES.
         for (String category : THEME_CATEGORIES) {
             if (categoryToPackage.containsKey(category)) {
-                OverlayIdentifier overlayInfo =
-                        new OverlayIdentifier(categoryToPackage.get(category));
+                OverlayIdentifier overlayInfo = categoryToPackage.get(category);
                 setEnabled(transaction, overlayInfo, category, userHandles, true);
             }
         }
@@ -284,7 +223,7 @@ public class ThemeOverlayApplier implements Dumpable {
      */
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mMainSystemColors=" + mMainSystemColors.size());
-        pw.println("mAccentColors=" + mAccentColors.size());
+        pw.println("mTargetPackageToCategories=" + mTargetPackageToCategories);
+        pw.println("mCategoryToTargetPackage=" + mCategoryToTargetPackage);
     }
 }

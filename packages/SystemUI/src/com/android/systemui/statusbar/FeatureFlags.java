@@ -78,4 +78,8 @@ public class FeatureFlags {
     public boolean isToastStyleEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_toast_style);
     }
+
+    public boolean isMonetEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_monet);
+    }
 }
