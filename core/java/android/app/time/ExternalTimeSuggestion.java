@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.timedetector;
+package android.app.time;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

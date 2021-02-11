@@ -19,6 +19,7 @@ package android.app.timedetector;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.app.time.ExternalTimeSuggestion;
 import android.content.Context;
 import android.os.SystemClock;
 import android.os.TimestampedValue;
