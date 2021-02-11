@@ -22,8 +22,6 @@ import android.os.Bundle
 import android.view.Surface
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.closePipWindow
-import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.repetitions
@@ -83,10 +81,6 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
                 }
                 test {
                     removeAllTasksButHome()
-
-                    if (device.hasPipWindow()) {
-                        device.closePipWindow()
-                    }
                     pipApp.exit()
                 }
             }
@@ -98,11 +92,13 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
      *
      * @param eachRun If the pip app should be launched in each run (otherwise only 1x per test)
      * @param stringExtras Arguments to pass to the PIP launch intent
+     * @param extraSpec Addicional segment of flicker specification
      */
     @JvmOverloads
-    fun getTransitionLaunch(
+    open fun getTransition(
         eachRun: Boolean,
-        stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true")
+        stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true"),
+        extraSpec: FlickerBuilder.(Bundle) -> Unit = {}
     ): FlickerBuilder.(Bundle) -> Unit {
         return { configuration ->
             setupAndTeardown(this, configuration)
@@ -135,6 +131,8 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
                     removeAllTasksButHome()
                 }
             }
+
+            extraSpec(this, configuration)
         }
     }
 }
