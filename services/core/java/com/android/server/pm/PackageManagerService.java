@@ -26211,30 +26211,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void setKeepUninstalledPackages(final List<String> packageList) {
-            Preconditions.checkNotNull(packageList);
-            List<String> removedFromList = null;
-            synchronized (mLock) {
-                if (mKeepUninstalledPackages != null) {
-                    final int packagesCount = mKeepUninstalledPackages.size();
-                    for (int i = 0; i < packagesCount; i++) {
-                        String oldPackage = mKeepUninstalledPackages.get(i);
-                        if (packageList != null && packageList.contains(oldPackage)) {
-                            continue;
-                        }
-                        if (removedFromList == null) {
-                            removedFromList = new ArrayList<>();
-                        }
-                        removedFromList.add(oldPackage);
-                    }
-                }
-                mKeepUninstalledPackages = new ArrayList<>(packageList);
-                if (removedFromList != null) {
-                    final int removedCount = removedFromList.size();
-                    for (int i = 0; i < removedCount; i++) {
-                        deletePackageIfUnusedLPr(removedFromList.get(i));
-                    }
-                }
-            }
+            PackageManagerService.this.setKeepUninstalledPackagesInternal(packageList);
         }
 
         @Override
@@ -27731,6 +27708,43 @@ public class PackageManagerService extends IPackageManager.Stub
     @NonNull
     public DomainVerificationService.Connection getDomainVerificationConnection() {
         return mDomainVerificationConnection;
+    }
+
+    @Override
+    public void setKeepUninstalledPackages(List<String> packageList) {
+        mContext.enforceCallingPermission(
+                Manifest.permission.KEEP_UNINSTALLED_PACKAGES,
+                "setKeepUninstalledPackages requires KEEP_UNINSTALLED_PACKAGES permission");
+        Objects.requireNonNull(packageList);
+
+        setKeepUninstalledPackagesInternal(packageList);
+    }
+
+    private void setKeepUninstalledPackagesInternal(List<String> packageList) {
+        Preconditions.checkNotNull(packageList);
+        List<String> removedFromList = null;
+        synchronized (mLock) {
+            if (mKeepUninstalledPackages != null) {
+                final int packagesCount = mKeepUninstalledPackages.size();
+                for (int i = 0; i < packagesCount; i++) {
+                    String oldPackage = mKeepUninstalledPackages.get(i);
+                    if (packageList != null && packageList.contains(oldPackage)) {
+                        continue;
+                    }
+                    if (removedFromList == null) {
+                        removedFromList = new ArrayList<>();
+                    }
+                    removedFromList.add(oldPackage);
+                }
+            }
+            mKeepUninstalledPackages = new ArrayList<>(packageList);
+            if (removedFromList != null) {
+                final int removedCount = removedFromList.size();
+                for (int i = 0; i < removedCount; i++) {
+                    deletePackageIfUnusedLPr(removedFromList.get(i));
+                }
+            }
+        }
     }
 }
 
