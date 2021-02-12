@@ -197,6 +197,7 @@ package android {
     field public static final String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
     field public static final String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
+    field public static final String READ_PEOPLE_DATA = "android.permission.READ_PEOPLE_DATA";
     field public static final String READ_PRINT_SERVICES = "android.permission.READ_PRINT_SERVICES";
     field public static final String READ_PRINT_SERVICE_RECOMMENDATIONS = "android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
@@ -1271,6 +1272,14 @@ package android.app.job {
 
   public class JobSchedulerFrameworkInitializer {
     method public static void registerServiceWrappers();
+  }
+
+}
+
+package android.app.people {
+
+  public final class PeopleManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PEOPLE_DATA) public boolean isConversation(@NonNull String, @NonNull String);
   }
 
 }
