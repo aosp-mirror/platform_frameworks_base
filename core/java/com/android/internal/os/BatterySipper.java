@@ -133,6 +133,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double wakeLockPowerMah;
     public double wifiPowerMah;
     public double systemServiceCpuPowerMah;
+    public double[] customMeasuredPowerMah;
 
     // Do not include this sipper in results because it is included
     // in an aggregate sipper.
@@ -251,6 +252,17 @@ public class BatterySipper implements Comparable<BatterySipper> {
         proportionalSmearMah += other.proportionalSmearMah;
         totalSmearedPowerMah += other.totalSmearedPowerMah;
         systemServiceCpuPowerMah += other.systemServiceCpuPowerMah;
+        if (other.customMeasuredPowerMah != null) {
+            if (customMeasuredPowerMah == null) {
+                customMeasuredPowerMah = new double[other.customMeasuredPowerMah.length];
+            }
+            if (customMeasuredPowerMah.length == other.customMeasuredPowerMah.length) {
+                // This should always be true.
+                for (int idx = 0; idx < other.customMeasuredPowerMah.length; idx++) {
+                    customMeasuredPowerMah[idx] += other.customMeasuredPowerMah[idx];
+                }
+            }
+        }
     }
 
     /**
@@ -264,6 +276,11 @@ public class BatterySipper implements Comparable<BatterySipper> {
                 sensorPowerMah + mobileRadioPowerMah + wakeLockPowerMah + cameraPowerMah +
                 flashlightPowerMah + bluetoothPowerMah + audioPowerMah + videoPowerMah
                 + systemServiceCpuPowerMah;
+        if (customMeasuredPowerMah != null) {
+            for (int idx = 0; idx < customMeasuredPowerMah.length; idx++) {
+                totalPowerMah += customMeasuredPowerMah[idx];
+            }
+        }
         totalSmearedPowerMah = totalPowerMah + screenPowerMah + proportionalSmearMah;
 
         return totalPowerMah;
