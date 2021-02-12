@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
@@ -82,6 +83,7 @@ interface IStatusBarService
     void hideCurrentInputMethodForBubbles();
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
     void clearInlineReplyUriPermissions(String key);
+    void onNotificationFeedbackReceived(String key, in Bundle feedback);
 
     void onGlobalActionsShown();
     void onGlobalActionsHidden();

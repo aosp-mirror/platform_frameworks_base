@@ -10088,6 +10088,7 @@ package android.service.notification {
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel, @NonNull android.service.notification.NotificationListenerService.RankingMap);
     method public void onNotificationExpansionChanged(@NonNull String, boolean, boolean);
+    method public void onNotificationFeedbackReceived(@NonNull String, @NonNull android.service.notification.NotificationListenerService.RankingMap, @NonNull android.os.Bundle);
     method public abstract void onNotificationSnoozedUntilContext(@NonNull android.service.notification.StatusBarNotification, @NonNull String);
     method public void onNotificationVisibilityChanged(@NonNull String, boolean);
     method public void onNotificationsSeen(@NonNull java.util.List<java.lang.String>);
@@ -10095,6 +10096,7 @@ package android.service.notification {
     method public void onPanelRevealed(int);
     method public void onSuggestedReplySent(@NonNull String, @NonNull CharSequence, int);
     method public final void unsnoozeNotification(@NonNull String);
+    field public static final String FEEDBACK_RATING = "feedback.rating";
     field public static final String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
     field public static final int SOURCE_FROM_APP = 0; // 0x0
     field public static final int SOURCE_FROM_ASSISTANT = 1; // 0x1

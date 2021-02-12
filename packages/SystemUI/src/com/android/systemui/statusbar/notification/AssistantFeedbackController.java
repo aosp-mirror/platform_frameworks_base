@@ -109,10 +109,10 @@ public class AssistantFeedbackController {
                 && newImportance < NotificationManager.IMPORTANCE_DEFAULT) {
             return STATUS_SILENCED;
         } else if (oldImportance < newImportance
-                || ranking.getRankingAdjustment() == ranking.RANKING_PROMOTED) {
+                || ranking.getRankingAdjustment() == Ranking.RANKING_PROMOTED) {
             return STATUS_PROMOTED;
         } else if (oldImportance > newImportance
-                || ranking.getRankingAdjustment() == ranking.RANKING_DEMOTED) {
+                || ranking.getRankingAdjustment() == Ranking.RANKING_DEMOTED) {
             return STATUS_DEMOTED;
         } else {
             return STATUS_UNCHANGED;

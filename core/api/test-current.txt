@@ -300,6 +300,7 @@ package android.app {
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
+    method public void sendNotificationFeedback(@Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 

@@ -6744,6 +6744,31 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @return true if the notification has image
+     */
+    public boolean hasImage() {
+        if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (MessagingStyle.Message m : MessagingStyle.Message
+                        .getMessagesFromBundleArray(messages)) {
+                    if (m.getDataUri() != null
+                            && m.getDataMimeType() != null
+                            && m.getDataMimeType().startsWith("image/")) {
+                        return true;
+                    }
+                }
+            }
+        } else if (hasLargeIcon()) {
+            return true;
+        } else if (extras.containsKey(EXTRA_BACKGROUND_IMAGE_URI)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
      * @removed
      */
     @SystemApi
