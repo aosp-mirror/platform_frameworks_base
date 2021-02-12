@@ -100,6 +100,15 @@ public abstract class KeyProperties {
 
     /**
      * Purpose of key: creating a shared ECDH secret through key agreement.
+     *
+     * <p>A key having this purpose can be combined with the elliptic curve public key of another
+     * party to establish a shared secret over an insecure channel. It should be used  as a
+     * parameter to {@link javax.crypto.KeyAgreement#init(java.security.Key)} (a complete example is
+     * available <a
+     * href="{@docRoot}reference/android/security/keystore/KeyGenParameterSpec#example:ecdh"
+     * >here</a>).
+     * See <a href="https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman">this
+     * article</a> for a more detailed explanation.
      */
     public static final int PURPOSE_AGREE_KEY = 1 << 6;
 
