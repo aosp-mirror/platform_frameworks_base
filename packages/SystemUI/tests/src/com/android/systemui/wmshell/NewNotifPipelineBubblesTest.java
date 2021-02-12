@@ -261,7 +261,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
 
         mBubblesManager = new BubblesManager(
                 mContext,
-                mBubbleController.getImpl(),
+                mBubbleController.asBubbles(),
                 mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,

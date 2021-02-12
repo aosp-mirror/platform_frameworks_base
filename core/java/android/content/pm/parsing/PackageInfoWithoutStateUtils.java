@@ -655,6 +655,7 @@ public class PackageInfoWithoutStateUtils {
         pi.protectionLevel = p.getProtectionLevel();
         pi.descriptionRes = p.getDescriptionRes();
         pi.flags = p.getFlags();
+        pi.knownCerts = p.getKnownCerts();
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return pi;

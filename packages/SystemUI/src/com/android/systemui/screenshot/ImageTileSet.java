@@ -21,6 +21,8 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.util.Log;
 
 import androidx.annotation.UiThread;
 
@@ -32,10 +34,13 @@ import java.util.List;
  * <p>
  * To display on-screen, use {@link #getDrawable()}.
  */
-@UiThread
 class ImageTileSet {
 
     private static final String TAG = "ImageTileSet";
+
+    ImageTileSet(@UiThread Handler handler) {
+        mHandler = handler;
+    }
 
     interface OnBoundsChangedListener {
         /**
@@ -54,6 +59,7 @@ class ImageTileSet {
 
     private final List<ImageTile> mTiles = new ArrayList<>();
     private final Rect mBounds = new Rect();
+    private final Handler mHandler;
 
     private OnContentChangedListener mOnContentChangedListener;
     private OnBoundsChangedListener mOnBoundsChangedListener;
@@ -73,13 +79,32 @@ class ImageTileSet {
         newBounds.union(newRect);
         if (!newBounds.equals(mBounds)) {
             mBounds.set(newBounds);
-            if (mOnBoundsChangedListener != null) {
-                mOnBoundsChangedListener.onBoundsChanged(
-                        newBounds.left, newBounds.top, newBounds.right, newBounds.bottom);
-            }
+            notifyBoundsChanged(mBounds);
         }
-        if (mOnContentChangedListener != null) {
+        notifyContentChanged();
+    }
+
+    void notifyContentChanged() {
+        if (mOnContentChangedListener == null) {
+            return;
+        }
+        if (mHandler.getLooper().isCurrentThread()) {
             mOnContentChangedListener.onContentChanged();
+        } else {
+            mHandler.post(() -> mOnContentChangedListener.onContentChanged());
+        }
+    }
+
+    void notifyBoundsChanged(Rect bounds) {
+        if (mOnBoundsChangedListener == null) {
+            return;
+        }
+        if (mHandler.getLooper().isCurrentThread()) {
+            mOnBoundsChangedListener.onBoundsChanged(
+                    bounds.left, bounds.top, bounds.right, bounds.bottom);
+        } else {
+            mHandler.post(() -> mOnBoundsChangedListener.onBoundsChanged(
+                    bounds.left, bounds.top, bounds.right, bounds.bottom));
         }
     }
 
@@ -117,22 +142,16 @@ class ImageTileSet {
      *               getHeight()).
      */
     Bitmap toBitmap(Rect bounds) {
+        Log.d(TAG, "exporting with bounds: " + bounds);
         if (mTiles.isEmpty()) {
             return null;
         }
         final RenderNode output = new RenderNode("Bitmap Export");
-        output.setPosition(0, 0, getWidth(), getHeight());
+        output.setPosition(0, 0, bounds.width(), bounds.height());
         RecordingCanvas canvas = output.beginRecording();
-        canvas.translate(-getLeft(), -getTop());
-        // Additional translation to account for the requested bounds
-        canvas.translate(-bounds.left, -bounds.top);
-        canvas.clipRect(bounds);
-        for (ImageTile tile : mTiles) {
-            canvas.save();
-            canvas.translate(tile.getLeft(), tile.getTop());
-            canvas.drawRenderNode(tile.getDisplayList());
-            canvas.restore();
-        }
+        Drawable drawable = getDrawable();
+        drawable.setBounds(bounds);
+        drawable.draw(canvas);
         output.endRecording();
         return HardwareRenderer.createHardwareBitmap(output, bounds.width(), bounds.height());
     }
@@ -162,14 +181,13 @@ class ImageTileSet {
     }
 
     void clear() {
-        mBounds.set(0, 0, 0, 0);
+        if (mBounds.isEmpty()) {
+            return;
+        }
+        mBounds.setEmpty();
         mTiles.forEach(ImageTile::close);
         mTiles.clear();
-        if (mOnBoundsChangedListener != null) {
-            mOnBoundsChangedListener.onBoundsChanged(0, 0, 0, 0);
-        }
-        if (mOnContentChangedListener != null) {
-            mOnContentChangedListener.onContentChanged();
-        }
+        notifyBoundsChanged(mBounds);
+        notifyContentChanged();
     }
 }

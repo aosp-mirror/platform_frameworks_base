@@ -3479,6 +3479,7 @@ public abstract class Context {
             STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
             TIME_ZONE_RULES_MANAGER_SERVICE,
+            VIBRATOR_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
             CONNECTIVITY_SERVICE,
@@ -3625,9 +3626,11 @@ public abstract class Context {
      *   (e.g., GPS) updates.
      *  <dt> {@link #SEARCH_SERVICE} ("search")
      *  <dd> A {@link android.app.SearchManager} for handling search.
+     *  <dt> {@link #VIBRATOR_MANAGER_SERVICE} ("vibrator_manager")
+     *  <dd> A {@link android.os.VibratorManager} for accessing the device vibrators, interacting
+     *  with individual ones and playing synchronized effects on multiple vibrators.
      *  <dt> {@link #VIBRATOR_SERVICE} ("vibrator")
-     *  <dd> A {@link android.os.Vibrator} for interacting with the vibrator
-     *  hardware.
+     *  <dd> A {@link android.os.Vibrator} for interacting with the vibrator hardware.
      *  <dt> {@link #CONNECTIVITY_SERVICE} ("connectivity")
      *  <dd> A {@link android.net.ConnectivityManager ConnectivityManager} for
      *  handling management of network connections.
@@ -3707,6 +3710,8 @@ public abstract class Context {
      * @see android.hardware.SensorManager
      * @see #STORAGE_SERVICE
      * @see android.os.storage.StorageManager
+     * @see #VIBRATOR_MANAGER_SERVICE
+     * @see android.os.VibratorManager
      * @see #VIBRATOR_SERVICE
      * @see android.os.Vibrator
      * @see #CONNECTIVITY_SERVICE
@@ -4034,8 +4039,19 @@ public abstract class Context {
     public static final String WALLPAPER_SERVICE = "wallpaper";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.os.Vibrator} for interacting with the vibration hardware.
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.os.VibratorManager}
+     * for accessing the device vibrators, interacting with individual ones and playing synchronized
+     * effects on multiple vibrators.
+     *
+     * @see #getSystemService(String)
+     * @see android.os.VibratorManager
+     */
+    @SuppressLint("ServiceName")
+    public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.os.Vibrator} for
+     * interacting with the vibration hardware.
      *
      * @see #getSystemService(String)
      * @see android.os.Vibrator

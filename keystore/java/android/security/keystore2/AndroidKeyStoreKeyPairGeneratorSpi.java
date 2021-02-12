@@ -18,16 +18,20 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
 import android.os.Build;
 import android.security.KeyPairGeneratorSpec;
+import android.security.KeyStore;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
 import android.security.KeyStoreSecurityLevel;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.ArrayUtils;
+import android.security.keystore.AttestationUtils;
+import android.security.keystore.DeviceIdAttestationException;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeymasterUtils;
@@ -38,6 +42,8 @@ import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyMetadata;
 import android.system.keystore2.ResponseCode;
+import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 import android.util.Log;
 
 import libcore.util.EmptyArray;
@@ -478,7 +484,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     }
                     throw p;
             }
-        } catch (UnrecoverableKeyException e) {
+        } catch (UnrecoverableKeyException | IllegalArgumentException
+                    | DeviceIdAttestationException e) {
             throw new ProviderException(
                     "Failed to construct key object from newly generated key pair.", e);
         } finally {
@@ -496,7 +503,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     }
 
     private void addAttestationParameters(@NonNull List<KeyParameter> params)
-            throws ProviderException {
+            throws ProviderException, IllegalArgumentException, DeviceIdAttestationException {
         byte[] challenge = mSpec.getAttestationChallenge();
 
         if (challenge != null) {
@@ -526,15 +533,69 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         Build.MODEL.getBytes(StandardCharsets.UTF_8)
                 ));
             }
-        } else {
-            if (mSpec.isDevicePropertiesAttestationIncluded()) {
-                throw new ProviderException("An attestation challenge must be provided when "
-                        + "requesting device properties attestation.");
+
+            int[] idTypes = mSpec.getAttestationIds();
+            if (idTypes == null) {
+                return;
+            }
+            final Set<Integer> idTypesSet = new ArraySet<>(idTypes.length);
+            for (int idType : idTypes) {
+                idTypesSet.add(idType);
+            }
+            TelephonyManager telephonyService = null;
+            if (idTypesSet.contains(AttestationUtils.ID_TYPE_IMEI)
+                    || idTypesSet.contains(AttestationUtils.ID_TYPE_MEID)) {
+                telephonyService =
+                    (TelephonyManager) KeyStore.getApplicationContext().getSystemService(
+                        Context.TELEPHONY_SERVICE);
+                if (telephonyService == null) {
+                    throw new DeviceIdAttestationException("Unable to access telephony service");
+                }
+            }
+            for (final Integer idType : idTypesSet) {
+                switch (idType) {
+                    case AttestationUtils.ID_TYPE_SERIAL:
+                        params.add(KeyStore2ParameterUtils.makeBytes(
+                                KeymasterDefs.KM_TAG_ATTESTATION_ID_SERIAL,
+                                Build.getSerial().getBytes(StandardCharsets.UTF_8)
+                        ));
+                        break;
+                    case AttestationUtils.ID_TYPE_IMEI: {
+                        final String imei = telephonyService.getImei(0);
+                        if (imei == null) {
+                            throw new DeviceIdAttestationException("Unable to retrieve IMEI");
+                        }
+                        params.add(KeyStore2ParameterUtils.makeBytes(
+                                KeymasterDefs.KM_TAG_ATTESTATION_ID_IMEI,
+                                imei.getBytes(StandardCharsets.UTF_8)
+                        ));
+                        break;
+                    }
+                    case AttestationUtils.ID_TYPE_MEID: {
+                        final String meid = telephonyService.getMeid(0);
+                        if (meid == null) {
+                            throw new DeviceIdAttestationException("Unable to retrieve MEID");
+                        }
+                        params.add(KeyStore2ParameterUtils.makeBytes(
+                                KeymasterDefs.KM_TAG_ATTESTATION_ID_MEID,
+                                meid.getBytes(StandardCharsets.UTF_8)
+                        ));
+                        break;
+                    }
+                    case AttestationUtils.USE_INDIVIDUAL_ATTESTATION: {
+                        params.add(KeyStore2ParameterUtils.makeBool(
+                                KeymasterDefs.KM_TAG_DEVICE_UNIQUE_ATTESTATION));
+                        break;
+                    }
+                    default:
+                        throw new IllegalArgumentException("Unknown device ID type " + idType);
+                }
             }
         }
     }
 
-    private Collection<KeyParameter> constructKeyGenerationArguments() {
+    private Collection<KeyParameter> constructKeyGenerationArguments()
+            throws DeviceIdAttestationException, IllegalArgumentException {
         List<KeyParameter> params = new ArrayList<>();
         params.add(KeyStore2ParameterUtils.makeInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits));
         params.add(KeyStore2ParameterUtils.makeEnum(

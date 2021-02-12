@@ -102,9 +102,8 @@ AssetManager2::AssetManager2() {
   memset(&configuration_, 0, sizeof(configuration_));
 }
 
-bool AssetManager2::SetApkAssets(const std::vector<const ApkAssets*>& apk_assets,
-                                 bool invalidate_caches) {
-  apk_assets_ = apk_assets;
+bool AssetManager2::SetApkAssets(std::vector<const ApkAssets*> apk_assets, bool invalidate_caches) {
+  apk_assets_ = std::move(apk_assets);
   BuildDynamicRefTable();
   RebuildFilterList();
   if (invalidate_caches) {
@@ -137,6 +136,36 @@ void AssetManager2::BuildDynamicRefTable() {
   // 0x01 is reserved for the android package.
   int next_package_id = 0x02;
   for (const ApkAssets* apk_assets : sorted_apk_assets) {
+    std::shared_ptr<OverlayDynamicRefTable> overlay_ref_table;
+    if (auto loaded_idmap = apk_assets->GetLoadedIdmap(); loaded_idmap != nullptr) {
+      // The target package must precede the overlay package in the apk assets paths in order
+      // to take effect.
+      auto iter = apk_assets_package_ids.find(std::string(loaded_idmap->TargetApkPath()));
+      if (iter == apk_assets_package_ids.end()) {
+         LOG(INFO) << "failed to find target package for overlay "
+                   << loaded_idmap->OverlayApkPath();
+      } else {
+        uint8_t target_package_id = iter->second;
+
+        // Create a special dynamic reference table for the overlay to rewrite references to
+        // overlay resources as references to the target resources they overlay.
+        overlay_ref_table = std::make_shared<OverlayDynamicRefTable>(
+            loaded_idmap->GetOverlayDynamicRefTable(target_package_id));
+
+        // Add the overlay resource map to the target package's set of overlays.
+        const uint8_t target_idx = package_ids_[target_package_id];
+        CHECK(target_idx != 0xff) << "overlay target '" << loaded_idmap->TargetApkPath()
+                                  << "'added to apk_assets_package_ids but does not have an"
+                                  << " assigned package group";
+
+        PackageGroup& target_package_group = package_groups_[target_idx];
+        target_package_group.overlays_.push_back(
+            ConfiguredOverlay{loaded_idmap->GetTargetResourcesMap(target_package_id,
+                                                                  overlay_ref_table.get()),
+                              apk_assets_cookies[apk_assets]});
+      }
+    }
+
     const LoadedArsc* loaded_arsc = apk_assets->GetLoadedArsc();
     for (const std::unique_ptr<const LoadedPackage>& package : loaded_arsc->GetPackages()) {
       // Get the package ID or assign one if a shared library.
@@ -147,50 +176,25 @@ void AssetManager2::BuildDynamicRefTable() {
         package_id = package->GetPackageId();
       }
 
-      // Add the mapping for package ID to index if not present.
       uint8_t idx = package_ids_[package_id];
       if (idx == 0xff) {
+        // Add the mapping for package ID to index if not present.
         package_ids_[package_id] = idx = static_cast<uint8_t>(package_groups_.size());
-        package_groups_.push_back({});
+        PackageGroup& new_group = package_groups_.emplace_back();
 
-        if (apk_assets->IsOverlay()) {
-          // The target package must precede the overlay package in the apk assets paths in order
-          // to take effect.
-          const auto& loaded_idmap = apk_assets->GetLoadedIdmap();
-          auto target_package_iter = apk_assets_package_ids.find(
-              std::string(loaded_idmap->TargetApkPath()));
-          if (target_package_iter == apk_assets_package_ids.end()) {
-             LOG(INFO) << "failed to find target package for overlay "
-                       << loaded_idmap->OverlayApkPath();
-          } else {
-            const uint8_t target_package_id = target_package_iter->second;
-            const uint8_t target_idx = package_ids_[target_package_id];
-            CHECK(target_idx != 0xff) << "overlay added to apk_assets_package_ids but does not"
-                                      << " have an assigned package group";
-
-            PackageGroup& target_package_group = package_groups_[target_idx];
-
-            // Create a special dynamic reference table for the overlay to rewrite references to
-            // overlay resources as references to the target resources they overlay.
-            auto overlay_table = std::make_shared<OverlayDynamicRefTable>(
-                loaded_idmap->GetOverlayDynamicRefTable(target_package_id));
-            package_groups_.back().dynamic_ref_table = overlay_table;
-
-            // Add the overlay resource map to the target package's set of overlays.
-            target_package_group.overlays_.push_back(
-                ConfiguredOverlay{loaded_idmap->GetTargetResourcesMap(target_package_id,
-                                                                      overlay_table.get()),
-                                  apk_assets_cookies[apk_assets]});
-          }
+        if (overlay_ref_table != nullptr) {
+          // If this package is from an overlay, use a dynamic reference table that can rewrite
+          // overlay resource ids to their corresponding target resource ids.
+          new_group.dynamic_ref_table = overlay_ref_table;
         }
 
-        DynamicRefTable* ref_table = package_groups_.back().dynamic_ref_table.get();
+        DynamicRefTable* ref_table = new_group.dynamic_ref_table.get();
         ref_table->mAssignedPackageId = package_id;
         ref_table->mAppAsLib = package->IsDynamic() && package->GetPackageId() == 0x7f;
       }
-      PackageGroup* package_group = &package_groups_[idx];
 
       // Add the package and to the set of packages with the same ID.
+      PackageGroup* package_group = &package_groups_[idx];
       package_group->packages_.push_back(ConfiguredPackage{package.get(), {}});
       package_group->cookies_.push_back(apk_assets_cookies[apk_assets]);
 
@@ -578,7 +582,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
 
   const PackageGroup& package_group = package_groups_[package_idx];
   auto result = FindEntryInternal(package_group, type_idx, entry_idx, *desired_config,
-                                 stop_at_first_match, ignore_configuration);
+                                  stop_at_first_match, ignore_configuration);
   if (UNLIKELY(!result.has_value())) {
     return base::unexpected(result.error());
   }

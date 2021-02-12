@@ -44,7 +44,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.sizecompatui.SizeCompatUI;
+import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import java.io.PrintWriter;
@@ -108,20 +108,20 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      * compat.
      */
     @Nullable
-    private final SizeCompatUI mSizeCompatUI;
+    private final SizeCompatUIController mSizeCompatUI;
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
         this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */);
     }
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            SizeCompatUI sizeCompatUI) {
+            SizeCompatUIController sizeCompatUI) {
         this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI);
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable SizeCompatUI sizeCompatUI) {
+            Context context, @Nullable SizeCompatUIController sizeCompatUI) {
         super(taskOrganizerController, mainExecutor);
         // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled
         //  by a controller, that class should be create while porting
@@ -342,8 +342,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     /**
-     * Notifies {@link SizeCompatUI} about the size compat info changed on the give Task to update
-     * the UI accordingly.
+     * Notifies {@link SizeCompatUIController} about the size compat info changed on the give Task
+     * to update the UI accordingly.
      *
      * @param taskInfo the new Task info
      * @param taskListener listener to handle the Task Surface placement. {@code null} if task is

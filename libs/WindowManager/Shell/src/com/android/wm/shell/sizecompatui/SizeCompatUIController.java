@@ -48,7 +48,6 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
 
     @VisibleForTesting
-    final SizeCompatUI mImpl = new SizeCompatUIImpl();
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
     private final DisplayController mDisplayController;
@@ -57,17 +56,8 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     /** Only show once automatically in the process life. */
     private boolean mHasShownHint;
 
-    /** Creates the {@link SizeCompatUIController}. */
-    public static SizeCompatUI create(Context context,
-            DisplayController displayController,
-            DisplayImeController imeController,
-            ShellExecutor mainExecutor) {
-        return new SizeCompatUIController(context, displayController, imeController, mainExecutor)
-                .mImpl;
-    }
-
     @VisibleForTesting
-    SizeCompatUIController(Context context,
+    public SizeCompatUIController(Context context,
             DisplayController displayController,
             DisplayImeController imeController,
             ShellExecutor mainExecutor) {
@@ -79,7 +69,7 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
         mImeController.addPositionProcessor(this);
     }
 
-    private void onSizeCompatInfoChanged(int displayId, int taskId, @Nullable Rect taskBounds,
+    public void onSizeCompatInfoChanged(int displayId, int taskId, @Nullable Rect taskBounds,
             @Nullable IBinder sizeCompatActivity,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
         // TODO Draw button on Task surface
@@ -176,16 +166,5 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
             }
         }
         return context;
-    }
-
-    private class SizeCompatUIImpl implements SizeCompatUI {
-        @Override
-        public void onSizeCompatInfoChanged(int displayId, int taskId, @Nullable Rect taskBounds,
-                @Nullable IBinder sizeCompatActivity,
-                @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-            mMainExecutor.execute(() ->
-                    SizeCompatUIController.this.onSizeCompatInfoChanged(displayId, taskId,
-                            taskBounds, sizeCompatActivity, taskListener));
-        }
     }
 }

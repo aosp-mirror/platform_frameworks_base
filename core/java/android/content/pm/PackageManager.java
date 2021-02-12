@@ -47,8 +47,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -9278,6 +9278,22 @@ public abstract class PackageManager {
     public void holdLock(IBinder token, int durationMs) {
         try {
             ActivityThread.getPackageManager().holdLock(token, durationMs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set a list of apps to keep around as APKs even if no user has currently installed it.
+     * @param packageList List of package names to keep cached.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.KEEP_UNINSTALLED_PACKAGES)
+    @TestApi
+    public void setKeepUninstalledPackages(@NonNull List<String> packageList) {
+        try {
+            ActivityThread.getPackageManager().setKeepUninstalledPackages(packageList);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

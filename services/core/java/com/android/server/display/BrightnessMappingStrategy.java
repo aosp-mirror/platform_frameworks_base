@@ -28,8 +28,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.Spline;
 
-import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
 

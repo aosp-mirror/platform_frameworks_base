@@ -16,13 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
@@ -48,8 +46,7 @@ class PipKeyboardTest(testSpec: FlickerTestRunnerFactory.TestSpec) : FlickerTest
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val imeApp = ImeAppHelper(instrumentation)
-            val baseConfig = getTransitionLaunch(eachRun = false)
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
+            val testSpec = getTransition(eachRun = false) { configuration ->
                 setup {
                     test {
                         imeApp.launchViaIntent(wmHelper)
@@ -90,7 +87,7 @@ class PipKeyboardTest(testSpec: FlickerTestRunnerFactory.TestSpec) : FlickerTest
             }
 
             return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
-                baseConfig, testSpec, supportedRotations = listOf(Surface.ROTATION_0),
+                testSpec, supportedRotations = listOf(Surface.ROTATION_0),
                 repetitions = 5)
         }
     }

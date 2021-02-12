@@ -217,7 +217,7 @@ public class BackgroundDexOptService extends JobService {
             // trade-off worth doing to save boot time work.
             int result = pm.performDexOptWithStatus(new DexoptOptions(
                     pkg,
-                    PackageManagerService.REASON_BOOT,
+                    PackageManagerService.REASON_POST_BOOT,
                     DexoptOptions.DEXOPT_BOOT_COMPLETE));
             if (result == PackageDexOptimizer.DEX_OPT_PERFORMED)  {
                 updatedPackages.add(pkg);

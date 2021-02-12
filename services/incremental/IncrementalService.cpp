@@ -69,6 +69,14 @@ struct Constants {
     static constexpr auto progressUpdateInterval = 1000ms;
     static constexpr auto perUidTimeoutOffset = progressUpdateInterval * 2;
     static constexpr auto minPerUidTimeout = progressUpdateInterval * 3;
+
+    // If DL was up and not crashing for 10mins, we consider it healthy and reset all delays.
+    static constexpr auto healthyDataLoaderUptime = 10min;
+    // 10s, 100s (~2min), 1000s (~15min), 10000s (~3hrs)
+    static constexpr auto minBindDelay = 10s;
+    static constexpr auto maxBindDelay = 10000s;
+    static constexpr auto bindDelayMultiplier = 10;
+    static constexpr auto bindDelayJitterDivider = 10;
 };
 
 static const Constants& constants() {
@@ -386,6 +394,28 @@ void IncrementalService::onDump(int fd) {
     dprintf(fd, "}\n");
 }
 
+bool IncrementalService::needStartDataLoaderLocked(IncFsMount& ifs) {
+    if (ifs.dataLoaderStub->params().packageName == Constants::systemPackage) {
+        return true;
+    }
+
+    // Check all permanent binds.
+    for (auto&& [_, bindPoint] : ifs.bindPoints) {
+        if (bindPoint.kind != BindKind::Permanent) {
+            continue;
+        }
+        const auto progress = getLoadingProgressFromPath(ifs, bindPoint.sourceDir,
+                                                         /*stopOnFirstIncomplete=*/true);
+        if (!progress.isError() && !progress.fullyLoaded()) {
+            LOG(INFO) << "Non system mount: [" << bindPoint.sourceDir
+                      << "], partial progress: " << progress.getProgress() * 100 << "%";
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void IncrementalService::onSystemReady() {
     if (mSystemReady.exchange(true)) {
         return;
@@ -396,8 +426,11 @@ void IncrementalService::onSystemReady() {
         std::lock_guard l(mLock);
         mounts.reserve(mMounts.size());
         for (auto&& [id, ifs] : mMounts) {
-            if (ifs->mountId == id &&
-                ifs->dataLoaderStub->params().packageName == Constants::systemPackage) {
+            if (ifs->mountId != id) {
+                continue;
+            }
+
+            if (needStartDataLoaderLocked(*ifs)) {
                 mounts.push_back(ifs);
             }
         }
@@ -1539,6 +1572,11 @@ static long elapsedMcs(Duration start, Duration end) {
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 }
 
+template <class Duration>
+static constexpr auto castToMs(Duration d) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(d);
+}
+
 // Extract lib files from zip, create new files in incfs and write data to them
 // Lib files should be placed next to the APK file in the following matter:
 // Example:
@@ -2134,9 +2172,43 @@ void IncrementalService::DataLoaderStub::setTargetStatusLocked(int status) {
                << status << " (current " << mCurrentStatus << ")";
 }
 
+Milliseconds IncrementalService::DataLoaderStub::updateBindDelay() {
+    std::unique_lock lock(mMutex);
+    const auto previousBindTs = mPreviousBindTs;
+    const auto now = Clock::now();
+    mPreviousBindTs = now;
+
+    const auto nonCrashingInterval = std::max(castToMs(now - previousBindTs), 100ms);
+    if (previousBindTs.time_since_epoch() == Clock::duration::zero() ||
+        nonCrashingInterval > Constants::healthyDataLoaderUptime) {
+        mPreviousBindDelay = 0ms;
+        return mPreviousBindDelay;
+    }
+
+    constexpr auto minBindDelayMs = castToMs(Constants::minBindDelay);
+    constexpr auto maxBindDelayMs = castToMs(Constants::maxBindDelay);
+
+    const auto bindDelayMs =
+            std::min(std::max(mPreviousBindDelay * Constants::bindDelayMultiplier, minBindDelayMs),
+                     maxBindDelayMs)
+                    .count();
+    const auto bindDelayJitterRangeMs = bindDelayMs / Constants::bindDelayJitterDivider;
+    const auto bindDelayJitterMs = rand() % (bindDelayJitterRangeMs * 2) - bindDelayJitterRangeMs;
+    mPreviousBindDelay = std::chrono::milliseconds(bindDelayMs + bindDelayJitterMs);
+
+    return mPreviousBindDelay;
+}
+
 bool IncrementalService::DataLoaderStub::bind() {
+    const auto bindDelay = updateBindDelay();
+    if (bindDelay > 1s) {
+        LOG(INFO) << "Delaying bind to " << mParams.packageName << " by "
+                  << bindDelay.count() / 1000 << "s";
+    }
+
     bool result = false;
-    auto status = mService.mDataLoaderManager->bindToDataLoader(id(), mParams, this, &result);
+    auto status = mService.mDataLoaderManager->bindToDataLoader(id(), mParams, bindDelay.count(),
+                                                                this, &result);
     if (!status.isOk() || !result) {
         LOG(ERROR) << "Failed to bind a data loader for mount " << id();
         return false;
@@ -2249,7 +2321,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
 
         listener = mStatusListener;
 
-        if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE) {
+        if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE ||
+            mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
             // For unavailable, unbind from DataLoader to ensure proper re-commit.
             setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
         }
@@ -2544,6 +2617,9 @@ void IncrementalService::DataLoaderStub::onDump(int fd) {
         dprintf(fd, "          blockIndex: %d\n", pendingRead.block);
         dprintf(fd, "          bootClockTsUs: %lld\n", (long long)pendingRead.bootClockTsUs);
     }
+    dprintf(fd, "        bind: %llds ago (delay: %llds)\n",
+            (long long)(elapsedMcs(mPreviousBindTs, Clock::now()) / 1000000),
+            (long long)(mPreviousBindDelay.count() / 1000));
     dprintf(fd, "      }\n");
     const auto& params = mParams;
     dprintf(fd, "      dataLoaderParams: {\n");

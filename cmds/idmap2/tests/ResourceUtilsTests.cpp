@@ -17,10 +17,12 @@
 #include <memory>
 #include <string>
 
+#include "R.h"
 #include "TestHelpers.h"
 #include "androidfw/ApkAssets.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "idmap2/ResourceContainer.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 
@@ -49,8 +51,8 @@ class ResourceUtilsTests : public Idmap2Tests {
 };
 
 TEST_F(ResourceUtilsTests, ResToTypeEntryName) {
-  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), 0x7f010000U);
-  ASSERT_TRUE(name);
+  Result<std::string> name = utils::ResToTypeEntryName(GetAssetManager(), R::target::integer::int1);
+  ASSERT_TRUE(name) << name.GetErrorMessage();
   ASSERT_EQ(*name, "integer/int1");
 }
 
@@ -60,25 +62,34 @@ TEST_F(ResourceUtilsTests, ResToTypeEntryNameNoSuchResourceId) {
 }
 
 TEST_F(ResourceUtilsTests, InvalidValidOverlayNameInvalidAttributes) {
-  auto info = utils::ExtractOverlayManifestInfo(GetTestDataPath() + "/overlay/overlay-invalid.apk",
-                                                "InvalidName");
+  auto overlay =
+      OverlayResourceContainer::FromPath(GetTestDataPath() + "/overlay/overlay-invalid.apk");
+  ASSERT_TRUE(overlay);
+
+  auto info = (*overlay)->FindOverlayInfo("InvalidName");
   ASSERT_FALSE(info);
 }
 
 TEST_F(ResourceUtilsTests, ValidOverlayNameInvalidAttributes) {
-  auto info = utils::ExtractOverlayManifestInfo(GetTestDataPath() + "/overlay/overlay-invalid.apk",
-                                                "ValidName");
+  auto overlay =
+      OverlayResourceContainer::FromPath(GetTestDataPath() + "/overlay/overlay-invalid.apk");
+  ASSERT_TRUE(overlay);
+
+  auto info = (*overlay)->FindOverlayInfo("ValidName");
   ASSERT_FALSE(info);
 }
 
 TEST_F(ResourceUtilsTests, ValidOverlayNameAndTargetPackageInvalidAttributes) {
-  auto info = utils::ExtractOverlayManifestInfo(GetTestDataPath() + "/overlay/overlay-invalid.apk",
-                                                "ValidNameAndTargetPackage");
+  auto overlay =
+      OverlayResourceContainer::FromPath(GetTestDataPath() + "/overlay/overlay-invalid.apk");
+  ASSERT_TRUE(overlay);
+
+  auto info = (*overlay)->FindOverlayInfo("ValidNameAndTargetPackage");
   ASSERT_TRUE(info);
   ASSERT_EQ("ValidNameAndTargetPackage", info->name);
   ASSERT_EQ("Valid", info->target_package);
-  ASSERT_EQ("", info->target_name); // Attribute resource id could not be found
-  ASSERT_EQ(0, info->resource_mapping); // Attribute resource id could not be found
+  ASSERT_EQ("", info->target_name);      // Attribute resource id could not be found
+  ASSERT_EQ(0, info->resource_mapping);  // Attribute resource id could not be found
 }
 
-}// namespace android::idmap2
+}  // namespace android::idmap2

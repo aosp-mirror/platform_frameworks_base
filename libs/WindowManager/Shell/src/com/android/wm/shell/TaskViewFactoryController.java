@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 public class TaskViewFactoryController {
     private final ShellTaskOrganizer mTaskOrganizer;
     private final ShellExecutor mShellExecutor;
+    private final TaskViewFactory mImpl = new TaskViewFactoryImpl();
 
     public TaskViewFactoryController(ShellTaskOrganizer taskOrganizer,
             ShellExecutor shellExecutor) {
@@ -37,17 +38,16 @@ public class TaskViewFactoryController {
         mShellExecutor = shellExecutor;
     }
 
+    public TaskViewFactory asTaskViewFactory() {
+        return mImpl;
+    }
+
     /** Creates an {@link TaskView} */
-    @ShellMainThread
     public void create(@UiContext Context context, Executor executor, Consumer<TaskView> onCreate) {
         TaskView taskView = new TaskView(context, mTaskOrganizer);
         executor.execute(() -> {
             onCreate.accept(taskView);
         });
-    }
-
-    public TaskViewFactory getTaskViewFactory() {
-        return new TaskViewFactoryImpl();
     }
 
     private class TaskViewFactoryImpl implements TaskViewFactory {

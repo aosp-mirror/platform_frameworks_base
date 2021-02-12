@@ -1055,6 +1055,14 @@
         android:description="@string/permdesc_accessImsCallService"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to perform IMS Single Registration related actions.
+         Only granted if the application is a system app AND is in the Default SMS Role.
+         The permission is revoked when the app is taken out of the Default SMS Role.
+        <p>Protection level: internal|role
+    -->
+    <permission android:name="android.permission.PERFORM_IMS_SINGLE_REGISTRATION"
+        android:protectionLevel="internal|role" />
+
     <!-- Allows an application to read the user's call log.
          <p class="note"><strong>Note:</strong> If your app uses the
          {@link #READ_CONTACTS} permission and <em>both</em> your <a
@@ -2247,6 +2255,11 @@
     <!-- @SystemApi @TestApi Allows read access to privileged phone state.
          @hide Used internally. -->
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows read access to privileged network state in the device config.
+         @hide Used internally. -->
+    <permission android:name="android.permission.READ_NETWORK_DEVICE_CONFIG"
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows to read device identifiers and use ICC based authentication like EAP-AKA.
@@ -3993,6 +4006,11 @@
          @hide -->
     <permission android:name="android.permission.MOVE_PACKAGE"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @TestApi Allows an application to keep uninstalled packages as apks.
+         @hide -->
+    <permission android:name="android.permission.KEEP_UNINSTALLED_PACKAGES"
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to change whether an application component (other than its own) is
          enabled or not.

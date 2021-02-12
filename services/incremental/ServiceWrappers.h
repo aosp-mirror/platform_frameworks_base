@@ -63,7 +63,7 @@ class DataLoaderManagerWrapper {
 public:
     virtual ~DataLoaderManagerWrapper() = default;
     virtual binder::Status bindToDataLoader(
-            MountId mountId, const content::pm::DataLoaderParamsParcel& params,
+            MountId mountId, const content::pm::DataLoaderParamsParcel& params, int bindDelayMs,
             const sp<content::pm::IDataLoaderStatusListener>& listener, bool* result) const = 0;
     virtual binder::Status getDataLoader(MountId mountId,
                                          sp<content::pm::IDataLoader>* result) const = 0;

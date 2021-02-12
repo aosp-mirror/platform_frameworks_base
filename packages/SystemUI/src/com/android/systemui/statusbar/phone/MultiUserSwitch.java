@@ -35,7 +35,6 @@ import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSDetailDisplayer;
-import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
@@ -44,8 +43,6 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 public class MultiUserSwitch extends FrameLayout implements View.OnClickListener {
 
     protected QSDetailDisplayer mQSDetailDisplayer;
-    private KeyguardUserSwitcher mKeyguardUserSwitcher;
-    private boolean mKeyguardMode;
     private UserSwitcherController.BaseUserAdapter mUserListener;
 
     final UserManager mUserManager;
@@ -85,15 +82,6 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         refreshContentDescription();
     }
 
-    public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
-        mKeyguardUserSwitcher = keyguardUserSwitcher;
-    }
-
-    public void setKeyguardMode(boolean keyguardShowing) {
-        mKeyguardMode = keyguardShowing;
-        registerListener();
-    }
-
     public boolean isMultiUserEnabled() {
         // TODO(b/138661450) Move IPC calls to background
         return whitelistIpcs(() -> mUserManager.isUserSwitcherEnabled(
@@ -123,11 +111,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if (mKeyguardMode) {
-            if (mKeyguardUserSwitcher != null) {
-                mKeyguardUserSwitcher.show(true /* animate */);
-            }
-        } else if (mQSDetailDisplayer != null && mUserSwitcherController != null) {
+        if (mQSDetailDisplayer != null && mUserSwitcherController != null) {
             View center = getChildCount() > 0 ? getChildAt(0) : this;
 
             int[] tmpInt = new int[2];

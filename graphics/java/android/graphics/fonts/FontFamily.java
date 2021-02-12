@@ -125,7 +125,7 @@ public final class FontFamily {
                 nAddFont(builderPtr, mFonts.get(i).getNativePtr());
             }
             final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback);
-            final FontFamily family = new FontFamily(mFonts, ptr);
+            final FontFamily family = new FontFamily(ptr);
             sFamilyRegistory.registerNativeAllocation(family, ptr);
             return family;
         }
@@ -146,7 +146,8 @@ public final class FontFamily {
     private final long mNativePtr;
 
     // Use Builder instead.
-    private FontFamily(@NonNull ArrayList<Font> fonts, long ptr) {
+    /** @hide */
+    public FontFamily(long ptr) {
         mNativePtr = ptr;
     }
 

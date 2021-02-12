@@ -38,6 +38,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Permission definition.
@@ -343,6 +344,14 @@ public final class Permission {
 
     public boolean isRole() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_ROLE) != 0;
+    }
+
+    public boolean isKnownSigner() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_KNOWN_SIGNER) != 0;
+    }
+
+    public Set<String> getKnownCerts() {
+        return mPermissionInfo.knownCerts;
     }
 
     public void transfer(@NonNull String oldPackageName, @NonNull String newPackageName) {

@@ -43,6 +43,7 @@ using ::android::hardware::tv::tuner::V1_0::DemuxStreamId;
 using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
+using ::android::hardware::tv::tuner::V1_1::DemuxFilterMonitorEvent;
 using ::android::hardware::tv::tuner::V1_1::ScramblingStatus;
 
 namespace android {
@@ -480,7 +481,7 @@ void FilterClient::getAidlIpAddress(DemuxIpAddress ipAddr,
         case DemuxIpAddress::SrcIpAddress::hidl_discriminator::v4: {
             int size = ipAddr.srcIpAddress.v4().size();
             srcIpAddress.isIpV6 = false;
-            srcIpAddress.addr.resize(ipAddr.srcIpAddress.v4().size());
+            srcIpAddress.addr.resize(size);
             copy(&ipAddr.srcIpAddress.v4()[0], &ipAddr.srcIpAddress.v4()[size],
                     srcIpAddress.addr.begin());
             break;
@@ -493,8 +494,6 @@ void FilterClient::getAidlIpAddress(DemuxIpAddress ipAddr,
                     srcIpAddress.addr.begin());
             break;
         }
-        default:
-            break;
     }
     switch (ipAddr.dstIpAddress.getDiscriminator()) {
         case DemuxIpAddress::DstIpAddress::hidl_discriminator::v4: {
@@ -513,8 +512,6 @@ void FilterClient::getAidlIpAddress(DemuxIpAddress ipAddr,
                     dstIpAddress.addr.begin());
             break;
         }
-        default:
-            break;
     }
 }
 
@@ -696,8 +693,6 @@ void TunerFilterCallback::getHidlFilterEvent(const vector<TunerFilterEvent>& fil
             getHidlRestartEvent(filterEvents, eventExt);
             break;
         }
-        default:
-            break;
     }
 }
 
@@ -883,19 +878,18 @@ void TunerFilterCallback::getHidlMonitorEvent(const vector<TunerFilterEvent>& fi
         DemuxFilterEventExt& eventExt) {
     auto monitor = filterEvents[0].get<TunerFilterEvent::monitor>();
     eventExt.events.resize(1);
+    DemuxFilterMonitorEvent monitorEvent;
     switch (monitor.getTag()) {
         case TunerFilterMonitorEvent::scramblingStatus: {
-            eventExt.events[0].monitorEvent().scramblingStatus(
-                    static_cast<ScramblingStatus>(monitor.scramblingStatus));
+            monitorEvent.scramblingStatus(static_cast<ScramblingStatus>(monitor.scramblingStatus));
+            eventExt.events[0].monitorEvent(monitorEvent);
             break;
         }
         case TunerFilterMonitorEvent::cid: {
-            eventExt.events[0].monitorEvent().cid(static_cast<uint32_t>(monitor.cid));
+            monitorEvent.cid(static_cast<uint32_t>(monitor.cid));
+            eventExt.events[0].monitorEvent(monitorEvent);
             break;
         }
-        default:
-            eventExt.events[0].noinit();
-            break;
     }
 }
 

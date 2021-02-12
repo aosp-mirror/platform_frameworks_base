@@ -73,6 +73,8 @@ public class PowerStatsService extends SystemService {
     private TimerTrigger mTimerTrigger;
     @Nullable
     private StatsPullAtomCallbackImpl mPullAtomCallback;
+    @Nullable
+    private PowerStatsInternal mPowerStatsInternal;
 
     @VisibleForTesting
     static class Injector {
@@ -125,8 +127,8 @@ public class PowerStatsService extends SystemService {
         }
 
         StatsPullAtomCallbackImpl createStatsPullerImpl(Context context,
-                IPowerStatsHALWrapper powerStatsHALWrapper) {
-            return new StatsPullAtomCallbackImpl(context, powerStatsHALWrapper);
+                PowerStatsInternal powerStatsInternal) {
+            return new StatsPullAtomCallbackImpl(context, powerStatsInternal);
         }
     }
 
@@ -175,21 +177,14 @@ public class PowerStatsService extends SystemService {
     @Override
     public void onStart() {
         if (getPowerStatsHal().isInitialized()) {
-            // Only create internal service if PowerStatsHal is available.
-            publishLocalService(PowerStatsInternal.class, new LocalService());
+            mPowerStatsInternal = new LocalService();
+            publishLocalService(PowerStatsInternal.class, mPowerStatsInternal);
         }
         publishBinderService(Context.POWER_STATS_SERVICE, new BinderService());
     }
 
     private void onSystemServicesReady() {
-        if (getPowerStatsHal().isInitialized()) {
-            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService statsd pullers");
-
-            // Only start statsd pullers if initialization is successful.
-            mPullAtomCallback = mInjector.createStatsPullerImpl(mContext, getPowerStatsHal());
-        } else {
-            Slog.e(TAG, "Failed to start PowerStatsService statsd pullers");
-        }
+        mPullAtomCallback = mInjector.createStatsPullerImpl(mContext, mPowerStatsInternal);
     }
 
     private void onBootCompleted() {

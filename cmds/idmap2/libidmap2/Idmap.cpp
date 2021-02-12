@@ -20,23 +20,16 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
-#include <map>
 #include <memory>
-#include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "android-base/macros.h"
-#include "android-base/stringprintf.h"
 #include "androidfw/AssetManager2.h"
 #include "idmap2/ResourceMapping.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
-#include "idmap2/ZipFile.h"
-#include "utils/String16.h"
-#include "utils/String8.h"
 
 namespace android::idmap2 {
 
@@ -93,22 +86,13 @@ bool WARN_UNUSED ReadString(std::istream& stream, std::string* out) {
 
 }  // namespace
 
-Result<uint32_t> GetPackageCrc(const ZipFile& zip) {
-  const Result<uint32_t> a = zip.Crc("resources.arsc");
-  const Result<uint32_t> b = zip.Crc("AndroidManifest.xml");
-  return a && b
-             ? Result<uint32_t>(*a ^ *b)
-             : Error("failed to get CRC for \"%s\"", a ? "AndroidManifest.xml" : "resources.arsc");
-}
-
 std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& stream) {
   std::unique_ptr<IdmapHeader> idmap_header(new IdmapHeader());
   if (!Read32(stream, &idmap_header->magic_) || !Read32(stream, &idmap_header->version_)) {
     return nullptr;
   }
 
-  if (idmap_header->magic_ != kIdmapMagic ||
-      idmap_header->version_ != kIdmapCurrentVersion) {
+  if (idmap_header->magic_ != kIdmapMagic || idmap_header->version_ != kIdmapCurrentVersion) {
     // Do not continue parsing if the file is not a current version idmap.
     return nullptr;
   }
@@ -127,32 +111,22 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
   return std::move(idmap_header);
 }
 
-Result<Unit> IdmapHeader::IsUpToDate(const std::string& target_path,
-                                     const std::string& overlay_path,
+Result<Unit> IdmapHeader::IsUpToDate(const TargetResourceContainer& target,
+                                     const OverlayResourceContainer& overlay,
                                      const std::string& overlay_name,
                                      PolicyBitmask fulfilled_policies,
                                      bool enforce_overlayable) const {
-  const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_path);
-  if (!target_zip) {
-    return Error("failed to open target %s", target_path.c_str());
-  }
-
-  const Result<uint32_t> target_crc = GetPackageCrc(*target_zip);
+  const Result<uint32_t> target_crc = target.GetCrc();
   if (!target_crc) {
     return Error("failed to get target crc");
   }
 
-  const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_path);
-  if (!overlay_zip) {
-    return Error("failed to overlay target %s", overlay_path.c_str());
-  }
-
-  const Result<uint32_t> overlay_crc = GetPackageCrc(*overlay_zip);
+  const Result<uint32_t> overlay_crc = overlay.GetCrc();
   if (!overlay_crc) {
     return Error("failed to get overlay crc");
   }
 
-  return IsUpToDate(target_path, overlay_path, overlay_name, *target_crc, *overlay_crc,
+  return IsUpToDate(target.GetPath(), overlay.GetPath(), overlay_name, *target_crc, *overlay_crc,
                     fulfilled_policies, enforce_overlayable);
 }
 
@@ -209,11 +183,7 @@ Result<Unit> IdmapHeader::IsUpToDate(const std::string& target_path,
 
 std::unique_ptr<const IdmapData::Header> IdmapData::Header::FromBinaryStream(std::istream& stream) {
   std::unique_ptr<IdmapData::Header> idmap_data_header(new IdmapData::Header());
-
-  uint8_t padding;
-  if (!Read8(stream, &idmap_data_header->target_package_id_) ||
-      !Read8(stream, &idmap_data_header->overlay_package_id_) || !Read8(stream, &padding) ||
-      !Read8(stream, &padding) || !Read32(stream, &idmap_data_header->target_entry_count) ||
+  if (!Read32(stream, &idmap_data_header->target_entry_count) ||
       !Read32(stream, &idmap_data_header->target_entry_inline_count) ||
       !Read32(stream, &idmap_data_header->overlay_entry_count) ||
       !Read32(stream, &idmap_data_header->string_pool_index_offset)) {
@@ -321,8 +291,6 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
   }
 
   std::unique_ptr<IdmapData::Header> data_header(new IdmapData::Header());
-  data_header->target_package_id_ = resource_mapping.GetTargetPackageId();
-  data_header->overlay_package_id_ = resource_mapping.GetOverlayPackageId();
   data_header->target_entry_count = static_cast<uint32_t>(data->target_entries_.size());
   data_header->target_entry_inline_count =
       static_cast<uint32_t>(data->target_inline_entries_.size());
@@ -332,57 +300,46 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
   return {std::move(data)};
 }
 
-Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& target_apk_assets,
-                                                          const ApkAssets& overlay_apk_assets,
-                                                          const std::string& overlay_name,
-                                                          const PolicyBitmask& fulfilled_policies,
-                                                          bool enforce_overlayable) {
+Result<std::unique_ptr<const Idmap>> Idmap::FromContainers(const TargetResourceContainer& target,
+                                                           const OverlayResourceContainer& overlay,
+                                                           const std::string& overlay_name,
+                                                           const PolicyBitmask& fulfilled_policies,
+                                                           bool enforce_overlayable) {
   SYSTRACE << "Idmap::FromApkAssets";
-  const std::string& target_apk_path = target_apk_assets.GetPath();
-  const std::string& overlay_apk_path = overlay_apk_assets.GetPath();
-
-  const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_apk_path);
-  if (!target_zip) {
-    return Error("failed to open target as zip");
-  }
-
-  const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_apk_path);
-  if (!overlay_zip) {
-    return Error("failed to open overlay as zip");
-  }
-
   std::unique_ptr<IdmapHeader> header(new IdmapHeader());
   header->magic_ = kIdmapMagic;
   header->version_ = kIdmapCurrentVersion;
 
-  Result<uint32_t> crc = GetPackageCrc(*target_zip);
-  if (!crc) {
-    return Error(crc.GetError(), "failed to get zip CRC for target");
+  const auto target_crc = target.GetCrc();
+  if (!target_crc) {
+    return Error(target_crc.GetError(), "failed to get zip CRC for '%s'", target.GetPath().data());
   }
-  header->target_crc_ = *crc;
+  header->target_crc_ = *target_crc;
 
-  crc = GetPackageCrc(*overlay_zip);
-  if (!crc) {
-    return Error(crc.GetError(), "failed to get zip CRC for overlay");
+  const auto overlay_crc = overlay.GetCrc();
+  if (!overlay_crc) {
+    return Error(overlay_crc.GetError(), "failed to get zip CRC for '%s'",
+                 overlay.GetPath().data());
   }
-  header->overlay_crc_ = *crc;
+  header->overlay_crc_ = *overlay_crc;
+
   header->fulfilled_policies_ = fulfilled_policies;
   header->enforce_overlayable_ = enforce_overlayable;
-  header->target_path_ = target_apk_path;
-  header->overlay_path_ = overlay_apk_path;
+  header->target_path_ = target.GetPath();
+  header->overlay_path_ = overlay.GetPath();
   header->overlay_name_ = overlay_name;
 
-  auto info = utils::ExtractOverlayManifestInfo(overlay_apk_path, overlay_name);
+  auto info = overlay.FindOverlayInfo(overlay_name);
   if (!info) {
-    return info.GetError();
+    return Error(info.GetError(), "failed to get overlay info for '%s'", overlay.GetPath().data());
   }
 
   LogInfo log_info;
-  auto resource_mapping =
-      ResourceMapping::FromApkAssets(target_apk_assets, overlay_apk_assets, *info,
-                                     fulfilled_policies, enforce_overlayable, log_info);
+  auto resource_mapping = ResourceMapping::FromContainers(
+      target, overlay, *info, fulfilled_policies, enforce_overlayable, log_info);
   if (!resource_mapping) {
-    return resource_mapping.GetError();
+    return Error(resource_mapping.GetError(), "failed to generate resource map for '%s'",
+                 overlay.GetPath().data());
   }
 
   auto idmap_data = IdmapData::FromResourceMapping(*resource_mapping);

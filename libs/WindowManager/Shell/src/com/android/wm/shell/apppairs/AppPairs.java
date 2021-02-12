@@ -35,8 +35,4 @@ public interface AppPairs {
     boolean pair(ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2);
     /** Unpairs any app-pair containing this task id. */
     void unpair(int taskId);
-    /** Dumps current status of app pairs. */
-    void dump(@NonNull PrintWriter pw, String prefix);
-    /** Called when the shell organizer has been registered. */
-    void onOrganizerRegistered();
 }

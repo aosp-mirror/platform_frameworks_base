@@ -108,7 +108,7 @@ public class AppSearchManagerService extends SystemService {
                         schemasPackageAccessibleBundles.entrySet()) {
                     List<PackageIdentifier> packageIdentifiers =
                             new ArrayList<>(entry.getValue().size());
-                    for (int i = 0; i < packageIdentifiers.size(); i++) {
+                    for (int i = 0; i < entry.getValue().size(); i++) {
                         packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));
                     }
                     schemasPackageAccessible.put(entry.getKey(), packageIdentifiers);

@@ -14,6 +14,7 @@ package android {
     field public static final String CONTROL_DEVICE_LIGHTS = "android.permission.CONTROL_DEVICE_LIGHTS";
     field public static final String CONTROL_DEVICE_STATE = "android.permission.CONTROL_DEVICE_STATE";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
+    field public static final String KEEP_UNINSTALLED_PACKAGES = "android.permission.KEEP_UNINSTALLED_PACKAGES";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
@@ -53,9 +54,8 @@ package android {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
-    field public static final int config_systemAutomotiveProjection = 17039402; // 0x104002a
+    field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
-    field public static final int config_systemVideoCall = 17039401; // 0x1040029
   }
 
 }
@@ -391,11 +391,11 @@ package android.app.admin {
     method public java.util.List<java.lang.String> getOwnerInstalledCaCerts(@NonNull android.os.UserHandle);
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
+    method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void resetDefaultCrossProfileIntentFilters(int);
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, int);
-    method @NonNull public static String unsafeOperationReasonToString(int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
     field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
@@ -425,6 +425,7 @@ package android.app.admin {
     field public static final int OPERATION_REMOVE_KEY_PAIR = 28; // 0x1c
     field public static final int OPERATION_REMOVE_USER = 6; // 0x6
     field public static final int OPERATION_REQUEST_BUGREPORT = 29; // 0x1d
+    field public static final int OPERATION_SAFETY_REASON_NONE = -1; // 0xffffffff
     field public static final int OPERATION_SET_ALWAYS_ON_VPN_PACKAGE = 30; // 0x1e
     field public static final int OPERATION_SET_APPLICATION_HIDDEN = 15; // 0xf
     field public static final int OPERATION_SET_APPLICATION_RESTRICTIONS = 16; // 0x10
@@ -460,7 +461,6 @@ package android.app.admin {
     field public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
     field public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7; // 0x7
     field public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5; // 0x5
-    field public static final int UNSAFE_OPERATION_REASON_NONE = -1; // 0xffffffff
   }
 
   public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
@@ -693,6 +693,7 @@ package android.content.pm {
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method public void holdLock(android.os.IBinder, int);
+    method @RequiresPermission(android.Manifest.permission.KEEP_UNINSTALLED_PACKAGES) public void setKeepUninstalledPackages(@NonNull java.util.List<java.lang.String>);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final String FEATURE_HDMI_CEC = "android.hardware.hdmi.cec";
@@ -913,6 +914,8 @@ package android.hardware.devicestate {
     method @NonNull public int[] getSupportedStates();
     method public void removeDeviceStateListener(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateListener);
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
+    field public static final int MAXIMUM_DEVICE_STATE = 255; // 0xff
+    field public static final int MINIMUM_DEVICE_STATE = 0; // 0x0
   }
 
   public static interface DeviceStateManager.DeviceStateListener {
@@ -1369,6 +1372,32 @@ package android.os {
     field public static final String[] ACTIVE_CODENAMES;
     field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
+  }
+
+  public abstract class CombinedVibrationEffect implements android.os.Parcelable {
+    method public abstract long getDuration();
+  }
+
+  public static final class CombinedVibrationEffect.Mono extends android.os.CombinedVibrationEffect {
+    method public long getDuration();
+    method @NonNull public android.os.VibrationEffect getEffect();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect.Mono> CREATOR;
+  }
+
+  public static final class CombinedVibrationEffect.Sequential extends android.os.CombinedVibrationEffect {
+    method @NonNull public java.util.List<java.lang.Integer> getDelays();
+    method public long getDuration();
+    method @NonNull public java.util.List<android.os.CombinedVibrationEffect> getEffects();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect.Sequential> CREATOR;
+  }
+
+  public static final class CombinedVibrationEffect.Stereo extends android.os.CombinedVibrationEffect {
+    method public long getDuration();
+    method @NonNull public android.util.SparseArray<android.os.VibrationEffect> getEffects();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect.Stereo> CREATOR;
   }
 
   public class DeviceIdleManager {

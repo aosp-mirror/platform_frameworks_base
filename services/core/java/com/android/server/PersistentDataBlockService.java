@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -147,14 +148,15 @@ public class PersistentDataBlockService extends SystemService {
     private int getAllowedUid(int userHandle) {
         String allowedPackage = mContext.getResources()
                 .getString(R.string.config_persistentDataPackageName);
-        PackageManager pm = mContext.getPackageManager();
         int allowedUid = -1;
-        try {
-            allowedUid = pm.getPackageUidAsUser(allowedPackage,
-                    PackageManager.MATCH_SYSTEM_ONLY, userHandle);
-        } catch (PackageManager.NameNotFoundException e) {
-            // not expected
-            Slog.e(TAG, "not able to find package " + allowedPackage, e);
+        if (!TextUtils.isEmpty(allowedPackage)) {
+            try {
+                allowedUid = mContext.getPackageManager().getPackageUidAsUser(
+                        allowedPackage, PackageManager.MATCH_SYSTEM_ONLY, userHandle);
+            } catch (PackageManager.NameNotFoundException e) {
+                // not expected
+                Slog.e(TAG, "not able to find package " + allowedPackage, e);
+            }
         }
         return allowedUid;
     }

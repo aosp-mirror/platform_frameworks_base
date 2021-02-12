@@ -26,7 +26,7 @@ import android.util.Slog;
 import android.view.Choreographer;
 import android.view.Display;
 
-import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.display.BrightnessSynchronizer;
 
 import java.io.PrintWriter;
 
