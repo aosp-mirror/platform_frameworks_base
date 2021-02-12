@@ -1902,6 +1902,18 @@ public final class Settings {
     public static final String EXTRA_CONVERSATION_ID = "android.provider.extra.CONVERSATION_ID";
 
     /**
+     * Activity Extra: An {@code Arraylist<String>} of {@link NotificationChannel} field names to
+     * show on the Settings UI.
+     *
+     * <p>
+     * This is an optional extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}. If
+     * included the system will filter out any Settings that doesn't appear in this list that
+     * otherwise would display.
+     */
+    public static final String EXTRA_CHANNEL_FILTER_LIST
+            = "android.provider.extra.CHANNEL_FILTER_LIST";
+
+    /**
      * Activity Action: Show notification redaction settings.
      *
      * @hide

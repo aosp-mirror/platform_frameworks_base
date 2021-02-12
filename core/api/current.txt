@@ -6062,6 +6062,13 @@ package android.app {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.NotificationChannel> CREATOR;
     field public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
+    field public static final String EDIT_CONVERSATION = "convo";
+    field public static final String EDIT_IMPORTANCE = "importance";
+    field public static final String EDIT_LAUNCHER = "launcher";
+    field public static final String EDIT_LOCKED_DEVICE = "locked";
+    field public static final String EDIT_SOUND = "sound";
+    field public static final String EDIT_VIBRATION = "vibration";
+    field public static final String EDIT_ZEN = "dnd";
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -34699,6 +34706,7 @@ package android.provider {
     field public static final String EXTRA_AUTHORITIES = "authorities";
     field public static final String EXTRA_BATTERY_SAVER_MODE_ENABLED = "android.settings.extra.battery_saver_mode_enabled";
     field public static final String EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED = "android.provider.extra.BIOMETRIC_AUTHENTICATORS_ALLOWED";
+    field public static final String EXTRA_CHANNEL_FILTER_LIST = "android.provider.extra.CHANNEL_FILTER_LIST";
     field public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
     field public static final String EXTRA_CONVERSATION_ID = "android.provider.extra.CONVERSATION_ID";
     field public static final String EXTRA_DO_NOT_DISTURB_MODE_ENABLED = "android.settings.extra.do_not_disturb_mode_enabled";
