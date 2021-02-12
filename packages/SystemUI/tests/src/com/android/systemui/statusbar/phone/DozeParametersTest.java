@@ -35,7 +35,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.tuner.TunerService;
 
@@ -58,7 +57,6 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private PowerManager mPowerManager;
     @Mock private TunerService mTunerService;
     @Mock private BatteryController mBatteryController;
-    @Mock private FeatureFlags mFeatureFlags;
 
     @Before
     public void setup() {
@@ -69,8 +67,7 @@ public class DozeParametersTest extends SysuiTestCase {
             mAlwaysOnDisplayPolicy,
             mPowerManager,
             mBatteryController,
-            mTunerService,
-            mFeatureFlags
+            mTunerService
         );
     }
     @Test
