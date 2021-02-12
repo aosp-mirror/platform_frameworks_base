@@ -62,6 +62,7 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.OPERATION_SAFETY_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
@@ -92,7 +93,6 @@ import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_REMOVE_N
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_STARTING_PROFILE_FAILED;
-import static android.app.admin.DevicePolicyManager.UNSAFE_OPERATION_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -157,9 +157,9 @@ import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
+import android.app.admin.DevicePolicyManager.OperationSafetyReason;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
-import android.app.admin.DevicePolicyManager.UnsafeOperationReason;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.DeviceStateCache;
@@ -1101,7 +1101,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private void checkCanExecuteOrThrowUnsafe(@DevicePolicyOperation int operation) {
         int reason = getUnsafeOperationReason(operation);
-        if (reason == UNSAFE_OPERATION_REASON_NONE) return;
+        if (reason == OPERATION_SAFETY_REASON_NONE) return;
 
         if (mSafetyChecker == null) {
             // Happens on CTS after it's set just once (by OneTimeSafetyChecker)
@@ -1114,21 +1114,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * Returns whether it's safe to execute the given {@code operation}, and why.
      */
-    @UnsafeOperationReason
+    @OperationSafetyReason
     int getUnsafeOperationReason(@DevicePolicyOperation int operation) {
-        return mSafetyChecker == null ? UNSAFE_OPERATION_REASON_NONE
+        return mSafetyChecker == null ? OPERATION_SAFETY_REASON_NONE
                 : mSafetyChecker.getUnsafeOperationReason(operation);
     }
 
     @Override
     public void setNextOperationSafety(@DevicePolicyOperation int operation,
-            @UnsafeOperationReason int reason) {
+            @OperationSafetyReason int reason) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
         Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %s)",
                 DevicePolicyManager.operationToString(operation),
-                DevicePolicyManager.unsafeOperationReasonToString(reason)));
+                DevicePolicyManager.operationSafetyReasonToString(reason)));
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, reason);
+    }
+
+    @Override
+    public boolean isSafeOperation(@OperationSafetyReason int reason) {
+        return mSafetyChecker == null ? true : mSafetyChecker.isSafeOperation(reason);
     }
 
     // Used by DevicePolicyManagerServiceShellCommand
@@ -7522,19 +7527,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         sendActiveAdminCommand(action, extras, deviceOwnerUserId, receiverComponent);
     }
 
-    private void sendProfileOwnerCommand(String action, Bundle extras, int userHandle) {
-        sendActiveAdminCommand(action, extras, userHandle,
-                mOwners.getProfileOwnerComponent(userHandle));
+    private void sendProfileOwnerCommand(String action, Bundle extras, @UserIdInt int userId) {
+        sendActiveAdminCommand(action, extras, userId,
+                mOwners.getProfileOwnerComponent(userId));
     }
 
     private void sendActiveAdminCommand(String action, Bundle extras,
-            int userHandle, ComponentName receiverComponent) {
+            @UserIdInt int userId, ComponentName receiverComponent) {
+        if (VERBOSE_LOG) {
+            Slog.v(LOG_TAG, "sending intent " + action + " to "
+                    + receiverComponent.flattenToShortString() + " on user " + userId);
+        }
         final Intent intent = new Intent(action);
         intent.setComponent(receiverComponent);
         if (extras != null) {
             intent.putExtras(extras);
         }
-        mContext.sendBroadcastAsUser(intent, UserHandle.of(userHandle));
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
     private void sendOwnerChangedBroadcast(String broadcast, int userId) {
@@ -12222,6 +12231,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             LocalServices.getService(CrossProfileAppsInternal.class)
                     .setInteractAcrossProfilesAppOp(
                             packageName, findInteractAcrossProfilesResetMode(packageName), userId);
+        }
+
+        @Override
+        public void notifyUnsafeOperationStateChanged(DevicePolicySafetyChecker checker, int reason,
+                boolean isSafe) {
+            // TODO(b/178494483): use EventLog instead
+            // TODO(b/178494483): log metrics?
+            if (VERBOSE_LOG) {
+                Slog.v(LOG_TAG, String.format("notifyUnsafeOperationStateChanged(): %s=%b",
+                        DevicePolicyManager.operationSafetyReasonToString(reason), isSafe));
+            }
+
+            Preconditions.checkArgument(mSafetyChecker == checker,
+                    "invalid checker: should be %s, was %s", mSafetyChecker, checker);
+
+            Bundle extras = new Bundle();
+            extras.putInt(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_REASON, reason);
+            extras.putBoolean(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_STATE, isSafe);
+
+            // TODO(b/178494483): add CTS test
+            sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
+                    extras);
+            for (int profileOwnerId : mOwners.getProfileOwnerKeys()) {
+                sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
+                        extras, profileOwnerId);
+            }
         }
 
         private @Mode int findInteractAcrossProfilesResetMode(String packageName) {
