@@ -77,6 +77,7 @@ import java.util.Arrays;
  * bit FrameworksCoreTests:com.android.internal.os.BatteryStatsCpuTimesTest
  */
 @SmallTest
+@SkipPresubmit("b/180015146")
 @RunWith(AndroidJUnit4.class)
 public class BatteryStatsCpuTimesTest {
     @Mock

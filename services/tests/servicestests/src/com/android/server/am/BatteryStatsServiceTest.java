@@ -30,6 +30,7 @@ import com.android.internal.os.BatteryStatsImpl;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -59,6 +60,7 @@ public final class BatteryStatsServiceTest {
     }
 
     @Test
+    @Ignore("b/180015146")
     public void testAwaitCompletion() throws Exception {
         final CountDownLatch readyLatch = new CountDownLatch(2);
         final CountDownLatch startLatch = new CountDownLatch(1);
