@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.window.common.DeviceStateManagerPostureProducer;
 import androidx.window.common.DisplayFeature;
 import androidx.window.common.ResourceConfigDisplayFeatureProducer;
 import androidx.window.common.SettingsDevicePostureProducer;
@@ -55,7 +56,10 @@ class SampleSidecarImpl extends StubSidecar {
 
     SampleSidecarImpl(Context context) {
         mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
-        mDevicePostureProducer = mSettingsDevicePostureProducer;
+        mDevicePostureProducer = new PriorityDataProducer<>(List.of(
+                mSettingsDevicePostureProducer,
+                new DeviceStateManagerPostureProducer(context)
+        ));
 
         mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
         mDisplayFeatureProducer = new PriorityDataProducer<>(List.of(
