@@ -360,6 +360,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
 
     /**
+     * Namespace for swcodec native related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_SWCODEC_NATIVE = "swcodec_native";
+
+
+    /**
      * Namespace for System UI related features.
      *
      * @hide
