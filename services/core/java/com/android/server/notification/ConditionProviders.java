@@ -21,6 +21,7 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.IPackageManager;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -194,6 +195,11 @@ public class ConditionProviders extends ManagedServices {
         if (mCallback != null) {
             mCallback.onServiceAdded(info.component);
         }
+    }
+
+    @Override
+    protected void ensureFilters(ServiceInfo si, int userId) {
+        // nothing to filter
     }
 
     @Override
