@@ -430,6 +430,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         updateSignalStrength();
     }
 
+    public void setImsType(int imsType) {
+        mMobileSignalController.setImsType(imsType);
+    }
+
     public void setIsGsm(boolean gsm) {
         when(mSignalStrength.isGsm()).thenReturn(gsm);
         updateSignalStrength();
@@ -630,6 +634,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             assertEquals("Type content description (html)", typeContentDescriptionHtml,
                     typeContentDescriptionHtmlArg.getValue());
         }
+    }
+
+    protected void verifyLastCallStrength(int icon) {
+        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
+        verify(mCallbackHandler, Mockito.atLeastOnce()).setCallIndicator(
+                iconArg.capture(),
+                anyInt());
+        assertEquals("Call strength, in status bar", icon, (int) iconArg.getValue().icon);
     }
 
     protected void assertNetworkNameEquals(String expected) {

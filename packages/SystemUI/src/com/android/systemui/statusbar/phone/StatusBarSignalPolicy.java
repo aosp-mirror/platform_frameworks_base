@@ -22,6 +22,7 @@ import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -39,7 +40,7 @@ import java.util.Objects;
 public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
     private static final String TAG = "StatusBarSignalPolicy";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.INFO);
 
     private final String mSlotAirplane;
     private final String mSlotMobile;
@@ -67,7 +68,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private boolean mWifiVisible = false;
 
     private ArrayList<MobileIconState> mMobileStates = new ArrayList<MobileIconState>();
-    private ArrayList<NoCallingIconState> mNoCallingStates = new ArrayList<NoCallingIconState>();
+    private ArrayList<CallIndicatorIconState> mCallIndicatorStates =
+            new ArrayList<CallIndicatorIconState>();
     private WifiIconState mWifiIconState = new WifiIconState();
 
     public StatusBarSignalPolicy(Context context, StatusBarIconController iconController) {
@@ -201,19 +203,25 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setNoCallingStatus(boolean noCalling, int subId) {
+    public void setCallIndicator(IconState statusIcon, int subId) {
         if (DEBUG) {
-            Log.d(TAG, "setNoCallingStatus: "
-                    + "noCalling = " + noCalling + ","
+            Log.d(TAG, "setCallIndicator: "
+                    + "statusIcon = " + statusIcon + ","
                     + "subId = " + subId);
         }
-        NoCallingIconState state = getNoCallingState(subId);
+        CallIndicatorIconState state = getNoCallingState(subId);
         if (state == null) {
             return;
         }
-        state.visible = noCalling;
-        mIconController.setNoCallingIcons(
-                mSlotNoCalling, NoCallingIconState.copyStates(mNoCallingStates));
+        if (statusIcon.icon == R.drawable.ic_qs_no_calling_sms) {
+            state.isNoCalling = statusIcon.visible;
+            state.noCallingDescription = statusIcon.contentDescription;
+        } else {
+            state.callStrengthResId = statusIcon.icon;
+            state.callStrengthDescription = statusIcon.contentDescription;
+        }
+        mIconController.setCallIndicatorIcons(
+                mSlotNoCalling, CallIndicatorIconState.copyStates(mCallIndicatorStates));
     }
 
     @Override
@@ -273,8 +281,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         }
     }
 
-    private NoCallingIconState getNoCallingState(int subId) {
-        for (NoCallingIconState state : mNoCallingStates) {
+    private CallIndicatorIconState getNoCallingState(int subId) {
+        for (CallIndicatorIconState state : mCallIndicatorStates) {
             if (state.subId == subId) {
                 return state;
             }
@@ -315,23 +323,25 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         }
 
         mIconController.removeAllIconsForSlot(mSlotMobile);
+        mIconController.removeAllIconsForSlot(mSlotNoCalling);
         mMobileStates.clear();
-        List<NoCallingIconState> noCallingStates = new ArrayList<NoCallingIconState>();
-        noCallingStates.addAll(mNoCallingStates);
-        mNoCallingStates.clear();
+        List<CallIndicatorIconState> noCallingStates = new ArrayList<CallIndicatorIconState>();
+        noCallingStates.addAll(mCallIndicatorStates);
+        mCallIndicatorStates.clear();
         final int n = subs.size();
         for (int i = 0; i < n; i++) {
             mMobileStates.add(new MobileIconState(subs.get(i).getSubscriptionId()));
             boolean isNewSub = true;
-            for (NoCallingIconState state : noCallingStates) {
+            for (CallIndicatorIconState state : noCallingStates) {
                 if (state.subId == subs.get(i).getSubscriptionId()) {
-                    mNoCallingStates.add(state);
+                    mCallIndicatorStates.add(state);
                     isNewSub = false;
                     break;
                 }
             }
             if (isNewSub) {
-                mNoCallingStates.add(new NoCallingIconState(subs.get(i).getSubscriptionId()));
+                mCallIndicatorStates.add(
+                        new CallIndicatorIconState(subs.get(i).getSubscriptionId()));
             }
         }
     }
@@ -425,14 +435,18 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     /**
      * Stores the StatusBar state for no Calling & SMS.
      */
-    public static class NoCallingIconState {
-        public boolean visible;
-        public int resId;
+    public static class CallIndicatorIconState {
+        public boolean isNoCalling;
+        public int noCallingResId;
+        public int callStrengthResId;
         public int subId;
+        public String noCallingDescription;
+        public String callStrengthDescription;
 
-        private NoCallingIconState(int subId) {
+        private CallIndicatorIconState(int subId) {
             this.subId = subId;
-            this.resId = R.drawable.ic_qs_no_calling_sms;
+            this.noCallingResId = R.drawable.ic_qs_no_calling_sms;
+            this.callStrengthResId = TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[0];
         }
 
         @Override
@@ -441,27 +455,36 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            NoCallingIconState that = (NoCallingIconState) o;
-            return visible == that.visible
-                    && resId == that.resId
-                    && subId == that.subId;
+            CallIndicatorIconState that = (CallIndicatorIconState) o;
+            return  isNoCalling == that.isNoCalling
+                    && noCallingResId == that.noCallingResId
+                    && callStrengthResId == that.callStrengthResId
+                    && subId == that.subId
+                    && noCallingDescription == that.noCallingDescription
+                    && callStrengthDescription == that.callStrengthDescription;
+
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(visible, resId, subId);
+            return Objects.hash(isNoCalling, noCallingResId,
+                    callStrengthResId, subId, noCallingDescription, callStrengthDescription);
         }
 
-        private void copyTo(NoCallingIconState other) {
-            other.visible = visible;
-            other.resId = resId;
+        private void copyTo(CallIndicatorIconState other) {
+            other.isNoCalling = isNoCalling;
+            other.noCallingResId = noCallingResId;
+            other.callStrengthResId = callStrengthResId;
             other.subId = subId;
+            other.noCallingDescription = noCallingDescription;
+            other.callStrengthDescription = callStrengthDescription;
         }
 
-        private static List<NoCallingIconState> copyStates(List<NoCallingIconState> inStates) {
-            ArrayList<NoCallingIconState> outStates = new ArrayList<>();
-            for (NoCallingIconState state : inStates) {
-                NoCallingIconState copy = new NoCallingIconState(state.subId);
+        private static List<CallIndicatorIconState> copyStates(
+                List<CallIndicatorIconState> inStates) {
+            ArrayList<CallIndicatorIconState> outStates = new ArrayList<>();
+            for (CallIndicatorIconState state : inStates) {
+                CallIndicatorIconState copy = new CallIndicatorIconState(state.subId);
                 state.copyTo(copy);
                 outStates.add(copy);
             }

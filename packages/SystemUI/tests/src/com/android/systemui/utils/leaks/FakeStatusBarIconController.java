@@ -19,8 +19,8 @@ import android.testing.LeakCheck;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.NoCallingIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
     }
 
     @Override
-    public void setNoCallingIcons(String slot, List<NoCallingIconState> states) {
+    public void setCallIndicatorIcons(String slot, List<CallIndicatorIconState> states) {
     }
 
     @Override
