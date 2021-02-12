@@ -17,45 +17,41 @@
 package com.android.server.appsearch.external.localstorage.converter;
 
 import android.annotation.NonNull;
-import android.app.appsearch.SetSchemaResult;
+import android.app.appsearch.SetSchemaResponse;
 
 import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.proto.SetSchemaResultProto;
 
 /**
- * Translates a {@link SetSchemaResultProto} into {@link SetSchemaResult}.
+ * Translates a {@link SetSchemaResultProto} into {@link SetSchemaResponse}.
  *
  * @hide
  */
-public class SetSchemaResultToProtoConverter {
+public class SetSchemaResponseToProtoConverter {
 
-    private SetSchemaResultToProtoConverter() {}
+    private SetSchemaResponseToProtoConverter() {}
 
     /**
-     * Translate a {@link SetSchemaResultProto} into {@link SetSchemaResult}.
+     * Translate a {@link SetSchemaResultProto} into {@link SetSchemaResponse}.
      *
      * @param proto The {@link SetSchemaResultProto} containing results.
      * @param prefix The prefix need to removed from schemaTypes
-     * @return {@link SetSchemaResult} of results.
+     * @return The {@link SetSchemaResponse} object.
      */
     @NonNull
-    public static SetSchemaResult toSetSchemaResult(
+    public static SetSchemaResponse toSetSchemaResponse(
             @NonNull SetSchemaResultProto proto, @NonNull String prefix) {
         Preconditions.checkNotNull(proto);
         Preconditions.checkNotNull(prefix);
-        SetSchemaResult.Builder builder =
-                new SetSchemaResult.Builder()
-                        .setResultCode(
-                                ResultCodeToProtoConverter.toResultCode(
-                                        proto.getStatus().getCode()));
+        SetSchemaResponse.Builder builder = new SetSchemaResponse.Builder();
 
         for (int i = 0; i < proto.getDeletedSchemaTypesCount(); i++) {
-            builder.addDeletedSchemaType(proto.getDeletedSchemaTypes(i).substring(prefix.length()));
+            builder.addDeletedType(proto.getDeletedSchemaTypes(i).substring(prefix.length()));
         }
 
         for (int i = 0; i < proto.getIncompatibleSchemaTypesCount(); i++) {
-            builder.addIncompatibleSchemaType(
+            builder.addIncompatibleType(
                     proto.getIncompatibleSchemaTypes(i).substring(prefix.length()));
         }
 
