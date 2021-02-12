@@ -872,8 +872,7 @@ public class DevicePolicyManager {
      *
      * The name is displayed only during provisioning.
      *
-     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
-     * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
      * @hide
      */
