@@ -43,6 +43,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Singleton;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -224,6 +225,12 @@ public abstract class ApexManager {
      */
     @Nullable
     abstract ApexSessionInfo getStagedSessionInfo(int sessionId);
+
+    /**
+     * Returns array of all staged sessions known to apexd.
+     */
+    @NonNull
+    abstract SparseArray<ApexSessionInfo> getSessions();
 
     /**
      * Submit a staged session to apex service. This causes the apex service to perform some initial
@@ -691,6 +698,21 @@ public abstract class ApexManager {
         }
 
         @Override
+        SparseArray<ApexSessionInfo> getSessions() {
+            try {
+                final ApexSessionInfo[] sessions = waitForApexService().getSessions();
+                final SparseArray<ApexSessionInfo> result = new SparseArray<>(sessions.length);
+                for (int i = 0; i < sessions.length; i++) {
+                    result.put(sessions[i].sessionId, sessions[i]);
+                }
+                return result;
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to contact apexservice", re);
+                throw new RuntimeException(re);
+            }
+        }
+
+        @Override
         ApexInfoList submitStagedSession(ApexSessionParams params) throws PackageManagerException {
             try {
                 final ApexInfoList apexInfoList = new ApexInfoList();
@@ -1080,6 +1102,11 @@ public abstract class ApexManager {
         @Override
         ApexSessionInfo getStagedSessionInfo(int sessionId) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        SparseArray<ApexSessionInfo> getSessions() {
+            return new SparseArray<>(0);
         }
 
         @Override
