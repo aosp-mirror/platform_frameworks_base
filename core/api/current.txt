@@ -50983,6 +50983,7 @@ package android.view.displayhash {
     method public void onDisplayHashError(int);
     method public void onDisplayHashResult(@NonNull android.view.displayhash.DisplayHash);
     field public static final int DISPLAY_HASH_ERROR_INVALID_BOUNDS = -2; // 0xfffffffe
+    field public static final int DISPLAY_HASH_ERROR_INVALID_HASH_ALGORITHM = -5; // 0xfffffffb
     field public static final int DISPLAY_HASH_ERROR_MISSING_WINDOW = -3; // 0xfffffffd
     field public static final int DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN = -4; // 0xfffffffc
     field public static final int DISPLAY_HASH_ERROR_UNKNOWN = -1; // 0xffffffff
