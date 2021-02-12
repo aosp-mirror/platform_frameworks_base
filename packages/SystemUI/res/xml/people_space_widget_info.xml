@@ -16,11 +16,11 @@
 
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="140dp"
-    android:minHeight="40dp"
+    android:minHeight="55dp"
     android:minResizeWidth="110dp"
-    android:minResizeHeight="40dp"
+    android:minResizeHeight="55dp"
     android:updatePeriodMillis="60000"
-    android:previewImage="@drawable/ic_android"
+    android:previewImage="@drawable/ic_person"
     android:resizeMode="horizontal|vertical"
     android:configure="com.android.systemui.people.PeopleSpaceActivity"
     android:initialLayout="@layout/people_space_widget">

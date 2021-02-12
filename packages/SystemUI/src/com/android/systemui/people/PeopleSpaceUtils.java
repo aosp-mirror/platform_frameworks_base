@@ -17,12 +17,21 @@
 package com.android.systemui.people;
 
 import static android.app.Notification.EXTRA_MESSAGES;
+import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
+import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
+import static android.app.people.ConversationStatus.ACTIVITY_GAME;
+import static android.app.people.ConversationStatus.ACTIVITY_LOCATION;
+import static android.app.people.ConversationStatus.ACTIVITY_MEDIA;
+import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
+import static android.app.people.ConversationStatus.ACTIVITY_UPCOMING_BIRTHDAY;
+import static android.app.people.ConversationStatus.AVAILABILITY_AVAILABLE;
 
 import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
+import android.app.people.ConversationStatus;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
@@ -37,6 +46,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
@@ -71,6 +81,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -441,20 +452,141 @@ public class PeopleSpaceUtils {
     /** Creates a {@link RemoteViews} for {@code tile}. */
     public static RemoteViews createRemoteViews(Context context,
             PeopleSpaceTile tile, int appWidgetId) {
-        RemoteViews views;
+        RemoteViews viewsForTile = getViewForTile(context, tile);
+        RemoteViews views = setCommonRemoteViewsFields(context, viewsForTile, tile);
+        return setLaunchIntents(context, views, tile, appWidgetId);
+    }
+
+    /**
+     * The prioritization for the {@code tile} content is missed calls, followed by notification
+     * content, then birthdays, then the most recent status, and finally last interaction.
+     */
+    private static RemoteViews getViewForTile(Context context, PeopleSpaceTile tile) {
         if (tile.getNotificationKey() != null) {
-            views = createNotificationRemoteViews(context, tile);
-        } else if (tile.getBirthdayText() != null) {
-            views = createStatusRemoteViews(context, tile);
-        } else {
-            views = createLastInteractionRemoteViews(context, tile);
+            if (DEBUG) Log.d(TAG, "Create notification view");
+            return createNotificationRemoteViews(context, tile);
         }
-        return setCommonRemoteViewsFields(context, views, tile, appWidgetId);
+
+        // TODO: Add sorting when we expose timestamp of statuses.
+        List<ConversationStatus> statusesForEntireView =
+                tile.getStatuses() == null ? Arrays.asList() : tile.getStatuses().stream().filter(
+                        c -> isStatusValidForEntireStatusView(c)).collect(Collectors.toList());
+        ConversationStatus birthdayStatus = getBirthdayStatus(tile, statusesForEntireView);
+        if (birthdayStatus != null) {
+            if (DEBUG) Log.d(TAG, "Create birthday view");
+            return createStatusRemoteViews(context, birthdayStatus);
+        }
+
+        if (!statusesForEntireView.isEmpty()) {
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Create status view for: " + statusesForEntireView.get(0).getActivity());
+            }
+            return createStatusRemoteViews(context, statusesForEntireView.get(0));
+        }
+
+        return createLastInteractionRemoteViews(context, tile);
+    }
+
+    @Nullable
+    private static ConversationStatus getBirthdayStatus(PeopleSpaceTile tile,
+            List<ConversationStatus> statuses) {
+        Optional<ConversationStatus> birthdayStatus = statuses.stream().filter(
+                c -> c.getActivity() == ACTIVITY_BIRTHDAY).findFirst();
+        if (birthdayStatus.isPresent()) {
+            return birthdayStatus.get();
+        }
+        if (!TextUtils.isEmpty(tile.getBirthdayText())) {
+            return new ConversationStatus.Builder(tile.getId(), ACTIVITY_BIRTHDAY).build();
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns whether a {@code status} should have its own entire templated view.
+     *
+     * <p>A status may still be shown on the view (for example, as a new story ring) even if it's
+     * not valid to compose an entire view.
+     */
+    private static boolean isStatusValidForEntireStatusView(ConversationStatus status) {
+        switch (status.getActivity()) {
+            // Birthday & Anniversary don't require text provided or icon provided.
+            case ACTIVITY_BIRTHDAY:
+            case ACTIVITY_ANNIVERSARY:
+                return true;
+            default:
+                // For future birthday, location, new story, video, music, game, and other, the
+                // app must provide either text or an icon.
+                return !TextUtils.isEmpty(status.getDescription())
+                        || status.getIcon() != null;
+        }
+    }
+
+    private static RemoteViews createStatusRemoteViews(Context context, ConversationStatus status) {
+        RemoteViews views = new RemoteViews(
+                context.getPackageName(), R.layout.people_space_small_avatar_tile);
+        CharSequence statusText = status.getDescription();
+        if (TextUtils.isEmpty(statusText)) {
+            statusText = getStatusTextByType(context, status.getActivity());
+        }
+        views.setTextViewText(R.id.status, statusText);
+        Icon statusIcon = status.getIcon();
+        if (statusIcon != null) {
+            views.setImageViewIcon(R.id.image, statusIcon);
+            views.setBoolean(R.id.content_background, "setClipToOutline", true);
+        } else {
+            views.setViewVisibility(R.id.content_background, View.GONE);
+        }
+        // TODO: Set status pre-defined icons
+        return views;
+    }
+
+    private static String getStatusTextByType(Context context, int activity) {
+        switch (activity) {
+            case ACTIVITY_BIRTHDAY:
+                return context.getString(R.string.birthday_status);
+            case ACTIVITY_UPCOMING_BIRTHDAY:
+                return context.getString(R.string.upcoming_birthday_status);
+            case ACTIVITY_ANNIVERSARY:
+                return context.getString(R.string.anniversary_status);
+            case ACTIVITY_LOCATION:
+                return context.getString(R.string.location_status);
+            case ACTIVITY_NEW_STORY:
+                return context.getString(R.string.new_story_status);
+            case ACTIVITY_MEDIA:
+                return context.getString(R.string.video_status);
+            case ACTIVITY_GAME:
+                return context.getString(R.string.game_status);
+            default:
+                return EMPTY_STRING;
+        }
     }
 
     private static RemoteViews setCommonRemoteViewsFields(Context context, RemoteViews views,
-            PeopleSpaceTile tile, int appWidgetId) {
+            PeopleSpaceTile tile) {
         try {
+            boolean isAvailable =
+                    tile.getStatuses() != null && tile.getStatuses().stream().anyMatch(
+                            c -> c.getAvailability() == AVAILABILITY_AVAILABLE);
+            if (isAvailable) {
+                views.setViewVisibility(R.id.availability, View.VISIBLE);
+            } else {
+                views.setViewVisibility(R.id.availability, View.GONE);
+            }
+            boolean hasNewStory =
+                    tile.getStatuses() != null && tile.getStatuses().stream().anyMatch(
+                            c -> c.getActivity() == ACTIVITY_NEW_STORY);
+            if (hasNewStory) {
+                views.setViewVisibility(R.id.person_icon_with_story, View.VISIBLE);
+                views.setViewVisibility(R.id.person_icon_only, View.GONE);
+                views.setImageViewIcon(R.id.person_icon_inside_ring, tile.getUserIcon());
+            } else {
+                views.setViewVisibility(R.id.person_icon_with_story, View.GONE);
+                views.setViewVisibility(R.id.person_icon_only, View.VISIBLE);
+                views.setImageViewIcon(R.id.person_icon_only, tile.getUserIcon());
+            }
+
             views.setTextViewText(R.id.name, tile.getUserName().toString());
             views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
             views.setBoolean(R.id.content_background, "setClipToOutline", true);
@@ -466,7 +598,16 @@ public class PeopleSpaceUtils {
                                     tile.getPackageName())
                     )
             );
+            return views;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set common fields: " + e);
+        }
+        return views;
+    }
 
+    private static RemoteViews setLaunchIntents(Context context, RemoteViews views,
+            PeopleSpaceTile tile, int appWidgetId) {
+        try {
             Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
             activityIntent.addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK
@@ -484,38 +625,32 @@ public class PeopleSpaceUtils {
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
             return views;
         } catch (Exception e) {
-            Log.e(TAG, "Failed to set common fields: " + e);
+            Log.e(TAG, "Failed to add launch intents: " + e);
         }
-        return null;
+        return views;
     }
 
     private static RemoteViews createNotificationRemoteViews(Context context,
             PeopleSpaceTile tile) {
         RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.people_space_small_avatar_tile);
+                context.getPackageName(), R.layout.people_space_notification_content_tile);
         Uri image = tile.getNotificationDataUri();
         if (image != null) {
-            //TODO: Use NotificationInlineImageCache
+            // TODO: Use NotificationInlineImageCache
             views.setImageViewUri(R.id.image, image);
-            views.setViewVisibility(R.id.image, View.VISIBLE);
+            views.setViewVisibility(R.id.content_background, View.VISIBLE);
+            views.setBoolean(R.id.content_background, "setClipToOutline", true);
             views.setViewVisibility(R.id.content, View.GONE);
         } else {
             CharSequence content = tile.getNotificationContent();
             views = setPunctuationRemoteViewsFields(views, content);
             views.setTextViewText(R.id.content, content);
             views.setViewVisibility(R.id.content, View.VISIBLE);
-            views.setViewVisibility(R.id.image, View.GONE);
+            views.setViewVisibility(R.id.content_background, View.GONE);
         }
-        views.setTextViewText(R.id.time, PeopleSpaceUtils.getLastInteractionString(
+        // TODO: Set subtext as Group Sender name once storing the name in PeopleSpaceTile.
+        views.setTextViewText(R.id.subtext, PeopleSpaceUtils.getLastInteractionString(
                 context, tile.getLastInteractionTimestamp(), false));
-        return views;
-    }
-
-    private static RemoteViews createStatusRemoteViews(Context context,
-            PeopleSpaceTile tile) {
-        RemoteViews views = new RemoteViews(
-                context.getPackageName(), R.layout.people_space_large_avatar_tile);
-        views.setTextViewText(R.id.status, tile.getBirthdayText());
         return views;
     }
 
@@ -525,7 +660,7 @@ public class PeopleSpaceUtils {
                 context.getPackageName(), R.layout.people_space_large_avatar_tile);
         String status = PeopleSpaceUtils.getLastInteractionString(
                 context, tile.getLastInteractionTimestamp(), true);
-        views.setTextViewText(R.id.status, status);
+        views.setTextViewText(R.id.last_interaction, status);
         return views;
     }
 
@@ -682,20 +817,35 @@ public class PeopleSpaceUtils {
         Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
         MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
                 MeasureFormat.FormatWidth.WIDE);
+        MeasureFormat shortFormatter = MeasureFormat.getInstance(Locale.getDefault(),
+                MeasureFormat.FormatWidth.SHORT);
         if (durationSinceLastInteraction.toHours() < MIN_HOUR) {
-            return context.getString(includeLastChatted ? R.string.last_interaction_status_less_than
-                            : R.string.less_than_timestamp,
-                    formatter.formatMeasures(new Measure(MIN_HOUR, MeasureUnit.HOUR)));
+            if (includeLastChatted) {
+                return context.getString(R.string.last_interaction_status_less_than,
+                        formatter.formatMeasures(new Measure(MIN_HOUR, MeasureUnit.HOUR)));
+            }
+            return context.getString(R.string.timestamp, shortFormatter.formatMeasures(
+                    new Measure(durationSinceLastInteraction.toMinutes(), MeasureUnit.MINUTE)));
         } else if (durationSinceLastInteraction.toDays() < ONE_DAY) {
-            return context.getString(
-                    includeLastChatted ? R.string.last_interaction_status : R.string.timestamp,
-                    formatter.formatMeasures(
-                            new Measure(durationSinceLastInteraction.toHours(), MeasureUnit.HOUR)));
+            if (includeLastChatted) {
+                return context.getString(R.string.last_interaction_status,
+                        formatter.formatMeasures(
+                                new Measure(durationSinceLastInteraction.toHours(),
+                                        MeasureUnit.HOUR)));
+            }
+            return context.getString(R.string.timestamp, shortFormatter.formatMeasures(
+                    new Measure(durationSinceLastInteraction.toHours(),
+                            MeasureUnit.HOUR)));
         } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
-            return context.getString(
-                    includeLastChatted ? R.string.last_interaction_status : R.string.timestamp,
-                    formatter.formatMeasures(
-                            new Measure(durationSinceLastInteraction.toDays(), MeasureUnit.DAY)));
+            if (includeLastChatted) {
+                return context.getString(R.string.last_interaction_status,
+                        formatter.formatMeasures(
+                                new Measure(durationSinceLastInteraction.toDays(),
+                                        MeasureUnit.DAY)));
+            }
+            return context.getString(R.string.timestamp, shortFormatter.formatMeasures(
+                    new Measure(durationSinceLastInteraction.toHours(),
+                            MeasureUnit.DAY)));
         } else {
             return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK
                             ? (includeLastChatted ? R.string.last_interaction_status :
