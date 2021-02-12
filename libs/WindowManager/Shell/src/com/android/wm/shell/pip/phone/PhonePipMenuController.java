@@ -416,15 +416,6 @@ public class PhonePipMenuController implements PipMenuController {
     }
 
     /**
-     * Preemptively mark the menu as invisible, used when we are directly manipulating the pinned
-     * stack and don't want to trigger a resize which can animate the stack in a conflicting way
-     * (ie. when manually expanding or dismissing).
-     */
-    public void hideMenuWithoutResize() {
-        onMenuStateChanged(MENU_STATE_NONE, false /* resize */, null /* callback */);
-    }
-
-    /**
      * Sets the menu actions to the actions provided by the current PiP menu.
      */
     @Override

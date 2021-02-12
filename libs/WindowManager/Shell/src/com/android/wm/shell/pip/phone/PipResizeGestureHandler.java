@@ -516,8 +516,8 @@ public class PipResizeGestureHandler {
                     }
                     if (mThresholdCrossed) {
                         if (mPhonePipMenuController.isMenuVisible()) {
-                            mPhonePipMenuController.hideMenuWithoutResize();
-                            mPhonePipMenuController.hideMenu();
+                            mPhonePipMenuController.hideMenu(false /* animate */,
+                                    false /* resize */);
                         }
                         final Rect currentPipBounds = mPipBoundsState.getBounds();
                         mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(x, y,
