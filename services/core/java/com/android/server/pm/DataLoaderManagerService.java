@@ -27,6 +27,8 @@ import android.content.pm.IDataLoaderManager;
 import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -45,12 +47,20 @@ import java.util.List;
 public class DataLoaderManagerService extends SystemService {
     private static final String TAG = "DataLoaderManager";
     private final Context mContext;
+    private final HandlerThread mThread;
+    private final Handler mHandler;
     private final DataLoaderManagerBinderService mBinderService;
     private SparseArray<DataLoaderServiceConnection> mServiceConnections = new SparseArray<>();
 
     public DataLoaderManagerService(Context context) {
         super(context);
         mContext = context;
+
+        mThread = new HandlerThread(TAG);
+        mThread.start();
+
+        mHandler = new Handler(mThread.getLooper());
+
         mBinderService = new DataLoaderManagerBinderService();
     }
 
@@ -62,7 +72,7 @@ public class DataLoaderManagerService extends SystemService {
     final class DataLoaderManagerBinderService extends IDataLoaderManager.Stub {
         @Override
         public boolean bindToDataLoader(int dataLoaderId, DataLoaderParamsParcel params,
-                IDataLoaderStatusListener listener) {
+                long bindDelayMs, IDataLoaderStatusListener listener) {
             synchronized (mServiceConnections) {
                 if (mServiceConnections.get(dataLoaderId) != null) {
                     return true;
@@ -76,19 +86,21 @@ public class DataLoaderManagerService extends SystemService {
             }
 
             // Binds to the specific data loader service.
-            DataLoaderServiceConnection connection = new DataLoaderServiceConnection(dataLoaderId,
-                    listener);
+            final DataLoaderServiceConnection connection = new DataLoaderServiceConnection(
+                    dataLoaderId, listener);
 
-            Intent intent = new Intent();
+            final Intent intent = new Intent();
             intent.setComponent(dataLoaderComponent);
-            if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
-                    UserHandle.of(UserHandle.getCallingUserId()))) {
-                Slog.e(TAG,
-                        "Failed to bind to: " + dataLoaderComponent + " for ID=" + dataLoaderId);
-                mContext.unbindService(connection);
-                return false;
-            }
-            return true;
+
+            return mHandler.postDelayed(() -> {
+                if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
+                        mHandler, UserHandle.of(UserHandle.getCallingUserId()))) {
+                    Slog.e(TAG,
+                            "Failed to bind to: " + dataLoaderComponent + " for ID="
+                                    + dataLoaderId);
+                    mContext.unbindService(connection);
+                }
+            }, bindDelayMs);
         }
 
         /**

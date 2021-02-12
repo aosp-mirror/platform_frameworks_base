@@ -20,6 +20,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayManager;
 import android.content.om.OverlayManagerTransaction;
 import android.os.UserHandle;
@@ -32,14 +33,14 @@ import java.util.concurrent.FutureTask;
 class LocalOverlayManager {
     private static final long TIMEOUT = 30;
 
-    public static void toggleOverlaysAndWait(@NonNull final String[] overlaysToEnable,
-            @NonNull final String[] overlaysToDisable) throws Exception {
+    public static void toggleOverlaysAndWait(@NonNull final OverlayIdentifier[] overlaysToEnable,
+            @NonNull final OverlayIdentifier[] overlaysToDisable) throws Exception {
         final int userId = UserHandle.myUserId();
         OverlayManagerTransaction.Builder builder = new OverlayManagerTransaction.Builder();
-        for (String pkg : overlaysToEnable) {
+        for (OverlayIdentifier pkg : overlaysToEnable) {
             builder.setEnabled(pkg, true, userId);
         }
-        for (String pkg : overlaysToDisable) {
+        for (OverlayIdentifier pkg : overlaysToDisable) {
             builder.setEnabled(pkg, false, userId);
         }
         OverlayManagerTransaction transaction = builder.build();
@@ -48,7 +49,7 @@ class LocalOverlayManager {
         FutureTask<Boolean> task = new FutureTask<>(() -> {
             while (true) {
                 final String[] paths = ctx.getResources().getAssets().getApkPaths();
-                if (arrayTailContains(paths, overlaysToEnable)
+                if (arrayTailContainsOverlays(paths, overlaysToEnable)
                         && arrayDoesNotContain(paths, overlaysToDisable)) {
                     return true;
                 }
@@ -64,15 +65,15 @@ class LocalOverlayManager {
         task.get(TIMEOUT, SECONDS);
     }
 
-    private static boolean arrayTailContains(@NonNull final String[] array,
-            @NonNull final String[] substrings) {
-        if (array.length < substrings.length) {
+    private static boolean arrayTailContainsOverlays(@NonNull final String[] array,
+            @NonNull final OverlayIdentifier[] overlays) {
+        if (array.length < overlays.length) {
             return false;
         }
-        for (int i = 0; i < substrings.length; i++) {
-            String a = array[array.length - substrings.length + i];
-            String s = substrings[i];
-            if (!a.contains(s)) {
+        for (int i = 0; i < overlays.length; i++) {
+            String a = array[array.length - overlays.length + i];
+            OverlayIdentifier s = overlays[i];
+            if (!a.contains(s.getPackageName())) {
                 return false;
             }
         }
@@ -80,10 +81,10 @@ class LocalOverlayManager {
     }
 
     private static boolean arrayDoesNotContain(@NonNull final String[] array,
-            @NonNull final String[] substrings) {
-        for (String s : substrings) {
+            @NonNull final OverlayIdentifier[] overlays) {
+        for (OverlayIdentifier s : overlays) {
             for (String a : array) {
-                if (a.contains(s)) {
+                if (a.contains(s.getPackageName())) {
                     return false;
                 }
             }

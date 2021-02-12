@@ -53,13 +53,6 @@ public class TaskInfo {
     public int userId;
 
     /**
-     * The id of the ActivityStack that currently contains this task.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public int stackId;
-
-    /**
      * The identifier for this task.
      */
     public int taskId;
@@ -358,7 +351,6 @@ public class TaskInfo {
      */
     void readFromParcel(Parcel source) {
         userId = source.readInt();
-        stackId = source.readInt();
         taskId = source.readInt();
         displayId = source.readInt();
         isRunning = source.readBoolean();
@@ -394,7 +386,6 @@ public class TaskInfo {
      */
     void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(userId);
-        dest.writeInt(stackId);
         dest.writeInt(taskId);
         dest.writeInt(displayId);
         dest.writeBoolean(isRunning);
@@ -428,7 +419,7 @@ public class TaskInfo {
 
     @Override
     public String toString() {
-        return "TaskInfo{userId=" + userId + " stackId=" + stackId + " taskId=" + taskId
+        return "TaskInfo{userId=" + userId + " taskId=" + taskId
                 + " displayId=" + displayId
                 + " isRunning=" + isRunning
                 + " baseIntent=" + baseIntent + " baseActivity=" + baseActivity

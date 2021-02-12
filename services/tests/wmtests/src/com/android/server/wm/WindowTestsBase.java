@@ -337,6 +337,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
         attrs.setTitle(name);
+        attrs.packageName = "test";
 
         final WindowState w = new WindowState(service, session, iWindow, token, parent,
                 OP_NONE, attrs, VISIBLE, ownerId, userId,

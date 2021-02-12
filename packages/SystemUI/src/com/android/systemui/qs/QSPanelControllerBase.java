@@ -34,6 +34,8 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.util.Utils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -63,6 +65,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
+    private final FeatureFlags mFeatureFlags;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
     private int mLastOrientation;
@@ -93,11 +96,18 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private boolean mUsingHorizontalLayout;
 
-    protected QSPanelControllerBase(T view, QSTileHost host,
+    protected QSPanelControllerBase(
+            T view,
+            QSTileHost host,
             QSCustomizerController qsCustomizerController,
-            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer, MediaHost mediaHost,
-            MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager) {
+            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
+            MediaHost mediaHost,
+            MetricsLogger metricsLogger,
+            UiEventLogger uiEventLogger,
+            QSLogger qsLogger,
+            DumpManager dumpManager,
+            FeatureFlags featureFlags
+    ) {
         super(view);
         mHost = host;
         mQsCustomizerController = qsCustomizerController;
@@ -107,6 +117,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUiEventLogger = uiEventLogger;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
+        mFeatureFlags = featureFlags;
     }
 
     @Override
@@ -334,9 +345,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean shouldUseHorizontalLayout() {
+        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, getResources()))  {
+            return false;
+        }
         return mUsingMediaPlayer && mMediaHost.getVisible()
-                && getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE;
+                    && getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private void logTiles() {

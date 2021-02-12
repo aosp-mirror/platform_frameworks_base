@@ -54,12 +54,6 @@ struct Idmap_header {
 };
 
 struct Idmap_data_header {
-  uint8_t target_package_id;
-  uint8_t overlay_package_id;
-
-  // Padding to ensure 4 byte alignment for target_entry_count
-  uint16_t p0;
-
   uint32_t target_entry_count;
   uint32_t target_inline_entry_count;
   uint32_t overlay_entry_count;
@@ -158,19 +152,19 @@ IdmapResMap::Result IdmapResMap::Lookup(uint32_t target_res_id) const {
     return {};
   }
 
-  // The resource ids encoded within the idmap are build-time resource ids.
-  target_res_id = (0x00FFFFFFU & target_res_id)
-      | (((uint32_t) data_header_->target_package_id) << 24U);
+  // The resource ids encoded within the idmap are build-time resource ids so do not consider the
+  // package id when determining if the resource in the target package is overlaid.
+  target_res_id &= 0x00FFFFFFU;
 
   // Check if the target resource is mapped to an overlay resource.
   auto first_entry = entries_;
   auto end_entry = entries_ + dtohl(data_header_->target_entry_count);
   auto entry = std::lower_bound(first_entry, end_entry, target_res_id,
-                                [](const Idmap_target_entry &e, const uint32_t target_id) {
-    return dtohl(e.target_id) < target_id;
+                                [](const Idmap_target_entry& e, const uint32_t target_id) {
+    return (0x00FFFFFFU & dtohl(e.target_id)) < target_id;
   });
 
-  if (entry != end_entry && dtohl(entry->target_id) == target_res_id) {
+  if (entry != end_entry && (0x00FFFFFFU & dtohl(entry->target_id)) == target_res_id) {
     uint32_t overlay_resource_id = dtohl(entry->overlay_id);
     // Lookup the resource without rewriting the overlay resource id back to the target resource id
     // being looked up.
@@ -182,12 +176,13 @@ IdmapResMap::Result IdmapResMap::Lookup(uint32_t target_res_id) const {
   auto first_inline_entry = inline_entries_;
   auto end_inline_entry = inline_entries_ + dtohl(data_header_->target_inline_entry_count);
   auto inline_entry = std::lower_bound(first_inline_entry, end_inline_entry, target_res_id,
-                                       [](const Idmap_target_entry_inline &e,
+                                       [](const Idmap_target_entry_inline& e,
                                           const uint32_t target_id) {
-    return dtohl(e.target_id) < target_id;
+    return (0x00FFFFFFU & dtohl(e.target_id)) < target_id;
   });
 
-  if (inline_entry != end_inline_entry && dtohl(inline_entry->target_id) == target_res_id) {
+  if (inline_entry != end_inline_entry &&
+      (0x00FFFFFFU & dtohl(inline_entry->target_id)) == target_res_id) {
     return Result(inline_entry->value);
   }
   return {};
@@ -235,7 +230,7 @@ std::optional<std::string_view> ReadString(const uint8_t** in_out_data_ptr, size
   }
   return std::string_view(data, *len);
 }
-}
+} // namespace
 
 LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
                          const Idmap_header* header,

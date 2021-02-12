@@ -20,6 +20,9 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.Context;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -29,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Container for a batch of requests to the OverlayManagerService.
@@ -60,12 +64,13 @@ public class OverlayManagerTransaction
 
     private OverlayManagerTransaction(@NonNull final Parcel source) {
         final int size = source.readInt();
-        mRequests = new ArrayList<Request>(size);
+        mRequests = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             final int request = source.readInt();
-            final String packageName = source.readString();
+            final OverlayIdentifier overlay = source.readParcelable(null);
             final int userId = source.readInt();
-            mRequests.add(new Request(request, packageName, userId));
+            final Bundle extras = source.readBundle(null);
+            mRequests.add(new Request(request, overlay, userId, extras));
         }
     }
 
@@ -95,22 +100,36 @@ public class OverlayManagerTransaction
 
         public static final int TYPE_SET_ENABLED = 0;
         public static final int TYPE_SET_DISABLED = 1;
+        public static final int TYPE_REGISTER_FABRICATED = 2;
+        public static final int TYPE_UNREGISTER_FABRICATED = 3;
 
-        @RequestType public final int type;
-        public final String packageName;
+        public static final String BUNDLE_FABRICATED_OVERLAY = "fabricated_overlay";
+
+        @RequestType
+        public final int type;
+        @NonNull
+        public final OverlayIdentifier overlay;
         public final int userId;
+        @Nullable
+        public final Bundle extras;
 
-        public Request(@RequestType final int type, @NonNull final String packageName,
+        public Request(@RequestType final int type, @NonNull final OverlayIdentifier overlay,
                 final int userId) {
+            this(type, overlay, userId, null /* extras */);
+        }
+
+        public Request(@RequestType final int type, @NonNull final OverlayIdentifier overlay,
+                final int userId, @Nullable Bundle extras) {
             this.type = type;
-            this.packageName = packageName;
+            this.overlay = overlay;
             this.userId = userId;
+            this.extras = extras;
         }
 
         @Override
         public String toString() {
-            return String.format("Request{type=0x%02x (%s), packageName=%s, userId=%d}",
-                    type, typeToString(), packageName, userId);
+            return String.format(Locale.US, "Request{type=0x%02x (%s), overlay=%s, userId=%d}",
+                    type, typeToString(), overlay, userId);
         }
 
         /**
@@ -123,6 +142,8 @@ public class OverlayManagerTransaction
             switch (type) {
                 case TYPE_SET_ENABLED: return "TYPE_SET_ENABLED";
                 case TYPE_SET_DISABLED: return "TYPE_SET_DISABLED";
+                case TYPE_REGISTER_FABRICATED: return "TYPE_REGISTER_FABRICATED";
+                case TYPE_UNREGISTER_FABRICATED: return "TYPE_UNREGISTER_FABRICATED";
                 default: return String.format("TYPE_UNKNOWN (0x%02x)", type);
             }
         }
@@ -152,22 +173,56 @@ public class OverlayManagerTransaction
          * longer affect the resources of the target package. If the target is
          * currently running, its outdated resources will be replaced by new ones.
          *
-         * @param packageName The name of the overlay package.
+         * @param overlay The name of the overlay package.
          * @param enable true to enable the overlay, false to disable it.
          * @return this Builder object, so you can chain additional requests
          */
-        public Builder setEnabled(@NonNull String packageName, boolean enable) {
-            return setEnabled(packageName, enable, UserHandle.myUserId());
+        public Builder setEnabled(@NonNull OverlayIdentifier overlay, boolean enable) {
+            return setEnabled(overlay, enable, UserHandle.myUserId());
         }
 
         /**
          * @hide
          */
-        public Builder setEnabled(@NonNull String packageName, boolean enable, int userId) {
-            checkNotNull(packageName);
+        public Builder setEnabled(@NonNull OverlayIdentifier overlay, boolean enable, int userId) {
+            checkNotNull(overlay);
             @Request.RequestType final int type =
                 enable ? Request.TYPE_SET_ENABLED : Request.TYPE_SET_DISABLED;
-            mRequests.add(new Request(type, packageName, userId));
+            mRequests.add(new Request(type, overlay, userId));
+            return this;
+        }
+
+        /**
+         * Registers the fabricated overlay with the overlay manager so it can be enabled and
+         * disabled for any user.
+         *
+         * The fabricated overlay is initialized in a disabled state. If an overlay is re-registered
+         * the existing overlay will be replaced by the newly registered overlay and the enabled
+         * state of the overlay will be left unchanged if the target package and target overlayable
+         * have not changed.
+         *
+         * @param overlay the overlay to register with the overlay manager
+         *
+         * @hide
+         */
+        public Builder registerFabricatedOverlay(@NonNull FabricatedOverlay overlay) {
+            final Bundle extras = new Bundle();
+            extras.putParcelable(Request.BUNDLE_FABRICATED_OVERLAY, overlay.mOverlay);
+            mRequests.add(new Request(Request.TYPE_REGISTER_FABRICATED, overlay.getIdentifier(),
+                    UserHandle.USER_ALL, extras));
+            return this;
+        }
+
+        /**
+         * Disables and removes the overlay from the overlay manager for all users.
+         *
+         * @param overlay the overlay to disable and remove
+         *
+         * @hide
+         */
+        public Builder unregisterFabricatedOverlay(@NonNull OverlayIdentifier overlay) {
+            mRequests.add(new Request(Request.TYPE_UNREGISTER_FABRICATED, overlay,
+                    UserHandle.USER_ALL));
             return this;
         }
 
@@ -195,8 +250,9 @@ public class OverlayManagerTransaction
         for (int i = 0; i < size; i++) {
             final Request req = mRequests.get(i);
             dest.writeInt(req.type);
-            dest.writeString(req.packageName);
+            dest.writeParcelable(req.overlay, flags);
             dest.writeInt(req.userId);
+            dest.writeBundle(req.extras);
         }
     }
 

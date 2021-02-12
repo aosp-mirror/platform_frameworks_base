@@ -218,7 +218,7 @@ public class BatteryStatsHelperTest extends TestCase {
         sippers.add(sipperBg);
         sippers.add(sipperFg);
 
-        spc.smearScreenBatterySipper(sippers, mScreenBatterySipper);
+        spc.smearScreenBatterySipper(sippers, mScreenBatterySipper, 0);
 
         assertThat(sipperNull.screenPowerMah).isWithin(PRECISION).of(0);
         assertThat(sipperBg.screenPowerMah).isWithin(PRECISION).of(0);
@@ -253,7 +253,7 @@ public class BatteryStatsHelperTest extends TestCase {
         doReturn(TIME_STATE_FOREGROUND_US).when(mUid).getProcessStateTime(eq(PROCESS_STATE_TOP),
                 anyLong(), anyInt());
 
-        final long time = spc.getProcessForegroundTimeMs(mUid);
+        final long time = spc.getProcessForegroundTimeMs(mUid, 1000);
 
         assertThat(time).isEqualTo(TIME_STATE_FOREGROUND_MS);
     }
@@ -296,7 +296,7 @@ public class BatteryStatsHelperTest extends TestCase {
         doReturn(uidCode).when(sipper).getUid();
         if (!isUidNull) {
             final BatteryStats.Uid uid = mock(BatteryStats.Uid.class, RETURNS_DEEP_STUBS);
-            doReturn(activityTime).when(spc).getProcessForegroundTimeMs(eq(uid));
+            doReturn(activityTime).when(spc).getProcessForegroundTimeMs(eq(uid), anyLong());
             doReturn(uidCode).when(uid).getUid();
             sipper.uidObj = uid;
         }

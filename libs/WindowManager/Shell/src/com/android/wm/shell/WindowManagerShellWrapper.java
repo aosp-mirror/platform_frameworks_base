@@ -27,6 +27,7 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder.PinnedStackListener
 /**
  * The singleton wrapper to communicate between WindowManagerService and WMShell features
  * (e.g: PIP, SplitScreen, Bubble, OneHandedMode...etc)
+ * TODO: Remove once PinnedStackListenerForwarder can be removed
  */
 public class WindowManagerShellWrapper {
     private static final String TAG = WindowManagerShellWrapper.class.getSimpleName();

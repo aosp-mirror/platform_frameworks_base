@@ -25,6 +25,7 @@ import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.RemoteException;
 import android.util.ArraySet;
+import android.util.Log;
 
 /**
  * Common set of interfaces to test biometric-related APIs, including {@link BiometricPrompt} and
@@ -33,7 +34,10 @@ import android.util.ArraySet;
  */
 @TestApi
 public class BiometricTestSession implements AutoCloseable {
+    private static final String TAG = "BiometricTestSession";
+
     private final Context mContext;
+    private final int mSensorId;
     private final ITestSession mTestSession;
 
     // Keep track of users that were tested, which need to be cleaned up when finishing.
@@ -42,8 +46,10 @@ public class BiometricTestSession implements AutoCloseable {
     /**
      * @hide
      */
-    public BiometricTestSession(@NonNull Context context, @NonNull ITestSession testSession) {
+    public BiometricTestSession(@NonNull Context context, int sensorId,
+            @NonNull ITestSession testSession) {
         mContext = context;
+        mSensorId = sensorId;
         mTestSession = testSession;
         mTestedUsers = new ArraySet<>();
         setTestHalEnabled(true);
@@ -61,6 +67,7 @@ public class BiometricTestSession implements AutoCloseable {
     @RequiresPermission(TEST_BIOMETRIC)
     private void setTestHalEnabled(boolean enabled) {
         try {
+            Log.w(TAG, "setTestHalEnabled, sensor: " + mSensorId + " enabled: " + enabled);
             mTestSession.setTestHalEnabled(enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

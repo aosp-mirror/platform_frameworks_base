@@ -70,9 +70,10 @@ public:
     ~RealDataLoaderManager() = default;
     binder::Status bindToDataLoader(MountId mountId,
                                     const content::pm::DataLoaderParamsParcel& params,
+                                    int bindDelayMs,
                                     const sp<content::pm::IDataLoaderStatusListener>& listener,
                                     bool* _aidl_return) const final {
-        return mInterface->bindToDataLoader(mountId, params, listener, _aidl_return);
+        return mInterface->bindToDataLoader(mountId, params, bindDelayMs, listener, _aidl_return);
     }
     binder::Status getDataLoader(MountId mountId,
                                  sp<content::pm::IDataLoader>* _aidl_return) const final {

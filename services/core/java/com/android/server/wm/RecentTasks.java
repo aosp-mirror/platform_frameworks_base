@@ -58,6 +58,8 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -1886,6 +1888,7 @@ class RecentTasks {
         // Fill in some deprecated values.
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
+        rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
 
         // Fill in organized child task info for the task created by organizer.
         if (tr.mCreatedByOrganizer) {

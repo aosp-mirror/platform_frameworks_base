@@ -151,16 +151,18 @@ Result<std::string> XmlParser::Node::GetAttributeStringValue(const std::string& 
   return value ? GetStringValue(parser_, *value, name) : value.GetError();
 }
 
-Result<std::unique_ptr<const XmlParser>> XmlParser::Create(const void* data, size_t size,
-                                                           bool copy_data) {
-  auto parser = std::unique_ptr<const XmlParser>(new XmlParser());
-  if (parser->tree_.setTo(data, size, copy_data) != NO_ERROR) {
+XmlParser::XmlParser(std::unique_ptr<ResXMLTree> tree) : tree_(std::move(tree)) {
+}
+
+Result<XmlParser> XmlParser::Create(const void* data, size_t size, bool copy_data) {
+  auto tree = std::make_unique<ResXMLTree>();
+  if (tree->setTo(data, size, copy_data) != NO_ERROR) {
     return Error("Malformed xml block");
   }
 
   // Find the beginning of the first tag.
   XmlParser::Event event;
-  while ((event = parser->tree_.next()) != XmlParser::Event::BAD_DOCUMENT &&
+  while ((event = tree->next()) != XmlParser::Event::BAD_DOCUMENT &&
          event != XmlParser::Event::END_DOCUMENT && event != XmlParser::Event::START_TAG) {
   }
 
@@ -172,11 +174,7 @@ Result<std::unique_ptr<const XmlParser>> XmlParser::Create(const void* data, siz
     return Error("Bad xml document");
   }
 
-  return parser;
-}
-
-XmlParser::~XmlParser() {
-  tree_.uninit();
+  return XmlParser{std::move(tree)};
 }
 
 }  // namespace android::idmap2

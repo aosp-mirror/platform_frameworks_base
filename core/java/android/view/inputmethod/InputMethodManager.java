@@ -115,7 +115,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -1080,19 +1079,6 @@ public final class InputMethodManager {
                     == getLooper()) {
                 ((DumpableInputConnection) getInputConnection()).dumpDebug(proto, fieldId);
             }
-        }
-    }
-
-    private static class ImeThreadFactory implements ThreadFactory {
-        private final String mThreadName;
-
-        ImeThreadFactory(String name) {
-            mThreadName = name;
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, mThreadName);
         }
     }
 

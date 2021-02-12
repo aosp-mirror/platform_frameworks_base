@@ -20,6 +20,7 @@ import android.animation.AnimationHandler;
 import android.content.Context;
 import android.view.IWindowManager;
 
+import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -39,11 +40,20 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Provides dependencies from {@link com.android.wm.shell} which could be customized among different
- * branches of SystemUI.
+ * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only
+ * accessible from components within the WM subcomponent (can be explicitly exposed to the
+ * SysUIComponent, see {@link WMComponent}).
+ *
+ * This module only defines Shell dependencies for the TV SystemUI implementation.  Common
+ * dependencies should go into {@link WMShellBaseModule}.
  */
 @Module(includes = {TvPipModule.class})
 public class TvWMShellModule {
+
+    //
+    // Internal common - Components used internally by multiple shell features
+    //
+
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
@@ -53,16 +63,20 @@ public class TvWMShellModule {
                 transactionPool);
     }
 
+    //
+    // Split/multiwindow
+    //
+
     @WMSingleton
     @Provides
-    static LegacySplitScreen provideSplitScreen(Context context,
+    static LegacySplitScreenController provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor,
             @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
-        return LegacySplitScreenController.create(context, displayController, systemWindows,
+        return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }

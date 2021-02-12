@@ -3778,7 +3778,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (!dataLoaderManager.bindToDataLoader(sessionId, params.getData(), statusListener)) {
+        final long bindDelayMs = 0;
+        if (!dataLoaderManager.bindToDataLoader(sessionId, params.getData(), bindDelayMs,
+                statusListener)) {
             throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                     "Failed to initialize data loader");
         }

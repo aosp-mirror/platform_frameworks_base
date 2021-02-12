@@ -37,8 +37,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * This test class adapts the AppSearch Framework API to ListenableFuture, so it can be tested via
- * a consistent interface.
+ * This test class adapts the AppSearch Framework API to ListenableFuture, so it can be tested via a
+ * consistent interface.
+ *
  * @hide
  */
 public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
@@ -47,7 +48,13 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
 
     @NonNull
     public static ListenableFuture<GlobalSearchSessionShim> createGlobalSearchSession() {
-        Context context = ApplicationProvider.getApplicationContext();
+        return createGlobalSearchSession(ApplicationProvider.getApplicationContext());
+    }
+
+    /** Only for use when called from a non-instrumented context. */
+    @NonNull
+    public static ListenableFuture<GlobalSearchSessionShim> createGlobalSearchSession(
+            @NonNull Context context) {
         AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
         SettableFuture<AppSearchResult<GlobalSearchSession>> future = SettableFuture.create();
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -62,7 +69,6 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
             @NonNull GlobalSearchSession session, @NonNull ExecutorService executor) {
         mGlobalSearchSession = Preconditions.checkNotNull(session);
         mExecutor = Preconditions.checkNotNull(executor);
-
     }
 
     @NonNull

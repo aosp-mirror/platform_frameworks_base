@@ -43,6 +43,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
 import android.hardware.rebootescrow.IRebootEscrow;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserManager;
@@ -152,6 +153,11 @@ public class RebootEscrowManagerTests {
             mUserManager = userManager;
             mKeyStoreManager = keyStoreManager;
             mInjected = injected;
+        }
+
+        @Override
+        void post(Handler handler, Runnable runnable) {
+            runnable.run();
         }
 
         @Override
@@ -369,7 +375,7 @@ public class RebootEscrowManagerTests {
 
     @Test
     public void loadRebootEscrowDataIfAvailable_NothingAvailable_Success() throws Exception {
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
     }
 
     @Test
@@ -401,7 +407,7 @@ public class RebootEscrowManagerTests {
         doNothing().when(mInjected).reportMetric(metricsSuccessCaptor.capture());
         when(mRebootEscrow.retrieveKey()).thenAnswer(invocation -> keyByteCaptor.getValue());
 
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
         verify(mRebootEscrow).retrieveKey();
         assertTrue(metricsSuccessCaptor.getValue());
         verify(mKeyStoreManager).clearKeyStoreEncryptionKey();
@@ -435,7 +441,7 @@ public class RebootEscrowManagerTests {
 
         when(mServiceConnection.unwrap(any(), anyLong()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
         verify(mServiceConnection).unwrap(any(), anyLong());
         assertTrue(metricsSuccessCaptor.getValue());
         verify(mKeyStoreManager).clearKeyStoreEncryptionKey();
@@ -466,7 +472,7 @@ public class RebootEscrowManagerTests {
         when(mInjected.getBootCount()).thenReturn(10);
         when(mRebootEscrow.retrieveKey()).thenReturn(new byte[32]);
 
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
         verify(mRebootEscrow).retrieveKey();
         verify(mInjected, never()).reportMetric(anyBoolean());
     }
@@ -493,7 +499,7 @@ public class RebootEscrowManagerTests {
         when(mInjected.getBootCount()).thenReturn(10);
         when(mRebootEscrow.retrieveKey()).thenReturn(new byte[32]);
 
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
         verify(mInjected, never()).reportMetric(anyBoolean());
     }
 
@@ -527,7 +533,7 @@ public class RebootEscrowManagerTests {
         when(mInjected.getBootCount()).thenReturn(10);
         when(mRebootEscrow.retrieveKey()).thenAnswer(invocation -> keyByteCaptor.getValue());
 
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
         verify(mInjected).reportMetric(eq(true));
     }
 
@@ -557,7 +563,7 @@ public class RebootEscrowManagerTests {
         ArgumentCaptor<Boolean> metricsSuccessCaptor = ArgumentCaptor.forClass(Boolean.class);
         doNothing().when(mInjected).reportMetric(metricsSuccessCaptor.capture());
         when(mRebootEscrow.retrieveKey()).thenAnswer(invocation -> new byte[32]);
-        mService.loadRebootEscrowDataIfAvailable();
+        mService.loadRebootEscrowDataIfAvailable(null);
         verify(mRebootEscrow).retrieveKey();
         assertFalse(metricsSuccessCaptor.getValue());
     }

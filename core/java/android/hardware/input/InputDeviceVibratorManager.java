@@ -16,9 +16,12 @@
 
 package android.hardware.input;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.CombinedVibrationEffect;
 import android.os.NullVibrator;
+import android.os.VibrationAttributes;
 import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.util.SparseArray;
@@ -86,6 +89,7 @@ public class InputDeviceVibratorManager extends VibratorManager
         }
     }
 
+    @NonNull
     @Override
     public int[] getVibratorIds() {
         synchronized (mVibrators) {
@@ -97,6 +101,7 @@ public class InputDeviceVibratorManager extends VibratorManager
         }
     }
 
+    @NonNull
     @Override
     public Vibrator getVibrator(int vibratorId) {
         synchronized (mVibrators) {
@@ -107,6 +112,7 @@ public class InputDeviceVibratorManager extends VibratorManager
         return NullVibrator.getInstance();
     }
 
+    @NonNull
     @Override
     public Vibrator getDefaultVibrator() {
         // Returns vibrator ID 0
@@ -119,7 +125,13 @@ public class InputDeviceVibratorManager extends VibratorManager
     }
 
     @Override
-    public void vibrate(CombinedVibrationEffect effect) {
+    public void vibrate(int uid, String opPkg, @NonNull CombinedVibrationEffect effect,
+            String reason, @Nullable VibrationAttributes attributes) {
         mInputManager.vibrate(mDeviceId, effect, mToken);
+    }
+
+    @Override
+    public void cancel() {
+        mInputManager.cancelVibrate(mDeviceId, mToken);
     }
 }

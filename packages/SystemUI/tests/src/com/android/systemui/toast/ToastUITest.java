@@ -57,8 +57,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.statusbar.FeatureFlags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +87,6 @@ public class ToastUITest extends SysuiTestCase {
     private static final String TEXT = "Hello World";
     private static final int MESSAGE_RES_ID = R.id.message;
 
-    private FakeExecutor mFakeDelayableExecutor = new FakeExecutor(new FakeSystemClock());
     private Context mContextSpy;
     private ToastUI mToastUI;
     @Mock private LayoutInflater mLayoutInflater;
@@ -99,6 +97,7 @@ public class ToastUITest extends SysuiTestCase {
     @Mock private PluginManager mPluginManager;
     @Mock private DumpManager mDumpManager;
     @Mock private ToastLogger mToastLogger;
+    @Mock private FeatureFlags mFeatureFlags;
 
     @Mock private ITransientNotificationCallback mCallback;
     @Captor private ArgumentCaptor<View> mViewCaptor;
@@ -107,12 +106,9 @@ public class ToastUITest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        // This is because inflate will result in WindowManager (WM) calls, which will fail since we
-        // are mocking it, so we mock LayoutInflater with the view obtained before mocking WM.
-        View view = ToastPresenter.getTextToastView(mContext, TEXT);
-        when(mLayoutInflater.inflate(eq(TEXT_TOAST_LAYOUT), any())).thenReturn(view);
-        mContext.addMockSystemService(LayoutInflater.class, mLayoutInflater);
+        when(mLayoutInflater.inflate(eq(TEXT_TOAST_LAYOUT), any())).thenReturn(
+                ToastPresenter.getTextToastView(mContext, TEXT));
+        when(mFeatureFlags.isToastStyleEnabled()).thenReturn(false);
 
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
         mContextSpy = spy(mContext);
@@ -120,8 +116,8 @@ public class ToastUITest extends SysuiTestCase {
 
         doReturn(mContextSpy).when(mContextSpy).createContextAsUser(any(), anyInt());
         mToastUI = new ToastUI(mContextSpy, mCommandQueue, mNotificationManager,
-                mAccessibilityManager, new ToastFactory(mPluginManager, mDumpManager),
-                mFakeDelayableExecutor, mToastLogger);
+                mAccessibilityManager, new ToastFactory(mLayoutInflater, mPluginManager,
+                mDumpManager, mFeatureFlags), mToastLogger);
     }
 
     @Test

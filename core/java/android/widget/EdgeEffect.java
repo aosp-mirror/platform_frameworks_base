@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.AttributeSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -111,11 +113,14 @@ public class EdgeEffect {
     private float mGlowAlpha;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private float mGlowScaleY;
+    private float mDistance;
 
     private float mGlowAlphaStart;
     private float mGlowAlphaFinish;
     private float mGlowScaleYStart;
     private float mGlowScaleYFinish;
+    private float mDistanceStart;
+    private float mDistanceFinish;
 
     private long mStartTime;
     private float mDuration;
@@ -150,9 +155,18 @@ public class EdgeEffect {
      * @param context Context used to provide theming and resource information for the EdgeEffect
      */
     public EdgeEffect(Context context) {
+        this(context, null);
+    }
+
+    /**
+     * Construct a new EdgeEffect with a theme appropriate for the provided context.
+     * @param context Context used to provide theming and resource information for the EdgeEffect
+     * @param attrs The attributes of the XML tag that is inflating the view
+     */
+    public EdgeEffect(@NonNull Context context, @Nullable AttributeSet attrs) {
         mPaint.setAntiAlias(true);
         final TypedArray a = context.obtainStyledAttributes(
-                com.android.internal.R.styleable.EdgeEffect);
+                attrs, com.android.internal.R.styleable.EdgeEffect);
         final int themeColor = a.getColor(
                 com.android.internal.R.styleable.EdgeEffect_colorEdgeEffect, 0xff666666);
         mEdgeEffectType = a.getInt(
@@ -248,6 +262,7 @@ public class EdgeEffect {
         mDuration = PULL_TIME;
 
         mPullDistance += deltaDistance;
+        mDistanceStart = mDistanceFinish = mDistance = Math.max(0f, mPullDistance);
 
         final float absdd = Math.abs(deltaDistance);
         mGlowAlpha = mGlowAlphaStart = Math.min(MAX_ALPHA,
@@ -267,6 +282,56 @@ public class EdgeEffect {
     }
 
     /**
+     * A view should call this when content is pulled away from an edge by the user.
+     * This will update the state of the current visual effect and its associated animation.
+     * The host view should always {@link android.view.View#invalidate()} after this
+     * and draw the results accordingly. This works similarly to {@link #onPull(float, float)},
+     * but returns the amount of <code>deltaDistance</code> that has been consumed. If the
+     * {@link #getDistance()} is currently 0 and <code>deltaDistance</code> is negative, this
+     * function will return 0 and the drawn value will remain unchanged.
+     *
+     * This method can be used to reverse the effect from a pull or absorb and partially consume
+     * some of a motion:
+     *
+     * <pre class="prettyprint">
+     *     if (deltaY < 0) {
+     *         float consumed = edgeEffect.onPullDistance(deltaY / getHeight(), x / getWidth());
+     *         deltaY -= consumed * getHeight();
+     *         if (edgeEffect.getDistance() == 0f) edgeEffect.onRelease();
+     *     }
+     * </pre>
+     *
+     * @param deltaDistance Change in distance since the last call. Values may be 0 (no change) to
+     *                      1.f (full length of the view) or negative values to express change
+     *                      back toward the edge reached to initiate the effect.
+     * @param displacement The displacement from the starting side of the effect of the point
+     *                     initiating the pull. In the case of touch this is the finger position.
+     *                     Values may be from 0-1.
+     * @return The amount of <code>deltaDistance</code> that was consumed, a number between
+     * 0 and <code>deltaDistance</code>.
+     */
+    public float onPullDistance(float deltaDistance, float displacement) {
+        float finalDistance = Math.max(0f, deltaDistance + mDistance);
+        float delta = finalDistance - mDistance;
+        onPull(delta, displacement);
+        return delta;
+    }
+
+    /**
+     * Returns the pull distance needed to be released to remove the showing effect.
+     * It is determined by the {@link #onPull(float, float)} <code>deltaDistance</code> and
+     * any animating values, including from {@link #onAbsorb(int)} and {@link #onRelease()}.
+     *
+     * This can be used in conjunction with {@link #onPullDistance(float, float)} to
+     * release the currently showing effect.
+     *
+     * @return The pull distance that must be released to remove the showing effect.
+     */
+    public float getDistance() {
+        return mDistance;
+    }
+
+    /**
      * Call when the object is released after being pulled.
      * This will begin the "decay" phase of the effect. After calling this method
      * the host view should {@link android.view.View#invalidate()} and thereby
@@ -282,9 +347,11 @@ public class EdgeEffect {
         mState = STATE_RECEDE;
         mGlowAlphaStart = mGlowAlpha;
         mGlowScaleYStart = mGlowScaleY;
+        mDistanceStart = mDistance;
 
         mGlowAlphaFinish = 0.f;
         mGlowScaleYFinish = 0.f;
+        mDistanceFinish = 0.f;
 
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
         mDuration = RECEDE_TIME;
@@ -311,7 +378,7 @@ public class EdgeEffect {
         // nearly invisible.
         mGlowAlphaStart = GLOW_ALPHA_START;
         mGlowScaleYStart = Math.max(mGlowScaleY, 0.f);
-
+        mDistanceStart = mDistance;
 
         // Growth for the size of the glow should be quadratic to properly
         // respond
@@ -322,6 +389,9 @@ public class EdgeEffect {
         mGlowAlphaFinish = Math.max(
                 mGlowAlphaStart, Math.min(velocity * VELOCITY_GLOW_FACTOR * .00001f, MAX_ALPHA));
         mTargetDisplacement = 0.5f;
+
+        // Use glow values to estimate the absorption for stretch distance.
+        mDistanceFinish = calculateDistanceFromGlowValues(mGlowScaleYFinish, mGlowAlphaFinish);
     }
 
     /**
@@ -447,6 +517,7 @@ public class EdgeEffect {
 
         mGlowAlpha = mGlowAlphaStart + (mGlowAlphaFinish - mGlowAlphaStart) * interp;
         mGlowScaleY = mGlowScaleYStart + (mGlowScaleYFinish - mGlowScaleYStart) * interp;
+        mDistance = mDistanceStart + (mDistanceFinish - mDistanceStart) * interp;
         mDisplacement = (mDisplacement + mTargetDisplacement) / 2;
 
         if (t >= 1.f - EPSILON) {
@@ -458,10 +529,12 @@ public class EdgeEffect {
 
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
+                    mDistanceStart = mDistance;
 
                     // After absorb, the glow should fade to nothing.
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = 0.f;
+                    mDistanceFinish = 0.f;
                     break;
                 case STATE_PULL:
                     mState = STATE_PULL_DECAY;
@@ -470,10 +543,12 @@ public class EdgeEffect {
 
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
+                    mDistanceStart = mDistance;
 
                     // After pull, the glow should fade to nothing.
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = 0.f;
+                    mDistanceFinish = 0.f;
                     break;
                 case STATE_PULL_DECAY:
                     mState = STATE_RECEDE;
@@ -483,5 +558,21 @@ public class EdgeEffect {
                     break;
             }
         }
+    }
+
+    /**
+     * @return The estimated pull distance as calculated from mGlowScaleY.
+     */
+    private float calculateDistanceFromGlowValues(float scale, float alpha) {
+        if (scale >= 1f) {
+            // It should asymptotically approach 1, but not reach there.
+            // Here, we're just choosing a value that is large.
+            return 1f;
+        }
+        if (scale > 0f) {
+            float v = 1f / 0.7f / (mGlowScaleY - 1f);
+            return v * v / mBounds.height();
+        }
+        return alpha / PULL_DISTANCE_ALPHA_GLOW_FACTOR;
     }
 }

@@ -107,8 +107,6 @@ public final class ContentObserverController extends StateController {
                         taskStatus.contentObserverJobInstance.mChangedUris.add(uri);
                     }
                 }
-                taskStatus.changedAuthorities = null;
-                taskStatus.changedUris = null;
             }
             taskStatus.changedAuthorities = null;
             taskStatus.changedUris = null;

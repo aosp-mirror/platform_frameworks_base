@@ -33,4 +33,8 @@ abstract class Utils {
     static byte[] cloneIfNotNull(byte[] value) {
         return (value != null) ? value.clone() : null;
     }
+
+    static int[] cloneIfNotNull(int[] value) {
+        return (value != null) ? value.clone() : null;
+    }
 }

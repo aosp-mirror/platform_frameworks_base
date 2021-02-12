@@ -29,6 +29,7 @@ import static org.junit.Assert.fail;
 
 import android.content.pm.PackageParser.SigningDetails;
 import android.util.ArraySet;
+import android.util.PackageUtils;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -817,6 +818,124 @@ public class SigningDetailsTest {
         assertFalse(secondDetails.hasCommonSignerWithCapability(firstDetails, PERMISSION));
     }
 
+    @Test
+    public void hasAncestorOrSelfWithDigest_nullSet_returnsFalse() throws Exception {
+        // The hasAncestorOrSelfWithDigest method is intended to verify whether the SigningDetails
+        // is currently signed, or has previously been signed, by any of the certificate digests
+        // in the provided Set. This test verifies if a null Set is provided then false is returned.
+        SigningDetails details = createSigningDetails(FIRST_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(null));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_unknownDetails_returnsFalse() throws Exception {
+        // If hasAncestorOrSelfWithDigest is invoked against an UNKNOWN
+        // instance of the SigningDetails then false is returned.
+        SigningDetails details = SigningDetails.UNKNOWN;
+        Set<String> digests = createDigestSet(FIRST_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_singleSignerInSet_returnsTrue() throws Exception {
+        // If the single signer of an app is in the provided digest Set then
+        // the method should return true.
+        SigningDetails details = createSigningDetails(FIRST_SIGNATURE);
+        Set<String> digests = createDigestSet(FIRST_SIGNATURE, SECOND_SIGNATURE);
+
+        assertTrue(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_singleSignerNotInSet_returnsFalse() throws Exception {
+        // If the single signer of an app is not in the provided digest Set then
+        // the method should return false.
+        SigningDetails details = createSigningDetails(FIRST_SIGNATURE);
+        Set<String> digests = createDigestSet(SECOND_SIGNATURE, THIRD_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_multipleSignersInSet_returnsTrue() throws Exception {
+        // If an app is signed by multiple signers and all of the signers are in
+        // the digest Set then the method should return true.
+        SigningDetails details = createSigningDetails(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        Set<String> digests = createDigestSet(FIRST_SIGNATURE, SECOND_SIGNATURE, THIRD_SIGNATURE);
+
+        assertTrue(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_multipleSignersNotInSet_returnsFalse()
+            throws Exception {
+        // If an app is signed by multiple signers then all signers must be in the digest Set; if
+        // only a subset of the signers are in the Set then the method should return false.
+        SigningDetails details = createSigningDetails(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        Set<String> digests = createDigestSet(FIRST_SIGNATURE, THIRD_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_multipleSignersOneInSet_returnsFalse()
+            throws Exception {
+        // If an app is signed by multiple signers and the Set size is smaller than the number of
+        // signers then the method should immediately return false since there's no way for the
+        // requirement of all signers in the Set to be met.
+        SigningDetails details = createSigningDetails(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        Set<String> digests = createDigestSet(FIRST_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_lineageSignerInSet_returnsTrue() throws Exception {
+        // If an app has a rotated signing key and a previous key in the lineage is in the digest
+        // Set then this method should return true.
+        SigningDetails details = createSigningDetailsWithLineage(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        Set<String> digests = createDigestSet(FIRST_SIGNATURE, THIRD_SIGNATURE);
+
+        assertTrue(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_lineageSignerNotInSet_returnsFalse() throws Exception {
+        // If an app has a rotated signing key, but neither the current key nor any of the signers
+        // in the lineage are in the digest set then the method should return false.
+        SigningDetails details = createSigningDetailsWithLineage(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        Set<String> digests = createDigestSet(THIRD_SIGNATURE, FOURTH_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_lastSignerInLineageInSet_returnsTrue()
+            throws Exception {
+        // If an app has multiple signers in the lineage only one of those signers must be in the
+        // Set for this method to return true. This test verifies if the last signer in the lineage
+        // is in the set then the method returns true.
+        SigningDetails details = createSigningDetailsWithLineage(FIRST_SIGNATURE, SECOND_SIGNATURE,
+                THIRD_SIGNATURE);
+        Set<String> digests = createDigestSet(SECOND_SIGNATURE);
+
+        assertTrue(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
+    @Test
+    public void hasAncestorOrSelfWithDigest_nullLineageSingleSIgner_returnsFalse()
+            throws Exception {
+        // Under some instances an app with only a single signer can have a null lineage; this
+        // test verifies that null lineage does not result in a NullPointerException and instead the
+        // method returns false if the single signer is not in the Set.
+        SigningDetails details = createSigningDetails(true, FIRST_SIGNATURE);
+        Set<String> digests = createDigestSet(SECOND_SIGNATURE, THIRD_SIGNATURE);
+
+        assertFalse(details.hasAncestorOrSelfWithDigest(digests));
+    }
+
     private SigningDetails createSigningDetailsWithLineage(String... signers) throws Exception {
         int[] capabilities = new int[signers.length];
         for (int i = 0; i < capabilities.length; i++) {
@@ -853,10 +972,19 @@ public class SigningDetailsTest {
         // If there are multiple signers then the pastSigningCertificates should be set to null, but
         // if there is only a single signer both the current signer and the past signers should be
         // set to that one signer.
-        if (signers.length > 1) {
+        if (signers.length > 1 || useNullPastSigners) {
             return new SigningDetails(currentSignatures, SIGNING_BLOCK_V3, null);
         }
         return new SigningDetails(currentSignatures, SIGNING_BLOCK_V3, currentSignatures);
+    }
+
+    private Set<String> createDigestSet(String... signers) {
+        Set<String> digests = new ArraySet<>();
+        for (String signer : signers) {
+            String digest = PackageUtils.computeSha256Digest(new Signature(signer).toByteArray());
+            digests.add(digest);
+        }
+        return digests;
     }
 
     private void assertSigningDetailsContainsLineage(SigningDetails details,

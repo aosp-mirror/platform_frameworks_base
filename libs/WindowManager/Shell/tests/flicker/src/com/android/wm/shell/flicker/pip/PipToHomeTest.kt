@@ -16,13 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -52,8 +50,7 @@ class PipToHomeTest(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
-            val baseConfig = getTransitionLaunch(eachRun = true)
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
+            val testSpec = getTransition(eachRun = true) { configuration ->
                 setup {
                     eachRun {
                         this.setRotation(configuration.startRotation)
@@ -111,7 +108,7 @@ class PipToHomeTest(
                 }
             }
 
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation, baseConfig,
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
                 testSpec, supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
         }
     }

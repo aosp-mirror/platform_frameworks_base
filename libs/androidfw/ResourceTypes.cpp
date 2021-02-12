@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include <algorithm>
+#include <fstream>
 #include <limits>
 #include <map>
 #include <memory>
@@ -44,6 +45,7 @@
 
 #ifdef __ANDROID__
 #include <binder/TextOutput.h>
+
 #endif
 
 #ifndef INT32_MAX
@@ -231,6 +233,15 @@ void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs
     memcpy(data, colors, patch.numColors * sizeof(uint32_t));
 
     fill9patchOffsets(reinterpret_cast<Res_png_9patch*>(outData));
+}
+
+bool IsFabricatedOverlay(const std::string& path) {
+  std::ifstream fin(path);
+  uint32_t magic;
+  if (fin.read(reinterpret_cast<char*>(&magic), sizeof(uint32_t))) {
+    return magic == kFabricatedOverlayMagic;
+  }
+  return false;
 }
 
 static bool assertIdmapHeader(const void* idmap, size_t size) {
