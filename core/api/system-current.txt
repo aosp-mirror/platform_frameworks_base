@@ -10738,34 +10738,6 @@ package android.telephony.cdma {
 
 package android.telephony.data {
 
-  public final class ApnThrottleStatus implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getApnType();
-    method public int getRetryType();
-    method public int getSlotIndex();
-    method public long getThrottleExpiryTimeMillis();
-    method public int getThrottleType();
-    method public int getTransportType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.ApnThrottleStatus> CREATOR;
-    field public static final int RETRY_TYPE_HANDOVER = 3; // 0x3
-    field public static final int RETRY_TYPE_NEW_CONNECTION = 2; // 0x2
-    field public static final int RETRY_TYPE_NONE = 1; // 0x1
-    field public static final int THROTTLE_TYPE_ELAPSED_TIME = 2; // 0x2
-    field public static final int THROTTLE_TYPE_NONE = 1; // 0x1
-  }
-
-  public static final class ApnThrottleStatus.Builder {
-    ctor public ApnThrottleStatus.Builder();
-    method @NonNull public android.telephony.data.ApnThrottleStatus build();
-    method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setApnType(int);
-    method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setNoThrottle();
-    method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setRetryType(int);
-    method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setSlotIndex(int);
-    method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
-    method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setTransportType(int);
-  }
-
   public final class DataCallResponse implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.net.LinkAddress> getAddresses();
@@ -10935,7 +10907,7 @@ package android.telephony.data {
     ctor public QualifiedNetworksService.NetworkAvailabilityProvider(int);
     method public abstract void close();
     method public final int getSlotIndex();
-    method public void reportApnThrottleStatusChanged(@NonNull java.util.List<android.telephony.data.ApnThrottleStatus>);
+    method public void reportThrottleStatusChanged(@NonNull java.util.List<android.telephony.data.ThrottleStatus>);
     method public final void updateQualifiedNetworkTypes(int, @NonNull java.util.List<java.lang.Integer>);
   }
 
@@ -10963,6 +10935,34 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceServiceType(int);
     method @NonNull public android.telephony.data.SliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
     method @NonNull public android.telephony.data.SliceInfo.Builder setSliceServiceType(int);
+  }
+
+  public final class ThrottleStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getApnType();
+    method public int getRetryType();
+    method public int getSlotIndex();
+    method public long getThrottleExpiryTimeMillis();
+    method public int getThrottleType();
+    method public int getTransportType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.ThrottleStatus> CREATOR;
+    field public static final int RETRY_TYPE_HANDOVER = 3; // 0x3
+    field public static final int RETRY_TYPE_NEW_CONNECTION = 2; // 0x2
+    field public static final int RETRY_TYPE_NONE = 1; // 0x1
+    field public static final int THROTTLE_TYPE_ELAPSED_TIME = 2; // 0x2
+    field public static final int THROTTLE_TYPE_NONE = 1; // 0x1
+  }
+
+  public static final class ThrottleStatus.Builder {
+    ctor public ThrottleStatus.Builder();
+    method @NonNull public android.telephony.data.ThrottleStatus build();
+    method @NonNull public android.telephony.data.ThrottleStatus.Builder setApnType(int);
+    method @NonNull public android.telephony.data.ThrottleStatus.Builder setNoThrottle();
+    method @NonNull public android.telephony.data.ThrottleStatus.Builder setRetryType(int);
+    method @NonNull public android.telephony.data.ThrottleStatus.Builder setSlotIndex(int);
+    method @NonNull public android.telephony.data.ThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
+    method @NonNull public android.telephony.data.ThrottleStatus.Builder setTransportType(int);
   }
 
 }
