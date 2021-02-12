@@ -146,7 +146,13 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     BatteryUsageStats apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
-        BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(0, 0);
+        final long[] customMeasuredEnergiesMicroJoules =
+                mBatteryStats.getCustomMeasuredEnergiesMicroJoules();
+        final int customMeasuredEnergiesCount = customMeasuredEnergiesMicroJoules != null
+                ? customMeasuredEnergiesMicroJoules.length
+                : 0;
+        BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
+                customMeasuredEnergiesCount, 0);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));
