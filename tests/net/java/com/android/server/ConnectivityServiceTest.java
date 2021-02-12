@@ -2590,10 +2590,6 @@ public class ConnectivityServiceTest {
 
         NetworkCapabilities filter = new NetworkCapabilities();
         filter.addCapability(capability);
-        // Add NOT_VCN_MANAGED capability into filter unconditionally since some request will add
-        // NOT_VCN_MANAGED automatically but not for NetworkCapabilities,
-        // see {@code NetworkCapabilities#deduceNotVcnManagedCapability} for more details.
-        filter.addCapability(NET_CAPABILITY_NOT_VCN_MANAGED);
         final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
         handlerThread.start();
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
@@ -3845,7 +3841,6 @@ public class ConnectivityServiceTest {
         handlerThread.start();
         NetworkCapabilities filter = new NetworkCapabilities()
                 .addTransportType(TRANSPORT_CELLULAR)
-                .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
                 .addCapability(NET_CAPABILITY_INTERNET);
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
                 mServiceContext, "testFactory", filter);
@@ -5748,7 +5743,6 @@ public class ConnectivityServiceTest {
                 .addTransportType(TRANSPORT_CELLULAR)
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addCapability(NET_CAPABILITY_NOT_CONGESTED)
-                .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
                 .setLinkDownstreamBandwidthKbps(10);
         final NetworkCapabilities wifiNc = new NetworkCapabilities()
                 .addTransportType(TRANSPORT_WIFI)
@@ -5757,7 +5751,6 @@ public class ConnectivityServiceTest {
                 .addCapability(NET_CAPABILITY_NOT_ROAMING)
                 .addCapability(NET_CAPABILITY_NOT_CONGESTED)
                 .addCapability(NET_CAPABILITY_NOT_SUSPENDED)
-                .addCapability(NET_CAPABILITY_NOT_VCN_MANAGED)
                 .setLinkUpstreamBandwidthKbps(20);
         mCellNetworkAgent.setNetworkCapabilities(cellNc, true /* sendToConnectivityService */);
         mWiFiNetworkAgent.setNetworkCapabilities(wifiNc, true /* sendToConnectivityService */);
@@ -7389,13 +7382,19 @@ public class ConnectivityServiceTest {
             mWiFiNetworkAgent.removeCapability(testCap);
             callbackWithCap.expectAvailableCallbacksValidated(mCellNetworkAgent);
             callbackWithoutCap.expectCapabilitiesWithout(testCap, mWiFiNetworkAgent);
-            verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
-            reset(mMockNetd);
+            // TODO: Test default network changes for NOT_VCN_MANAGED once the default request has
+            //  it.
+            if (testCap == NET_CAPABILITY_TRUSTED) {
+                verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
+                reset(mMockNetd);
+            }
 
             mCellNetworkAgent.removeCapability(testCap);
             callbackWithCap.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
             callbackWithoutCap.assertNoCallback();
-            verify(mMockNetd).networkClearDefault();
+            if (testCap == NET_CAPABILITY_TRUSTED) {
+                verify(mMockNetd).networkClearDefault();
+            }
 
             mCm.unregisterNetworkCallback(callbackWithCap);
             mCm.unregisterNetworkCallback(callbackWithoutCap);
