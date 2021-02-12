@@ -7246,7 +7246,7 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_LOCALE = "android.app.extra.PROVISIONING_LOCALE";
     field public static final String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.PROVISIONING_LOCAL_TIME";
     field public static final String EXTRA_PROVISIONING_LOGO_URI = "android.app.extra.PROVISIONING_LOGO_URI";
-    field public static final String EXTRA_PROVISIONING_MAIN_COLOR = "android.app.extra.PROVISIONING_MAIN_COLOR";
+    field @Deprecated public static final String EXTRA_PROVISIONING_MAIN_COLOR = "android.app.extra.PROVISIONING_MAIN_COLOR";
     field public static final String EXTRA_PROVISIONING_MODE = "android.app.extra.PROVISIONING_MODE";
     field public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT = "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
     field public static final String EXTRA_PROVISIONING_SERIAL_NUMBER = "android.app.extra.PROVISIONING_SERIAL_NUMBER";
