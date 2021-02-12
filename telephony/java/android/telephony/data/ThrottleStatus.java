@@ -35,7 +35,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class ApnThrottleStatus implements Parcelable {
+public final class ThrottleStatus implements Parcelable {
     /**
      * The APN type is not throttled.
      */
@@ -43,14 +43,14 @@ public final class ApnThrottleStatus implements Parcelable {
 
     /**
      * The APN type is throttled until {@link android.os.SystemClock#elapsedRealtime()}
-     * has reached {@link ApnThrottleStatus#getThrottleExpiryTimeMillis}
+     * has reached {@link ThrottleStatus#getThrottleExpiryTimeMillis}
      */
     public static final int THROTTLE_TYPE_ELAPSED_TIME = 2;
 
     /** {@hide} */
     @IntDef(flag = true, prefix = {"THROTTLE_TYPE_"}, value = {
-            ApnThrottleStatus.THROTTLE_TYPE_NONE,
-            ApnThrottleStatus.THROTTLE_TYPE_ELAPSED_TIME,
+            ThrottleStatus.THROTTLE_TYPE_NONE,
+            ThrottleStatus.THROTTLE_TYPE_ELAPSED_TIME,
     })
     public @interface ThrottleType {
     }
@@ -72,9 +72,9 @@ public final class ApnThrottleStatus implements Parcelable {
 
     /** {@hide} */
     @IntDef(flag = true, prefix = {"RETRY_TYPE_"}, value = {
-            ApnThrottleStatus.RETRY_TYPE_NONE,
-            ApnThrottleStatus.RETRY_TYPE_NEW_CONNECTION,
-            ApnThrottleStatus.RETRY_TYPE_HANDOVER,
+            ThrottleStatus.RETRY_TYPE_NONE,
+            ThrottleStatus.RETRY_TYPE_NEW_CONNECTION,
+            ThrottleStatus.RETRY_TYPE_HANDOVER,
     })
     public @interface RetryType {
     }
@@ -141,7 +141,7 @@ public final class ApnThrottleStatus implements Parcelable {
      * {@link SystemClock#elapsedRealtime}.
      *
      * This value only applies when the throttle type is set to
-     * {@link ApnThrottleStatus#THROTTLE_TYPE_ELAPSED_TIME}.
+     * {@link ThrottleStatus#THROTTLE_TYPE_ELAPSED_TIME}.
      *
      * A value of {@link Long#MAX_VALUE} implies that the APN type is throttled indefinitely.
      *
@@ -152,7 +152,7 @@ public final class ApnThrottleStatus implements Parcelable {
         return mThrottleExpiryTimeMillis;
     }
 
-    private ApnThrottleStatus(int slotIndex,
+    private ThrottleStatus(int slotIndex,
             @AccessNetworkConstants.TransportType int transportType,
             @Annotation.ApnType int apnTypes,
             @ThrottleType int throttleType,
@@ -166,7 +166,7 @@ public final class ApnThrottleStatus implements Parcelable {
         mRetryType = retryType;
     }
 
-    private ApnThrottleStatus(@NonNull Parcel source) {
+    private ThrottleStatus(@NonNull Parcel source) {
         mSlotIndex = source.readInt();
         mTransportType = source.readInt();
         mApnType = source.readInt();
@@ -185,16 +185,16 @@ public final class ApnThrottleStatus implements Parcelable {
         dest.writeInt(mThrottleType);
     }
 
-    public static final @NonNull Parcelable.Creator<ApnThrottleStatus> CREATOR =
-            new Parcelable.Creator<ApnThrottleStatus>() {
+    public static final @NonNull Parcelable.Creator<ThrottleStatus> CREATOR =
+            new Parcelable.Creator<ThrottleStatus>() {
                 @Override
-                public ApnThrottleStatus createFromParcel(@NonNull Parcel source) {
-                    return new ApnThrottleStatus(source);
+                public ThrottleStatus createFromParcel(@NonNull Parcel source) {
+                    return new ThrottleStatus(source);
                 }
 
                 @Override
-                public ApnThrottleStatus[] newArray(int size) {
-                    return new ApnThrottleStatus[size];
+                public ThrottleStatus[] newArray(int size) {
+                    return new ThrottleStatus[size];
                 }
             };
 
@@ -213,8 +213,8 @@ public final class ApnThrottleStatus implements Parcelable {
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
-        } else if (obj instanceof ApnThrottleStatus) {
-            ApnThrottleStatus other = (ApnThrottleStatus) obj;
+        } else if (obj instanceof ThrottleStatus) {
+            ThrottleStatus other = (ThrottleStatus) obj;
             return this.mSlotIndex == other.mSlotIndex
                     && this.mApnType == other.mApnType
                     && this.mRetryType == other.mRetryType
@@ -228,7 +228,7 @@ public final class ApnThrottleStatus implements Parcelable {
 
     @Override
     public String toString() {
-        return "ApnThrottleStatus{"
+        return "ThrottleStatus{"
                 + "mSlotIndex=" + mSlotIndex
                 + ", mTransportType=" + mTransportType
                 + ", mApnType=" + ApnSetting.getApnTypeString(mApnType)
@@ -239,18 +239,18 @@ public final class ApnThrottleStatus implements Parcelable {
     }
 
     /**
-     * Provides a convenient way to set the fields of an {@link ApnThrottleStatus} when creating a
+     * Provides a convenient way to set the fields of an {@link ThrottleStatus} when creating a
      * new instance.
      *
-     * <p>The example below shows how you might create a new {@code ApnThrottleStatus}:
+     * <p>The example below shows how you might create a new {@code ThrottleStatus}:
      *
      * <pre><code>
      *
-     * DataCallResponseApnThrottleStatus = new ApnThrottleStatus.Builder()
+     * ThrottleStatus = new ThrottleStatus.Builder()
      *     .setSlotIndex(1)
      *     .setApnType({@link ApnSetting#TYPE_EMERGENCY})
      *     .setNoThrottle()
-     *     .setRetryType({@link ApnThrottleStatus#RETRY_TYPE_NEW_CONNECTION})
+     *     .setRetryType({@link ThrottleStatus#RETRY_TYPE_NEW_CONNECTION})
      *     .build();
      * </code></pre>
      */
@@ -316,7 +316,7 @@ public final class ApnThrottleStatus implements Parcelable {
          * {@link SystemClock#elapsedRealtime}.
          *
          * When setting this value, the throttle type is set to
-         * {@link ApnThrottleStatus#THROTTLE_TYPE_ELAPSED_TIME}.
+         * {@link ThrottleStatus#THROTTLE_TYPE_ELAPSED_TIME}.
          *
          * A value of {@link Long#MAX_VALUE} implies that the APN type is throttled indefinitely.
          *
@@ -342,7 +342,7 @@ public final class ApnThrottleStatus implements Parcelable {
          * Sets the status of the APN type as not being throttled.
          *
          * When setting this value, the throttle type is set to
-         * {@link ApnThrottleStatus#THROTTLE_TYPE_NONE} and the expiry time is set to
+         * {@link ThrottleStatus#THROTTLE_TYPE_NONE} and the expiry time is set to
          * {@link Builder#NO_THROTTLE_EXPIRY_TIME}.
          *
          * @return The same instance of the builder.
@@ -369,13 +369,13 @@ public final class ApnThrottleStatus implements Parcelable {
         }
 
         /**
-         * Build the {@link ApnThrottleStatus}
+         * Build the {@link ThrottleStatus}
          *
-         * @return the {@link ApnThrottleStatus} object
+         * @return the {@link ThrottleStatus} object
          */
         @NonNull
-        public ApnThrottleStatus build() {
-            return new ApnThrottleStatus(
+        public ThrottleStatus build() {
+            return new ThrottleStatus(
                     mSlotIndex,
                     mTransportType,
                     mApnType,
