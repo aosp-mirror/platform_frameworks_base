@@ -2590,6 +2590,13 @@ public final class Debug
     public static native long getIonPoolsSizeKb();
 
     /**
+     * Return GPU DMA buffer usage in kB or -1 on error.
+     *
+     * @hide
+     */
+    public static native long getGpuDmaBufUsageKb();
+
+    /**
      * Return DMA-BUF memory mapped by processes in kB.
      * Notes:
      *  * Warning: Might impact performance as it reads /proc/<pid>/maps files for each process.
