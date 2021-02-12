@@ -2922,33 +2922,61 @@ public class DevicePolicyManager {
         return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
 
-    private static final String PREFIX_UNSAFE_OPERATION_REASON = "UNSAFE_OPERATION_REASON_";
+    private static final String PREFIX_OPERATION_SAFETY_REASON = "OPERATION_SAFETY_REASON_";
 
     /** @hide */
-    @IntDef(prefix = PREFIX_UNSAFE_OPERATION_REASON, value = {
-            UNSAFE_OPERATION_REASON_NONE,
-            UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION
+    @IntDef(prefix = PREFIX_OPERATION_SAFETY_REASON, value = {
+            OPERATION_SAFETY_REASON_NONE,
+            OPERATION_SAFETY_REASON_DRIVING_DISTRACTION
     })
     @Retention(RetentionPolicy.SOURCE)
-    public static @interface UnsafeOperationReason {
+    public static @interface OperationSafetyReason {
     }
 
     /** @hide */
     @TestApi
-    public static final int UNSAFE_OPERATION_REASON_NONE = -1;
+    public static final int OPERATION_SAFETY_REASON_NONE = -1;
 
     /**
      * Indicates that a {@link UnsafeStateException} was thrown because the operation would distract
      * the driver of the vehicle.
      */
-    public static final int UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION = 1;
+    public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
 
     /** @hide */
     @NonNull
     @TestApi
-    public static String unsafeOperationReasonToString(@UnsafeOperationReason int reason) {
+    public static String operationSafetyReasonToString(@OperationSafetyReason int reason) {
         return DebugUtils.constantToString(DevicePolicyManager.class,
-                PREFIX_UNSAFE_OPERATION_REASON, reason);
+                PREFIX_OPERATION_SAFETY_REASON, reason);
+    }
+
+    /** @hide */
+    public static boolean isValidOperationSafetyReason(@OperationSafetyReason int reason) {
+        return reason == OPERATION_SAFETY_REASON_DRIVING_DISTRACTION;
+    }
+
+    /**
+     * Checks if it's safe to run operations that can be affected by the given {@code reason}.
+     *
+     * <p><b>Note:/b> notice that the operation safety state might change between the time this
+     * method returns and the operation's method is called, so calls to the latter could still throw
+     * a {@link UnsafeStateException} even when this method returns {@code true}.
+     *
+     * @param reason currently, only supported reason is
+     * {@link #OPERATION_SAFETY_REASON_DRIVING_DISTRACTION}.
+     *
+     * @return whether it's safe to run operations that can be affected by the given {@code reason}.
+     */
+    // TODO(b/173541467): should it throw SecurityException if caller is not admin?
+    public boolean isSafeOperation(@OperationSafetyReason int reason) {
+        if (mService == null) return false;
+
+        try {
+            return mService.isSafeOperation(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */
@@ -13157,7 +13185,7 @@ public class DevicePolicyManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
     public void setNextOperationSafety(@DevicePolicyOperation int operation,
-            @UnsafeOperationReason int reason) {
+            @OperationSafetyReason int reason) {
         if (mService != null) {
             try {
                 mService.setNextOperationSafety(operation, reason);
