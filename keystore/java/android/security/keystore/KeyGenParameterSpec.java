@@ -267,6 +267,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mUserPresenceRequired;
     private final byte[] mAttestationChallenge;
     private final boolean mDevicePropertiesAttestationIncluded;
+    private final int[] mAttestationIds;
     private final boolean mUniqueIdIncluded;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
@@ -308,6 +309,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean userPresenceRequired,
             byte[] attestationChallenge,
             boolean devicePropertiesAttestationIncluded,
+            int[] attestationIds,
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
@@ -361,6 +363,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mUserAuthenticationType = userAuthenticationType;
         mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
         mDevicePropertiesAttestationIncluded = devicePropertiesAttestationIncluded;
+        mAttestationIds = attestationIds;
         mUniqueIdIncluded = uniqueIdIncluded;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
@@ -720,6 +723,25 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
+     * @hide
+     * Allows the caller to specify device IDs to be attested to in the certificate for the
+     * generated key pair. These values are the enums specified in
+     * {@link android.security.keystore.AttestationUtils}
+     *
+     * @see android.security.keystore.AttestationUtils#ID_TYPE_SERIAL
+     * @see android.security.keystore.AttestationUtils#ID_TYPE_IMEI
+     * @see android.security.keystore.AttestationUtils#ID_TYPE_MEID
+     * @see android.security.keystore.AttestationUtils#USE_INDIVIDUAL_ATTESTATION
+     *
+     * @return integer array representing the requested device IDs to attest.
+     */
+    @SystemApi
+    @Nullable
+    public int[] getAttestationIds() {
+        return Utils.cloneIfNotNull(mAttestationIds);
+    }
+
+    /**
      * @hide This is a system-only API
      *
      * Returns {@code true} if the attestation certificate will contain a unique ID field.
@@ -834,6 +856,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mUserPresenceRequired = false;
         private byte[] mAttestationChallenge = null;
         private boolean mDevicePropertiesAttestationIncluded = false;
+        private int[] mAttestationIds = null;
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
@@ -902,6 +925,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mAttestationChallenge = sourceSpec.getAttestationChallenge();
             mDevicePropertiesAttestationIncluded =
                     sourceSpec.isDevicePropertiesAttestationIncluded();
+            mAttestationIds = sourceSpec.getAttestationIds();
             mUniqueIdIncluded = sourceSpec.isUniqueIdIncluded();
             mUserAuthenticationValidWhileOnBody = sourceSpec.isUserAuthenticationValidWhileOnBody();
             mInvalidatedByBiometricEnrollment = sourceSpec.isInvalidatedByBiometricEnrollment();
@@ -1473,6 +1497,26 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
+         * @hide
+         * Sets which IDs to attest in the attestation certificate for the key. The acceptable
+         * values in this integer array are the enums specified in
+         * {@link android.security.keystore.AttestationUtils}
+         *
+         * @param attestationIds the array of ID types to attest to in the certificate.
+         *
+         * @see android.security.keystore.AttestationUtils#ID_TYPE_SERIAL
+         * @see android.security.keystore.AttestationUtils#ID_TYPE_IMEI
+         * @see android.security.keystore.AttestationUtils#ID_TYPE_MEID
+         * @see android.security.keystore.AttestationUtils#USE_INDIVIDUAL_ATTESTATION
+         */
+        @SystemApi
+        @NonNull
+        public Builder setAttestationIds(@NonNull int[] attestationIds) {
+            mAttestationIds = attestationIds;
+            return this;
+        }
+
+        /**
          * @hide Only system apps can use this method.
          *
          * Sets whether to include a temporary unique ID field in the attestation certificate.
@@ -1638,6 +1682,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mUserPresenceRequired,
                     mAttestationChallenge,
                     mDevicePropertiesAttestationIncluded,
+                    mAttestationIds,
                     mUniqueIdIncluded,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,

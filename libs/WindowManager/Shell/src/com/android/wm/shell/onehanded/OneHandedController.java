@@ -134,10 +134,10 @@ public class OneHandedController {
 
 
     /**
-     * Creates {@link OneHanded}, returns {@code null} if the feature is not supported.
+     * Creates {@link OneHandedController}, returns {@code null} if the feature is not supported.
      */
     @Nullable
-    public static OneHanded create(
+    public static OneHandedController create(
             Context context, DisplayController displayController,
             TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
             ShellExecutor mainExecutor, Handler mainHandler) {
@@ -166,7 +166,7 @@ public class OneHandedController {
         return new OneHandedController(context, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
                 gestureHandler, timeoutHandler, oneHandedUiEventsLogger, overlayManager,
-                taskStackListener, mainExecutor, mainHandler).mImpl;
+                taskStackListener, mainExecutor, mainHandler);
     }
 
     @VisibleForTesting
@@ -226,6 +226,10 @@ public class OneHandedController {
                 context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
+    }
+
+    public OneHanded asOneHanded() {
+        return mImpl;
     }
 
     /**
@@ -468,7 +472,7 @@ public class OneHandedController {
         }
     }
 
-    private void dump(@NonNull PrintWriter pw) {
+    public void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mOffSetFraction=");
@@ -559,13 +563,6 @@ public class OneHandedController {
         public void registerGestureCallback(OneHandedGestureEventCallback callback) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.registerGestureCallback(callback);
-            });
-        }
-
-        @Override
-        public void dump(@NonNull PrintWriter pw) {
-            mMainExecutor.execute(() -> {
-                OneHandedController.this.dump(pw);
             });
         }
     }

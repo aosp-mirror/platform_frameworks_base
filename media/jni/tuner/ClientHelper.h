@@ -19,6 +19,7 @@
 
 #include <android/binder_parcel_utils.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
+#include <utils/Log.h>
 
 using Status = ::ndk::ScopedAStatus;
 
@@ -37,6 +38,7 @@ public:
         } else if (s.isOk()) {
             return Result::SUCCESS;
         }
+        ALOGE("Aidl exception code %s", s.getDescription().c_str());
         return Result::UNKNOWN_ERROR;
     }
 };

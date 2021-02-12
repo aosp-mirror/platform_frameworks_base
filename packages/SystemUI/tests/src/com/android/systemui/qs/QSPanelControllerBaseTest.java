@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -28,6 +30,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -37,6 +41,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
@@ -44,6 +49,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.animation.DisappearParameters;
 
 import org.junit.Before;
@@ -86,17 +92,25 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     QSTileView mQSTileView;
     @Mock
     PagedTileLayout mPagedTileLayout;
+    @Mock
+    FeatureFlags mFeatureFlags;
+    @Mock
+    Resources mResources;
+    @Mock
+    Configuration mConfiguration;
 
     private QSPanelControllerBase<QSPanel> mController;
+
+
 
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
                 QSCustomizerController qsCustomizerController, MediaHost mediaHost,
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-                DumpManager dumpManager) {
+                DumpManager dumpManager, FeatureFlags featureFlags) {
             super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
-                    qsLogger, dumpManager);
+                    qsLogger, dumpManager, featureFlags);
         }
 
         @Override
@@ -121,10 +135,12 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSTileRevealControllerFactory.create(any(), any()))
                 .thenReturn(mQSTileRevealController);
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
+        when(mQSPanel.getResources()).thenReturn(mResources);
+        when(mResources.getConfiguration()).thenReturn(mConfiguration);
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
-                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager);
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mFeatureFlags);
 
         mController.init();
         reset(mQSTileRevealController);
@@ -136,7 +152,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         QSPanelControllerBase<QSPanel> controller = new TestableQSPanelControllerBase(mQSPanel,
                 mQSTileHost, mQSCustomizerController, mMediaHost,
-                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager) {
+                mMetricsLogger, mUiEventLogger, mQSLogger, mDumpManager, mFeatureFlags) {
             @Override
             protected QSTileRevealController createTileRevealController() {
                 return mQSTileRevealController;
@@ -217,5 +233,19 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.setListening(false);
         verify(mQSLogger).logAllTilesChangeListening(false, "QSPanel", "dnd");
         verify(mPagedTileLayout).setListening(false, mUiEventLogger);
+    }
+
+
+    @Test
+    public void testShouldUzeHorizontalLayout_falseForSplitShade() {
+        mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        when(mMediaHost.getVisible()).thenReturn(true);
+
+        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        assertThat(mController.shouldUseHorizontalLayout()).isTrue();
+
+        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        assertThat(mController.shouldUseHorizontalLayout()).isFalse();
     }
 }

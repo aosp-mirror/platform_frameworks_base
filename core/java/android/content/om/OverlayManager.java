@@ -205,6 +205,25 @@ public class OverlayManager {
     }
 
     /**
+     * Returns information about the overlay represented by the identifier for the specified user.
+     *
+     * @param overlay the identifier representing the overlay
+     * @param userHandle the user of which to get overlay state info
+     * @return the overlay info or null if the overlay cannot be found
+     *
+     * @hide
+     */
+    @Nullable
+    public OverlayInfo getOverlayInfo(@NonNull final OverlayIdentifier overlay,
+            @NonNull final UserHandle userHandle) {
+        try {
+            return mService.getOverlayInfoByIdentifier(overlay, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns information about all overlays for the given target package for
      * the specified user. The returned list is ordered according to the
      * overlay priority with the highest priority at the end of the list.

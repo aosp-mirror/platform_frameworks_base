@@ -29,6 +29,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -59,6 +60,10 @@ import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
+import android.graphics.ColorSpace;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -66,6 +71,8 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
+import android.view.Surface;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
@@ -446,12 +453,8 @@ public class RecentTasksTest extends WindowTestsBase {
         doReturn(false).when(child2).isOrganized();
         mRecentTasks.add(root);
 
-        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
-        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
-        final List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0 /* callingUid */).getList();
-
         // Make sure only organized child will be appended.
+        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
         final List<RecentTaskInfo> childrenTaskInfos = infos.get(0).childrenTaskInfos;
         assertEquals(childrenTaskInfos.size(), 1);
         assertEquals(childrenTaskInfos.get(0).taskId, child1.mTaskId);
@@ -1051,9 +1054,6 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testTaskInfo_expectNoExtras() {
-        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
-        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
-
         final Bundle data = new Bundle();
         data.putInt("key", 100);
         final Task task1 = createTaskBuilder(".Task").build();
@@ -1063,13 +1063,66 @@ public class RecentTasksTest extends WindowTestsBase {
                 .build();
         mRecentTasks.add(r1.getTask());
 
-        final List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList();
+        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
         assertTrue(infos.size() == 1);
         for (int i = 0; i < infos.size(); i++)  {
             final Bundle extras = infos.get(i).baseIntent.getExtras();
             assertTrue(extras == null || extras.isEmpty());
         }
+    }
+
+    @Test
+    public void testLastSnapshotData_snapshotSaved() {
+        final TaskSnapshot snapshot = createSnapshot(new Point(100, 100), new Point(80, 80));
+        final Task task1 = createTaskBuilder(".Task").build();
+        task1.onSnapshotChanged(snapshot);
+
+        mRecentTasks.add(task1);
+        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
+        final RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
+                infos.get(0).lastSnapshotData;
+        assertTrue(lastSnapshotData.taskSize.equals(100, 100));
+        assertTrue(lastSnapshotData.bufferSize.equals(80, 80));
+    }
+
+    @Test
+    public void testLastSnapshotData_noBuffer() {
+        final Task task1 = createTaskBuilder(".Task").build();
+        final TaskSnapshot snapshot = createSnapshot(new Point(100, 100), null);
+        task1.onSnapshotChanged(snapshot);
+
+        mRecentTasks.add(task1);
+        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
+        final RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
+                infos.get(0).lastSnapshotData;
+        assertTrue(lastSnapshotData.taskSize.equals(100, 100));
+        assertNull(lastSnapshotData.bufferSize);
+    }
+
+    @Test
+    public void testLastSnapshotData_notSet() {
+        final Task task1 = createTaskBuilder(".Task").build();
+
+        mRecentTasks.add(task1);
+        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
+        final RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
+                infos.get(0).lastSnapshotData;
+        assertNull(lastSnapshotData.taskSize);
+        assertNull(lastSnapshotData.bufferSize);
+    }
+
+    private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
+        HardwareBuffer buffer = null;
+        if (bufferSize != null) {
+            buffer = mock(HardwareBuffer.class);
+            doReturn(bufferSize.x).when(buffer).getWidth();
+            doReturn(bufferSize.y).when(buffer).getHeight();
+        }
+        return new TaskSnapshot(1, new ComponentName("", ""), buffer,
+                ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
+                Surface.ROTATION_0, taskSize, new Rect() /* insets */, false /* isLowResolution */,
+                true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
+                false /* isTranslucent */, false /* hasImeSurface */);
     }
 
     /**
@@ -1084,15 +1137,19 @@ public class RecentTasksTest extends WindowTestsBase {
         }
     }
 
+    private List<RecentTaskInfo> getRecentTasks(int flags) {
+        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
+        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
+        return mRecentTasks.getRecentTasks(MAX_VALUE, flags, true /* getTasksAllowed */,
+                TEST_USER_0_ID, 0 /* callingUid */).getList();
+    }
+
     /**
      * Ensures that the recent tasks list is in the provided order. Note that the expected tasks
      * should be ordered from least to most recent.
      */
     private void assertGetRecentTasksOrder(int getRecentTaskFlags, Task... expectedTasks) {
-        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
-        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
-        List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, getRecentTaskFlags,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList();
+        List<RecentTaskInfo> infos = getRecentTasks(getRecentTaskFlags);
         assertTrue(expectedTasks.length == infos.size());
         for (int i = 0; i < infos.size(); i++)  {
             assertTrue(expectedTasks[i].mTaskId == infos.get(i).taskId);

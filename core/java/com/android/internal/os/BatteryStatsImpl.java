@@ -7157,20 +7157,34 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override
     public long getScreenOnEnergy() {
-        if (mGlobalMeasuredEnergyStats == null) {
-            return ENERGY_DATA_UNAVAILABLE;
-        }
-        return mGlobalMeasuredEnergyStats
-                .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
+        return getMeasuredEnergyMicroJoules(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
     }
 
     @Override
     public long getScreenDozeEnergy() {
+        return getMeasuredEnergyMicroJoules(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
+    }
+
+    /**
+     * Returns the energy in microjoules that the given standard energy bucket consumed.
+     * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+     *
+     * @param bucket standard energy bucket of interest
+     * @return energy (in microjoules) used for this energy bucket
+     */
+    private long getMeasuredEnergyMicroJoules(@StandardEnergyBucket int bucket) {
         if (mGlobalMeasuredEnergyStats == null) {
             return ENERGY_DATA_UNAVAILABLE;
         }
-        return mGlobalMeasuredEnergyStats
-                .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
+        return mGlobalMeasuredEnergyStats.getAccumulatedStandardBucketEnergy(bucket);
+    }
+
+    @Override
+    public @Nullable long[] getCustomMeasuredEnergiesMicroJoules() {
+        if (mGlobalMeasuredEnergyStats == null) {
+            return null;
+        }
+        return mGlobalMeasuredEnergyStats.getAccumulatedCustomBucketEnergies();
     }
 
     @Override public long getStartClockTime() {
@@ -7941,6 +7955,13 @@ public class BatteryStatsImpl extends BatteryStats {
                     .updateStandardBucket(energyBucket, energyDeltaUJ, accumulate);
         }
 
+        /** Adds the given energy to the given custom energy bucket for this uid. */
+        private void addEnergyToCustomBucketLocked(long energyDeltaUJ, int energyBucket,
+                boolean accumulate) {
+            getOrCreateMeasuredEnergyStatsLocked()
+                    .updateCustomBucket(energyBucket, energyDeltaUJ, accumulate);
+        }
+
         /**
          * Returns the energy used by this uid for a standard energy bucket of interest.
          * @param bucket standard energy bucket of interest
@@ -7955,6 +7976,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 return 0L; // It is supported, but was never filled, so it must be 0
             }
             return mUidMeasuredEnergyStats.getAccumulatedStandardBucketEnergy(bucket);
+        }
+
+        @Override
+        public long[] getCustomMeasuredEnergiesMicroJoules() {
+            if (mBsi.mGlobalMeasuredEnergyStats == null) {
+                return null;
+            }
+            if (mUidMeasuredEnergyStats == null) {
+                // Custom buckets may exist. But all values for this uid are 0 so we report all 0s.
+                return new long[mBsi.mGlobalMeasuredEnergyStats.getNumberCustomEnergyBuckets()];
+            }
+            return mUidMeasuredEnergyStats.getAccumulatedCustomBucketEnergies();
         }
 
         /**
@@ -12465,6 +12498,42 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Accumulate Custom energy bucket energy, globally and for each app.
+     *
+     * @param totalEnergyUJ energy (microjoules) used for this bucket since this was last called.
+     * @param uidEnergies map of uid->energy (microjoules) for this bucket since last called.
+     *                    Data inside uidEnergies will not be modified (treated immutable).
+     */
+    public void updateCustomMeasuredEnergyDataLocked(int customEnergyBucket,
+            long totalEnergyUJ, @Nullable SparseLongArray uidEnergies) {
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Updating attributed measured energy stats for custom bucket "
+                    + customEnergyBucket
+                    + " with total energy " + totalEnergyUJ
+                    + " and uid energies " + String.valueOf(uidEnergies));
+        }
+        if (mGlobalMeasuredEnergyStats == null) return;
+        if (!mOnBatteryInternal || mIgnoreNextExternalStats || totalEnergyUJ <= 0) return;
+
+        mGlobalMeasuredEnergyStats.updateCustomBucket(customEnergyBucket, totalEnergyUJ, true);
+
+        if (uidEnergies == null) return;
+        final int numUids = uidEnergies.size();
+        for (int i = 0; i < numUids; i++) {
+            final int uidInt = mapUid(uidEnergies.keyAt(i));
+            final long uidEnergyUJ = uidEnergies.valueAt(i);
+            if (uidEnergyUJ == 0) continue;
+            // TODO: Worry about uids not in BSI currently, including uninstalled uids 'coming back'
+            //  Specifically: What if the uid had been removed? We'll re-create it now.
+            //  And if we instead use getAvailableUidStatsLocked() and chec for null, then we might
+            //  not create a Uid even when we should be (say, the app's first event, somehow, was to
+            //  use GPU). I guess that CPU/kernel data might already have this problem?
+            final Uid uidObj = getUidStatsLocked(uidInt);
+            uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket, true);
+        }
+    }
+
+    /**
      * Read and record Rail Energy data.
      */
     public void updateRailStatsLocked() {
@@ -12933,16 +13002,17 @@ public class BatteryStatsImpl extends BatteryStats {
         mWakeLockAllocationsUs = null;
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
+        final List<Integer> uidsToRemove = new ArrayList<>();
         mCpuUidFreqTimeReader.readDelta((uid, cpuFreqTimeMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
-                mCpuUidFreqTimeReader.removeUid(uid);
+                uidsToRemove.add(uid);
                 if (DEBUG) Slog.d(TAG, "Got freq readings for an isolated uid: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 if (DEBUG) Slog.d(TAG, "Got freq readings for an invalid user's uid " + uid);
-                mCpuUidFreqTimeReader.removeUid(uid);
+                uidsToRemove.add(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, startTimeMs);
@@ -13001,6 +13071,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         });
+        for (int uid : uidsToRemove) {
+            mCpuUidFreqTimeReader.removeUid(uid);
+        }
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
         if (DEBUG_ENERGY_CPU || elapsedTimeMs >= 100) {
@@ -13047,21 +13120,25 @@ public class BatteryStatsImpl extends BatteryStats {
     public void readKernelUidCpuActiveTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
+        final List<Integer> uidsToRemove = new ArrayList<>();
         mCpuUidActiveTimeReader.readDelta((uid, cpuActiveTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
-                mCpuUidActiveTimeReader.removeUid(uid);
+                uidsToRemove.add(uid);
                 if (DEBUG) Slog.w(TAG, "Got active times for an isolated uid: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 if (DEBUG) Slog.w(TAG, "Got active times for an invalid user's uid " + uid);
-                mCpuUidActiveTimeReader.removeUid(uid);
+                uidsToRemove.add(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, startTimeMs);
             u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesMs, onBattery);
         });
+        for (int uid : uidsToRemove) {
+            mCpuUidActiveTimeReader.removeUid(uid);
+        }
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
         if (DEBUG_ENERGY_CPU || elapsedTimeMs >= 100) {
@@ -13077,21 +13154,25 @@ public class BatteryStatsImpl extends BatteryStats {
     public void readKernelUidCpuClusterTimesLocked(boolean onBattery) {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
+        final List<Integer> uidsToRemove = new ArrayList<>();
         mCpuUidClusterTimeReader.readDelta((uid, cpuClusterTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
-                mCpuUidClusterTimeReader.removeUid(uid);
+                uidsToRemove.add(uid);
                 if (DEBUG) Slog.w(TAG, "Got cluster times for an isolated uid: " + uid);
                 return;
             }
             if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
                 if (DEBUG) Slog.w(TAG, "Got cluster times for an invalid user's uid " + uid);
-                mCpuUidClusterTimeReader.removeUid(uid);
+                uidsToRemove.add(uid);
                 return;
             }
             final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, startTimeMs);
             u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesMs, onBattery);
         });
+        for (int uid : uidsToRemove) {
+            mCpuUidClusterTimeReader.removeUid(uid);
+        }
 
         final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
         if (DEBUG_ENERGY_CPU || elapsedTimeMs >= 100) {
@@ -14454,7 +14535,12 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @GuardedBy("this")
     public void dumpMeasuredEnergyStatsLocked(PrintWriter pw) {
-        if (mGlobalMeasuredEnergyStats == null) return;
+        pw.printf("On battery measured energy stats (microjoules) \n");
+        if (mGlobalMeasuredEnergyStats == null) {
+            pw.printf("    Not supported on this device.\n");
+            return;
+        }
+
         dumpMeasuredEnergyStatsLocked(pw, "non-uid usage", mGlobalMeasuredEnergyStats);
 
         int size = mUidStats.size();
@@ -14472,7 +14558,8 @@ public class BatteryStatsImpl extends BatteryStats {
             MeasuredEnergyStats stats) {
         if (stats == null) return;
         final IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "    ");
-        iPw.printf("On battery measured energy stats for %s:\n", name);
+        iPw.increaseIndent();
+        iPw.printf("%s:\n", name);
         iPw.increaseIndent();
         stats.dump(iPw);
         iPw.decreaseIndent();

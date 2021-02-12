@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.AndroidException;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -79,17 +78,7 @@ import java.util.Set;
 public final class ApplicationMediaCapabilities implements Parcelable {
     private static final String TAG = "ApplicationMediaCapabilities";
 
-    /**
-     * This exception is thrown when a given format is not specified in the media capabilities.
-     */
-    public static class FormatNotFoundException extends AndroidException {
-        public FormatNotFoundException(@NonNull String format) {
-            super(format);
-        }
-    }
-
     /** List of supported video codec mime types. */
-    // TODO: init it with avc and mpeg4 as application is assuming to support them.
     private Set<String> mSupportedVideoMimeTypes = new HashSet<>();
 
     /** List of unsupported video codec mime types. */
@@ -113,39 +102,54 @@ public final class ApplicationMediaCapabilities implements Parcelable {
 
     /**
      * Query if a video codec format is supported by the application.
+     * <p>
+     * If the application has not specified supporting the format or not, this will return false.
+     * Use {@link #isFormatSpecified(String)} to query if a format is specified or not.
+     *
      * @param videoMime The mime type of the video codec format. Must be the one used in
      * {@link MediaFormat#KEY_MIME}.
      * @return true if application supports the video codec format, false otherwise.
-     * @throws FormatNotFoundException if the application did not specify the codec either in the
-     * supported or unsupported formats.
      */
     public boolean isVideoMimeTypeSupported(
-            @NonNull String videoMime) throws FormatNotFoundException {
-        if (mUnsupportedVideoMimeTypes.contains(videoMime.toLowerCase())) {
-            return false;
-        } else if (mSupportedVideoMimeTypes.contains(videoMime.toLowerCase())) {
+            @NonNull String videoMime) {
+        if (mSupportedVideoMimeTypes.contains(videoMime.toLowerCase())) {
             return true;
-        } else {
-            throw new FormatNotFoundException(videoMime);
         }
+        return false;
     }
 
     /**
      * Query if a HDR type is supported by the application.
+     * <p>
+     * If the application has not specified supporting the format or not, this will return false.
+     * Use {@link #isFormatSpecified(String)} to query if a format is specified or not.
+     *
      * @param hdrType The type of the HDR format.
      * @return true if application supports the HDR format, false otherwise.
-     * @throws FormatNotFoundException if the application did not specify the format either in the
-     * supported or unsupported formats.
      */
     public boolean isHdrTypeSupported(
-            @NonNull @MediaFeature.MediaHdrType String hdrType) throws FormatNotFoundException {
-        if (mUnsupportedHdrTypes.contains(hdrType)) {
-            return false;
-        } else if (mSupportedHdrTypes.contains(hdrType)) {
+            @NonNull @MediaFeature.MediaHdrType String hdrType) {
+        if (mSupportedHdrTypes.contains(hdrType)) {
             return true;
-        } else {
-            throw new FormatNotFoundException(hdrType);
         }
+        return false;
+    }
+
+    /**
+     * Query if a format is specified by the application.
+     * <p>
+     * The format could be either the video format or the hdr format.
+     *
+     * @param format The name of the format.
+     * @return true if application specifies the format, false otherwise.
+     */
+    public boolean isFormatSpecified(@NonNull String format) {
+        if (mSupportedVideoMimeTypes.contains(format) || mUnsupportedVideoMimeTypes.contains(format)
+                || mSupportedHdrTypes.contains(format) || mUnsupportedHdrTypes.contains(format)) {
+            return true;
+
+        }
+        return false;
     }
 
     @Override

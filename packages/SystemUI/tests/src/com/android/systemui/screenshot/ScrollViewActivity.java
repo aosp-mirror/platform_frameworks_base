@@ -34,7 +34,7 @@ public class ScrollViewActivity extends Activity {
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         TextView text = new TextView(this);
         text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 40);
-        text.setText(com.android.systemui.R.string.test_content);
+        text.setText(com.android.systemui.tests.R.string.test_content);
         linearLayout.addView(text);
         scrollView.addView(linearLayout);
         setContentView(scrollView);

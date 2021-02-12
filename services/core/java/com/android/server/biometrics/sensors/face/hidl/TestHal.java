@@ -25,10 +25,12 @@ import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.biometrics.face.V1_1.IBiometricsFace;
 import android.os.NativeHandle;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import java.util.ArrayList;
 
 public class TestHal extends IBiometricsFace.Stub {
+    private static final String TAG = "face.hidl.TestHal";
     @Nullable
     private IBiometricsFaceClientCallback mCallback;
 
@@ -47,6 +49,7 @@ public class TestHal extends IBiometricsFace.Stub {
 
     @Override
     public OptionalUint64 generateChallenge(int challengeTimeoutSec) {
+        Slog.w(TAG, "generateChallenge");
         final OptionalUint64 result = new OptionalUint64();
         result.status = Status.OK;
         result.value = 0;
@@ -55,6 +58,7 @@ public class TestHal extends IBiometricsFace.Stub {
 
     @Override
     public int enroll(ArrayList<Byte> hat, int timeoutSec, ArrayList<Integer> disabledFeatures) {
+        Slog.w(TAG, "enroll");
         return 0;
     }
 
@@ -94,17 +98,23 @@ public class TestHal extends IBiometricsFace.Stub {
     }
 
     @Override
-    public int enumerate() {
+    public int enumerate() throws RemoteException {
+        Slog.w(TAG, "enumerate");
+        if (mCallback != null) {
+            mCallback.onEnumerate(0 /* deviceId */, new ArrayList<>(), 0 /* userId */);
+        }
         return 0;
     }
 
     @Override
     public int remove(int faceId) {
+        Slog.w(TAG, "remove");
         return 0;
     }
 
     @Override
     public int authenticate(long operationId) {
+        Slog.w(TAG, "authenticate");
         return 0;
     }
 
@@ -115,6 +125,7 @@ public class TestHal extends IBiometricsFace.Stub {
 
     @Override
     public int resetLockout(ArrayList<Byte> hat) {
+        Slog.w(TAG, "resetLockout");
         return 0;
     }
 

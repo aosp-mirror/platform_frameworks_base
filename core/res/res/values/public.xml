@@ -3064,6 +3064,7 @@
     <public name="previewLayout" />
     <public name="clipToOutline" />
     <public name="edgeEffectType" />
+    <public name="knownCerts" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
@@ -3117,8 +3118,6 @@
   <public-group type="string" first-id="0x01040028">
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveCluster" />
-    <!-- @hide @SystemApi @TestApi -->
-    <public name="config_systemVideoCall" />
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveProjection" />
   </public-group>

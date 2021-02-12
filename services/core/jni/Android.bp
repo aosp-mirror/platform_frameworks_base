@@ -149,7 +149,7 @@ cc_defaults {
         "android.hardware.power@1.1",
         "android.hardware.power-V1-cpp",
         "android.hardware.power.stats@1.0",
-        "android.hardware.power.stats-ndk_platform",
+        "android.hardware.power.stats-V1-ndk_platform",
         "android.hardware.thermal@1.0",
         "android.hardware.tv.input@1.0",
         "android.hardware.vibrator-V2-cpp",

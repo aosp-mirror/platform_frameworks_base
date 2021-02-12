@@ -46,13 +46,12 @@ TunerClient::TunerClient() {
     // Connect with Tuner Service.
     ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
     mTunerService = ITunerService::fromBinder(binder);
-    // TODO: Remove after JNI migration is done.
-    mTunerService = NULL;
     if (mTunerService == NULL) {
         ALOGE("Failed to get tuner service");
     } else {
         // TODO: b/178124017 update TRM in TunerService independently.
         mTunerService->updateTunerResources();
+        mTunerService->getTunerHalVersion(&mTunerVersion);
     }
 }
 
@@ -115,7 +114,7 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
         if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
             return NULL;
         }
-        return new FrontendClient(tunerFrontend, frontendHandle, aidlFrontendInfo.type);
+        return new FrontendClient(tunerFrontend, aidlFrontendInfo.type);
     }
 
     if (mTuner != NULL) {
@@ -127,8 +126,10 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
             if (res != Result::SUCCESS) {
                 return NULL;
             }
-            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id, (int)hidlInfo.type);
+            sp<FrontendClient> frontendClient = new FrontendClient(
+                    NULL, (int)hidlInfo.type);
             frontendClient->setHidlFrontend(hidlFrontend);
+            frontendClient->setId(id);
             return frontendClient;
         }
     }
@@ -358,7 +359,7 @@ void TunerClient::updateLnbResources() {
 
 sp<ITuner> TunerClient::getHidlTuner() {
     if (mTuner == NULL) {
-        mTunerVersion = 0;
+        mTunerVersion = TUNER_HAL_VERSION_UNKNOWN;
         mTuner_1_1 = ::android::hardware::tv::tuner::V1_1::ITuner::getService();
 
         if (mTuner_1_1 == NULL) {
@@ -367,11 +368,11 @@ sp<ITuner> TunerClient::getHidlTuner() {
             if (mTuner == NULL) {
                 ALOGW("Failed to get tuner 1.0 service.");
             } else {
-                mTunerVersion = 1 << 16;
+                mTunerVersion = TUNER_HAL_VERSION_1_0;
             }
         } else {
             mTuner = static_cast<sp<ITuner>>(mTuner_1_1);
-            mTunerVersion = ((1 << 16) | 1);
+            mTunerVersion = TUNER_HAL_VERSION_1_1;
          }
      }
      return mTuner;

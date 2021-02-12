@@ -73,10 +73,6 @@ static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
               static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
 
 static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId) {
-    // TODO(b/167946816): remove this once VibratorService is removed.
-    if (vibratorId < 0) {
-        return std::move(std::make_unique<vibrator::HalController>());
-    }
     vibrator::ManagerHalController* manager = android_server_VibratorManagerService_getManager();
     if (manager == nullptr) {
         return nullptr;

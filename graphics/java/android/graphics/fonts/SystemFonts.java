@@ -68,42 +68,21 @@ public final class SystemFonts {
      */
     public static @NonNull Set<Font> getAvailableFonts() {
         synchronized (LOCK) {
-            if (sAvailableFonts != null) {
-                return sAvailableFonts;
-            }
-
-            if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
-                sAvailableFonts = collectAllFonts();
-            } else {
+            if (sAvailableFonts == null) {
                 Set<Font> set = new ArraySet<>();
-                for (FontFamily[] items : sFamilyMap.values()) {
-                    for (FontFamily family : items) {
-                        for (int i = 0; i < family.getSize(); ++i) {
-                            set.add(family.getFont(i));
+                for (Typeface tf : Typeface.getSystemFontMap().values()) {
+                    List<FontFamily> families = tf.getFallback();
+                    for (int i = 0; i < families.size(); ++i) {
+                        FontFamily family = families.get(i);
+                        for (int j = 0; j < family.getSize(); ++j) {
+                            set.add(family.getFont(j));
                         }
                     }
                 }
-
                 sAvailableFonts = Collections.unmodifiableSet(set);
             }
             return sAvailableFonts;
         }
-    }
-
-    private static @NonNull Set<Font> collectAllFonts() {
-        // TODO: use updated fonts
-        FontConfig fontConfig = getSystemPreinstalledFontConfig();
-        Map<String, FontFamily[]> map = buildSystemFallback(fontConfig);
-
-        Set<Font> res = new ArraySet<>();
-        for (FontFamily[] families : map.values()) {
-            for (FontFamily family : families) {
-                for (int i = 0; i < family.getSize(); ++i) {
-                    res.add(family.getFont(i));
-                }
-            }
-        }
-        return res;
     }
 
     private static @Nullable ByteBuffer mmap(@NonNull String fullPath) {
@@ -328,14 +307,5 @@ public final class SystemFonts {
         final ArrayMap<String, Typeface> result = new ArrayMap<>();
         Typeface.initSystemDefaultTypefaces(fallbackMap, fontConfig.getAliases(), result);
         return result;
-    }
-
-    /**
-     * @hide
-     */
-    public void resetFallbackMapping(Map<String, FontFamily[]> fallbackMap) {
-        synchronized (LOCK) {
-            sFamilyMap = fallbackMap;
-        }
     }
 }

@@ -88,6 +88,8 @@ struct ZipAssetsProvider : public AssetsProvider {
   WARN_UNUSED const std::string& GetDebugName() const override;
   WARN_UNUSED bool IsUpToDate() const override;
 
+  WARN_UNUSED std::optional<uint32_t> GetCrc(std::string_view path) const;
+
   ~ZipAssetsProvider() override = default;
  protected:
   std::unique_ptr<Asset> OpenInternal(const std::string& path, Asset::AccessMode mode,

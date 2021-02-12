@@ -32,7 +32,28 @@ public class PipSurfaceTransactionHelper {
     private final Matrix mTmpTransform = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
     private final RectF mTmpSourceRectF = new RectF();
+    private final RectF mTmpDestinationRectF = new RectF();
     private final Rect mTmpDestinationRect = new Rect();
+
+    public void scale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds) {
+        mTmpSourceRectF.set(sourceBounds);
+        mTmpDestinationRectF.set(destinationBounds);
+        mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
+                .setPosition(leash, mTmpDestinationRectF.left, mTmpDestinationRectF.top);
+    }
+
+    public void scale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds,
+            float degree, float positionX, float positionY) {
+        mTmpSourceRectF.set(sourceBounds);
+        mTmpDestinationRectF.set(destinationBounds);
+        mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
+        mTmpTransform.postRotate(degree, 0, 0);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
+                .setPosition(leash, positionX, positionY);
+    }
 
     public void scaleAndCrop(SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect sourceBounds, Rect destinationBounds, Rect insets) {

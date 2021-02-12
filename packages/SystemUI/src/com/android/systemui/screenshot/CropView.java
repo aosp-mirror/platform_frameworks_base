@@ -16,17 +16,22 @@
 
 package com.android.systemui.screenshot;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import com.android.systemui.R;
 
@@ -35,6 +40,7 @@ import com.android.systemui.R;
  * cropped out.
  */
 public class CropView extends View {
+    private static final String TAG = "CropView";
     public enum CropBoundary {
         NONE, TOP, BOTTOM
     }
@@ -118,14 +124,47 @@ public class CropView extends View {
             case MotionEvent.ACTION_UP:
                 if (mCurrentDraggingBoundary != CropBoundary.NONE) {
                     // Commit the delta to the stored crop values.
-                    mTopCrop += mTopDelta;
-                    mBottomCrop += mBottomDelta;
-                    mTopDelta = 0;
-                    mBottomDelta = 0;
+                    commitDeltas();
                     updateListener(event);
                 }
         }
         return super.onTouchEvent(event);
+    }
+
+    /**
+     * Animate the given boundary to the given value.
+     */
+    public void animateBoundaryTo(CropBoundary boundary, float value) {
+        if (boundary == CropBoundary.NONE) {
+            Log.w(TAG, "No boundary selected for animation");
+            return;
+        }
+        float totalDelta = (boundary == CropBoundary.TOP) ? (value - mTopCrop)
+                : (value - mBottomCrop);
+        ValueAnimator animator = new ValueAnimator();
+        animator.addUpdateListener(animation -> {
+            if (boundary == CropBoundary.TOP) {
+                mTopDelta = animation.getAnimatedFraction() * totalDelta;
+            } else {
+                mBottomDelta = animation.getAnimatedFraction() * totalDelta;
+            }
+            invalidate();
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                commitDeltas();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                commitDeltas();
+            }
+        });
+        animator.setFloatValues(0f, 1f);
+        animator.setDuration(750);
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+        animator.start();
     }
 
     /**
@@ -146,6 +185,13 @@ public class CropView extends View {
 
     public void setCropInteractionListener(CropInteractionListener listener) {
         mCropInteractionListener = listener;
+    }
+
+    private void commitDeltas() {
+        mTopCrop += mTopDelta;
+        mBottomCrop += mBottomDelta;
+        mTopDelta = 0;
+        mBottomDelta = 0;
     }
 
     private void updateListener(MotionEvent event) {

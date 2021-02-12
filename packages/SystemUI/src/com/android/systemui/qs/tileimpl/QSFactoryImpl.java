@@ -37,6 +37,7 @@ import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
+import com.android.systemui.qs.tiles.DeviceControlsTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
@@ -89,6 +90,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<ReduceBrightColorsTile> mReduceBrightColorsTileProvider;
     private final Provider<CameraToggleTile> mCameraToggleTileProvider;
     private final Provider<MicrophoneToggleTile> mMicrophoneToggleTileProvider;
+    private final Provider<DeviceControlsTile> mDeviceControlsTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
     private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
@@ -123,7 +125,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<ScreenRecordTile> screenRecordTileProvider,
             Provider<ReduceBrightColorsTile> reduceBrightColorsTileProvider,
             Provider<CameraToggleTile> cameraToggleTileProvider,
-            Provider<MicrophoneToggleTile> microphoneToggleTileProvider) {
+            Provider<MicrophoneToggleTile> microphoneToggleTileProvider,
+            Provider<DeviceControlsTile> deviceControlsTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
@@ -153,6 +156,7 @@ public class QSFactoryImpl implements QSFactory {
         mReduceBrightColorsTileProvider = reduceBrightColorsTileProvider;
         mCameraToggleTileProvider = cameraToggleTileProvider;
         mMicrophoneToggleTileProvider = microphoneToggleTileProvider;
+        mDeviceControlsTileProvider = deviceControlsTileProvider;
     }
 
     public QSTile createTile(String tileSpec) {
@@ -212,6 +216,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mCameraToggleTileProvider.get();
             case "mictoggle":
                 return mMicrophoneToggleTileProvider.get();
+            case "controls":
+                return mDeviceControlsTileProvider.get();
         }
 
         // Custom tiles
