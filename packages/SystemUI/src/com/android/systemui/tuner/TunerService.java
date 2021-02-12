@@ -109,7 +109,7 @@ public abstract class TunerService {
         dialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel),
                 (OnClickListener) null);
         dialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                context.getString(R.string.qs_customize_remove), new OnClickListener() {
+                context.getString(R.string.guest_exit_guest_dialog_remove), new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Tell the tuner (in main SysUI process) to clear all its settings.
