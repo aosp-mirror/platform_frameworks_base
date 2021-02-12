@@ -24,7 +24,6 @@ import android.os.SystemClock
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
-import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
 import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
@@ -113,7 +112,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         if (isTelevision) {
             uiDevice.closeTvPipWindow()
         } else {
-            uiDevice.closePipWindow()
+            closePipWindow(WindowManagerStateHelper(mInstrumentation))
         }
     }
 

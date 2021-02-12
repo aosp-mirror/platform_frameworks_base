@@ -30,6 +30,7 @@ import android.service.controls.actions.CommandAction
 import android.service.controls.actions.FloatAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -71,7 +72,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             cvh.action(BooleanAction(templateId, !isChecked))
         }, true /* blockable */))
@@ -79,7 +80,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
 
     override fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
         val blockable = cvh.usePanel()
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (cvh.usePanel()) {
                 showDialog(cvh, control.getAppIntent().getIntent())
@@ -98,13 +99,13 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float) {
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.action(FloatAction(templateId, newValue))
         }, false /* blockable */))
     }
 
     override fun longPress(cvh: ControlViewHolder) {
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             // Long press snould only be called when there is valid control state, otherwise ignore
             cvh.cws.control?.let {
                 cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -114,6 +115,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun runPendingAction(controlId: String) {
+        if (!keyguardStateController.isUnlocked()) return
         if (pendingAction?.controlId == controlId) {
             pendingAction?.invoke()
             pendingAction = null
@@ -135,7 +137,8 @@ class ControlActionCoordinatorImpl @Inject constructor(
             false
         }
 
-    private fun bouncerOrRun(action: Action) {
+    @VisibleForTesting
+    fun bouncerOrRun(action: Action) {
         if (keyguardStateController.isShowing()) {
             var closeDialog = !keyguardStateController.isUnlocked()
             if (closeDialog) {
@@ -189,6 +192,10 @@ class ControlActionCoordinatorImpl @Inject constructor(
             }
         }
     }
+
+    @VisibleForTesting
+    fun createAction(controlId: String, f: () -> Unit, blockable: Boolean) =
+        Action(controlId, f, blockable)
 
     inner class Action(val controlId: String, val f: () -> Unit, val blockable: Boolean) {
         fun invoke() {

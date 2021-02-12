@@ -23,6 +23,7 @@
     <bool name="flag_notif_updates">false</bool>
 
     <bool name="flag_shade_is_opaque">false</bool>
+    <bool name="flag_monet">false</bool>
 
     <!-- b/171917882 -->
     <bool name="flag_notification_twocolumn">false</bool>
@@ -39,4 +40,6 @@
 
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
+
+    <bool name="flag_toast_style">false</bool>
 </resources>

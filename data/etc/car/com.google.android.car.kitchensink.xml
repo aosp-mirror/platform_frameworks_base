@@ -27,8 +27,10 @@
         <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.LOCATION_HARDWARE"/>
+        <permission name="android.permission.LOCK_DEVICE"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MASTER_CLEAR"/>
         <!-- use for CarServiceTest -->
         <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
@@ -40,9 +42,11 @@
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_LOGS"/>
         <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RESET_PASSWORD"/>
         <permission name="android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS"/>
         <!-- use for CarServiceTest -->
         <permission name="android.permission.SET_ACTIVITY_WATCHER"/>
+        <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
 
         <!-- use for rotary fragment to enable/disable packages related to rotary -->

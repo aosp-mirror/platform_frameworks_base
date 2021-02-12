@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -30,6 +31,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import com.android.internal.backup.IBackupTransport;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -56,6 +58,7 @@ public class UserBackupManagerServiceTest {
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
     @Mock TransportClient mTransportClient;
+    @Mock IBackupTransport mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
 
 
@@ -130,6 +133,29 @@ public class UserBackupManagerServiceTest {
         assertThat(params.kvPackages).isEmpty();
         assertThat(params.fullPackages).isEmpty();
         assertThat(params.mBackupEligibilityRules).isEqualTo(mBackupEligibilityRules);
+    }
+
+    @Test
+    public void testGetOperationTypeFromTransport_returnsMigrationForMigrationTransport()
+            throws Exception {
+        when(mTransportClient.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mBackupTransport.getTransportFlags()).thenReturn(
+                BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER);
+
+        int operationType = mService.getOperationTypeFromTransport(mTransportClient);
+
+        assertThat(operationType).isEqualTo(OperationType.MIGRATION);
+    }
+
+    @Test
+    public void testGetOperationTypeFromTransport_returnsBackupByDefault()
+            throws Exception {
+        when(mTransportClient.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mBackupTransport.getTransportFlags()).thenReturn(0);
+
+        int operationType = mService.getOperationTypeFromTransport(mTransportClient);
+
+        assertThat(operationType).isEqualTo(OperationType.BACKUP);
     }
 
     private static PackageInfo getPackageInfo(String packageName) {

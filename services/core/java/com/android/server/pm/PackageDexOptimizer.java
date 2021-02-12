@@ -687,7 +687,8 @@ public class PackageDexOptimizer {
         boolean generateCompactDex = true;
         switch (compilationReason) {
             case PackageManagerService.REASON_FIRST_BOOT:
-            case PackageManagerService.REASON_BOOT:
+            case PackageManagerService.REASON_BOOT_AFTER_OTA:
+            case PackageManagerService.REASON_POST_BOOT:
             case PackageManagerService.REASON_INSTALL:
                  generateCompactDex = false;
         }

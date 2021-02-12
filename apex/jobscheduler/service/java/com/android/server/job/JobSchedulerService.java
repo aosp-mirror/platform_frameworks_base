@@ -212,7 +212,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     final JobPackageTracker mJobPackageTracker = new JobPackageTracker();
     final JobConcurrencyManager mConcurrencyManager;
 
-    static final int MSG_JOB_EXPIRED = 0;
+    static final int MSG_CHECK_INDIVIDUAL_JOB = 0;
     static final int MSG_CHECK_JOB = 1;
     static final int MSG_STOP_JOB = 2;
     static final int MSG_CHECK_JOB_GREEDY = 3;
@@ -1711,6 +1711,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
+            JobStatus newJs = mJobs.getJobByUidAndJobId(jobStatus.getUid(), jobStatus.getJobId());
+            if (newJs != null) {
+                // This job was stopped because the app scheduled a new job with the same job ID.
+                // Check if the new job is ready to run.
+                mHandler.obtainMessage(MSG_CHECK_INDIVIDUAL_JOB, newJs).sendToTarget();
+            }
             return;
         }
 
@@ -1748,7 +1754,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onRunJobNow(JobStatus jobStatus) {
-        mHandler.obtainMessage(MSG_JOB_EXPIRED, jobStatus).sendToTarget();
+        if (jobStatus == null) {
+            mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
+        } else {
+            mHandler.obtainMessage(MSG_CHECK_INDIVIDUAL_JOB, jobStatus).sendToTarget();
+        }
     }
 
     final private class JobHandler extends Handler {
@@ -1764,18 +1774,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                     return;
                 }
                 switch (message.what) {
-                    case MSG_JOB_EXPIRED: {
-                        JobStatus runNow = (JobStatus) message.obj;
-                        // runNow can be null, which is a controller's way of indicating that its
-                        // state is such that all ready jobs should be run immediately.
-                        if (runNow != null) {
-                            if (!isCurrentlyActiveLocked(runNow)
-                                    && isReadyToBeExecutedLocked(runNow)) {
-                                mJobPackageTracker.notePending(runNow);
-                                addOrderedItem(mPendingJobs, runNow, sPendingJobComparator);
+                    case MSG_CHECK_INDIVIDUAL_JOB: {
+                        JobStatus js = (JobStatus) message.obj;
+                        if (js != null) {
+                            if (isReadyToBeExecutedLocked(js)) {
+                                mJobPackageTracker.notePending(js);
+                                addOrderedItem(mPendingJobs, js, sPendingJobComparator);
                             }
                         } else {
-                            queueReadyJobsForExecutionLocked();
+                            Slog.e(TAG, "Given null job to check individually");
                         }
                     } break;
                     case MSG_CHECK_JOB:
@@ -1909,12 +1916,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         // This method will check and capture all ready jobs, so we don't need to keep any messages
         // in the queue.
         mHandler.removeMessages(MSG_CHECK_JOB_GREEDY);
+        mHandler.removeMessages(MSG_CHECK_INDIVIDUAL_JOB);
         // MSG_CHECK_JOB is a weaker form of _GREEDY. Since we're checking and queueing all ready
         // jobs, we don't need to keep any MSG_CHECK_JOB messages in the queue.
         mHandler.removeMessages(MSG_CHECK_JOB);
-        // This method will capture all expired jobs that are ready, so there's no need to keep
-        // the _EXPIRED messages in the queue.
-        mHandler.removeMessages(MSG_JOB_EXPIRED);
         if (DEBUG) {
             Slog.d(TAG, "queuing all ready jobs for execution:");
         }

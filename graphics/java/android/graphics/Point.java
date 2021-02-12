@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -93,6 +94,27 @@ public class Point implements Parcelable {
     @Override
     public String toString() {
         return "Point(" + x + ", " + y + ")";
+    }
+
+    /**
+     * @return Returns a {@link String} that represents this point which can be parsed with
+     * {@link #unflattenFromString(String)}.
+     * @hide
+     */
+    @NonNull
+    public String flattenToString() {
+        return x + "x" + y;
+    }
+
+    /**
+     * @return Returns a {@link Point} from a short string created from {@link #flattenToString()}.
+     * @hide
+     */
+    @Nullable
+    public static Point unflattenFromString(String s) throws NumberFormatException {
+        final int sep_ix = s.indexOf("x");
+        return new Point(Integer.parseInt(s.substring(0, sep_ix)),
+                Integer.parseInt(s.substring(sep_ix + 1)));
     }
 
     /**

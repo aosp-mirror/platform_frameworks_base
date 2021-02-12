@@ -2807,7 +2807,7 @@ public class ParsingPackageUtils {
      *                        limits length of the name to the {@link #MAX_FILE_NAME_SIZE}.
      * @return Success if it's valid.
      */
-    public static ParseResult validateName(ParseInput input, String name, boolean requireSeparator,
+    public static String validateName(String name, boolean requireSeparator,
             boolean requireFilename) {
         final int N = name.length();
         boolean hasSep = false;
@@ -2828,18 +2828,28 @@ public class ParsingPackageUtils {
                 front = true;
                 continue;
             }
-            return input.error("bad character '" + c + "'");
+            return "bad character '" + c + "'";
         }
         if (requireFilename) {
             if (!FileUtils.isValidExtFilename(name)) {
-                return input.error("Invalid filename");
+                return "Invalid filename";
             } else if (N > MAX_FILE_NAME_SIZE) {
-                return input.error("the length of the name is greater than " + MAX_FILE_NAME_SIZE);
+                return "the length of the name is greater than " + MAX_FILE_NAME_SIZE;
             }
         }
-        return hasSep || !requireSeparator
-                ? input.success(null)
-                : input.error("must have at least one '.' separator");
+        return hasSep || !requireSeparator ? null : "must have at least one '.' separator";
+    }
+
+    /**
+     * @see #validateName(String, boolean, boolean)
+     */
+    public static ParseResult validateName(ParseInput input, String name, boolean requireSeparator,
+            boolean requireFilename) {
+        final String errorMessage = validateName(name, requireSeparator, requireFilename);
+        if (errorMessage != null) {
+            return input.error(errorMessage);
+        }
+        return input.success(null);
     }
 
     /**

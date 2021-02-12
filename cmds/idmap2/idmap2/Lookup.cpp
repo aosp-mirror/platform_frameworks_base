@@ -37,7 +37,6 @@
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 #include "idmap2/XmlParser.h"
-#include "idmap2/ZipFile.h"
 #include "utils/String16.h"
 #include "utils/String8.h"
 
@@ -52,10 +51,10 @@ using android::base::StringPrintf;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::IdmapHeader;
+using android::idmap2::OverlayResourceContainer;
 using android::idmap2::ResourceId;
 using android::idmap2::Result;
 using android::idmap2::Unit;
-using android::idmap2::utils::ExtractOverlayManifestInfo;
 
 namespace {
 
@@ -195,12 +194,17 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
       }
       apk_assets.push_back(std::move(target_apk));
 
-      auto manifest_info = ExtractOverlayManifestInfo(idmap_header->GetOverlayPath(),
-                                                      idmap_header->GetOverlayName());
+      auto overlay = OverlayResourceContainer::FromPath(idmap_header->GetOverlayPath());
+      if (!overlay) {
+        return overlay.GetError();
+      }
+
+      auto manifest_info = (*overlay)->FindOverlayInfo(idmap_header->GetOverlayName());
       if (!manifest_info) {
         return manifest_info.GetError();
       }
-      target_package_name = manifest_info->target_package;
+
+      target_package_name = (*manifest_info).target_package;
     } else if (target_path != idmap_header->GetTargetPath()) {
       return Error("different target APKs (expected target APK %s but %s has target APK %s)",
                    target_path.c_str(), idmap_path.c_str(), idmap_header->GetTargetPath().c_str());

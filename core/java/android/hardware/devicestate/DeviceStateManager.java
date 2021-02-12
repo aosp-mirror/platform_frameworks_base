@@ -42,6 +42,12 @@ public final class DeviceStateManager {
      */
     public static final int INVALID_DEVICE_STATE = -1;
 
+    /** The minimum allowed device state identifier. */
+    public static final int MINIMUM_DEVICE_STATE = 0;
+
+    /** The maximum allowed device state identifier. */
+    public static final int MAXIMUM_DEVICE_STATE = 255;
+
     private final DeviceStateManagerGlobal mGlobal;
 
     /** @hide */

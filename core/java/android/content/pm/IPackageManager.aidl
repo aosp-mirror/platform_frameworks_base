@@ -808,4 +808,6 @@ interface IPackageManager {
 
     PackageManager.Property getProperty(String propertyName, String packageName, String className);
     ParceledListSlice queryProperty(String propertyName, int componentType);
+
+    void setKeepUninstalledPackages(in List<String> packageList);
 }

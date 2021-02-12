@@ -415,6 +415,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
         @Override
         public void onUserSwitching(int userId) {
+            if (DEBUG) Log.d(TAG, String.format("onUserSwitching %d", userId));
             // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
             // We need to force a reset of the views, since lockNow (called by
             // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
@@ -432,6 +433,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
         @Override
         public void onUserSwitchComplete(int userId) {
+            if (DEBUG) Log.d(TAG, String.format("onUserSwitchComplete %d", userId));
             if (userId != UserHandle.USER_SYSTEM) {
                 UserInfo info = UserManager.get(mContext).getUserInfo(userId);
                 // Don't try to dismiss if the user has Pin/Patter/Password set

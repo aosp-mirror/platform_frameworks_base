@@ -52,7 +52,8 @@ import javax.annotation.Nullable;
 public final class DeviceStateManagerServiceTest {
     private static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(0, "DEFAULT");
     private static final DeviceState OTHER_DEVICE_STATE = new DeviceState(1, "OTHER");
-    private static final DeviceState UNSUPPORTED_DEVICE_STATE = new DeviceState(999, "UNSUPPORTED");
+    // A device state that is not reported as being supported for the default test provider.
+    private static final DeviceState UNSUPPORTED_DEVICE_STATE = new DeviceState(255, "UNSUPPORTED");
 
     private TestDeviceStatePolicy mPolicy;
     private TestDeviceStateProvider mProvider;

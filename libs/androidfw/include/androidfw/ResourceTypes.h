@@ -43,8 +43,19 @@
 
 namespace android {
 
-constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const static uint32_t kIdmapCurrentVersion = 0x00000007u;
+constexpr const uint32_t kIdmapMagic = 0x504D4449u;
+constexpr const uint32_t kIdmapCurrentVersion = 0x00000008u;
+
+// This must never change.
+constexpr const uint32_t kFabricatedOverlayMagic = 0x4f525246; // FRRO (big endian)
+
+// The version should only be changed when a backwards-incompatible change must be made to the
+// fabricated overlay file format. Old fabricated overlays must be migrated to the new file format
+// to prevent losing fabricated overlay data.
+constexpr const uint32_t kFabricatedOverlayCurrentVersion = 1;
+
+// Returns whether or not the path represents a fabricated overlay.
+bool IsFabricatedOverlay(const std::string& path);
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of

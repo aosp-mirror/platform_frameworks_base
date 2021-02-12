@@ -245,7 +245,6 @@ private:
         void setTargetStatusLocked(int status);
 
         bool fsmStep();
-        bool fsmStep(int currentStatus, int targetStatus);
 
         void onHealthStatus(StorageHealthListener healthListener, int healthStatus);
         void updateHealthStatus(bool baseline = false);
@@ -258,6 +257,8 @@ private:
         void resetHealthControl();
 
         BootClockTsUs getOldestPendingReadTs();
+
+        Milliseconds updateBindDelay();
 
         void registerForPendingReads();
         void unregisterFromPendingReads();
@@ -275,6 +276,9 @@ private:
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
+
+        TimePoint mPreviousBindTs = {};
+        Milliseconds mPreviousBindDelay = {};
 
         std::string mHealthPath;
         incfs::UniqueControl mHealthControl;
@@ -369,6 +373,8 @@ private:
 
     void addBindMountRecordLocked(IncFsMount& ifs, StorageId storage, std::string&& metadataName,
                                   std::string&& source, std::string&& target, BindKind kind);
+
+    bool needStartDataLoaderLocked(IncFsMount& ifs);
 
     DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs,
                                         content::pm::DataLoaderParamsParcel&& params,

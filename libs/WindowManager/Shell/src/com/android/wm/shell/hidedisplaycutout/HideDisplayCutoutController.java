@@ -44,20 +44,12 @@ public class HideDisplayCutoutController {
     @VisibleForTesting
     boolean mEnabled;
 
-    HideDisplayCutoutController(Context context, HideDisplayCutoutOrganizer organizer,
-            ShellExecutor mainExecutor) {
-        mContext = context;
-        mOrganizer = organizer;
-        mMainExecutor = mainExecutor;
-        updateStatus();
-    }
-
     /**
      * Creates {@link HideDisplayCutoutController}, returns {@code null} if the feature is not
      * supported.
      */
     @Nullable
-    public static HideDisplayCutout create(
+    public static HideDisplayCutoutController create(
             Context context, DisplayController displayController, ShellExecutor mainExecutor) {
         // The SystemProperty is set for devices that support this feature and is used to control
         // whether to create the HideDisplayCutout instance.
@@ -68,7 +60,19 @@ public class HideDisplayCutoutController {
 
         HideDisplayCutoutOrganizer organizer =
                 new HideDisplayCutoutOrganizer(context, displayController, mainExecutor);
-        return new HideDisplayCutoutController(context, organizer, mainExecutor).mImpl;
+        return new HideDisplayCutoutController(context, organizer, mainExecutor);
+    }
+
+    HideDisplayCutoutController(Context context, HideDisplayCutoutOrganizer organizer,
+            ShellExecutor mainExecutor) {
+        mContext = context;
+        mOrganizer = organizer;
+        mMainExecutor = mainExecutor;
+        updateStatus();
+    }
+
+    public HideDisplayCutout asHideDisplayCutout() {
+        return mImpl;
     }
 
     @VisibleForTesting
@@ -94,7 +98,7 @@ public class HideDisplayCutoutController {
         updateStatus();
     }
 
-    private void dump(@NonNull PrintWriter pw) {
+    public void dump(@NonNull PrintWriter pw) {
         final String prefix = "  ";
         pw.print(TAG);
         pw.println(" states: ");
@@ -110,15 +114,6 @@ public class HideDisplayCutoutController {
             mMainExecutor.execute(() -> {
                 HideDisplayCutoutController.this.onConfigurationChanged(newConfig);
             });
-        }
-
-        @Override
-        public void dump(@NonNull PrintWriter pw) {
-            try {
-                mMainExecutor.executeBlocking(() -> HideDisplayCutoutController.this.dump(pw));
-            } catch (InterruptedException e) {
-                Slog.e(TAG, "Failed to dump HideDisplayCutoutController in 2s");
-            }
         }
     }
 }

@@ -257,11 +257,15 @@ public final class AuthSession implements IBinder.DeathRecipient {
                             mUserId,
                             mOpPackageName,
                             mOperationId);
+                    mState = STATE_AUTH_STARTED;
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
                 }
+            } else {
+                // The UI was already showing :)
+                mState = STATE_AUTH_STARTED_UI_SHOWING;
             }
-            mState = STATE_AUTH_STARTED;
+
         }
     }
 

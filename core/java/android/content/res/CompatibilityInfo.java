@@ -252,9 +252,10 @@ public class CompatibilityInfo implements Parcelable {
             }
 
             if (overrideScale != 1.0f) {
-                applicationDensity = DisplayMetrics.DENSITY_DEFAULT;
                 applicationScale = overrideScale;
                 applicationInvertedScale = 1.0f / overrideScale;
+                applicationDensity = (int) ((DisplayMetrics.DENSITY_DEVICE_STABLE
+                        * applicationInvertedScale) + .5f);
                 compatFlags |= HAS_OVERRIDE_SCALING;
             } else if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
                 applicationDensity = DisplayMetrics.DENSITY_DEVICE;
@@ -519,10 +520,6 @@ public class CompatibilityInfo implements Parcelable {
         if (isScalingRequired()) {
             float invertedRatio = applicationInvertedScale;
             inoutConfig.densityDpi = (int)((inoutConfig.densityDpi * invertedRatio) + .5f);
-            inoutConfig.screenWidthDp = (int) ((inoutConfig.screenWidthDp * invertedRatio) + .5f);
-            inoutConfig.screenHeightDp = (int) ((inoutConfig.screenHeightDp * invertedRatio) + .5f);
-            inoutConfig.smallestScreenWidthDp =
-                    (int) ((inoutConfig.smallestScreenWidthDp * invertedRatio) + .5f);
             inoutConfig.windowConfiguration.getMaxBounds().scale(invertedRatio);
             inoutConfig.windowConfiguration.getBounds().scale(invertedRatio);
             final Rect appBounds = inoutConfig.windowConfiguration.getAppBounds();

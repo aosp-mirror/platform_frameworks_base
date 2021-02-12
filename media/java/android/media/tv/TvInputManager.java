@@ -2526,6 +2526,7 @@ public final class TvInputManager {
          * Pauses TV program recording in the current recording session.
          *
          * @param params A set of extra parameters which might be handled with this event.
+         *        {@link TvRecordingClient#pauseRecording(Bundle)}.
          */
         void pauseRecording(@NonNull Bundle params) {
             if (mToken == null) {
@@ -2543,6 +2544,7 @@ public final class TvInputManager {
          * Resumes TV program recording in the current recording session.
          *
          * @param params A set of extra parameters which might be handled with this event.
+         *        {@link TvRecordingClient#resumeRecording(Bundle)}.
          */
         void resumeRecording(@NonNull Bundle params) {
             if (mToken == null) {

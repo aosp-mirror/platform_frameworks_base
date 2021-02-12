@@ -86,7 +86,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         final Rect taskBounds = new Rect(0, 0, 1000, 2000);
 
         // Verify that the restart button is added with non-null size compat activity.
-        mController.mImpl.onSizeCompatInfoChanged(DISPLAY_ID, taskId, taskBounds,
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, taskId, taskBounds,
                 mMockActivityToken, mMockTaskListener);
         mShellMainExecutor.flushAll();
 
@@ -94,7 +94,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
         verify(mMockButton).updateLastTargetActivity(eq(mMockActivityToken));
 
         // Verify that the restart button is removed with null size compat activity.
-        mController.mImpl.onSizeCompatInfoChanged(DISPLAY_ID, taskId, null, null, null);
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, taskId, null, null, null);
 
         mShellMainExecutor.flushAll();
         verify(mMockButton).remove();
@@ -104,7 +104,7 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
     public void testChangeButtonVisibilityOnImeShowHide() {
         final int taskId = 12;
         final Rect taskBounds = new Rect(0, 0, 1000, 2000);
-        mController.mImpl.onSizeCompatInfoChanged(DISPLAY_ID, taskId, taskBounds,
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, taskId, taskBounds,
                 mMockActivityToken, mMockTaskListener);
         mShellMainExecutor.flushAll();
 

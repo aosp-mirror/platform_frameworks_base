@@ -3131,11 +3131,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_ERRORED;
             }
             final Op op = getOpLocked(ops, code, uid, true);
-            if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
-                scheduleOpNotedIfNeededLocked(code, uid, packageName, flags,
-                        AppOpsManager.MODE_IGNORED);
-                return AppOpsManager.MODE_IGNORED;
-            }
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             if (attributedOp.isRunning()) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName + " code "
@@ -3145,6 +3140,12 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
+            if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
+                attributedOp.rejected(uidState.state, flags);
+                scheduleOpNotedIfNeededLocked(code, uid, packageName, flags,
+                        AppOpsManager.MODE_IGNORED);
+                return AppOpsManager.MODE_IGNORED;
+            }
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.opModes != null && uidState.opModes.indexOfKey(switchCode) >= 0) {

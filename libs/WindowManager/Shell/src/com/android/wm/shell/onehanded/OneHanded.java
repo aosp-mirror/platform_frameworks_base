@@ -69,9 +69,4 @@ public interface OneHanded {
      * 3 button navigation mode only
      */
     void registerGestureCallback(OneHandedGestureEventCallback callback);
-
-    /**
-     * Dump one handed status.
-     */
-    void dump(@NonNull PrintWriter pw);
 }

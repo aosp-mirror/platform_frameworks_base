@@ -168,15 +168,14 @@ class LoadedIdmap {
   }
 
   // Returns a mapping from target resource ids to overlay values.
-  const IdmapResMap GetTargetResourcesMap(
-      uint8_t target_assigned_package_id, const OverlayDynamicRefTable* overlay_ref_table) const {
+  const IdmapResMap GetTargetResourcesMap(uint8_t target_assigned_package_id,
+                                          const OverlayDynamicRefTable* overlay_ref_table) const {
     return IdmapResMap(data_header_, target_entries_, target_inline_entries_,
                        target_assigned_package_id, overlay_ref_table);
   }
 
   // Returns a dynamic reference table for a loaded overlay package.
-  const OverlayDynamicRefTable GetOverlayDynamicRefTable(
-      uint8_t target_assigned_package_id) const {
+  const OverlayDynamicRefTable GetOverlayDynamicRefTable(uint8_t target_assigned_package_id) const {
     return OverlayDynamicRefTable(data_header_, overlay_entries_, target_assigned_package_id);
   }
 

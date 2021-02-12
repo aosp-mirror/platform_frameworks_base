@@ -50,7 +50,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
+import android.hardware.HardwareBuffer;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
@@ -76,6 +78,7 @@ import android.util.Singleton;
 import android.util.Size;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
+import android.window.TaskSnapshot;
 
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
@@ -1740,6 +1743,62 @@ public class ActivityManager {
      */
     public static class RecentTaskInfo extends TaskInfo implements Parcelable {
         /**
+         * @hide
+         */
+        public static class PersistedTaskSnapshotData {
+            /**
+             * The bounds of the task when the last snapshot was taken, may be null if the task is
+             * not yet attached to the hierarchy.
+             * @see {@link android.window.TaskSnapshot#mTaskSize}.
+             * @hide
+             */
+            public @Nullable Point taskSize;
+
+            /**
+             * The content insets of the task when the task snapshot was taken.
+             * @see {@link android.window.TaskSnapshot#mContentInsets}.
+             * @hide
+             */
+            public @Nullable Rect contentInsets;
+
+            /**
+             * The size of the last snapshot taken, may be null if there is no associated snapshot.
+             * @see {@link android.window.TaskSnapshot#mSnapshot}.
+             * @hide
+             */
+            public @Nullable Point bufferSize;
+
+            /**
+             * Sets the data from the other data.
+             * @hide
+             */
+            public void set(PersistedTaskSnapshotData other) {
+                taskSize = other.taskSize;
+                contentInsets = other.contentInsets;
+                bufferSize = other.bufferSize;
+            }
+
+            /**
+             * Sets the data from the provided {@param snapshot}.
+             * @hide
+             */
+            public void set(TaskSnapshot snapshot) {
+                if (snapshot == null) {
+                    taskSize = null;
+                    contentInsets = null;
+                    bufferSize = null;
+                    return;
+                }
+                final HardwareBuffer buffer = snapshot.getHardwareBuffer();
+                taskSize = new Point(snapshot.getTaskSize());
+                contentInsets = new Rect(snapshot.getContentInsets());
+                bufferSize = buffer != null
+                        ? new Point(buffer.getWidth(), buffer.getHeight())
+                        : null;
+            }
+        }
+
+        /**
          * If this task is currently running, this is the identifier for it.
          * If it is not running, this will be -1.
          *
@@ -1782,6 +1841,12 @@ public class ActivityManager {
          */
         public ArrayList<RecentTaskInfo> childrenTaskInfos = new ArrayList<>();
 
+        /**
+         * Information about the last snapshot taken for this task.
+         * @hide
+         */
+        public PersistedTaskSnapshotData lastSnapshotData = new PersistedTaskSnapshotData();
+
         public RecentTaskInfo() {
         }
 
@@ -1798,6 +1863,9 @@ public class ActivityManager {
             id = source.readInt();
             persistentId = source.readInt();
             childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader());
+            lastSnapshotData.taskSize = source.readTypedObject(Point.CREATOR);
+            lastSnapshotData.contentInsets = source.readTypedObject(Rect.CREATOR);
+            lastSnapshotData.bufferSize = source.readTypedObject(Point.CREATOR);
             super.readFromParcel(source);
         }
 
@@ -1806,6 +1874,9 @@ public class ActivityManager {
             dest.writeInt(id);
             dest.writeInt(persistentId);
             dest.writeList(childrenTaskInfos);
+            dest.writeTypedObject(lastSnapshotData.taskSize, flags);
+            dest.writeTypedObject(lastSnapshotData.contentInsets, flags);
+            dest.writeTypedObject(lastSnapshotData.bufferSize, flags);
             super.writeToParcel(dest, flags);
         }
 
@@ -1825,7 +1896,6 @@ public class ActivityManager {
         public void dump(PrintWriter pw, String indent) {
             pw.println(); pw.print("   ");
             pw.print(" id="); pw.print(persistentId);
-            pw.print(" stackId="); pw.print(stackId);
             pw.print(" userId="); pw.print(userId);
             pw.print(" hasTask="); pw.print((id != -1));
             pw.print(" lastActiveTime="); pw.println(lastActiveTime);
@@ -1872,6 +1942,12 @@ public class ActivityManager {
                 pw.print(Integer.toHexString(td.getBackgroundColorFloating()));
                 pw.println(" }");
             }
+            pw.print("   ");
+            pw.print(" lastSnapshotData {");
+            pw.print(" taskSize=" + lastSnapshotData.taskSize);
+            pw.print(" contentInsets=" + lastSnapshotData.contentInsets);
+            pw.print(" bufferSize=" + lastSnapshotData.bufferSize);
+            pw.println(" }");
         }
     }
 

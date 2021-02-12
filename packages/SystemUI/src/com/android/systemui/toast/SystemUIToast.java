@@ -20,10 +20,21 @@ import android.animation.Animator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.ToastPresenter;
 
 import com.android.internal.R;
+import com.android.launcher3.icons.IconFactory;
 import com.android.systemui.plugins.ToastPlugin;
 
 /**
@@ -35,23 +46,43 @@ public class SystemUIToast implements ToastPlugin.Toast {
     final CharSequence mText;
     final ToastPlugin.Toast mPluginToast;
 
-    final int mDefaultGravity;
-    final int mDefaultY;
+    private final String mPackageName;
+    private final int mUserId;
+    private final LayoutInflater mLayoutInflater;
+    private final boolean mToastStyleEnabled;
+
     final int mDefaultX = 0;
     final int mDefaultHorizontalMargin = 0;
     final int mDefaultVerticalMargin = 0;
 
-    SystemUIToast(Context context, CharSequence text) {
-        this(context, text, null);
+    private int mDefaultY;
+    private int mDefaultGravity;
+
+    @NonNull private final View mToastView;
+    @Nullable private final Animator mInAnimator;
+    @Nullable private final Animator mOutAnimator;
+
+    SystemUIToast(LayoutInflater layoutInflater, Context context, CharSequence text,
+            String packageName, int userId, boolean toastStyleEnabled, int orientation) {
+        this(layoutInflater, context, text, null, packageName, userId,
+                toastStyleEnabled, orientation);
     }
 
-    SystemUIToast(Context context, CharSequence text, ToastPlugin.Toast pluginToast) {
+    SystemUIToast(LayoutInflater layoutInflater, Context context, CharSequence text,
+            ToastPlugin.Toast pluginToast, String packageName, int userId,
+            boolean toastStyleEnabled, int orientation) {
+        mToastStyleEnabled = toastStyleEnabled;
+        mLayoutInflater = layoutInflater;
         mContext = context;
         mText = text;
         mPluginToast = pluginToast;
+        mPackageName = packageName;
+        mUserId = userId;
+        mToastView = inflateToastView();
+        mInAnimator = createInAnimator();
+        mOutAnimator = createOutAnimator();
 
-        mDefaultGravity = context.getResources().getInteger(R.integer.config_toastDefaultGravity);
-        mDefaultY = context.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
+        onOrientationChange(orientation);
     }
 
     @Override
@@ -102,28 +133,19 @@ public class SystemUIToast implements ToastPlugin.Toast {
     @Override
     @NonNull
     public View getView() {
-        if (isPluginToast() && mPluginToast.getView() != null) {
-            return mPluginToast.getView();
-        }
-        return ToastPresenter.getTextToastView(mContext, mText);
+        return mToastView;
     }
 
     @Override
     @Nullable
     public Animator getInAnimation() {
-        if (isPluginToast() && mPluginToast.getInAnimation() != null) {
-            return mPluginToast.getInAnimation();
-        }
-        return null;
+        return mInAnimator;
     }
 
     @Override
     @Nullable
     public Animator getOutAnimation() {
-        if (isPluginToast() && mPluginToast.getOutAnimation() != null) {
-            return mPluginToast.getOutAnimation();
-        }
-        return null;
+        return mOutAnimator;
     }
 
     /**
@@ -135,5 +157,81 @@ public class SystemUIToast implements ToastPlugin.Toast {
 
     private boolean isPluginToast() {
         return mPluginToast != null;
+    }
+
+    private View inflateToastView() {
+        if (isPluginToast() && mPluginToast.getView() != null) {
+            return mPluginToast.getView();
+        }
+
+        View toastView;
+        if (mToastStyleEnabled) {
+            toastView = mLayoutInflater.inflate(
+                    com.android.systemui.R.layout.text_toast, null);
+            ((TextView) toastView.findViewById(com.android.systemui.R.id.text)).setText(mText);
+
+            ((ImageView) toastView.findViewById(com.android.systemui.R.id.icon))
+                    .setImageDrawable(getBadgedIcon(mContext, mPackageName, mUserId));
+        } else {
+            toastView = ToastPresenter.getTextToastView(mContext, mText);
+        }
+
+        return toastView;
+    }
+
+    /**
+     * Called on orientation changes to update parameters associated with the toast placement.
+     */
+    public void onOrientationChange(int orientation) {
+        if (mPluginToast != null) {
+            mPluginToast.onOrientationChange(orientation);
+        }
+
+        mDefaultY = mContext.getResources().getDimensionPixelSize(
+                mToastStyleEnabled
+                        ? com.android.systemui.R.dimen.toast_y_offset
+                        : R.dimen.toast_y_offset);
+        mDefaultGravity =
+                mContext.getResources().getInteger(R.integer.config_toastDefaultGravity);
+    }
+
+    private Animator createInAnimator() {
+        if (isPluginToast() && mPluginToast.getInAnimation() != null) {
+            return mPluginToast.getInAnimation();
+        }
+
+        return mToastStyleEnabled
+                ? ToastDefaultAnimation.Companion.toastIn(getView())
+                : null;
+    }
+
+    private Animator createOutAnimator() {
+        if (isPluginToast() && mPluginToast.getOutAnimation() != null) {
+            return mPluginToast.getOutAnimation();
+        }
+        return mToastStyleEnabled
+                ? ToastDefaultAnimation.Companion.toastOut(getView())
+                : null;
+    }
+
+    /**
+     * Get badged app icon if necessary, similar as used in the Settings UI.
+     * @return The icon to use
+     */
+    public static Drawable getBadgedIcon(@NonNull Context context, String packageName,
+            int userId) {
+        final PackageManager packageManager = context.getPackageManager();
+        try {
+            final ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
+                    packageName, PackageManager.GET_META_DATA, userId);
+            UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
+            IconFactory iconFactory = IconFactory.obtain(context);
+            Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
+                    appInfo.loadUnbadgedIcon(packageManager), user, false).icon;
+            return new BitmapDrawable(context.getResources(), iconBmp);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e("SystemUIToast", "could not load icon for package=" + packageName + " e=" + e);
+            return null;
+        }
     }
 }

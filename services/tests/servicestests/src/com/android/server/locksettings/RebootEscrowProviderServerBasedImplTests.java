@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -42,7 +43,6 @@ import org.junit.runner.RunWith;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
-import java.io.IOException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -130,7 +130,7 @@ public class RebootEscrowProviderServerBasedImplTests {
     @Test
     public void getAndClearRebootEscrowKey_ServiceConnectionException_failure() throws Exception {
         when(mServiceConnection.wrapBlob(any(), anyLong(), anyLong())).thenAnswer(mFakeEncryption);
-        doThrow(IOException.class).when(mServiceConnection).unwrap(any(), anyLong());
+        doThrow(RemoteException.class).when(mServiceConnection).unwrap(any(), anyLong());
 
         assertTrue(mRebootEscrowProvider.hasRebootEscrowSupport());
         mRebootEscrowProvider.storeRebootEscrowKey(mRebootEscrowKey, mKeyStoreEncryptionKey);

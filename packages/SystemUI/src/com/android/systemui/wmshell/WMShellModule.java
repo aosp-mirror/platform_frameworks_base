@@ -21,10 +21,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
+import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
-import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -36,7 +36,6 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -60,11 +59,20 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Provides dependencies from {@link com.android.wm.shell} which could be customized among different
- * branches of SystemUI.
+ * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only
+ * accessible from components within the WM subcomponent (can be explicitly exposed to the
+ * SysUIComponent, see {@link WMComponent}).
+ *
+ * This module only defines Shell dependencies for handheld SystemUI implementation.  Common
+ * dependencies should go into {@link WMShellBaseModule}.
  */
 @Module(includes = WMShellBaseModule.class)
 public class WMShellModule {
+
+    //
+    // Internal common - Components used internally by multiple shell features
+    //
+
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
@@ -74,28 +82,36 @@ public class WMShellModule {
                 transactionPool);
     }
 
+    //
+    // Split/multiwindow
+    //
+
     @WMSingleton
     @Provides
-    static LegacySplitScreen provideLegacySplitScreen(Context context,
+    static LegacySplitScreenController provideLegacySplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor,
             @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
-        return LegacySplitScreenController.create(context, displayController, systemWindows,
+        return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }
 
     @WMSingleton
     @Provides
-    static AppPairs provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
+    static AppPairsController provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return AppPairsController.create(shellTaskOrganizer, syncQueue, displayController,
+        return new AppPairsController(shellTaskOrganizer, syncQueue, displayController,
                 mainExecutor);
     }
+
+    //
+    // Pip
+    //
 
     @WMSingleton
     @Provides
@@ -161,7 +177,8 @@ public class WMShellModule {
             PipAnimationController pipAnimationController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             PipTransitionController pipTransitionController,
-            Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
+            Optional<LegacySplitScreenController> splitScreenOptional,
+            DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,

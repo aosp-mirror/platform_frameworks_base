@@ -38,7 +38,6 @@ import static org.testng.Assert.expectThrows;
 
 import android.annotation.UserIdInt;
 import android.app.Application;
-import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -874,8 +873,7 @@ public class BackupManagerServiceRoboTest {
                 SecurityException.class,
                 () ->
                         backupManagerService.requestBackup(
-                                mUserTwoId, packages, observer, monitor, 0,
-                                OperationType.BACKUP));
+                                mUserTwoId, packages, observer, monitor, 0));
     }
 
     /**
@@ -893,11 +891,9 @@ public class BackupManagerServiceRoboTest {
         IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ true);
 
-        backupManagerService.requestBackup(mUserTwoId, packages, observer, monitor, /* flags */ 0,
-                OperationType.BACKUP);
+        backupManagerService.requestBackup(mUserTwoId, packages, observer, monitor, /* flags */ 0);
 
-        verify(mUserTwoService).requestBackup(packages, observer, monitor, /* flags */ 0,
-                OperationType.BACKUP);
+        verify(mUserTwoService).requestBackup(packages, observer, monitor, /* flags */ 0);
     }
 
     /** Test that the backup service routes methods correctly to the user that requests it. */
@@ -910,11 +906,9 @@ public class BackupManagerServiceRoboTest {
         IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
-        backupManagerService.requestBackup(mUserOneId, packages, observer, monitor, /* flags */ 0,
-                OperationType.BACKUP);
+        backupManagerService.requestBackup(mUserOneId, packages, observer, monitor, /* flags */ 0);
 
-        verify(mUserOneService).requestBackup(packages, observer, monitor, /* flags */ 0,
-                OperationType.BACKUP);
+        verify(mUserOneService).requestBackup(packages, observer, monitor, /* flags */ 0);
     }
 
     /** Test that the backup service routes methods correctly to the user that requests it. */
@@ -927,11 +921,9 @@ public class BackupManagerServiceRoboTest {
         IBackupManagerMonitor monitor = mock(IBackupManagerMonitor.class);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
-        backupManagerService.requestBackup(mUserTwoId, packages, observer, monitor, /* flags */ 0,
-                OperationType.BACKUP);
+        backupManagerService.requestBackup(mUserTwoId, packages, observer, monitor, /* flags */ 0);
 
-        verify(mUserOneService, never()).requestBackup(packages, observer, monitor, /* flags */ 0,
-                OperationType.BACKUP);
+        verify(mUserOneService, never()).requestBackup(packages, observer, monitor, /* flags */ 0);
     }
 
     /**
@@ -1092,11 +1084,9 @@ public class BackupManagerServiceRoboTest {
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserOneId, /* shouldGrantPermission */ false);
 
-        backupManagerService.beginRestoreSession(mUserOneId, TEST_PACKAGE, TEST_TRANSPORT,
-                OperationType.BACKUP);
+        backupManagerService.beginRestoreSession(mUserOneId, TEST_PACKAGE, TEST_TRANSPORT);
 
-        verify(mUserOneService).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT,
-                OperationType.BACKUP);
+        verify(mUserOneService).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
     }
 
     /** Test that the backup service does not route methods for non-registered users. */
@@ -1106,11 +1096,9 @@ public class BackupManagerServiceRoboTest {
         registerUser(backupManagerService, mUserOneId, mUserOneService);
         setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
 
-        backupManagerService.beginRestoreSession(mUserTwoId, TEST_PACKAGE, TEST_TRANSPORT,
-                OperationType.BACKUP);
+        backupManagerService.beginRestoreSession(mUserTwoId, TEST_PACKAGE, TEST_TRANSPORT);
 
-        verify(mUserOneService, never()).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT,
-                OperationType.BACKUP);
+        verify(mUserOneService, never()).beginRestoreSession(TEST_PACKAGE, TEST_TRANSPORT);
     }
 
     /** Test that the backup service routes methods correctly to the user that requests it. */
