@@ -29,7 +29,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.tuner.TunerService;
 
@@ -55,7 +54,6 @@ public class DozeParameters implements TunerService.Tunable,
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
     private final Resources mResources;
     private final BatteryController mBatteryController;
-    private final FeatureFlags mFeatureFlags;
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
@@ -67,8 +65,7 @@ public class DozeParameters implements TunerService.Tunable,
             AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
             PowerManager powerManager,
             BatteryController batteryController,
-            TunerService tunerService,
-            FeatureFlags featureFlags) {
+            TunerService tunerService) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAlwaysOnPolicy = alwaysOnDisplayPolicy;
@@ -77,7 +74,6 @@ public class DozeParameters implements TunerService.Tunable,
         mControlScreenOffAnimation = !getDisplayNeedsBlanking();
         mPowerManager = powerManager;
         mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
-        mFeatureFlags = featureFlags;
 
         tunerService.addTunable(
                 this,
@@ -204,7 +200,8 @@ public class DozeParameters implements TunerService.Tunable,
      * then abruptly showing AOD.
      */
     public boolean shouldControlUnlockedScreenOff() {
-        return getAlwaysOn() && mFeatureFlags.useNewLockscreenAnimations();
+        return getAlwaysOn() && SystemProperties.getBoolean(
+                "persist.sysui.show_new_screen_on_transitions", false);
     }
 
     private boolean getBoolean(String propName, int resId) {
