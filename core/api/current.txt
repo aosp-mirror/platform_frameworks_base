@@ -54632,6 +54632,7 @@ package android.widget {
     method public void setAccessibilityTraversalAfter(@IdRes int, @IdRes int);
     method public void setAccessibilityTraversalBefore(@IdRes int, @IdRes int);
     method public void setBitmap(@IdRes int, String, android.graphics.Bitmap);
+    method public void setBlendMode(@IdRes int, @NonNull String, @Nullable android.graphics.BlendMode);
     method public void setBoolean(@IdRes int, String, boolean);
     method public void setBundle(@IdRes int, String, android.os.Bundle);
     method public void setByte(@IdRes int, String, byte);
