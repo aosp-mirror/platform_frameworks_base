@@ -7531,8 +7531,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (spec != null) {
                     result.setTo(spec);
                 }
-                spec.scale *= windowState.mGlobalScale;
-                return spec;
+                result.scale *= windowState.mGlobalScale;
+                return result;
             }
         }
 
