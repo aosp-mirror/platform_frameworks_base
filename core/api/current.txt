@@ -10226,12 +10226,15 @@ package android.content {
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public boolean bindServiceAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
     method @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)") public abstract int checkCallingOrSelfPermission(@NonNull String);
     method @CheckResult(suggest="#enforceCallingOrSelfUriPermission(Uri,int,String)") public abstract int checkCallingOrSelfUriPermission(android.net.Uri, int);
+    method @NonNull public int[] checkCallingOrSelfUriPermissions(@NonNull java.util.List<android.net.Uri>, int);
     method @CheckResult(suggest="#enforceCallingPermission(String,String)") public abstract int checkCallingPermission(@NonNull String);
     method @CheckResult(suggest="#enforceCallingUriPermission(Uri,int,String)") public abstract int checkCallingUriPermission(android.net.Uri, int);
+    method @NonNull public int[] checkCallingUriPermissions(@NonNull java.util.List<android.net.Uri>, int);
     method @CheckResult(suggest="#enforcePermission(String,int,int,String)") public abstract int checkPermission(@NonNull String, int, int);
     method public abstract int checkSelfPermission(@NonNull String);
     method @CheckResult(suggest="#enforceUriPermission(Uri,int,int,String)") public abstract int checkUriPermission(android.net.Uri, int, int, int);
     method @CheckResult(suggest="#enforceUriPermission(Uri,String,String,int,int,int,String)") public abstract int checkUriPermission(@Nullable android.net.Uri, @Nullable String, @Nullable String, int, int, int);
+    method @NonNull public int[] checkUriPermissions(@NonNull java.util.List<android.net.Uri>, int, int, int);
     method @Deprecated public abstract void clearWallpaper() throws java.io.IOException;
     method @NonNull public android.content.Context createAttributionContext(@Nullable String);
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
