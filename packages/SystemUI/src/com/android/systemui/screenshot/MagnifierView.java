@@ -144,7 +144,9 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
                 setAlpha(0f);
                 setTranslationX((getParentWidth() - getWidth()) / 2);
                 setVisibility(View.VISIBLE);
-                animate().alpha(1f).translationX(0).scaleX(1f).scaleY(1f).start();
+                boolean touchOnRight = event.getX() > getParentWidth() / 2;
+                float translateXTarget = touchOnRight ? 0 : getParentWidth() - getWidth();
+                animate().alpha(1f).translationX(translateXTarget).scaleX(1f).scaleY(1f).start();
                 break;
             case MotionEvent.ACTION_MOVE:
                 mLastCropPosition = cropPosition;
