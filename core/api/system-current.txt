@@ -2523,7 +2523,8 @@ package android.content.pm {
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
     field public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
-    field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
+    field @Deprecated public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
+    field public static final String FEATURE_INCREMENTAL_DELIVERY_VERSION = "android.software.incremental_delivery_version";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final String FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION = "android.hardware.telephony.ims.singlereg";
