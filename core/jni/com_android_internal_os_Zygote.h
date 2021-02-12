@@ -20,6 +20,14 @@
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
+/*
+ * All functions that lead to ForkCommon must be marked with the
+ * no_stack_protector attributed.  Because ForkCommon changes the stack
+ * protector cookie, all of the guard checks on the frames above ForkCommon
+ * would fail when they are popped.
+ */
+#define NO_STACK_PROTECTOR __attribute__((no_stack_protector))
+
 #include <jni.h>
 #include <vector>
 #include <android-base/stringprintf.h>
