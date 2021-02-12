@@ -102,6 +102,12 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         public void onConfigChanged(Configuration newConfig) {
             mView.updateNavBackDrop(newConfig, mLightBarController);
             mView.updateResources();
+            if (mTileAdapter.updateNumColumns()) {
+                RecyclerView.LayoutManager lm = mView.getRecyclerView().getLayoutManager();
+                if (lm instanceof GridLayoutManager) {
+                    ((GridLayoutManager) lm).setSpanCount(mTileAdapter.getNumColumns());
+                }
+            }
         }
     };
 
