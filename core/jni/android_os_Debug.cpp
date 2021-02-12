@@ -520,14 +520,15 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
     }
 
     if (outUssSwapPssRss != NULL) {
-        if (env->GetArrayLength(outUssSwapPssRss) >= 1) {
+        int outLen = env->GetArrayLength(outUssSwapPssRss);
+        if (outLen >= 1) {
             jlong* outUssSwapPssRssArray = env->GetLongArrayElements(outUssSwapPssRss, 0);
             if (outUssSwapPssRssArray != NULL) {
                 outUssSwapPssRssArray[0] = uss;
-                if (env->GetArrayLength(outUssSwapPssRss) >= 2) {
+                if (outLen >= 2) {
                     outUssSwapPssRssArray[1] = swapPss;
                 }
-                if (env->GetArrayLength(outUssSwapPssRss) >= 3) {
+                if (outLen >= 3) {
                     outUssSwapPssRssArray[2] = rss;
                 }
             }
@@ -536,17 +537,18 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
     }
 
     if (outMemtrack != NULL) {
-        if (env->GetArrayLength(outMemtrack) >= 1) {
+        int outLen = env->GetArrayLength(outMemtrack);
+        if (outLen >= 1) {
             jlong* outMemtrackArray = env->GetLongArrayElements(outMemtrack, 0);
             if (outMemtrackArray != NULL) {
                 outMemtrackArray[0] = memtrack;
-                if (env->GetArrayLength(outMemtrack) >= 2) {
+                if (outLen >= 2) {
                     outMemtrackArray[1] = graphics_mem.graphics;
                 }
-                if (env->GetArrayLength(outMemtrack) >= 3) {
+                if (outLen >= 3) {
                     outMemtrackArray[2] = graphics_mem.gl;
                 }
-                if (env->GetArrayLength(outMemtrack) >= 4) {
+                if (outLen >= 4) {
                     outMemtrackArray[3] = graphics_mem.other;
                 }
             }
