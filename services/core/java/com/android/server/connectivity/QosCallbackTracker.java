@@ -27,7 +27,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.data.EpsBearerQosSessionAttributes;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.util.CollectionUtils;
 import com.android.server.ConnectivityService;
@@ -260,18 +260,18 @@ public class QosCallbackTracker {
     }
 
     private static void log(final String msg) {
-        Slog.d(TAG, msg);
+        Log.d(TAG, msg);
     }
 
     private static void logw(final String msg) {
-        Slog.w(TAG, msg);
+        Log.w(TAG, msg);
     }
 
     private static void loge(final String msg) {
-        Slog.e(TAG, msg);
+        Log.e(TAG, msg);
     }
 
     private static void logwtf(final String msg) {
-        Slog.wtf(TAG, msg);
+        Log.wtf(TAG, msg);
     }
 }
