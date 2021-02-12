@@ -207,6 +207,7 @@ cc_library_shared {
             ],
 
             shared_libs: [
+                "android.hardware.memtrack-unstable-ndk_platform",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "av-types-aidl-cpp",
