@@ -315,10 +315,9 @@ class MediaDataManagerTest : SysuiTestCase() {
         }
         mediaDataManager.onNotificationAdded(KEY, notif)
 
-        // THEN it loads and uses the default background color
+        // THEN it still loads
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
-        assertThat(mediaDataCaptor.value!!.backgroundColor).isEqualTo(DEFAULT_COLOR)
     }
 }
