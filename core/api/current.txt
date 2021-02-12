@@ -10385,6 +10385,7 @@ package android.content {
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
     field public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
     field public static final String DEVICE_POLICY_SERVICE = "device_policy";
+    field public static final String DISPLAY_HASH_SERVICE = "display_hash";
     field public static final String DISPLAY_SERVICE = "display";
     field public static final String DOWNLOAD_SERVICE = "download";
     field public static final String DROPBOX_SERVICE = "dropbox";
@@ -47897,6 +47898,7 @@ package android.view {
     method public android.view.View focusSearch(int);
     method public void forceHasOverlappingRendering(boolean);
     method public void forceLayout();
+    method @Nullable public void generateDisplayHash(@NonNull String, @Nullable android.graphics.Rect, @NonNull java.util.concurrent.Executor, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method public static int generateViewId();
     method public CharSequence getAccessibilityClassName();
     method public android.view.View.AccessibilityDelegate getAccessibilityDelegate();
@@ -50847,6 +50849,41 @@ package android.view.contentcapture {
     method public default void onError(int);
     method public void onRejected();
     method public void onWrite(@NonNull android.os.ParcelFileDescriptor);
+  }
+
+}
+
+package android.view.displayhash {
+
+  public final class DisplayHash implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.displayhash.DisplayHash> CREATOR;
+  }
+
+  public final class DisplayHashManager {
+    method @NonNull public java.util.Set<java.lang.String> getSupportedHashAlgorithms();
+    method @Nullable public android.view.displayhash.VerifiedDisplayHash verifyDisplayHash(@NonNull android.view.displayhash.DisplayHash);
+  }
+
+  public interface DisplayHashResultCallback {
+    method public void onDisplayHashError(int);
+    method public void onDisplayHashResult(@NonNull android.view.displayhash.DisplayHash);
+    field public static final int DISPLAY_HASH_ERROR_INVALID_BOUNDS = -2; // 0xfffffffe
+    field public static final int DISPLAY_HASH_ERROR_MISSING_WINDOW = -3; // 0xfffffffd
+    field public static final int DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN = -4; // 0xfffffffc
+    field public static final int DISPLAY_HASH_ERROR_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public final class VerifiedDisplayHash implements android.os.Parcelable {
+    ctor public VerifiedDisplayHash(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public android.graphics.Rect getBoundsInWindow();
+    method @NonNull public String getHashAlgorithm();
+    method @NonNull public byte[] getImageHash();
+    method public long getTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.displayhash.VerifiedDisplayHash> CREATOR;
   }
 
 }

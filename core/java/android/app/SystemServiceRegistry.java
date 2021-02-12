@@ -206,6 +206,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
+import android.view.displayhash.DisplayHashManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
@@ -1404,6 +1405,13 @@ public final class SystemServiceRegistry {
                         return new DomainVerificationManagerImpl(context, service);
                     }
                 });
+
+        registerService(Context.DISPLAY_HASH_SERVICE, DisplayHashManager.class,
+                new CachedServiceFetcher<DisplayHashManager>() {
+                    @Override
+                    public DisplayHashManager createService(ContextImpl ctx) {
+                        return new DisplayHashManager();
+                    }});
 
         sInitializing = true;
         try {

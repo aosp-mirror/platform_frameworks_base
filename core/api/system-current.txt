@@ -9899,6 +9899,18 @@ package android.service.dataloader {
 
 }
 
+package android.service.displayhash {
+
+  public abstract class DisplayHasherService extends android.app.Service {
+    ctor public DisplayHasherService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
+    method @Nullable public abstract android.view.displayhash.VerifiedDisplayHash onVerifyDisplayHash(@NonNull byte[], @NonNull android.view.displayhash.DisplayHash);
+    field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHasherService";
+  }
+
+}
+
 package android.service.euicc {
 
   public final class DownloadSubscriptionResult implements android.os.Parcelable {
@@ -10255,30 +10267,6 @@ package android.service.rotationresolver {
   public static interface RotationResolverService.RotationResolverCallback {
     method public void onFailure(int);
     method public void onSuccess(int);
-  }
-
-}
-
-package android.service.screenshot {
-
-  public final class ScreenshotHash implements android.os.Parcelable {
-    ctor public ScreenshotHash(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
-    method public int describeContents();
-    method @NonNull public android.graphics.Rect getBoundsInWindow();
-    method @NonNull public String getHashingAlgorithm();
-    method @NonNull public byte[] getHmac();
-    method @NonNull public byte[] getImageHash();
-    method public long getScreenshotTimeMillis();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.screenshot.ScreenshotHash> CREATOR;
-  }
-
-  public abstract class ScreenshotHasherService extends android.app.Service {
-    ctor public ScreenshotHasherService();
-    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract android.service.screenshot.ScreenshotHash onGenerateScreenshotHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
-    method public abstract boolean onVerifyScreenshotHash(@NonNull byte[], @NonNull android.service.screenshot.ScreenshotHash);
-    field public static final String SERVICE_INTERFACE = "android.service.screenshot.ScreenshotHasherService";
   }
 
 }
@@ -14293,6 +14281,21 @@ package android.view.contentcapture {
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
     method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
+  }
+
+}
+
+package android.view.displayhash {
+
+  public final class DisplayHash implements android.os.Parcelable {
+    ctor public DisplayHash(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public android.graphics.Rect getBoundsInWindow();
+    method @NonNull public String getHashAlgorithm();
+    method @NonNull public byte[] getHmac();
+    method @NonNull public byte[] getImageHash();
+    method public long getTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
   }
 
 }

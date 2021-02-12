@@ -5462,6 +5462,14 @@ public abstract class Context {
     public static final String DOMAIN_VERIFICATION_SERVICE = "domain_verification";
 
     /**
+     * Use with {@link #getSystemService(String)} to access
+     * {@link android.view.displayhash.DisplayHashManager} to handle display hashes.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String DISPLAY_HASH_SERVICE = "display_hash";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

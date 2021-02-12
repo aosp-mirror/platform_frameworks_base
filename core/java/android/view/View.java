@@ -18,6 +18,12 @@ package android.view;
 
 import static android.content.res.Resources.ID_NULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
+import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
+import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
+import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
+import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH;
+import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -89,6 +95,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -135,6 +142,9 @@ import android.view.autofill.AutofillValue;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
+import android.view.displayhash.DisplayHash;
+import android.view.displayhash.DisplayHashManager;
+import android.view.displayhash.DisplayHashResultCallback;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
@@ -176,6 +186,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -30700,5 +30711,72 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
     public void onTranslationComplete(@NonNull TranslationRequest request) {
         // no-op
+    }
+
+    /**
+     * Called to generate a {@link DisplayHash} for this view.
+     *
+     * @param hashAlgorithm The hash algorithm to use when hashing the display. Must be one of
+     *                      the values returned from
+     *                      {@link DisplayHashManager#getSupportedHashAlgorithms()}
+     * @param bounds The bounds for the content within the View to generate the hash for. If
+     *               bounds are null, the entire View's bounds will be used. If empty, it will
+     *               invoke the callback
+     *               {@link DisplayHashResultCallback#onDisplayHashError} with error
+     *               {@link DisplayHashResultCallback#DISPLAY_HASH_ERROR_INVALID_BOUNDS}
+     * @param executor The executor that the callback should be invoked on.
+     * @param callback The callback to handle the results of generating the display hash
+     */
+    @Nullable
+    public void generateDisplayHash(@NonNull String hashAlgorithm,
+            @Nullable Rect bounds, @NonNull Executor executor,
+            @NonNull DisplayHashResultCallback callback) {
+        IWindowSession session = getWindowSession();
+        if (session == null) {
+            callback.onDisplayHashError(DISPLAY_HASH_ERROR_MISSING_WINDOW);
+            return;
+        }
+        IWindow window = getWindow();
+        if (window == null) {
+            callback.onDisplayHashError(DISPLAY_HASH_ERROR_MISSING_WINDOW);
+            return;
+        }
+
+        Rect visibleBounds = new Rect();
+        getGlobalVisibleRect(visibleBounds);
+
+        if (bounds != null && bounds.isEmpty()) {
+            callback.onDisplayHashError(DISPLAY_HASH_ERROR_INVALID_BOUNDS);
+            return;
+        }
+
+        if (bounds != null) {
+            bounds.offset(visibleBounds.left, visibleBounds.top);
+            visibleBounds.intersectUnchecked(bounds);
+        }
+
+        if (visibleBounds.isEmpty()) {
+            callback.onDisplayHashError(DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN);
+            return;
+        }
+
+        RemoteCallback remoteCallback = new RemoteCallback(result ->
+                executor.execute(() -> {
+                    DisplayHash displayHash = result.getParcelable(EXTRA_DISPLAY_HASH);
+                    int errorCode = result.getInt(EXTRA_DISPLAY_HASH_ERROR_CODE,
+                            DISPLAY_HASH_ERROR_UNKNOWN);
+                    if (displayHash != null) {
+                        callback.onDisplayHashResult(displayHash);
+                    } else {
+                        callback.onDisplayHashError(errorCode);
+                    }
+                }));
+
+        try {
+            session.generateDisplayHash(window, visibleBounds, hashAlgorithm, remoteCallback);
+        } catch (RemoteException e) {
+            Log.e(VIEW_LOG_TAG, "Failed to call generateDisplayHash");
+            callback.onDisplayHashError(DISPLAY_HASH_ERROR_UNKNOWN);
+        }
     }
 }
