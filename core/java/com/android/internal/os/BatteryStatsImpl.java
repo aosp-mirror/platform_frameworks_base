@@ -1001,8 +1001,12 @@ public class BatteryStatsImpl extends BatteryStats {
     int mWifiRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
 
     /**
-     * Accumulated energy consumption, that is not attributed to individual uids, of various
-     * consumers while on battery.
+     * Accumulated global (generally, device-wide total) energy consumption of various consumers
+     * while on battery.
+     * Its '<b>custom</b> energy buckets' correspond to the
+     * {@link android.hardware.power.stats.EnergyConsumer.ordinal}s of (custom) energy consumer
+     * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
+     *
      * If energy consumer data is completely unavailable this will be null.
      */
     @GuardedBy("this")
@@ -7532,9 +7536,16 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         private final ArraySet<BinderCallStats> mBinderCallStats = new ArraySet<>();
 
-        /** Measured energies attributed to this uid while on battery. */
-        // We do not use a SparseArray<LongSamplingCounters> since it would cause lots of
-        // unnecessary timebase references, and we're just going to use on-battery anyway...
+        /**
+         * Measured energies attributed to this uid while on battery.
+         * Its '<b>custom</b> energy buckets' correspond to the
+         * {@link android.hardware.power.stats.EnergyConsumer.ordinal}s of (custom) energy consumer
+         * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
+         *
+         * Will be null if energy consumer data is completely unavailable (in which case
+         * {@link #mGlobalMeasuredEnergyStats} will also be null) or if the power usage by this uid
+         * is 0 for every bucket.
+         */
         private MeasuredEnergyStats mUidMeasuredEnergyStats;
 
         /**
@@ -12518,11 +12529,8 @@ public class BatteryStatsImpl extends BatteryStats {
             final int uidInt = mapUid(uidEnergies.keyAt(i));
             final long uidEnergyUJ = uidEnergies.valueAt(i);
             if (uidEnergyUJ == 0) continue;
-            // TODO: Worry about uids not in BSI currently, including uninstalled uids 'coming back'
-            //  Specifically: What if the uid had been removed? We'll re-create it now.
-            //  And if we instead use getAvailableUidStatsLocked() and chec for null, then we might
-            //  not create a Uid even when we should be (say, the app's first event, somehow, was to
-            //  use GPU). I guess that CPU/kernel data might already have this problem?
+            // TODO(b/180030409): Worry about dead Uids (no longer in BSI) being revived by this,
+            //  or converse problem of not creating a new Uid if its first blame is recorded here.
             final Uid uidObj = getUidStatsLocked(uidInt);
             uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket, true);
         }
@@ -14524,7 +14532,7 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        dumpMeasuredEnergyStatsLocked(pw, "non-uid usage", mGlobalMeasuredEnergyStats);
+        dumpMeasuredEnergyStatsLocked(pw, "global usage", mGlobalMeasuredEnergyStats);
 
         int size = mUidStats.size();
         for (int i = 0; i < size; i++) {

@@ -149,7 +149,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
      * Maps an {@link EnergyConsumerType} to it's corresponding {@link EnergyConsumer#id}s,
      * unless it is of {@link EnergyConsumer#type}=={@link EnergyConsumerType#OTHER}
      */
-    // TODO: Hook this up (it isn't used yet)
+    // TODO(b/180029015): Hook this up (it isn't used yet)
     @GuardedBy("mWorkerLock")
     private @Nullable SparseArray<int[]> mEnergyConsumerTypeToIdMap = null;
 
@@ -818,14 +818,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         if (energyConsumerIds.isEmpty()) {
             return null;
         }
-        // TODO: Query *specific* subsystems from HAL based on energyConsumerIds.toArray()
+        // TODO(b/180029015): Query specific subsystems from HAL based on energyConsumerIds.toArray
         return getEnergyConsumptionData();
     }
 
     @GuardedBy("mWorkerLock")
     private void addEnergyConsumerIdLocked(
             List<Integer> energyConsumerIds, @EnergyConsumerType int type) {
-        final int consumerId = 0; // TODO: Use mEnergyConsumerTypeToIdMap to get this
+        final int consumerId = 0; // TODO(b/180029015): Use mEnergyConsumerTypeToIdMap to get this
         energyConsumerIds.add(consumerId);
     }
 
@@ -840,7 +840,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             return null;
         }
 
-        // TODO: Initialize typeToIds
+        // TODO(b/180029015): Initialize typeToIds
         // Maps type -> {ids} (1:n map, since multiple ids might have the same type)
         // final SparseArray<SparseIntArray> typeToIds = new SparseArray<>();
 
@@ -862,9 +862,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 }
             }
             idToConsumer.put(consumer.id, consumer);
-            // TODO: Also populate typeToIds map
+            // TODO(b/180029015): Also populate typeToIds map
         }
-        // TODO: Store typeToIds in mEnergyConsumerTypeToIdMap.
+        // TODO(b/180029015): Store typeToIds in mEnergyConsumerTypeToIdMap.
         return idToConsumer;
     }
 }
