@@ -577,7 +577,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
-    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"Wi-Fi operatore"</string>
+    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Dati mobili disattivati"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Non impostato per l\'utilizzo dei dati"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Nessun telefono."</string>
@@ -591,5 +591,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Dati: tre barre."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Massimo segnale dati."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Connessione Ethernet annullata."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Connessione Ethernet stabilita."</string>
+    <!-- no translation found for accessibility_ethernet_connected (6175942685957461563) -->
+    <skip />
 </resources>
