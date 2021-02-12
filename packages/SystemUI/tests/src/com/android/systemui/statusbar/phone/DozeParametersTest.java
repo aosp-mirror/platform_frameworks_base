@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -113,5 +115,38 @@ public class DozeParametersTest extends SysuiTestCase {
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
 
         assertThat(mDozeParameters.getAlwaysOn()).isFalse();
+    }
+
+    @Test
+    public void testControlUnlockedScreenOffAnimation_dozeAfterScreenOff_false() {
+        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
+        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
+        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(true);
+
+        assertTrue(mDozeParameters.shouldControlUnlockedScreenOff());
+
+        // Trigger the setter for the current value.
+        mDozeParameters.setControlScreenOffAnimation(mDozeParameters.shouldControlScreenOff());
+
+        // We should have asked power manager not to doze after screen off no matter what, since
+        // we're animating and controlling screen off.
+        verify(mPowerManager).setDozeAfterScreenOff(eq(false));
+    }
+
+    @Test
+    public void testControlUnlockedScreenOffAnimationDisabled_dozeAfterScreenOff() {
+        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
+        mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
+        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(false);
+
+        assertFalse(mDozeParameters.shouldControlUnlockedScreenOff());
+
+        // Trigger the setter for the current value.
+        mDozeParameters.setControlScreenOffAnimation(mDozeParameters.shouldControlScreenOff());
+
+        // We should have asked power manager to doze only if we're not controlling screen off
+        // normally.
+        verify(mPowerManager).setDozeAfterScreenOff(
+                eq(!mDozeParameters.shouldControlScreenOff()));
     }
 }

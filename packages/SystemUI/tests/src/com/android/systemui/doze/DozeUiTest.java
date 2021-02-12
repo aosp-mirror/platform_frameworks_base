@@ -173,4 +173,30 @@ public class DozeUiTest extends SysuiTestCase {
         mDozeUi.transitionTo(UNINITIALIZED, DOZE);
         verify(mHost).setAnimateWakeup(eq(false));
     }
+
+    @Test
+    public void controlScreenOffTrueWhenKeyguardNotShowingAndControlUnlockedScreenOff() {
+        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
+
+        // Tell doze that keyguard is not visible.
+        mDozeUi.getKeyguardCallback().onKeyguardVisibilityChanged(false /* showing */);
+
+        // Since we're controlling the unlocked screen off animation, verify that we've asked to
+        // control the screen off animation despite being unlocked.
+        verify(mDozeParameters).setControlScreenOffAnimation(true);
+    }
+
+    @Test
+    public void controlScreenOffFalseWhenKeyguardNotShowingAndControlUnlockedScreenOffFalse() {
+        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(false);
+
+        // Tell doze that keyguard is not visible.
+        mDozeUi.getKeyguardCallback().onKeyguardVisibilityChanged(false /* showing */);
+
+        // Since we're not controlling the unlocked screen off animation, verify that we haven't
+        // asked to control the screen off animation since we're unlocked.
+        verify(mDozeParameters).setControlScreenOffAnimation(false);
+    }
 }
