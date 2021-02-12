@@ -29,6 +29,7 @@ import android.os.storage.StorageManager;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 
 import java.io.File;
@@ -43,7 +44,9 @@ public final class ImplInstanceManager {
 
     private static ImplInstanceManager sImplInstanceManager;
 
-    private final SparseArray<AppSearchImpl> mInstances = new SparseArray<>();
+    @GuardedBy("mInstancesLocked")
+    private final SparseArray<AppSearchImpl> mInstancesLocked = new SparseArray<>();
+
     private final String mGlobalQuerierPackage;
 
     private ImplInstanceManager(@NonNull String globalQuerierPackage) {
@@ -81,19 +84,16 @@ public final class ImplInstanceManager {
      * @return An initialized {@link AppSearchImpl} for this user
      */
     @NonNull
-    public AppSearchImpl getAppSearchImpl(@NonNull Context context, @UserIdInt int userId)
-            throws AppSearchException {
-        AppSearchImpl instance = mInstances.get(userId);
-        if (instance == null) {
-            synchronized (ImplInstanceManager.class) {
-                instance = mInstances.get(userId);
-                if (instance == null) {
-                    instance = createImpl(context, userId);
-                    mInstances.put(userId, instance);
-                }
+    public AppSearchImpl getAppSearchImpl(
+            @NonNull Context context, @UserIdInt int userId) throws AppSearchException {
+        synchronized (mInstancesLocked) {
+            AppSearchImpl instance = mInstancesLocked.get(userId);
+            if (instance == null) {
+                instance = createImpl(context, userId);
+                mInstancesLocked.put(userId, instance);
             }
+            return instance;
         }
-        return instance;
     }
 
     private AppSearchImpl createImpl(@NonNull Context context, @UserIdInt int userId)
