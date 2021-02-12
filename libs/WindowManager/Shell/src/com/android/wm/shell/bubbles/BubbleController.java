@@ -86,6 +86,7 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -586,11 +587,15 @@ public class BubbleController {
             // There were no bubbles saved for this used.
             return;
         }
-        for (BubbleEntry e : mSysuiProxy.getShouldRestoredEntries(savedBubbleKeys)) {
-            if (canLaunchInActivityView(mContext, e)) {
-                updateBubble(e, true /* suppressFlyout */, false /* showInShade */);
-            }
-        }
+        mSysuiProxy.getShouldRestoredEntries(savedBubbleKeys, (entries) -> {
+            mMainExecutor.execute(() -> {
+                for (BubbleEntry e : entries) {
+                    if (canLaunchInActivityView(mContext, e)) {
+                        updateBubble(e, true /* suppressFlyout */, false /* showInShade */);
+                    }
+                }
+            });
+        });
         // Finally, remove the entries for this user now that bubbles are restored.
         mSavedBubbleKeysPerUser.remove(mCurrentUserId);
     }
@@ -856,21 +861,24 @@ public class BubbleController {
         }
     }
 
-    private void onRankingUpdated(RankingMap rankingMap) {
+    private void onRankingUpdated(RankingMap rankingMap,
+            HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey) {
         if (mTmpRanking == null) {
             mTmpRanking = new NotificationListenerService.Ranking();
         }
         String[] orderedKeys = rankingMap.getOrderedKeys();
         for (int i = 0; i < orderedKeys.length; i++) {
             String key = orderedKeys[i];
-            BubbleEntry entry = mSysuiProxy.getPendingOrActiveEntry(key);
+            Pair<BubbleEntry, Boolean> entryData = entryDataByKey.get(key);
+            BubbleEntry entry = entryData.first;
+            boolean shouldBubbleUp = entryData.second;
             rankingMap.getRanking(key, mTmpRanking);
             boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
             if (isActiveBubble && !mTmpRanking.canBubble()) {
                 // If this entry is no longer allowed to bubble, dismiss with the BLOCKED reason.
                 // This means that the app or channel's ability to bubble has been revoked.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_BLOCKED);
-            } else if (isActiveBubble && !mSysuiProxy.shouldBubbleUp(key)) {
+            } else if (isActiveBubble && !shouldBubbleUp) {
                 // If this entry is allowed to bubble, but cannot currently bubble up, dismiss it.
                 // This happens when DND is enabled and configured to hide bubbles. Dismissing with
                 // the reason DISMISS_NO_BUBBLE_UP will retain the underlying notification, so that
@@ -919,17 +927,20 @@ public class BubbleController {
     private void setIsBubble(@NonNull final Bubble b, final boolean isBubble) {
         Objects.requireNonNull(b);
         b.setIsBubble(isBubble);
-        final BubbleEntry entry = mSysuiProxy.getPendingOrActiveEntry(b.getKey());
-        if (entry != null) {
-            // Updating the entry to be a bubble will trigger our normal update flow
-            setIsBubble(entry, isBubble, b.shouldAutoExpand());
-        } else if (isBubble) {
-            // If bubble doesn't exist, it's a persisted bubble so we need to add it to the
-            // stack ourselves
-            Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);
-            inflateAndAdd(bubble, bubble.shouldAutoExpand() /* suppressFlyout */,
-                    !bubble.shouldAutoExpand() /* showInShade */);
-        }
+        mSysuiProxy.getPendingOrActiveEntry(b.getKey(), (entry) -> {
+            mMainExecutor.execute(() -> {
+                if (entry != null) {
+                    // Updating the entry to be a bubble will trigger our normal update flow
+                    setIsBubble(entry, isBubble, b.shouldAutoExpand());
+                } else if (isBubble) {
+                    // If bubble doesn't exist, it's a persisted bubble so we need to add it to the
+                    // stack ourselves
+                    Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);
+                    inflateAndAdd(bubble, bubble.shouldAutoExpand() /* suppressFlyout */,
+                            !bubble.shouldAutoExpand() /* showInShade */);
+                }
+            });
+        });
     }
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -992,14 +1003,17 @@ public class BubbleController {
                     }
 
                 }
-                final BubbleEntry entry = mSysuiProxy.getPendingOrActiveEntry(bubble.getKey());
-                if (entry != null) {
-                    final String groupKey = entry.getStatusBarNotification().getGroupKey();
-                    if (getBubblesInGroup(groupKey).isEmpty()) {
-                        // Time to potentially remove the summary
-                        mSysuiProxy.notifyMaybeCancelSummary(bubble.getKey());
-                    }
-                }
+                mSysuiProxy.getPendingOrActiveEntry(bubble.getKey(), (entry) -> {
+                    mMainExecutor.execute(() -> {
+                        if (entry != null) {
+                            final String groupKey = entry.getStatusBarNotification().getGroupKey();
+                            if (getBubblesInGroup(groupKey).isEmpty()) {
+                                // Time to potentially remove the summary
+                                mSysuiProxy.notifyMaybeCancelSummary(bubble.getKey());
+                            }
+                        }
+                    });
+                });
             }
             mDataRepository.removeBubbles(mCurrentUserId, bubblesToBeRemovedFromRepository);
 
@@ -1119,23 +1133,6 @@ public class BubbleController {
         }
 
         mStackView.updateContentDescription();
-    }
-
-    /**
-     * The task id of the expanded view, if the stack is expanded and not occluded by the
-     * status bar, otherwise returns {@link ActivityTaskManager#INVALID_TASK_ID}.
-     */
-    private int getExpandedTaskId() {
-        if (mStackView == null) {
-            return INVALID_TASK_ID;
-        }
-        final BubbleViewProvider expandedViewProvider = mStackView.getExpandedBubble();
-        if (expandedViewProvider != null && isStackExpanded()
-                && !mStackView.isExpansionAnimating()
-                && !mSysuiProxy.isNotificationShadeExpand()) {
-            return expandedViewProvider.getTaskId();
-        }
-        return INVALID_TASK_ID;
     }
 
     @VisibleForTesting
@@ -1343,9 +1340,10 @@ public class BubbleController {
         }
 
         @Override
-        public void onRankingUpdated(RankingMap rankingMap) {
+        public void onRankingUpdated(RankingMap rankingMap,
+                HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.onRankingUpdated(rankingMap);
+                BubbleController.this.onRankingUpdated(rankingMap, entryDataByKey);
             });
         }
 

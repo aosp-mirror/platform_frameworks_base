@@ -43,6 +43,7 @@ import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_AT
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
 
+import android.annotation.BinderThread;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
@@ -498,7 +499,7 @@ public class TaskSnapshotWindow {
         }
     }
 
-    @ExternalThread
+    @BinderThread
     static class Window extends BaseIWindow {
         private TaskSnapshotWindow mOuter;
 
