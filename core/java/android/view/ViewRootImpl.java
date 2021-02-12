@@ -1898,11 +1898,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void setBoundsLayerCrop(Transaction t) {
-        // mWinFrame is already adjusted for surface insets. So offset it and use it as
-        // the cropping bounds.
-        mTempBoundsRect.set(mWinFrame);
-        mTempBoundsRect.offsetTo(mWindowAttributes.surfaceInsets.left,
-                mWindowAttributes.surfaceInsets.top);
+        // Adjust of insets and update the bounds layer so child surfaces do not draw into
+        // the surface inset region.
+        mTempBoundsRect.set(0, 0, mSurfaceSize.x, mSurfaceSize.y);
+        mTempBoundsRect.inset(mWindowAttributes.surfaceInsets.left,
+                mWindowAttributes.surfaceInsets.top,
+                mWindowAttributes.surfaceInsets.right, mWindowAttributes.surfaceInsets.bottom);
         t.setWindowCrop(mBoundsLayer, mTempBoundsRect);
     }
 
@@ -1913,25 +1914,18 @@ public final class ViewRootImpl implements ViewParent,
     private boolean updateBoundsLayer(SurfaceControl.Transaction t) {
         if (mBoundsLayer != null) {
             setBoundsLayerCrop(t);
-            t.deferTransactionUntil(mBoundsLayer, getSurfaceControl(),
-                mSurface.getNextFrameNumber());
             return true;
         }
         return false;
     }
 
-    private void prepareSurfaces(boolean sizeChanged) {
+    private void prepareSurfaces() {
         final SurfaceControl.Transaction t = mTransaction;
         final SurfaceControl sc = getSurfaceControl();
         if (!sc.isValid()) return;
 
-        boolean applyTransaction = updateBoundsLayer(t);
-        if (sizeChanged) {
-            applyTransaction = true;
-            t.setBufferSize(sc, mSurfaceSize.x, mSurfaceSize.y);
-        }
-        if (applyTransaction) {
-            t.apply();
+        if (updateBoundsLayer(t)) {
+              mergeWithNextTransaction(t, mSurface.getNextFrameNumber());
         }
     }
 
@@ -3036,7 +3030,7 @@ public final class ViewRootImpl implements ViewParent,
             // stopping, but on the client side it doesn't get stopped since it's restarted quick
             // enough. WMS doesn't want to keep around old children since they will leak when the
             // client creates new children.
-            prepareSurfaces(surfaceSizeChanged);
+            prepareSurfaces();
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
@@ -3070,8 +3064,10 @@ public final class ViewRootImpl implements ViewParent,
                     // via the WM relayout code path. We probably eventually
                     // want to synchronize transparent region hint changes
                     // with draws.
-                    mTransaction.setTransparentRegionHint(getSurfaceControl(),
-                        mTransparentRegion).apply();
+                    SurfaceControl sc = getSurfaceControl();
+                    if (sc.isValid()) {
+                        mTransaction.setTransparentRegionHint(sc, mTransparentRegion).apply();
+                    }
                 }
             }
 

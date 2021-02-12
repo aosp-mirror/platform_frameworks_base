@@ -83,7 +83,7 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
 
     private double getMeasuredOrEstimatedPower(long measuredEnergyUJ, long durationMs) {
         if (measuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
-            return mAhToUJ(measuredEnergyUJ);
+            return uJtoMah(measuredEnergyUJ);
         } else {
             return mPowerEstimator.calculatePower(durationMs);
         }

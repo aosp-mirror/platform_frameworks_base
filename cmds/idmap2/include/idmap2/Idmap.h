@@ -23,8 +23,8 @@
  *                               debug_info
  * data                       := data_header target_entry* target_inline_entry* overlay_entry*
  *                               string_pool
- * data_header                := target_package_id overlay_package_id padding(2) target_entry_count
- *                               target_inline_entry_count overlay_entry_count string_pool_index
+ * data_header                := target_entry_count target_inline_entry_count overlay_entry_count
+ *                               string_pool_index
  * target_entry               := target_id overlay_id
  * target_inline_entry        := target_id Res_value::size padding(1) Res_value::type
  *                               Res_value::value
@@ -68,11 +68,10 @@
 #include <vector>
 
 #include "android-base/macros.h"
-#include "androidfw/ApkAssets.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
+#include "idmap2/ResourceContainer.h"
 #include "idmap2/ResourceMapping.h"
-#include "idmap2/ZipFile.h"
 
 namespace android::idmap2 {
 
@@ -84,9 +83,6 @@ static constexpr const uint32_t kIdmapMagic = android::kIdmapMagic;
 
 // current version of the idmap binary format; must be incremented when the format is changed
 static constexpr const uint32_t kIdmapCurrentVersion = android::kIdmapCurrentVersion;
-
-// Retrieves a crc generated using all of the files within the zip that can affect idmap generation.
-Result<uint32_t> GetPackageCrc(const ZipFile& zip_info);
 
 class IdmapHeader {
  public:
@@ -135,9 +131,9 @@ class IdmapHeader {
   // Invariant: anytime the idmap data encoding is changed, the idmap version
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
-  Result<Unit> IsUpToDate(const std::string& target_path, const std::string& overlay_path,
-                          const std::string& overlay_name, PolicyBitmask fulfilled_policies,
-                          bool enforce_overlayable) const;
+  Result<Unit> IsUpToDate(const TargetResourceContainer& target,
+                          const OverlayResourceContainer& overlay, const std::string& overlay_name,
+                          PolicyBitmask fulfilled_policies, bool enforce_overlayable) const;
 
   Result<Unit> IsUpToDate(const std::string& target_path, const std::string& overlay_path,
                           const std::string& overlay_name, uint32_t target_crc,
@@ -169,14 +165,6 @@ class IdmapData {
    public:
     static std::unique_ptr<const Header> FromBinaryStream(std::istream& stream);
 
-    inline PackageId GetTargetPackageId() const {
-      return target_package_id_;
-    }
-
-    inline PackageId GetOverlayPackageId() const {
-      return overlay_package_id_;
-    }
-
     inline uint32_t GetTargetEntryCount() const {
       return target_entry_count;
     }
@@ -196,8 +184,6 @@ class IdmapData {
     void accept(Visitor* v) const;
 
    private:
-    PackageId target_package_id_;
-    PackageId overlay_package_id_;
     uint32_t target_entry_count;
     uint32_t target_entry_inline_count;
     uint32_t overlay_entry_count;
@@ -275,11 +261,10 @@ class Idmap {
   // file is used; change this in the next version of idmap to use a named
   // package instead; also update FromApkAssets to take additional parameters:
   // the target and overlay package names
-  static Result<std::unique_ptr<const Idmap>> FromApkAssets(const ApkAssets& target_apk_assets,
-                                                            const ApkAssets& overlay_apk_assets,
-                                                            const std::string& overlay_name,
-                                                            const PolicyBitmask& fulfilled_policies,
-                                                            bool enforce_overlayable);
+  static Result<std::unique_ptr<const Idmap>> FromContainers(
+      const TargetResourceContainer& target, const OverlayResourceContainer& overlay,
+      const std::string& overlay_name, const PolicyBitmask& fulfilled_policies,
+      bool enforce_overlayable);
 
   const std::unique_ptr<const IdmapHeader>& GetHeader() const {
     return header_;

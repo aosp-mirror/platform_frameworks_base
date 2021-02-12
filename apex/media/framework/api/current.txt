@@ -8,9 +8,10 @@ package android.media {
     method @NonNull public java.util.List<java.lang.String> getSupportedVideoMimeTypes();
     method @NonNull public java.util.List<java.lang.String> getUnsupportedHdrTypes();
     method @NonNull public java.util.List<java.lang.String> getUnsupportedVideoMimeTypes();
-    method public boolean isHdrTypeSupported(@NonNull String) throws android.media.ApplicationMediaCapabilities.FormatNotFoundException;
+    method public boolean isFormatSpecified(@NonNull String);
+    method public boolean isHdrTypeSupported(@NonNull String);
     method public boolean isSlowMotionSupported();
-    method public boolean isVideoMimeTypeSupported(@NonNull String) throws android.media.ApplicationMediaCapabilities.FormatNotFoundException;
+    method public boolean isVideoMimeTypeSupported(@NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.ApplicationMediaCapabilities> CREATOR;
   }
@@ -22,10 +23,6 @@ package android.media {
     method @NonNull public android.media.ApplicationMediaCapabilities.Builder addUnsupportedHdrType(@NonNull String);
     method @NonNull public android.media.ApplicationMediaCapabilities.Builder addUnsupportedVideoMimeType(@NonNull String);
     method @NonNull public android.media.ApplicationMediaCapabilities build();
-  }
-
-  public static class ApplicationMediaCapabilities.FormatNotFoundException extends android.util.AndroidException {
-    ctor public ApplicationMediaCapabilities.FormatNotFoundException(@NonNull String);
   }
 
   public class MediaCommunicationManager {

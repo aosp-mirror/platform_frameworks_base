@@ -184,6 +184,15 @@ public abstract class Vibrator {
     }
 
     /**
+     * Return the ID of this vibrator.
+     *
+     * @return The id of the vibrator controlled by this service.
+     */
+    public int getId() {
+        return -1;
+    }
+
+    /**
      * Check whether the hardware has a vibrator.
      *
      * @return True if the hardware has a vibrator, else false.

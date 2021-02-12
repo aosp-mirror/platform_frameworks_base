@@ -82,6 +82,7 @@ java_library_static {
         ":framework_native_aidl",
         ":gsiservice_aidl",
         ":idmap2_aidl",
+        ":idmap2_core_aidl",
         ":inputconstants_aidl",
         ":installd_aidl",
         ":storaged_aidl",

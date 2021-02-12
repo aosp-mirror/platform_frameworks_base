@@ -387,6 +387,59 @@ public class MeasuredEnergyStatsTest {
     }
 
     @Test
+    public void testIsValidCustomBucket() {
+        final MeasuredEnergyStats stats
+                = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 3);
+        assertFalse(stats.isValidCustomBucket(-1));
+        assertTrue(stats.isValidCustomBucket(0));
+        assertTrue(stats.isValidCustomBucket(1));
+        assertTrue(stats.isValidCustomBucket(2));
+        assertFalse(stats.isValidCustomBucket(3));
+        assertFalse(stats.isValidCustomBucket(4));
+
+        final MeasuredEnergyStats boringStats
+                = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 0);
+        assertFalse(boringStats.isValidCustomBucket(-1));
+        assertFalse(boringStats.isValidCustomBucket(0));
+        assertFalse(boringStats.isValidCustomBucket(1));
+    }
+
+    @Test
+    public void testGetAccumulatedCustomBucketEnergies() {
+        final MeasuredEnergyStats stats
+                = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 3);
+
+        stats.updateCustomBucket(0, 50, true);
+        stats.updateCustomBucket(1, 60, true);
+        stats.updateCustomBucket(2, 13, true);
+        stats.updateCustomBucket(1, 70, true);
+
+        final long[] output = stats.getAccumulatedCustomBucketEnergies();
+        assertEquals(3, output.length);
+
+        assertEquals(50, output[0]);
+        assertEquals(60 + 70, output[1]);
+        assertEquals(13, output[2]);
+    }
+
+    @Test
+    public void testGetAccumulatedCustomBucketEnergies_empty() {
+        final MeasuredEnergyStats stats
+                = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 0);
+
+        final long[] output = stats.getAccumulatedCustomBucketEnergies();
+        assertEquals(0, output.length);
+    }
+
+    @Test
+    public void testGetNumberCustomEnergyBuckets() {
+        assertEquals(0, new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 0)
+                .getNumberCustomEnergyBuckets());
+        assertEquals(3, new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 3)
+                .getNumberCustomEnergyBuckets());
+    }
+
+    @Test
     public void testReset() {
         final boolean[] supportedStandardBuckets = new boolean[NUMBER_STANDARD_ENERGY_BUCKETS];
         final int numCustomBuckets = 2;

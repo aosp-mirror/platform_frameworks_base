@@ -204,7 +204,6 @@ Landroid/os/IRemoteCallback$Stub;-><init>()V
 Landroid/os/IUpdateEngine$Stub;-><init>()V
 Landroid/os/IUserManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/IUserManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IUserManager;
-Landroid/os/IVibratorService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/IVibratorService;
 Landroid/os/storage/IObbActionListener$Stub;-><init>()V
 Landroid/os/storage/IStorageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/storage/IStorageManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/os/storage/IStorageManager;

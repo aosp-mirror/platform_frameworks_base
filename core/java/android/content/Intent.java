@@ -5718,7 +5718,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
 
     /**
-     * Used in the extra field in the remote intent. It's astring token passed with the
+     * Used in the extra field in the remote intent. It's a string token passed with the
      * remote intent.
      */
     public static final String EXTRA_REMOTE_INTENT_TOKEN =
@@ -6061,6 +6061,16 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Type: String
      */
     public static final String EXTRA_UNSTARTABLE_REASON = "android.intent.extra.UNSTARTABLE_REASON";
+
+    /**
+     * A boolean extra indicating whether an activity is bubbled. Set on the shortcut or
+     * pending intent provided for the bubble. If the extra is not present or false, then it is not
+     * bubbled.
+     *
+     * @see android.app.Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
+     * @see android.app.Notification.BubbleMetadata.Builder#Builder(String)
+     */
+    public static final String EXTRA_IS_BUBBLED = "android.intent.extra.IS_BUBBLED";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

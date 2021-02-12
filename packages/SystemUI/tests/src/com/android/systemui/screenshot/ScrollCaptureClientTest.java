@@ -57,6 +57,8 @@ import org.mockito.stubbing.Answer;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class ScrollCaptureClientTest extends SysuiTestCase {
+    private static final float MAX_PAGES = 3f;
+
     private Context mContext;
     private IWindowManager mWm;
 
@@ -96,7 +98,7 @@ public class ScrollCaptureClientTest extends SysuiTestCase {
 
         Connection conn = mConnectionConsumer.getValue();
 
-        conn.start(mSessionConsumer);
+        conn.start(mSessionConsumer, MAX_PAGES);
         verify(mSessionConsumer, timeout(100)).accept(any(Session.class));
 
         Session session = mSessionConsumer.getValue();

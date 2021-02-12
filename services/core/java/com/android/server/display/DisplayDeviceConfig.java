@@ -23,8 +23,8 @@ import android.os.PowerManager;
 import android.util.Slog;
 import android.view.DisplayAddress;
 
-import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.R;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;

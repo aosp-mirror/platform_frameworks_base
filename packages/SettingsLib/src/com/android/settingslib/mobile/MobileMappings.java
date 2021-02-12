@@ -65,7 +65,7 @@ public class MobileMappings {
                 return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA_Plus";
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA:
                 return toIconKey(TelephonyManager.NETWORK_TYPE_NR);
-            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE:
+            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED:
                 return toIconKey(TelephonyManager.NETWORK_TYPE_NR) + "_Plus";
             default:
                 return "unsupported";
@@ -180,7 +180,7 @@ public class MobileMappings {
                 TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA),
                 TelephonyIcons.NR_5G);
         networkToIconLookup.put(toDisplayIconKey(
-                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE),
+                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED),
                 TelephonyIcons.NR_5G_PLUS);
         networkToIconLookup.put(toIconKey(
                 TelephonyManager.NETWORK_TYPE_NR),

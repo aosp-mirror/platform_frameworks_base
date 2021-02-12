@@ -14,10 +14,50 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<view xmlns:android="http://schemas.android.com/apk/res/android"
-        class="com.android.systemui.statusbar.policy.KeyguardUserSwitcher$Container"
-        android:visibility="gone"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
-    <!-- KeyguardUserSwitcher loads keyguard_user_switcher_inner.xml here -->
-</view>
+<!-- This is a view that shows a user switcher in Keyguard. -->
+<com.android.systemui.statusbar.policy.KeyguardUserSwitcherView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyguard_user_switcher_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="end">
+
+    <com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView
+        android:id="@+id/keyguard_user_switcher_list"
+        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="top|end"
+        android:gravity="end" />
+
+    <LinearLayout
+        android:id="@+id/end_guest_button"
+        android:layout_height="@dimen/end_guest_button_layout_height"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/end_guest_button_margin_bottom"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingLeft="@dimen/end_guest_button_padding_horizontal"
+        android:paddingRight="@dimen/end_guest_button_padding_horizontal"
+        android:background="@drawable/end_guest_button_background"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:src="@drawable/ic_exit_to_app"
+            android:background="@android:color/transparent"
+            android:color="?attr/wallpaperTextColor" />
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
+            android:textColor="?attr/wallpaperTextColor"
+            android:textSize="13sp"
+            android:text="@string/guest_exit_button" />
+    </LinearLayout>
+
+</com.android.systemui.statusbar.policy.KeyguardUserSwitcherView>

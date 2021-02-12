@@ -27,6 +27,7 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 /**
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
@@ -53,6 +54,12 @@ public class KeyguardClockPositionAlgorithm {
      * Height of {@link KeyguardStatusView}.
      */
     private int mKeyguardStatusHeight;
+
+    /**
+     * Height of {@link KeyguardUserSwitcherListView} when it
+     * is closed and only the current user's icon is visible.
+     */
+    private int mKeyguardUserSwitcherHeight;
 
     /**
      * Preferred Y position of clock.
@@ -173,17 +180,20 @@ public class KeyguardClockPositionAlgorithm {
      * Sets up algorithm values.
      */
     public void setup(int statusBarMinHeight, int maxShadeBottom, int notificationStackHeight,
-            float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
-            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
-            boolean bypassEnabled, int unlockedStackScrollerPadding, boolean showLockIcon,
-            float qsExpansion, int cutoutTopInset) {
+            float panelExpansion, int parentHeight, int keyguardStatusHeight,
+            int keyguardUserSwitcherHeight, int clockPreferredY, boolean hasCustomClock,
+            boolean hasVisibleNotifs, float dark, float emptyDragAmount, boolean bypassEnabled,
+            int unlockedStackScrollerPadding, boolean showLockIcon, float qsExpansion,
+            int cutoutTopInset) {
         mMinTopMargin = statusBarMinHeight + (showLockIcon
-                ? mContainerTopPaddingWithLockIcon : mContainerTopPaddingWithoutLockIcon);
+                ? mContainerTopPaddingWithLockIcon : mContainerTopPaddingWithoutLockIcon)
+                + keyguardUserSwitcherHeight;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
+        mKeyguardUserSwitcherHeight = keyguardUserSwitcherHeight;
         mClockPreferredY = clockPreferredY;
         mHasCustomClock = hasCustomClock;
         mHasVisibleNotifs = hasVisibleNotifs;
@@ -246,7 +256,8 @@ public class KeyguardClockPositionAlgorithm {
         final int availableHeight = mMaxShadeBottom - mMinTopMargin;
         final int containerCenter = mMinTopMargin + availableHeight / 2;
 
-        float y = containerCenter - mKeyguardStatusHeight * CLOCK_HEIGHT_WEIGHT
+        float y = containerCenter
+                - (mKeyguardStatusHeight + mKeyguardUserSwitcherHeight) * CLOCK_HEIGHT_WEIGHT
                 - mClockNotificationsMargin - mNotificationStackHeight / 2;
         if (y < mMinTopMargin) {
             y = mMinTopMargin;

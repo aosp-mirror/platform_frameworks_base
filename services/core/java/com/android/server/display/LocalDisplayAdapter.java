@@ -38,7 +38,7 @@ import android.view.DisplayEventReceiver;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
-import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;

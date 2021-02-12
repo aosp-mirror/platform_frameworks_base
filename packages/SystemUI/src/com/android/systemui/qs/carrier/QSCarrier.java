@@ -28,9 +28,7 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
-import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
-import com.android.systemui.qs.QuickStatusBarHeader;
 
 import java.util.Objects;
 
@@ -40,9 +38,6 @@ public class QSCarrier extends LinearLayout {
     private TextView mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
-    private DualToneHandler mDualToneHandler;
-    private ColorStateList mColorForegroundStateList;
-    private float mColorForegroundIntensity;
     private CellSignalState mLastSignalState;
 
     public QSCarrier(Context context) {
@@ -64,7 +59,6 @@ public class QSCarrier extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_combo);
         if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
             mMobileRoaming = findViewById(R.id.mobile_roaming_large);
@@ -74,11 +68,6 @@ public class QSCarrier extends LinearLayout {
         mMobileSignal = findViewById(R.id.mobile_signal);
         mCarrierText = findViewById(R.id.qs_carrier_text);
         mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
-
-        int colorForeground = Utils.getColorAttrDefaultColor(mContext,
-                android.R.attr.colorForeground);
-        mColorForegroundStateList = ColorStateList.valueOf(colorForeground);
-        mColorForegroundIntensity = QuickStatusBarHeader.getColorIntensity(colorForeground);
     }
 
     /**
@@ -92,8 +81,8 @@ public class QSCarrier extends LinearLayout {
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
-            ColorStateList colorStateList = ColorStateList.valueOf(
-                    mDualToneHandler.getSingleColor(mColorForegroundIntensity));
+            ColorStateList colorStateList = Utils.getColorAttr(mContext,
+                    android.R.attr.textColorPrimary);
             mMobileRoaming.setImageTintList(colorStateList);
             mMobileSignal.setImageTintList(colorStateList);
             mMobileSignal.setImageLevel(state.mobileSignalIconId);

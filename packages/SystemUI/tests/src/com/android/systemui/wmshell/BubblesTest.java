@@ -89,8 +89,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
@@ -297,7 +295,7 @@ public class BubblesTest extends SysuiTestCase {
 
         mBubblesManager = new BubblesManager(
                 mContext,
-                mBubbleController.getImpl(),
+                mBubbleController.asBubbles(),
                 mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,

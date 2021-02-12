@@ -22,8 +22,6 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewStub;
-import android.view.ViewStub.OnInflateListener;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
@@ -44,14 +42,11 @@ import java.util.Comparator;
  * The container with notification stack scroller and quick settings inside.
  */
 public class NotificationsQuickSettingsContainer extends ConstraintLayout
-        implements OnInflateListener, FragmentListener,
-        AboveShelfObserver.HasViewAboveShelfChangedListener {
+        implements FragmentListener, AboveShelfObserver.HasViewAboveShelfChangedListener {
 
     private FrameLayout mQsFrame;
-    private View mUserSwitcher;
     private NotificationStackScrollLayout mStackScroller;
     private View mKeyguardStatusBar;
-    private boolean mInflated;
     private boolean mQsExpanded;
     private boolean mCustomizerAnimating;
 
@@ -73,9 +68,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
-        ViewStub userSwitcher = findViewById(R.id.keyguard_user_switcher);
-        userSwitcher.setOnInflateListener(this);
-        mUserSwitcher = userSwitcher;
     }
 
     @Override
@@ -119,10 +111,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         // touches first but the panel gets drawn above.
         mDrawingOrderedChildren.clear();
         mLayoutDrawingOrder.clear();
-        if (mInflated && mUserSwitcher.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mUserSwitcher);
-            mLayoutDrawingOrder.add(mUserSwitcher);
-        }
         if (mKeyguardStatusBar.getVisibility() == View.VISIBLE) {
             mDrawingOrderedChildren.add(mKeyguardStatusBar);
             mLayoutDrawingOrder.add(mKeyguardStatusBar);
@@ -154,14 +142,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
             return super.drawChild(canvas, mDrawingOrderedChildren.get(layoutIndex), drawingTime);
         } else {
             return super.drawChild(canvas, child, drawingTime);
-        }
-    }
-
-    @Override
-    public void onInflate(ViewStub stub, View inflated) {
-        if (stub == mUserSwitcher) {
-            mUserSwitcher = inflated;
-            mInflated = true;
         }
     }
 

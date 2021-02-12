@@ -49,9 +49,12 @@ using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtBandwidth;
 using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtGuardInterval;
 using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtMode;
 using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtModulation;
+using ::android::hardware::tv::tuner::V1_0::FrontendModulationStatus;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanAtsc3PlpInfo;
+using ::android::hardware::tv::tuner::V1_0::FrontendStatusAtsc3PlpInfo;
 using ::android::hardware::tv::tuner::V1_0::LnbVoltage;
 using ::android::hardware::tv::tuner::V1_1::Constant;
+using ::android::hardware::tv::tuner::V1_1::FrontendBandwidth;
 using ::android::hardware::tv::tuner::V1_1::FrontendCableTimeInterleaveMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbBandwidth;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbGuardInterval;
@@ -61,19 +64,22 @@ using ::android::hardware::tv::tuner::V1_1::FrontendDtmbTransmissionMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbcBandwidth;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbtConstellation;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbtTransmissionMode;
+using ::android::hardware::tv::tuner::V1_1::FrontendGuardInterval;
+using ::android::hardware::tv::tuner::V1_1::FrontendInterleaveMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendModulation;
+using ::android::hardware::tv::tuner::V1_1::FrontendRollOff;
 using ::android::hardware::tv::tuner::V1_1::FrontendSpectralInversion;
+using ::android::hardware::tv::tuner::V1_1::FrontendTransmissionMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendType;
 
 namespace android {
 
 /////////////// FrontendClient ///////////////////////
 
-FrontendClient::FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int id, int type) {
+FrontendClient::FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int type) {
     mTunerFrontend = tunerFrontend;
     mAidlCallback = NULL;
     mHidlCallback = NULL;
-    mId = id;
     mType = type;
 }
 
@@ -102,6 +108,11 @@ Result FrontendClient::setCallback(sp<FrontendClientCallback> frontendClientCall
 void FrontendClient::setHidlFrontend(sp<IFrontend> frontend) {
     mFrontend = frontend;
     mFrontend_1_1 = ::android::hardware::tv::tuner::V1_1::IFrontend::castFrom(mFrontend);
+}
+
+// TODO: move after migration is done
+void FrontendClient::setId(int id) {
+    mId = id;
 }
 
 Result FrontendClient::tune(const FrontendSettings& settings,
@@ -333,13 +344,26 @@ shared_ptr<ITunerFrontend> FrontendClient::getAidlFrontend() {
 }
 
 int FrontendClient::getId() {
-    return mId;
+    if (mTunerFrontend != NULL) {
+        Status s = mTunerFrontend->getFrontendId(&mId);
+        if (ClientHelper::getServiceSpecificErrorCode(s) == Result::SUCCESS) {
+            return mId;
+        }
+        ALOGE("Failed to getFrontendId from Tuner Frontend");
+        return -1;
+    }
+
+    if (mFrontend != NULL) {
+        return mId;
+    }
+
+    return -1;
 }
 
 vector<FrontendStatus> FrontendClient::getHidlStatus(vector<TunerFrontendStatus>& aidlStatus) {
     vector<FrontendStatus> hidlStatus;
     for (TunerFrontendStatus s : aidlStatus) {
-        FrontendStatus status;
+        FrontendStatus status = FrontendStatus();
         switch (s.getTag()) {
             case TunerFrontendStatus::isDemodLocked: {
                 status.isDemodLocked(s.get<TunerFrontendStatus::isDemodLocked>());
@@ -389,25 +413,31 @@ vector<FrontendStatus> FrontendClient::getHidlStatus(vector<TunerFrontendStatus>
             }
             case TunerFrontendStatus::modulation: {
                 auto aidlMod = s.get<TunerFrontendStatus::modulation>();
+                FrontendModulationStatus modulation;
                 switch (mType) {
                     case (int)FrontendType::DVBC:
-                        status.modulation().dvbc(static_cast<FrontendDvbcModulation>(aidlMod));
+                        modulation.dvbc(static_cast<FrontendDvbcModulation>(aidlMod));
+                        status.modulation(modulation);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::DVBS:
-                        status.modulation().dvbs(static_cast<FrontendDvbsModulation>(aidlMod));
+                        modulation.dvbs(static_cast<FrontendDvbsModulation>(aidlMod));
+                        status.modulation(modulation);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBS:
-                        status.modulation().isdbs(static_cast<FrontendIsdbsModulation>(aidlMod));
+                        modulation.isdbs(static_cast<FrontendIsdbsModulation>(aidlMod));
+                        status.modulation(modulation);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBS3:
-                        status.modulation().isdbs3(static_cast<FrontendIsdbs3Modulation>(aidlMod));
+                        modulation.isdbs3(static_cast<FrontendIsdbs3Modulation>(aidlMod));
+                        status.modulation(modulation);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBT:
-                        status.modulation().isdbt(static_cast<FrontendIsdbtModulation>(aidlMod));
+                        modulation.isdbt(static_cast<FrontendIsdbtModulation>(aidlMod));
+                        status.modulation(modulation);
                         hidlStatus.push_back(status);
                         break;
                     default:
@@ -466,7 +496,7 @@ vector<FrontendStatus> FrontendClient::getHidlStatus(vector<TunerFrontendStatus>
             }
             case TunerFrontendStatus::hierarchy: {
                 status.hierarchy(static_cast<FrontendDvbtHierarchy>(
-                        s.get<TunerFrontendStatus::freqOffset>()));
+                        s.get<TunerFrontendStatus::hierarchy>()));
                 hidlStatus.push_back(status);
                 break;
             }
@@ -477,15 +507,16 @@ vector<FrontendStatus> FrontendClient::getHidlStatus(vector<TunerFrontendStatus>
             }
             case TunerFrontendStatus::plpInfo: {
                 int size = s.get<TunerFrontendStatus::plpInfo>().size();
-                status.plpInfo().resize(size);
+                hidl_vec<FrontendStatusAtsc3PlpInfo> info(size);
                 for (int i = 0; i < size; i++) {
                     auto aidlInfo = s.get<TunerFrontendStatus::plpInfo>()[i];
-                    status.plpInfo()[i] = {
+                    info[i] = {
                         .plpId = (uint8_t)aidlInfo.plpId,
                         .isLocked = aidlInfo.isLocked,
                         .uec = (uint32_t)aidlInfo.uec,
                     };
                 }
+                status.plpInfo(info);
                 hidlStatus.push_back(status);
                 break;
             }
@@ -503,52 +534,54 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
         FrontendStatusExt1_1 status;
         switch (s.getTag()) {
             case TunerFrontendStatus::modulations: {
+                vector<FrontendModulation> ms;
                 for (auto aidlMod : s.get<TunerFrontendStatus::modulations>()) {
-                    int size = status.modulations().size();
-                    status.modulations().resize(size + 1);
+                    FrontendModulation m;
                     switch (mType) {
                         case (int)FrontendType::DVBC:
-                            status.modulations()[size].dvbc(
-                                    static_cast<FrontendDvbcModulation>(aidlMod));
+                            m.dvbc(static_cast<FrontendDvbcModulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::DVBS:
-                            status.modulations()[size].dvbs(
-                                    static_cast<FrontendDvbsModulation>(aidlMod));
+                            m.dvbs(static_cast<FrontendDvbsModulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::DVBT:
-                            status.modulations()[size].dvbt(
-                                    static_cast<FrontendDvbtConstellation>(aidlMod));
+                            m.dvbt(static_cast<FrontendDvbtConstellation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::ISDBS:
-                            status.modulations()[size].isdbs(
-                                    static_cast<FrontendIsdbsModulation>(aidlMod));
+                            m.isdbs(static_cast<FrontendIsdbsModulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::ISDBS3:
-                            status.modulations()[size].isdbs3(
-                                    static_cast<FrontendIsdbs3Modulation>(aidlMod));
+                            m.isdbs3(static_cast<FrontendIsdbs3Modulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::ISDBT:
-                            status.modulations()[size].isdbt(
-                                    static_cast<FrontendIsdbtModulation>(aidlMod));
+                            m.isdbt(static_cast<FrontendIsdbtModulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::ATSC:
-                            status.modulations()[size].atsc(
-                                    static_cast<FrontendAtscModulation>(aidlMod));
+                            m.atsc(static_cast<FrontendAtscModulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::ATSC3:
-                            status.modulations()[size].atsc3(
-                                    static_cast<FrontendAtsc3Modulation>(aidlMod));
+                            m.atsc3(static_cast<FrontendAtsc3Modulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         case (int)FrontendType::DTMB:
-                            status.modulations()[size].dtmb(
-                                    static_cast<FrontendDtmbModulation>(aidlMod));
+                            m.dtmb(static_cast<FrontendDtmbModulation>(aidlMod));
+                            ms.push_back(m);
                             break;
                         default:
-                            status.modulations().resize(size);
                             break;
                     }
                 }
-                hidlStatus.push_back(status);
+                if (ms.size() > 0) {
+                    status.modulations(ms);
+                    hidlStatus.push_back(status);
+                }
                 break;
             }
             case TunerFrontendStatus::bers: {
@@ -571,25 +604,31 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
             }
             case TunerFrontendStatus::bandwidth: {
                 auto aidlBand = s.get<TunerFrontendStatus::bandwidth>();
+                FrontendBandwidth band;
                 switch (mType) {
                     case (int)FrontendType::ATSC3:
-                        status.bandwidth().atsc3(static_cast<FrontendAtsc3Bandwidth>(aidlBand));
+                        band.atsc3(static_cast<FrontendAtsc3Bandwidth>(aidlBand));
+                        status.bandwidth(band);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::DVBC:
-                        status.bandwidth().dvbc(static_cast<FrontendDvbcBandwidth>(aidlBand));
+                        band.dvbc(static_cast<FrontendDvbcBandwidth>(aidlBand));
+                        status.bandwidth(band);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::DVBT:
-                        status.bandwidth().dvbt(static_cast<FrontendDvbtBandwidth>(aidlBand));
+                        band.dvbt(static_cast<FrontendDvbtBandwidth>(aidlBand));
+                        status.bandwidth(band);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBT:
-                        status.bandwidth().isdbt(static_cast<FrontendIsdbtBandwidth>(aidlBand));
+                        band.isdbt(static_cast<FrontendIsdbtBandwidth>(aidlBand));
+                        status.bandwidth(band);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::DTMB:
-                        status.bandwidth().dtmb(static_cast<FrontendDtmbBandwidth>(aidlBand));
+                        band.dtmb(static_cast<FrontendDtmbBandwidth>(aidlBand));
+                        status.bandwidth(band);
                         hidlStatus.push_back(status);
                         break;
                     default:
@@ -599,17 +638,21 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
             }
             case TunerFrontendStatus::interval: {
                 auto aidlInter = s.get<TunerFrontendStatus::interval>();
+                FrontendGuardInterval inter;
                 switch (mType) {
                     case (int)FrontendType::DVBT:
-                        status.interval().dvbt(static_cast<FrontendDvbtGuardInterval>(aidlInter));
+                        inter.dvbt(static_cast<FrontendDvbtGuardInterval>(aidlInter));
+                        status.interval(inter);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBT:
-                        status.interval().isdbt(static_cast<FrontendIsdbtGuardInterval>(aidlInter));
+                        inter.isdbt(static_cast<FrontendIsdbtGuardInterval>(aidlInter));
+                        status.interval(inter);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::DTMB:
-                        status.interval().dtmb(static_cast<FrontendDtmbGuardInterval>(aidlInter));
+                        inter.dtmb(static_cast<FrontendDtmbGuardInterval>(aidlInter));
+                        status.interval(inter);
                         hidlStatus.push_back(status);
                         break;
                     default:
@@ -619,19 +662,21 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
             }
             case TunerFrontendStatus::transmissionMode: {
                 auto aidlTran = s.get<TunerFrontendStatus::transmissionMode>();
+                FrontendTransmissionMode trans;
                 switch (mType) {
                     case (int)FrontendType::DVBT:
-                        status.transmissionMode().dvbt(
-                                static_cast<FrontendDvbtTransmissionMode>(aidlTran));
+                        trans.dvbt(static_cast<FrontendDvbtTransmissionMode>(aidlTran));
+                        status.transmissionMode(trans);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBT:
-                        status.transmissionMode().isdbt(static_cast<FrontendIsdbtMode>(aidlTran));
+                        trans.isdbt(static_cast<FrontendIsdbtMode>(aidlTran));
+                        status.transmissionMode(trans);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::DTMB:
-                        status.transmissionMode().dtmb(
-                                static_cast<FrontendDtmbTransmissionMode>(aidlTran));
+                        trans.dtmb(static_cast<FrontendDtmbTransmissionMode>(aidlTran));
+                        status.transmissionMode(trans);
                         hidlStatus.push_back(status);
                         break;
                     default:
@@ -650,28 +695,30 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
                 break;
             }
             case TunerFrontendStatus::interleaving: {
+                vector<FrontendInterleaveMode> modes;
                 for (auto aidlInter : s.get<TunerFrontendStatus::interleaving>()) {
-                    int size = status.interleaving().size();
-                    status.interleaving().resize(size + 1);
+                    FrontendInterleaveMode mode;
                     switch (mType) {
                         case (int)FrontendType::DVBC:
-                            status.interleaving()[size].dvbc(
-                                    static_cast<FrontendCableTimeInterleaveMode>(aidlInter));
+                            mode.dvbc(static_cast<FrontendCableTimeInterleaveMode>(aidlInter));
+                            modes.push_back(mode);
                             break;
                         case (int)FrontendType::ATSC3:
-                            status.interleaving()[size].atsc3(
-                                    static_cast<FrontendAtsc3TimeInterleaveMode>(aidlInter));
+                            mode.atsc3(static_cast<FrontendAtsc3TimeInterleaveMode>(aidlInter));
+                            modes.push_back(mode);
                             break;
                         case (int)FrontendType::DTMB:
-                            status.interleaving()[size].dtmb(
-                                    static_cast<FrontendDtmbTimeInterleaveMode>(aidlInter));
+                            mode.dtmb(static_cast<FrontendDtmbTimeInterleaveMode>(aidlInter));
+                            modes.push_back(mode);
                             break;
                         default:
-                            status.interleaving().resize(size);
                             break;
                     }
                 }
-                hidlStatus.push_back(status);
+                if (modes.size() > 0) {
+                    status.interleaving(modes);
+                    hidlStatus.push_back(status);
+                }
                 break;
             }
             case TunerFrontendStatus::isdbtSegment: {
@@ -690,17 +737,21 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
             }
             case TunerFrontendStatus::rollOff: {
                 auto aidlRoll = s.get<TunerFrontendStatus::rollOff>();
+                FrontendRollOff roll;
                 switch (mType) {
                     case (int)FrontendType::DVBS:
-                        status.rollOff().dvbs(static_cast<FrontendDvbsRolloff>(aidlRoll));
+                        roll.dvbs(static_cast<FrontendDvbsRolloff>(aidlRoll));
+                        status.rollOff(roll);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBS:
-                        status.rollOff().isdbs(static_cast<FrontendIsdbsRolloff>(aidlRoll));
+                        roll.isdbs(static_cast<FrontendIsdbsRolloff>(aidlRoll));
+                        status.rollOff(roll);
                         hidlStatus.push_back(status);
                         break;
                     case (int)FrontendType::ISDBS3:
-                        status.rollOff().isdbs3(static_cast<FrontendIsdbs3Rolloff>(aidlRoll));
+                        roll.isdbs3(static_cast<FrontendIsdbs3Rolloff>(aidlRoll));
+                        status.rollOff(roll);
                         hidlStatus.push_back(status);
                         break;
                     default:

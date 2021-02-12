@@ -74,4 +74,12 @@ public class FeatureFlags {
     public boolean isPeopleTileEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_conversations);
     }
+
+    public boolean isToastStyleEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_toast_style);
+    }
+
+    public boolean isMonetEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_monet);
+    }
 }
