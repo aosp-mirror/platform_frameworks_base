@@ -3105,6 +3105,11 @@
 
   <public-group type="dimen" first-id="0x01050008">
     <!-- dimension definitions go here -->
+
+    <!-- System-provided dimensions for app widgets. -->
+    <public name="system_app_widget_background_radius" />
+    <public name="system_app_widget_inner_radius" />
+    <public name="system_app_widget_internal_padding" />
   </public-group>
 
   <public-group type="bool" first-id="0x01110007">

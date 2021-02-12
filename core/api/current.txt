@@ -1740,6 +1740,9 @@ package android {
     field public static final int dialog_min_width_minor = 17104900; // 0x1050004
     field public static final int notification_large_icon_height = 17104902; // 0x1050006
     field public static final int notification_large_icon_width = 17104901; // 0x1050005
+    field public static final int system_app_widget_background_radius = 17104904; // 0x1050008
+    field public static final int system_app_widget_inner_radius = 17104905; // 0x1050009
+    field public static final int system_app_widget_internal_padding = 17104906; // 0x105000a
     field public static final int thumbnail_height = 17104897; // 0x1050001
     field public static final int thumbnail_width = 17104898; // 0x1050002
   }
