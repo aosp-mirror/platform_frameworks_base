@@ -4054,6 +4054,8 @@ public abstract class PackageManager {
     /**
      * Permission flag: This location permission is selected as the level of granularity of
      * location accuracy.
+     * Example: If this flag is set for ACCESS_FINE_LOCATION, FINE location is the selected location
+     *          accuracy for location permissions.
      *
      * @hide
      */
