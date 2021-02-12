@@ -64,7 +64,7 @@ import java.util.List;
  * and which {@link JobServiceContext} to run each job on.
  */
 class JobConcurrencyManager {
-    private static final String TAG = JobSchedulerService.TAG;
+    private static final String TAG = JobSchedulerService.TAG + ".Concurrency";
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
 
     static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
@@ -321,13 +321,14 @@ class JobConcurrencyManager {
         }
     }
 
+    /** Return {@code true} if the state was updated. */
     @GuardedBy("mLock")
-    private void refreshSystemStateLocked() {
+    private boolean refreshSystemStateLocked() {
         final long nowUptime = JobSchedulerService.sUptimeMillisClock.millis();
 
         // Only refresh the information every so often.
         if (nowUptime < mNextSystemStateRefreshTime) {
-            return;
+            return false;
         }
 
         final long start = mStatLogger.getTime();
@@ -340,11 +341,14 @@ class JobConcurrencyManager {
         }
 
         mStatLogger.logDurationStat(Stats.REFRESH_SYSTEM_STATE, start);
+        return true;
     }
 
     @GuardedBy("mLock")
     private void updateCounterConfigLocked() {
-        refreshSystemStateLocked();
+        if (!refreshSystemStateLocked()) {
+            return;
+        }
 
         final WorkConfigLimitsPerMemoryTrimLevel workConfigs = mEffectiveInteractiveState
                 ? CONFIG_LIMITS_SCREEN_ON : CONFIG_LIMITS_SCREEN_OFF;
@@ -437,9 +441,10 @@ class JobConcurrencyManager {
             // (sharing the same Uid as nextPending)
             int minPriorityForPreemption = Integer.MAX_VALUE;
             int selectedContextId = -1;
-            int workType = mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+            int allWorkTypes = getJobWorkTypes(nextPending);
+            int workType = mWorkCountTracker.canJobStart(allWorkTypes);
             boolean startingJob = false;
-            for (int j=0; j<MAX_JOB_CONTEXTS_COUNT; j++) {
+            for (int j = 0; j < MAX_JOB_CONTEXTS_COUNT; j++) {
                 JobStatus job = contextIdToJobMap[j];
                 int preferredUid = preferredUidForContext[j];
                 if (job == null) {
@@ -483,7 +488,7 @@ class JobConcurrencyManager {
             if (startingJob) {
                 // Increase the counters when we're going to start a job.
                 workTypeForContext[selectedContextId] = workType;
-                mWorkCountTracker.stageJob(workType);
+                mWorkCountTracker.stageJob(workType, allWorkTypes);
             }
         }
         if (DEBUG) {
@@ -578,8 +583,10 @@ class JobConcurrencyManager {
 
             JobStatus highestPriorityJob = null;
             int highPriWorkType = workType;
+            int highPriAllWorkTypes = workType;
             JobStatus backupJob = null;
             int backupWorkType = WORK_TYPE_NONE;
+            int backupAllWorkTypes = WORK_TYPE_NONE;
             for (int i = 0; i < pendingJobs.size(); i++) {
                 final JobStatus nextPending = pendingJobs.get(i);
 
@@ -589,11 +596,12 @@ class JobConcurrencyManager {
 
                 if (worker.getPreferredUid() != nextPending.getUid()) {
                     if (backupJob == null) {
-                        int workAsType =
-                                mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+                        int allWorkTypes = getJobWorkTypes(nextPending);
+                        int workAsType = mWorkCountTracker.canJobStart(allWorkTypes);
                         if (workAsType != WORK_TYPE_NONE) {
                             backupJob = nextPending;
                             backupWorkType = workAsType;
+                            backupAllWorkTypes = allWorkTypes;
                         }
                     }
                     continue;
@@ -611,7 +619,8 @@ class JobConcurrencyManager {
                 // reserved slots. We should just run the highest priority job we can find,
                 // though it would be ideal to use an available WorkType slot instead of
                 // overloading slots.
-                final int workAsType = mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+                highPriAllWorkTypes = getJobWorkTypes(nextPending);
+                final int workAsType = mWorkCountTracker.canJobStart(highPriAllWorkTypes);
                 if (workAsType == WORK_TYPE_NONE) {
                     // Just use the preempted job's work type since this new one is technically
                     // replacing it anyway.
@@ -624,7 +633,7 @@ class JobConcurrencyManager {
                 if (DEBUG) {
                     Slog.d(TAG, "Running job " + jobStatus + " as preemption");
                 }
-                mWorkCountTracker.stageJob(highPriWorkType);
+                mWorkCountTracker.stageJob(highPriWorkType, highPriAllWorkTypes);
                 startJobLocked(worker, highestPriorityJob, highPriWorkType);
             } else {
                 if (DEBUG) {
@@ -635,7 +644,7 @@ class JobConcurrencyManager {
                     if (DEBUG) {
                         Slog.d(TAG, "Running job " + jobStatus + " instead");
                     }
-                    mWorkCountTracker.stageJob(backupWorkType);
+                    mWorkCountTracker.stageJob(backupWorkType, backupAllWorkTypes);
                     startJobLocked(worker, backupJob, backupWorkType);
                 }
             }
@@ -647,6 +656,7 @@ class JobConcurrencyManager {
             // find.
             JobStatus highestPriorityJob = null;
             int highPriWorkType = workType;
+            int highPriAllWorkTypes = workType;
             for (int i = 0; i < pendingJobs.size(); i++) {
                 final JobStatus nextPending = pendingJobs.get(i);
 
@@ -654,7 +664,8 @@ class JobConcurrencyManager {
                     continue;
                 }
 
-                final int workAsType = mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+                final int allWorkTypes = getJobWorkTypes(nextPending);
+                final int workAsType = mWorkCountTracker.canJobStart(allWorkTypes);
                 if (workAsType == WORK_TYPE_NONE) {
                     continue;
                 }
@@ -663,6 +674,7 @@ class JobConcurrencyManager {
                         < nextPending.lastEvaluatedPriority) {
                     highestPriorityJob = nextPending;
                     highPriWorkType = workAsType;
+                    highPriAllWorkTypes = allWorkTypes;
                 }
             }
 
@@ -672,7 +684,7 @@ class JobConcurrencyManager {
                 if (DEBUG) {
                     Slog.d(TAG, "About to run job: " + jobStatus);
                 }
-                mWorkCountTracker.stageJob(highPriWorkType);
+                mWorkCountTracker.stageJob(highPriWorkType, highPriAllWorkTypes);
                 startJobLocked(worker, highestPriorityJob, highPriWorkType);
             }
         }
@@ -1102,26 +1114,58 @@ class JobConcurrencyManager {
         }
 
         void incrementPendingJobCount(int workTypes) {
-            // We don't know which type we'll classify the job as when we run it yet, so make sure
-            // we have space in all applicable slots.
-            if ((workTypes & WORK_TYPE_TOP) == WORK_TYPE_TOP) {
-                mNumPendingJobs.put(WORK_TYPE_TOP, mNumPendingJobs.get(WORK_TYPE_TOP) + 1);
-            }
-            if ((workTypes & WORK_TYPE_EJ) == WORK_TYPE_EJ) {
-                mNumPendingJobs.put(WORK_TYPE_EJ, mNumPendingJobs.get(WORK_TYPE_EJ) + 1);
-            }
-            if ((workTypes & WORK_TYPE_BG) == WORK_TYPE_BG) {
-                mNumPendingJobs.put(WORK_TYPE_BG, mNumPendingJobs.get(WORK_TYPE_BG) + 1);
-            }
-            if ((workTypes & WORK_TYPE_BGUSER) == WORK_TYPE_BGUSER) {
-                mNumPendingJobs.put(WORK_TYPE_BGUSER, mNumPendingJobs.get(WORK_TYPE_BGUSER) + 1);
+            adjustPendingJobCount(workTypes, true);
+        }
+
+        void decrementPendingJobCount(int workTypes) {
+            if (adjustPendingJobCount(workTypes, false) > 1) {
+                // We don't need to adjust reservations if only one work type was modified
+                // because that work type is the one we're using.
+
+                // 0 is WORK_TYPE_NONE.
+                int workType = 1;
+                int rem = workTypes;
+                while (rem > 0) {
+                    if ((rem & 1) != 0) {
+                        maybeAdjustReservations(workType);
+                    }
+                    rem = rem >>> 1;
+                    workType = workType << 1;
+                }
             }
         }
 
-        void stageJob(@WorkType int workType) {
+        /** Returns the number of WorkTypes that were modified. */
+        private int adjustPendingJobCount(int workTypes, boolean add) {
+            final int adj = add ? 1 : -1;
+
+            int numAdj = 0;
+            // We don't know which type we'll classify the job as when we run it yet, so make sure
+            // we have space in all applicable slots.
+            if ((workTypes & WORK_TYPE_TOP) == WORK_TYPE_TOP) {
+                mNumPendingJobs.put(WORK_TYPE_TOP, mNumPendingJobs.get(WORK_TYPE_TOP) + adj);
+                numAdj++;
+            }
+            if ((workTypes & WORK_TYPE_EJ) == WORK_TYPE_EJ) {
+                mNumPendingJobs.put(WORK_TYPE_EJ, mNumPendingJobs.get(WORK_TYPE_EJ) + adj);
+                numAdj++;
+            }
+            if ((workTypes & WORK_TYPE_BG) == WORK_TYPE_BG) {
+                mNumPendingJobs.put(WORK_TYPE_BG, mNumPendingJobs.get(WORK_TYPE_BG) + adj);
+                numAdj++;
+            }
+            if ((workTypes & WORK_TYPE_BGUSER) == WORK_TYPE_BGUSER) {
+                mNumPendingJobs.put(WORK_TYPE_BGUSER, mNumPendingJobs.get(WORK_TYPE_BGUSER) + adj);
+                numAdj++;
+            }
+
+            return numAdj;
+        }
+
+        void stageJob(@WorkType int workType, int allWorkTypes) {
             final int newNumStartingJobs = mNumStartingJobs.get(workType) + 1;
             mNumStartingJobs.put(workType, newNumStartingJobs);
-            mNumPendingJobs.put(workType, Math.max(0, mNumPendingJobs.get(workType) - 1));
+            decrementPendingJobCount(allWorkTypes);
             if (newNumStartingJobs + mNumRunningJobs.get(workType)
                     > mNumActuallyReservedSlots.get(workType)) {
                 mNumUnspecializedRemaining--;
