@@ -540,6 +540,15 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
             jlong* outMemtrackArray = env->GetLongArrayElements(outMemtrack, 0);
             if (outMemtrackArray != NULL) {
                 outMemtrackArray[0] = memtrack;
+                if (env->GetArrayLength(outMemtrack) >= 2) {
+                    outMemtrackArray[1] = graphics_mem.graphics;
+                }
+                if (env->GetArrayLength(outMemtrack) >= 3) {
+                    outMemtrackArray[2] = graphics_mem.gl;
+                }
+                if (env->GetArrayLength(outMemtrack) >= 4) {
+                    outMemtrackArray[3] = graphics_mem.other;
+                }
             }
             env->ReleaseLongArrayElements(outMemtrack, outMemtrackArray, 0);
         }
