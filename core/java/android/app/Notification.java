@@ -1208,7 +1208,8 @@ public class Notification implements Parcelable
      * of a {@link BigPictureStyle} notification.  This will replace a
      * {@link Builder#setLargeIcon(Icon) large icon} in that state if one was provided.
      */
-    public static final String EXTRA_PROMOTE_PICTURE = "android.promotePicture";
+    public static final String EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED =
+            "android.showBigPictureWhenCollapsed";
 
     /**
      * {@link #extras} key: An array of CharSequences to show in {@link InboxStyle} expanded
@@ -7059,7 +7060,7 @@ public class Notification implements Parcelable
         private Icon mBigLargeIcon;
         private boolean mBigLargeIconSet = false;
         private CharSequence mPictureContentDescription;
-        private boolean mPromotePicture;
+        private boolean mShowBigPictureWhenCollapsed;
 
         public BigPictureStyle() {
         }
@@ -7124,7 +7125,7 @@ public class Notification implements Parcelable
          */
         @NonNull
         public BigPictureStyle showBigPictureWhenCollapsed(boolean show) {
-            mPromotePicture = show;
+            mShowBigPictureWhenCollapsed = show;
             return this;
         }
 
@@ -7195,7 +7196,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
-            if (mPicture == null || !mPromotePicture) {
+            if (mPicture == null || !mShowBigPictureWhenCollapsed) {
                 return super.makeContentView(increasedHeight);
             }
 
@@ -7225,7 +7226,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            if (mPicture == null || !mPromotePicture) {
+            if (mPicture == null || !mShowBigPictureWhenCollapsed) {
                 return super.makeHeadsUpContentView(increasedHeight);
             }
 
@@ -7309,7 +7310,7 @@ public class Notification implements Parcelable
                 extras.putCharSequence(EXTRA_PICTURE_CONTENT_DESCRIPTION,
                         mPictureContentDescription);
             }
-            extras.putBoolean(EXTRA_PROMOTE_PICTURE, mPromotePicture);
+            extras.putBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED, mShowBigPictureWhenCollapsed);
             extras.putParcelable(EXTRA_PICTURE, mPicture);
         }
 
@@ -7330,7 +7331,7 @@ public class Notification implements Parcelable
                         extras.getCharSequence(EXTRA_PICTURE_CONTENT_DESCRIPTION);
             }
 
-            mPromotePicture = extras.getBoolean(EXTRA_PROMOTE_PICTURE);
+            mShowBigPictureWhenCollapsed = extras.getBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED);
             mPicture = extras.getParcelable(EXTRA_PICTURE);
         }
 
