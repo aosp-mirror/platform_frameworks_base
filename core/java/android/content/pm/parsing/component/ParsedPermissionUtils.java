@@ -25,7 +25,6 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -33,8 +32,6 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Locale;
-import java.util.Set;
 
 /** @hide */
 public class ParsedPermissionUtils {
@@ -103,17 +100,12 @@ public class ParsedPermissionUtils {
                 if (resourceType.equals("array")) {
                     final String[] knownCerts = res.getStringArray(knownCertsResource);
                     if (knownCerts != null) {
-                        // Convert the provided digest to upper case for consistent Set membership
-                        // checks when verifying the signing certificate digests of requesting apps.
-                        permission.knownCerts = new ArraySet<>();
-                        for (String knownCert : knownCerts) {
-                            permission.knownCerts.add(knownCert.toUpperCase(Locale.US));
-                        }
+                        permission.setKnownCerts(knownCerts);
                     }
                 } else {
                     final String knownCert = res.getString(knownCertsResource);
                     if (knownCert != null) {
-                        permission.knownCerts = Set.of(knownCert.toUpperCase(Locale.US));
+                        permission.setKnownCert(knownCert);
                     }
                 }
                 if (permission.knownCerts == null) {
@@ -126,7 +118,7 @@ public class ParsedPermissionUtils {
                 final String knownCert = sa.getString(
                         R.styleable.AndroidManifestPermission_knownCerts);
                 if (knownCert != null) {
-                    permission.knownCerts = Set.of(knownCert.toUpperCase(Locale.US));
+                    permission.setKnownCert(knownCert);
                 }
             }
 
