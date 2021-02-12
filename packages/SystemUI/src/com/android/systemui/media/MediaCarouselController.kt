@@ -1,7 +1,9 @@
 package com.android.systemui.media
 
+import android.animation.ArgbEvaluator
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
@@ -112,6 +114,9 @@ class MediaCarouselController @Inject constructor(
     private val visualStabilityCallback: VisualStabilityManager.Callback
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
+    private var bgColor = getBackgroundColor()
+    private var fgColor = com.android.settingslib.Utils.getColorAttr(context,
+            com.android.internal.R.attr.textColorPrimary).defaultColor
     private var isRtl: Boolean = false
         set(value) {
             if (value != field) {
@@ -147,7 +152,7 @@ class MediaCarouselController @Inject constructor(
         }
 
         override fun onUiModeChanged() {
-            // Only settings button needs to update for dark theme
+            recreatePlayers()
             inflateSettingsButton()
         }
     }
@@ -249,6 +254,11 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
+        data.actions.forEach {
+            it.icon?.setTintList(ColorStateList.valueOf(fgColor))
+        }
+        data.appIcon?.setTintList(ColorStateList.valueOf(fgColor))
+        val dataCopy = data.copy(backgroundColor = bgColor)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key, oldKey)
         if (existingPlayer == null) {
             var newPlayer = mediaControlPanelFactory.get()
@@ -257,14 +267,14 @@ class MediaCarouselController @Inject constructor(
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
             newPlayer.view?.player?.setLayoutParams(lp)
-            newPlayer.bind(data, key)
+            newPlayer.bind(dataCopy, key)
             newPlayer.setListening(currentlyExpanded)
-            MediaPlayerData.addMediaPlayer(key, data, newPlayer)
+            MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers()
         } else {
-            existingPlayer.bind(data, key)
-            MediaPlayerData.addMediaPlayer(key, data, existingPlayer)
+            existingPlayer.bind(dataCopy, key)
+            MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer)
             if (visualStabilityManager.isReorderingAllowed) {
                 reorderAllPlayers()
             } else {
@@ -298,10 +308,25 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun recreatePlayers() {
+        bgColor = getBackgroundColor()
+
+        fgColor = com.android.settingslib.Utils.getColorAttr(context,
+                com.android.internal.R.attr.textColorPrimary).defaultColor
+        pageIndicator.tintList = ColorStateList.valueOf(fgColor)
+
         MediaPlayerData.mediaData().forEach { (key, data) ->
             removePlayer(key, dismissMediaData = false)
             addOrUpdatePlayer(key = key, oldKey = null, data = data)
         }
+    }
+
+    private fun getBackgroundColor(): Int {
+        val themeAccent = com.android.settingslib.Utils.getColorAttr(context,
+                com.android.internal.R.attr.colorAccent).defaultColor
+        val themeBackground = com.android.settingslib.Utils.getColorAttr(context,
+                com.android.internal.R.attr.colorBackground).defaultColor
+        // Simulate transparency - cannot be actually transparent because of lockscreen
+        return ArgbEvaluator().evaluate(0.25f, themeBackground, themeAccent) as Int
     }
 
     private fun updatePageIndicator() {

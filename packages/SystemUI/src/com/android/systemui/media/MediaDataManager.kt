@@ -25,7 +25,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -38,7 +37,6 @@ import android.os.UserHandle
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
-import com.android.internal.graphics.ColorUtils
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -48,7 +46,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
-import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
@@ -68,10 +65,6 @@ private val ART_URIS = arrayOf(
 
 private const val TAG = "MediaDataManager"
 private const val DEBUG = true
-private const val DEFAULT_LUMINOSITY = 0.25f
-private const val LUMINOSITY_THRESHOLD = 0.05f
-private const val SATURATION_MULTIPLIER = 0.8f
-const val DEFAULT_COLOR = Color.DKGRAY
 
 private val LOADING = MediaData(-1, false, 0, null, null, null, null, null,
         emptyList(), emptyList(), "INVALID", null, null, null, true, null)
@@ -109,6 +102,11 @@ class MediaDataManager(
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean
 ) : Dumpable {
+
+    private val themeText = com.android.settingslib.Utils.getColorAttr(context,
+            com.android.internal.R.attr.textColorPrimary).defaultColor
+    private val bgColor = com.android.settingslib.Utils.getColorAttr(context,
+            com.android.internal.R.attr.colorBackground).defaultColor
 
     // Internal listeners are part of the internal pipeline. External listeners (those registered
     // with [MediaDeviceManager.addListener]) receive events after they have propagated through
@@ -395,7 +393,6 @@ class MediaDataManager(
         } else {
             null
         }
-        val bgColor = artworkBitmap?.let { computeBackgroundColor(it) } ?: DEFAULT_COLOR
 
         val mediaAction = getResumeMediaAction(resumeAction)
         foregroundExecutor.execute {
@@ -449,7 +446,6 @@ class MediaDataManager(
                 }
             }
         }
-        val bgColor = computeBackgroundColor(artworkBitmap)
 
         // App name
         val builder = Notification.Builder.recoverBuilder(context, notif)
@@ -506,7 +502,7 @@ class MediaDataManager(
                     Icon.createWithResource(packageContext, action.getIcon()!!.getResId())
                 } else {
                     action.getIcon()
-                }
+                }.setTint(themeText)
                 val mediaAction = MediaAction(
                         mediaActionIcon,
                         runnable,
@@ -589,38 +585,9 @@ class MediaDataManager(
         }
     }
 
-    private fun computeBackgroundColor(artworkBitmap: Bitmap?): Int {
-        var color = Color.WHITE
-        if (artworkBitmap != null && artworkBitmap.width > 1 && artworkBitmap.height > 1) {
-            // If we have valid art, get colors from that
-            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
-                    .generate()
-            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
-            color = swatch.rgb
-        } else {
-            return DEFAULT_COLOR
-        }
-        // Adapt background color, so it's always subdued and text is legible
-        val tmpHsl = floatArrayOf(0f, 0f, 0f)
-        ColorUtils.colorToHSL(color, tmpHsl)
-
-        val l = tmpHsl[2]
-        // Colors with very low luminosity can have any saturation. This means that changing the
-        // luminosity can make a black become red. Let's remove the saturation of very light or
-        // very dark colors to avoid this issue.
-        if (l < LUMINOSITY_THRESHOLD || l > 1f - LUMINOSITY_THRESHOLD) {
-            tmpHsl[1] = 0f
-        }
-        tmpHsl[1] *= SATURATION_MULTIPLIER
-        tmpHsl[2] = DEFAULT_LUMINOSITY
-
-        color = ColorUtils.HSLToColor(tmpHsl)
-        return color
-    }
-
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            Icon.createWithResource(context, R.drawable.lb_ic_play),
+            Icon.createWithResource(context, R.drawable.lb_ic_play).setTint(themeText),
             action,
             context.getString(R.string.controls_media_resume)
         )
