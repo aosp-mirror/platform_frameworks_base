@@ -134,7 +134,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mStackScrollerController = stackScrollerController;
         mNotificationPanelViewController = notificationPanelViewController;
         notificationPanelViewController.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        notificationPanelViewController.addVerticalTranslationListener(mUpdatePanelTranslation);
+        notificationPanelViewController.setVerticalTranslationListener(mUpdatePanelTranslation);
         notificationPanelViewController.setHeadsUpAppearanceController(this);
         mStackScrollerController.addOnExpandedHeightChangedListener(mSetExpandedHeight);
         mStackScrollerController.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
@@ -171,7 +171,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mHeadsUpStatusBarView.setOnDrawingRectChangedListener(null);
         mWakeUpCoordinator.removeListener(this);
         mNotificationPanelViewController.removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        mNotificationPanelViewController.removeVerticalTranslationListener(mUpdatePanelTranslation);
+        mNotificationPanelViewController.setVerticalTranslationListener(null);
         mNotificationPanelViewController.setHeadsUpAppearanceController(null);
         mStackScrollerController.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
         mStackScrollerController.removeOnLayoutChangeListener(mStackScrollLayoutChangeListener);
