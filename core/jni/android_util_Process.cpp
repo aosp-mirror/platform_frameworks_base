@@ -377,6 +377,10 @@ jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
     return (int) sp;
 }
 
+jint android_os_Process_createProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid) {
+    return createProcessGroup(uid, pid);
+}
+
 /** Sample CPUset list format:
  *  0-3,4,6-8
  */
@@ -1358,6 +1362,7 @@ static const JNINativeMethod methods[] = {
         {"setThreadGroupAndCpuset", "(II)V", (void*)android_os_Process_setThreadGroupAndCpuset},
         {"setProcessGroup", "(II)V", (void*)android_os_Process_setProcessGroup},
         {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
+        {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
         {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
         {"setArgV0", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},

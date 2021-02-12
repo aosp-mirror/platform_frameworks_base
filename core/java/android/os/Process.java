@@ -970,6 +970,16 @@ public class Process {
             throws IllegalArgumentException, SecurityException;
 
     /**
+     *
+     * Create a new process group in the cgroup uid/pid hierarchy
+     *
+     * @return <0 in case of error
+     *
+     * @hide
+     */
+    public static final native int createProcessGroup(int uid, int pid);
+
+    /**
      * On some devices, the foreground process may have one or more CPU
      * cores exclusively reserved for it. This method can be used to
      * retrieve which cores that are (if any), so the calling process
