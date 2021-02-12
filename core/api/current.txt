@@ -5311,6 +5311,14 @@ package android.app {
     field @Deprecated public static final int TRANSIT_UNSET = -1; // 0xffffffff
   }
 
+  public final class GameManager {
+    method public int getGameMode();
+    field public static final int GAME_MODE_BATTERY = 3; // 0x3
+    field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
+    field public static final int GAME_MODE_STANDARD = 1; // 0x1
+    field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
+  }
+
   public class Instrumentation {
     ctor public Instrumentation();
     method public android.os.TestLooperManager acquireLooperManager(android.os.Looper);
@@ -10487,6 +10495,7 @@ package android.content {
     field public static final String EUICC_SERVICE = "euicc";
     field public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
     field public static final String FINGERPRINT_SERVICE = "fingerprint";
+    field public static final String GAME_SERVICE = "game";
     field public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
     field public static final String INPUT_METHOD_SERVICE = "input_method";
     field public static final String INPUT_SERVICE = "input";

@@ -418,6 +418,9 @@
     <!-- Permission required for CTS test - PeopleManagerTest -->
     <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
 
+    <!-- Permission required for CTS test - CtsGameManagerTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
