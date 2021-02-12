@@ -219,7 +219,7 @@ public class LatencyTracker {
     }
 
     private static String getTraceTriggerNameForAction(@Action int action) {
-        return "latency-tracker-" + getNameOfAction(STATSD_ACTION[action]);
+        return "com.android.telemetry.latency-tracker-" + getNameOfAction(STATSD_ACTION[action]);
     }
 
     public static boolean isEnabled(Context ctx) {
