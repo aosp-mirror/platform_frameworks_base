@@ -602,6 +602,43 @@ public class SubscriptionManager {
     public @interface SimDisplayNameSource {}
 
     /**
+     * Device status is not shared to a remote party.
+     */
+    public static final int D2D_SHARING_DISABLED = 0;
+
+    /**
+     * Device status is shared with all numbers in the user's contacts.
+     */
+    public static final int D2D_SHARING_ALL_CONTACTS = 1;
+
+    /**
+     * Device status is shared with all starred contacts.
+     */
+    public static final int D2D_SHARING_STARRED_CONTACTS = 2;
+
+    /**
+     * Device status is shared whenever possible.
+     */
+    public static final int D2D_SHARING_ALL = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"D2D_SHARING_"},
+            value = {
+                    D2D_SHARING_DISABLED,
+                    D2D_SHARING_ALL_CONTACTS,
+                    D2D_SHARING_STARRED_CONTACTS,
+                    D2D_SHARING_ALL
+            })
+    public @interface DeviceToDeviceStatusSharing {}
+
+    /**
+     * TelephonyProvider column name for device to device sharing status.
+     * <P>Type: INTEGER (int)</P>
+     */
+    public static final String D2D_STATUS_SHARING = SimInfo.COLUMN_D2D_STATUS_SHARING;
+
+    /**
      * TelephonyProvider column name for the color of a SIM.
      * <P>Type: INTEGER (int)</P>
      */
@@ -3371,6 +3408,36 @@ public class SubscriptionManager {
         }
 
         return false;
+    }
+
+    /**
+     * Set the device to device status sharing user preference for a subscription ID. The setting
+     * app uses this method to indicate with whom they wish to share device to device status
+     * information.
+     * @param sharing the status sharing preference
+     * @param subId the unique Subscription ID in database
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setDeviceToDeviceStatusSharing(@DeviceToDeviceStatusSharing int sharing,
+            int subId) {
+        if (VDBG) {
+            logd("[setDeviceToDeviceStatusSharing] + sharing: " + sharing + " subId: " + subId);
+        }
+        setSubscriptionPropertyHelper(subId, "setDeviceToDeviceSharingStatus",
+                (iSub)->iSub.setDeviceToDeviceStatusSharing(sharing, subId));
+    }
+
+    /**
+     * Returns the user-chosen device to device status sharing preference
+     * @param subId Subscription id of subscription
+     * @return The device to device status sharing preference
+     */
+    public @DeviceToDeviceStatusSharing int getDeviceToDeviceStatusSharing(int subId) {
+        if (VDBG) {
+            logd("[getDeviceToDeviceStatusSharing] + subId: " + subId);
+        }
+        return getIntegerSubscriptionProperty(subId, D2D_STATUS_SHARING, D2D_SHARING_DISABLED,
+                mContext);
     }
 
     /**

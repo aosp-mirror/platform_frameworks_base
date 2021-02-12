@@ -42038,6 +42038,7 @@ package android.telephony {
     method public static int getDefaultSmsSubscriptionId();
     method public static int getDefaultSubscriptionId();
     method public static int getDefaultVoiceSubscriptionId();
+    method public int getDeviceToDeviceStatusSharing(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
@@ -42050,6 +42051,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharing(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
     method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
@@ -42061,6 +42063,11 @@ package android.telephony {
     field public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
     field public static final String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
+    field public static final int D2D_SHARING_ALL = 3; // 0x3
+    field public static final int D2D_SHARING_ALL_CONTACTS = 1; // 0x1
+    field public static final int D2D_SHARING_DISABLED = 0; // 0x0
+    field public static final int D2D_SHARING_STARRED_CONTACTS = 2; // 0x2
+    field public static final String D2D_STATUS_SHARING = "d2d_sharing_status";
     field public static final int DATA_ROAMING_DISABLE = 0; // 0x0
     field public static final int DATA_ROAMING_ENABLE = 1; // 0x1
     field public static final int DEFAULT_SUBSCRIPTION_ID = 2147483647; // 0x7fffffff
