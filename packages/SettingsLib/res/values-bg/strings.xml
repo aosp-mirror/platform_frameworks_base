@@ -591,5 +591,5 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Данните са с три чертички."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Сигналът за данни е пълен."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Връзката с Ethernet е прекратена."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Установена е връзка с Ethernet."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
 </resources>

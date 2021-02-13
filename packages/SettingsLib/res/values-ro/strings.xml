@@ -592,5 +592,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Semnal pentru date: trei bare."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Semnal pentru date: complet."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet deconectat."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Ethernet conectat."</string>
+    <!-- no translation found for accessibility_ethernet_connected (6175942685957461563) -->
+    <skip />
 </resources>
