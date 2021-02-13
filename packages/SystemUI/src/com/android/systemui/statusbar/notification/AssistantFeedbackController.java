@@ -18,23 +18,19 @@ package com.android.systemui.statusbar.notification;
 
 import static android.service.notification.NotificationListenerService.Ranking;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.ENABLE_NAS_FEEDBACK;
+
 import android.app.NotificationManager;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.util.Pair;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import javax.inject.Inject;
 
@@ -45,10 +41,10 @@ import javax.inject.Inject;
  * should show an indicator.
  */
 @SysUISingleton
-public class AssistantFeedbackController extends ContentObserver {
-    private final Uri FEEDBACK_URI
-            = Settings.Global.getUriFor(Settings.Global.NOTIFICATION_FEEDBACK_ENABLED);
-    private ContentResolver mResolver;
+public class AssistantFeedbackController {
+    private final Context mContext;
+    private final Handler mHandler;
+    private final DeviceConfigProxy mDeviceConfigProxy;
 
     public static final int STATUS_UNCHANGED = 0;
     public static final int STATUS_ALERTED = 1;
@@ -56,34 +52,39 @@ public class AssistantFeedbackController extends ContentObserver {
     public static final int STATUS_PROMOTED = 3;
     public static final int STATUS_DEMOTED = 4;
 
-    private boolean mFeedbackEnabled;
+    private volatile boolean mFeedbackEnabled;
+
+    private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    if (properties.getKeyset().contains(ENABLE_NAS_FEEDBACK)) {
+                        mFeedbackEnabled = properties.getBoolean(
+                                ENABLE_NAS_FEEDBACK, false);
+                    }
+                }
+            };
 
     /** Injected constructor */
     @Inject
-    public AssistantFeedbackController(Context context) {
-        super(new Handler(Looper.getMainLooper()));
-        mResolver = context.getContentResolver();
-        mResolver.registerContentObserver(FEEDBACK_URI, false, this, UserHandle.USER_ALL);
-        update(null);
+    public AssistantFeedbackController(@Main Handler handler,
+            Context context, DeviceConfigProxy proxy) {
+        mHandler = handler;
+        mContext = context;
+        mDeviceConfigProxy = proxy;
+        mFeedbackEnabled = mDeviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                ENABLE_NAS_FEEDBACK, false);
+        mDeviceConfigProxy.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                this::postToHandler, mPropertiesChangedListener);
     }
 
-    @Override
-    public void onChange(boolean selfChange, @Nullable Uri uri, int flags) {
-        update(uri);
-    }
-
-    @VisibleForTesting
-    public void update(@Nullable Uri uri) {
-        if (uri == null || FEEDBACK_URI.equals(uri)) {
-            mFeedbackEnabled = Settings.Global.getInt(mResolver,
-                    Settings.Global.NOTIFICATION_FEEDBACK_ENABLED, 0)
-                    != 0;
-        }
+    private void postToHandler(Runnable r) {
+        this.mHandler.post(r);
     }
 
     /**
-     * Determines whether to show any user controls related to the assistant. This is based on the
-     * settings flag {@link Settings.Global.NOTIFICATION_FEEDBACK_ENABLED}
+     * Determines whether to show any user controls related to the assistant based on the
+     * DeviceConfig flag value
      */
     public boolean isFeedbackEnabled() {
         return mFeedbackEnabled;

@@ -20,6 +20,7 @@ import static android.service.notification.NotificationListenerService.FLAG_FILT
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 
+import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -31,7 +32,7 @@ import android.util.ArraySet;
  */
 public class NotificationListenerFilter implements Parcelable {
     private int mAllowedNotificationTypes;
-    private ArraySet<String> mDisallowedPackages;
+    private ArraySet<VersionedPackage> mDisallowedPackages;
 
     public NotificationListenerFilter() {
         mAllowedNotificationTypes = FLAG_FILTER_TYPE_CONVERSATIONS
@@ -41,7 +42,7 @@ public class NotificationListenerFilter implements Parcelable {
         mDisallowedPackages = new ArraySet<>();
     }
 
-    public NotificationListenerFilter(int types, ArraySet<String> pkgs) {
+    public NotificationListenerFilter(int types, ArraySet<VersionedPackage> pkgs) {
         mAllowedNotificationTypes = types;
         mDisallowedPackages = pkgs;
     }
@@ -51,7 +52,8 @@ public class NotificationListenerFilter implements Parcelable {
      */
     protected NotificationListenerFilter(Parcel in) {
         mAllowedNotificationTypes = in.readInt();
-        mDisallowedPackages = (ArraySet<String>) in.readArraySet(String.class.getClassLoader());
+        mDisallowedPackages = (ArraySet<VersionedPackage>) in.readArraySet(
+                VersionedPackage.class.getClassLoader());
     }
 
     @Override
@@ -77,7 +79,7 @@ public class NotificationListenerFilter implements Parcelable {
         return (mAllowedNotificationTypes & type) != 0;
     }
 
-    public boolean isPackageAllowed(String pkg) {
+    public boolean isPackageAllowed(VersionedPackage pkg) {
         return !mDisallowedPackages.contains(pkg);
     }
 
@@ -85,7 +87,7 @@ public class NotificationListenerFilter implements Parcelable {
         return mAllowedNotificationTypes;
     }
 
-    public ArraySet<String> getDisallowedPackages() {
+    public ArraySet<VersionedPackage> getDisallowedPackages() {
         return mDisallowedPackages;
     }
 
@@ -93,8 +95,16 @@ public class NotificationListenerFilter implements Parcelable {
         mAllowedNotificationTypes = types;
     }
 
-    public void setDisallowedPackages(ArraySet<String> pkgs) {
+    public void setDisallowedPackages(ArraySet<VersionedPackage> pkgs) {
         mDisallowedPackages = pkgs;
+    }
+
+    public void removePackage(VersionedPackage pkg) {
+        mDisallowedPackages.remove(pkg);
+    }
+
+    public void addPackage(VersionedPackage pkg) {
+        mDisallowedPackages.add(pkg);
     }
 
     @Override

@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.IntDef;
@@ -37,6 +38,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -182,8 +184,11 @@ public interface Bubbles {
      * permissions on the notification channel or the global setting.
      *
      * @param rankingMap the updated ranking map from NotificationListenerService
+     * @param entryDataByKey a map of ranking key to bubble entry and whether the entry should
+     *                       bubble up
      */
-    void onRankingUpdated(RankingMap rankingMap);
+    void onRankingUpdated(RankingMap rankingMap,
+            HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey);
 
     /**
      * Called when the status bar has become visible or invisible (either permanently or
@@ -243,14 +248,10 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
-        @Nullable
-        BubbleEntry getPendingOrActiveEntry(String key);
+        void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 
-        List<BubbleEntry> getShouldRestoredEntries(ArraySet<String> savedBubbleKeys);
-
-        boolean isNotificationShadeExpand();
-
-        boolean shouldBubbleUp(String key);
+        void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,
+                Consumer<List<BubbleEntry>> callback);
 
         void setNotificationInterruption(String key);
 

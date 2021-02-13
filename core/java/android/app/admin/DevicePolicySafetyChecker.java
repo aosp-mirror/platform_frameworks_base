@@ -17,7 +17,7 @@ package android.app.admin;
 
 import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
-import android.app.admin.DevicePolicyManager.UnsafeOperationReason;
+import android.app.admin.DevicePolicyManager.OperationSafetyReason;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -31,15 +31,20 @@ public interface DevicePolicySafetyChecker {
     /**
      * Returns whether the given {@code operation} can be safely executed at the moment.
      */
-    @UnsafeOperationReason
+    @OperationSafetyReason
     int getUnsafeOperationReason(@DevicePolicyOperation int operation);
+
+    /**
+     * Return whether it's safe to run operations that can be affected by the given {@code reason}.
+     */
+    boolean isSafeOperation(@OperationSafetyReason int reason);
 
     /**
      * Returns a new exception for when the given {@code operation} cannot be safely executed.
      */
     @NonNull
     default UnsafeStateException newUnsafeStateException(@DevicePolicyOperation int operation,
-            @UnsafeOperationReason int reason) {
+            @OperationSafetyReason int reason) {
         return new UnsafeStateException(operation, reason);
     }
 

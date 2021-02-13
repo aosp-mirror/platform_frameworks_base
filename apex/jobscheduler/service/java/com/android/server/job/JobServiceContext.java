@@ -20,6 +20,7 @@ import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.Nullable;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
 import android.app.job.JobInfo;
@@ -326,6 +327,7 @@ public final class JobServiceContext implements ServiceConnection {
     /**
      * Used externally to query the running job. Will return null if there is no job running.
      */
+    @Nullable
     JobStatus getRunningJobLocked() {
         return mRunningJob;
     }

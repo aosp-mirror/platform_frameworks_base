@@ -98,7 +98,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
 
         mQSCarrierGroupController = new QSCarrierGroupController.Builder(
                 mActivityStarter, handler, TestableLooper.get(this).getLooper(),
-                mNetworkController, mCarrierTextControllerBuilder)
+                mNetworkController, mCarrierTextControllerBuilder, mContext)
                 .setQSCarrierGroup(mQSCarrierGroup)
                 .build();
 

@@ -48,6 +48,8 @@ public class AccessibilityContentDescriptions {
 
     public static final int WIFI_NO_CONNECTION = R.string.accessibility_no_wifi;
 
+    public static final int NO_CALLING = R.string.accessibility_no_calling;
+
     public static final int[] ETHERNET_CONNECTION_VALUES = {
         R.string.accessibility_ethernet_disconnected,
         R.string.accessibility_ethernet_connected,

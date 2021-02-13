@@ -185,10 +185,16 @@ ASurfaceControl* ASurfaceControl_create(ASurfaceControl* parent, const char* deb
     return reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
 }
 
-void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
-    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+void ASurfaceControl_acquire(ASurfaceControl* aSurfaceControl) {
+    SurfaceControl* surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
 
-    SurfaceControl_release(surfaceControl.get());
+    SurfaceControl_acquire(surfaceControl);
+}
+
+void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
+    SurfaceControl* surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+
+    SurfaceControl_release(surfaceControl);
 }
 
 ASurfaceTransaction* ASurfaceTransaction_create() {
