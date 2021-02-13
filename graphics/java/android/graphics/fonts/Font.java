@@ -63,6 +63,10 @@ public final class Font {
             NativeAllocationRegistry.createMalloced(
                     ByteBuffer.class.getClassLoader(), nGetReleaseNativeFont());
 
+    private static final NativeAllocationRegistry FONT_REGISTRY =
+            NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
+                    nGetReleaseNativeFont());
+
     private static final Object SOURCE_ID_LOCK = new Object();
     @GuardedBy("SOURCE_ID_LOCK")
     private static final LongSparseLongArray FONT_SOURCE_ID_MAP =
@@ -526,11 +530,14 @@ public final class Font {
      * Use Builder instead
      *
      * Caller must increment underlying minikin::Font ref count.
+     * This class takes the ownership of the passing native objects.
      *
      * @hide
      */
     public Font(long nativePtr) {
         mNativePtr = nativePtr;
+
+        FONT_REGISTRY.registerNativeAllocation(this, mNativePtr);
     }
 
     /**
