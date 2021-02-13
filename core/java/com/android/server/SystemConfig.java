@@ -1236,6 +1236,8 @@ public class SystemConfig {
 
         if (IncrementalManager.isFeatureEnabled()) {
             addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, 0);
+            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY_VERSION,
+                    IncrementalManager.isV2Available() ? 2 : 1);
         }
 
         if (PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT) {

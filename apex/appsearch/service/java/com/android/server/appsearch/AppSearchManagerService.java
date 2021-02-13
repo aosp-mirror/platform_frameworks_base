@@ -41,6 +41,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -58,8 +59,11 @@ public class AppSearchManagerService extends SystemService {
     private PackageManagerInternal mPackageManagerInternal;
     private ImplInstanceManager mImplInstanceManager;
 
-    // Cache of unlocked user ids so we don't have to query UserManager service each time.
-    private final Set<Integer> mUnlockedUserIds = new ArraySet<>();
+    // Cache of unlocked user ids so we don't have to query UserManager service each time. The
+    // "locked" suffix refers to the fact that access to the field should be locked; unrelated to
+    // the unlocked status of user ids.
+    @GuardedBy("mUnlockedUserIdsLocked")
+    private final Set<Integer> mUnlockedUserIdsLocked = new ArraySet<>();
 
     public AppSearchManagerService(Context context) {
         super(context);
@@ -74,7 +78,9 @@ public class AppSearchManagerService extends SystemService {
 
     @Override
     public void onUserUnlocked(@NonNull TargetUser user) {
-        mUnlockedUserIds.add(user.getUserIdentifier());
+        synchronized (mUnlockedUserIdsLocked) {
+            mUnlockedUserIdsLocked.add(user.getUserIdentifier());
+        }
     }
 
     private class Stub extends IAppSearchManager.Stub {
@@ -503,9 +509,11 @@ public class AppSearchManagerService extends SystemService {
         }
 
         private void verifyUserUnlocked(int callingUserId) {
-            if (!mUnlockedUserIds.contains(callingUserId)) {
-                throw new IllegalStateException(
-                        "User " + callingUserId + " is locked or not running.");
+            synchronized (mUnlockedUserIdsLocked) {
+                if (!mUnlockedUserIdsLocked.contains(callingUserId)) {
+                    throw new IllegalStateException(
+                            "User " + callingUserId + " is locked or not running.");
+                }
             }
         }
 

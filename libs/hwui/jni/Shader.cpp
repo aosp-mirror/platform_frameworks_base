@@ -239,14 +239,12 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 
 static jlong RuntimeShader_createShaderBuilder(JNIEnv* env, jobject, jstring sksl) {
     ScopedUtfChars strSksl(env, sksl);
-    auto result = SkRuntimeEffect::Make(SkString(strSksl.c_str()));
-    sk_sp<SkRuntimeEffect> effect = std::get<0>(result);
-    if (effect.get() == nullptr) {
-        const auto& err = std::get<1>(result);
-        doThrowIAE(env, err.c_str());
+    auto result = SkRuntimeEffect::Make(SkString(strSksl.c_str()), SkRuntimeEffect::Options{});
+    if (result.effect.get() == nullptr) {
+        doThrowIAE(env, result.errorText.c_str());
         return 0;
     }
-    return reinterpret_cast<jlong>(new SkRuntimeShaderBuilder(std::move(effect)));
+    return reinterpret_cast<jlong>(new SkRuntimeShaderBuilder(std::move(result.effect)));
 }
 
 static void SkRuntimeShaderBuilder_delete(SkRuntimeShaderBuilder* builder) {

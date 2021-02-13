@@ -53,7 +53,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
 
         /**
          * Callback for listeners to be able to update the state of any UI tracking connectivity
-         *  @param statusIcon the icon that should be shown in the status bar
+         * @param statusIcon the icon that should be shown in the status bar
          * @param qsIcon the icon to show in Quick Settings
          * @param statusType the resId of the data type icon (e.g. LTE) to show in the status bar
          * @param qsType similar to above, the resId of the data type icon to show in Quick Settings
@@ -95,11 +95,11 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 boolean noNetworksAvailable) {}
 
         /**
-         * Callback for listeners to be able to update the no calling & SMS status
-         * @param noCalling whether the calling and SMS is not working.
+         * Callback for listeners to be able to update the call indicator
+         * @param statusIcon the icon for the call indicator
          * @param subId subscription ID for which to update the UI
          */
-        default void setNoCallingStatus(boolean noCalling, int subId) {}
+        default void setCallIndicator(IconState statusIcon, int subId) {}
     }
 
     public interface EmergencyListener {

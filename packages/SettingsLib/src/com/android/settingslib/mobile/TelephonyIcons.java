@@ -317,5 +317,21 @@ public class TelephonyIcons {
         ICON_NAME_TO_ICON.put("datadisable", DATA_DISABLED);
         ICON_NAME_TO_ICON.put("notdefaultdata", NOT_DEFAULT_DATA);
     }
+
+    public static final int[] WIFI_CALL_STRENGTH_ICONS = {
+        R.drawable.ic_wifi_call_strength_1,
+        R.drawable.ic_wifi_call_strength_1,
+        R.drawable.ic_wifi_call_strength_2,
+        R.drawable.ic_wifi_call_strength_3,
+        R.drawable.ic_wifi_call_strength_3
+    };
+
+    public static final int[] MOBILE_CALL_STRENGTH_ICONS = {
+        R.drawable.ic_mobile_call_strength_1,
+        R.drawable.ic_mobile_call_strength_1,
+        R.drawable.ic_mobile_call_strength_2,
+        R.drawable.ic_mobile_call_strength_3,
+        R.drawable.ic_mobile_call_strength_3
+    };
 }
 

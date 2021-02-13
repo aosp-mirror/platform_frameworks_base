@@ -45,6 +45,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -86,10 +87,12 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
@@ -248,38 +251,19 @@ public class BubblesManager implements Dumpable {
                 });
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
-            private <T> T executeBlockingForResult(Supplier<T> runnable, Executor executor,
-                    Class clazz) {
-                if (Looper.myLooper() == Looper.getMainLooper()) {
-                    return runnable.get();
-                }
-                final T[] result = (T[]) Array.newInstance(clazz, 1);
-                final CountDownLatch latch = new CountDownLatch(1);
-                executor.execute(() -> {
-                    result[0] = runnable.get();
-                    latch.countDown();
-                });
-                try {
-                    latch.await();
-                    return result[0];
-                } catch (InterruptedException e) {
-                    return null;
-                }
-            }
-
             @Override
-            @Nullable
-            public BubbleEntry getPendingOrActiveEntry(String key) {
-                return executeBlockingForResult(() -> {
+            public void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback) {
+                sysuiMainExecutor.execute(() -> {
                     NotificationEntry entry =
                             mNotificationEntryManager.getPendingOrActiveNotif(key);
-                    return entry == null ? null : notifToBubbleEntry(entry);
-                }, sysuiMainExecutor, BubbleEntry.class);
+                    callback.accept(entry == null ? null : notifToBubbleEntry(entry));
+                });
             }
 
             @Override
-            public List<BubbleEntry> getShouldRestoredEntries(ArraySet<String> savedBubbleKeys) {
-                return executeBlockingForResult(() -> {
+            public void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,
+                    Consumer<List<BubbleEntry>> callback) {
+                sysuiMainExecutor.execute(() -> {
                     List<BubbleEntry> result = new ArrayList<>();
                     List<NotificationEntry> activeEntries =
                             mNotificationEntryManager.getActiveNotificationsForCurrentUser();
@@ -291,27 +275,8 @@ public class BubblesManager implements Dumpable {
                             result.add(notifToBubbleEntry(entry));
                         }
                     }
-                    return result;
-                }, sysuiMainExecutor, List.class);
-            }
-
-            @Override
-            public boolean isNotificationShadeExpand() {
-                return executeBlockingForResult(() -> {
-                    return mNotificationShadeWindowController.getPanelExpanded();
-                }, sysuiMainExecutor, Boolean.class);
-            }
-
-            @Override
-            public boolean shouldBubbleUp(String key) {
-                return executeBlockingForResult(() -> {
-                    final NotificationEntry entry =
-                            mNotificationEntryManager.getPendingOrActiveNotif(key);
-                    if (entry != null) {
-                        return mNotificationInterruptStateProvider.shouldBubbleUp(entry);
-                    }
-                    return false;
-                }, sysuiMainExecutor, Boolean.class);
+                    callback.accept(result);
+                });
             }
 
             @Override
@@ -587,7 +552,20 @@ public class BubblesManager implements Dumpable {
     }
 
     void onRankingUpdate(RankingMap rankingMap) {
-        mBubbles.onRankingUpdated(rankingMap);
+        String[] orderedKeys = rankingMap.getOrderedKeys();
+        HashMap<String, Pair<BubbleEntry, Boolean>> pendingOrActiveNotif = new HashMap<>();
+        for (int i = 0; i < orderedKeys.length; i++) {
+            String key = orderedKeys[i];
+            NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(key);
+            BubbleEntry bubbleEntry = entry != null
+                    ? notifToBubbleEntry(entry)
+                    : null;
+            boolean shouldBubbleUp = entry != null
+                    ? mNotificationInterruptStateProvider.shouldBubbleUp(entry)
+                    : false;
+            pendingOrActiveNotif.put(key, new Pair<>(bubbleEntry, shouldBubbleUp));
+        }
+        mBubbles.onRankingUpdated(rankingMap, pendingOrActiveNotif);
     }
 
     /**

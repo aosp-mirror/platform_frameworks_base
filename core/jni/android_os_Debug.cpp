@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <aidl/android/hardware/memtrack/DeviceInfo.h>
 #include <android-base/logging.h>
 #include <bionic/malloc.h>
 #include <debuggerd/client.h>
@@ -45,6 +46,7 @@
 #include "jni.h"
 #include <dmabufinfo/dmabuf_sysfs_stats.h>
 #include <dmabufinfo/dmabufinfo.h>
+#include <dmabufinfo/dmabuf_sysfs_stats.h>
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <memtrack/memtrack.h>
@@ -520,14 +522,15 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
     }
 
     if (outUssSwapPssRss != NULL) {
-        if (env->GetArrayLength(outUssSwapPssRss) >= 1) {
+        int outLen = env->GetArrayLength(outUssSwapPssRss);
+        if (outLen >= 1) {
             jlong* outUssSwapPssRssArray = env->GetLongArrayElements(outUssSwapPssRss, 0);
             if (outUssSwapPssRssArray != NULL) {
                 outUssSwapPssRssArray[0] = uss;
-                if (env->GetArrayLength(outUssSwapPssRss) >= 2) {
+                if (outLen >= 2) {
                     outUssSwapPssRssArray[1] = swapPss;
                 }
-                if (env->GetArrayLength(outUssSwapPssRss) >= 3) {
+                if (outLen >= 3) {
                     outUssSwapPssRssArray[2] = rss;
                 }
             }
@@ -536,10 +539,20 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
     }
 
     if (outMemtrack != NULL) {
-        if (env->GetArrayLength(outMemtrack) >= 1) {
+        int outLen = env->GetArrayLength(outMemtrack);
+        if (outLen >= 1) {
             jlong* outMemtrackArray = env->GetLongArrayElements(outMemtrack, 0);
             if (outMemtrackArray != NULL) {
                 outMemtrackArray[0] = memtrack;
+                if (outLen >= 2) {
+                    outMemtrackArray[1] = graphics_mem.graphics;
+                }
+                if (outLen >= 3) {
+                    outMemtrackArray[2] = graphics_mem.gl;
+                }
+                if (outLen >= 4) {
+                    outMemtrackArray[3] = graphics_mem.other;
+                }
             }
             env->ReleaseLongArrayElements(outMemtrack, outMemtrackArray, 0);
         }
@@ -838,6 +851,31 @@ static jlong android_os_Debug_getDmabufHeapPoolsSizeKb(JNIEnv* env, jobject claz
     return poolsSizeKb;
 }
 
+static jlong android_os_Debug_getGpuDmaBufUsageKb(JNIEnv* env, jobject clazz) {
+    std::vector<aidl::android::hardware::memtrack::DeviceInfo> gpu_device_info;
+    if (!memtrack_gpu_device_info(&gpu_device_info)) {
+        return -1;
+    }
+
+    dmabufinfo::DmabufSysfsStats stats;
+    if (!GetDmabufSysfsStats(&stats)) {
+        return -1;
+    }
+
+    jlong sizeKb = 0;
+    const auto& importer_stats = stats.importer_info();
+    for (const auto& dev_info : gpu_device_info) {
+        const auto& importer_info = importer_stats.find(dev_info.name);
+        if (importer_info == importer_stats.end()) {
+            continue;
+        }
+
+        sizeKb += importer_info->second.size;
+    }
+
+    return sizeKb;
+}
+
 static jlong android_os_Debug_getDmabufMappedSizeKb(JNIEnv* env, jobject clazz) {
     jlong dmabufPss = 0;
     std::vector<dmabufinfo::DmaBuffer> dmabufs;
@@ -946,6 +984,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonHeapsSizeKb },
     { "getDmabufTotalExportedKb", "()J",
             (void*)android_os_Debug_getDmabufTotalExportedKb },
+    { "getGpuDmaBufUsageKb", "()J",
+            (void*)android_os_Debug_getGpuDmaBufUsageKb },
     { "getIonPoolsSizeKb", "()J",
             (void*)android_os_Debug_getIonPoolsSizeKb },
     { "getDmabufMappedSizeKb", "()J",

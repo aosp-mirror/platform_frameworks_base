@@ -36,6 +36,7 @@ import java.util.List;
  * the current or specified Looper.
  */
 public class CallbackHandler extends Handler implements EmergencyListener, SignalCallback {
+    private static final String TAG = "CallbackHandler";
     private static final int MSG_EMERGENCE_CHANGED           = 0;
     private static final int MSG_SUBS_CHANGED                = 1;
     private static final int MSG_NO_SIM_VISIBLE_CHANGED      = 2;
@@ -198,17 +199,17 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     @Override
-    public void setNoCallingStatus(boolean noCalling, int subId) {
+    public void setCallIndicator(IconState statusIcon, int subId) {
         String log = new StringBuilder()
                 .append(SSDF.format(System.currentTimeMillis())).append(",")
-                .append("setNoCallingStatus: ")
-                .append("noCalling=").append(noCalling).append(",")
+                .append("setCallIndicator: ")
+                .append("statusIcon=").append(statusIcon).append(",")
                 .append("subId=").append(subId)
                 .toString();
         recordLastCallback(log);
         post(() -> {
             for (SignalCallback signalCluster : mSignalCallbacks) {
-                signalCluster.setNoCallingStatus(noCalling, subId);
+                signalCluster.setCallIndicator(statusIcon, subId);
             }
         });
     }
@@ -226,24 +227,11 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
 
     @Override
     public void setNoSims(boolean show, boolean simDetected) {
-        String log = new StringBuilder()
-                .append(SSDF.format(System.currentTimeMillis())).append(",")
-                .append("setNoSims: ")
-                .append("show=").append(show).append(",")
-                .append("simDetected=").append(simDetected)
-                .toString();
-        recordLastCallback(log);
         obtainMessage(MSG_NO_SIM_VISIBLE_CHANGED, show ? 1 : 0, simDetected ? 1 : 0).sendToTarget();
     }
 
     @Override
     public void setMobileDataEnabled(boolean enabled) {
-        String log = new StringBuilder()
-                .append(SSDF.format(System.currentTimeMillis())).append(",")
-                .append("setMobileDataEnabled: ")
-                .append("enabled=").append(enabled)
-                .toString();
-        recordLastCallback(log);
         obtainMessage(MSG_MOBILE_DATA_ENABLED_CHANGED, enabled ? 1 : 0, 0).sendToTarget();
     }
 
@@ -283,7 +271,8 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     protected void recordLastCallback(String callback) {
-        mHistory[mHistoryIndex++ & (HISTORY_SIZE - 1)] = callback;
+        mHistory[mHistoryIndex] = callback;
+        mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
     }
 
     /**
@@ -293,7 +282,9 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
         pw.println("  - CallbackHandler -----");
         int size = 0;
         for (int i = 0; i < HISTORY_SIZE; i++) {
-            if (mHistory[i] != null) size++;
+            if (mHistory[i] != null) {
+                size++;
+            }
         }
         // Print out the previous states in ordered number.
         for (int i = mHistoryIndex + HISTORY_SIZE - 1;
