@@ -206,7 +206,6 @@ public class DevicePolicyManager {
      * {@link android.os.Build.VERSION_CODES#N}</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_USER_CONSENT}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}, optional</li>
@@ -250,7 +249,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * </ul>
      *
      * <p>If provisioning fails, the device returns to its previous state.
@@ -289,7 +287,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DISCLAIMERS}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS}, optional</li>
      * </ul>
@@ -388,8 +385,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCALE}, optional</li>
@@ -438,8 +433,6 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SUPPORT_URL}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ORGANIZATION_NAME}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
@@ -654,7 +647,10 @@ public class DevicePolicyManager {
      *
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE} or
      * {@link #ACTION_PROVISION_MANAGED_DEVICE}.
+     *
+     * @deprecated Color customization is no longer supported in the provisioning flow.
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_MAIN_COLOR =
              "android.app.extra.PROVISIONING_MAIN_COLOR";
 
@@ -905,8 +901,10 @@ public class DevicePolicyManager {
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
      * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
+     * @deprecated This extra is no longer respected in the provisioning flow.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL =
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
@@ -930,9 +928,11 @@ public class DevicePolicyManager {
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
      * or {@link #ACTION_PROVISION_FINANCED_DEVICE}
      *
+     * @deprecated This extra is no longer respected in the provisioning flow.
      * @hide
      */
     @SystemApi
+    @Deprecated
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI =
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI";
 
@@ -2922,33 +2922,61 @@ public class DevicePolicyManager {
         return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
 
-    private static final String PREFIX_UNSAFE_OPERATION_REASON = "UNSAFE_OPERATION_REASON_";
+    private static final String PREFIX_OPERATION_SAFETY_REASON = "OPERATION_SAFETY_REASON_";
 
     /** @hide */
-    @IntDef(prefix = PREFIX_UNSAFE_OPERATION_REASON, value = {
-            UNSAFE_OPERATION_REASON_NONE,
-            UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION
+    @IntDef(prefix = PREFIX_OPERATION_SAFETY_REASON, value = {
+            OPERATION_SAFETY_REASON_NONE,
+            OPERATION_SAFETY_REASON_DRIVING_DISTRACTION
     })
     @Retention(RetentionPolicy.SOURCE)
-    public static @interface UnsafeOperationReason {
+    public static @interface OperationSafetyReason {
     }
 
     /** @hide */
     @TestApi
-    public static final int UNSAFE_OPERATION_REASON_NONE = -1;
+    public static final int OPERATION_SAFETY_REASON_NONE = -1;
 
     /**
      * Indicates that a {@link UnsafeStateException} was thrown because the operation would distract
      * the driver of the vehicle.
      */
-    public static final int UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION = 1;
+    public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
 
     /** @hide */
     @NonNull
     @TestApi
-    public static String unsafeOperationReasonToString(@UnsafeOperationReason int reason) {
+    public static String operationSafetyReasonToString(@OperationSafetyReason int reason) {
         return DebugUtils.constantToString(DevicePolicyManager.class,
-                PREFIX_UNSAFE_OPERATION_REASON, reason);
+                PREFIX_OPERATION_SAFETY_REASON, reason);
+    }
+
+    /** @hide */
+    public static boolean isValidOperationSafetyReason(@OperationSafetyReason int reason) {
+        return reason == OPERATION_SAFETY_REASON_DRIVING_DISTRACTION;
+    }
+
+    /**
+     * Checks if it's safe to run operations that can be affected by the given {@code reason}.
+     *
+     * <p><b>Note:/b> notice that the operation safety state might change between the time this
+     * method returns and the operation's method is called, so calls to the latter could still throw
+     * a {@link UnsafeStateException} even when this method returns {@code true}.
+     *
+     * @param reason currently, only supported reason is
+     * {@link #OPERATION_SAFETY_REASON_DRIVING_DISTRACTION}.
+     *
+     * @return whether it's safe to run operations that can be affected by the given {@code reason}.
+     */
+    // TODO(b/173541467): should it throw SecurityException if caller is not admin?
+    public boolean isSafeOperation(@OperationSafetyReason int reason) {
+        if (mService == null) return false;
+
+        try {
+            return mService.isSafeOperation(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */
@@ -13157,7 +13185,7 @@ public class DevicePolicyManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
     public void setNextOperationSafety(@DevicePolicyOperation int operation,
-            @UnsafeOperationReason int reason) {
+            @OperationSafetyReason int reason) {
         if (mService != null) {
             try {
                 mService.setNextOperationSafety(operation, reason);

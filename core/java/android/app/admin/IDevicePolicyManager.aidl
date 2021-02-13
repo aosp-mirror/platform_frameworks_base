@@ -492,6 +492,7 @@ interface IDevicePolicyManager {
     boolean canProfileOwnerResetPasswordWhenLocked(int userId);
 
     void setNextOperationSafety(int operation, int reason);
+    boolean isSafeOperation(int reason);
 
     String getEnrollmentSpecificId(String callerPackage);
     void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);

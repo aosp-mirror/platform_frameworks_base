@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.android.settingslib.SignalIcon.IconGroup;
 import com.android.settingslib.SignalIcon.State;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
@@ -167,8 +168,8 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         }
     }
 
-    protected final void notifyNoCallingStatusChange(boolean noCalling, int subId) {
-        mCallbackHandler.setNoCallingStatus(noCalling, subId);
+    protected final void notifyCallStateChange(IconState statusIcon, int subId) {
+        mCallbackHandler.setCallIndicator(statusIcon, subId);
     }
 
     /**
@@ -187,7 +188,8 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
      * and last value of any state data.
      */
     protected void recordLastState() {
-        mHistory[mHistoryIndex++ & (HISTORY_SIZE - 1)].copyFrom(mLastState);
+        mHistory[mHistoryIndex].copyFrom(mLastState);
+        mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
     }
 
     public void dump(PrintWriter pw) {

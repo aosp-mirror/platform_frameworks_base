@@ -225,6 +225,7 @@ LIBANDROID {
     AStorageManager_unmountObb;
     ASurfaceControl_create; # introduced=29
     ASurfaceControl_createFromWindow; # introduced=29
+    ASurfaceControl_acquire; # introduced=31
     ASurfaceControl_release; # introduced=29
     ASurfaceTexture_acquireANativeWindow; # introduced=28
     ASurfaceTexture_attachToGLContext; # introduced=28

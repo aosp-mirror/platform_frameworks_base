@@ -15,6 +15,7 @@ import android.net.NetworkInfo;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.telephony.CellSignalStrength;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -240,6 +241,28 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
             setConnectivityViaBroadcastForVcn(
                     NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
             verifyLastMobileDataIndicatorsForVcn(false, testLevel, TelephonyIcons.ICON_CWF, false);
+        }
+    }
+
+    @Test
+    public void testCallStrengh() {
+        String testSsid = "Test SSID";
+        setWifiEnabled(true);
+        setWifiState(true, testSsid);
+        // Set the ImsType to be IMS_TYPE_WLAN
+        setImsType(2);
+        setWifiLevel(1);
+        for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
+            setWifiLevel(testLevel);
+            verifyLastCallStrength(TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[testLevel]);
+        }
+        // Set the ImsType to be IMS_TYPE_WWAN
+        setImsType(1);
+        for (int testStrength = 0;
+                testStrength < CellSignalStrength.getNumSignalStrengthLevels(); testStrength++) {
+            setupDefaultSignal();
+            setLevel(testStrength);
+            verifyLastCallStrength(TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[testStrength]);
         }
     }
 

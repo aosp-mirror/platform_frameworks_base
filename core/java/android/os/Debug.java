@@ -1902,7 +1902,8 @@ public final class Debug
      * Retrieves the PSS memory used by the process as given by the smaps. Optionally supply a long
      * array of up to 3 entries to also receive (up to 3 values in order): the Uss and SwapPss and
      * Rss (only filled in as of {@link android.os.Build.VERSION_CODES#P}) of the process, and
-     * another array to also retrieve the separate memtrack size.
+     * another array to also retrieve the separate memtrack sizes (up to 4 values in order): the
+     * total memtrack reported size, memtrack graphics, memtrack gl and memtrack other.
      *
      * @return The PSS memory usage, or 0 if failed to retrieve (i.e., given pid has gone).
      * @hide
@@ -2587,6 +2588,13 @@ public final class Debug
      * @hide
      */
     public static native long getIonPoolsSizeKb();
+
+    /**
+     * Return GPU DMA buffer usage in kB or -1 on error.
+     *
+     * @hide
+     */
+    public static native long getGpuDmaBufUsageKb();
 
     /**
      * Return DMA-BUF memory mapped by processes in kB.

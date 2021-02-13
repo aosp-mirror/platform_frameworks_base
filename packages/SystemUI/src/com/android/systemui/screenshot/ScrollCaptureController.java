@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
+
 import android.annotation.IdRes;
 import android.annotation.UiThread;
 import android.content.ComponentName;
@@ -27,11 +29,22 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
@@ -123,8 +136,10 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mCallback = callback;
 
         setContentView(R.layout.long_screenshot);
+        mWindow.setCallback(new WindowCallbacks(this::doFinish));
         mWindow.getDecorView().getViewTreeObserver()
                 .addOnComputeInternalInsetsListener(this);
+
         mPreview = findViewById(R.id.preview);
 
         mSave = findViewById(R.id.save);
@@ -332,6 +347,132 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
             mPreview.setImageDrawable(mImageTileSet.getDrawable());
             mMagnifierView.setImageTileset(mImageTileSet);
             mCropView.animateBoundaryTo(CropView.CropBoundary.BOTTOM, 0.5f);
+        }
+    }
+
+    private static class WindowCallbacks implements Window.Callback {
+
+        private final Runnable mFinish;
+
+        WindowCallbacks(Runnable finish) {
+            mFinish = finish;
+        }
+
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent event) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                if (DEBUG_INPUT) {
+                    Log.d(TAG, "onKeyEvent: KeyEvent.KEYCODE_BACK");
+                }
+                mFinish.run();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean dispatchTrackballEvent(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean dispatchGenericMotionEvent(MotionEvent event) {
+            return false;
+        }
+
+        @Override
+        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public View onCreatePanelView(int featureId) {
+            return null;
+        }
+
+        @Override
+        public boolean onCreatePanelMenu(int featureId, @NonNull Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onPreparePanel(int featureId, @Nullable View view, @NonNull Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onMenuOpened(int featureId, @NonNull Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onMenuItemSelected(int featureId, @NonNull MenuItem item) {
+            return false;
+        }
+
+        @Override
+        public void onWindowAttributesChanged(WindowManager.LayoutParams attrs) {
+        }
+
+        @Override
+        public void onContentChanged() {
+        }
+
+        @Override
+        public void onWindowFocusChanged(boolean hasFocus) {
+        }
+
+        @Override
+        public void onAttachedToWindow() {
+        }
+
+        @Override
+        public void onDetachedFromWindow() {
+        }
+
+        @Override
+        public void onPanelClosed(int featureId, @NonNull Menu menu) {
+        }
+
+        @Override
+        public boolean onSearchRequested() {
+            return false;
+        }
+
+        @Override
+        public boolean onSearchRequested(SearchEvent searchEvent) {
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+            return null;
+        }
+
+        @Override
+        public void onActionModeStarted(ActionMode mode) {
+        }
+
+        @Override
+        public void onActionModeFinished(ActionMode mode) {
         }
     }
 }

@@ -1245,9 +1245,10 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     @Override
     public IRestoreSession beginRestoreSessionForUser(
-            int userId, String packageName, String transportID) throws RemoteException {
+            int userId, String packageName, String transportID,
+            @OperationType int operationType) throws RemoteException {
         return isUserReadyForBackup(userId)
-                ? beginRestoreSession(userId, packageName, transportID) : null;
+                ? beginRestoreSession(userId, packageName, transportID, operationType) : null;
     }
 
     /**
@@ -1256,13 +1257,15 @@ public class BackupManagerService extends IBackupManager.Stub {
      */
     @Nullable
     public IRestoreSession beginRestoreSession(
-            @UserIdInt int userId, String packageName, String transportName) {
+            @UserIdInt int userId, String packageName, String transportName,
+            @OperationType int operationType) {
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(userId, "beginRestoreSession()");
 
         return userBackupManagerService == null
                 ? null
-                : userBackupManagerService.beginRestoreSession(packageName, transportName);
+                : userBackupManagerService.beginRestoreSession(packageName, transportName,
+                        operationType);
     }
 
     @Override
@@ -1347,15 +1350,15 @@ public class BackupManagerService extends IBackupManager.Stub {
         if (!isUserReadyForBackup(userId)) {
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
-        return requestBackup(userId, packages, observer, monitor, flags);
+        return requestBackup(userId, packages, observer, monitor, flags, OperationType.BACKUP);
     }
 
     @Override
     public int requestBackup(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags)
+            IBackupManagerMonitor monitor, int flags, @OperationType int operationType)
             throws RemoteException {
         return requestBackup(binderGetCallingUserId(), packages,
-                observer, monitor, flags);
+                observer, monitor, flags, operationType);
     }
 
     /**
@@ -1367,13 +1370,15 @@ public class BackupManagerService extends IBackupManager.Stub {
             String[] packages,
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
-            int flags) {
+            int flags,
+            @OperationType int operationType) {
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(userId, "requestBackup()");
 
         return userBackupManagerService == null
                 ? BackupManager.ERROR_BACKUP_NOT_ALLOWED
-                : userBackupManagerService.requestBackup(packages, observer, monitor, flags);
+                : userBackupManagerService.requestBackup(packages, observer, monitor, flags,
+                        operationType);
     }
 
     @Override

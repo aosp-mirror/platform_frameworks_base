@@ -39,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -51,7 +52,7 @@ public class WorkCountTrackerTest {
     private static final String TAG = "WorkerCountTrackerTest";
 
     private static final double[] EQUAL_PROBABILITY_CDF =
-            buildCdf(1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES,
+            buildWorkTypeCdf(1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES, 1.0 / NUM_WORK_TYPES,
                     1.0 / NUM_WORK_TYPES);
 
     private Random mRandom;
@@ -64,18 +65,19 @@ public class WorkCountTrackerTest {
     }
 
     @NonNull
-    private static double[] buildCdf(double pTop, double pEj, double pBg, double pBgUser) {
-        double[] cdf = new double[JobConcurrencyManager.NUM_WORK_TYPES];
+    private static double[] buildWorkTypeCdf(double pTop, double pEj, double pBg, double pBgUser) {
+        return buildCdf(pTop, pEj, pBg, pBgUser);
+    }
+
+    @NonNull
+    private static double[] buildCdf(double... probs) {
+        double[] cdf = new double[probs.length];
         double sum = 0;
 
-        sum += pTop;
-        cdf[0] = sum;
-        sum += pEj;
-        cdf[1] = sum;
-        sum += pBg;
-        cdf[2] = sum;
-        sum += pBgUser;
-        cdf[3] = sum;
+        for (int i = 0; i < probs.length; ++i) {
+            sum += probs[i];
+            cdf[i] = sum;
+        }
 
         if (Double.compare(1, sum) != 0) {
             throw new IllegalArgumentException("probabilities don't sum to one: " + sum);
@@ -83,25 +85,30 @@ public class WorkCountTrackerTest {
         return cdf;
     }
 
-    @JobConcurrencyManager.WorkType
-    static int getRandomWorkType(double[] cdf, double rand) {
+    static int getRandomIndex(double[] cdf, double rand) {
         for (int i = cdf.length - 1; i >= 0; --i) {
             if (rand < cdf[i] && (i == 0 || rand > cdf[i - 1])) {
-                switch (i) {
-                    case 0:
-                        return WORK_TYPE_TOP;
-                    case 1:
-                        return WORK_TYPE_EJ;
-                    case 2:
-                        return WORK_TYPE_BG;
-                    case 3:
-                        return WORK_TYPE_BGUSER;
-                    default:
-                        throw new IllegalStateException("Unknown work type");
-                }
+                return i;
             }
         }
-        throw new IllegalStateException("Couldn't pick random work type");
+        throw new IllegalStateException("Couldn't pick random index");
+    }
+
+    @JobConcurrencyManager.WorkType
+    static int getRandomWorkType(double[] cdf, double rand) {
+        final int index = getRandomIndex(cdf, rand);
+        switch (index) {
+            case 0:
+                return WORK_TYPE_TOP;
+            case 1:
+                return WORK_TYPE_EJ;
+            case 2:
+                return WORK_TYPE_BG;
+            case 3:
+                return WORK_TYPE_BGUSER;
+            default:
+                throw new IllegalStateException("Unknown work type");
+        }
     }
 
     /**
@@ -110,25 +117,59 @@ public class WorkCountTrackerTest {
     class Jobs {
         public final SparseIntArray running = new SparseIntArray();
         public final SparseIntArray pending = new SparseIntArray();
+        public final List<Integer> pendingMultiTypes = new ArrayList<>();
 
-        public void maybeEnqueueJobs(double probStart, double[] typeCdf) {
+        /**
+         * @param probStart   Probability of starting a job
+         * @param typeCdf     The CDF representing the probability of each work type
+         * @param numTypesCdf The CDF representing the probability of a job having X different
+         *                    work types. Each index i represents i+1 work types (ie. index 0 = 1
+         *                    work type, index 3 = 4 work types).
+         */
+        public void maybeEnqueueJobs(double probStart, double[] typeCdf, double[] numTypesCdf) {
+            assertThat(numTypesCdf.length).isAtMost(NUM_WORK_TYPES);
+            assertThat(numTypesCdf.length).isAtLeast(1);
+
             while (mRandom.nextDouble() < probStart) {
-                final int workType = getRandomWorkType(typeCdf, mRandom.nextDouble());
-                pending.put(workType, pending.get(workType) + 1);
+                final int numTypes = getRandomIndex(numTypesCdf, mRandom.nextDouble()) + 1;
+                int types = WORK_TYPE_NONE;
+                for (int i = 0; i < numTypes; ++i) {
+                    types |= getRandomWorkType(typeCdf, mRandom.nextDouble());
+                }
+                addPending(types, 1);
             }
         }
 
-        public void maybeFinishJobs(double probStop) {
-            for (int i = running.get(WORK_TYPE_BG); i > 0; i--) {
-                if (mRandom.nextDouble() < probStop) {
-                    running.put(WORK_TYPE_BG, running.get(WORK_TYPE_BG) - 1);
-                    mWorkCountTracker.onJobFinished(WORK_TYPE_BG);
+        void addPending(int allWorkTypes, int num) {
+            for (int n = 0; n < num; ++n) {
+                for (int i = 0; i < 32; ++i) {
+                    final int type = 1 << i;
+                    if ((allWorkTypes & type) != 0) {
+                        pending.put(type, pending.get(type) + 1);
+                    }
+                }
+                pendingMultiTypes.add(allWorkTypes);
+            }
+        }
+
+        void removePending(int allWorkTypes) {
+            for (int i = 0; i < 32; ++i) {
+                final int type = 1 << i;
+                if ((allWorkTypes & type) != 0) {
+                    pending.put(type, pending.get(type) - 1);
                 }
             }
-            for (int i = running.get(WORK_TYPE_TOP); i > 0; i--) {
-                if (mRandom.nextDouble() < probStop) {
-                    running.put(WORK_TYPE_TOP, running.get(WORK_TYPE_TOP) - 1);
-                    mWorkCountTracker.onJobFinished(WORK_TYPE_TOP);
+            pendingMultiTypes.remove(Integer.valueOf(allWorkTypes));
+        }
+
+        public void maybeFinishJobs(double probStop) {
+            for (int i = running.size() - 1; i >= 0; --i) {
+                final int workType = running.keyAt(i);
+                for (int c = running.valueAt(i); c > 0; --c) {
+                    if (mRandom.nextDouble() < probStop) {
+                        running.put(workType, running.get(workType) - 1);
+                        mWorkCountTracker.onJobFinished(workType);
+                    }
                 }
             }
         }
@@ -171,6 +212,15 @@ public class WorkCountTrackerTest {
         return false;
     }
 
+    private int getPendingMultiType(Jobs jobs, @JobConcurrencyManager.WorkType int workType) {
+        for (int multiType : jobs.pendingMultiTypes) {
+            if ((multiType & workType) != 0) {
+                return multiType;
+            }
+        }
+        throw new IllegalStateException("No pending multi type with work type: " + workType);
+    }
+
     private void startPendingJobs(Jobs jobs) {
         while (hasStartablePendingJob(jobs)) {
             final int startingWorkType =
@@ -178,9 +228,10 @@ public class WorkCountTrackerTest {
 
             if (jobs.pending.get(startingWorkType) > 0
                     && mWorkCountTracker.canJobStart(startingWorkType) != WORK_TYPE_NONE) {
-                jobs.pending.put(startingWorkType, jobs.pending.get(startingWorkType) - 1);
+                final int pendingMultiType = getPendingMultiType(jobs, startingWorkType);
+                jobs.removePending(pendingMultiType);
                 jobs.running.put(startingWorkType, jobs.running.get(startingWorkType) + 1);
-                mWorkCountTracker.stageJob(startingWorkType);
+                mWorkCountTracker.stageJob(startingWorkType, pendingMultiType);
                 mWorkCountTracker.onJobStarted(startingWorkType);
             }
         }
@@ -192,12 +243,17 @@ public class WorkCountTrackerTest {
     private void checkRandom(Jobs jobs, int numTests, int totalMax,
             @NonNull List<Pair<Integer, Integer>> minLimits,
             @NonNull List<Pair<Integer, Integer>> maxLimits,
-            double probStart, double[] typeCdf, double probStop) {
+            double probStart, double[] typeCdf, double[] numTypesCdf, double probStop) {
+        int minExpected = 0;
+        for (Pair<Integer, Integer> minLimit : minLimits) {
+            minExpected = Math.min(minLimit.second, minExpected);
+        }
         for (int i = 0; i < numTests; i++) {
             jobs.maybeFinishJobs(probStop);
-            jobs.maybeEnqueueJobs(probStart, typeCdf);
+            jobs.maybeEnqueueJobs(probStart, typeCdf, numTypesCdf);
 
             recount(jobs, totalMax, minLimits, maxLimits);
+            final int numPending = jobs.pendingMultiTypes.size();
             startPendingJobs(jobs);
 
             int totalRunning = 0;
@@ -209,6 +265,7 @@ public class WorkCountTrackerTest {
                 totalRunning += numRunning;
             }
             assertThat(totalRunning).isAtMost(totalMax);
+            assertThat(totalRunning).isAtLeast(Math.min(minExpected, numPending));
             for (Pair<Integer, Integer> maxLimit : maxLimits) {
                 assertWithMessage("Work type " + maxLimit.first + " is running too many jobs")
                         .that(jobs.running.get(maxLimit.first)).isAtMost(maxLimit.second);
@@ -233,7 +290,7 @@ public class WorkCountTrackerTest {
         final double probStart = 0.1;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
-                EQUAL_PROBABILITY_CDF, probStop);
+                EQUAL_PROBABILITY_CDF, EQUAL_PROBABILITY_CDF, probStop);
     }
 
     @Test
@@ -246,10 +303,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of();
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(0.5, 0, 0.5, 0);
+        final double[] cdf = buildWorkTypeCdf(0.5, 0, 0.5, 0);
+        final double[] numTypesCdf = buildCdf(.5, .3, .15, .05);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -262,10 +321,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(1.0 / 3, 0, 1.0 / 3, 1.0 / 3);
+        final double[] cdf = buildWorkTypeCdf(1.0 / 3, 0, 1.0 / 3, 1.0 / 3);
+        final double[] numTypesCdf = buildCdf(.75, .2, .05);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -278,10 +339,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final List<Pair<Integer, Integer>> minLimits = List.of();
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(1.0 / 3, 0, 1.0 / 3, 1.0 / 3);
+        final double[] cdf = buildWorkTypeCdf(1.0 / 3, 0, 1.0 / 3, 1.0 / 3);
+        final double[] numTypesCdf = buildCdf(.05, .95);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -294,10 +357,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(0.1, 0, 0.8, .1);
+        final double[] cdf = buildWorkTypeCdf(0.1, 0, 0.8, .1);
+        final double[] numTypesCdf = buildCdf(.5, .3, .15, .05);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -310,10 +375,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(0.9, 0, 0.1, 0);
+        final double[] cdf = buildWorkTypeCdf(0.9, 0, 0.1, 0);
+        final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -326,10 +393,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 2));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildCdf(0.1, 0, 0.1, .8);
+        final double[] cdf = buildWorkTypeCdf(0.1, 0, 0.1, .8);
+        final double[] numTypesCdf = buildCdf(0.5, 0.5);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -343,10 +412,12 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.4;
-        final double[] cdf = buildCdf(0.9, 0, 0.05, 0.05);
+        final double[] cdf = buildWorkTypeCdf(0.9, 0, 0.05, 0.05);
+        final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -360,10 +431,12 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(0, 0, 0.5, 0.5);
+        final double[] cdf = buildWorkTypeCdf(0, 0, 0.5, 0.5);
+        final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -377,10 +450,12 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(0, 0, 0.1, 0.9);
+        final double[] cdf = buildWorkTypeCdf(0, 0, 0.1, 0.9);
+        final double[] numTypesCdf = buildCdf(0.9, 0.1);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -394,10 +469,12 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_BG, 2), Pair.create(WORK_TYPE_BGUSER, 1));
         final double probStop = 0.5;
-        final double[] cdf = buildCdf(0, 0, 0.9, 0.1);
+        final double[] cdf = buildWorkTypeCdf(0, 0, 0.9, 0.1);
+        final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -410,10 +487,12 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildCdf(0.5, 0.5, 0, 0);
+        final double[] cdf = buildWorkTypeCdf(0.5, 0.5, 0, 0);
+        final double[] numTypesCdf = buildCdf(0.1, 0.7, 0.2);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -430,10 +509,11 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1));
         final double probStop = 0.01;
+        final double[] numTypesCdf = buildCdf(0, 0.05, 0.05, 0.9);
         final double probStart = 0.99;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
-                EQUAL_PROBABILITY_CDF, probStop);
+                EQUAL_PROBABILITY_CDF, numTypesCdf, probStop);
     }
 
     @Test
@@ -446,10 +526,12 @@ public class WorkCountTrackerTest {
                 List.of(Pair.create(WORK_TYPE_EJ, 5), Pair.create(WORK_TYPE_BG, 4));
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildCdf(.1, 0.5, 0.35, 0.05);
+        final double[] cdf = buildWorkTypeCdf(.1, 0.5, 0.35, 0.05);
+        final double[] numTypesCdf = buildCdf(1);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     @Test
@@ -464,10 +546,12 @@ public class WorkCountTrackerTest {
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2));
         final double probStop = 0.4;
-        final double[] cdf = buildCdf(0.01, 0.49, 0.1, 0.4);
+        final double[] cdf = buildWorkTypeCdf(0.01, 0.49, 0.1, 0.4);
+        final double[] numTypesCdf = buildCdf(0.7, 0.3);
         final double probStart = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart, cdf, probStop);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
+                cdf, numTypesCdf, probStop);
     }
 
     /** Used by the following tests */
@@ -483,7 +567,7 @@ public class WorkCountTrackerTest {
             jobs.running.put(run.first, run.second);
         }
         for (Pair<Integer, Integer> pend : pending) {
-            jobs.pending.put(pend.first, pend.second);
+            jobs.addPending(pend.first, pend.second);
         }
 
         recount(jobs, totalMax, minLimits, maxLimits);
@@ -651,14 +735,32 @@ public class WorkCountTrackerTest {
                         Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 1)),
                 /* resPen */ List.of(
                         Pair.create(WORK_TYPE_BG, 1), Pair.create(WORK_TYPE_BGUSER, 2)));
+
+        // Test multi-types
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 1)),
+                /* run */ List.of(),
+                /* pen */ List.of(
+                        // 2 of these as TOP, 1 as EJ
+                        Pair.create(WORK_TYPE_TOP | WORK_TYPE_EJ, 3),
+                        // 1 as EJ, 2 as BG
+                        Pair.create(WORK_TYPE_EJ | WORK_TYPE_BG, 3),
+                        Pair.create(WORK_TYPE_BG, 4),
+                        Pair.create(WORK_TYPE_BGUSER, 1)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 2),
+                        Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 2)),
+                /* resPen */ List.of(
+                        Pair.create(WORK_TYPE_BG, 4), Pair.create(WORK_TYPE_BGUSER, 1)));
     }
 
     /** Tests that the counter updates properly when jobs are stopped. */
     @Test
     public void testJobLifecycleLoop() {
         final Jobs jobs = new Jobs();
-        jobs.pending.put(WORK_TYPE_TOP, 11);
-        jobs.pending.put(WORK_TYPE_BG, 10);
+        jobs.addPending(WORK_TYPE_TOP, 11);
+        jobs.addPending(WORK_TYPE_BG, 10);
 
         final int totalMax = 6;
         final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 1));
@@ -728,5 +830,150 @@ public class WorkCountTrackerTest {
         assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(5);
         assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
         assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(3);
+    }
+
+    /** Tests that the counter updates properly when jobs are stopped. */
+    @Test
+    public void testJobLifecycleLoop_Multitype() {
+        final Jobs jobs = new Jobs();
+        jobs.addPending(WORK_TYPE_TOP, 6); // a
+        jobs.addPending(WORK_TYPE_TOP | WORK_TYPE_EJ, 5); // b
+        jobs.addPending(WORK_TYPE_BG, 10); // c
+
+        final int totalMax = 8;
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_EJ, 1), Pair.create(WORK_TYPE_BG, 1));
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 5));
+
+        recount(jobs, totalMax, minLimits, maxLimits);
+
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(11);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isEqualTo(5);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(10);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(6);
+        assertThat(jobs.running.get(WORK_TYPE_EJ)).isEqualTo(1);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(4);
+        // Since starting happens in random order, all EJs could have run first.
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(9);
+
+        // Stop all jobs
+        jobs.maybeFinishJobs(1);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_TOP);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_EJ)).isEqualTo(WORK_TYPE_EJ);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP) + jobs.running.get(WORK_TYPE_EJ)).isEqualTo(4);
+        // Depending on the order jobs start, we may run all TOP/EJ combos as TOP and reserve a slot
+        // for EJ, which would reduce BG count to 3 instead of 4.
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isAtLeast(3);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isAtMost(4);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isAtLeast(5);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isAtMost(6);
+
+        // Stop only a bg job and make sure the counter only allows another bg job to start.
+        jobs.running.put(WORK_TYPE_BG, jobs.running.get(WORK_TYPE_BG) - 1);
+        mWorkCountTracker.onJobFinished(WORK_TYPE_BG);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_NONE);
+        // Depending on the order jobs start, we may run all TOP/EJ combos as TOP and reserve a slot
+        // for EJ, which would reduce BG count to 3 instead of 4.
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP) + jobs.running.get(WORK_TYPE_EJ)).isEqualTo(4);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isAtLeast(3);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isAtMost(4);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isAtLeast(4);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isAtMost(5);
+    }
+
+    /** Tests that the counter updates properly when jobs are stopped. */
+    @Test
+    public void testJobLifecycleLoop_Multitype_RandomOrder() {
+        final Jobs jobs = new Jobs();
+        SparseIntArray multiToCount = new SparseIntArray();
+        multiToCount.put(WORK_TYPE_TOP, 6); // a
+        multiToCount.put(WORK_TYPE_TOP | WORK_TYPE_EJ, 5); // b
+        multiToCount.put(WORK_TYPE_EJ | WORK_TYPE_BG, 5); // c
+        multiToCount.put(WORK_TYPE_BG, 5); // d
+        while (multiToCount.size() > 0) {
+            final int index = mRandom.nextInt(multiToCount.size());
+            final int count = multiToCount.valueAt(index);
+            jobs.addPending(multiToCount.keyAt(index), 1);
+            if (count <= 1) {
+                multiToCount.removeAt(index);
+            } else {
+                multiToCount.put(multiToCount.keyAt(index), count - 1);
+            }
+        }
+
+        final int totalMax = 8;
+        final List<Pair<Integer, Integer>> minLimits =
+                List.of(Pair.create(WORK_TYPE_EJ, 1), Pair.create(WORK_TYPE_BG, 1));
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 5));
+
+        recount(jobs, totalMax, minLimits, maxLimits);
+
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(11);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isEqualTo(10);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(10);
+
+        startPendingJobs(jobs);
+
+        // Random order, but we should have 6 TOP, 1 EJ, and 1 BG running.
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(6);
+        assertThat(jobs.running.get(WORK_TYPE_EJ)).isEqualTo(1);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(4);
+        // Can't equate pending EJ since some could be running as TOP and BG
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isAtLeast(2);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(9);
+
+        // Stop all jobs
+        jobs.maybeFinishJobs(1);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_TOP);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_EJ)).isEqualTo(WORK_TYPE_EJ);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+
+        startPendingJobs(jobs);
+
+        // Random order, but we should have 4 TOP, 1 EJ, and 1 BG running.
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isAtLeast(1);
+        assertThat(jobs.running.get(WORK_TYPE_EJ)).isAtLeast(1);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        // At this point, all TOP should be running (or have already run).
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isAtLeast(2);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(5);
+
+        // Stop only a bg job and make sure the counter only allows another bg job to start.
+        jobs.running.put(WORK_TYPE_BG, jobs.running.get(WORK_TYPE_BG) - 1);
+        mWorkCountTracker.onJobFinished(WORK_TYPE_BG);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_NONE);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_EJ)).isEqualTo(WORK_TYPE_NONE);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isAtLeast(1);
+        assertThat(jobs.running.get(WORK_TYPE_EJ)).isAtLeast(1);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_EJ)).isAtLeast(2);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(4);
     }
 }

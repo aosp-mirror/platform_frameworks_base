@@ -34,8 +34,8 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.NoCallingIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -206,6 +206,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         Collections.reverse(iconStates);
 
         for (MobileIconState state : iconStates) {
+
             StatusBarIconHolder holder = mobileSlot.getHolderForTag(state.subId);
             if (holder == null) {
                 holder = StatusBarIconHolder.fromMobileIconState(state);
@@ -218,23 +219,25 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     }
 
     /**
-     * Accept a list of NoCallingIconStates, and show them in the same slot
+     * Accept a list of CallIndicatorIconStates, and show them in the same slot
      * @param slot StatusBar slot
      * @param states All of the no Calling & SMS icon states
      */
     @Override
-    public void setNoCallingIcons(String slot, List<NoCallingIconState> states) {
+    public void setCallIndicatorIcons(String slot, List<CallIndicatorIconState> states) {
         Slot noCallingSlot = getSlot(slot);
         int slotIndex = getSlotIndex(slot);
-
-        for (NoCallingIconState state : states) {
+        for (CallIndicatorIconState state : states) {
             StatusBarIconHolder holder = noCallingSlot.getHolderForTag(state.subId);
             if (holder == null) {
-                holder = StatusBarIconHolder.fromNoCallingState(mContext, state);
-                holder.setVisible(state.visible);
+                holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
                 setIcon(slotIndex, holder);
             } else {
-                holder.setVisible(state.visible);
+                int resId = state.isNoCalling ? state.noCallingResId : state.callStrengthResId;
+                String contentDescription = state.isNoCalling
+                        ? state.noCallingDescription : state.callStrengthDescription;
+                holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                        Icon.createWithResource(mContext, resId), 0, 0, contentDescription));
                 setIcon(slotIndex, holder);
             }
         }

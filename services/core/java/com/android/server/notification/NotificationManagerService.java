@@ -177,6 +177,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
@@ -8969,7 +8970,8 @@ public class NotificationManagerService extends SystemService {
         NotificationListenerFilter nls = mListeners.getNotificationListenerFilter(listener.mKey);
         if (nls != null
                 && (!nls.isTypeAllowed(notificationType)
-                || !nls.isPackageAllowed(sbn.getPackageName()))) {
+                || !nls.isPackageAllowed(
+                        new VersionedPackage(sbn.getPackageName(), sbn.getUid())))) {
             return false;
         }
         return true;
@@ -9580,7 +9582,8 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_REQUESTED_LISTENER = "listener";
         static final String ATT_COMPONENT = "component";
         static final String ATT_TYPES = "types";
-        static final String ATT_PKGS = "pkgs";
+        static final String ATT_PKG = "pkg";
+        static final String ATT_UID = "uid";
         static final String TAG_APPROVED = "allowed";
         static final String TAG_DISALLOWED= "disallowed";
         static final String XML_SEPARATOR = ",";
@@ -9738,6 +9741,18 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
+
+            // clean up anything in the disallowed pkgs list
+            for (int i = 0; i < pkgList.length; i++) {
+                String pkg = pkgList[i];
+                int userId = UserHandle.getUserId(uidList[i]);
+                for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
+                    NotificationListenerFilter nlf = mRequestedNotificationListeners.valueAt(j);
+
+                    VersionedPackage ai = new VersionedPackage(pkg, uidList[i]);
+                    nlf.removePackage(ai);
+                }
+            }
         }
 
         @Override
@@ -9767,15 +9782,17 @@ public class NotificationManagerService extends SystemService {
                     int approved = FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ALERTING
                             | FLAG_FILTER_TYPE_SILENT | FLAG_FILTER_TYPE_ONGOING;
 
-                    ArraySet<String> disallowedPkgs = new ArraySet<>();
+                    ArraySet<VersionedPackage> disallowedPkgs = new ArraySet<>();
                     final int listenerOuterDepth = parser.getDepth();
                     while (XmlUtils.nextElementWithin(parser, listenerOuterDepth)) {
                         if (TAG_APPROVED.equals(parser.getName())) {
                             approved = XmlUtils.readIntAttribute(parser, ATT_TYPES);
                         } else if (TAG_DISALLOWED.equals(parser.getName())) {
-                            String pkgs = XmlUtils.readStringAttribute(parser, ATT_PKGS);
-                            if (!TextUtils.isEmpty(pkgs)) {
-                                disallowedPkgs = new ArraySet<>(pkgs.split(XML_SEPARATOR));
+                            String pkg = XmlUtils.readStringAttribute(parser, ATT_PKG);
+                            int uid = XmlUtils.readIntAttribute(parser, ATT_UID);
+                            if (!TextUtils.isEmpty(pkg)) {
+                                VersionedPackage ai = new VersionedPackage(pkg, uid);
+                                disallowedPkgs.add(ai);
                             }
                         }
                     }
@@ -9800,10 +9817,14 @@ public class NotificationManagerService extends SystemService {
                 XmlUtils.writeIntAttribute(out, ATT_TYPES, nlf.getTypes());
                 out.endTag(null, TAG_APPROVED);
 
-                out.startTag(null, TAG_DISALLOWED);
-                XmlUtils.writeStringAttribute(
-                        out, ATT_PKGS, String.join(XML_SEPARATOR, nlf.getDisallowedPackages()));
-                out.endTag(null, TAG_DISALLOWED);
+                for (VersionedPackage ai : nlf.getDisallowedPackages()) {
+                    if (!TextUtils.isEmpty(ai.getPackageName())) {
+                        out.startTag(null, TAG_DISALLOWED);
+                        XmlUtils.writeStringAttribute(out, ATT_PKG, ai.getPackageName());
+                        XmlUtils.writeIntAttribute(out, ATT_UID, ai.getVersionCode());
+                        out.endTag(null, TAG_DISALLOWED);
+                    }
+                }
 
                 out.endTag(null, TAG_REQUESTED_LISTENER);
             }

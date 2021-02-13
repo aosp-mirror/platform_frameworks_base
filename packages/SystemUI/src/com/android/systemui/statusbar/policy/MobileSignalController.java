@@ -26,6 +26,7 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Global;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
 import android.telephony.ServiceState;
@@ -34,12 +35,18 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
+import android.telephony.ims.ImsException;
+import android.telephony.ims.ImsMmTelManager;
+import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsRegistrationAttributes;
+import android.telephony.ims.RegistrationManager.RegistrationCallback;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.SignalIcon.MobileIconGroup;
 import com.android.settingslib.SignalIcon.MobileState;
 import com.android.settingslib.Utils;
@@ -65,13 +72,19 @@ import java.util.Map;
  */
 public class MobileSignalController extends SignalController<MobileState, MobileIconGroup> {
     private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
-
+    private static final int STATUS_HISTORY_SIZE = 64;
+    private static final int IMS_TYPE_WWAN = 1;
+    private static final int IMS_TYPE_WLAN = 2;
+    private static final int IMS_TYPE_WLAN_CROSS_SIM = 3;
     private final TelephonyManager mPhone;
+    private final ImsMmTelManager mImsMmTelManager;
     private final SubscriptionDefaults mDefaults;
     private final String mNetworkNameDefault;
     private final String mNetworkNameSeparator;
     private final ContentObserver mObserver;
     private final boolean mProviderModel;
+    private final Handler mReceiverHandler;
+    private int mImsType = IMS_TYPE_WWAN;
     // Save entire info for logging, we only use the id.
     final SubscriptionInfo mSubscriptionInfo;
     // @VisibleForDemoMode
@@ -86,16 +99,21 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
     private ServiceState mServiceState;
     private SignalStrength mSignalStrength;
+    private int mLastLevel;
     private MobileIconGroup mDefaultIcons;
     private Config mConfig;
     @VisibleForTesting
     boolean mInflateSignalStrengths = false;
     private MobileStatusTracker.Callback mCallback;
+    private RegistrationCallback mRegistrationCallback;
+    private int mLastWwanLevel;
+    private int mLastWlanLevel;
+    private int mLastWlanCrossSimLevel;
     @VisibleForTesting
     MobileStatusTracker mMobileStatusTracker;
 
-    // Save the previous HISTORY_SIZE states for logging.
-    private final String[] mMobileStatusHistory = new String[HISTORY_SIZE];
+    // Save the previous STATUS_HISTORY_SIZE states for logging.
+    private final String[] mMobileStatusHistory = new String[STATUS_HISTORY_SIZE];
     // Where to copy the next state into.
     private int mMobileStatusHistoryIndex;
 
@@ -116,6 +134,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 .toString();
         mNetworkNameDefault = getTextIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default).toString();
+        mReceiverHandler = new Handler(receiverLooper);
 
         mNetworkToIconLookup = mapIconSets(mConfig);
         mDefaultIcons = getDefaultIcons(mConfig);
@@ -133,6 +152,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             }
         };
         mCallback = new MobileStatusTracker.Callback() {
+            private String mLastStatus;
+
             @Override
             public void onMobileStatusChanged(boolean updateTelephony,
                     MobileStatus mobileStatus) {
@@ -141,11 +162,15 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                             + " updateTelephony=" + updateTelephony
                             + " mobileStatus=" + mobileStatus.toString());
                 }
-                String status = new StringBuilder()
-                        .append(SSDF.format(System.currentTimeMillis())).append(",")
-                        .append(mobileStatus.toString())
-                        .toString();
-                recordLastMobileStatus(status);
+                String currentStatus = mobileStatus.toString();
+                if (!currentStatus.equals(mLastStatus)) {
+                    mLastStatus = currentStatus;
+                    String status = new StringBuilder()
+                            .append(SSDF.format(System.currentTimeMillis())).append(",")
+                            .append(currentStatus)
+                            .toString();
+                    recordLastMobileStatus(status);
+                }
                 updateMobileStatus(mobileStatus);
                 if (updateTelephony) {
                     updateTelephony();
@@ -154,6 +179,53 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 }
             }
         };
+
+        mRegistrationCallback = new RegistrationCallback() {
+            @Override
+            public void onRegistered(ImsRegistrationAttributes attributes) {
+                Log.d(mTag, "onRegistered: " + "attributes=" + attributes);
+                int imsTransportType = attributes.getTransportType();
+                int registrationAttributes = attributes.getAttributeFlags();
+                if (imsTransportType == AccessNetworkConstants.TRANSPORT_TYPE_WWAN) {
+                    mImsType = IMS_TYPE_WWAN;
+                    IconState statusIcon = new IconState(
+                            true,
+                            getCallStrengthIcon(mLastWwanLevel, /* isWifi= */false),
+                            getCallStrengthDescription(mLastWwanLevel, /* isWifi= */false));
+                    notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+                } else if (imsTransportType == AccessNetworkConstants.TRANSPORT_TYPE_WLAN) {
+                    if (registrationAttributes == 0) {
+                        mImsType = IMS_TYPE_WLAN;
+                        IconState statusIcon = new IconState(
+                                true,
+                                getCallStrengthIcon(mLastWlanLevel, /* isWifi= */true),
+                                getCallStrengthDescription(mLastWlanLevel, /* isWifi= */true));
+                        notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+                    } else if (registrationAttributes
+                            == ImsRegistrationAttributes.ATTR_EPDG_OVER_CELL_INTERNET) {
+                        mImsType = IMS_TYPE_WLAN_CROSS_SIM;
+                        IconState statusIcon = new IconState(
+                                true,
+                                getCallStrengthIcon(mLastWlanCrossSimLevel, /* isWifi= */false),
+                                getCallStrengthDescription(
+                                        mLastWlanCrossSimLevel, /* isWifi= */false));
+                        notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+                    }
+                }
+            }
+
+            @Override
+            public void onUnregistered(ImsReasonInfo info) {
+                Log.d(mTag, "onDeregistered: " + "info=" + info);
+                mImsType = IMS_TYPE_WWAN;
+                IconState statusIcon = new IconState(
+                        true,
+                        getCallStrengthIcon(mLastWwanLevel, /* isWifi= */false),
+                        getCallStrengthDescription(mLastWwanLevel, /* isWifi= */false));
+                notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+            }
+        };
+        mImsMmTelManager = ImsMmTelManager.createForSubscriptionId(info.getSubscriptionId());
         mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
                 info, mDefaults, mCallback);
         mProviderModel = FeatureFlagUtils.isEnabled(
@@ -202,7 +274,33 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(
                 Global.MOBILE_DATA + mSubscriptionInfo.getSubscriptionId()),
                 true, mObserver);
+        if (mProviderModel) {
+            mReceiverHandler.post(mTryRegisterIms);
+        }
     }
+
+    // There is no listener to monitor whether the IMS service is ready, so we have to retry the
+    // IMS registration.
+    private final Runnable mTryRegisterIms = new Runnable() {
+        private static final int MAX_RETRY = 12;
+        private int mRetryCount;
+
+        @Override
+        public void run() {
+            try {
+                mRetryCount++;
+                mImsMmTelManager.registerImsRegistrationCallback(
+                        mReceiverHandler::post, mRegistrationCallback);
+                Log.d(mTag, "registerImsRegistrationCallback succeeded");
+            } catch (RuntimeException | ImsException e) {
+                if (mRetryCount < MAX_RETRY) {
+                    Log.e(mTag, mRetryCount + " registerImsRegistrationCallback failed", e);
+                    // Wait for 5 seconds to retry
+                    mReceiverHandler.postDelayed(mTryRegisterIms, 5000);
+                }
+            }
+        }
+    };
 
     /**
      * Stop listening for phone state changes.
@@ -210,6 +308,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     public void unregisterListener() {
         mMobileStatusTracker.setListening(false);
         mContext.getContentResolver().unregisterContentObserver(mObserver);
+        mImsMmTelManager.unregisterImsRegistrationCallback(mRegistrationCallback);
     }
 
     private void updateInflateSignalStrength() {
@@ -452,9 +551,9 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     /**
      * Extracts the CellSignalStrengthCdma from SignalStrength then returns the level
      */
-    private final int getCdmaLevel() {
+    private int getCdmaLevel(SignalStrength signalStrength) {
         List<CellSignalStrengthCdma> signalStrengthCdma =
-            mSignalStrength.getCellSignalStrengths(CellSignalStrengthCdma.class);
+                signalStrength.getCellSignalStrengths(CellSignalStrengthCdma.class);
         if (!signalStrengthCdma.isEmpty()) {
             return signalStrengthCdma.get(0).getLevel();
         }
@@ -467,6 +566,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mCurrentState.dataSim = mobileStatus.dataSim;
         mCurrentState.carrierNetworkChangeMode = mobileStatus.carrierNetworkChangeMode;
         mDataState = mobileStatus.dataState;
+        notifyMobileLevelChangeIfNecessary(mobileStatus.signalStrength);
         mSignalStrength = mobileStatus.signalStrength;
         mTelephonyDisplayInfo = mobileStatus.telephonyDisplayInfo;
         int lastVoiceState = mServiceState != null ? mServiceState.getState() : -1;
@@ -481,9 +581,117 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 && (lastVoiceState == -1
                         || (lastVoiceState == ServiceState.STATE_IN_SERVICE
                                 || currentVoiceState == ServiceState.STATE_IN_SERVICE))) {
-            notifyNoCallingStatusChange(
-                    currentVoiceState != ServiceState.STATE_IN_SERVICE,
-                    mSubscriptionInfo.getSubscriptionId());
+            boolean isNoCalling = currentVoiceState != ServiceState.STATE_IN_SERVICE;
+            IconState statusIcon = new IconState(isNoCalling, R.drawable.ic_qs_no_calling_sms,
+                    getTextIfExists(AccessibilityContentDescriptions.NO_CALLING).toString());
+            notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+        }
+    }
+
+    private int getCallStrengthIcon(int level, boolean isWifi) {
+        return isWifi ? TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[level]
+                : TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[level];
+    }
+
+    private String getCallStrengthDescription(int level, boolean isWifi) {
+        return isWifi
+                ? getTextIfExists(AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH[level])
+                        .toString()
+                : getTextIfExists(AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[level])
+                        .toString();
+    }
+
+    void refreshCallIndicator(SignalCallback callback) {
+        boolean isNoCalling = mServiceState != null
+                && mServiceState.getState() != ServiceState.STATE_IN_SERVICE;
+        IconState statusIcon = new IconState(isNoCalling, R.drawable.ic_qs_no_calling_sms,
+                getTextIfExists(AccessibilityContentDescriptions.NO_CALLING).toString());
+        callback.setCallIndicator(statusIcon, mSubscriptionInfo.getSubscriptionId());
+
+        switch (mImsType) {
+            case IMS_TYPE_WWAN:
+                statusIcon = new IconState(
+                        true,
+                        getCallStrengthIcon(mLastWwanLevel, /* isWifi= */false),
+                        getCallStrengthDescription(mLastWwanLevel, /* isWifi= */false));
+                break;
+            case IMS_TYPE_WLAN:
+                statusIcon = new IconState(
+                        true,
+                        getCallStrengthIcon(mLastWlanLevel, /* isWifi= */true),
+                        getCallStrengthDescription(mLastWlanLevel, /* isWifi= */true));
+                break;
+            case IMS_TYPE_WLAN_CROSS_SIM:
+                statusIcon = new IconState(
+                        true,
+                        getCallStrengthIcon(mLastWlanCrossSimLevel, /* isWifi= */false),
+                        getCallStrengthDescription(mLastWlanCrossSimLevel, /* isWifi= */false));
+        }
+        callback.setCallIndicator(statusIcon, mSubscriptionInfo.getSubscriptionId());
+    }
+
+    void notifyWifiLevelChange(int level) {
+        if (!mProviderModel) {
+            return;
+        }
+        Log.d("mTag", "notifyWifiLevelChange " + mImsType);
+        mLastWlanLevel = level;
+        if (mImsType != IMS_TYPE_WLAN) {
+            return;
+        }
+        IconState statusIcon = new IconState(
+                true,
+                getCallStrengthIcon(level, /* isWifi= */true),
+                getCallStrengthDescription(level, /* isWifi= */true));
+        notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+    }
+
+    void notifyDefaultMobileLevelChange(int level) {
+        if (!mProviderModel) {
+            return;
+        }
+        Log.d("mTag", "notifyDefaultMobileLevelChange " + mImsType);
+        mLastWlanCrossSimLevel = level;
+        if (mImsType != IMS_TYPE_WLAN_CROSS_SIM) {
+            return;
+        }
+        IconState statusIcon = new IconState(
+                true,
+                getCallStrengthIcon(level, /* isWifi= */false),
+                getCallStrengthDescription(level, /* isWifi= */false));
+        notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+    }
+
+    void notifyMobileLevelChangeIfNecessary(SignalStrength signalStrength) {
+        if (!mProviderModel) {
+            return;
+        }
+        int newLevel = getSignalLevel(signalStrength);
+        if (newLevel != mLastLevel) {
+            mLastLevel = newLevel;
+            Log.d("mTag", "notifyMobileLevelChangeIfNecessary " + mImsType);
+            mLastWwanLevel = newLevel;
+            if (mImsType == IMS_TYPE_WWAN) {
+                IconState statusIcon = new IconState(
+                        true,
+                        getCallStrengthIcon(newLevel, /* isWifi= */false),
+                        getCallStrengthDescription(newLevel, /* isWifi= */false));
+                notifyCallStateChange(statusIcon, mSubscriptionInfo.getSubscriptionId());
+            }
+            if (mCurrentState.dataSim) {
+                mNetworkController.notifyDefaultMobileLevelChange(newLevel);
+            }
+        }
+    }
+
+    int getSignalLevel(SignalStrength signalStrength) {
+        if (signalStrength == null) {
+            return 0;
+        }
+        if (!signalStrength.isGsm() && mConfig.alwaysShowCdmaRssi) {
+            return getCdmaLevel(signalStrength);
+        } else {
+            return signalStrength.getLevel();
         }
     }
 
@@ -501,11 +709,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         checkDefaultData();
         mCurrentState.connected = Utils.isInService(mServiceState) && mSignalStrength != null;
         if (mCurrentState.connected) {
-            if (!mSignalStrength.isGsm() && mConfig.alwaysShowCdmaRssi) {
-                mCurrentState.level = getCdmaLevel();
-            } else {
-                mCurrentState.level = mSignalStrength.getLevel();
-            }
+            mCurrentState.level = getSignalLevel(mSignalStrength);
         }
 
         String iconKey = getIconKey(mTelephonyDisplayInfo);
@@ -577,7 +781,13 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     }
 
     private void recordLastMobileStatus(String mobileStatus) {
-        mMobileStatusHistory[mMobileStatusHistoryIndex++ & (HISTORY_SIZE - 1)] = mobileStatus;
+        mMobileStatusHistory[mMobileStatusHistoryIndex] = mobileStatus;
+        mMobileStatusHistoryIndex = (mMobileStatusHistoryIndex + 1) % STATUS_HISTORY_SIZE;
+    }
+
+    @VisibleForTesting
+    void setImsType(int imsType) {
+        mImsType = imsType;
     }
 
     @Override
@@ -592,15 +802,17 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
         pw.println("  MobileStatusHistory");
         int size = 0;
-        for (int i = 0; i < HISTORY_SIZE; i++) {
-            if (mMobileStatusHistory[i] != null) size++;
+        for (int i = 0; i < STATUS_HISTORY_SIZE; i++) {
+            if (mMobileStatusHistory[i] != null) {
+                size++;
+            }
         }
         // Print out the previous states in ordered number.
-        for (int i = mMobileStatusHistoryIndex + HISTORY_SIZE - 1;
-                i >= mMobileStatusHistoryIndex + HISTORY_SIZE - size; i--) {
+        for (int i = mMobileStatusHistoryIndex + STATUS_HISTORY_SIZE - 1;
+                i >= mMobileStatusHistoryIndex + STATUS_HISTORY_SIZE - size; i--) {
             pw.println("  Previous MobileStatus("
-                    + (mMobileStatusHistoryIndex + HISTORY_SIZE - i) + "): "
-                    + mMobileStatusHistory[i & (HISTORY_SIZE - 1)]);
+                    + (mMobileStatusHistoryIndex + STATUS_HISTORY_SIZE - i) + "): "
+                    + mMobileStatusHistory[i & (STATUS_HISTORY_SIZE - 1)]);
         }
     }
 }
