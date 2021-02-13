@@ -1797,6 +1797,12 @@
     <permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to manage an automotive device's application network
+         preference as it relates to OEM_PAID and OEM_PRIVATE capable networks.
+         <p>Not for use by third-party or privileged applications. -->
+    <permission android:name="android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE"
+        android:protectionLevel="signature" />
+
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
     <!-- ======================================= -->
