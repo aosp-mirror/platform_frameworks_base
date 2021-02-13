@@ -32,9 +32,6 @@
     <dimen name="user_spinner_padding_sides">20dp</dimen>
     <dimen name="user_spinner_item_height">56dp</dimen>
 
-    <dimen name="two_target_pref_small_icon_size">24dp</dimen>
-    <dimen name="two_target_pref_medium_icon_size">32dp</dimen>
-
     <!-- Lock icon for preferences locked by admin -->
     <dimen name="restricted_icon_padding">4dp</dimen>
 
