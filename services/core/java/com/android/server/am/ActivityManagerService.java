@@ -13756,7 +13756,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
+                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
+                if (gpuDmaBufUsage >= 0) {
+                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                    pw.print("      GPU: ");
+                    pw.print(stringifyKBSize(gpuUsage));
+                    pw.print(" (");
+                    pw.print(stringifyKBSize(gpuDmaBufUsage));
+                    pw.print(" dmabuf + ");
+                    pw.print(stringifyKBSize(gpuPrivateUsage));
+                    pw.println(" private)");
+                } else {
+                    pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
+                }
             }
 
             /*
@@ -14586,9 +14598,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long gpuUsage = Debug.getGpuTotalUsageKb();
         if (gpuUsage >= 0) {
-            memInfoBuilder.append("       GPU: ");
-            memInfoBuilder.append(stringifyKBSize(gpuUsage));
-            memInfoBuilder.append("\n");
+            final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
+            if (gpuDmaBufUsage >= 0) {
+                final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                memInfoBuilder.append("      GPU: ");
+                memInfoBuilder.append(stringifyKBSize(gpuUsage));
+                memInfoBuilder.append(" (");
+                memInfoBuilder.append(stringifyKBSize(gpuDmaBufUsage));
+                memInfoBuilder.append(" dmabuf + ");
+                memInfoBuilder.append(stringifyKBSize(gpuPrivateUsage));
+                memInfoBuilder.append(" private)\n");
+            } else {
+                memInfoBuilder.append("       GPU: ");
+                memInfoBuilder.append(stringifyKBSize(gpuUsage));
+                memInfoBuilder.append("\n");
+            }
+
         }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
