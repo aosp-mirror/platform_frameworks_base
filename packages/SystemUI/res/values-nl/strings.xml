@@ -722,7 +722,7 @@
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen recente bubbels"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recente bubbels en gesloten bubbels worden hier weergegeven"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden ingesteld"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Melding via proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle meldingen van <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Meer weergeven"</string>
