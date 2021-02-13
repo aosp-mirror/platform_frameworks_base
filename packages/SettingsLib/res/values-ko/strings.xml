@@ -591,5 +591,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"데이터 신호 막대가 세 개입니다."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"데이터 신호가 강합니다."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"이더넷에서 연결 해제되었습니다."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"이더넷에 연결되었습니다."</string>
+    <!-- no translation found for accessibility_ethernet_connected (6175942685957461563) -->
+    <skip />
 </resources>
