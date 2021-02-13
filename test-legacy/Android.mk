@@ -27,6 +27,9 @@ ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := android.test.legacy
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0 SPDX-license-identifier-MIT SPDX-license-identifier-Unicode-DFS
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../NOTICE
 
 LOCAL_SDK_VERSION := current
 
