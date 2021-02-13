@@ -444,6 +444,7 @@ cc_defaults {
         "renderthread/TimeLord.cpp",
         "hwui/AnimatedImageDrawable.cpp",
         "hwui/Bitmap.cpp",
+        "hwui/BlurDrawLooper.cpp",
         "hwui/Canvas.cpp",
         "hwui/ImageDecoder.cpp",
         "hwui/MinikinSkia.cpp",
