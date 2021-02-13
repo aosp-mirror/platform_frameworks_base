@@ -1590,8 +1590,8 @@
          take precedence over lower ones.
          See com.android.server.timedetector.TimeDetectorStrategy for available sources. -->
     <string-array name="config_autoTimeSourcesPriority">
-        <item>telephony</item>
         <item>network</item>
+        <item>telephony</item>
     </string-array>
 
     <!-- Enables the GnssTimeUpdate service. This is the global switch for enabling Gnss time based

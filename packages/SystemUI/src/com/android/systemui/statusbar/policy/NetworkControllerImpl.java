@@ -554,6 +554,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return controller != null ? controller.getNetworkNameForCarrierWiFi() : "";
     }
 
+    void notifyWifiLevelChange(int level) {
+        for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+            MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
+            mobileSignalController.notifyWifiLevelChange(level);
+        }
+    }
+
+    void notifyDefaultMobileLevelChange(int level) {
+        for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+            MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
+            mobileSignalController.notifyDefaultMobileLevelChange(level);
+        }
+    }
+
     private void notifyControllersMobileDataChanged() {
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
@@ -623,6 +637,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
             mobileSignalController.notifyListeners(cb);
+            if (mProviderModel) {
+                mobileSignalController.refreshCallIndicator(cb);
+            }
         }
         mCallbackHandler.setListening(cb, true);
     }
@@ -1272,7 +1289,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private void recordLastNetworkCallback(String callback) {
-        mHistory[mHistoryIndex++ & (HISTORY_SIZE - 1)] = callback;
+        mHistory[mHistoryIndex] = callback;
+        mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
     }
 
     private SubscriptionInfo addSignalController(int id, int simSlotIndex) {
