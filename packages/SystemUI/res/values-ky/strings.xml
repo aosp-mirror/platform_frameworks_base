@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экрандан жаздырылып алынган видео иштетилүүдө"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жаздырып баштайсызбы?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Жаздыруу учурунда Android тутуму экраныңызда көрүнүп турган жана түзмөктө ойноп жаткан бардык купуя маалыматты жаздырып алат. Буга сырсөздөр, төлөм маалыматы, сүрөттөр, билдирүүлөр жана аудио файлдар кирет."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Жаздыруу учурунда Android системасы экраныңызда көрүнүп турган жана түзмөктө ойноп жаткан бардык купуя маалыматты жаздырып алат. Буга сырсөздөр, төлөм маалыматы, сүрөттөр, билдирүүлөр жана аудио файлдар кирет."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жаздыруу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктүн аудиосу"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, чалуулар жана шыңгырлар сыяктуу түзмөгүңүздөгү добуштар"</string>
@@ -434,7 +434,7 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Баштадык"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Токтотуу"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Түзмөк"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Башка колдонмого которулуу үчүн,, өйдө сүрүңүз"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Башка колдонмого которулуу үчүн өйдө сүрүңүз"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Колдонмолорду тез которуштуруу үчүн, оңго сүйрөңүз"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Сереп салууну өчүрүү/күйгүзүү"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Кубатталды"</string>
@@ -457,9 +457,9 @@
     <string name="keyguard_retry" msgid="886802522584053523">"Кайталоо үчүн экранды өйдө сүрүңүз"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Бул түзмөк уюмуңузга таандык"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Бул түзмөк төмөнкүгө таандык: <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="phone_hint" msgid="6682125338461375925">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"Сүрөтчөнү серпип үн жардамчысына өтүңүз"</string>
-    <string name="camera_hint" msgid="4519495795000658637">"Сүрөтчөнү серпип камерага өтүңүз"</string>
+    <string name="phone_hint" msgid="6682125338461375925">"Сүрөтчөнү сүрүп телефонго өтүңүз"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"Сүрөтчөнү сүрүп үн жардамчысына өтүңүз"</string>
+    <string name="camera_hint" msgid="4519495795000658637">"Сүрөтчөнү сүрүп камерага өтүңүз"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Тымтырс"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"Шашылыш билдирүүлөр гана"</string>
