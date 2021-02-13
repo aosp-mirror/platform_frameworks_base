@@ -918,8 +918,8 @@
     <string name="pip_notification_message" msgid="4991831338795022227">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="333995977693142810">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="1139598607050555845">"Pausatu"</string>
-    <string name="pip_skip_to_next" msgid="3864212650579956062">"Saltatu hurrengora"</string>
-    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Saltatu aurrekora"</string>
+    <string name="pip_skip_to_next" msgid="3864212650579956062">"Joan hurrengora"</string>
+    <string name="pip_skip_to_prev" msgid="3742589641443049237">"Joan aurrekora"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Aldatu tamaina"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Beroegi egoteagatik itzali da"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ohi bezala ari da funtzionatzen telefonoa orain.\nInformazio gehiago lortzeko, sakatu hau."</string>
