@@ -125,10 +125,11 @@ import java.util.concurrent.TimeUnit;
 public class VcnGatewayConnection extends StateMachine {
     private static final String TAG = VcnGatewayConnection.class.getSimpleName();
 
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final InetAddress DUMMY_ADDR = InetAddresses.parseNumericAddress("192.0.2.0");
+
     private static final int[] MERGED_CAPABILITIES =
             new int[] {NET_CAPABILITY_NOT_METERED, NET_CAPABILITY_NOT_ROAMING};
-
-    private static final InetAddress DUMMY_ADDR = InetAddresses.parseNumericAddress("192.0.2.0");
     private static final int ARG_NOT_PRESENT = Integer.MIN_VALUE;
 
     private static final String DISCONNECT_REASON_INTERNAL_ERROR = "Uncaught exception: ";
@@ -412,11 +413,11 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull private final VcnGatewayConnectionConfig mConnectionConfig;
     @NonNull private final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull private final Dependencies mDeps;
-
     @NonNull private final VcnUnderlyingNetworkTrackerCallback mUnderlyingNetworkTrackerCallback;
 
     @NonNull private final IpSecManager mIpSecManager;
-    @NonNull private final IpSecTunnelInterface mTunnelIface;
+
+    @Nullable private IpSecTunnelInterface mTunnelIface = null;
 
     /** Running state of this VcnGatewayConnection. */
     private boolean mIsRunning = true;
@@ -525,20 +526,6 @@ public class VcnGatewayConnection extends StateMachine {
                         mConnectionConfig.getAllUnderlyingCapabilities(),
                         mUnderlyingNetworkTrackerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
-
-        IpSecTunnelInterface iface;
-        try {
-            iface =
-                    mIpSecManager.createIpSecTunnelInterface(
-                            DUMMY_ADDR, DUMMY_ADDR, new Network(-1));
-        } catch (IOException | ResourceUnavailableException e) {
-            teardownAsynchronously();
-            mTunnelIface = null;
-
-            return;
-        }
-
-        mTunnelIface = iface;
 
         addState(mDisconnectedState);
         addState(mDisconnectingState);
@@ -1117,6 +1104,18 @@ public class VcnGatewayConnection extends StateMachine {
     class ConnectedState extends ConnectedStateBase {
         @Override
         protected void enterState() throws Exception {
+            if (mTunnelIface == null) {
+                try {
+                    // Requires a real Network object in order to be created; doing this any earlier
+                    // means not having a real Network object, or picking an incorrect Network.
+                    mTunnelIface =
+                            mIpSecManager.createIpSecTunnelInterface(
+                                    DUMMY_ADDR, DUMMY_ADDR, mUnderlying.network);
+                } catch (IOException | ResourceUnavailableException e) {
+                    teardownAsynchronously();
+                }
+            }
+
             // Successful connection, clear failed attempt counter
             mFailedAttempts = 0;
         }
@@ -1431,6 +1430,11 @@ public class VcnGatewayConnection extends StateMachine {
             // will be closed by the IKE library.
             Slog.v(TAG, "ChildTransformDeleted; Direction: " + direction + "; for token " + mToken);
         }
+    }
+
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    void setTunnelInterface(IpSecTunnelInterface tunnelIface) {
+        mTunnelIface = tunnelIface;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
