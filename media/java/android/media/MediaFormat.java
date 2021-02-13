@@ -1223,6 +1223,22 @@ public final class MediaFormat {
     public static final String KEY_HDR10_PLUS_INFO = "hdr10-plus-info";
 
     /**
+     * An optional key describing the opto-electronic transfer function
+     * requested for the output video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_TRANSFER_ values. When unspecified the component will not touch the
+     * video content; otherwise the component will tone-map the raw video frame
+     * to match the requested transfer function.
+     *
+     * After configure, component's input format will contain this key to note
+     * whether the request is supported or not. If the value in the input format
+     * is the same as the requested value, the request is supported. The value
+     * is set to 0 if unsupported.
+     */
+    public static final String KEY_COLOR_TRANSFER_REQUEST = "color-transfer-request";
+
+    /**
      * A key describing a unique ID for the content of a media track.
      *
      * <p>This key is used by {@link MediaExtractor}. Some extractors provide multiple encodings
