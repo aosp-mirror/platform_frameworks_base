@@ -17,8 +17,7 @@
 package com.android.wm.shell.pip.phone;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -371,9 +370,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /**
      * Stash PiP to the closest edge. We set velocityY to 0 to limit pure horizontal motion.
      */
-    void stashToEdge(float velocityX, @Nullable Runnable postBoundsUpdateCallback) {
-        mPipBoundsState.setStashed(velocityX < 0 ? STASH_TYPE_LEFT : STASH_TYPE_RIGHT);
-        movetoTarget(velocityX, 0 /* velocityY */, postBoundsUpdateCallback, true /* isStash */);
+    void stashToEdge(float velX, float velY, @Nullable Runnable postBoundsUpdateCallback) {
+        velY = mPipBoundsState.getStashedState() == STASH_TYPE_NONE ? 0 : velY;
+        movetoTarget(velX, velY, postBoundsUpdateCallback, true /* isStash */);
     }
 
     private void movetoTarget(
