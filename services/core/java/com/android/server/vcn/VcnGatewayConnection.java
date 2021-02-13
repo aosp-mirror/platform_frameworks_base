@@ -1325,7 +1325,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTransform transform,
                 int direction) {
             try {
-                // TODO: Set underlying network of tunnel interface
+                // TODO(b/180163196): Set underlying network of tunnel interface
 
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
@@ -1455,6 +1455,7 @@ public class VcnGatewayConnection extends StateMachine {
             // mUnderlying assumed non-null, given check above.
             // If network changed, migrate. Otherwise, update any existing networkAgent.
             if (oldUnderlying == null || !oldUnderlying.network.equals(mUnderlying.network)) {
+                Slog.v(TAG, "Migrating to new network: " + mUnderlying.network);
                 mIkeSession.setNetwork(mUnderlying.network);
             } else {
                 // oldUnderlying is non-null & underlying network itself has not changed
@@ -1705,6 +1706,15 @@ public class VcnGatewayConnection extends StateMachine {
         public void onIpSecTransformCreated(@NonNull IpSecTransform transform, int direction) {
             Slog.v(TAG, "ChildTransformCreated; Direction: " + direction + "; token " + mToken);
             childTransformCreated(mToken, transform, direction);
+        }
+
+        @Override
+        public void onIpSecTransformsMigrated(
+                @NonNull IpSecTransform inIpSecTransform,
+                @NonNull IpSecTransform outIpSecTransform) {
+            Slog.v(TAG, "ChildTransformsMigrated; token " + mToken);
+            onIpSecTransformCreated(inIpSecTransform, IpSecManager.DIRECTION_IN);
+            onIpSecTransformCreated(outIpSecTransform, IpSecManager.DIRECTION_OUT);
         }
 
         @Override
