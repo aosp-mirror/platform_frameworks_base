@@ -255,7 +255,11 @@ public class ThemeOverlayApplier implements Dumpable {
         }
 
         mExecutor.execute(() -> {
-            mOverlayManager.commit(transaction.build());
+            try {
+                mOverlayManager.commit(transaction.build());
+            } catch (SecurityException | IllegalStateException e) {
+                Log.e(TAG, "setEnabled failed", e);
+            }
         });
     }
 
