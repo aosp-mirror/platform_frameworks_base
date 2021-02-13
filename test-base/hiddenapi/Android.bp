@@ -19,6 +19,15 @@
 // UnsupportedAppUsage annotation to tag those methods that are accessible via the hiddenapi.
 // Relies on the convention that modules with name <x>-hiddenapi provide hiddenapi information for
 // module <x> that is on the bootclasspath.
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_library {
     name: "android.test.base-hiddenapi",
     compile_dex: true,
