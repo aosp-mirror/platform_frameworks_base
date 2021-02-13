@@ -921,7 +921,7 @@ public class MediaPlayer extends PlayerBase
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.setAudioSessionId(audioSessionId);
+            mp.native_setAudioSessionId(audioSessionId);
             mp.setDataSource(context, uri);
             if (holder != null) {
                 mp.setDisplay(holder);
@@ -987,7 +987,7 @@ public class MediaPlayer extends PlayerBase
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.setAudioSessionId(audioSessionId);
+            mp.native_setAudioSessionId(audioSessionId);
 
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
