@@ -794,8 +794,8 @@ public class SmartReplyView extends ViewGroup {
         public final List<CharSequence> choices;
         public final boolean fromAssistant;
 
-        public SmartReplies(List<CharSequence> choices, RemoteInput remoteInput,
-                PendingIntent pendingIntent, boolean fromAssistant) {
+        public SmartReplies(@NonNull List<CharSequence> choices, @NonNull RemoteInput remoteInput,
+                @NonNull PendingIntent pendingIntent, boolean fromAssistant) {
             this.choices = choices;
             this.remoteInput = remoteInput;
             this.pendingIntent = pendingIntent;
@@ -812,7 +812,7 @@ public class SmartReplyView extends ViewGroup {
         public final List<Notification.Action> actions;
         public final boolean fromAssistant;
 
-        public SmartActions(List<Notification.Action> actions, boolean fromAssistant) {
+        public SmartActions(@NonNull List<Notification.Action> actions, boolean fromAssistant) {
             this.actions = actions;
             this.fromAssistant = fromAssistant;
         }

@@ -270,13 +270,24 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             Context packageContext,
             SmartRepliesAndActions previousSmartRepliesAndActions,
             SmartRepliesAndActionsInflater inflater) {
-        if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0 && result.newExpandedView != null) {
-            result.expandedInflatedSmartReplies = inflater.inflateSmartReplies(
-                    context, packageContext, entry, previousSmartRepliesAndActions);
+        boolean inflateContracted = (reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0
+                && result.newContentView != null;
+        boolean inflateExpanded = (reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0
+                && result.newExpandedView != null;
+        boolean inflateHeadsUp = (reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0
+                && result.newHeadsUpView != null;
+        if (inflateContracted || inflateExpanded || inflateHeadsUp) {
+            result.inflatedSmartRepliesAndActions = inflater.inflateRepliesAndActions(entry);
         }
-        if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0 && result.newHeadsUpView != null) {
+        if (inflateExpanded) {
+            result.expandedInflatedSmartReplies = inflater.inflateSmartReplies(
+                    context, packageContext, entry, previousSmartRepliesAndActions,
+                    result.inflatedSmartRepliesAndActions);
+        }
+        if (inflateHeadsUp) {
             result.headsUpInflatedSmartReplies = inflater.inflateSmartReplies(
-                    context, packageContext, entry, previousSmartRepliesAndActions);
+                    context, packageContext, entry, previousSmartRepliesAndActions,
+                    result.inflatedSmartRepliesAndActions);
         }
         return result;
     }
@@ -566,6 +577,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         if (runningInflations.isEmpty()) {
+            boolean setRepliesAndActions = true;
             if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
                 if (result.inflatedContentView != null) {
                     // New view case
@@ -578,6 +590,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
                             result.newContentView);
                 }
+                setRepliesAndActions = true;
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
@@ -599,6 +612,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     privateLayout.setExpandedInflatedSmartReplies(null);
                 }
                 row.setExpandable(result.newExpandedView != null);
+                setRepliesAndActions = true;
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
@@ -619,6 +633,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 } else {
                     privateLayout.setHeadsUpInflatedSmartReplies(null);
                 }
+                setRepliesAndActions = true;
+            }
+            if (setRepliesAndActions) {
+                privateLayout.setInflatedSmartRepliesAndActions(
+                        result.inflatedSmartRepliesAndActions);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
@@ -879,6 +898,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private CharSequence headsUpStatusBarText;
         private CharSequence headsUpStatusBarTextPublic;
 
+        private SmartRepliesAndActions inflatedSmartRepliesAndActions;
         private InflatedSmartReplies expandedInflatedSmartReplies;
         private InflatedSmartReplies headsUpInflatedSmartReplies;
     }

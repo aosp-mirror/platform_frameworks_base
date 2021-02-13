@@ -68,6 +68,8 @@ import com.android.systemui.statusbar.policy.SmartReplyView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
@@ -1189,20 +1191,12 @@ public class NotificationContentView extends FrameLayout {
 
         applyRemoteInput(entry, hasFreeformRemoteInput(entry));
 
-        if (mExpandedInflatedSmartReplies == null && mHeadsUpInflatedSmartReplies == null) {
+        if (mCurrentSmartRepliesAndActions == null) {
             if (DEBUG) {
-                Log.d(TAG, "Both expanded, and heads-up InflatedSmartReplies are null, "
-                        + "don't add smart replies.");
+                Log.d(TAG, "InflatedSmartReplies are null, don't add smart replies.");
             }
             return;
         }
-        // The inflated smart-reply objects for the expanded view and the heads-up view both contain
-        // the same SmartRepliesAndActions to avoid discrepancies between the two views. We here
-        // reuse that object for our local SmartRepliesAndActions to avoid discrepancies between
-        // this class and the InflatedSmartReplies classes.
-        mCurrentSmartRepliesAndActions = mExpandedInflatedSmartReplies != null
-                ? mExpandedInflatedSmartReplies.getSmartRepliesAndActions()
-                : mHeadsUpInflatedSmartReplies.getSmartRepliesAndActions();
         if (DEBUG) {
             Log.d(TAG, String.format("Adding suggestions for %s, %d actions, and %d replies.",
                     entry.getSbn().getKey(),
@@ -1417,7 +1411,11 @@ public class NotificationContentView extends FrameLayout {
     private void applySmartReplyView(
             SmartRepliesAndActions smartRepliesAndActions,
             NotificationEntry entry) {
+        if (mContractedChild != null) {
+            applyExternalSmartReplyState(mContractedChild, smartRepliesAndActions);
+        }
         if (mExpandedChild != null) {
+            applyExternalSmartReplyState(mExpandedChild, smartRepliesAndActions);
             mExpandedSmartReplyView = applySmartReplyView(mExpandedChild, smartRepliesAndActions,
                     entry, mExpandedInflatedSmartReplies);
             if (mExpandedSmartReplyView != null) {
@@ -1440,9 +1438,40 @@ public class NotificationContentView extends FrameLayout {
                 }
             }
         }
-        if (mHeadsUpChild != null && mSmartReplyConstants.getShowInHeadsUp()) {
-            mHeadsUpSmartReplyView = applySmartReplyView(mHeadsUpChild, smartRepliesAndActions,
-                    entry, mHeadsUpInflatedSmartReplies);
+        if (mHeadsUpChild != null) {
+            applyExternalSmartReplyState(mHeadsUpChild, smartRepliesAndActions);
+            if (mSmartReplyConstants.getShowInHeadsUp()) {
+                mHeadsUpSmartReplyView = applySmartReplyView(mHeadsUpChild, smartRepliesAndActions,
+                        entry, mHeadsUpInflatedSmartReplies);
+            }
+        }
+    }
+
+    private void applyExternalSmartReplyState(View view, SmartRepliesAndActions state) {
+        boolean hasPhishingAlert = state != null && state.hasPhishingAction;
+        View phishingAlertIcon = view.findViewById(com.android.internal.R.id.phishing_alert);
+        if (phishingAlertIcon != null) {
+            if (DEBUG) {
+                Log.d(TAG, "Setting 'phishing_alert' view visible=" + hasPhishingAlert + ".");
+            }
+            phishingAlertIcon.setVisibility(hasPhishingAlert ? View.VISIBLE : View.GONE);
+        }
+        List<Integer> suppressedActionIndices = state != null && state.suppressedActions != null
+                ? state.suppressedActions.suppressedActionIndices
+                : Collections.emptyList();
+        ViewGroup actionsList = view.findViewById(com.android.internal.R.id.actions);
+        if (actionsList != null) {
+            if (DEBUG && !suppressedActionIndices.isEmpty()) {
+                Log.d(TAG, "Suppressing actions with indices: " + suppressedActionIndices);
+            }
+            for (int i = 0; i < actionsList.getChildCount(); i++) {
+                View actionBtn = actionsList.getChildAt(i);
+                Object actionIndex =
+                        actionBtn.getTag(com.android.internal.R.id.notification_action_index_tag);
+                boolean suppressAction = actionIndex instanceof Integer
+                        && suppressedActionIndices.contains(actionIndex);
+                actionBtn.setVisibility(suppressAction ? View.GONE : View.VISIBLE);
+            }
         }
     }
 
@@ -1515,6 +1544,17 @@ public class NotificationContentView extends FrameLayout {
         if (inflatedSmartReplies == null) {
             mHeadsUpSmartReplyView = null;
         }
+    }
+
+    /**
+     * Set pre-inflated replies and actions for the notification.
+     * This can be relevant to any state of the notification, even contracted, because smart actions
+     * may cause a phishing alert to be made visible.
+     * @param inflatedSmartRepliesAndActions the pre-inflated list of replies and actions
+     */
+    public void setInflatedSmartRepliesAndActions(
+            @NonNull SmartRepliesAndActions inflatedSmartRepliesAndActions) {
+        mCurrentSmartRepliesAndActions = inflatedSmartRepliesAndActions;
     }
 
     /**

@@ -31,15 +31,12 @@ import java.util.List;
 public class InflatedSmartReplies {
     @Nullable private final SmartReplyView mSmartReplyView;
     @Nullable private final List<Button> mSmartSuggestionButtons;
-    @NonNull private final SmartRepliesAndActions mSmartRepliesAndActions;
 
     public InflatedSmartReplies(
             @Nullable SmartReplyView smartReplyView,
-            @Nullable List<Button> smartSuggestionButtons,
-            @NonNull SmartRepliesAndActions smartRepliesAndActions) {
+            @Nullable List<Button> smartSuggestionButtons) {
         mSmartReplyView = smartReplyView;
         mSmartSuggestionButtons = smartSuggestionButtons;
-        mSmartRepliesAndActions = smartRepliesAndActions;
     }
 
     @Nullable public SmartReplyView getSmartReplyView() {
@@ -50,30 +47,49 @@ public class InflatedSmartReplies {
         return mSmartSuggestionButtons;
     }
 
-    @NonNull public SmartRepliesAndActions getSmartRepliesAndActions() {
-        return mSmartRepliesAndActions;
-    }
-
     /**
      * A storage for smart replies and smart action.
      */
     public static class SmartRepliesAndActions {
         @Nullable public final SmartReplyView.SmartReplies smartReplies;
         @Nullable public final SmartReplyView.SmartActions smartActions;
+        @Nullable public final SuppressedActions suppressedActions;
+        public final boolean hasPhishingAction;
 
         SmartRepliesAndActions(
                 @Nullable SmartReplyView.SmartReplies smartReplies,
-                @Nullable SmartReplyView.SmartActions smartActions) {
+                @Nullable SmartReplyView.SmartActions smartActions,
+                @Nullable SuppressedActions suppressedActions,
+                boolean hasPhishingAction) {
             this.smartReplies = smartReplies;
             this.smartActions = smartActions;
+            this.suppressedActions = suppressedActions;
+            this.hasPhishingAction = hasPhishingAction;
         }
 
-        @NonNull public List<CharSequence> getSmartReplies() {
+        @NonNull public List<CharSequence> getSmartRepliesList() {
             return smartReplies == null ? Collections.emptyList() : smartReplies.choices;
         }
 
-        @NonNull public List<Notification.Action> getSmartActions() {
+        @NonNull public List<Notification.Action> getSmartActionsList() {
             return smartActions == null ? Collections.emptyList() : smartActions.actions;
+        }
+
+        @NonNull public List<Integer> getSuppressedActionIndices() {
+            return suppressedActions == null ? Collections.emptyList()
+                    : suppressedActions.suppressedActionIndices;
+        }
+
+        /**
+         * Data class for standard actions suppressed by the smart actions.
+         */
+        public static class SuppressedActions {
+            @NonNull
+            public final List<Integer> suppressedActionIndices;
+
+            public SuppressedActions(@NonNull List<Integer> suppressedActionIndices) {
+                this.suppressedActionIndices = suppressedActionIndices;
+            }
         }
     }
 }

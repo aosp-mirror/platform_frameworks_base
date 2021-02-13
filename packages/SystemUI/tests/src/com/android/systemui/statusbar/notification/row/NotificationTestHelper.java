@@ -67,6 +67,7 @@ import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
+import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
 import com.android.systemui.tests.R;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
@@ -139,8 +140,7 @@ public class NotificationTestHelper {
                 mock(ConversationNotificationProcessor.class),
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
-                (sysuiContext, notifPackageContext, entry, existingRepliesAndAction) ->
-                        mock(InflatedSmartReplies.class));
+                new MockSmartReplyInflater());
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
@@ -463,5 +463,21 @@ public class NotificationTestHelper {
                 .setDeleteIntent(deleteIntent)
                 .setDesiredHeight(314)
                 .build();
+    }
+
+    private static class MockSmartReplyInflater implements SmartRepliesAndActionsInflater {
+        @Override
+        public InflatedSmartReplies.SmartRepliesAndActions inflateRepliesAndActions(
+                NotificationEntry entry) {
+            return mock(InflatedSmartReplies.SmartRepliesAndActions.class);
+        }
+
+        @Override
+        public InflatedSmartReplies inflateSmartReplies(Context sysuiContext,
+                Context notifPackageContext, NotificationEntry entry,
+                InflatedSmartReplies.SmartRepliesAndActions existingRepliesAndActions,
+                InflatedSmartReplies.SmartRepliesAndActions newRepliesAndActions) {
+            return mock(InflatedSmartReplies.class);
+        }
     }
 }

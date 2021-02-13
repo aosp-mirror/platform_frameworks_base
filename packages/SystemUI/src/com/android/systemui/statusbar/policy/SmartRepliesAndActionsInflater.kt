@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions
+import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions.SuppressedActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartButtonType
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartReplies
@@ -55,8 +56,8 @@ fun shouldShowSmartReplyView(
     entry: NotificationEntry,
     smartRepliesAndActions: SmartRepliesAndActions
 ): Boolean {
-    if (smartRepliesAndActions.smartReplies == null
-            && smartRepliesAndActions.smartActions == null) {
+    if (smartRepliesAndActions.smartReplies == null &&
+            smartRepliesAndActions.smartActions == null) {
         // There are no smart replies and no smart actions.
         return false
     }
@@ -78,16 +79,21 @@ fun areSuggestionsSimilar(
 ): Boolean = when {
     left === right -> true
     left == null || right == null -> false
-    left.getSmartReplies() != right.getSmartReplies() -> false
-    else -> !NotificationUiAdjustment.areDifferent(left.getSmartActions(), right.getSmartActions())
+    left.hasPhishingAction != right.hasPhishingAction -> false
+    left.smartRepliesList != right.smartRepliesList -> false
+    left.suppressedActionIndices != right.suppressedActionIndices -> false
+    else -> !NotificationUiAdjustment.areDifferent(left.smartActionsList, right.smartActionsList)
 }
 
 interface SmartRepliesAndActionsInflater {
+    fun inflateRepliesAndActions(entry: NotificationEntry): SmartRepliesAndActions
+
     fun inflateSmartReplies(
         sysuiContext: Context,
         notifPackageContext: Context,
         entry: NotificationEntry,
-        existingRepliesAndAction: SmartRepliesAndActions?
+        existingRepliesAndActions: SmartRepliesAndActions?,
+        newRepliesAndActions: SmartRepliesAndActions
     ): InflatedSmartReplies
 }
 
@@ -100,25 +106,27 @@ interface SmartRepliesAndActionsInflater {
     private val smartActionsInflater: SmartActionInflater
 ) : SmartRepliesAndActionsInflater {
 
+    override fun inflateRepliesAndActions(entry: NotificationEntry): SmartRepliesAndActions =
+            chooseSmartRepliesAndActions(entry)
+
     override fun inflateSmartReplies(
         sysuiContext: Context,
         notifPackageContext: Context,
         entry: NotificationEntry,
-        existingRepliesAndAction: SmartRepliesAndActions?
+        existingRepliesAndActions: SmartRepliesAndActions?,
+        newRepliesAndActions: SmartRepliesAndActions
     ): InflatedSmartReplies {
-        val newRepliesAndActions = chooseSmartRepliesAndActions(entry)
         if (!shouldShowSmartReplyView(entry, newRepliesAndActions)) {
             return InflatedSmartReplies(
                     null /* smartReplyView */,
-                    null /* smartSuggestionButtons */,
-                    newRepliesAndActions)
+                    null /* smartSuggestionButtons */)
         }
 
         // Only block clicks if the smart buttons are different from the previous set - to avoid
         // scenarios where a user incorrectly cannot click smart buttons because the
         // notification is updated.
         val delayOnClickListener =
-                !areSuggestionsSimilar(existingRepliesAndAction, newRepliesAndActions)
+                !areSuggestionsSimilar(existingRepliesAndActions, newRepliesAndActions)
 
         val smartReplyView = SmartReplyView.inflate(sysuiContext, constants)
 
@@ -155,8 +163,7 @@ interface SmartRepliesAndActionsInflater {
 
         return InflatedSmartReplies(
                 smartReplyView,
-                (smartReplyButtons + smartActionButtons).toList(),
-                newRepliesAndActions)
+                (smartReplyButtons + smartActionButtons).toList())
     }
 
     /**
@@ -172,16 +179,16 @@ interface SmartRepliesAndActionsInflater {
                 notification.findRemoteInputActionPair(true /* freeform */)
         if (!constants.isEnabled) {
             if (DEBUG) {
-                Log.d(TAG, "Smart suggestions not enabled, not adding suggestions for "
-                        + entry.sbn.key)
+                Log.d(TAG, "Smart suggestions not enabled, not adding suggestions for " +
+                        entry.sbn.key)
             }
-            return SmartRepliesAndActions(null, null)
+            return SmartRepliesAndActions(null, null, null, false)
         }
         // Only use smart replies from the app if they target P or above. We have this check because
         // the smart reply API has been used for other things (Wearables) in the past. The API to
         // add smart actions is new in Q so it doesn't require a target-sdk check.
-        val enableAppGeneratedSmartReplies = (!constants.requiresTargetingP()
-                || entry.targetSdk >= Build.VERSION_CODES.P)
+        val enableAppGeneratedSmartReplies = (!constants.requiresTargetingP() ||
+                entry.targetSdk >= Build.VERSION_CODES.P)
         val appGeneratedSmartActions = notification.contextualActions
 
         var smartReplies: SmartReplies? = when {
@@ -207,18 +214,18 @@ interface SmartRepliesAndActionsInflater {
         if (smartReplies == null && smartActions == null) {
             val entryReplies = entry.smartReplies
             val entryActions = entry.smartActions
-            if (entryReplies.isNotEmpty()
-                    && freeformRemoteInputActionPair != null
-                    && freeformRemoteInputActionPair.second.allowGeneratedReplies
-                    && freeformRemoteInputActionPair.second.actionIntent != null) {
+            if (entryReplies.isNotEmpty() &&
+                    freeformRemoteInputActionPair != null &&
+                    freeformRemoteInputActionPair.second.allowGeneratedReplies &&
+                    freeformRemoteInputActionPair.second.actionIntent != null) {
                 smartReplies = SmartReplies(
                         entryReplies,
                         freeformRemoteInputActionPair.first,
                         freeformRemoteInputActionPair.second.actionIntent,
                         true /* fromAssistant */)
             }
-            if (entryActions.isNotEmpty()
-                    && notification.allowSystemGeneratedContextualActions) {
+            if (entryActions.isNotEmpty() &&
+                    notification.allowSystemGeneratedContextualActions) {
                 val systemGeneratedActions: List<Notification.Action> = when {
                     activityManagerWrapper.isLockTaskKioskModeActive ->
                         // Filter actions if we're in kiosk-mode - we don't care about screen
@@ -229,7 +236,21 @@ interface SmartRepliesAndActionsInflater {
                 smartActions = SmartActions(systemGeneratedActions, true /* fromAssistant */)
             }
         }
-        return SmartRepliesAndActions(smartReplies, smartActions)
+        val hasPhishingAction = smartActions?.actions?.any {
+            it.isContextual && it.semanticAction ==
+                    Notification.Action.SEMANTIC_ACTION_CONVERSATION_IS_PHISHING
+        } ?: false
+        var suppressedActions: SuppressedActions? = null
+        if (hasPhishingAction) {
+            // If there is a phishing action, calculate the indices of the actions with RemoteInput
+            //  as those need to be hidden from the view.
+            val suppressedActionIndices = notification.actions.mapIndexedNotNull { index, action ->
+                if (action.remoteInputs?.isNotEmpty() == true) index else null
+            }
+            suppressedActions = SuppressedActions(suppressedActionIndices)
+        }
+        return SmartRepliesAndActions(smartReplies, smartActions, suppressedActions,
+                hasPhishingAction)
     }
 
     /**
@@ -311,8 +332,8 @@ interface SmartActionInflater {
         actionIndex: Int,
         action: Notification.Action
     ) =
-        if (smartActions.fromAssistant
-            && SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY == action.semanticAction) {
+        if (smartActions.fromAssistant &&
+            SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY == action.semanticAction) {
             entry.row.doSmartActionClick(entry.row.x.toInt() / 2,
                 entry.row.y.toInt() / 2, SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY)
             smartReplyController

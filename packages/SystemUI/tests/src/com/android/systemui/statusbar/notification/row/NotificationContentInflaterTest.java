@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
+import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
 import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
 import com.android.systemui.tests.R;
 
@@ -87,11 +88,25 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
 
     @Mock private NotifRemoteViewCache mCache;
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
+    @Mock private SmartRepliesAndActions mSmartRepliesAndActions;
     @Mock private InflatedSmartReplies mInflatedSmartReplies;
 
     private final SmartRepliesAndActionsInflater mSmartRepliesAndActionsInflater =
-            (sysuiContext, notifPackageContext, entry, existingRepliesAndAction) ->
-                    mInflatedSmartReplies;
+            new SmartRepliesAndActionsInflater() {
+                @Override
+                public InflatedSmartReplies inflateSmartReplies(Context sysuiContext,
+                        Context notifPackageContext, NotificationEntry entry,
+                        SmartRepliesAndActions existingRepliesAndActions,
+                        SmartRepliesAndActions newRepliesAndActions) {
+                    return mInflatedSmartReplies;
+                }
+
+                @Override
+                public SmartRepliesAndActions inflateRepliesAndActions(
+                        NotificationEntry entry) {
+                    return mSmartRepliesAndActions;
+                }
+            };
 
     @Before
     public void setUp() throws Exception {

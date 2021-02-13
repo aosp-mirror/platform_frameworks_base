@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.service.notification.NotificationListenerService;
@@ -81,6 +82,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
+import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
+import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -140,6 +143,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    @Mock private SmartRepliesAndActions mSmartRepliesAndActions;
     @Mock private InflatedSmartReplies mInflatedSmartReplies;
 
     private StatusBarNotification mSbn;
@@ -206,8 +210,21 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mock(ConversationNotificationProcessor.class),
                 mock(MediaFeatureFlag.class),
                 mBgExecutor,
-                (sysuiContext, notifPackageContext, entry, existingRepliesAndAction) ->
-                        mInflatedSmartReplies);
+                new SmartRepliesAndActionsInflater() {
+                    @Override
+                    public SmartRepliesAndActions inflateRepliesAndActions(
+                            NotificationEntry entry) {
+                        return mSmartRepliesAndActions;
+                    }
+
+                    @Override
+                    public InflatedSmartReplies inflateSmartReplies(Context sysuiContext,
+                            Context notifPackageContext, NotificationEntry entry,
+                            SmartRepliesAndActions existingRepliesAndActions,
+                            SmartRepliesAndActions newRepliesAndActions) {
+                        return mInflatedSmartReplies;
+                    }
+                });
         mRowContentBindStage = new RowContentBindStage(
                 binder,
                 mock(NotifInflationErrorManager.class),
