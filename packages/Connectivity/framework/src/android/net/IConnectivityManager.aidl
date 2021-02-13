@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
+import android.net.IOnSetOemNetworkPreferenceListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
 import android.net.LinkProperties;
@@ -245,5 +246,6 @@ interface IConnectivityManager
     void registerQosSocketCallback(in QosSocketInfo socketInfo, in IQosCallback callback);
     void unregisterQosCallback(in IQosCallback callback);
 
-    void setOemNetworkPreference(in OemNetworkPreferences preference);
+    void setOemNetworkPreference(in OemNetworkPreferences preference,
+            in IOnSetOemNetworkPreferenceListener listener);
 }

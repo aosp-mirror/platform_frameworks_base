@@ -74,6 +74,7 @@ package android {
     field public static final String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
     field public static final String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
+    field public static final String CONTROL_OEM_PAID_NETWORK_PREFERENCE = "android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE";
     field public static final String CONTROL_VPN = "android.permission.CONTROL_VPN";
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
@@ -6045,6 +6046,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void requestNetwork(@NonNull android.net.NetworkRequest, int, int, @NonNull android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_AIRPLANE_MODE, android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE) public void setOemNetworkPreference(@NonNull android.net.OemNetworkPreferences, @Nullable java.util.concurrent.Executor, @Nullable android.net.ConnectivityManager.OnSetOemNetworkPreferenceListener);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public boolean shouldAvoidBadWifi();
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
@@ -6064,6 +6066,10 @@ package android.net {
     field public static final int TYPE_NONE = -1; // 0xffffffff
     field @Deprecated public static final int TYPE_PROXY = 16; // 0x10
     field @Deprecated public static final int TYPE_WIFI_P2P = 13; // 0xd
+  }
+
+  public static interface ConnectivityManager.OnSetOemNetworkPreferenceListener {
+    method public void onComplete();
   }
 
   @Deprecated public abstract static class ConnectivityManager.OnStartTetheringCallback {
@@ -6421,6 +6427,26 @@ package android.net {
 
   public static class NetworkStats.Entry {
     ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
+  }
+
+  public final class OemNetworkPreferences implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getNetworkPreferences();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.OemNetworkPreferences> CREATOR;
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID = 1; // 0x1
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK = 2; // 0x2
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY = 3; // 0x3
+    field public static final int OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY = 4; // 0x4
+    field public static final int OEM_NETWORK_PREFERENCE_UNINITIALIZED = 0; // 0x0
+  }
+
+  public static final class OemNetworkPreferences.Builder {
+    ctor public OemNetworkPreferences.Builder();
+    ctor public OemNetworkPreferences.Builder(@NonNull android.net.OemNetworkPreferences);
+    method @NonNull public android.net.OemNetworkPreferences.Builder addNetworkPreference(@NonNull String, int);
+    method @NonNull public android.net.OemNetworkPreferences build();
+    method @NonNull public android.net.OemNetworkPreferences.Builder clearNetworkPreference(@NonNull String);
   }
 
   public abstract class QosCallback {
