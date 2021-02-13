@@ -2040,9 +2040,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"電源ダイアログ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ロック画面"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"スクリーンショット"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助のショートカット"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助のショートカットの選択メニュー"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助機能のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助機能のショートカット"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>

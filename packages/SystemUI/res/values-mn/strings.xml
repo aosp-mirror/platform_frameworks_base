@@ -434,7 +434,7 @@
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Төхөөрөмж"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Апп сэлгэхийн тулд дээш шударна уу"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Аппуудыг хурдан сэлгэхийн тулд баруун тийш чирнэ үү"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг унтраах/асаах"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг асаах/унтраах"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Цэнэглэгдсэн"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Цэнэглэж байна"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"дүүргэхэд <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
