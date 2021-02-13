@@ -206,6 +206,7 @@ cc_library_shared {
             ],
 
             shared_libs: [
+                "android.hardware.memtrack-unstable-ndk_platform",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
