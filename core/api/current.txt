@@ -5587,10 +5587,10 @@ package android.app {
     field public static final String EXTRA_PROGRESS = "android.progress";
     field public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
     field public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
-    field public static final String EXTRA_PROMOTE_PICTURE = "android.promotePicture";
     field public static final String EXTRA_REMOTE_INPUT_DRAFT = "android.remoteInputDraft";
     field public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
     field @Deprecated public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
+    field public static final String EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED = "android.showBigPictureWhenCollapsed";
     field public static final String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
     field public static final String EXTRA_SHOW_WHEN = "android.showWhen";
     field @Deprecated public static final String EXTRA_SMALL_ICON = "android.icon";
@@ -6896,6 +6896,7 @@ package android.app.admin {
     method public void onLockTaskModeEntering(@NonNull android.content.Context, @NonNull android.content.Intent, @NonNull String);
     method public void onLockTaskModeExiting(@NonNull android.content.Context, @NonNull android.content.Intent);
     method public void onNetworkLogsAvailable(@NonNull android.content.Context, @NonNull android.content.Intent, long, @IntRange(from=1) int);
+    method public void onOperationSafetyStateChanged(@NonNull android.content.Context, int, boolean);
     method @Deprecated public void onPasswordChanged(@NonNull android.content.Context, @NonNull android.content.Intent);
     method public void onPasswordChanged(@NonNull android.content.Context, @NonNull android.content.Intent, @NonNull android.os.UserHandle);
     method @Deprecated public void onPasswordExpiring(@NonNull android.content.Context, @NonNull android.content.Intent);
@@ -7072,6 +7073,7 @@ package android.app.admin {
     method public boolean isProfileOwnerApp(String);
     method public boolean isProvisioningAllowed(@NonNull String);
     method public boolean isResetPasswordTokenActive(android.content.ComponentName);
+    method public boolean isSafeOperation(int);
     method public boolean isSecurityLoggingEnabled(@Nullable android.content.ComponentName);
     method public boolean isUninstallBlocked(@Nullable android.content.ComponentName, String);
     method public boolean isUniqueDeviceAttestationSupported();
@@ -7244,7 +7246,7 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_LOCALE = "android.app.extra.PROVISIONING_LOCALE";
     field public static final String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.PROVISIONING_LOCAL_TIME";
     field public static final String EXTRA_PROVISIONING_LOGO_URI = "android.app.extra.PROVISIONING_LOGO_URI";
-    field public static final String EXTRA_PROVISIONING_MAIN_COLOR = "android.app.extra.PROVISIONING_MAIN_COLOR";
+    field @Deprecated public static final String EXTRA_PROVISIONING_MAIN_COLOR = "android.app.extra.PROVISIONING_MAIN_COLOR";
     field public static final String EXTRA_PROVISIONING_MODE = "android.app.extra.PROVISIONING_MODE";
     field public static final String EXTRA_PROVISIONING_PERMISSION_GRANT_OPT_OUT = "android.app.extra.PROVISIONING_PERMISSION_GRANT_OPT_OUT";
     field public static final String EXTRA_PROVISIONING_SERIAL_NUMBER = "android.app.extra.PROVISIONING_SERIAL_NUMBER";
@@ -7300,6 +7302,7 @@ package android.app.admin {
     field public static final int LOCK_TASK_FEATURE_SYSTEM_INFO = 1; // 0x1
     field public static final int MAKE_USER_EPHEMERAL = 2; // 0x2
     field public static final String MIME_TYPE_PROVISIONING_NFC = "application/com.android.managedprovisioning";
+    field public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int PASSWORD_COMPLEXITY_HIGH = 327680; // 0x50000
     field public static final int PASSWORD_COMPLEXITY_LOW = 65536; // 0x10000
     field public static final int PASSWORD_COMPLEXITY_MEDIUM = 196608; // 0x30000
@@ -7336,7 +7339,6 @@ package android.app.admin {
     field public static final int RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT = 2; // 0x2
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int SKIP_SETUP_WIZARD = 1; // 0x1
-    field public static final int UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int WIPE_EUICC = 4; // 0x4
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
@@ -7490,7 +7492,7 @@ package android.app.admin {
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
     method public int describeContents();
-    method public int getReason();
+    method @NonNull public java.util.List<java.lang.Integer> getReasons();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UnsafeStateException> CREATOR;
   }

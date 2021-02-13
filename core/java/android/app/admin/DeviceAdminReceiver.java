@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.app.admin.DevicePolicyManager.OperationSafetyReason;
+
 import android.accounts.AccountManager;
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
@@ -35,6 +37,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.security.KeyChain;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -72,8 +75,8 @@ import java.lang.annotation.RetentionPolicy;
  * </div>
  */
 public class DeviceAdminReceiver extends BroadcastReceiver {
-    private static String TAG = "DevicePolicy";
-    private static boolean localLOGV = false;
+    private static final String TAG = "DevicePolicy";
+    private static final boolean LOCAL_LOGV = false;
 
     /**
      * This is the primary action that a device administrator must implement to be
@@ -508,6 +511,36 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public static final String EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE =
             "android.app.extra.TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE";
+
+    /**
+     * Broadcast action: notify the admin that the state of operations that can be unsafe because
+     * of a given reason (specified by the {@link #EXTRA_OPERATION_SAFETY_REASON} {@code int} extra)
+     * has changed (the new value is specified by the {@link #EXTRA_OPERATION_SAFETY_STATE}
+     * {@code boolean} extra).
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_OPERATION_SAFETY_STATE_CHANGED =
+            "android.app.action.OPERATION_SAFETY_STATE_CHANGED";
+
+    /**
+     * An {@code int} extra specifying an {@link OperationSafetyReason}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_OPERATION_SAFETY_REASON  =
+            "android.app.extra.OPERATION_SAFETY_REASON";
+
+    /**
+     * An {@code boolean} extra specifying whether an operation will fail due to a
+     * {@link OperationSafetyReason}. {@code true} means operations that rely on that reason are
+     * safe, while {@code false} means they're unsafe.
+     *
+     * @hide
+     */
+    public static final String EXTRA_OPERATION_SAFETY_STATE  =
+            "android.app.extra.OPERATION_SAFETY_STATE";
 
     private DevicePolicyManager mManager;
     private ComponentName mWho;
@@ -1018,6 +1051,51 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called to notify the state of operations that can be unsafe to execute has changed.
+     *
+     * <p><b>Note:/b> notice that the operation safety state might change between the time this
+     * callback is received and the operation's method on {@link DevicePolicyManager} is called, so
+     * calls to the latter could still throw a {@link UnsafeStateException} even when this method
+     * is called with {@code isSafe} as {@code true}
+     *
+     * @param context the running context as per {@link #onReceive}
+     * @param reason the reason an operation could be unsafe.
+     * @param isSafe whether the operation is safe to be executed.
+     */
+    public void onOperationSafetyStateChanged(@NonNull Context context,
+            @OperationSafetyReason int reason, boolean isSafe) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, String.format("onOperationSafetyStateChanged(): %s=%b",
+                    DevicePolicyManager.operationSafetyReasonToString(reason), isSafe));
+        }
+    }
+
+    private void onOperationSafetyStateChanged(Context context, Intent intent) {
+        if (!hasRequiredExtra(intent, EXTRA_OPERATION_SAFETY_REASON)
+                || !hasRequiredExtra(intent, EXTRA_OPERATION_SAFETY_STATE)) {
+            return;
+        }
+
+        int reason = intent.getIntExtra(EXTRA_OPERATION_SAFETY_REASON,
+                DevicePolicyManager.OPERATION_SAFETY_REASON_NONE);
+        if (!DevicePolicyManager.isValidOperationSafetyReason(reason)) {
+            Log.wtf(TAG, "Received invalid reason on " + intent.getAction() + ": " + reason);
+            return;
+        }
+        boolean isSafe = intent.getBooleanExtra(EXTRA_OPERATION_SAFETY_STATE,
+                /* defaultValue=*/ false);
+
+        onOperationSafetyStateChanged(context, reason, isSafe);
+    }
+
+    private boolean hasRequiredExtra(Intent intent, String extra) {
+        if (intent.hasExtra(extra)) return true;
+
+        Log.wtf(TAG, "Missing '" + extra + "' on intent " +  intent);
+        return false;
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -1025,6 +1103,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         String action = intent.getAction();
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "onReceive(): received " + action + " on user " + context.getUserId());
+        }
 
         if (ACTION_PASSWORD_CHANGED.equals(action)) {
             onPasswordChanged(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
@@ -1092,6 +1173,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE.equals(action)) {
             onTransferAffiliatedProfileOwnershipComplete(context,
                     intent.getParcelableExtra(Intent.EXTRA_USER));
+        } else if (ACTION_OPERATION_SAFETY_STATE_CHANGED.equals(action)) {
+            onOperationSafetyStateChanged(context, intent);
         }
     }
 }

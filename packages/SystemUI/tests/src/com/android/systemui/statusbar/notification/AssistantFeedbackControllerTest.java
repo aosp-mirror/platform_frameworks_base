@@ -36,16 +36,20 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.os.Handler;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.util.Pair;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.util.DeviceConfigProxyFake;
 
 import junit.framework.Assert;
 
@@ -55,38 +59,44 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class AssistantFeedbackControllerTest extends SysuiTestCase {
-    private static final int ON = 1;
-    private static final int OFF = 0;
     private static final String TEST_PACKAGE_NAME = "test_package";
     private static final int TEST_UID = 1;
 
     private AssistantFeedbackController mAssistantFeedbackController;
+    private DeviceConfigProxyFake mProxyFake;
+    private TestableLooper mTestableLooper;
+
     private StatusBarNotification mSbn;
 
     @Before
     public void setUp() {
-        mAssistantFeedbackController = new AssistantFeedbackController(mContext);
-        switchSetting(ON);
+        mProxyFake = new DeviceConfigProxyFake();
+        mTestableLooper = TestableLooper.get(this);
+        mAssistantFeedbackController = new AssistantFeedbackController(
+                new Handler(mTestableLooper.getLooper()),
+                mContext, mProxyFake);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
                 0, null, TEST_UID, 0, new Notification(),
                 UserHandle.CURRENT, null, 0);
     }
 
     @Test
-    public void testUserControls_settingDisabled() {
-        switchSetting(OFF);
+    public void testFlagDisabled() {
+        switchFlag("false");
         assertFalse(mAssistantFeedbackController.isFeedbackEnabled());
     }
 
     @Test
-    public void testUserControls_settingEnabled() {
+    public void testFlagEnabled() {
+        switchFlag("true");
         assertTrue(mAssistantFeedbackController.isFeedbackEnabled());
     }
 
     @Test
-    public void testFeedback_settingDisabled() {
-        switchSetting(OFF);
+    public void testFeedback_flagDisabled() {
+        switchFlag("false");
         assertEquals(STATUS_UNCHANGED, mAssistantFeedbackController.getFeedbackStatus(
                 getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_UNCHANGED)));
         assertFalse(mAssistantFeedbackController.showFeedbackIndicator(
@@ -95,6 +105,7 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
 
     @Test
     public void testFeedback_changedImportance() {
+        switchFlag("true");
         NotificationEntry entry = getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_HIGH, RANKING_UNCHANGED);
         assertEquals(STATUS_PROMOTED, mAssistantFeedbackController.getFeedbackStatus(entry));
         assertTrue(mAssistantFeedbackController.showFeedbackIndicator(entry));
@@ -110,6 +121,7 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
 
     @Test
     public void testFeedback_changedRanking() {
+        switchFlag("true");
         NotificationEntry entry =
                 getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_PROMOTED);
         assertEquals(STATUS_PROMOTED, mAssistantFeedbackController.getFeedbackStatus(entry));
@@ -121,8 +133,8 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetFeedbackResources_settingDisabled() {
-        switchSetting(OFF);
+    public void testGetFeedbackResources_flagDisabled() {
+        switchFlag("false");
         Assert.assertEquals(new Pair(0, 0), mAssistantFeedbackController.getFeedbackResources(
                 getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_UNCHANGED)));
     }
@@ -138,9 +150,10 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
                 .build();
     }
 
-    private void switchSetting(int setting) {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.NOTIFICATION_FEEDBACK_ENABLED, setting);
-        mAssistantFeedbackController.update(null);
+    private void switchFlag(String enabled) {
+        mProxyFake.setProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI, SystemUiDeviceConfigFlags.ENABLE_NAS_FEEDBACK,
+                enabled, false);
+        mTestableLooper.processAllMessages();
     }
 }

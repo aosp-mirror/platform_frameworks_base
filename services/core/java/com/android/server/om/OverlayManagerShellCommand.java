@@ -335,6 +335,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
 
         final List<OverlayInfo> overlaysForTarget =
                 mInterface.getOverlayInfosForTarget(overlayInfo.targetPackageName, userId);
+        overlaysForTarget.remove(overlayInfo);
         final OverlayManagerTransaction.Builder builder = new OverlayManagerTransaction.Builder();
         for (final OverlayInfo disableOverlay : overlaysForTarget) {
             if ((inCategory && !Objects.equals(disableOverlay.category,overlayInfo.category))

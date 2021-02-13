@@ -16,14 +16,14 @@
 
 package android.service.notification;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.app.NotificationChannel;
+import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.util.ArraySet;
 
@@ -45,16 +45,19 @@ public class NotificationListenerFilterTest {
         assertThat(nlf.isTypeAllowed(FLAG_FILTER_TYPE_SILENT)).isTrue();
         assertThat(nlf.getTypes()).isEqualTo(FLAG_FILTER_TYPE_CONVERSATIONS
                 | FLAG_FILTER_TYPE_ALERTING
-                | FLAG_FILTER_TYPE_SILENT);
+                | FLAG_FILTER_TYPE_SILENT
+                | FLAG_FILTER_TYPE_ONGOING);
 
         assertThat(nlf.getDisallowedPackages()).isEmpty();
-        assertThat(nlf.isPackageAllowed("pkg1")).isTrue();
+        assertThat(nlf.isPackageAllowed(new VersionedPackage("any", 0))).isTrue();
     }
 
 
     @Test
     public void testConstructor() {
-        ArraySet<String> pkgs = new ArraySet<>(new String[] {"pkg1", "pkg2"});
+        VersionedPackage a1 = new VersionedPackage("pkg1", 243);
+        VersionedPackage a2= new VersionedPackage("pkg2", 2142534);
+        ArraySet<VersionedPackage> pkgs = new ArraySet<>(new VersionedPackage[] {a1, a2});
         NotificationListenerFilter nlf =
                 new NotificationListenerFilter(FLAG_FILTER_TYPE_ALERTING, pkgs);
         assertThat(nlf.isTypeAllowed(FLAG_FILTER_TYPE_CONVERSATIONS)).isFalse();
@@ -62,20 +65,21 @@ public class NotificationListenerFilterTest {
         assertThat(nlf.isTypeAllowed(FLAG_FILTER_TYPE_SILENT)).isFalse();
         assertThat(nlf.getTypes()).isEqualTo(FLAG_FILTER_TYPE_ALERTING);
 
-        assertThat(nlf.getDisallowedPackages()).contains("pkg1");
-        assertThat(nlf.getDisallowedPackages()).contains("pkg2");
-        assertThat(nlf.isPackageAllowed("pkg1")).isFalse();
-        assertThat(nlf.isPackageAllowed("pkg2")).isFalse();
+        assertThat(nlf.getDisallowedPackages()).contains(a1);
+        assertThat(nlf.getDisallowedPackages()).contains(a2);
+        assertThat(nlf.isPackageAllowed(a1)).isFalse();
+        assertThat(nlf.isPackageAllowed(a2)).isFalse();
     }
 
     @Test
     public void testSetDisallowedPackages() {
         NotificationListenerFilter nlf = new NotificationListenerFilter();
 
-        ArraySet<String> pkgs = new ArraySet<>(new String[] {"pkg1"});
+        ArraySet<VersionedPackage> pkgs = new ArraySet<>(
+                new VersionedPackage[] {new VersionedPackage("pkg1", 0)});
         nlf.setDisallowedPackages(pkgs);
 
-        assertThat(nlf.isPackageAllowed("pkg1")).isFalse();
+        assertThat(nlf.isPackageAllowed(new VersionedPackage("pkg1", 0))).isFalse();
     }
 
     @Test
@@ -94,7 +98,9 @@ public class NotificationListenerFilterTest {
     @Test
     public void testDescribeContents() {
         final int expected = 0;
-        ArraySet<String> pkgs = new ArraySet<>(new String[] {"pkg1", "pkg2"});
+        VersionedPackage a1 = new VersionedPackage("pkg1", 243);
+        VersionedPackage a2= new VersionedPackage("pkg2", 2142534);
+        ArraySet<VersionedPackage> pkgs = new ArraySet<>(new VersionedPackage[] {a1, a2});
         NotificationListenerFilter nlf =
                 new NotificationListenerFilter(FLAG_FILTER_TYPE_ALERTING, pkgs);
         assertThat(nlf.describeContents()).isEqualTo(expected);
@@ -102,7 +108,9 @@ public class NotificationListenerFilterTest {
 
     @Test
     public void testParceling() {
-        ArraySet<String> pkgs = new ArraySet<>(new String[] {"pkg1", "pkg2"});
+        VersionedPackage a1 = new VersionedPackage("pkg1", 243);
+        VersionedPackage a2= new VersionedPackage("pkg2", 2142534);
+        ArraySet<VersionedPackage> pkgs = new ArraySet<>(new VersionedPackage[] {a1, a2});
         NotificationListenerFilter nlf =
                 new NotificationListenerFilter(FLAG_FILTER_TYPE_ALERTING, pkgs);
 
@@ -116,9 +124,9 @@ public class NotificationListenerFilterTest {
         assertThat(nlf1.isTypeAllowed(FLAG_FILTER_TYPE_SILENT)).isFalse();
         assertThat(nlf1.getTypes()).isEqualTo(FLAG_FILTER_TYPE_ALERTING);
 
-        assertThat(nlf1.getDisallowedPackages()).contains("pkg1");
-        assertThat(nlf1.getDisallowedPackages()).contains("pkg2");
-        assertThat(nlf1.isPackageAllowed("pkg1")).isFalse();
-        assertThat(nlf1.isPackageAllowed("pkg2")).isFalse();
+        assertThat(nlf1.getDisallowedPackages()).contains(a1);
+        assertThat(nlf1.getDisallowedPackages()).contains(a2);
+        assertThat(nlf1.isPackageAllowed(a1)).isFalse();
+        assertThat(nlf1.isPackageAllowed(a2)).isFalse();
     }
 }
