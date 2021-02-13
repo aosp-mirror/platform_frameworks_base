@@ -19,6 +19,16 @@
 // This contains the junit.framework and android.test classes that were in
 // Android API level 25 excluding those from android.test.runner.
 // Also contains the com.android.internal.util.Predicate[s] classes.
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-CPL-1.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_sdk_library {
     name: "android.test.base",
 
