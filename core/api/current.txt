@@ -35970,6 +35970,19 @@ package android.se.omapi {
 
 package android.security {
 
+  public final class AppUriAuthenticationPolicy implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Map<android.net.Uri,java.lang.String>> getAppAndUriMappings();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.AppUriAuthenticationPolicy> CREATOR;
+  }
+
+  public static final class AppUriAuthenticationPolicy.Builder {
+    ctor public AppUriAuthenticationPolicy.Builder();
+    method @NonNull public android.security.AppUriAuthenticationPolicy.Builder addAppAndUriMapping(@NonNull String, @NonNull android.net.Uri, @NonNull String);
+    method @NonNull public android.security.AppUriAuthenticationPolicy build();
+  }
+
   public final class AttestedKeyPair {
     ctor public AttestedKeyPair(@Nullable java.security.KeyPair, @NonNull java.util.List<java.security.cert.Certificate>);
     method @NonNull public java.util.List<java.security.cert.Certificate> getAttestationRecord();
