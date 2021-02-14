@@ -607,7 +607,8 @@ final class ProcessProfileRecord {
     @GuardedBy("mService")
     void dumpPss(PrintWriter pw, String prefix, long nowUptime) {
         synchronized (mProfilerLock) {
-            pw.print(" lastPssTime=");
+            pw.print(prefix);
+            pw.print("lastPssTime=");
             TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
             pw.print(" pssProcState=");
             pw.print(mPssProcState);
@@ -629,9 +630,8 @@ final class ProcessProfileRecord {
             DebugUtils.printSizeValue(pw, mLastRss * 1024);
             pw.println();
             pw.print(prefix);
-            pw.print(" trimMemoryLevel=");
+            pw.print("trimMemoryLevel=");
             pw.println(mTrimMemoryLevel);
-            pw.println();
             pw.print(prefix); pw.print("procStateMemTracker: ");
             mProcStateMemTracker.dumpLine(pw);
             pw.print(prefix);
@@ -653,5 +653,6 @@ final class ProcessProfileRecord {
             pw.print(" timeUsed=");
             TimeUtils.formatDuration(mCurCpuTime.get() - lastCpuTime, pw);
         }
+        pw.println();
     }
 }
