@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -118,6 +119,19 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testRegisterOrganizer_ignoreUntrustedDisplay() throws RemoteException {
+        doReturn(false).when(mDisplayContent).isTrusted();
+
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        List<DisplayAreaAppearedInfo> infos = mOrganizerController
+                .registerOrganizer(organizer, FEATURE_VENDOR_FIRST).getList();
+
+        assertThat(infos).isEmpty();
+        verify(organizer, never()).onDisplayAreaAppeared(any(DisplayAreaInfo.class),
+                any(SurfaceControl.class));
+    }
+
+    @Test
     public void testCreateTaskDisplayArea_topBelowRoot() {
         final String newTdaName = "testTda";
         final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
@@ -186,13 +200,20 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     @Test
     public void testCreateTaskDisplayArea_invalidDisplayAndRoot() {
         final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+
         assertThrows(IllegalArgumentException.class, () ->
                 mOrganizerController.createTaskDisplayArea(
                         organizer, SystemServicesTestRule.sNextDisplayId + 1, FEATURE_ROOT,
                         "testTda"));
+
         assertThrows(IllegalArgumentException.class, () ->
                 mOrganizerController.createTaskDisplayArea(
                         organizer, DEFAULT_DISPLAY, FEATURE_ROOT - 1, "testTda"));
+
+        doReturn(false).when(mDisplayContent).isTrusted();
+        assertThrows(IllegalArgumentException.class, () ->
+                mOrganizerController.createTaskDisplayArea(
+                        organizer, DEFAULT_DISPLAY, FEATURE_ROOT, "testTda"));
     }
 
     @Test
