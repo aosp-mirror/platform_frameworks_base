@@ -591,5 +591,5 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"তিন দন্ড ডেটার সংকেত৷"</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"পূর্ণ ডেটার সংকেত রয়েছে৷"</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ইথারনেটের সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ইথারনেট সংযুক্ত হয়েছে৷"</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ইথারনেট।"</string>
 </resources>

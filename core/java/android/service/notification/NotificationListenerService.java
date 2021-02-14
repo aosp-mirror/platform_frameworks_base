@@ -80,6 +80,10 @@ import java.util.Objects;
  *     &lt;intent-filter>
  *         &lt;action android:name="android.service.notification.NotificationListenerService" />
  *     &lt;/intent-filter>
+ *     &lt;meta-data
+ *               android:name="android.service.notification.default_filter_types"
+ *               android:value="1,2">
+ *           &lt;/meta-data>
  * &lt;/service></pre>
  *
  * <p>The service should wait for the {@link #onListenerConnected()} event
@@ -101,6 +105,21 @@ public abstract class NotificationListenerService extends Service {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String TAG = getClass().getSimpleName();
+
+    /**
+     * The name of the {@code meta-data} tag containing a comma separated list of default
+     * integer notification types that should be provided to this listener. See
+     * {@link #FLAG_FILTER_TYPE_ONGOING},
+     * {@link #FLAG_FILTER_TYPE_CONVERSATIONS}, {@link #FLAG_FILTER_TYPE_ALERTING),
+     * and {@link #FLAG_FILTER_TYPE_SILENT}.
+     * <p>This value will only be read if the app has not previously specified a default type list,
+     * and if the user has not overridden the allowed types.</p>
+     * <p>An absent value means 'allow all types'.
+     * A present but empty value means 'allow no types'.</p>
+     *
+     */
+    public static final String META_DATA_DEFAULT_FILTER_TYPES
+            = "android.service.notification.default_filter_types";
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
@@ -254,23 +273,19 @@ public abstract class NotificationListenerService extends Service {
     /**
      * A flag value indicating that this notification listener can see conversation type
      * notifications.
-     * @hide
      */
     public static final int FLAG_FILTER_TYPE_CONVERSATIONS = 1;
     /**
      * A flag value indicating that this notification listener can see altering type notifications.
-     * @hide
      */
     public static final int FLAG_FILTER_TYPE_ALERTING = 2;
     /**
      * A flag value indicating that this notification listener can see silent type notifications.
-     * @hide
      */
     public static final int FLAG_FILTER_TYPE_SILENT = 4;
     /**
      * A flag value indicating that this notification listener can see important
      * ( > {@link NotificationManager#IMPORTANCE_MIN}) ongoing type notifications.
-     * @hide
      */
     public static final int FLAG_FILTER_TYPE_ONGOING = 8;
 

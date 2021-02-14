@@ -469,9 +469,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
             if (wifiConnected) {
                 minimalStateDescription.append(cb.mWifiSignalContentDescription);
                 minimalContentDescription.append(removeDoubleQuotes(cb.mSsid));
-                if (!TextUtils.isEmpty(state.secondaryLabel)) {
-                    minimalContentDescription.append(",").append(state.secondaryLabel);
-                }
+            } else if (!TextUtils.isEmpty(state.secondaryLabel)) {
+                minimalContentDescription.append(",").append(state.secondaryLabel);
             }
         }
         state.stateDescription = minimalStateDescription.toString();

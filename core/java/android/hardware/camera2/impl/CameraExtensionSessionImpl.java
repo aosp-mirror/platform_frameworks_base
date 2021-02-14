@@ -1233,6 +1233,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                              int sequenceId) {
             synchronized (mInterfaceLock) {
                 if (mInternalRepeatingRequestEnabled) {
+                    mRepeatingRequestImageReader.setOnImageAvailableListener(
+                            new ImageLoopbackCallback(), mHandler);
                     resumeInternalRepeatingRequest(true);
                 }
             }
@@ -1263,7 +1265,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     mRequestUpdatedNeeded = false;
                     resumeInternalRepeatingRequest(false);
                 } else if (mInternalRepeatingRequestEnabled) {
+                    mRepeatingRequestImageReader.setOnImageAvailableListener(
+                            new ImageLoopbackCallback(), mHandler);
                     resumeInternalRepeatingRequest(true);
+                } else {
+                    mRepeatingRequestImageReader.setOnImageAvailableListener(
+                            new ImageLoopbackCallback(), mHandler);
                 }
             }
 

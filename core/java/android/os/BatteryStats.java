@@ -5296,8 +5296,11 @@ public abstract class BatteryStats implements Parcelable {
                     }
                     if (bs.customMeasuredPowerMah != null) {
                         for (int idx = 0; idx < bs.customMeasuredPowerMah.length; idx++) {
-                            pw.print(" custom[" + idx + "]=");
-                            printmAh(pw, bs.customMeasuredPowerMah[idx]);
+                            final double customPowerMah = bs.customMeasuredPowerMah[idx];
+                            if (customPowerMah != 0) {
+                                pw.print(" custom[" + idx + "]=");
+                                printmAh(pw, customPowerMah);
+                            }
                         }
                     }
                     pw.print(" )");
