@@ -30,10 +30,11 @@
 
 namespace android {
 
-MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
-                                 std::string_view filePath, int ttcIndex,
+MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, int sourceId, const void* fontData,
+                                 size_t fontSize, std::string_view filePath, int ttcIndex,
                                  const std::vector<minikin::FontVariation>& axes)
         : mTypeface(std::move(typeface))
+        , mSourceId(sourceId)
         , mFontData(fontData)
         , mFontSize(fontSize)
         , mTtcIndex(ttcIndex)
@@ -141,8 +142,8 @@ std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(stream), args));
 
-    return std::make_shared<MinikinFontSkia>(std::move(face), mFontData, mFontSize, mFilePath,
-                                             ttcIndex, variations);
+    return std::make_shared<MinikinFontSkia>(std::move(face), mSourceId, mFontData, mFontSize,
+                                             mFilePath, ttcIndex, variations);
 }
 
 // hinting<<16 | edging<<8 | bools:5bits

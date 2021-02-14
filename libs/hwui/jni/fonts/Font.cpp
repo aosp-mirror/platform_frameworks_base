@@ -137,12 +137,9 @@ static jlong Font_Builder_clone(JNIEnv* env, jobject clazz, jlong fontPtr, jlong
     sk_sp<SkTypeface> newTypeface = minikinSkia->GetSkTypeface()->makeClone(args);
 
     std::shared_ptr<minikin::MinikinFont> newMinikinFont = std::make_shared<MinikinFontSkia>(
-        std::move(newTypeface),
-        minikinSkia->GetFontData(),
-        minikinSkia->GetFontSize(),
-        minikinSkia->getFilePath(),
-        minikinSkia->GetFontIndex(),
-        builder->axes);
+            std::move(newTypeface), minikinSkia->GetSourceId(), minikinSkia->GetFontData(),
+            minikinSkia->GetFontSize(), minikinSkia->getFilePath(), minikinSkia->GetFontIndex(),
+            builder->axes);
     std::shared_ptr<minikin::Font> newFont = minikin::Font::Builder(newMinikinFont)
               .setWeight(weight)
               .setSlant(static_cast<minikin::FontStyle::Slant>(italic))
@@ -279,6 +276,12 @@ static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr, jint inde
     return (static_cast<uint64_t>(var.axisTag) << 32) | static_cast<uint64_t>(floatBinary);
 }
 
+// Critical Native
+static jint Font_getSourceId(CRITICAL_JNI_PARAMS_COMMA jlong fontPtr) {
+    FontWrapper* font = reinterpret_cast<FontWrapper*>(fontPtr);
+    return font->font->typeface()->GetSourceId();
+}
+
 // Fast Native
 static jlong FontFileUtil_getFontRevision(JNIEnv* env, jobject, jobject buffer, jint index) {
     NPE_CHECK_RETURN_ZERO(env, buffer);
@@ -369,6 +372,7 @@ static const JNINativeMethod gFontMethods[] = {
         {"nGetIndex", "(J)I", (void*)Font_getIndex},
         {"nGetAxisCount", "(J)I", (void*)Font_getAxisCount},
         {"nGetAxisInfo", "(JI)J", (void*)Font_getAxisInfo},
+        {"nGetSourceId", "(J)I", (void*)Font_getSourceId},
 };
 
 static const JNINativeMethod gFontFileUtilMethods[] = {
@@ -409,8 +413,13 @@ std::shared_ptr<minikin::MinikinFont> createMinikinFontSkia(
     if (face == nullptr) {
         return nullptr;
     }
-    return std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize,
+    return std::make_shared<MinikinFontSkia>(std::move(face), getNewSourceId(), fontPtr, fontSize,
                                              fontPath, ttcIndex, axes);
+}
+
+int getNewSourceId() {
+    static std::atomic<int> sSourceId = {0};
+    return sSourceId++;
 }
 
 }  // namespace fonts

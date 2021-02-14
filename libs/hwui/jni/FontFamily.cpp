@@ -17,15 +17,16 @@
 #undef LOG_TAG
 #define LOG_TAG "Minikin"
 
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include "FontUtils.h"
+#include "GraphicsJNI.h"
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkRefCnt.h"
 #include "SkTypeface.h"
-#include "GraphicsJNI.h"
-#include <nativehelper/ScopedPrimitiveArray.h>
-#include <nativehelper/ScopedUtfChars.h>
 #include "Utils.h"
-#include "FontUtils.h"
+#include "fonts/Font.h"
 
 #include <hwui/MinikinSkia.h>
 #include <hwui/Typeface.h>
@@ -34,6 +35,12 @@
 #include <ui/FatVector.h>
 
 #include <memory>
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// The following JNI methods are kept only for compatibility reasons due to hidden API accesses.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace android {
 
@@ -125,8 +132,8 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
         return false;
     }
     std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, "", ttcIndex,
-                    builder->axes);
+            std::make_shared<MinikinFontSkia>(std::move(face), fonts::getNewSourceId(), fontPtr,
+                                              fontSize, "", ttcIndex, builder->axes);
     minikin::Font::Builder fontBuilder(minikinFont);
 
     if (weight != RESOLVE_BY_FONT_TABLE) {
