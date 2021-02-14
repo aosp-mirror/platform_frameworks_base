@@ -27,7 +27,6 @@ import android.graphics.RectF;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
-import android.util.LongSparseLongArray;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.GuardedBy;
@@ -66,11 +65,6 @@ public final class Font {
     private static final NativeAllocationRegistry FONT_REGISTRY =
             NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
                     nGetReleaseNativeFont());
-
-    private static final Object SOURCE_ID_LOCK = new Object();
-    @GuardedBy("SOURCE_ID_LOCK")
-    private static final LongSparseLongArray FONT_SOURCE_ID_MAP =
-            new LongSparseLongArray(300);  // System font has 200 fonts, so 300 should be enough.
 
     /**
      * A builder class for creating new Font.
@@ -523,8 +517,6 @@ public final class Font {
     private @Nullable FontVariationAxis[] mAxes = null;
     @GuardedBy("mLock")
     private @NonNull LocaleList mLocaleList = null;
-    @GuardedBy("mLock")
-    private int mSourceIdentifier = -1;
 
     /**
      * Use Builder instead
@@ -758,20 +750,7 @@ public final class Font {
      * @return an unique identifier for the font source data.
      */
     public int getSourceIdentifier() {
-        synchronized (mLock) {
-            if (mSourceIdentifier == -1) {
-                long bufferAddress = nGetBufferAddress(mNativePtr);
-                synchronized (SOURCE_ID_LOCK) {
-                    long id = FONT_SOURCE_ID_MAP.get(bufferAddress, -1);
-                    if (id == -1) {
-                        id = FONT_SOURCE_ID_MAP.size();
-                        FONT_SOURCE_ID_MAP.append(bufferAddress, id);
-                    }
-                    mSourceIdentifier = (int) id;
-                }
-            }
-            return mSourceIdentifier;
-        }
+        return nGetSourceId(mNativePtr);
     }
 
     /**
@@ -888,6 +867,9 @@ public final class Font {
 
     @CriticalNative
     private static native long nGetBufferAddress(long font);
+
+    @CriticalNative
+    private static native int nGetSourceId(long font);
 
     @CriticalNative
     private static native long nGetReleaseNativeFont();
