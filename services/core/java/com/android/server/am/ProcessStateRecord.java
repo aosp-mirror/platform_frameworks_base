@@ -1277,7 +1277,7 @@ final class ProcessStateRecord {
         pw.print(" set="); pw.println(mSetAdj);
         pw.print(prefix); pw.print("mCurSchedGroup="); pw.print(mCurSchedGroup);
         pw.print(" setSchedGroup="); pw.print(mSetSchedGroup);
-        pw.print(" systemNoUi="); pw.print(mSystemNoUi);
+        pw.print(" systemNoUi="); pw.println(mSystemNoUi);
         pw.print(prefix); pw.print("curProcState="); pw.print(getCurProcState());
         pw.print(" mRepProcState="); pw.print(mRepProcState);
         pw.print(" setProcState="); pw.print(mSetProcState);
@@ -1297,7 +1297,7 @@ final class ProcessStateRecord {
         }
         if (mHasShownUi || mApp.mProfile.hasPendingUiClean()) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(mHasShownUi);
-            pw.print(" pendingUiClean="); pw.print(mApp.mProfile.hasPendingUiClean());
+            pw.print(" pendingUiClean="); pw.println(mApp.mProfile.hasPendingUiClean());
         }
         pw.print(prefix); pw.print("cached="); pw.print(mCached);
         pw.print(" empty="); pw.println(mEmpty);
@@ -1316,12 +1316,12 @@ final class ProcessStateRecord {
         }
         if (mHasForegroundActivities || mRepForegroundActivities) {
             pw.print(prefix);
-            pw.print(" foregroundActivities="); pw.print(mHasForegroundActivities);
+            pw.print("foregroundActivities="); pw.print(mHasForegroundActivities);
             pw.print(" (rep="); pw.print(mRepForegroundActivities); pw.println(")");
         }
         if (mSetProcState > ActivityManager.PROCESS_STATE_SERVICE) {
             pw.print(prefix);
-            pw.print(" whenUnimportant=");
+            pw.print("whenUnimportant=");
             TimeUtils.formatDuration(mWhenUnimportant - nowUptime, pw);
             pw.println();
         }
