@@ -2593,6 +2593,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         ArraySet<String> isPrivilegedPermissionAllowlisted = null;
         ArraySet<String> shouldGrantSignaturePermission = null;
         ArraySet<String> shouldGrantInternalPermission = null;
+        ArraySet<String> shouldGrantPrivilegedPermissionIfWasGranted = new ArraySet<>();
         final List<String> requestedPermissions = pkg.getRequestedPermissions();
         final int requestedPermissionsSize = requestedPermissions.size();
         for (int i = 0; i < requestedPermissionsSize; i++) {
@@ -2613,14 +2614,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 isPrivilegedPermissionAllowlisted.add(permissionName);
             }
             if (permission.isSignature() && (shouldGrantPermissionBySignature(pkg, permission)
-                    || shouldGrantPermissionByProtectionFlags(pkg, ps, permission))) {
+                    || shouldGrantPermissionByProtectionFlags(pkg, ps, permission,
+                            shouldGrantPrivilegedPermissionIfWasGranted))) {
                 if (shouldGrantSignaturePermission == null) {
                     shouldGrantSignaturePermission = new ArraySet<>();
                 }
                 shouldGrantSignaturePermission.add(permissionName);
             }
             if (permission.isInternal()
-                    && shouldGrantPermissionByProtectionFlags(pkg, ps, permission)) {
+                    && shouldGrantPermissionByProtectionFlags(pkg, ps, permission,
+                            shouldGrantPrivilegedPermissionIfWasGranted)) {
                 if (shouldGrantInternalPermission == null) {
                     shouldGrantInternalPermission = new ArraySet<>();
                 }
@@ -2842,14 +2845,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                             isPrivilegedPermissionAllowlisted, permName))
                                     && (CollectionUtils.contains(shouldGrantSignaturePermission,
                                             permName)
-                                            || ((bp.isDevelopment() || bp.isRole())
+                                            || (((bp.isPrivileged() && CollectionUtils.contains(
+                                                    shouldGrantPrivilegedPermissionIfWasGranted,
+                                                    permName)) || bp.isDevelopment() || bp.isRole())
                                                     && origState.isPermissionGranted(permName))))
                             || (bp.isInternal()
                                     && (!bp.isPrivileged() || CollectionUtils.contains(
                                             isPrivilegedPermissionAllowlisted, permName))
                                     && (CollectionUtils.contains(shouldGrantInternalPermission,
                                             permName)
-                                            || ((bp.isDevelopment() || bp.isRole())
+                                            || (((bp.isPrivileged() && CollectionUtils.contains(
+                                                    shouldGrantPrivilegedPermissionIfWasGranted,
+                                                    permName)) || bp.isDevelopment() || bp.isRole())
                                                     && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
                         if (uidState.grantPermission(bp)) {
@@ -3374,10 +3381,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (isInSystemConfigPrivAppPermissions(pkg, permissionName)) {
             return true;
         }
+        if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName)) {
+            return false;
+        }
+        // Updated system apps do not need to be allowlisted
+        if (packageSetting.getPkgState().isUpdatedSystemApp()) {
+            // Let shouldGrantPermissionByProtectionFlags() decide whether the privileged permission
+            // can be granted, because an updated system app may be in a shared UID, and in case a
+            // new privileged permission is requested by the updated system app but not the factory
+            // app, although this app and permission combination isn't in the allowlist and can't
+            // get the permission this way, other apps in the shared UID may still get it. A proper
+            // fix for this would be to perform the reconciliation by UID, but for now let's keep
+            // the old workaround working, which is to keep granted privileged permissions still
+            // granted.
+            return true;
+        }
         // Only enforce the allowlist on boot
-        if (!mSystemReady
-                // Updated system apps do not need to be allowlisted
-                && !packageSetting.getPkgState().isUpdatedSystemApp()) {
+        if (!mSystemReady) {
             final ApexManager apexManager = ApexManager.getInstance();
             final String containingApexPackageName =
                     apexManager.getActiveApexPackageNameContainingPackage(packageName);
@@ -3386,11 +3406,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     MATCH_ACTIVE_PACKAGE));
             // Apps that are in updated apexs' do not need to be allowlisted
             if (!isInUpdatedApex) {
-                // it's only a reportable violation if the permission isn't explicitly
-                // denied
-                if (isInSystemConfigPrivAppDenyPermissions(pkg, permissionName)) {
-                    return false;
-                }
                 Slog.w(TAG, "Privileged permission " + permissionName + " for package "
                         + packageName + " (" + pkg.getPath()
                         + ") not in privapp-permissions allowlist");
@@ -3468,7 +3483,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private boolean shouldGrantPermissionByProtectionFlags(@NonNull AndroidPackage pkg,
-            @NonNull PackageSetting pkgSetting, @NonNull Permission bp) {
+            @NonNull PackageSetting pkgSetting, @NonNull Permission bp,
+            @NonNull ArraySet<String> shouldGrantPrivilegedPermissionIfWasGranted) {
         boolean allowed = false;
         final boolean isPrivilegedPermission = bp.isPrivileged();
         final boolean isOemPermission = bp.isOem();
@@ -3480,11 +3496,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 final PackageSetting disabledPs = mPackageManagerInt
                         .getDisabledSystemPackage(pkg.getPackageName());
                 final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.pkg;
-                if (disabledPkg != null && disabledPkg.getRequestedPermissions().contains(
-                        permissionName)) {
-                    allowed = (isPrivilegedPermission && disabledPkg.isPrivileged())
-                            || (isOemPermission && canGrantOemPermission(disabledPkg,
-                            permissionName));
+                if (disabledPkg != null
+                        && ((isPrivilegedPermission && disabledPkg.isPrivileged())
+                        || (isOemPermission && canGrantOemPermission(disabledPkg,
+                                permissionName)))) {
+                    if (disabledPkg.getRequestedPermissions().contains(permissionName)) {
+                        allowed = true;
+                    } else {
+                        // If the original was granted this permission, we take
+                        // that grant decision as read and propagate it to the
+                        // update.
+                        shouldGrantPrivilegedPermissionIfWasGranted.add(permissionName);
+                    }
                 }
             } else {
                 allowed = (isPrivilegedPermission && pkg.isPrivileged())
