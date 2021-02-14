@@ -10,7 +10,7 @@
           "include-filter": "com.google.android.media.gts.WidevineGenericOpsTests"
         },
         {
-          "include-filter": "com.google.android.media.gts.WidevineYouTubePerformanceTests"
+          "include-filter": "com.google.android.media.gts.WidevineH264PlaybackTests"
         }
       ]
     }

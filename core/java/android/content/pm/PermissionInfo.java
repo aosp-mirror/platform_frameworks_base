@@ -28,6 +28,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.util.Parcelling;
+import com.android.internal.util.Parcelling.BuiltIn.ForStringSet;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
@@ -477,6 +480,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public @Nullable CharSequence nonLocalizedDescription;
 
+    private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
+
     /**
      * A {@link Set} of trusted signing certificate digests. If this permission has the {@link
      * #PROTECTION_FLAG_KNOWN_SIGNER} flag set the permission will be granted to a requesting app
@@ -688,6 +693,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
+        sForStringSet.parcel(knownCerts, dest, parcelableFlags);
     }
 
     /** @hide */
@@ -753,5 +759,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = source.readInt();
         requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+        knownCerts = sForStringSet.unparcel(source);
     }
 }

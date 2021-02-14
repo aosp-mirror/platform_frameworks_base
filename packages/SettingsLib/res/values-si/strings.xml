@@ -591,5 +591,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"දත්ත තීරු 3."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"දත්ත සංඥාව පිරී ඇත."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ඊතර්නෙට් විසන්ධි කරන ලදී."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ඊතර්නෙට් සම්බන්ධ කරන ලදී."</string>
+    <!-- no translation found for accessibility_ethernet_connected (6175942685957461563) -->
+    <skip />
 </resources>

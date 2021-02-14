@@ -47,7 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginBottom="4dp"
-        android:tint="@color/media_primary_text"
+        android:tint="?android:attr/textColorPrimary"
         android:forceHasOverlappingRendering="false"
     />
 </FrameLayout>

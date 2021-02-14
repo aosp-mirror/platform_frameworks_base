@@ -215,6 +215,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
+import android.service.notification.ConditionProviderService;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
@@ -9134,6 +9135,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        protected void ensureFilters(ServiceInfo si, int userId) {
+            // nothing to filter; no user visible settings for types/packages like other
+            // listeners
+        }
+
+        @Override
         @GuardedBy("mNotificationLock")
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
             mListeners.unregisterService(removed.service, removed.userid);
@@ -9578,7 +9585,7 @@ public class NotificationManagerService extends SystemService {
 
     public class NotificationListeners extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_LISTENERS = "enabled_listeners";
-        static final String TAG_REQUESTED_LISTENERS = "req_listeners";
+        static final String TAG_REQUESTED_LISTENERS = "request_listeners";
         static final String TAG_REQUESTED_LISTENER = "listener";
         static final String ATT_COMPONENT = "component";
         static final String ATT_TYPES = "types";
@@ -9701,28 +9708,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onUserUnlocked(int user) {
-            int flags = PackageManager.GET_SERVICES | PackageManager.GET_META_DATA;
-
-            final PackageManager pmWrapper = mContext.getPackageManager();
-            List<ResolveInfo> installedServices = pmWrapper.queryIntentServicesAsUser(
-                    new Intent(getConfig().serviceInterface), flags, user);
-
-            for (ResolveInfo resolveInfo : installedServices) {
-                ServiceInfo info = resolveInfo.serviceInfo;
-
-                if (!getConfig().bindPermission.equals(info.permission)) {
-                    continue;
-                }
-                Pair key = Pair.create(info.getComponentName(), user);
-                if (!mRequestedNotificationListeners.containsKey(key)) {
-                    mRequestedNotificationListeners.put(key, new NotificationListenerFilter());
-                }
-            }
-            super.onUserUnlocked(user);
-        }
-
-        @Override
         public void onPackagesChanged(boolean removingPackage, String[] pkgList, int[] uidList) {
             super.onPackagesChanged(removingPackage, pkgList, uidList);
 
@@ -9840,6 +9825,38 @@ public class NotificationManagerService extends SystemService {
         protected void setNotificationListenerFilter(Pair<ComponentName, Integer> pair,
                 NotificationListenerFilter nlf) {
             mRequestedNotificationListeners.put(pair, nlf);
+        }
+
+        @Override
+        protected void ensureFilters(ServiceInfo si, int userId) {
+            Pair listener = Pair.create(si.getComponentName(), userId);
+            NotificationListenerFilter existingNlf =
+                    mRequestedNotificationListeners.get(listener);
+            if (existingNlf  == null) {
+                // no stored filters for this listener; see if they provided a default
+                if (si.metaData != null) {
+                    String typeList = si.metaData.getString(
+                            NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES);
+                    if (typeList != null) {
+                        int types = 0;
+                        String[] typeStrings = typeList.split(XML_SEPARATOR);
+                        for (int i = 0; i < typeStrings.length; i++) {
+                            if (TextUtils.isEmpty(typeStrings[i])) {
+                                continue;
+                            }
+                            try {
+                                types |= Integer.parseInt(typeStrings[i]);
+                            } catch (NumberFormatException e) {
+                                // skip
+                            }
+                        }
+
+                         NotificationListenerFilter nlf =
+                                 new NotificationListenerFilter(types, new ArraySet<>());
+                        mRequestedNotificationListeners.put(listener, nlf);
+                    }
+                }
+            }
         }
 
         @GuardedBy("mNotificationLock")
