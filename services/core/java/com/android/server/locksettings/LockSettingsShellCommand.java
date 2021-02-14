@@ -189,6 +189,7 @@ class LockSettingsShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  remove-cache [--user USER_ID]");
             pw.println("    Removes cached unified challenge for the managed profile.");
+            pw.println("");
             pw.println("  set-resume-on-reboot-provider-package <package_name>");
             pw.println("    Sets the package name for server based resume on reboot service "
                     + "provider.");
