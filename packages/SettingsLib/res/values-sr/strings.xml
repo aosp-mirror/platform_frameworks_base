@@ -592,5 +592,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Сигнал за податке од три црте."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Сигнал за податке је најјачи."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Веза са етернетом је прекинута."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Етернет је повезан."</string>
+    <!-- no translation found for accessibility_ethernet_connected (6175942685957461563) -->
+    <skip />
 </resources>
