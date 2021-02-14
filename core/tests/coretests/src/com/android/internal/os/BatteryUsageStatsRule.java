@@ -49,6 +49,7 @@ public class BatteryUsageStatsRule implements TestRule {
     };
 
     private BatteryUsageStats mBatteryUsageStats;
+    private boolean mScreenOn;
 
     public BatteryUsageStatsRule() {
         Context context = InstrumentationRegistry.getContext();
@@ -97,6 +98,11 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
+    public BatteryUsageStatsRule startWithScreenOn(boolean screenOn) {
+        mScreenOn = screenOn;
+        return this;
+    }
+
     public void setNetworkStats(NetworkStats networkStats) {
         mBatteryStats.setNetworkStats(networkStats);
     }
@@ -115,6 +121,7 @@ public class BatteryUsageStatsRule implements TestRule {
     private void noteOnBattery() {
         mBatteryStats.setOnBatteryInternal(true);
         mBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
+        mBatteryStats.getOnBatteryScreenOffTimeBase().setRunning(!mScreenOn, 0, 0);
     }
 
     public PowerProfile getPowerProfile() {
