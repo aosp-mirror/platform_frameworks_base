@@ -367,6 +367,12 @@ static jlong Typeface_getFamily(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle, jint
     return reinterpret_cast<jlong>(new FontFamilyWrapper(std::move(family)));
 }
 
+// Regular JNI
+static void Typeface_warmUpCache(JNIEnv* env, jobject, jstring jFilePath) {
+    ScopedUtfChars filePath(env, jFilePath);
+    makeSkDataCached(filePath.c_str(), false /* fs verity */);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gTypefaceMethods[] = {
@@ -390,6 +396,7 @@ static const JNINativeMethod gTypefaceMethods[] = {
          (void*)Typeface_forceSetStaticFinalField},
         {"nativeGetFamilySize", "(J)I", (void*)Typeface_getFamilySize},
         {"nativeGetFamily", "(JI)J", (void*)Typeface_getFamily},
+        {"nativeWarmUpCache", "(Ljava/lang/String;)V", (void*)Typeface_warmUpCache},
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)

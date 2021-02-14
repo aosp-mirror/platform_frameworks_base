@@ -1346,6 +1346,19 @@ public class Typeface {
         }
     }
 
+    static {
+        // Preload Roboto-Regular.ttf in Zygote for improving app launch performance.
+        // TODO: add new attribute to fonts.xml to preload fonts in Zygote.
+        preloadFontFile("/system/fonts/Roboto-Regular.ttf");
+    }
+
+    private static void preloadFontFile(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            nativeWarmUpCache(filePath);
+        }
+    }
+
     /** @hide */
     @VisibleForTesting
     public static void destroySystemFontMap() {
@@ -1464,4 +1477,6 @@ public class Typeface {
     private static native @Nullable long[] nativeReadTypefaces(@NonNull ByteBuffer buffer);
 
     private static native void nativeForceSetStaticFinalField(String fieldName, Typeface typeface);
+
+    private static native void nativeWarmUpCache(String fileName);
 }
