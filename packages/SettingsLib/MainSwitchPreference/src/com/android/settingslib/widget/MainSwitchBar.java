@@ -24,15 +24,11 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
 import androidx.core.content.res.TypedArrayUtils;
-
-import com.android.settingslib.RestrictedLockUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +44,8 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
     private View mAboveDivider;
     private View mBelowDivider;
-    private TextView mTextView;
-    private ImageView mRestrictedIcon;
-    private Switch mSwitch;
-
-    private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin;
-    private boolean mDisabledByAdmin;
+    protected TextView mTextView;
+    protected Switch mSwitch;
 
     public MainSwitchBar(Context context) {
         this(context, null);
@@ -81,14 +73,6 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
-        mRestrictedIcon = findViewById(R.id.restricted_icon);
-        mRestrictedIcon.setOnClickListener((View v) -> {
-            if (mDisabledByAdmin) {
-                RestrictedLockUtils.sendShowAdminSupportDetailsIntent(context, mEnforcedAdmin);
-                onRestrictedIconClick();
-            }
-        });
-
         setChecked(mSwitch.isChecked());
 
         if (attrs != null) {
@@ -110,7 +94,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
     @Override
     public boolean performClick() {
-        return getDelegatingView().performClick();
+        return mSwitch.performClick();
     }
 
     /**
@@ -189,49 +173,12 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     }
 
     /**
-     * If admin is not null, disables the text and switch but keeps the view clickable.
-     * Otherwise, calls setEnabled which will enables the entire view including
-     * the text and switch.
-     */
-    public void setDisabledByAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mEnforcedAdmin = admin;
-        if (admin != null) {
-            super.setEnabled(true);
-            mDisabledByAdmin = true;
-            mTextView.setEnabled(false);
-            mSwitch.setEnabled(false);
-            mSwitch.setVisibility(View.GONE);
-            mRestrictedIcon.setVisibility(View.VISIBLE);
-        } else {
-            mDisabledByAdmin = false;
-            mSwitch.setVisibility(View.VISIBLE);
-            mRestrictedIcon.setVisibility(View.GONE);
-            setEnabled(true);
-        }
-    }
-
-    /**
      * Enable or disable the text and switch.
      */
     public void setEnabled(boolean enabled) {
-        if (enabled && mDisabledByAdmin) {
-            setDisabledByAdmin(null);
-            return;
-        }
         super.setEnabled(enabled);
         mTextView.setEnabled(enabled);
         mSwitch.setEnabled(enabled);
-    }
-
-    /**
-     * Called by the restricted icon clicked.
-     */
-    protected void onRestrictedIconClick() {
-    }
-
-    @VisibleForTesting
-    View getDelegatingView() {
-        return mDisabledByAdmin ? mRestrictedIcon : mSwitch;
     }
 
     private void propagateChecked(boolean isChecked) {
