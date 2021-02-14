@@ -115,10 +115,10 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Enable overlay within or owned by PACKAGE with optional unique NAME.");
         out.println("  disable [--user USER_ID] PACKAGE[:NAME]");
         out.println("    Disable overlay within or owned by PACKAGE with optional unique NAME.");
-        out.println("  enable-exclusive [--user USER_ID] [--category] PACKAGE[:NAME]");
-        out.println("    Enable overlay within or owned by PACKAGE with optional unique NAME and");
-        out.println("    disable all other overlays for its target package. If the --category");
-        out.println("    option is given, only disables other overlays in the same category.");
+        out.println("  enable-exclusive [--user USER_ID] [--category] PACKAGE");
+        out.println("    Enable overlay within or owned by PACKAGE and disable all other overlays");
+        out.println("    for its target package. If the --category option is given, only disables");
+        out.println("    other overlays in the same category.");
         out.println("  set-priority [--user USER_ID] PACKAGE PARENT|lowest|highest");
         out.println("    Change the priority of the overlay to be just higher than");
         out.println("    the priority of PARENT If PARENT is the special keyword");
@@ -325,28 +325,12 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return 1;
             }
         }
-
-        final OverlayIdentifier overlay = OverlayIdentifier.fromString(getNextArgRequired());
-        final OverlayInfo overlayInfo = mInterface.getOverlayInfoByIdentifier(overlay, userId);
-        if (overlayInfo == null) {
-            err.println("Error: Unable to get overlay info of: " + overlay);
-            return 1;
+        final String overlay = getNextArgRequired();
+        if (inCategory) {
+            return mInterface.setEnabledExclusiveInCategory(overlay, userId) ? 0 : 1;
+        } else {
+            return mInterface.setEnabledExclusive(overlay, true, userId) ? 0 : 1;
         }
-
-        final List<OverlayInfo> overlaysForTarget =
-                mInterface.getOverlayInfosForTarget(overlayInfo.targetPackageName, userId);
-        overlaysForTarget.remove(overlayInfo);
-        final OverlayManagerTransaction.Builder builder = new OverlayManagerTransaction.Builder();
-        for (final OverlayInfo disableOverlay : overlaysForTarget) {
-            if ((inCategory && !Objects.equals(disableOverlay.category,overlayInfo.category))
-                    || !disableOverlay.isMutable) {
-                continue;
-            }
-            builder.setEnabled(disableOverlay.getOverlayIdentifier(), false, userId);
-        }
-        builder.setEnabled(overlayInfo.getOverlayIdentifier(), true, userId);
-        mInterface.commit(builder.build());
-        return 0;
     }
 
     private int runSetPriority() throws RemoteException {

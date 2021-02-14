@@ -1686,6 +1686,11 @@ public class ManagedServicesTest extends UiServiceTestCase {
         }
 
         @Override
+        protected void ensureFilters(ServiceInfo si, int userId) {
+
+        }
+
+        @Override
         protected void loadDefaultsFromConfig() {
             mDefaultComponents.addAll(mDefaults);
         }

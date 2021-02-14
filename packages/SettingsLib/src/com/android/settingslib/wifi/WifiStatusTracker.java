@@ -39,6 +39,8 @@ import android.util.FeatureFlagUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +49,8 @@ import java.util.Set;
  * Track status of Wi-Fi for the Sys UI.
  */
 public class WifiStatusTracker {
+    private static final int HISTORY_SIZE = 32;
+    private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     private final Context mContext;
     private final WifiNetworkScoreCache mWifiNetworkScoreCache;
     private final WifiManager mWifiManager;
@@ -54,6 +58,10 @@ public class WifiStatusTracker {
     private final ConnectivityManager mConnectivityManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Set<Integer> mNetworks = new HashSet<>();
+    // Save the previous HISTORY_SIZE states for logging.
+    private final String[] mHistory = new String[HISTORY_SIZE];
+    // Where to copy the next state into.
+    private int mHistoryIndex;
     private final WifiNetworkScoreCache.CacheListener mCacheListener =
             new WifiNetworkScoreCache.CacheListener(mHandler) {
                 @Override
@@ -93,6 +101,13 @@ public class WifiStatusTracker {
             } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                 wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
             }
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append("onCapabilitiesChanged: ")
+                    .append("network=").append(network).append(",")
+                    .append("networkCapabilities=").append(networkCapabilities)
+                    .toString();
+            recordLastWifiNetwork(log);
             if (wifiInfo != null) {
                 updateWifiInfo(wifiInfo);
                 updateStatusLabel();
@@ -102,6 +117,12 @@ public class WifiStatusTracker {
 
         @Override
         public void onLost(Network network) {
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append("onLost: ")
+                    .append("network=").append(network)
+                    .toString();
+            recordLastWifiNetwork(log);
             if (mNetworks.contains(network.getNetId())) {
                 mNetworks.remove(network.getNetId());
                 updateWifiInfo(null);
@@ -335,5 +356,26 @@ public class WifiStatusTracker {
             }
         }
         return null;
+    }
+
+    private void recordLastWifiNetwork(String log) {
+        mHistory[mHistoryIndex] = log;
+        mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
+    }
+
+    /** Dump function. */
+    public void dump(PrintWriter pw) {
+        pw.println("  - WiFi Network History ------");
+        int size = 0;
+        for (int i = 0; i < HISTORY_SIZE; i++) {
+            if (mHistory[i] != null) size++;
+        }
+        // Print out the previous states in ordered number.
+        for (int i = mHistoryIndex + HISTORY_SIZE - 1;
+                i >= mHistoryIndex + HISTORY_SIZE - size; i--) {
+            pw.println("  Previous WiFiNetwork("
+                    + (mHistoryIndex + HISTORY_SIZE - i) + "): "
+                    + mHistory[i & (HISTORY_SIZE - 1)]);
+        }
     }
 }

@@ -591,5 +591,6 @@
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"డేటా మూడు బార్లు."</string>
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"డేటా సిగ్నల్ సంపూర్ణంగా ఉంది."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ఈథర్‌నెట్ డిస్‌కనెక్ట్ చేయబడింది."</string>
-    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ఈథర్‌నెట్ కనెక్ట్ చేయబడింది."</string>
+    <!-- no translation found for accessibility_ethernet_connected (6175942685957461563) -->
+    <skip />
 </resources>
