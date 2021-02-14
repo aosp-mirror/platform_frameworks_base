@@ -429,6 +429,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     void setOrganizer(IDisplayAreaOrganizer organizer, boolean skipDisplayAreaAppeared) {
         if (mOrganizer == organizer) return;
+        if (mDisplayContent == null || !mDisplayContent.isTrusted()) {
+            throw new IllegalStateException(
+                    "Don't organize or trigger events for unavailable or untrusted display.");
+        }
         IDisplayAreaOrganizer lastOrganizer = mOrganizer;
         // Update the new display area organizer before calling sendDisplayAreaVanished since it
         // could result in a new SurfaceControl getting created that would notify the old organizer

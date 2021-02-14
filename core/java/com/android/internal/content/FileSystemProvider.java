@@ -28,6 +28,7 @@ import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileObserver;
@@ -504,7 +505,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         final int pfdMode = ParcelFileDescriptor.parseMode(mode);
         if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY || visibleFile == null) {
-            return ParcelFileDescriptor.open(file, pfdMode);
+            return openFileForRead(file);
         } else {
             try {
                 // When finished writing, kick off media scanner
@@ -517,6 +518,24 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new FileNotFoundException("Failed to open for writing: " + e);
             }
         }
+    }
+
+    private ParcelFileDescriptor openFileForRead(final File target) throws FileNotFoundException {
+        final Uri uri = MediaStore.scanFile(getContext().getContentResolver(), target);
+
+        // Passing the calling uid via EXTRA_MEDIA_CAPABILITIES_UID, so that the decision to
+        // transcode or not transcode can be made based upon the calling app's uid, and not based
+        // upon the Provider's uid.
+        final Bundle opts = new Bundle();
+        opts.putInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID, Binder.getCallingUid());
+
+        final AssetFileDescriptor afd =
+                getContext().getContentResolver().openTypedAssetFileDescriptor(uri, "*/*", opts);
+        if (afd == null) {
+            return null;
+        }
+
+        return afd.getParcelFileDescriptor();
     }
 
     /**

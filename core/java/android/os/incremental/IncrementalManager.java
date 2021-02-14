@@ -241,6 +241,13 @@ public final class IncrementalManager {
     }
 
     /**
+     * Checks if device supports V2 calls (e.g. PerUid).
+     */
+    public static boolean isV2Available() {
+        return nativeIsV2Available();
+    }
+
+    /**
      * Checks if Incremental installations are allowed.
      * A developer can disable Incremental installations by setting the property.
      */
@@ -439,6 +446,7 @@ public final class IncrementalManager {
 
     /* Native methods */
     private static native boolean nativeIsEnabled();
+    private static native boolean nativeIsV2Available();
     private static native boolean nativeIsIncrementalPath(@NonNull String path);
     private static native byte[] nativeUnsafeGetFileSignature(@NonNull String path);
 }

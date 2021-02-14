@@ -16,11 +16,17 @@
 
 package com.android.server.vcn;
 
+import static android.net.IpSecManager.IpSecTunnelInterface;
+
+import static com.android.server.vcn.VcnGatewayConnection.DUMMY_ADDR;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+
+import android.net.IpSecManager;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,6 +43,11 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     public void setUp() throws Exception {
         super.setUp();
 
+        final IpSecTunnelInterface tunnelIface =
+                mContext.getSystemService(IpSecManager.class)
+                        .createIpSecTunnelInterface(
+                                DUMMY_ADDR, DUMMY_ADDR, TEST_UNDERLYING_NETWORK_RECORD_1.network);
+        mGatewayConnection.setTunnelInterface(tunnelIface);
         mGatewayConnection.transitionTo(mGatewayConnection.mDisconnectedState);
         mTestLooper.dispatchAll();
     }
