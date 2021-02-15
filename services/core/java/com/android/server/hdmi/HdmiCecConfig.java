@@ -295,7 +295,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
@@ -332,7 +332,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
                 return Global.HDMI_CONTROL_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
-                return Global.HDMI_CEC_VERSION;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
@@ -405,9 +405,6 @@ public class HdmiCecConfig {
             case Global.HDMI_CONTROL_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
                 break;
-            case Global.HDMI_CEC_VERSION:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION);
-                break;
             case Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
                 break;
@@ -461,7 +458,6 @@ public class HdmiCecConfig {
         ContentResolver resolver = mContext.getContentResolver();
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
-                Global.HDMI_CEC_VERSION,
                 Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
