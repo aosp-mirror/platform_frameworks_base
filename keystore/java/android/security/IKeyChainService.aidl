@@ -60,7 +60,6 @@ interface IKeyChainService {
     byte[] getEncodedCaCertificate(String alias, boolean includeDeletedSystem);
     List<String> getCaCertificateChainAliases(String rootAlias, boolean includeDeletedSystem);
     void setCredentialManagementApp(String packageName, in AppUriAuthenticationPolicy policy);
-    void updateCredentialManagementAppPolicy(in AppUriAuthenticationPolicy policy);
     boolean hasCredentialManagementApp();
     String getCredentialManagementAppPackageName();
     AppUriAuthenticationPolicy getCredentialManagementAppPolicy();
