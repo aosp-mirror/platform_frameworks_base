@@ -91,6 +91,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -2169,7 +2170,7 @@ public class MediaPlayer extends PlayerBase
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
         mOnRtpRxNoticeListener = null;
-        mOnRtpRxNoticeHandler = null;
+        mOnRtpRxNoticeExecutor = null;
         synchronized (mTimeProviderLock) {
             if (mTimeProvider != null) {
                 mTimeProvider.close();
@@ -3705,7 +3706,6 @@ public class MediaPlayer extends PlayerBase
 
             case MEDIA_RTP_RX_NOTICE:
                 final OnRtpRxNoticeListener rtpRxNoticeListener = mOnRtpRxNoticeListener;
-                final Handler rtpRxNoticeHandler = mOnRtpRxNoticeHandler;
                 if (rtpRxNoticeListener == null) {
                     return;
                 }
@@ -3724,14 +3724,9 @@ public class MediaPlayer extends PlayerBase
                     } finally {
                         parcel.recycle();
                     }
-                    if (rtpRxNoticeHandler == null) {
-                        rtpRxNoticeListener.onRtpRxNotice(mMediaPlayer, noticeType, data);
-                    } else {
-                        rtpRxNoticeHandler.post(
-                                () ->
-                                        rtpRxNoticeListener
-                                                .onRtpRxNotice(mMediaPlayer, noticeType, data));
-                    }
+                    mOnRtpRxNoticeExecutor.execute(() ->
+                            rtpRxNoticeListener
+                                    .onRtpRxNotice(mMediaPlayer, noticeType, data));
                 }
                 return;
 
@@ -4299,28 +4294,26 @@ public class MediaPlayer extends PlayerBase
      *
      * @see OnRtpRxNoticeListener
      *
-     * @param listener the listener called after a notice from RTP Rx
-     * @param handler the {@link Handler} that receives RTP Tx events. If null is passed,
-     *                notifications will be posted on the thread that created this MediaPlayer
-     *                instance. If the creating thread does not have a {@link Looper}, then
-     *                notifications will be posted on the main thread.
+     * @param listener the listener called after a notice from RTP Rx.
+     * @param executor the {@link Executor} on which to post RTP Tx events.
      * @hide
      */
     @SystemApi
     @RequiresPermission(BIND_IMS_SERVICE)
     public void setOnRtpRxNoticeListener(
             @NonNull Context context,
-            @NonNull OnRtpRxNoticeListener listener, @Nullable Handler handler) {
+            @NonNull Executor executor,
+            @NonNull OnRtpRxNoticeListener listener) {
         Objects.requireNonNull(context);
         Preconditions.checkArgument(
                 context.checkSelfPermission(BIND_IMS_SERVICE) == PERMISSION_GRANTED,
                 BIND_IMS_SERVICE + " permission not granted.");
         mOnRtpRxNoticeListener = Objects.requireNonNull(listener);
-        mOnRtpRxNoticeHandler = handler;
+        mOnRtpRxNoticeExecutor = Objects.requireNonNull(executor);
     }
 
     private OnRtpRxNoticeListener mOnRtpRxNoticeListener;
-    private Handler mOnRtpRxNoticeHandler;
+    private Executor mOnRtpRxNoticeExecutor;
 
     /**
      * Register a callback to be invoked when a selected track has timed metadata available.
