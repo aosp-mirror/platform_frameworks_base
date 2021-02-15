@@ -1300,10 +1300,8 @@ public class ConnectivityServiceTest {
     }
 
     private void processBroadcastForVpn(Intent intent) {
-        // The BroadcastReceiver for this broadcast checks it is being run on the handler thread.
-        final Handler handler = new Handler(mVMSHandlerThread.getLooper());
-        handler.post(() -> mServiceContext.sendBroadcast(intent));
-        HandlerUtils.waitForIdle(handler, TIMEOUT_MS);
+        mServiceContext.sendBroadcast(intent);
+        HandlerUtils.waitForIdle(mVMSHandlerThread, TIMEOUT_MS);
         waitForIdle();
     }
 
@@ -1430,6 +1428,7 @@ public class ConnectivityServiceTest {
         FakeSettingsProvider.clearSettingsProvider();
         mServiceContext = new MockContext(InstrumentationRegistry.getContext(),
                 new FakeSettingsProvider());
+        mServiceContext.setUseRegisteredHandlers(true);
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(
                 NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
