@@ -1614,6 +1614,7 @@ package android.os.storage {
   public class StorageManager {
     method @NonNull public static java.util.UUID convert(@NonNull String);
     method @NonNull public static String convert(@NonNull java.util.UUID);
+    method public static boolean isUserKeyUnlocked(int);
   }
 
   public final class StorageVolume implements android.os.Parcelable {
