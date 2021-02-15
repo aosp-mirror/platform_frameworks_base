@@ -40,7 +40,7 @@ import java.util.Map;
 @SmallTest
 public class OemNetworkPreferencesTest {
 
-    private static final int TEST_PREF = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_DEFAULT;
+    private static final int TEST_PREF = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_UNINITIALIZED;
     private static final String TEST_PACKAGE = "com.google.apps.contacts";
 
     private final OemNetworkPreferences.Builder mBuilder = new OemNetworkPreferences.Builder();
@@ -54,7 +54,7 @@ public class OemNetworkPreferencesTest {
     @Test
     public void testBuilderRemoveNetworkPreferenceRequiresNonNullPackageName() {
         assertThrows(NullPointerException.class,
-                () -> mBuilder.removeNetworkPreference(null));
+                () -> mBuilder.clearNetworkPreference(null));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class OemNetworkPreferencesTest {
 
         assertTrue(networkPreferences.containsKey(TEST_PACKAGE));
 
-        mBuilder.removeNetworkPreference(TEST_PACKAGE);
+        mBuilder.clearNetworkPreference(TEST_PACKAGE);
         networkPreferences = mBuilder.build().getNetworkPreferences();
 
         assertFalse(networkPreferences.containsKey(TEST_PACKAGE));

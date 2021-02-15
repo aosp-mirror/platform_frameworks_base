@@ -38,11 +38,7 @@ class PowerComponents {
         mCustomPowerComponentCount = builder.mCustomPowerComponentCount;
         mPowerComponents = builder.mPowerComponents;
         mTimeComponents = builder.mTimeComponents;
-        double totalPower = 0;
-        for (int i = mPowerComponents.length - 1; i >= 0; i--) {
-            totalPower += mPowerComponents[i];
-        }
-        mTotalPowerConsumed = totalPower;
+        mTotalPowerConsumed = builder.getTotalPower();
     }
 
     PowerComponents(@NonNull Parcel source) {
@@ -261,6 +257,18 @@ class PowerComponents {
             for (int i = 0; i < mTimeComponents.length; i++) {
                 mTimeComponents[i] += other.mTimeComponents[i];
             }
+        }
+
+        /**
+         * Returns the total power accumulated by this builder so far. It may change
+         * by the time the {@code build()} method is called.
+         */
+        public double getTotalPower() {
+            double totalPower = 0;
+            for (int i = mPowerComponents.length - 1; i >= 0; i--) {
+                totalPower += mPowerComponents[i];
+            }
+            return totalPower;
         }
 
         /**

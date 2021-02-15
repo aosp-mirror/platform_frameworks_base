@@ -21,6 +21,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.DisplayArea.Type.ANY;
 
+import android.annotation.Nullable;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.IBinder;
@@ -77,6 +78,11 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         mService.enforceTaskPermission(func);
     }
 
+    @Nullable
+    IDisplayAreaOrganizer getOrganizerByFeature(int featureId) {
+        return mOrganizersByFeatureIds.get(featureId);
+    }
+
     @Override
     public ParceledListSlice<DisplayAreaAppearedInfo> registerOrganizer(
             IDisplayAreaOrganizer organizer, int feature) {
@@ -100,10 +106,18 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                 }
 
                 final List<DisplayAreaAppearedInfo> displayAreaInfos = new ArrayList<>();
-                mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
-                    if (da.mFeatureId != feature) return;
-                    displayAreaInfos.add(organizeDisplayArea(organizer, da,
-                            "DisplayAreaOrganizerController.registerOrganizer"));
+                mService.mRootWindowContainer.forAllDisplays(dc -> {
+                    if (!dc.isTrusted()) {
+                        ProtoLog.w(WM_DEBUG_WINDOW_ORGANIZER,
+                                "Don't organize or trigger events for untrusted displayId=%d",
+                                dc.getDisplayId());
+                        return;
+                    }
+                    dc.forAllDisplayAreas((da) -> {
+                        if (da.mFeatureId != feature) return;
+                        displayAreaInfos.add(organizeDisplayArea(organizer, da,
+                                "DisplayAreaOrganizerController.registerOrganizer"));
+                    });
                 });
 
                 mOrganizersByFeatureIds.put(feature, organizer);
@@ -146,6 +160,10 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                         mService.mRootWindowContainer.getDisplayContent(displayId);
                 if (display == null) {
                     throw new IllegalArgumentException("createTaskDisplayArea unknown displayId="
+                            + displayId);
+                }
+                if (!display.isTrusted()) {
+                    throw new IllegalArgumentException("createTaskDisplayArea untrusted displayId="
                             + displayId);
                 }
 
