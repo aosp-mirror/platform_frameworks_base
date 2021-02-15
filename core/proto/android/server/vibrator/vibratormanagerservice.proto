@@ -15,7 +15,7 @@
  */
 
 syntax = "proto2";
-package com.android.server;
+package com.android.server.vibrator;
 
 option java_multiple_files = true;
 
@@ -51,10 +51,23 @@ message ComposedProto {
 // A com.android.os.VibrationEffect object.
 message VibrationEffectProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-    optional OneShotProto oneshot = 3;
-    optional WaveformProto waveform = 1;
-    optional PrebakedProto prebaked = 2;
+    optional OneShotProto oneshot = 1;
+    optional WaveformProto waveform = 2;
+    optional PrebakedProto prebaked = 3;
     optional ComposedProto composed = 4;
+}
+
+message SyncVibrationEffectProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    repeated VibrationEffectProto effects = 1;
+    repeated int32 vibrator_ids = 2;
+}
+
+// A com.android.os.CombinedVibrationEffect object.
+message CombinedVibrationEffectProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    repeated SyncVibrationEffectProto effects = 1;
+    repeated int32 delays = 2;
 }
 
 message VibrationAttributesProto {
@@ -68,30 +81,31 @@ message VibrationAttributesProto {
 message VibrationProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     optional int64 start_time = 1;
-    optional int64 end_time = 4;
-    optional VibrationEffectProto effect = 2;
-    optional VibrationEffectProto original_effect = 3;
+    optional int64 end_time = 2;
+    optional CombinedVibrationEffectProto effect = 3;
+    optional CombinedVibrationEffectProto original_effect = 4;
     optional VibrationAttributesProto attributes = 5;
     optional int32 status = 6;
 }
 
-// Next id: 17
-message VibratorServiceDumpProto {
+// Next id: 18
+message VibratorManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-    optional VibrationProto current_vibration = 1;
-    optional bool is_vibrating = 2;
-    optional VibrationProto current_external_vibration = 3;
-    optional bool vibrator_under_external_control = 4;
-    optional bool low_power_mode = 5;
-    optional int32 haptic_feedback_intensity = 6;
-    optional int32 haptic_feedback_default_intensity = 14;
-    optional int32 notification_intensity = 7;
-    optional int32 notification_default_intensity = 15;
-    optional int32 ring_intensity = 8;
-    optional int32 ring_default_intensity = 16;
-    repeated VibrationProto previous_ring_vibrations = 9;
-    repeated VibrationProto previous_notification_vibrations = 10;
-    repeated VibrationProto previous_alarm_vibrations = 11;
-    repeated VibrationProto previous_vibrations = 12;
-    repeated VibrationProto previous_external_vibrations = 13;
+    repeated int32 vibrator_ids = 1;
+    optional VibrationProto current_vibration = 2;
+    optional bool is_vibrating = 3;
+    optional VibrationProto current_external_vibration = 4;
+    optional bool vibrator_under_external_control = 5;
+    optional bool low_power_mode = 6;
+    optional int32 haptic_feedback_intensity = 7;
+    optional int32 haptic_feedback_default_intensity = 8;
+    optional int32 notification_intensity = 9;
+    optional int32 notification_default_intensity = 10;
+    optional int32 ring_intensity = 11;
+    optional int32 ring_default_intensity = 12;
+    repeated VibrationProto previous_ring_vibrations = 13;
+    repeated VibrationProto previous_notification_vibrations = 14;
+    repeated VibrationProto previous_alarm_vibrations = 15;
+    repeated VibrationProto previous_vibrations = 16;
+    repeated VibrationProto previous_external_vibrations = 17;
 }

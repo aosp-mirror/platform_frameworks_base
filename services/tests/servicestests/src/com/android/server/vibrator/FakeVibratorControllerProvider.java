@@ -33,7 +33,7 @@ import java.util.Map;
  * Provides {@link VibratorController} with controlled vibrator hardware capabilities and
  * interactions.
  */
-public final class FakeVibratorControllerProvider {
+final class FakeVibratorControllerProvider {
 
     private static final int EFFECT_DURATION = 20;
 

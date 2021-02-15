@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.vibrator;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -73,9 +73,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
-import com.android.server.vibrator.FakeVibrator;
-import com.android.server.vibrator.FakeVibratorControllerProvider;
-import com.android.server.vibrator.VibratorController;
+import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
@@ -533,28 +531,15 @@ public class VibratorManagerServiceTest {
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{1});
-        when(mIInputManagerMock.getInputDevice(1)).thenReturn(createInputDeviceWithVibrator(1));
+        when(mIInputManagerMock.getVibratorIds(eq(1))).thenReturn(new int[]{1});
+        when(mIInputManagerMock.getInputDevice(eq(1))).thenReturn(createInputDeviceWithVibrator(1));
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
         VibratorManagerService service = createService();
 
-        // Prebaked vibration will play fallback waveform on input device.
-        ArgumentCaptor<VibrationEffect> captor = ArgumentCaptor.forClass(VibrationEffect.class);
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), ALARM_ATTRS);
-        verify(mIInputManagerMock).vibrate(eq(1), captor.capture(), any());
-        assertTrue(captor.getValue() instanceof VibrationEffect.Waveform);
-
-        VibrationEffect[] effects = new VibrationEffect[]{
-                VibrationEffect.createOneShot(100, 128),
-                VibrationEffect.createWaveform(new long[]{10}, new int[]{100}, -1),
-                VibrationEffect.startComposition()
-                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
-                        .compose(),
-        };
-
-        for (VibrationEffect effect : effects) {
-            vibrate(service, effect, ALARM_ATTRS);
-            verify(mIInputManagerMock).vibrate(eq(1), eq(effect), any());
-        }
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+                VibrationEffect.createOneShot(10, 10));
+        vibrate(service, effect, ALARM_ATTRS);
+        verify(mIInputManagerMock).vibrateCombined(eq(1), eq(effect), any());
 
         // VibrationThread will start this vibration async, so wait before checking it never played.
         assertFalse(waitUntil(s -> !mVibratorProviders.get(1).getEffects().isEmpty(),
