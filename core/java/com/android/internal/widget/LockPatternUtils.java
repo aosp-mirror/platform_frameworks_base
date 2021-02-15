@@ -1103,6 +1103,10 @@ public class LockPatternUtils {
      * {@link #CREDENTIAL_TYPE_PASSWORD}
      */
     public @CredentialType int getCredentialTypeForUser(int userHandle) {
+        if (userHandle < 0) {
+            throw new IllegalArgumentException("Invalid userHandle: " + userHandle);
+        }
+
         try {
             return getLockSettings().getCredentialType(userHandle);
         } catch (RemoteException re) {
