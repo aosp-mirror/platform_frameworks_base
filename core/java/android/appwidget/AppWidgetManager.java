@@ -23,6 +23,8 @@ import android.annotation.RequiresFeature;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1089,7 +1091,9 @@ public class AppWidgetManager {
      *
      * @hide
      */
-    public void setBindAppWidgetPermission(String packageName, int userId, boolean permission) {
+    @TestApi
+    public void setBindAppWidgetPermission(
+            @NonNull String packageName, @UserIdInt int userId, boolean permission) {
         if (mService == null) {
             return;
         }

@@ -577,6 +577,14 @@ package android.app.usage {
 
 }
 
+package android.appwidget {
+
+  public class AppWidgetManager {
+    method public void setBindAppWidgetPermission(@NonNull String, int, boolean);
+  }
+
+}
+
 package android.bluetooth {
 
   public final class BluetoothClass implements android.os.Parcelable {
