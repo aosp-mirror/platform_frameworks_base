@@ -755,7 +755,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         + Arrays.toString(vpnNai.declaredUnderlyingNetworks));
                 return;
             }
-            final NetworkAgentInfo underlyingNai =  mService.getNetworkAgentInfoForNetwork(
+            final NetworkAgentInfo underlyingNai = mService.getNetworkAgentInfoForNetwork(
                     vpnNai.declaredUnderlyingNetworks[0]);
             if (underlyingNai == null) return;
 
@@ -4910,12 +4910,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!mLockdownEnabled) {
             return null;
         }
-        // The legacy lockdown VPN always only applies to UID 0.
+        // The legacy lockdown VPN always only applies to userId 0.
         final NetworkAgentInfo nai = getVpnForUid(Process.FIRST_APPLICATION_UID);
         if (nai == null || !isLegacyLockdownNai(nai)) return null;
 
         // The legacy lockdown VPN must always have exactly one underlying network.
-        if (nai.declaredUnderlyingNetworks == null ||  nai.declaredUnderlyingNetworks.length != 1) {
+        // This code may run on any thread and declaredUnderlyingNetworks may change, so store it in
+        // a local variable. There is no need to make a copy because its contents cannot change.
+        final Network[] underlying = nai.declaredUnderlyingNetworks;
+        if (underlying == null ||  underlying.length != 1) {
             return null;
         }
 
@@ -4925,8 +4928,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Report that the VPN is not connected, so when the state of NetworkInfo objects
         // overwritten by getLegacyLockdownState will be set to CONNECTING and not CONNECTED.
         final NetworkAgentInfo defaultNetwork = getDefaultNetwork();
-        if (defaultNetwork == null
-                || !defaultNetwork.network.equals(nai.declaredUnderlyingNetworks[0])) {
+        if (defaultNetwork == null || !defaultNetwork.network.equals(underlying[0])) {
             return null;
         }
 
@@ -4985,6 +4987,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // TODO: make BroadcastInterceptingContext use the Handler passed in to registerReceiver
+            // and put this back.
+            // ensureRunningOnConnectivityServiceThread();
             final String action = intent.getAction();
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
