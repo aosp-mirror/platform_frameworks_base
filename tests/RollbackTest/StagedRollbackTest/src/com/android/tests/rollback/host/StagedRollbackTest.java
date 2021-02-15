@@ -554,6 +554,30 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         });
     }
 
+    /**
+     * Tests that packages are monitored across multiple reboots.
+     */
+    @Test
+    public void testWatchdogMonitorsAcrossReboots() throws Exception {
+        runPhase("testWatchdogMonitorsAcrossReboots_Phase1_Install");
+
+        // The first reboot will make the rollback available.
+        // Information about which packages are monitored will be persisted to a file before the
+        // second reboot, and read from disk after the second reboot.
+        getDevice().reboot();
+        getDevice().reboot();
+
+        runPhase("testWatchdogMonitorsAcrossReboots_Phase2_VerifyInstall");
+
+        // Launch the app to crash to trigger rollback
+        startActivity(TESTAPP_A);
+        // Wait for reboot to happen
+        waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
+        getDevice().waitForDeviceAvailable();
+
+        runPhase("testWatchdogMonitorsAcrossReboots_Phase3_VerifyRollback");
+    }
+
     private void pushTestApex() throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
