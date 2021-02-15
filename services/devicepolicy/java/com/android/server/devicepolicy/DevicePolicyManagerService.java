@@ -6372,7 +6372,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().getVpnLockdownWhitelist(
+                () -> mInjector.getConnectivityManager().getVpnLockdownAllowlist(
                         caller.getUserId()));
     }
 
