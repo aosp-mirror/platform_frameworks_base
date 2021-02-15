@@ -2624,23 +2624,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                                 UserHandle.USER_CURRENT_OR_SELF);
                     }
-                    float minFloat = mPowerManager.getBrightnessConstraint(
+                    float min = mPowerManager.getBrightnessConstraint(
                             PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-                    float maxFloat = mPowerManager.getBrightnessConstraint(
+                    float max = mPowerManager.getBrightnessConstraint(
                             PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-                    float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
-                    float brightnessFloat = Settings.System.getFloatForUser(
-                            mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                            mContext.getDisplay().getBrightnessDefault(),
-                            UserHandle.USER_CURRENT_OR_SELF);
-                    brightnessFloat += stepFloat;
+                    float step = (max - min) / BRIGHTNESS_STEPS * direction;
+                    int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
+                    float brightness = mDisplayManager.getBrightness(screenDisplayId);
+                    brightness += step;
                     // Make sure we don't go beyond the limits.
-                    brightnessFloat = Math.min(maxFloat, brightnessFloat);
-                    brightnessFloat = Math.max(minFloat, brightnessFloat);
+                    brightness = Math.min(max, brightness);
+                    brightness = Math.max(min, brightness);
 
-                    Settings.System.putFloatForUser(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessFloat,
-                            UserHandle.USER_CURRENT_OR_SELF);
+                    mDisplayManager.setBrightness(screenDisplayId, brightness);
                     startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
                             UserHandle.CURRENT_OR_SELF);
                 }
