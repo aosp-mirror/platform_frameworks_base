@@ -95,6 +95,12 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public int startingWindowTypeParameter;
 
+    /**
+     * Specifies a theme for the splash screen.
+     * @hide
+     */
+    public int splashScreenThemeResId;
+
     public StartingWindowInfo() {
 
     }
@@ -115,6 +121,7 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeTypedObject(topOpaqueWindowInsetsState, flags);
         dest.writeTypedObject(topOpaqueWindowLayoutParams, flags);
         dest.writeTypedObject(mainWindowLayoutParams, flags);
+        dest.writeInt(splashScreenThemeResId);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -124,6 +131,7 @@ public final class StartingWindowInfo implements Parcelable {
         topOpaqueWindowLayoutParams = source.readTypedObject(
                 WindowManager.LayoutParams.CREATOR);
         mainWindowLayoutParams = source.readTypedObject(WindowManager.LayoutParams.CREATOR);
+        splashScreenThemeResId = source.readInt();
     }
 
     @Override
@@ -135,7 +143,8 @@ public final class StartingWindowInfo implements Parcelable {
                 + Integer.toHexString(startingWindowTypeParameter)
                 + " insetsState=" + topOpaqueWindowInsetsState
                 + " topWindowLayoutParams=" + topOpaqueWindowLayoutParams
-                + " mainWindowLayoutParams=" + mainWindowLayoutParams;
+                + " mainWindowLayoutParams=" + mainWindowLayoutParams
+                + " splashScreenThemeResId " + Integer.toHexString(splashScreenThemeResId);
     }
 
     public static final @android.annotation.NonNull Creator<StartingWindowInfo> CREATOR =

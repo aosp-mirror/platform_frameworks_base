@@ -273,7 +273,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
                 text, 0, null, disabledMessage, 0, null,
                 categoriesSet, intents, rank, extras,
                 getCreationTimestampMillis(), flags, iconResId, iconResName, bitmapPath, iconUri,
-                disabledReason, persons, locusId);
+                disabledReason, persons, locusId, 0);
     }
 
     /** @hide */

@@ -19,6 +19,7 @@ package com.android.server;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
+import static android.app.UiModeManager.MODE_NIGHT_NO;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
@@ -82,6 +83,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -158,6 +160,7 @@ final class UiModeManagerService extends SystemService {
     private NotificationManager mNotificationManager;
     private StatusBarManager mStatusBarManager;
     private WindowManagerInternal mWindowManager;
+    private ActivityTaskManagerInternal mActivityTaskManager;
     private AlarmManager mAlarmManager;
     private PowerManager mPowerManager;
 
@@ -366,6 +369,7 @@ final class UiModeManagerService extends SystemService {
                 mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
                 mWindowManager = LocalServices.getService(WindowManagerInternal.class);
+                mActivityTaskManager = LocalServices.getService(ActivityTaskManagerInternal.class);
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 TwilightManager twilightManager = getLocalService(TwilightManager.class);
                 if (twilightManager != null) mTwilightManager = twilightManager;
@@ -746,6 +750,39 @@ final class UiModeManagerService extends SystemService {
         public int getNightMode() {
             synchronized (mLock) {
                 return mNightMode;
+            }
+        }
+
+        @Override
+        public void setApplicationNightMode(@UiModeManager.NightMode int mode)
+                throws RemoteException {
+            switch (mode) {
+                case UiModeManager.MODE_NIGHT_NO:
+                case UiModeManager.MODE_NIGHT_YES:
+                case UiModeManager.MODE_NIGHT_AUTO:
+                case UiModeManager.MODE_NIGHT_CUSTOM:
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown mode: " + mode);
+            }
+            final int configNightMode;
+            switch (mode) {
+                case MODE_NIGHT_YES:
+                    configNightMode = Configuration.UI_MODE_NIGHT_YES;
+                    break;
+                case MODE_NIGHT_NO:
+                    configNightMode = Configuration.UI_MODE_NIGHT_NO;
+                    break;
+                default:
+                    configNightMode = Configuration.UI_MODE_NIGHT_UNDEFINED;
+            }
+            try {
+                final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
+                        mActivityTaskManager.createPackageConfigurationUpdater();
+                updater.setNightMode(configNightMode);
+                updater.commit();
+            } catch (RemoteException e) {
+                throw e;
             }
         }
 

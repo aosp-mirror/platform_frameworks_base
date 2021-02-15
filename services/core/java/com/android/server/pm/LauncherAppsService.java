@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -934,6 +935,17 @@ public class LauncherAppsService extends SystemService {
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intents[0].setSourceBounds(sourceBounds);
+
+            // Replace theme for splash screen
+            final int splashScreenThemeResId =
+                    mShortcutServiceInternal.getShortcutStartingThemeResId(getCallingUserId(),
+                            callingPackage, packageName, shortcutId, targetUserId);
+            if (splashScreenThemeResId != 0) {
+                if (startActivityOptions == null) {
+                    startActivityOptions = new Bundle();
+                }
+                startActivityOptions.putInt(KEY_SPLASH_SCREEN_THEME, splashScreenThemeResId);
+            }
 
             return startShortcutIntentsAsPublisher(
                     intents, packageName, featureId, startActivityOptions, targetUserId);

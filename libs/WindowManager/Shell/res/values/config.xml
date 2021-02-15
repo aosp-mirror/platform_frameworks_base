@@ -48,4 +48,7 @@
 
     <!-- one handed background panel default alpha -->
     <item name="config_one_handed_background_alpha" format="float" type="dimen">0.5</item>
+
+    <!-- maximum animation duration for the icon when entering the starting window -->
+    <integer name="max_starting_window_intro_icon_anim_duration">1000</integer>
 </resources>

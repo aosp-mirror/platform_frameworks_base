@@ -3214,6 +3214,32 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public int getShortcutStartingThemeResId(int launcherUserId,
+                @NonNull String callingPackage, @NonNull String packageName,
+                @NonNull String shortcutId, int userId) {
+            Objects.requireNonNull(callingPackage, "callingPackage");
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(shortcutId, "shortcutId");
+
+            synchronized (mLock) {
+                throwIfUserLockedL(userId);
+                throwIfUserLockedL(launcherUserId);
+
+                getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
+                        .attemptToRestoreIfNeededAndSave();
+
+                final ShortcutPackage p = getUserShortcutsLocked(userId)
+                        .getPackageShortcutsIfExists(packageName);
+                if (p == null) {
+                    return 0;
+                }
+
+                final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
+                return shortcutInfo != null ? shortcutInfo.getStartingThemeResId() : 0;
+            }
+        }
+
+        @Override
         public ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
                 @NonNull String shortcutId, int userId) {

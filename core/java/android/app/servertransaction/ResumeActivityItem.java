@@ -60,7 +60,7 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     public void postExecute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         // TODO(lifecycler): Use interface callback instead of actual implementation.
-        ActivityClient.getInstance().activityResumed(token);
+        ActivityClient.getInstance().activityResumed(token, client.isHandleSplashScreenExit(token));
     }
 
     @Override

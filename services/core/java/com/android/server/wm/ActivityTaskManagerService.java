@@ -224,6 +224,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.window.IWindowOrganizerController;
+import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
@@ -451,6 +452,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The controller for all operations related to locktask. */
     private LockTaskController mLockTaskController;
     private ActivityStartController mActivityStartController;
+    PackageConfigPersister mPackageConfigPersister;
 
     boolean mSuppressResizeConfigChanges;
 
@@ -866,6 +868,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         setRecentTasks(new RecentTasks(this, mTaskSupervisor));
         mVrController = new VrController(mGlobalLock);
         mKeyguardController = mTaskSupervisor.getKeyguardController();
+        mPackageConfigPersister = new PackageConfigPersister(mTaskSupervisor.mPersisterQueue);
     }
 
     public void onActivityManagerInternalAdded() {
@@ -2027,8 +2030,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // We are reshowing a task, use a starting window to hide the initial draw delay
                 // so the transition can start earlier.
-                topActivity.showStartingWindow(null /* prev */, false /* newTask */,
-                        true /* taskSwitch */);
+                topActivity.showStartingWindow(true /* taskSwitch */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -3245,6 +3247,30 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "suppressResizeConfigChanges()");
         synchronized (mGlobalLock) {
             mSuppressResizeConfigChanges = suppress;
+        }
+    }
+
+    /**
+     * A splash screen view has copied, pass it to an activity.
+     *
+     * @param taskId Id of task to handle the material to reconstruct the view.
+     * @param parcelable Used to reconstruct the view, null means the surface is un-copyable.
+     * @hide
+     */
+    @Override
+    public void onSplashScreenViewCopyFinished(int taskId, SplashScreenViewParcelable parcelable)
+            throws RemoteException {
+        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_TASKS,
+                "copySplashScreenViewFinish()");
+        synchronized (mGlobalLock) {
+            final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                    MATCH_ATTACHED_TASK_ONLY);
+            if (task != null) {
+                final ActivityRecord r = task.getTopWaitSplashScreenActivity();
+                if (r != null) {
+                    r.onCopySplashScreenFinish(parcelable);
+                }
+            }
         }
     }
 
@@ -5433,6 +5459,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 mAppWarnings.onPackageUninstalled(name);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
+                mPackageConfigPersister.onPackageUninstall(name);
             }
         }
 
@@ -6103,6 +6130,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void removeUser(int userId) {
             synchronized (mGlobalLock) {
                 mRootWindowContainer.removeUser(userId);
+                mPackageConfigPersister.removeUser(userId);
             }
         }
 
@@ -6200,6 +6228,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void loadRecentTasksForUser(int userId) {
             synchronized (mGlobalLock) {
                 mRecentTasks.loadUserRecentsLocked(userId);
+                // TODO renaming the methods(?)
+                mPackageConfigPersister.loadUserPackages(userId);
             }
         }
 
@@ -6307,6 +6337,55 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 return getLockTaskController().isBaseOfLockedTask(packageName);
             }
+        }
+
+        @Override
+        public PackageConfigurationUpdater createPackageConfigurationUpdater() {
+            synchronized (mGlobalLock) {
+                return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
+            }
+        }
+    }
+
+    final class PackageConfigurationUpdaterImpl implements
+            ActivityTaskManagerInternal.PackageConfigurationUpdater {
+        private int mPid;
+        private int mNightMode;
+
+        PackageConfigurationUpdaterImpl(int pid) {
+            mPid = pid;
+        }
+
+        @Override
+        public ActivityTaskManagerInternal.PackageConfigurationUpdater setNightMode(int nightMode) {
+            mNightMode = nightMode;
+            return this;
+        }
+
+        @Override
+        public void commit() throws RemoteException {
+            if (mPid == 0) {
+                throw new RemoteException("Invalid process");
+            }
+            synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mProcessMap.getProcess(mPid);
+                if (wpc == null) {
+                    Slog.w(TAG, "Override application configuration: cannot find application");
+                    return;
+                }
+                if (wpc.getNightMode() == mNightMode) {
+                    return;
+                }
+                if (!wpc.setOverrideNightMode(mNightMode)) {
+                    return;
+                }
+                wpc.updateNightModeForAllActivities(mNightMode);
+                mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
+            }
+        }
+
+        int getNightMode() {
+            return mNightMode;
         }
     }
 }
