@@ -185,9 +185,9 @@ void Typeface::setRobotoTypefaceForTest() {
     sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(fontData));
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
-    std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
-            std::move(typeface), data, st.st_size, kRobotoFont, 0,
-            std::vector<minikin::FontVariation>());
+    std::shared_ptr<minikin::MinikinFont> font =
+            std::make_shared<MinikinFontSkia>(std::move(typeface), 0, data, st.st_size, kRobotoFont,
+                                              0, std::vector<minikin::FontVariation>());
     std::vector<std::shared_ptr<minikin::Font>> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
 

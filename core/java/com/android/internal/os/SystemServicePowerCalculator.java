@@ -20,12 +20,12 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.Process;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,87 +36,112 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     private static final boolean DEBUG = false;
     private static final String TAG = "SystemServicePowerCalc";
 
-    private static final long MICROSEC_IN_HR = (long) 60 * 60 * 1000 * 1000;
-
-    private final PowerProfile mPowerProfile;
-
-    // Tracks system server CPU [cluster][speed] power in milliAmp-microseconds
-    // Data organized like this:
+    // Power estimators per CPU cluster, per CPU frequency. The array is flattened according
+    // to this layout:
     // {cluster1-speed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...}
-    private double[] mSystemServicePowerMaUs;
+    private final UsageBasedPowerEstimator[] mPowerEstimators;
 
     public SystemServicePowerCalculator(PowerProfile powerProfile) {
-        mPowerProfile = powerProfile;
+        int numFreqs = 0;
+        final int numCpuClusters = powerProfile.getNumCpuClusters();
+        for (int cluster = 0; cluster < numCpuClusters; cluster++) {
+            numFreqs += powerProfile.getNumSpeedStepsInCpuCluster(cluster);
+        }
+
+        mPowerEstimators = new UsageBasedPowerEstimator[numFreqs];
+        int index = 0;
+        for (int cluster = 0; cluster < numCpuClusters; cluster++) {
+            final int numSpeeds = powerProfile.getNumSpeedStepsInCpuCluster(cluster);
+            for (int speed = 0; speed < numSpeeds; speed++) {
+                mPowerEstimators[index++] = new UsageBasedPowerEstimator(
+                        powerProfile.getAveragePowerForCpuCore(cluster, speed));
+            }
+        }
     }
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        calculateSystemServicePower(batteryStats);
-        super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
-    }
+        double systemServicePowerMah = calculateSystemServicePower(batteryStats);
+        final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+                builder.getUidBatteryConsumerBuilders();
+        final UidBatteryConsumer.Builder systemServerConsumer = uidBatteryConsumerBuilders.get(
+                Process.SYSTEM_UID);
 
-    @Override
-    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES,
-                calculateSystemServerCpuPowerMah(u));
+        if (systemServerConsumer != null) {
+            systemServicePowerMah = Math.min(systemServicePowerMah,
+                    systemServerConsumer.getTotalPower());
+
+            // The system server power needs to be adjusted because part of it got
+            // distributed to applications
+            systemServerConsumer.setConsumedPower(
+                    BatteryConsumer.POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
+                    -systemServicePowerMah);
+        }
+
+        for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
+            if (app != systemServerConsumer) {
+                final BatteryStats.Uid uid = app.getBatteryStatsUid();
+                app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES,
+                        systemServicePowerMah * uid.getProportionalSystemServiceUsage());
+            }
+        }
     }
 
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType,
             SparseArray<UserHandle> asUsers) {
-        calculateSystemServicePower(batteryStats);
-        super.calculate(sippers, batteryStats, rawRealtimeUs, rawUptimeUs, statsType, asUsers);
+        double systemServicePowerMah = calculateSystemServicePower(batteryStats);
+        BatterySipper systemServerSipper = null;
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            final BatterySipper app = sippers.get(i);
+            if (app.drainType == BatterySipper.DrainType.APP) {
+                if (app.getUid() == Process.SYSTEM_UID) {
+                    systemServerSipper = app;
+                    break;
+                }
+            }
+        }
+
+        if (systemServerSipper != null) {
+            systemServicePowerMah = Math.min(systemServicePowerMah, systemServerSipper.sumPower());
+
+            // The system server power needs to be adjusted because part of it got
+            // distributed to applications
+            systemServerSipper.powerReattributedToOtherSippersMah = -systemServicePowerMah;
+        }
+
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            final BatterySipper app = sippers.get(i);
+            if (app.drainType == BatterySipper.DrainType.APP) {
+                if (app != systemServerSipper) {
+                    final BatteryStats.Uid uid = app.uidObj;
+                    app.systemServiceCpuPowerMah =
+                            systemServicePowerMah * uid.getProportionalSystemServiceUsage();
+                }
+            }
+        }
     }
 
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        app.systemServiceCpuPowerMah = calculateSystemServerCpuPowerMah(u);
-    }
-
-    private void calculateSystemServicePower(BatteryStats batteryStats) {
+    private double calculateSystemServicePower(BatteryStats batteryStats) {
         final long[] systemServiceTimeAtCpuSpeeds = batteryStats.getSystemServiceTimeAtCpuSpeeds();
         if (systemServiceTimeAtCpuSpeeds == null) {
-            return;
+            return 0;
         }
 
-        if (mSystemServicePowerMaUs == null) {
-            mSystemServicePowerMaUs = new double[systemServiceTimeAtCpuSpeeds.length];
-        }
-        int index = 0;
-        final int numCpuClusters = mPowerProfile.getNumCpuClusters();
-        for (int cluster = 0; cluster < numCpuClusters; cluster++) {
-            final int numSpeeds = mPowerProfile.getNumSpeedStepsInCpuCluster(cluster);
-            for (int speed = 0; speed < numSpeeds; speed++) {
-                mSystemServicePowerMaUs[index] =
-                        systemServiceTimeAtCpuSpeeds[index]
-                                * mPowerProfile.getAveragePowerForCpuCore(cluster, speed);
-                index++;
-            }
+        // TODO(179210707): additionally account for CPU active and per cluster battery use
+
+        double powerMah = 0;
+        for (int i = 0; i < mPowerEstimators.length; i++) {
+            powerMah += mPowerEstimators[i].calculatePower(systemServiceTimeAtCpuSpeeds[i]);
         }
 
         if (DEBUG) {
-            Log.d(TAG, "System service power per CPU cluster and frequency:"
-                    + Arrays.toString(mSystemServicePowerMaUs));
+            Log.d(TAG, "System service power:" + powerMah);
         }
-    }
 
-    private double calculateSystemServerCpuPowerMah(BatteryStats.Uid u) {
-        double cpuPowerMaUs = 0;
-        final double proportionalUsage = u.getProportionalSystemServiceUsage();
-        if (proportionalUsage > 0 && mSystemServicePowerMaUs != null) {
-            for (int i = 0; i < mSystemServicePowerMaUs.length; i++) {
-                cpuPowerMaUs += mSystemServicePowerMaUs[i] * proportionalUsage;
-            }
-        }
-        return cpuPowerMaUs / MICROSEC_IN_HR;
-    }
-
-    @Override
-    public void reset() {
-        mSystemServicePowerMaUs = null;
+        return powerMah;
     }
 }

@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -29,11 +30,12 @@ import java.util.Map;
 import java.util.Objects;
 
 /** @hide */
+@SystemApi
 public final class OemNetworkPreferences implements Parcelable {
     /**
-     * Use default behavior requesting networks. Equivalent to not setting any preference at all.
+     * Default in case this value is not set. Using it will result in an error.
      */
-    public static final int OEM_NETWORK_PREFERENCE_DEFAULT = 0;
+    public static final int OEM_NETWORK_PREFERENCE_UNINITIALIZED = 0;
 
     /**
      * If an unmetered network is available, use it.
@@ -45,17 +47,17 @@ public final class OemNetworkPreferences implements Parcelable {
     /**
      * If an unmetered network is available, use it.
      * Otherwise, if a network with the OEM_PAID capability is available, use it.
-     * Otherwise, the app doesn't get a network.
+     * Otherwise, the app doesn't get a default network.
      */
     public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK = 2;
 
     /**
-     * Prefer only NET_CAPABILITY_OEM_PAID networks.
+     * Use only NET_CAPABILITY_OEM_PAID networks.
      */
     public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY = 3;
 
     /**
-     * Prefer only NET_CAPABILITY_OEM_PRIVATE networks.
+     * Use only NET_CAPABILITY_OEM_PRIVATE networks.
      */
     public static final int OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY = 4;
 
@@ -95,8 +97,6 @@ public final class OemNetworkPreferences implements Parcelable {
     /**
      * Builder used to create {@link OemNetworkPreferences} objects.  Specify the preferred Network
      * to package name mappings.
-     *
-     * @hide
      */
     public static final class Builder {
         private final Bundle mNetworkMappings;
@@ -135,7 +135,7 @@ public final class OemNetworkPreferences implements Parcelable {
          * @return The builder to facilitate chaining.
          */
         @NonNull
-        public Builder removeNetworkPreference(@NonNull final String packageName) {
+        public Builder clearNetworkPreference(@NonNull final String packageName) {
             Objects.requireNonNull(packageName);
             mNetworkMappings.remove(packageName);
             return this;
@@ -160,7 +160,7 @@ public final class OemNetworkPreferences implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "OEM_NETWORK_PREFERENCE_", value = {
-            OEM_NETWORK_PREFERENCE_DEFAULT,
+            OEM_NETWORK_PREFERENCE_UNINITIALIZED,
             OEM_NETWORK_PREFERENCE_OEM_PAID,
             OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK,
             OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY,
@@ -174,12 +174,14 @@ public final class OemNetworkPreferences implements Parcelable {
      *
      * @param value int value of OemNetworkPreference
      * @return string version of OemNetworkPreference
+     *
+     * @hide
      */
     @NonNull
     public static String oemNetworkPreferenceToString(@OemNetworkPreference int value) {
         switch (value) {
-            case OEM_NETWORK_PREFERENCE_DEFAULT:
-                return "OEM_NETWORK_PREFERENCE_DEFAULT";
+            case OEM_NETWORK_PREFERENCE_UNINITIALIZED:
+                return "OEM_NETWORK_PREFERENCE_UNINITIALIZED";
             case OEM_NETWORK_PREFERENCE_OEM_PAID:
                 return "OEM_NETWORK_PREFERENCE_OEM_PAID";
             case OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK:

@@ -2407,6 +2407,11 @@ public final class ProcessList {
                         app.getDisabledCompatChanges(), pkgDataInfoMap, allowlistedAppDataInfoMap,
                         false, false,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
+
+                if (Process.createProcessGroup(uid, startResult.pid) < 0) {
+                    Slog.e(ActivityManagerService.TAG, "Unable to create process group for "
+                            + app.processName + " (" + startResult.pid + ")");
+                }
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
