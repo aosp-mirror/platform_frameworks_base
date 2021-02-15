@@ -171,7 +171,7 @@ public class VcnTest {
         // Doesn't matter which callback this gets - any Gateway entering safe mode should shut down
         // all Gateways
         final VcnGatewayStatusCallback statusCallback = mGatewayStatusCallbackCaptor.getValue();
-        statusCallback.onEnteredSafemode();
+        statusCallback.onEnteredSafeMode();
         mTestLooper.dispatchAll();
 
         for (final VcnGatewayConnection gatewayConnection : gatewayConnections) {

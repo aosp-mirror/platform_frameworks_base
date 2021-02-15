@@ -86,12 +86,12 @@ public class Vcn extends Handler {
     private static final int MSG_CMD_TEARDOWN = MSG_CMD_BASE;
 
     /**
-     * Causes this VCN to immediately enter Safemode.
+     * Causes this VCN to immediately enter safe mode.
      *
-     * <p>Upon entering Safemode, the VCN will unregister its RequestListener, tear down all of its
-     * VcnGatewayConnections, and notify VcnManagementService that it is in Safemode.
+     * <p>Upon entering safe mode, the VCN will unregister its RequestListener, tear down all of its
+     * VcnGatewayConnections, and notify VcnManagementService that it is in safe mode.
      */
-    private static final int MSG_CMD_ENTER_SAFEMODE = MSG_CMD_BASE + 1;
+    private static final int MSG_CMD_ENTER_SAFE_MODE = MSG_CMD_BASE + 1;
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
@@ -216,8 +216,8 @@ public class Vcn extends Handler {
             case MSG_CMD_TEARDOWN:
                 handleTeardown();
                 break;
-            case MSG_CMD_ENTER_SAFEMODE:
-                handleEnterSafemode();
+            case MSG_CMD_ENTER_SAFE_MODE:
+                handleEnterSafeMode();
                 break;
             default:
                 Slog.wtf(getLogTag(), "Unknown msg.what: " + msg.what);
@@ -243,7 +243,7 @@ public class Vcn extends Handler {
         mIsActive.set(false);
     }
 
-    private void handleEnterSafemode() {
+    private void handleEnterSafeMode() {
         handleTeardown();
 
         mVcnSafeModeCallback.onEnteredSafeMode();
@@ -335,14 +335,14 @@ public class Vcn extends Handler {
     /** Callback used for passing status signals from a VcnGatewayConnection to its managing Vcn. */
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     public interface VcnGatewayStatusCallback {
-        /** Called by a VcnGatewayConnection to indicate that it has entered Safemode. */
-        void onEnteredSafemode();
+        /** Called by a VcnGatewayConnection to indicate that it has entered safe mode. */
+        void onEnteredSafeMode();
     }
 
     private class VcnGatewayStatusCallbackImpl implements VcnGatewayStatusCallback {
         @Override
-        public void onEnteredSafemode() {
-            sendMessage(obtainMessage(MSG_CMD_ENTER_SAFEMODE));
+        public void onEnteredSafeMode() {
+            sendMessage(obtainMessage(MSG_CMD_ENTER_SAFE_MODE));
         }
     }
 
