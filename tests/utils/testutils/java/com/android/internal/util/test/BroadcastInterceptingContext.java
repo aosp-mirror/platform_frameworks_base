@@ -42,6 +42,8 @@ public class BroadcastInterceptingContext extends ContextWrapper {
 
     private final List<BroadcastInterceptor> mInterceptors = new ArrayList<>();
 
+    private boolean mUseRegisteredHandlers;
+
     public abstract class FutureIntent extends FutureTask<Intent> {
         public FutureIntent() {
             super(
@@ -61,17 +63,24 @@ public class BroadcastInterceptingContext extends ContextWrapper {
     public class BroadcastInterceptor extends FutureIntent {
         private final BroadcastReceiver mReceiver;
         private final IntentFilter mFilter;
+        private final Handler mHandler;
 
-        public BroadcastInterceptor(BroadcastReceiver receiver, IntentFilter filter) {
+        public BroadcastInterceptor(BroadcastReceiver receiver, IntentFilter filter,
+                Handler handler) {
             mReceiver = receiver;
             mFilter = filter;
+            mHandler = mUseRegisteredHandlers ? handler : null;
         }
 
         public boolean dispatchBroadcast(Intent intent) {
             if (mFilter.match(getContentResolver(), intent, false, TAG) > 0) {
                 if (mReceiver != null) {
                     final Context context = BroadcastInterceptingContext.this;
-                    mReceiver.onReceive(context, intent);
+                    if (mHandler == null) {
+                        mReceiver.onReceive(context, intent);
+                    } else {
+                        mHandler.post(() -> mReceiver.onReceive(context, intent));
+                    }
                     return false;
                 } else {
                     set(intent);
@@ -116,25 +125,38 @@ public class BroadcastInterceptingContext extends ContextWrapper {
     }
 
     public FutureIntent nextBroadcastIntent(IntentFilter filter) {
-        final BroadcastInterceptor interceptor = new BroadcastInterceptor(null, filter);
+        final BroadcastInterceptor interceptor = new BroadcastInterceptor(null, filter, null);
         synchronized (mInterceptors) {
             mInterceptors.add(interceptor);
         }
         return interceptor;
     }
 
+    /**
+     * Whether to send broadcasts to registered handlers. By default, receivers are called
+     * synchronously by sendBroadcast. If this method is called with {@code true}, the receiver is
+     * instead called by a runnable posted to the Handler specified when the receiver was
+     * registered. This method applies only to future registrations, already-registered receivers
+     * are unaffected.
+     */
+    public void setUseRegisteredHandlers(boolean use) {
+        synchronized (mInterceptors) {
+            mUseRegisteredHandlers = use;
+        }
+    }
+
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-        synchronized (mInterceptors) {
-            mInterceptors.add(new BroadcastInterceptor(receiver, filter));
-        }
-        return null;
+        return registerReceiver(receiver, filter, null, null);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
-        return registerReceiver(receiver, filter);
+        synchronized (mInterceptors) {
+            mInterceptors.add(new BroadcastInterceptor(receiver, filter, scheduler));
+        }
+        return null;
     }
 
     @Override
