@@ -3,5 +3,4 @@ per-file *AppOp* = file:/core/java/android/permission/OWNERS
 per-file *Bluetooth* = file:/core/java/android/bluetooth/OWNERS
 per-file *Gnss* = file:/services/core/java/com/android/server/location/OWNERS
 per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
-per-file *Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNERS
 per-file GestureLauncherServiceTest.java = file:platform/packages/apps/EmergencyInfo:/OWNERS

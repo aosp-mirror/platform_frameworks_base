@@ -29,8 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** Controls vibration scaling. */
-// TODO(b/159207608): Make this package-private once vibrator services are moved to this package
-public final class VibrationScaler {
+final class VibrationScaler {
     private static final String TAG = "VibrationScaler";
 
     // Scale levels. Each level, except MUTE, is defined as the delta between the current setting
@@ -56,7 +55,7 @@ public final class VibrationScaler {
     private final VibrationSettings mSettingsController;
     private final int mDefaultVibrationAmplitude;
 
-    public VibrationScaler(Context context, VibrationSettings settingsController) {
+    VibrationScaler(Context context, VibrationSettings settingsController) {
         mSettingsController = settingsController;
         mDefaultVibrationAmplitude = context.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultVibrationAmplitude);

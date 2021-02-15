@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -56,12 +56,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
-import com.android.server.vibrator.InputDeviceDelegate;
-import com.android.server.vibrator.Vibration;
-import com.android.server.vibrator.VibrationScaler;
-import com.android.server.vibrator.VibrationSettings;
-import com.android.server.vibrator.VibrationThread;
-import com.android.server.vibrator.VibratorController;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -967,7 +963,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     /** Listener for synced vibration completion callbacks from native. */
     @VisibleForTesting
-    public interface OnSyncedVibrationCompleteListener {
+    interface OnSyncedVibrationCompleteListener {
 
         /** Callback triggered when synced vibration is complete. */
         void onComplete(long vibrationId);
@@ -1167,6 +1163,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     }
                 }
 
+                pw.println();
                 pw.println("  Previous external vibrations:");
                 for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
                     pw.println("    " + info);
@@ -1181,46 +1178,48 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 mVibrationSettings.dumpProto(proto);
                 if (mCurrentVibration != null) {
                     mCurrentVibration.getVibration().getDebugInfo().dumpProto(proto,
-                            VibratorServiceDumpProto.CURRENT_VIBRATION);
+                            VibratorManagerServiceDumpProto.CURRENT_VIBRATION);
                 }
                 if (mCurrentExternalVibration != null) {
                     mCurrentExternalVibration.getDebugInfo().dumpProto(proto,
-                            VibratorServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
+                            VibratorManagerServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
                 }
 
                 boolean isVibrating = false;
                 boolean isUnderExternalControl = false;
                 for (int i = 0; i < mVibrators.size(); i++) {
+                    proto.write(VibratorManagerServiceDumpProto.VIBRATOR_IDS, mVibrators.keyAt(i));
                     isVibrating |= mVibrators.valueAt(i).isVibrating();
                     isUnderExternalControl |= mVibrators.valueAt(i).isUnderExternalControl();
                 }
-                proto.write(VibratorServiceDumpProto.IS_VIBRATING, isVibrating);
-                proto.write(VibratorServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
+                proto.write(VibratorManagerServiceDumpProto.IS_VIBRATING, isVibrating);
+                proto.write(VibratorManagerServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
                         isUnderExternalControl);
 
-                for (Vibration.DebugInfo info : mPreviousVibrations.get(
-                        VibrationAttributes.USAGE_RINGTONE)) {
-                    info.dumpProto(proto, VibratorServiceDumpProto.PREVIOUS_RING_VIBRATIONS);
-                }
-
-                for (Vibration.DebugInfo info : mPreviousVibrations.get(
-                        VibrationAttributes.USAGE_NOTIFICATION)) {
-                    info.dumpProto(proto,
-                            VibratorServiceDumpProto.PREVIOUS_NOTIFICATION_VIBRATIONS);
-                }
-
-                for (Vibration.DebugInfo info : mPreviousVibrations.get(
-                        VibrationAttributes.USAGE_ALARM)) {
-                    info.dumpProto(proto, VibratorServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS);
-                }
-
-                for (Vibration.DebugInfo info : mPreviousVibrations.get(
-                        VibrationAttributes.USAGE_UNKNOWN)) {
-                    info.dumpProto(proto, VibratorServiceDumpProto.PREVIOUS_VIBRATIONS);
+                for (int i = 0; i < mPreviousVibrations.size(); i++) {
+                    long fieldId;
+                    switch (mPreviousVibrations.keyAt(i)) {
+                        case VibrationAttributes.USAGE_RINGTONE:
+                            fieldId = VibratorManagerServiceDumpProto.PREVIOUS_RING_VIBRATIONS;
+                            break;
+                        case VibrationAttributes.USAGE_NOTIFICATION:
+                            fieldId = VibratorManagerServiceDumpProto
+                                    .PREVIOUS_NOTIFICATION_VIBRATIONS;
+                            break;
+                        case VibrationAttributes.USAGE_ALARM:
+                            fieldId = VibratorManagerServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS;
+                            break;
+                        default:
+                            fieldId = VibratorManagerServiceDumpProto.PREVIOUS_VIBRATIONS;
+                    }
+                    for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
+                        info.dumpProto(proto, fieldId);
+                    }
                 }
 
                 for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
-                    info.dumpProto(proto, VibratorServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
+                    info.dumpProto(proto,
+                            VibratorManagerServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
                 }
             }
             proto.flush();
@@ -1300,7 +1299,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     cancelingVibration.join();
                 } catch (InterruptedException e) {
                     Slog.w("Interrupted while waiting for vibration to finish before starting "
-                                    + "external control", e);
+                            + "external control", e);
                 }
             }
             if (DEBUG) {

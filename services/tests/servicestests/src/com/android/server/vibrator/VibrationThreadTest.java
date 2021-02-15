@@ -40,6 +40,7 @@ import android.os.SystemClock;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.LargeTest;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
@@ -709,6 +710,7 @@ public class VibrationThreadTest {
         assertEquals(Arrays.asList(6), mVibratorProviders.get(3).getAmplitudes());
     }
 
+    @LargeTest
     @Test
     public void vibrate_withWaveform_totalVibrationTimeRespected() {
         int totalDuration = 10_000; // 10s

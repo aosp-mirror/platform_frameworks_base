@@ -32,8 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import libcore.util.NativeAllocationRegistry;
 
 /** Controls a single vibrator. */
-// TODO(b/159207608): Make this package-private once vibrator services are moved to this package
-public final class VibratorController {
+final class VibratorController {
     private static final String TAG = "VibratorController";
 
     private final Object mLock = new Object();
@@ -99,12 +98,12 @@ public final class VibratorController {
 
     static native void vibratorAlwaysOnDisable(long nativePtr, long id);
 
-    public VibratorController(int vibratorId, OnVibrationCompleteListener listener) {
+    VibratorController(int vibratorId, OnVibrationCompleteListener listener) {
         this(vibratorId, listener, new NativeWrapper());
     }
 
     @VisibleForTesting
-    public VibratorController(int vibratorId, OnVibrationCompleteListener listener,
+    VibratorController(int vibratorId, OnVibrationCompleteListener listener,
             NativeWrapper nativeWrapper) {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
@@ -140,11 +139,6 @@ public final class VibratorController {
                 Binder.restoreCallingIdentity(token);
             }
         }
-    }
-
-    @VisibleForTesting
-    public NativeWrapper getNativeWrapper() {
-        return mNativeWrapper;
     }
 
     /** Return the {@link VibratorInfo} representing the vibrator controlled by this instance. */
