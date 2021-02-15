@@ -524,7 +524,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
@@ -565,7 +565,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
-                return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
@@ -634,9 +634,6 @@ public class HdmiCecConfig {
             case Global.HDMI_CONTROL_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
                 break;
-            case Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
-                break;
             case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
                 break;
@@ -681,7 +678,6 @@ public class HdmiCecConfig {
         ContentResolver resolver = mContext.getContentResolver();
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
         };
         for (String setting: settings) {
