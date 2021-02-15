@@ -258,6 +258,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     Drawable mBackgroundDrawable = null;
     Drawable mBackgroundFallbackDrawable = null;
 
+    int mBackgroundBlurRadius = 0;
+
     private boolean mLoadElevation = true;
     private float mElevation;
 
@@ -1523,6 +1525,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public final void setBackgroundBlurRadius(int blurRadius) {
+        super.setBackgroundBlurRadius(blurRadius);
+        if (getContext().getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_CROSS_LAYER_BLUR)) {
+            mBackgroundBlurRadius = Math.max(blurRadius, 0);
+        }
+    }
+
+    @Override
     public final void setFeatureDrawableResource(int featureId, int resId) {
         if (resId != 0) {
             DrawableFeatureState st = getDrawableState(featureId, true);
@@ -2548,6 +2559,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             params.blurBehindRadius = a.getDimensionPixelSize(
                     android.R.styleable.Window_windowBlurBehindRadius, 0);
         }
+
+        setBackgroundBlurRadius(a.getDimensionPixelSize(
+                R.styleable.Window_windowBackgroundBlurRadius, 0));
 
 
         if (params.windowAnimations == 0) {
