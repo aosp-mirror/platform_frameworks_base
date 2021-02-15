@@ -1117,7 +1117,7 @@ public class ConnectivityManager {
      * @hide
      */
     @Deprecated
-    public List<String> getVpnLockdownWhitelist(int userId) {
+    public List<String> getVpnLockdownAllowlist(int userId) {
         return getVpnManager().getVpnLockdownAllowlist(userId);
     }
 
