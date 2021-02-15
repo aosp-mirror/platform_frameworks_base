@@ -64,8 +64,8 @@ static jlong createBitmapEffect(
     sk_sp<SkImage> image = android::bitmap::toBitmap(bitmapHandle).makeImage();
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImageFilter> bitmapFilter =
-        SkImageFilters::Image(image, srcRect, dstRect, kLow_SkFilterQuality);
+    sk_sp<SkImageFilter> bitmapFilter = SkImageFilters::Image(
+            image, srcRect, dstRect, SkSamplingOptions(SkFilterMode::kLinear));
     return reinterpret_cast<jlong>(bitmapFilter.release());
 }
 
