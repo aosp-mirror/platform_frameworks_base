@@ -2920,7 +2920,8 @@ public class NotificationPanelViewController extends PanelViewController {
      * @param x the x-coordinate the touch event
      */
     protected void updateHorizontalPanelPosition(float x) {
-        if (mNotificationStackScrollLayoutController.getWidth() * 1.75f > mView.getWidth()) {
+        if (mNotificationStackScrollLayoutController.getWidth() * 1.75f > mView.getWidth()
+                || Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
             resetHorizontalPanelPosition();
             return;
         }

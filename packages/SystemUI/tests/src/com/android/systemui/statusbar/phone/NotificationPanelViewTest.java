@@ -442,9 +442,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testAllChildrenOfNotificationContainer_haveIds() {
-        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
-
+        enableDualPaneShade();
         mNotificationContainerParent.addView(newViewWithId(1));
         mNotificationContainerParent.addView(newViewWithId(View.NO_ID));
 
@@ -473,8 +471,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testSplitShadeLayout_isAlignedToGuideline() {
-        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        enableDualPaneShade();
         mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
         mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
 
@@ -497,6 +494,23 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         // required as cloning ConstraintSet fails if view doesn't have layout params
         view.setLayoutParams(layoutParams);
         return view;
+    }
+
+    @Test
+    public void testOnDragDownEvent_horizontalTranslationIsZeroForDualPaneShade() {
+        when(mNotificationStackScrollLayoutController.getWidth()).thenReturn(350f);
+        when(mView.getWidth()).thenReturn(800);
+        enableDualPaneShade();
+
+        onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN,
+                200f /* x position */, 0f, 0));
+
+        verify(mQsFrame).setTranslationX(0);
+    }
+
+    private void enableDualPaneShade() {
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
     }
 
     private void onTouchEvent(MotionEvent ev) {
