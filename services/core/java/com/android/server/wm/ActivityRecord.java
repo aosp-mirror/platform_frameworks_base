@@ -1078,11 +1078,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "supportsEnterPipOnTaskSwitch: "
                         + supportsEnterPipOnTaskSwitch);
             }
-            if (info.maxAspectRatio != 0) {
-                pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
+            if (info.getMaxAspectRatio() != 0) {
+                pw.println(prefix + "maxAspectRatio=" + info.getMaxAspectRatio());
             }
-            if (info.minAspectRatio != 0) {
-                pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
+            if (info.getMinAspectRatio() != 0) {
+                pw.println(prefix + "minAspectRatio=" + info.getMinAspectRatio());
+            }
+            if (info.getMinAspectRatio() != info.getManifestMinAspectRatio()) {
+                // Log the fact that we've overridden the min aspect ratio from the manifest
+                pw.println(prefix + "manifestMinAspectRatio="
+                        + info.getManifestMinAspectRatio());
             }
             pw.println(prefix + "supportsSizeChanges="
                     + ActivityInfo.sizeChangesSupportModeToString(info.supportsSizeChanges()));
@@ -7053,8 +7058,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Adjust the fixed orientation letterbox bounds to fit the app request aspect ratio in
         // order to use the extra available space.
-        final float maxAspectRatio = info.maxAspectRatio;
-        final float minAspectRatio = info.minAspectRatio;
+        final float maxAspectRatio = info.getMaxAspectRatio();
+        final float minAspectRatio = info.getMinAspectRatio();
         if (aspect > maxAspectRatio && maxAspectRatio != 0) {
             aspect = maxAspectRatio;
         } else if (aspect < minAspectRatio) {
@@ -7291,21 +7296,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The rest of the condition is that only one side is smaller than the container, but it
         // still needs to exclude the cases where the size is limited by the fixed aspect ratio.
-        if (info.maxAspectRatio > 0) {
+        if (info.getMaxAspectRatio() > 0) {
             final float aspectRatio = (0.5f + Math.max(appWidth, appHeight))
                     / Math.min(appWidth, appHeight);
-            if (aspectRatio >= info.maxAspectRatio) {
+            if (aspectRatio >= info.getMaxAspectRatio()) {
                 // The current size has reached the max aspect ratio.
                 return false;
             }
         }
-        if (info.minAspectRatio > 0) {
+        if (info.getMinAspectRatio() > 0) {
             // The activity should have at least the min aspect ratio, so this checks if the
             // container still has available space to provide larger aspect ratio.
             final float containerAspectRatio =
                     (0.5f + Math.max(containerAppWidth, containerAppHeight))
                             / Math.min(containerAppWidth, containerAppHeight);
-            if (containerAspectRatio <= info.minAspectRatio) {
+            if (containerAspectRatio <= info.getMinAspectRatio()) {
                 // The long side has reached the parent.
                 return false;
             }
@@ -7472,9 +7477,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private void applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
-        final float maxAspectRatio = info.maxAspectRatio;
+        final float maxAspectRatio = info.getMaxAspectRatio();
         final Task rootTask = getRootTask();
-        final float minAspectRatio = info.minAspectRatio;
+        final float minAspectRatio = info.getMinAspectRatio();
 
         if (task == null || rootTask == null
                 || (inMultiWindowMode() && !shouldCreateCompatDisplayInsets())
