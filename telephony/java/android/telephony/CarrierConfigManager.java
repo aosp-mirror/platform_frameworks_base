@@ -5351,11 +5351,28 @@ public class CarrierConfigManager {
         public static final String KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED =
                 KEY_PREFIX + "suggestion_ssid_list_with_mac_randomization_disabled";
 
+        /**
+         * Avoid SoftAp in 5GHz if cellular is on unlicensed 5Ghz using License Assisted Access
+         * (LAA).
+         */
+        public static final String KEY_AVOID_5GHZ_SOFTAP_FOR_LAA_BOOL =
+                KEY_PREFIX + "avoid_5ghz_softap_for_laa_bool";
+
+        /**
+         * Avoid Wifi Direct in 5GHz if cellular is on unlicensed 5Ghz using License Assisted
+         * Access (LAA).
+         */
+        public static final String KEY_AVOID_5GHZ_WIFI_DIRECT_FOR_LAA_BOOL =
+                KEY_PREFIX + "avoid_5ghz_wifi_direct_for_laa_bool";
+
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_HOTSPOT_MAX_CLIENT_COUNT, 0);
             defaults.putStringArray(KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED,
                     new String[0]);
+            defaults.putBoolean(KEY_AVOID_5GHZ_SOFTAP_FOR_LAA_BOOL, false);
+            defaults.putBoolean(KEY_AVOID_5GHZ_WIFI_DIRECT_FOR_LAA_BOOL, false);
 
             return defaults;
         }

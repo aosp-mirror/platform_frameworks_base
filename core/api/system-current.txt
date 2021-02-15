@@ -11076,6 +11076,8 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.Wifi {
+    field public static final String KEY_AVOID_5GHZ_SOFTAP_FOR_LAA_BOOL = "wifi.avoid_5ghz_softap_for_laa_bool";
+    field public static final String KEY_AVOID_5GHZ_WIFI_DIRECT_FOR_LAA_BOOL = "wifi.avoid_5ghz_wifi_direct_for_laa_bool";
     field public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT = "wifi.hotspot_maximum_client_count";
     field public static final String KEY_PREFIX = "wifi.";
     field public static final String KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED = "wifi.suggestion_ssid_list_with_mac_randomization_disabled";
