@@ -527,6 +527,8 @@ package android {
     field public static final int detailSocialSummary = 16843428; // 0x10102a4
     field public static final int detailsElementBackground = 16843598; // 0x101034e
     field public static final int dial = 16843010; // 0x1010102
+    field public static final int dialTint = 16844342; // 0x1010636
+    field public static final int dialTintMode = 16844343; // 0x1010637
     field public static final int dialogCornerRadius = 16844145; // 0x1010571
     field public static final int dialogIcon = 16843252; // 0x10101f4
     field public static final int dialogLayout = 16843255; // 0x10101f7
@@ -724,8 +726,14 @@ package android {
     field public static final int groupIndicator = 16843019; // 0x101010b
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
+    field public static final int hand_hourTint = 16844344; // 0x1010638
+    field public static final int hand_hourTintMode = 16844345; // 0x1010639
     field public static final int hand_minute = 16843012; // 0x1010104
+    field public static final int hand_minuteTint = 16844346; // 0x101063a
+    field public static final int hand_minuteTintMode = 16844347; // 0x101063b
     field public static final int hand_second = 16844323; // 0x1010623
+    field public static final int hand_secondTint = 16844348; // 0x101063c
+    field public static final int hand_secondTintMode = 16844349; // 0x101063d
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -53292,11 +53300,27 @@ package android.widget {
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
+    method @Deprecated @Nullable public android.graphics.BlendMode getDialTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getDialTintList();
+    method @Deprecated @Nullable public android.graphics.BlendMode getHourHandTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getHourHandTintList();
+    method @Deprecated @Nullable public android.graphics.BlendMode getMinuteHandTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getMinuteHandTintList();
+    method @Deprecated @Nullable public android.graphics.BlendMode getSecondHandTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getSecondHandTintList();
     method @Deprecated @Nullable public String getTimeZone();
     method @Deprecated public void setDial(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setDialTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setDialTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setHourHand(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setHourHandTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setHourHandTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setMinuteHand(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setMinuteHandTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setMinuteHandTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setSecondHand(@Nullable android.graphics.drawable.Icon);
+    method @Deprecated public void setSecondHandTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setSecondHandTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setTimeZone(@Nullable String);
   }
 
