@@ -1079,7 +1079,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         message.getSource(),
                         HdmiControlManager.ONE_TOUCH_RECORD_PREVIOUS_RECORDING_IN_PROGRESS);
             }
-            return super.handleRecordTvScreen(message);
+            // The default behavior of <Record TV Screen> is replying <Feature Abort> with
+            // "Cannot provide source".
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_CANNOT_PROVIDE_SOURCE);
+            return true;
         }
 
         int recorderAddress = message.getSource();

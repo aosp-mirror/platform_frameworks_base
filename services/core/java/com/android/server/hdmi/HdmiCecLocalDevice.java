@@ -788,10 +788,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleRecordTvScreen(HdmiCecMessage message) {
-        // The default behavior of <Record TV Screen> is replying <Feature Abort> with
-        // "Cannot provide source".
-        mService.maySendFeatureAbortCommand(message, Constants.ABORT_CANNOT_PROVIDE_SOURCE);
-        return true;
+        return false;
     }
 
     protected boolean handleTimerClearedStatus(HdmiCecMessage message) {

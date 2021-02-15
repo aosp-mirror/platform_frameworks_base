@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ABORT_UNRECOGNIZED_OPCODE;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_INVALID;
@@ -1585,5 +1586,19 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(features.contains(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU)).isFalse();
         assertThat(features.contains(
                 Constants.RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU)).isFalse();
+    }
+
+    @Test
+    public void doesNotSupportRecordTvScreen() {
+        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_TV, mPlaybackLogicalAddress,
+                Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
+
+        mNativeWrapper.onCecMessage(recordTvScreen);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage featureAbort = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                mPlaybackLogicalAddress, ADDR_TV, Constants.MESSAGE_RECORD_TV_SCREEN,
+                ABORT_UNRECOGNIZED_OPCODE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(featureAbort);
     }
 }
