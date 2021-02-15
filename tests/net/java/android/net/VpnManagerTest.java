@@ -49,7 +49,7 @@ public class VpnManagerTest {
     private static final String IDENTITY_STRING = "Identity";
     private static final byte[] PSK_BYTES = "preSharedKey".getBytes();
 
-    private IConnectivityManager mMockCs;
+    private IVpnManager mMockService;
     private VpnManager mVpnManager;
     private final MockContext mMockContext =
             new MockContext() {
@@ -61,24 +61,26 @@ public class VpnManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        mMockCs = mock(IConnectivityManager.class);
-        mVpnManager = new VpnManager(mMockContext, mMockCs);
+        mMockService = mock(IVpnManager.class);
+        mVpnManager = new VpnManager(mMockContext, mMockService);
     }
 
     @Test
     public void testProvisionVpnProfilePreconsented() throws Exception {
         final PlatformVpnProfile profile = getPlatformVpnProfile();
-        when(mMockCs.provisionVpnProfile(any(VpnProfile.class), eq(PKG_NAME))).thenReturn(true);
+        when(mMockService.provisionVpnProfile(any(VpnProfile.class), eq(PKG_NAME)))
+                .thenReturn(true);
 
         // Expect there to be no intent returned, as consent has already been granted.
         assertNull(mVpnManager.provisionVpnProfile(profile));
-        verify(mMockCs).provisionVpnProfile(eq(profile.toVpnProfile()), eq(PKG_NAME));
+        verify(mMockService).provisionVpnProfile(eq(profile.toVpnProfile()), eq(PKG_NAME));
     }
 
     @Test
     public void testProvisionVpnProfileNeedsConsent() throws Exception {
         final PlatformVpnProfile profile = getPlatformVpnProfile();
-        when(mMockCs.provisionVpnProfile(any(VpnProfile.class), eq(PKG_NAME))).thenReturn(false);
+        when(mMockService.provisionVpnProfile(any(VpnProfile.class), eq(PKG_NAME)))
+                .thenReturn(false);
 
         // Expect intent to be returned, as consent has not already been granted.
         final Intent intent = mVpnManager.provisionVpnProfile(profile);
@@ -88,25 +90,25 @@ public class VpnManagerTest {
                 ComponentName.unflattenFromString(
                         "com.android.vpndialogs/com.android.vpndialogs.PlatformVpnConfirmDialog");
         assertEquals(expectedComponentName, intent.getComponent());
-        verify(mMockCs).provisionVpnProfile(eq(profile.toVpnProfile()), eq(PKG_NAME));
+        verify(mMockService).provisionVpnProfile(eq(profile.toVpnProfile()), eq(PKG_NAME));
     }
 
     @Test
     public void testDeleteProvisionedVpnProfile() throws Exception {
         mVpnManager.deleteProvisionedVpnProfile();
-        verify(mMockCs).deleteVpnProfile(eq(PKG_NAME));
+        verify(mMockService).deleteVpnProfile(eq(PKG_NAME));
     }
 
     @Test
     public void testStartProvisionedVpnProfile() throws Exception {
         mVpnManager.startProvisionedVpnProfile();
-        verify(mMockCs).startVpnProfile(eq(PKG_NAME));
+        verify(mMockService).startVpnProfile(eq(PKG_NAME));
     }
 
     @Test
     public void testStopProvisionedVpnProfile() throws Exception {
         mVpnManager.stopProvisionedVpnProfile();
-        verify(mMockCs).stopVpnProfile(eq(PKG_NAME));
+        verify(mMockService).stopVpnProfile(eq(PKG_NAME));
     }
 
     private Ikev2VpnProfile getPlatformVpnProfile() throws Exception {
