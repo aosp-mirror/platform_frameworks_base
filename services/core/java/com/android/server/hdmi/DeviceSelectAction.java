@@ -103,10 +103,11 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         if (mIsCec20) {
             sendSetStreamPath();
         }
-        if (!mIsCec20 || mTarget.getDevicePowerStatus()
-                              == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+        int targetPowerStatus = localDevice().mService.getHdmiCecNetwork()
+                .getCecDeviceInfo(getTargetAddress()).getDevicePowerStatus();
+        if (!mIsCec20 || targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {
             queryDevicePowerStatus();
-        } else if (mTarget.getDevicePowerStatus() == HdmiControlManager.POWER_STATUS_ON) {
+        } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
             invokeCallbackAndFinish(HdmiControlManager.RESULT_SUCCESS);
             return true;
         }
