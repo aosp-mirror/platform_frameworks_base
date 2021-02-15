@@ -223,6 +223,14 @@ package android.net {
     field @NonNull public final java.util.List<java.lang.String> underlyingIfaces;
   }
 
+  public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
+    ctor public VpnTransportInfo(int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
+    field public final int type;
+  }
+
 }
 
 package android.os {
