@@ -30,6 +30,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -43,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class AutomaticBrightnessControllerTest {
     private static final float BRIGHTNESS_MIN_FLOAT = 0.0f;
