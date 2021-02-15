@@ -1818,6 +1818,9 @@
   <java-symbol type="string" name="forward_intent_to_owner" />
   <java-symbol type="string" name="forward_intent_to_work" />
   <java-symbol type="dimen" name="cross_profile_apps_thumbnail_size" />
+  <java-symbol type="layout" name="splash_screen_view" />
+  <java-symbol type="id" name="splashscreen_icon_view" />
+  <java-symbol type="id" name="splashscreen_branding_view" />
 
   <!-- From services -->
   <java-symbol type="anim" name="screen_rotate_0_enter" />

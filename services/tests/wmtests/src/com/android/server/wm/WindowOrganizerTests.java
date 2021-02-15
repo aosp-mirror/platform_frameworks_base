@@ -549,6 +549,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
             public void removeStartingWindow(int taskId) { }
 
             @Override
+            public void copySplashScreenView(int taskId) { }
+
+            @Override
             public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
 
             @Override
@@ -609,10 +612,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
             public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
 
             }
-
             @Override
             public void removeStartingWindow(int taskId) { }
-
+            @Override
+            public void copySplashScreenView(int taskId) { }
             @Override
             public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
 
@@ -685,7 +688,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
             @Override
             public void removeStartingWindow(int taskId) { }
-
+            @Override
+            public void copySplashScreenView(int taskId) { }
             @Override
             public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
 
@@ -828,6 +832,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         public void addStartingWindow(StartingWindowInfo info, IBinder appToken) { }
         @Override
         public void removeStartingWindow(int taskId) { }
+        @Override
+        public void copySplashScreenView(int taskId) { }
         @Override
         public void onTaskAppeared(RunningTaskInfo info, SurfaceControl leash) {
             mInfo = info;

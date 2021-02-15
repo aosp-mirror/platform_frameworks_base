@@ -171,12 +171,15 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
 import android.view.ViewRootImpl;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import android.webkit.WebView;
+import android.window.SplashScreen;
+import android.window.SplashScreenView;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -185,6 +188,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -227,6 +231,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -285,6 +290,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     /** Use background GC policy and default JIT threshold. */
     private static final int VM_PROCESS_STATE_JANK_IMPERCEPTIBLE = 1;
 
+    private static final int REMOVE_SPLASH_SCREEN_VIEW_TIMEOUT = 5000;
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
      */
@@ -485,6 +491,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     final ArrayMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
         = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
+
+    private SplashScreen.SplashScreenManagerGlobal mSplashScreenGlobal;
 
     final GcIdler mGcIdler = new GcIdler();
     final PurgeIdler mPurgeIdler = new PurgeIdler();
@@ -1930,6 +1938,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
 
+        public static final int REMOVE_SPLASH_SCREEN_VIEW = 172;
+
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1976,6 +1986,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
+                    case REMOVE_SPLASH_SCREEN_VIEW:
+                        return "REMOVE_SPLASH_SCREEN_VIEW";
                 }
             }
             return Integer.toString(code);
@@ -2168,6 +2180,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                     break;
                 case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                     handleFinishInstrumentationWithoutRestart();
+                    break;
+                case REMOVE_SPLASH_SCREEN_VIEW:
+                    handleRemoveSplashScreenView((ActivityClientRecord) msg.obj);
                     break;
             }
             Object obj = msg.obj;
@@ -3955,6 +3970,106 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     /**
+     * Register a splash screen manager to this process.
+     */
+    public void registerSplashScreenManager(
+            @NonNull SplashScreen.SplashScreenManagerGlobal manager) {
+        synchronized (this) {
+            mSplashScreenGlobal = manager;
+        }
+    }
+
+    @Override
+    public boolean isHandleSplashScreenExit(@NonNull IBinder token) {
+        synchronized (this) {
+            return mSplashScreenGlobal != null && mSplashScreenGlobal.containsExitListener(token);
+        }
+    }
+
+    @Override
+    public void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
+            @Nullable SplashScreenView.SplashScreenViewParcelable parcelable) {
+        final DecorView decorView = (DecorView) r.window.peekDecorView();
+        if (parcelable != null && decorView != null) {
+            createSplashScreen(r, decorView, parcelable);
+        } else {
+            // shouldn't happen!
+            Slog.e(TAG, "handleAttachSplashScreenView failed, unable to attach");
+        }
+    }
+
+    private void createSplashScreen(ActivityClientRecord r, DecorView decorView,
+            SplashScreenView.SplashScreenViewParcelable parcelable) {
+        final SplashScreenView.Builder builder = new SplashScreenView.Builder(r.activity);
+        final SplashScreenView view = builder.createFromParcel(parcelable).build();
+        decorView.addView(view);
+        view.cacheRootWindow(r.window);
+        view.makeSystemUIColorsTransparent();
+        r.activity.mSplashScreenView = view;
+        view.requestLayout();
+        // Ensure splash screen view is shown before remove the splash screen window.
+        final ViewRootImpl impl = decorView.getViewRootImpl();
+        final boolean hardwareEnabled = impl != null && impl.isHardwareEnabled();
+        final AtomicBoolean notified = new AtomicBoolean();
+        if (hardwareEnabled) {
+            final Runnable frameCommit = new Runnable() {
+                        @Override
+                        public void run() {
+                            view.post(() -> {
+                                if (!notified.get()) {
+                                    view.getViewTreeObserver().unregisterFrameCommitCallback(this);
+                                    ActivityClient.getInstance().reportSplashScreenAttached(
+                                            r.token);
+                                    notified.set(true);
+                                }
+                            });
+                        }
+                    };
+            view.getViewTreeObserver().registerFrameCommitCallback(frameCommit);
+        } else {
+            final ViewTreeObserver.OnDrawListener onDrawListener =
+                    new ViewTreeObserver.OnDrawListener() {
+                        @Override
+                        public void onDraw() {
+                            view.post(() -> {
+                                if (!notified.get()) {
+                                    view.getViewTreeObserver().removeOnDrawListener(this);
+                                    ActivityClient.getInstance().reportSplashScreenAttached(
+                                            r.token);
+                                    notified.set(true);
+                                }
+                            });
+                        }
+                    };
+            view.getViewTreeObserver().addOnDrawListener(onDrawListener);
+        }
+    }
+
+    @Override
+    public void handOverSplashScreenView(@NonNull ActivityClientRecord r) {
+        if (r.activity.mSplashScreenView != null) {
+            Message msg = mH.obtainMessage(H.REMOVE_SPLASH_SCREEN_VIEW, r);
+            mH.sendMessageDelayed(msg, REMOVE_SPLASH_SCREEN_VIEW_TIMEOUT);
+            synchronized (this) {
+                if (mSplashScreenGlobal != null) {
+                    mSplashScreenGlobal.dispatchOnExitAnimation(r.token,
+                            r.activity.mSplashScreenView);
+                }
+            }
+        }
+    }
+
+    /**
+     * Force remove splash screen view.
+     */
+    private void handleRemoveSplashScreenView(@NonNull ActivityClientRecord r) {
+        if (r.activity.mSplashScreenView != null) {
+            r.activity.mSplashScreenView.remove();
+            r.activity.mSplashScreenView = null;
+        }
+    }
+
+    /**
      * Cycle activity through onPause and onUserLeaveHint so that PIP is entered if supported, then
      * return to its previous state. This allows activities that rely on onUserLeaveHint instead of
      * onPictureInPictureRequested to enter picture-in-picture.
@@ -5174,6 +5289,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.setState(ON_DESTROY);
         mLastReportedWindowingMode.remove(r.activity.getActivityToken());
         schedulePurgeIdler();
+        synchronized (this) {
+            if (mSplashScreenGlobal != null) {
+                mSplashScreenGlobal.tokenDestroyed(r.token);
+            }
+        }
         // updatePendingActivityConfiguration() reads from mActivities to update
         // ActivityClientRecord which runs in a different thread. Protect modifications to
         // mActivities to avoid race.
