@@ -134,10 +134,10 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void activityResumed(IBinder token) {
+    public void activityResumed(IBinder token, boolean handleSplashScreenExit) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
-            ActivityRecord.activityResumedLocked(token);
+            ActivityRecord.activityResumedLocked(token, handleSplashScreenExit);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -689,6 +689,18 @@ class ActivityClientController extends IActivityClientController.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    /**
+     * Splash screen view is attached to activity.
+     */
+    @Override
+    public void splashScreenAttached(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            ActivityRecord.splashScreenAttachedLocked(token);
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     /**

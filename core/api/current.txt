@@ -1295,6 +1295,7 @@ package android {
     field public static final int spinnerMode = 16843505; // 0x10102f1
     field public static final int spinnerStyle = 16842881; // 0x1010081
     field public static final int spinnersShown = 16843595; // 0x101034b
+    field public static final int splashScreenTheme = 16844336; // 0x1010630
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitName = 16844105; // 0x1010549
     field public static final int splitTrack = 16843852; // 0x101044c
@@ -1655,6 +1656,10 @@ package android {
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
+    field public static final int windowSplashScreenAnimatedIcon = 16844333; // 0x101062d
+    field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
+    field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
+    field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
     field public static final int windowSplashscreenContent = 16844132; // 0x1010564
     field @Deprecated public static final int windowSwipeToDismiss = 16843763; // 0x10103f3
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c
@@ -3865,6 +3870,7 @@ package android.app {
     method @Nullable public android.net.Uri getReferrer();
     method public int getRequestedOrientation();
     method public final android.view.SearchEvent getSearchEvent();
+    method @NonNull public final android.window.SplashScreen getSplashScreen();
     method public int getTaskId();
     method public final CharSequence getTitle();
     method public final int getTitleColor();
@@ -6653,6 +6659,7 @@ package android.app {
     method @NonNull public java.time.LocalTime getCustomNightModeEnd();
     method @NonNull public java.time.LocalTime getCustomNightModeStart();
     method public int getNightMode();
+    method public void setApplicationNightMode(int);
     method public void setCustomNightModeEnd(@NonNull java.time.LocalTime);
     method public void setCustomNightModeStart(@NonNull java.time.LocalTime);
     method public void setNightMode(int);
@@ -12779,6 +12786,7 @@ package android.content.pm {
     method @NonNull public android.content.pm.ShortcutInfo.Builder setPersons(@NonNull android.app.Person[]);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setRank(int);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setShortLabel(@NonNull CharSequence);
+    method @NonNull public android.content.pm.ShortcutInfo.Builder setStartingTheme(int);
   }
 
   public class ShortcutManager {
@@ -55820,6 +55828,25 @@ package android.widget.inline {
     ctor public InlinePresentationSpec.Builder(@NonNull android.util.Size, @NonNull android.util.Size);
     method @NonNull public android.widget.inline.InlinePresentationSpec build();
     method @NonNull public android.widget.inline.InlinePresentationSpec.Builder setStyle(@NonNull android.os.Bundle);
+  }
+
+}
+
+package android.window {
+
+  public interface SplashScreen {
+    method public void setOnExitAnimationListener(@Nullable android.window.SplashScreen.OnExitAnimationListener);
+  }
+
+  public static interface SplashScreen.OnExitAnimationListener {
+    method public void onSplashScreenExit(@NonNull android.window.SplashScreenView);
+  }
+
+  public final class SplashScreenView extends android.widget.FrameLayout {
+    method public long getIconAnimationDurationMillis();
+    method public long getIconAnimationStartMillis();
+    method @Nullable public android.view.View getIconView();
+    method public void remove();
   }
 
 }

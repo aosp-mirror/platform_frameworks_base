@@ -719,7 +719,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         assertTrue(activity.hasSavedState());
 
-        ActivityRecord.activityResumedLocked(activity.appToken);
+        ActivityRecord.activityResumedLocked(activity.appToken, false /* handleSplashScreenExit */);
         assertFalse(activity.hasSavedState());
         assertNull(activity.getSavedState());
     }

@@ -2262,6 +2262,23 @@
             -->
             <enum name="always" value="3" />
         </attr>
+
+        <!-- The background color for the splash screen, if not specify then system will
+             calculate from windowBackground. -->
+        <attr name="windowSplashScreenBackground" format="color"/>
+
+        <!-- Replace an icon in the center of the starting window, if the object is animated
+             and drawable(e.g. AnimationDrawable, AnimatedVectorDrawable), then it will also
+             play the animation while showing the starting window. -->
+        <attr name="windowSplashScreenAnimatedIcon" format="reference"/>
+        <!-- The duration, in milliseconds, of the window splash screen icon animation duration
+             when playing the splash screen starting window. The maximum animation duration should
+             be limited below 1000ms. -->
+        <attr name="windowSplashScreenAnimationDuration" format="integer"/>
+
+        <!-- Place an drawable image in the bottom of the starting window, it can be used to
+             represent the branding of the application. -->
+        <attr name="windowSplashScreenBrandingImage" format="reference"/>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -9260,6 +9277,7 @@
         <attr name="shortcutShortLabel" format="reference" />
         <attr name="shortcutLongLabel" format="reference" />
         <attr name="shortcutDisabledMessage" format="reference" />
+        <attr name="splashScreenTheme" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="ShortcutCategories">

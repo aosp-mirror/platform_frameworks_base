@@ -46,9 +46,9 @@ public class ActivityClient {
     }
 
     /** Reports {@link Activity#onResume()} is done. */
-    public void activityResumed(IBinder token) {
+    public void activityResumed(IBinder token, boolean handleSplashScreenExit) {
         try {
-            getActivityClientController().activityResumed(token);
+            getActivityClientController().activityResumed(token, handleSplashScreenExit);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -483,6 +483,17 @@ public class ActivityClient {
     void onBackPressedOnTaskRoot(IBinder token) {
         try {
             getActivityClientController().onBackPressedOnTaskRoot(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports the splash screen view has attached to client.
+     */
+    void reportSplashScreenAttached(IBinder token) {
+        try {
+            getActivityClientController().splashScreenAttached(token);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
