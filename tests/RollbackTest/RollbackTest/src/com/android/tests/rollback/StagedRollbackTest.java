@@ -125,21 +125,11 @@ public class StagedRollbackTest {
     }
 
     /**
-     * Test rollbacks of staged installs involving only apks with bad update.
-     * Trigger rollback phase.
-     */
-    @Test
-    public void testBadApkOnly_Phase3_Crash() throws Exception {
-        // One more crash to trigger rollback
-        RollbackUtils.sendCrashBroadcast(TestApp.A, 1);
-    }
-
-    /**
      * Test rollbacks of staged installs involving only apks.
      * Confirm rollback phase.
      */
     @Test
-    public void testBadApkOnly_Phase4_VerifyRollback() throws Exception {
+    public void testBadApkOnly_Phase3_VerifyRollback() throws Exception {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         InstallUtils.processUserData(TestApp.A);
 
@@ -447,8 +437,10 @@ public class StagedRollbackTest {
                 Rollback.from(TEST_APEX_WITH_APK_V2).to(TEST_APEX_WITH_APK_V1),
                 Rollback.from(TestApp.A, 0).to(TestApp.A1));
 
-        // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
-        RollbackUtils.sendCrashBroadcast(TestApp.A, 5);
+        // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT-1 times
+        RollbackUtils.sendCrashBroadcast(TestApp.A, 4);
+        // Sleep for a while to make sure we don't trigger rollback
+        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
     }
 
     @Test
