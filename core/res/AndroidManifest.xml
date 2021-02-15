@@ -5471,6 +5471,13 @@
     <permission android:name="android.permission.MANAGE_GAME_MODE"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows the holder to register callbacks to inform the RebootReadinessManager
+         when they are performing reboot-blocking work.
+         @hide -->
+    <permission android:name="android.permission.SIGNAL_REBOOT_READINESS"
+                android:protectionLevel="signature|privileged" />
+
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
