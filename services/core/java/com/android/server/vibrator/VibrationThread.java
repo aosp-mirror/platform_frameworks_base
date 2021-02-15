@@ -42,8 +42,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 /** Plays a {@link Vibration} in dedicated thread. */
-// TODO(b/159207608): Make this package-private once vibrator services are moved to this package
-public final class VibrationThread extends Thread implements IBinder.DeathRecipient {
+final class VibrationThread extends Thread implements IBinder.DeathRecipient {
     private static final String TAG = "VibrationThread";
     private static final boolean DEBUG = false;
 
@@ -54,7 +53,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     private static final long CALLBACKS_EXTRA_TIMEOUT = 100;
 
     /** Callbacks for playing a {@link Vibration}. */
-    public interface VibrationCallbacks {
+    interface VibrationCallbacks {
 
         /**
          * Callback triggered before starting a synchronized vibration step. This will be called
@@ -92,7 +91,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     @GuardedBy("mLock")
     private boolean mForceStop;
 
-    public VibrationThread(Vibration vib, SparseArray<VibratorController> availableVibrators,
+    VibrationThread(Vibration vib, SparseArray<VibratorController> availableVibrators,
             PowerManager.WakeLock wakeLock, IBatteryStats batteryStatsService,
             VibrationCallbacks callbacks) {
         mVibration = vib;
@@ -169,7 +168,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
         }
     }
 
-    public Vibration getVibration() {
+    Vibration getVibration() {
         return mVibration;
     }
 

@@ -25,25 +25,16 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.ComposedProto;
-import com.android.server.OneShotProto;
-import com.android.server.PrebakedProto;
-import com.android.server.VibrationAttributesProto;
-import com.android.server.VibrationEffectProto;
-import com.android.server.VibrationProto;
-import com.android.server.WaveformProto;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /** Represents a vibration request to the vibrator service. */
-// TODO(b/159207608): Make this package-private once vibrator services are moved to this package
-public class Vibration {
+final class Vibration {
     private static final String TAG = "Vibration";
     private static final SimpleDateFormat DEBUG_DATE_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
-    public enum Status {
+    enum Status {
         RUNNING,
         FINISHED,
         FORWARDED_TO_INPUT_DEVICES,
@@ -91,7 +82,7 @@ public class Vibration {
     private long mEndTimeDebug;
     private Status mStatus;
 
-    public Vibration(IBinder token, int id, CombinedVibrationEffect effect,
+    Vibration(IBinder token, int id, CombinedVibrationEffect effect,
             VibrationAttributes attrs, int uid, String opPkg, String reason) {
         this.token = token;
         this.mEffect = effect;
@@ -157,7 +148,7 @@ public class Vibration {
     }
 
     /** Debug information about vibrations. */
-    public static final class DebugInfo {
+    static final class DebugInfo {
         private final long mStartTimeDebug;
         private final long mEndTimeDebug;
         private final CombinedVibrationEffect mEffect;
@@ -169,7 +160,7 @@ public class Vibration {
         private final String mReason;
         private final Status mStatus;
 
-        public DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibrationEffect effect,
+        DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibrationEffect effect,
                 CombinedVibrationEffect originalEffect, float scale, VibrationAttributes attrs,
                 int uid, String opPkg, String reason, Status status) {
             mStartTimeDebug = startTimeDebug;
@@ -235,21 +226,49 @@ public class Vibration {
         }
 
         private void dumpEffect(
-                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect combinedEffect) {
-            VibrationEffect effect;
-            // TODO(b/177805090): add proper support for dumping combined effects to proto
-            if (combinedEffect instanceof CombinedVibrationEffect.Mono) {
-                effect = ((CombinedVibrationEffect.Mono) combinedEffect).getEffect();
-            } else if (combinedEffect instanceof CombinedVibrationEffect.Stereo) {
-                effect = ((CombinedVibrationEffect.Stereo) combinedEffect).getEffects().valueAt(0);
-            } else if (combinedEffect instanceof CombinedVibrationEffect.Sequential) {
-                dumpEffect(proto, fieldId,
-                        ((CombinedVibrationEffect.Sequential) combinedEffect).getEffects().get(0));
-                return;
-            } else {
-                // Unknown combined effect, skip dump.
-                return;
+                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect effect) {
+            dumpEffect(proto, fieldId,
+                    (CombinedVibrationEffect.Sequential) CombinedVibrationEffect.startSequential()
+                            .addNext(effect)
+                            .combine());
+        }
+
+        private void dumpEffect(
+                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect.Sequential effect) {
+            final long token = proto.start(fieldId);
+            for (int i = 0; i < effect.getEffects().size(); i++) {
+                CombinedVibrationEffect nestedEffect = effect.getEffects().get(i);
+                if (nestedEffect instanceof CombinedVibrationEffect.Mono) {
+                    dumpEffect(proto, CombinedVibrationEffectProto.EFFECTS,
+                            (CombinedVibrationEffect.Mono) nestedEffect);
+                } else if (nestedEffect instanceof CombinedVibrationEffect.Stereo) {
+                    dumpEffect(proto, CombinedVibrationEffectProto.EFFECTS,
+                            (CombinedVibrationEffect.Stereo) nestedEffect);
+                }
+                proto.write(CombinedVibrationEffectProto.DELAYS, effect.getDelays().get(i));
             }
+            proto.end(token);
+        }
+
+        private void dumpEffect(
+                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect.Mono effect) {
+            final long token = proto.start(fieldId);
+            dumpEffect(proto, SyncVibrationEffectProto.EFFECTS, effect.getEffect());
+            proto.end(token);
+        }
+
+        private void dumpEffect(
+                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect.Stereo effect) {
+            final long token = proto.start(fieldId);
+            for (int i = 0; i < effect.getEffects().size(); i++) {
+                proto.write(SyncVibrationEffectProto.VIBRATOR_IDS, effect.getEffects().keyAt(i));
+                dumpEffect(proto, SyncVibrationEffectProto.EFFECTS, effect.getEffects().valueAt(i));
+            }
+            proto.end(token);
+        }
+
+        private void dumpEffect(
+                ProtoOutputStream proto, long fieldId, VibrationEffect effect) {
             final long token = proto.start(fieldId);
             if (effect instanceof VibrationEffect.OneShot) {
                 dumpEffect(proto, VibrationEffectProto.ONESHOT, (VibrationEffect.OneShot) effect);
