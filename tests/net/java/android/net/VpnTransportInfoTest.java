@@ -17,7 +17,6 @@
 package android.net;
 
 import static com.android.testutils.ParcelUtils.assertParcelSane;
-import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -36,7 +35,6 @@ public class VpnTransportInfoTest {
     public void testParceling() {
         VpnTransportInfo v = new VpnTransportInfo(VpnManager.TYPE_VPN_PLATFORM);
         assertParcelSane(v, 1 /* fieldCount */);
-        assertParcelingIsLossless(v);
     }
 
     @Test

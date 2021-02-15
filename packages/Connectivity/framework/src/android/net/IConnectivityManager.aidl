@@ -43,9 +43,6 @@ import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 
 import com.android.connectivity.aidl.INetworkAgent;
-import com.android.internal.net.LegacyVpnInfo;
-import com.android.internal.net.VpnConfig;
-import com.android.internal.net.VpnProfile;
 
 /**
  * Interface that answers queries about, and allows changing, the
@@ -123,35 +120,8 @@ interface IConnectivityManager
 
     ProxyInfo getProxyForNetwork(in Network nework);
 
-    boolean prepareVpn(String oldPackage, String newPackage, int userId);
-
-    void setVpnPackageAuthorization(String packageName, int userId, int vpnType);
-
-    ParcelFileDescriptor establishVpn(in VpnConfig config);
-
-    boolean provisionVpnProfile(in VpnProfile profile, String packageName);
-
-    void deleteVpnProfile(String packageName);
-
-    void startVpnProfile(String packageName);
-
-    void stopVpnProfile(String packageName);
-
-    VpnConfig getVpnConfig(int userId);
-
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    void startLegacyVpn(in VpnProfile profile);
-
-    LegacyVpnInfo getLegacyVpnInfo(int userId);
-
-    boolean updateLockdownVpn();
-    boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
-    boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown,
-            in List<String> lockdownWhitelist);
-    String getAlwaysOnVpnPackage(int userId);
-    boolean isVpnLockdownEnabled(int userId);
-    List<String> getVpnLockdownWhitelist(int userId);
     void setRequireVpnForUids(boolean requireVpn, in UidRange[] ranges);
+    void setLegacyLockdownVpnEnabled(boolean enabled);
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 
@@ -200,10 +170,6 @@ interface IConnectivityManager
 
     int getRestoreDefaultNetworkDelay(int networkType);
 
-    boolean addVpnAddress(String address, int prefixLength);
-    boolean removeVpnAddress(String address, int prefixLength);
-    boolean setUnderlyingNetworksForVpn(in Network[] networks);
-
     void factoryReset();
 
     void startNattKeepalive(in Network network, int intervalSeconds,
@@ -223,8 +189,6 @@ interface IConnectivityManager
     byte[] getNetworkWatchlistConfigHash();
 
     int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
-    boolean isCallerCurrentAlwaysOnVpnApp();
-    boolean isCallerCurrentAlwaysOnVpnLockdownApp();
 
     void registerConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback,
             in NetworkRequest request, String callingPackageName);

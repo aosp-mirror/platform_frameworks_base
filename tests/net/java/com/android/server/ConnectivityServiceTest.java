@@ -200,6 +200,7 @@ import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
 import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
+import android.net.TransportInfo;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
@@ -376,6 +377,7 @@ public class ConnectivityServiceTest {
 
     private MockContext mServiceContext;
     private HandlerThread mCsHandlerThread;
+    private HandlerThread mVMSHandlerThread;
     private ConnectivityService.Dependencies mDeps;
     private ConnectivityService mService;
     private WrappedConnectivityManager mCm;
@@ -390,6 +392,7 @@ public class ConnectivityServiceTest {
     private TestNetIdManager mNetIdManager;
     private QosCallbackMockHelper mQosCallbackMockHelper;
     private QosCallbackTracker mQosCallbackTracker;
+    private VpnManagerService mVpnManagerService;
 
     // State variables required to emulate NetworkPolicyManagerService behaviour.
     private int mUidRules = RULE_NONE;
@@ -1262,22 +1265,55 @@ public class ConnectivityServiceTest {
                 r -> new UidRangeParcel(r.start, r.stop)).toArray(UidRangeParcel[]::new);
     }
 
-    private void mockVpn(int uid) {
-        synchronized (mService.mVpns) {
-            int userId = UserHandle.getUserId(uid);
-            mMockVpn = new MockVpn(userId);
-            // This has no effect unless the VPN is actually connected, because things like
-            // getActiveNetworkForUidInternal call getNetworkAgentInfoForNetId on the VPN
-            // netId, and check if that network is actually connected.
-            mService.mVpns.put(userId, mMockVpn);
-        }
+    private VpnManagerService makeVpnManagerService() {
+        final VpnManagerService.Dependencies deps = new VpnManagerService.Dependencies() {
+            public int getCallingUid() {
+                return mDeps.getCallingUid();
+            }
+
+            public HandlerThread makeHandlerThread() {
+                return mVMSHandlerThread;
+            }
+
+            public KeyStore getKeyStore() {
+                return mKeyStore;
+            }
+
+            public INetd getNetd() {
+                return mMockNetd;
+            }
+
+            public INetworkManagementService getINetworkManagementService() {
+                return mNetworkManagementService;
+            }
+        };
+        return new VpnManagerService(mServiceContext, deps);
+    }
+
+    private void assertVpnTransportInfo(NetworkCapabilities nc, int type) {
+        assertNotNull(nc);
+        final TransportInfo ti = nc.getTransportInfo();
+        assertTrue("VPN TransportInfo is not a VpnTransportInfo: " + ti,
+                ti instanceof VpnTransportInfo);
+        assertEquals(type, ((VpnTransportInfo) ti).type);
+
     }
 
     private void processBroadcastForVpn(Intent intent) {
         // The BroadcastReceiver for this broadcast checks it is being run on the handler thread.
-        final Handler handler = new Handler(mCsHandlerThread.getLooper());
+        final Handler handler = new Handler(mVMSHandlerThread.getLooper());
         handler.post(() -> mServiceContext.sendBroadcast(intent));
+        HandlerUtils.waitForIdle(handler, TIMEOUT_MS);
         waitForIdle();
+    }
+
+    private void mockVpn(int uid) {
+        synchronized (mVpnManagerService.mVpns) {
+            int userId = UserHandle.getUserId(uid);
+            mMockVpn = new MockVpn(userId);
+            // Every running user always has a Vpn in the mVpns array, even if no VPN is running.
+            mVpnManagerService.mVpns.put(userId, mMockVpn);
+        }
     }
 
     private void mockUidNetworkingBlocked() {
@@ -1403,6 +1439,7 @@ public class ConnectivityServiceTest {
         initAlarmManager(mAlarmManager, mAlarmManagerThread.getThreadHandler());
 
         mCsHandlerThread = new HandlerThread("TestConnectivityService");
+        mVMSHandlerThread = new HandlerThread("TestVpnManagerService");
         mDeps = makeDependencies();
         returnRealCallingUid();
         mService = new ConnectivityService(mServiceContext,
@@ -1425,6 +1462,8 @@ public class ConnectivityServiceTest {
         // getSystemService() correctly.
         mCm = new WrappedConnectivityManager(InstrumentationRegistry.getContext(), mService);
         mService.systemReadyInternal();
+        mVpnManagerService = makeVpnManagerService();
+        mVpnManagerService.systemReady();
         mockVpn(Process.myUid());
         mCm.bindProcessToNetwork(null);
         mQosCallbackTracker = mock(QosCallbackTracker.class);
@@ -1452,7 +1491,6 @@ public class ConnectivityServiceTest {
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
         doReturn(mBatteryStatsService).when(deps).getBatteryStatsService();
-        doReturn(mKeyStore).when(deps).getKeyStore();
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(
                     inv.getArgument(0), inv.getArgument(1), inv.getArgument(2));
@@ -3871,6 +3909,24 @@ public class ConnectivityServiceTest {
 
         mCm.unregisterNetworkCallback(dfltNetworkCallback);
         mCm.unregisterNetworkCallback(cellNetworkCallback);
+    }
+
+    @Test
+    public void testRegisterSystemDefaultCallbackRequiresNetworkSettings() throws Exception {
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(false /* validated */);
+
+        final Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        assertThrows(SecurityException.class,
+                () -> mCm.registerSystemDefaultNetworkCallback(callback, handler));
+        callback.assertNoCallback();
+
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_GRANTED);
+        mCm.registerSystemDefaultNetworkCallback(callback, handler);
+        callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
+        mCm.unregisterNetworkCallback(callback);
     }
 
     private void setCaptivePortalMode(int mode) {
@@ -6484,6 +6540,8 @@ public class ConnectivityServiceTest {
         assertTrue(nc.hasCapability(NET_CAPABILITY_VALIDATED));
         assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        assertVpnTransportInfo(nc, VpnManager.TYPE_VPN_SERVICE);
     }
 
     private void assertDefaultNetworkCapabilities(int userId, NetworkAgentWrapper... networks) {
@@ -6523,6 +6581,7 @@ public class ConnectivityServiceTest {
         assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_METERED));
         // A VPN without underlying networks is not suspended.
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        assertVpnTransportInfo(nc, VpnManager.TYPE_VPN_SERVICE);
 
         final int userId = UserHandle.getUserId(Process.myUid());
         assertDefaultNetworkCapabilities(userId /* no networks */);
@@ -6686,6 +6745,7 @@ public class ConnectivityServiceTest {
         // By default, VPN is set to track default network (i.e. its underlying networks is null).
         // In case of no default network, VPN is considered metered.
         assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertVpnTransportInfo(nc, VpnManager.TYPE_VPN_SERVICE);
 
         // Connect to Cell; Cell is the default network.
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
@@ -6743,6 +6803,7 @@ public class ConnectivityServiceTest {
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
         assertNotNull("nc=" + nc, nc.getUids());
         assertEquals(nc.getUids(), uidRangesForUid(uid));
+        assertVpnTransportInfo(nc, VpnManager.TYPE_VPN_SERVICE);
 
         // Set an underlying network and expect to see the VPN transports change.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
@@ -6825,8 +6886,8 @@ public class ConnectivityServiceTest {
 
         // Enable always-on VPN lockdown. The main user loses network access because no VPN is up.
         final ArrayList<String> allowList = new ArrayList<>();
-        mService.setAlwaysOnVpnPackage(PRIMARY_USER, ALWAYS_ON_PACKAGE, true /* lockdown */,
-                allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(PRIMARY_USER, ALWAYS_ON_PACKAGE,
+                true /* lockdown */, allowList);
         waitForIdle();
         assertNull(mCm.getActiveNetworkForUid(uid));
         // This is arguably overspecified: a UID that is not running doesn't have an active network.
@@ -6856,7 +6917,8 @@ public class ConnectivityServiceTest {
         assertNull(mCm.getActiveNetworkForUid(uid));
         assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
 
-        mService.setAlwaysOnVpnPackage(PRIMARY_USER, null, false /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(PRIMARY_USER, null, false /* lockdown */,
+                allowList);
         waitForIdle();
     }
 
@@ -7232,7 +7294,8 @@ public class ConnectivityServiceTest {
         final int uid = Process.myUid();
         final int userId = UserHandle.getUserId(uid);
         final ArrayList<String> allowList = new ArrayList<>();
-        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */,
+                allowList);
         waitForIdle();
 
         UidRangeParcel firstHalf = new UidRangeParcel(1, VPN_UID - 1);
@@ -7254,7 +7317,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_WIFI, DetailedState.BLOCKED);
 
         // Disable lockdown, expect to see the network unblocked.
-        mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
         callback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
         defaultCallback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
         vpnUidCallback.assertNoCallback();
@@ -7267,7 +7330,8 @@ public class ConnectivityServiceTest {
 
         // Add our UID to the allowlist and re-enable lockdown, expect network is not blocked.
         allowList.add(TEST_PACKAGE_NAME);
-        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */,
+                allowList);
         callback.assertNoCallback();
         defaultCallback.assertNoCallback();
         vpnUidCallback.assertNoCallback();
@@ -7300,11 +7364,12 @@ public class ConnectivityServiceTest {
 
         // Disable lockdown, remove our UID from the allowlist, and re-enable lockdown.
         // Everything should now be blocked.
-        mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
         waitForIdle();
         expectNetworkRejectNonSecureVpn(inOrder, false, piece1, piece2, piece3);
         allowList.clear();
-        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */,
+                allowList);
         waitForIdle();
         expectNetworkRejectNonSecureVpn(inOrder, true, firstHalf, secondHalf);
         defaultCallback.expectBlockedStatusCallback(true, mWiFiNetworkAgent);
@@ -7317,7 +7382,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_WIFI, DetailedState.BLOCKED);
 
         // Disable lockdown. Everything is unblocked.
-        mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
         defaultCallback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
         assertBlockedCallbackInAnyOrder(callback, false, mWiFiNetworkAgent, mCellNetworkAgent);
         vpnUidCallback.assertNoCallback();
@@ -7329,7 +7394,8 @@ public class ConnectivityServiceTest {
 
         // Enable and disable an always-on VPN package without lockdown. Expect no changes.
         reset(mMockNetd);
-        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, false /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, false /* lockdown */,
+                allowList);
         inOrder.verify(mMockNetd, never()).networkRejectNonSecureVpn(anyBoolean(), any());
         callback.assertNoCallback();
         defaultCallback.assertNoCallback();
@@ -7340,7 +7406,7 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
 
-        mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
         inOrder.verify(mMockNetd, never()).networkRejectNonSecureVpn(anyBoolean(), any());
         callback.assertNoCallback();
         defaultCallback.assertNoCallback();
@@ -7352,7 +7418,8 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
 
         // Enable lockdown and connect a VPN. The VPN is not blocked.
-        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        mVpnManagerService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */,
+                allowList);
         defaultCallback.expectBlockedStatusCallback(true, mWiFiNetworkAgent);
         assertBlockedCallbackInAnyOrder(callback, true, mWiFiNetworkAgent, mCellNetworkAgent);
         vpnUidCallback.assertNoCallback();
@@ -7398,11 +7465,14 @@ public class ConnectivityServiceTest {
         when(mKeyStore.get(Credentials.VPN + profileName)).thenReturn(encodedProfile);
     }
 
-    private void establishLegacyLockdownVpn() throws Exception {
+    private void establishLegacyLockdownVpn(Network underlying) throws Exception {
+        // The legacy lockdown VPN only supports userId 0, and must have an underlying network.
+        assertNotNull(underlying);
         mMockVpn.setVpnType(VpnManager.TYPE_VPN_LEGACY);
         // The legacy lockdown VPN only supports userId 0.
         final Set<UidRange> ranges = Collections.singleton(UidRange.createForUser(PRIMARY_USER));
         mMockVpn.registerAgent(ranges);
+        mMockVpn.setUnderlyingNetworks(new Network[]{underlying});
         mMockVpn.connect(true);
     }
 
@@ -7410,6 +7480,9 @@ public class ConnectivityServiceTest {
     public void testLegacyLockdownVpn() throws Exception {
         mServiceContext.setPermission(
                 Manifest.permission.CONTROL_VPN, PERMISSION_GRANTED);
+        // For LockdownVpnTracker to call registerSystemDefaultNetworkCallback.
+        mServiceContext.setPermission(
+                Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
 
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         final TestNetworkCallback callback = new TestNetworkCallback();
@@ -7417,6 +7490,10 @@ public class ConnectivityServiceTest {
 
         final TestNetworkCallback defaultCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(defaultCallback);
+
+        final TestNetworkCallback systemDefaultCallback = new TestNetworkCallback();
+        mCm.registerSystemDefaultNetworkCallback(systemDefaultCallback,
+                new Handler(ConnectivityThread.getInstanceLooper()));
 
         // Pretend lockdown VPN was configured.
         setupLegacyLockdownVpn();
@@ -7447,6 +7524,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false /* validated */);
         callback.expectAvailableCallbacksUnvalidatedAndBlocked(mCellNetworkAgent);
         defaultCallback.expectAvailableCallbacksUnvalidatedAndBlocked(mCellNetworkAgent);
+        systemDefaultCallback.expectAvailableCallbacksUnvalidatedAndBlocked(mCellNetworkAgent);
         waitForIdle();
         assertNull(mMockVpn.getAgent());
 
@@ -7458,6 +7536,8 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         callback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         defaultCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
+        systemDefaultCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED,
+                mCellNetworkAgent);
         waitForIdle();
         assertNull(mMockVpn.getAgent());
 
@@ -7467,6 +7547,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.disconnect();
         callback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         defaultCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+        systemDefaultCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         b1.expectBroadcast();
 
         // When lockdown VPN is active, the NetworkInfo state in CONNECTIVITY_ACTION is overwritten
@@ -7476,6 +7557,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false /* validated */);
         callback.expectAvailableCallbacksUnvalidatedAndBlocked(mCellNetworkAgent);
         defaultCallback.expectAvailableCallbacksUnvalidatedAndBlocked(mCellNetworkAgent);
+        systemDefaultCallback.expectAvailableCallbacksUnvalidatedAndBlocked(mCellNetworkAgent);
         b1.expectBroadcast();
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
@@ -7498,9 +7580,10 @@ public class ConnectivityServiceTest {
         mMockVpn.expectStartLegacyVpnRunner();
         b1 = expectConnectivityAction(TYPE_VPN, DetailedState.CONNECTED);
         ExpectedBroadcast b2 = expectConnectivityAction(TYPE_MOBILE, DetailedState.CONNECTED);
-        establishLegacyLockdownVpn();
+        establishLegacyLockdownVpn(mCellNetworkAgent.getNetwork());
         callback.expectAvailableThenValidatedCallbacks(mMockVpn);
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        systemDefaultCallback.assertNoCallback();
         NetworkCapabilities vpnNc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
         b1.expectBroadcast();
         b2.expectBroadcast();
@@ -7512,9 +7595,7 @@ public class ConnectivityServiceTest {
         assertTrue(vpnNc.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(vpnNc.hasTransport(TRANSPORT_WIFI));
         assertFalse(vpnNc.hasCapability(NET_CAPABILITY_NOT_METERED));
-        VpnTransportInfo ti = (VpnTransportInfo) vpnNc.getTransportInfo();
-        assertNotNull(ti);
-        assertEquals(VpnManager.TYPE_VPN_LEGACY, ti.type);
+        assertVpnTransportInfo(vpnNc, VpnManager.TYPE_VPN_LEGACY);
 
         // Switch default network from cell to wifi. Expect VPN to disconnect and reconnect.
         final LinkProperties wifiLp = new LinkProperties();
@@ -7542,11 +7623,10 @@ public class ConnectivityServiceTest {
         // fact that a VPN is connected should only result in the VPN itself being unblocked, not
         // any other network. Bug in isUidBlockedByVpn?
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
-        callback.expectCapabilitiesThat(mMockVpn, nc -> nc.hasTransport(TRANSPORT_WIFI));
         callback.expectCallback(CallbackEntry.LOST, mMockVpn);
-        defaultCallback.expectCapabilitiesThat(mMockVpn, nc -> nc.hasTransport(TRANSPORT_WIFI));
         defaultCallback.expectCallback(CallbackEntry.LOST, mMockVpn);
         defaultCallback.expectAvailableCallbacksUnvalidatedAndBlocked(mWiFiNetworkAgent);
+        systemDefaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
 
         // While the VPN is reconnecting on the new network, everything is blocked.
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.BLOCKED);
@@ -7557,9 +7637,10 @@ public class ConnectivityServiceTest {
         // The VPN comes up again on wifi.
         b1 = expectConnectivityAction(TYPE_VPN, DetailedState.CONNECTED);
         b2 = expectConnectivityAction(TYPE_WIFI, DetailedState.CONNECTED);
-        establishLegacyLockdownVpn();
+        establishLegacyLockdownVpn(mWiFiNetworkAgent.getNetwork());
         callback.expectAvailableThenValidatedCallbacks(mMockVpn);
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        systemDefaultCallback.assertNoCallback();
         b1.expectBroadcast();
         b2.expectBroadcast();
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
@@ -7573,14 +7654,10 @@ public class ConnectivityServiceTest {
         assertTrue(vpnNc.hasCapability(NET_CAPABILITY_NOT_METERED));
 
         // Disconnect cell. Nothing much happens since it's not the default network.
-        // Whenever LockdownVpnTracker is connected, it will send a connected broadcast any time any
-        // NetworkInfo is updated. This is probably a bug.
-        // TODO: consider fixing this.
-        b1 = expectConnectivityAction(TYPE_WIFI, DetailedState.CONNECTED);
         mCellNetworkAgent.disconnect();
-        b1.expectBroadcast();
         callback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         defaultCallback.assertNoCallback();
+        systemDefaultCallback.assertNoCallback();
 
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
@@ -7590,6 +7667,7 @@ public class ConnectivityServiceTest {
         b1 = expectConnectivityAction(TYPE_WIFI, DetailedState.DISCONNECTED);
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        systemDefaultCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         b1.expectBroadcast();
         callback.expectCapabilitiesThat(mMockVpn, nc -> !nc.hasTransport(TRANSPORT_WIFI));
         b2 = expectConnectivityAction(TYPE_VPN, DetailedState.DISCONNECTED);
