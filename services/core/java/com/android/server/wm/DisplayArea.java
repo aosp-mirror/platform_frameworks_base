@@ -504,6 +504,17 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return false;
     }
 
+    @Override
+    void removeImmediately() {
+        setOrganizer(null);
+        super.removeImmediately();
+    }
+
+    @Override
+    DisplayArea getDisplayArea() {
+        return this;
+    }
+
     /**
      * DisplayArea that contains WindowTokens, and orders them according to their type.
      */
@@ -582,11 +593,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         final DisplayArea.Tokens asTokens() {
             return this;
         }
-    }
-
-    @Override
-    DisplayArea getDisplayArea() {
-        return this;
     }
 
     /**
