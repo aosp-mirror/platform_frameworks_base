@@ -16,8 +16,10 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -26,7 +28,15 @@ import com.android.internal.util.MessageUtils;
 
 import java.util.Objects;
 
-/** @hide */
+/**
+ * Container for VPN-specific transport information.
+ *
+ * @see android.net.TransportInfo
+ * @see NetworkCapabilities#getTransportInfo()
+ *
+ * @hide
+ */
+@SystemApi(client = MODULE_LIBRARIES)
 public final class VpnTransportInfo implements TransportInfo, Parcelable {
     private static final SparseArray<String> sTypeToString =
             MessageUtils.findMessageNames(new Class[]{VpnManager.class}, new String[]{"TYPE_VPN_"});
