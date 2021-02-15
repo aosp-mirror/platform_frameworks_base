@@ -135,6 +135,12 @@ interface IUsbManager
     /* Resets the USB gadget. */
     void resetUsbGadget();
 
+    /* Set USB data on or off */
+    boolean enableUsbDataSignal(boolean enable);
+
+    /* Gets the USB Hal Version. */
+    int getUsbHalVersion();
+
     /* Get the functionfs control handle for the given function. Usb
      * descriptors will already be written, and the handle will be
      * ready to use.

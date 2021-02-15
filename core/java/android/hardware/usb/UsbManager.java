@@ -516,6 +516,46 @@ public class UsbManager {
     public static final int USB_DATA_TRANSFER_RATE_40G = 40 * 1024;
 
     /**
+     * The Value for USB hal is not presented.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_NOT_SUPPORTED = -1;
+
+    /**
+     * Value for USB Hal Version v1.0.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_0 = 10;
+
+    /**
+     * Value for USB Hal Version v1.1.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_1 = 11;
+
+    /**
+     * Value for USB Hal Version v1.2.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_2 = 12;
+
+    /**
+     * Value for USB Hal Version v1.3.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V1_3 = 13;
+
+    /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
      * {@hide}
      */
@@ -616,6 +656,16 @@ public class UsbManager {
             GADGET_HAL_V1_2,
     })
     public @interface UsbGadgetHalVersion {}
+
+    /** @hide */
+    @IntDef(prefix = { "USB_HAL_" }, value = {
+            USB_HAL_NOT_SUPPORTED,
+            USB_HAL_V1_0,
+            USB_HAL_V1_1,
+            USB_HAL_V1_2,
+            USB_HAL_V1_3,
+    })
+    public @interface UsbHalVersion {}
 
     private final Context mContext;
     private final IUsbManager mService;
@@ -1076,6 +1126,26 @@ public class UsbManager {
     }
 
     /**
+     * Get the Current USB Hal Version.
+     * <p>
+     * This function returns the current USB Hal Version.
+     * </p>
+     *
+     * @return a integer {@code USB_HAL_*} represent hal version.
+     *
+     * {@hide}
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @UsbHalVersion int getUsbHalVersion() {
+        try {
+            return mService.getUsbHalVersion();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets the USB Gadget.
      * <p>
      * Performs USB data stack reset through USB Gadget HAL.
@@ -1089,6 +1159,28 @@ public class UsbManager {
     public void resetUsbGadget() {
         try {
             mService.resetUsbGadget();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable/Disable the USB data signaling.
+     * <p>
+     * Enables/Disables USB data path in all the USB ports.
+     * It will force to stop or restore USB data signaling.
+     * </p>
+     *
+     * @param enable enable or disable USB data signaling
+     * @return true enable or disable USB data successfully
+     *         false if something wrong
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public boolean enableUsbDataSignal(boolean enable) {
+        try {
+            return mService.enableUsbDataSignal(enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
