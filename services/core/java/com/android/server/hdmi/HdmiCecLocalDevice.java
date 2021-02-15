@@ -654,7 +654,9 @@ abstract class HdmiCecLocalDevice {
                     FOLLOWER_SAFETY_TIMEOUT);
             return true;
         }
-        return false;
+
+        mService.maySendFeatureAbortCommand(message, Constants.ABORT_INVALID_OPERAND);
+        return true;
     }
 
     @ServiceThreadOnly
@@ -666,9 +668,8 @@ abstract class HdmiCecLocalDevice {
             final long upTime = SystemClock.uptimeMillis();
             injectKeyEvent(upTime, KeyEvent.ACTION_UP, mLastKeycode, 0);
             mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
-            return true;
         }
-        return false;
+        return true;
     }
 
     static void injectKeyEvent(long time, int action, int keycode, int repeat) {
