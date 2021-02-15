@@ -7173,7 +7173,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().getVpnLockdownWhitelist(userId));
+                () -> mInjector.getConnectivityManager().getVpnLockdownAllowlist(userId));
     }
 
     private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc) {
