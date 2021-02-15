@@ -425,9 +425,10 @@ class ProcessRecord implements WindowProcessListener {
             pw.print(prefix); pw.print("mInstr="); pw.println(mInstr);
         }
         pw.print(prefix); pw.print("thread="); pw.println(mThread);
-        pw.print(prefix); pw.print("pid="); pw.print(mPid);
+        pw.print(prefix); pw.print("pid="); pw.println(mPid);
         pw.print(prefix); pw.print("lastActivityTime=");
         TimeUtils.formatDuration(mLastActivityTime, nowUptime, pw);
+        pw.println();
         if (mPersistent || mRemoved) {
             pw.print(prefix); pw.print("persistent="); pw.print(mPersistent);
             pw.print(" removed="); pw.println(mRemoved);

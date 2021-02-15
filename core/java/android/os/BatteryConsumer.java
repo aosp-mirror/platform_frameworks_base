@@ -47,7 +47,9 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_SYSTEM_SERVICES,
             POWER_COMPONENT_SENSORS,
             POWER_COMPONENT_GNSS,
+            POWER_COMPONENT_WAKELOCK,
             POWER_COMPONENT_SCREEN,
+            POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface PowerComponent {
@@ -64,9 +66,14 @@ public abstract class BatteryConsumer {
     public static final int POWER_COMPONENT_MOBILE_RADIO = 8;
     public static final int POWER_COMPONENT_SENSORS = 9;
     public static final int POWER_COMPONENT_GNSS = 10;
+    public static final int POWER_COMPONENT_WAKELOCK = 12;
     public static final int POWER_COMPONENT_SCREEN = 13;
+    // Power that is re-attributed to other battery consumers. For example, for System Server
+    // this represents the power attributed to apps requesting system services.
+    // The value should be negative or zero.
+    public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS = 14;
 
-    public static final int POWER_COMPONENT_COUNT = 14;
+    public static final int POWER_COMPONENT_COUNT = 15;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
@@ -87,6 +94,7 @@ public abstract class BatteryConsumer {
             TIME_COMPONENT_MOBILE_RADIO,
             TIME_COMPONENT_SENSORS,
             TIME_COMPONENT_GNSS,
+            TIME_COMPONENT_WAKELOCK,
             TIME_COMPONENT_SCREEN,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -104,6 +112,7 @@ public abstract class BatteryConsumer {
     public static final int TIME_COMPONENT_MOBILE_RADIO = 8;
     public static final int TIME_COMPONENT_SENSORS = 9;
     public static final int TIME_COMPONENT_GNSS = 10;
+    public static final int TIME_COMPONENT_WAKELOCK = 12;
     public static final int TIME_COMPONENT_SCREEN = 13;
 
     public static final int TIME_COMPONENT_COUNT = 14;
@@ -235,6 +244,14 @@ public abstract class BatteryConsumer {
             mPowerComponentsBuilder.setUsageDurationForCustomComponentMillis(componentId,
                     componentUsageTimeMillis);
             return (T) this;
+        }
+
+        /**
+         * Returns the total power accumulated by this builder so far. It may change
+         * by the time the {@code build()} method is called.
+         */
+        public double getTotalPower() {
+            return mPowerComponentsBuilder.getTotalPower();
         }
     }
 }

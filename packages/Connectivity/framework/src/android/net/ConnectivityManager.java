@@ -4886,15 +4886,6 @@ public class ConnectivityManager {
         }
     }
 
-    private void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference) {
-        try {
-            mService.setOemNetworkPreference(preference);
-        } catch (RemoteException e) {
-            Log.e(TAG, "setOemNetworkPreference() failed for preference: " + preference.toString());
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     @NonNull
     private final List<QosCallbackConnection> mQosCallbackConnections = new ArrayList<>();
 
@@ -5095,5 +5086,61 @@ public class ConnectivityManager {
         final NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, 0, BACKGROUND_REQUEST,
                 TYPE_NONE, handler == null ? getDefaultHandler() : new CallbackHandler(handler));
+    }
+
+    /**
+     * Listener for {@link #setOemNetworkPreference(OemNetworkPreferences, Executor,
+     * OnSetOemNetworkPreferenceListener)}.
+     * @hide
+     */
+    @SystemApi
+    public interface OnSetOemNetworkPreferenceListener {
+        /**
+         * Called when setOemNetworkPreference() successfully completes.
+         */
+        void onComplete();
+    }
+
+    /**
+     * Used by automotive devices to set the network preferences used to direct traffic at an
+     * application level as per the given OemNetworkPreferences. An example use-case would be an
+     * automotive OEM wanting to provide connectivity for applications critical to the usage of a
+     * vehicle via a particular network.
+     *
+     * Calling this will overwrite the existing preference.
+     *
+     * @param preference {@link OemNetworkPreferences} The application network preference to be set.
+     * @param executor the executor on which listener will be invoked.
+     * @param listener {@link OnSetOemNetworkPreferenceListener} optional listener used to
+     *                  communicate completion of setOemNetworkPreference(). This will only be
+     *                  called once upon successful completion of setOemNetworkPreference().
+     * @throws IllegalArgumentException if {@code preference} contains invalid preference values.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws UnsupportedOperationException if called on a non-automotive device.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE)
+    public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference,
+            @Nullable @CallbackExecutor final Executor executor,
+            @Nullable final OnSetOemNetworkPreferenceListener listener) {
+        Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
+        if (null != listener) {
+            Objects.requireNonNull(executor, "Executor must be non-null");
+        }
+        final IOnSetOemNetworkPreferenceListener listenerInternal = listener == null ? null :
+                new IOnSetOemNetworkPreferenceListener.Stub() {
+                    @Override
+                    public void onComplete() {
+                        executor.execute(listener::onComplete);
+                    }
+        };
+
+        try {
+            mService.setOemNetworkPreference(preference, listenerInternal);
+        } catch (RemoteException e) {
+            Log.e(TAG, "setOemNetworkPreference() failed for preference: " + preference.toString());
+            throw e.rethrowFromSystemServer();
+        }
     }
 }
