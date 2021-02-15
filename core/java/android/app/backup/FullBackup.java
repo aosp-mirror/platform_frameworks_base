@@ -16,6 +16,9 @@
 
 package android.app.backup;
 
+import static android.app.backup.BackupManager.OperationType;
+
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -41,6 +44,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -90,27 +94,61 @@ public class FullBackup {
             "fakeClientSideEncryption";
 
     /**
+     * Identify {@link BackupScheme} object by package and operation type
+     * (see {@link OperationType}) it corresponds to.
+     */
+    private static class BackupSchemeId {
+        final String mPackageName;
+        @OperationType final int mOperationType;
+
+        BackupSchemeId(String packageName, @OperationType int operationType) {
+            mPackageName = packageName;
+            mOperationType = operationType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mPackageName, mOperationType);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            BackupSchemeId that = (BackupSchemeId) object;
+            return Objects.equals(mPackageName, that.mPackageName) &&
+                    Objects.equals(mOperationType, that.mOperationType);
+        }
+    }
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
     static public native int backupToTar(String packageName, String domain,
             String linkdomain, String rootpath, String path, FullBackupDataOutput output);
 
-    private static final Map<String, BackupScheme> kPackageBackupSchemeMap =
-            new ArrayMap<String, BackupScheme>();
+    private static final Map<BackupSchemeId, BackupScheme> kPackageBackupSchemeMap =
+            new ArrayMap<>();
 
-    static synchronized BackupScheme getBackupScheme(Context context) {
+    static synchronized BackupScheme getBackupScheme(Context context,
+            @OperationType int operationType) {
+        BackupSchemeId backupSchemeId = new BackupSchemeId(context.getPackageName(), operationType);
         BackupScheme backupSchemeForPackage =
-                kPackageBackupSchemeMap.get(context.getPackageName());
+                kPackageBackupSchemeMap.get(backupSchemeId);
         if (backupSchemeForPackage == null) {
-            backupSchemeForPackage = new BackupScheme(context);
-            kPackageBackupSchemeMap.put(context.getPackageName(), backupSchemeForPackage);
+            backupSchemeForPackage = new BackupScheme(context, operationType);
+            kPackageBackupSchemeMap.put(backupSchemeId, backupSchemeForPackage);
         }
         return backupSchemeForPackage;
     }
 
     public static BackupScheme getBackupSchemeForTest(Context context) {
-        BackupScheme testing = new BackupScheme(context);
+        BackupScheme testing = new BackupScheme(context, OperationType.BACKUP);
         testing.mExcludes = new ArraySet();
         testing.mIncludes = new ArrayMap();
         return testing;
@@ -236,6 +274,7 @@ public class FullBackup {
         private final static String TAG_EXCLUDE = "exclude";
 
         final int mFullBackupContent;
+        @OperationType final int mOperationType;
         final PackageManager mPackageManager;
         final StorageManager mStorageManager;
         final String mPackageName;
@@ -354,8 +393,9 @@ public class FullBackup {
          */
         ArraySet<PathWithRequiredFlags> mExcludes;
 
-        BackupScheme(Context context) {
+        BackupScheme(Context context, @OperationType int operationType) {
             mFullBackupContent = context.getApplicationInfo().fullBackupContent;
+            mOperationType = operationType;
             mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
             mPackageManager = context.getPackageManager();
             mPackageName = context.getPackageName();
