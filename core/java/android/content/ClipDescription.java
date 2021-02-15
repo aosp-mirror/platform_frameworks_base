@@ -120,6 +120,7 @@ public class ClipDescription implements Parcelable {
     private final ArrayList<String> mMimeTypes;
     private PersistableBundle mExtras;
     private long mTimeStamp;
+    private boolean mIsStyledText;
 
     /**
      * Create a new clip.
@@ -325,6 +326,26 @@ public class ClipDescription implements Parcelable {
         }
     }
 
+    /**
+     * Returns true if the first item of the associated {@link ClipData} contains styled text, i.e.
+     * if it contains spans such as {@link android.text.style.CharacterStyle CharacterStyle}, {@link
+     * android.text.style.ParagraphStyle ParagraphStyle}, or {@link
+     * android.text.style.UpdateAppearance UpdateAppearance}. Returns false if it does not, or if
+     * there is no associated clip data.
+     */
+    public boolean isStyledText() {
+        return mIsStyledText;
+    }
+
+    /**
+     * Sets whether the associated {@link ClipData} contains styled text in its first item. This
+     * should be called when this description is associated with clip data or when the first item
+     * is added to the associated clip data.
+     */
+    void setIsStyledText(boolean isStyledText) {
+        mIsStyledText = isStyledText;
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
@@ -429,6 +450,7 @@ public class ClipDescription implements Parcelable {
         dest.writeStringList(mMimeTypes);
         dest.writePersistableBundle(mExtras);
         dest.writeLong(mTimeStamp);
+        dest.writeBoolean(mIsStyledText);
     }
 
     ClipDescription(Parcel in) {
@@ -436,6 +458,7 @@ public class ClipDescription implements Parcelable {
         mMimeTypes = in.createStringArrayList();
         mExtras = in.readPersistableBundle();
         mTimeStamp = in.readLong();
+        mIsStyledText = in.readBoolean();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ClipDescription> CREATOR =
