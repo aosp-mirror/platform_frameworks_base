@@ -4987,9 +4987,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO: make BroadcastInterceptingContext use the Handler passed in to registerReceiver
-            // and put this back.
-            // ensureRunningOnConnectivityServiceThread();
+            ensureRunningOnConnectivityServiceThread();
             final String action = intent.getAction();
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
