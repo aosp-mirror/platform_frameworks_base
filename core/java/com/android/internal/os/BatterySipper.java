@@ -135,6 +135,11 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double systemServiceCpuPowerMah;
     public double[] customMeasuredPowerMah;
 
+    // Power that is re-attributed to other sippers. For example, for System Server
+    // this represents the power attributed to apps requesting system services.
+    // The value should be negative or zero.
+    public double powerReattributedToOtherSippersMah;
+
     // Do not include this sipper in results because it is included
     // in an aggregate sipper.
     public boolean isAggregated;
@@ -263,6 +268,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
                 }
             }
         }
+        powerReattributedToOtherSippersMah += other.powerReattributedToOtherSippersMah;
     }
 
     /**
@@ -281,6 +287,10 @@ public class BatterySipper implements Comparable<BatterySipper> {
                 totalPowerMah += customMeasuredPowerMah[idx];
             }
         }
+
+        // powerAttributedToOtherSippersMah is negative or zero
+        totalPowerMah = totalPowerMah + powerReattributedToOtherSippersMah;
+
         totalSmearedPowerMah = totalPowerMah + screenPowerMah + proportionalSmearMah;
 
         return totalPowerMah;

@@ -33,6 +33,8 @@ std::shared_ptr<minikin::MinikinFont> createMinikinFontSkia(
         sk_sp<SkData>&& data, std::string_view fontPath, const void *fontPtr, size_t fontSize,
         int ttcIndex, const std::vector<minikin::FontVariation>& axes);
 
+int getNewSourceId();
+
 } // namespace fonts
 
 } // namespace android
