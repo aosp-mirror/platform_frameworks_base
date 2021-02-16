@@ -23,6 +23,7 @@ import android.os.Build;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -183,6 +184,17 @@ public final class FontVariationAxis {
      * @return String a valid font variation settings string.
      */
     public static @NonNull String toFontVariationSettings(@Nullable FontVariationAxis[] axes) {
+        if (axes == null) {
+            return "";
+        }
+        return TextUtils.join(",", axes);
+    }
+
+    /**
+     * Stringify the array of FontVariationAxis.
+     * @hide
+     */
+    public static @NonNull String toFontVariationSettings(@Nullable List<FontVariationAxis> axes) {
         if (axes == null) {
             return "";
         }

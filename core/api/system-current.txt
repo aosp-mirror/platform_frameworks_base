@@ -2815,16 +2815,48 @@ package android.debug {
 
 package android.graphics.fonts {
 
+  public final class FontFamilyUpdateRequest {
+    method @NonNull public java.util.List<android.graphics.fonts.FontFamilyUpdateRequest.FontFamily> getFontFamilies();
+    method @NonNull public java.util.List<android.graphics.fonts.FontFileUpdateRequest> getFontFileUpdateRequests();
+  }
+
+  public static final class FontFamilyUpdateRequest.Builder {
+    ctor public FontFamilyUpdateRequest.Builder();
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Builder addFontFamily(@NonNull android.graphics.fonts.FontFamilyUpdateRequest.FontFamily);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest.Builder addFontFileUpdateRequest(@NonNull android.graphics.fonts.FontFileUpdateRequest);
+    method @NonNull public android.graphics.fonts.FontFamilyUpdateRequest build();
+  }
+
+  public static final class FontFamilyUpdateRequest.Font {
+    ctor public FontFamilyUpdateRequest.Font(@NonNull String, @NonNull android.graphics.fonts.FontStyle, @NonNull java.util.List<android.graphics.fonts.FontVariationAxis>);
+    method @NonNull public java.util.List<android.graphics.fonts.FontVariationAxis> getAxes();
+    method @NonNull public String getPostScriptName();
+    method @NonNull public android.graphics.fonts.FontStyle getStyle();
+  }
+
+  public static final class FontFamilyUpdateRequest.FontFamily {
+    ctor public FontFamilyUpdateRequest.FontFamily(@NonNull String, @NonNull java.util.List<android.graphics.fonts.FontFamilyUpdateRequest.Font>);
+    method @NonNull public java.util.List<android.graphics.fonts.FontFamilyUpdateRequest.Font> getFonts();
+    method @NonNull public String getName();
+  }
+
+  public final class FontFileUpdateRequest {
+    ctor public FontFileUpdateRequest(@NonNull android.os.ParcelFileDescriptor, @NonNull byte[]);
+    method @NonNull public android.os.ParcelFileDescriptor getParcelFileDescriptor();
+    method @NonNull public byte[] getSignature();
+  }
+
   public class FontManager {
     method @Nullable public android.text.FontConfig getFontConfig();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFamily(@NonNull android.graphics.fonts.FontFamilyUpdateRequest, @IntRange(from=0) int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.os.ParcelFileDescriptor, @NonNull byte[], @IntRange(from=0) int);
     field public static final int RESULT_ERROR_DOWNGRADING = -5; // 0xfffffffb
     field public static final int RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE = -1; // 0xffffffff
     field public static final int RESULT_ERROR_FAILED_UPDATE_CONFIG = -6; // 0xfffffffa
+    field public static final int RESULT_ERROR_FONT_NOT_FOUND = -9; // 0xfffffff7
     field public static final int RESULT_ERROR_FONT_UPDATER_DISABLED = -7; // 0xfffffff9
     field public static final int RESULT_ERROR_INVALID_FONT_FILE = -3; // 0xfffffffd
     field public static final int RESULT_ERROR_INVALID_FONT_NAME = -4; // 0xfffffffc
-    field public static final int RESULT_ERROR_REMOTE_EXCEPTION = -9; // 0xfffffff7
     field public static final int RESULT_ERROR_VERIFICATION_FAILURE = -2; // 0xfffffffe
     field public static final int RESULT_ERROR_VERSION_MISMATCH = -8; // 0xfffffff8
     field public static final int RESULT_SUCCESS = 0; // 0x0
