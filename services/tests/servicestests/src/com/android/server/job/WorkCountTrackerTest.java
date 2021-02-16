@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.util.Pair;
 import android.util.SparseIntArray;
 
+import androidx.test.filters.LargeTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -496,6 +497,7 @@ public class WorkCountTrackerTest {
     }
 
     @Test
+    @LargeTest
     public void testRandom13() {
         assertThat(EQUAL_PROBABILITY_CDF.length).isEqualTo(NUM_WORK_TYPES);
 
@@ -508,9 +510,9 @@ public class WorkCountTrackerTest {
                 Pair.create(WORK_TYPE_BGUSER, 3));
         final List<Pair<Integer, Integer>> minLimits =
                 List.of(Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1));
-        final double probStop = 0.01;
-        final double[] numTypesCdf = buildCdf(0, 0.05, 0.05, 0.9);
-        final double probStart = 0.99;
+        final double probStop = 0.13;
+        final double[] numTypesCdf = buildCdf(0, 0.05, 0.1, 0.85);
+        final double probStart = 0.87;
 
         checkRandom(jobs, numTests, totalMax, minLimits, maxLimits, probStart,
                 EQUAL_PROBABILITY_CDF, numTypesCdf, probStop);
