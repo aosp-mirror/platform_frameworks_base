@@ -39817,7 +39817,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handleMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handleMmi(String, android.telecom.PhoneAccountHandle);
-    method public boolean hasCompanionInCallServiceAccess();
+    method public boolean hasManageOngoingCallsPermission();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isInCall();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isInManagedCall();
     method public boolean isIncomingCallPermitted(android.telecom.PhoneAccountHandle);
