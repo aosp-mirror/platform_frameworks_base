@@ -33,6 +33,7 @@
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>
 
+#include <dlfcn.h>
 #include <sys/resource.h>
 #include <utils/Condition.h>
 #include <utils/Log.h>
@@ -48,6 +49,17 @@ namespace renderthread {
 static bool gHasRenderThreadInstance = false;
 
 static JVMAttachHook gOnStartHook = nullptr;
+
+ASurfaceControlFunctions::ASurfaceControlFunctions() {
+    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
+    acquireFunc = (ASC_acquire) dlsym(handle_, "ASurfaceControl_acquire");
+    LOG_ALWAYS_FATAL_IF(acquireFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_acquire!");
+
+    releaseFunc = (ASC_release) dlsym(handle_, "ASurfaceControl_release");
+    LOG_ALWAYS_FATAL_IF(releaseFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_release!");
+}
 
 void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
     RenderThread* rt = reinterpret_cast<RenderThread*>(data);
