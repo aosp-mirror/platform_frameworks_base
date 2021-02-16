@@ -18,6 +18,7 @@ package com.android.server.compat;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.app.compat.ChangeIdStateCache;
+import android.app.compat.PackageOverride;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -33,6 +35,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.compat.AndroidBuildClassifier;
+import com.android.internal.compat.CompatibilityOverrideConfig;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +49,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
@@ -83,6 +87,8 @@ public class CompatConfigTest {
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
         when(mBuildClassifier.isFinalBuild()).thenReturn(false);
         ChangeIdStateCache.disable();
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt()))
+                .thenThrow(new NameNotFoundException());
     }
 
     @Test
@@ -163,6 +169,10 @@ public class CompatConfigTest {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addDisabledChangeWithId(1234L)
                 .build();
+        ApplicationInfo info = ApplicationInfoBuilder.create()
+                .withPackageName("com.some.package").build();
+        when(mPackageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(info);
 
         compatConfig.addOverride(1234L, "com.some.package", true);
 
@@ -177,6 +187,10 @@ public class CompatConfigTest {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1234L)
                 .build();
+        ApplicationInfo info = ApplicationInfoBuilder.create()
+                .withPackageName("com.some.package").build();
+        when(mPackageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(info);
 
         compatConfig.addOverride(1234L, "com.some.package", false);
 
@@ -191,6 +205,10 @@ public class CompatConfigTest {
         CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
         compatConfig.forceNonDebuggableFinalForTest(false);
 
+        ApplicationInfo info = ApplicationInfoBuilder.create()
+                .withPackageName("com.some.package").build();
+        when(mPackageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(info);
 
         compatConfig.addOverride(1234L, "com.some.package", false);
 
@@ -262,6 +280,71 @@ public class CompatConfigTest {
 
         compatConfig.recheckOverrides("com.notinstalled.foo");
         assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isTrue();
+    }
+
+    @Test
+    public void testOverrideWithAppVersion() throws Exception {
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.installed.foo")
+                .withVersionCode(100L)
+                .debuggable().build();
+        when(mPackageManager.getApplicationInfo(eq("com.installed.foo"), anyInt()))
+                .thenReturn(applicationInfo);
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1234L).build();
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        // Add override that doesn't include the installed app version
+        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(
+                Collections.singletonMap(1234L,
+                        new PackageOverride.Builder()
+                                .setMaxVersionCode(99L)
+                                .setEnabled(true)
+                                .build()));
+        compatConfig.addOverrides(config, "com.installed.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
+
+        // Add override that does include the installed app version
+        config = new CompatibilityOverrideConfig(
+                Collections.singletonMap(1234L,
+                        new PackageOverride.Builder()
+                                .setMinVersionCode(100L)
+                                .setMaxVersionCode(100L)
+                                .setEnabled(true)
+                                .build()));
+        compatConfig.addOverrides(config, "com.installed.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isTrue();
+    }
+
+    @Test
+    public void testApplyDeferredOverridesAfterInstallingAppVersion() throws Exception {
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.notinstalled.foo")
+                .withVersionCode(100L)
+                .debuggable().build();
+        when(mPackageManager.getApplicationInfo(eq("com.notinstalled.foo"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1234L).build();
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        // Add override before the app is available.
+        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(
+                Collections.singletonMap(1234L, new PackageOverride.Builder()
+                        .setMaxVersionCode(99L)
+                        .setEnabled(true)
+                        .build()));
+        compatConfig.addOverrides(config, "com.notinstalled.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
+
+        // Pretend the app is now installed.
+        when(mPackageManager.getApplicationInfo(eq("com.notinstalled.foo"), anyInt()))
+                .thenReturn(applicationInfo);
+
+        compatConfig.recheckOverrides("com.notinstalled.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
     }
 
     @Test
@@ -384,6 +467,8 @@ public class CompatConfigTest {
         ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
                 .withPackageName("com.some.package")
                 .build();
+        when(mPackageManager.getApplicationInfo(eq("com.some.package"), anyInt()))
+                .thenReturn(applicationInfo);
 
         assertThat(compatConfig.addOverride(1234L, "com.some.package", false)).isTrue();
         assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
@@ -404,6 +489,8 @@ public class CompatConfigTest {
                 .withPackageName("foo.bar")
                 .withTargetSdk(2)
                 .build();
+        when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
+                .thenReturn(applicationInfo);
 
         assertThat(compatConfig.isChangeEnabled(3, applicationInfo)).isFalse();
         assertThat(compatConfig.isChangeEnabled(4, applicationInfo)).isFalse();
@@ -425,7 +512,8 @@ public class CompatConfigTest {
                 .withPackageName("foo.bar")
                 .withTargetSdk(2)
                 .build();
-
+        when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
+                .thenReturn(applicationInfo);
         assertThat(compatConfig.enableTargetSdkChangesForPackage("foo.bar", 3)).isEqualTo(1);
         assertThat(compatConfig.isChangeEnabled(3, applicationInfo)).isTrue();
         assertThat(compatConfig.isChangeEnabled(4, applicationInfo)).isFalse();
@@ -533,22 +621,114 @@ public class CompatConfigTest {
                 + "            <override-value packageName=\"foo.bar\" enabled=\"true\">\n"
                 + "            </override-value>\n"
                 + "        </validated>\n"
-                + "        <deferred>\n"
-                + "        </deferred>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
                 + "    </change-overrides>\n"
                 + "    <change-overrides changeId=\"2\">\n"
                 + "        <validated>\n"
                 + "        </validated>\n"
-                + "        <deferred>\n"
-                + "            <override-value packageName=\"bar.baz\" enabled=\"false\">\n"
-                + "            </override-value>\n"
-                + "        </deferred>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"false\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
                 + "    </change-overrides>\n"
                 + "</overrides>\n");
     }
 
     @Test
-    public void testLoadOverrides() throws Exception {
+    public void testSaveOverridesWithRanges() throws Exception {
+        File overridesFile = new File(createTempDir(), "overrides.xml");
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1L)
+                .addEnableSinceSdkChangeWithId(2, 2L)
+                .build();
+        compatConfig.forceNonDebuggableFinalForTest(true);
+        compatConfig.initOverrides(overridesFile);
+
+        compatConfig.addOverrides(new CompatibilityOverrideConfig(Collections.singletonMap(1L,
+                new PackageOverride.Builder()
+                        .setMinVersionCode(99L)
+                        .setMaxVersionCode(101L)
+                        .setEnabled(true)
+                        .build())), "foo.bar");
+
+        assertThat(readFile(overridesFile)).isEqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                + "<overrides>\n"
+                + "    <change-overrides changeId=\"1\">\n"
+                + "        <validated>\n"
+                + "        </validated>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"99\" maxVersionCode=\"101\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
+                + "    </change-overrides>\n"
+                + "</overrides>\n");
+    }
+
+    @Test
+    public void testLoadOverridesRaw() throws Exception {
+        File tempDir = createTempDir();
+        File overridesFile = new File(tempDir, "overrides.xml");
+        // Change 1 is enabled for foo.bar (validated)
+        // Change 2 is disabled for bar.baz (deferred)
+        String xmlData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                + "<overrides>\n"
+                + "    <change-overrides changeId=\"1\">\n"
+                + "        <validated>\n"
+                + "            <override-value packageName=\"foo.bar\" enabled=\"true\">\n"
+                + "            </override-value>\n"
+                + "        </validated>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"foo.bar\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"true\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
+                + "    </change-overrides>\n"
+                + "    <change-overrides changeId=\"2\">\n"
+                + "        <validated>\n"
+                + "        </validated>\n"
+                + "        <raw>\n"
+                + "            <raw-override-value packageName=\"bar.baz\" "
+                + "minVersionCode=\"-9223372036854775808\" "
+                + "maxVersionCode=\"9223372036854775807\" enabled=\"false\">\n"
+                + "            </raw-override-value>\n"
+                + "        </raw>\n"
+                + "    </change-overrides>\n"
+                + "</overrides>\n";
+        writeToFile(tempDir, "overrides.xml", xmlData);
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1L)
+                .addEnableSinceSdkChangeWithId(2, 2L)
+                .build();
+        compatConfig.forceNonDebuggableFinalForTest(true);
+        compatConfig.initOverrides(overridesFile);
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("foo.bar")
+                .withVersionCode(100L)
+                .debuggable()
+                .build();
+        when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
+                .thenReturn(applicationInfo);
+        when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        assertThat(compatConfig.isChangeEnabled(1L, applicationInfo)).isTrue();
+        assertThat(compatConfig.willChangeBeEnabled(2L, "bar.baz")).isFalse();
+
+        compatConfig.recheckOverrides("foo.bar");
+        assertThat(compatConfig.isChangeEnabled(1L, applicationInfo)).isTrue();
+    }
+
+    @Test
+    public void testLoadOverridesDeferred() throws Exception {
         File tempDir = createTempDir();
         File overridesFile = new File(tempDir, "overrides.xml");
         // Change 1 is enabled for foo.bar (validated)
