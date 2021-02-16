@@ -337,8 +337,10 @@ public abstract class AbstractLocationProvider {
 
         @Override
         public State setListener(@Nullable Listener listener) {
-            return mInternalState.updateAndGet(
-                    internalState -> internalState.withListener(listener)).state;
+            InternalState oldInternalState = mInternalState.getAndUpdate(
+                    internalState -> internalState.withListener(listener));
+            Preconditions.checkState(listener == null || oldInternalState.listener == null);
+            return oldInternalState.state;
         }
 
         @Override

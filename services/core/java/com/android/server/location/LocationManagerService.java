@@ -78,6 +78,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
+import android.provider.Settings;
 import android.stats.location.LocationStatsEnums;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
@@ -97,6 +98,8 @@ import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AlarmHelper;
 import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.AppOpsHelper;
+import com.android.server.location.injector.DeviceIdleHelper;
+import com.android.server.location.injector.DeviceStationaryHelper;
 import com.android.server.location.injector.EmergencyHelper;
 import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationAttributionHelper;
@@ -108,6 +111,8 @@ import com.android.server.location.injector.SettingsHelper;
 import com.android.server.location.injector.SystemAlarmHelper;
 import com.android.server.location.injector.SystemAppForegroundHelper;
 import com.android.server.location.injector.SystemAppOpsHelper;
+import com.android.server.location.injector.SystemDeviceIdleHelper;
+import com.android.server.location.injector.SystemDeviceStationaryHelper;
 import com.android.server.location.injector.SystemEmergencyHelper;
 import com.android.server.location.injector.SystemLocationPermissionsHelper;
 import com.android.server.location.injector.SystemLocationPowerSaveModeHelper;
@@ -120,6 +125,7 @@ import com.android.server.location.provider.LocationProviderManager;
 import com.android.server.location.provider.MockLocationProvider;
 import com.android.server.location.provider.PassiveLocationProvider;
 import com.android.server.location.provider.PassiveLocationProviderManager;
+import com.android.server.location.provider.StationaryThrottlingLocationProvider;
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
@@ -313,6 +319,18 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             manager.startManager();
             if (realProvider != null) {
+
+                // custom logic wrapping all non-passive providers
+                if (manager != mPassiveManager) {
+                    boolean enableStationaryThrottling = Settings.Global.getInt(
+                            mContext.getContentResolver(),
+                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE, 1) != 0;
+                    if (enableStationaryThrottling) {
+                        realProvider = new StationaryThrottlingLocationProvider(manager.getName(),
+                                mInjector, realProvider, mEventLog);
+                    }
+                }
+
                 manager.setRealProvider(realProvider);
             }
             mProviderManagers.add(manager);
@@ -1368,6 +1386,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         private final SystemAppForegroundHelper mAppForegroundHelper;
         private final SystemLocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
         private final SystemScreenInteractiveHelper mScreenInteractiveHelper;
+        private final SystemDeviceStationaryHelper mDeviceStationaryHelper;
+        private final SystemDeviceIdleHelper mDeviceIdleHelper;
         private final LocationAttributionHelper mLocationAttributionHelper;
         private final LocationUsageLogger mLocationUsageLogger;
 
@@ -1391,6 +1411,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             mAppForegroundHelper = new SystemAppForegroundHelper(context);
             mLocationPowerSaveModeHelper = new SystemLocationPowerSaveModeHelper(context, eventLog);
             mScreenInteractiveHelper = new SystemScreenInteractiveHelper(context);
+            mDeviceStationaryHelper = new SystemDeviceStationaryHelper();
+            mDeviceIdleHelper = new SystemDeviceIdleHelper(context);
             mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
             mLocationUsageLogger = new LocationUsageLogger();
         }
@@ -1448,6 +1470,16 @@ public class LocationManagerService extends ILocationManager.Stub {
         @Override
         public ScreenInteractiveHelper getScreenInteractiveHelper() {
             return mScreenInteractiveHelper;
+        }
+
+        @Override
+        public DeviceStationaryHelper getDeviceStationaryHelper() {
+            return mDeviceStationaryHelper;
+        }
+
+        @Override
+        public DeviceIdleHelper getDeviceIdleHelper() {
+            return mDeviceIdleHelper;
         }
 
         @Override
