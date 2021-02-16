@@ -195,6 +195,7 @@ import com.android.server.twilight.TwilightService;
 import com.android.server.uri.UriGrantsManagerService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.vibrator.VibratorManagerService;
 import com.android.server.vr.VrManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
@@ -1295,6 +1296,7 @@ public final class SystemServer implements Dumpable {
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
         IpSecService ipSecService = null;
+        VpnManagerService vpnManager = null;
         VcnManagementService vcnManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
@@ -1881,6 +1883,15 @@ public final class SystemServer implements Dumpable {
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
             // TODO: Use ConnectivityManager instead of ConnectivityService.
             networkPolicy.bindConnectivityManager(connectivity);
+            t.traceEnd();
+
+            t.traceBegin("StartVpnManagerService");
+            try {
+                vpnManager = VpnManagerService.create(context);
+                ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
+            } catch (Throwable e) {
+                reportWtf("starting VPN Manager Service", e);
+            }
             t.traceEnd();
 
             t.traceBegin("StartVcnManagementService");
@@ -2611,6 +2622,7 @@ public final class SystemServer implements Dumpable {
         final MediaRouterService mediaRouterF = mediaRouter;
         final MmsServiceBroker mmsServiceF = mmsService;
         final IpSecService ipSecServiceF = ipSecService;
+        final VpnManagerService vpnManagerF = vpnManager;
         final VcnManagementService vcnManagementF = vcnManagement;
         final WindowManagerService windowManagerF = wm;
         final ConnectivityManager connectivityF = (ConnectivityManager)
@@ -2723,6 +2735,15 @@ public final class SystemServer implements Dumpable {
                 }
             } catch (Throwable e) {
                 reportWtf("making Connectivity Service ready", e);
+            }
+            t.traceEnd();
+            t.traceBegin("MakeVpnManagerServiceReady");
+            try {
+                if (vpnManagerF != null) {
+                    vpnManagerF.systemReady();
+                }
+            } catch (Throwable e) {
+                reportWtf("making VpnManagerService ready", e);
             }
             t.traceEnd();
             t.traceBegin("MakeVcnManagementServiceReady");

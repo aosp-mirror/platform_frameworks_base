@@ -1144,6 +1144,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
         public void removeStartingWindow(int taskId) {
         }
         @Override
+        public void copySplashScreenView(int taskId) {
+        }
+        @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         }
         @Override

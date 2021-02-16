@@ -477,16 +477,56 @@ public class UiModeManager {
      * Changes to night mode take effect globally and will result in a configuration change
      * (and potentially an Activity lifecycle event) being applied to all running apps.
      * Developers interested in an app-local implementation of night mode should consider using
-     * {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)} to manage the
-     * -night qualifier locally.
+     * {@link #setApplicationNightMode(int)} to set and persist the -night qualifier locally or
+     * {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)} for the
+     * backward compatible implementation.
      *
      * @param mode the night mode to set
      * @see #getNightMode()
+     * @see #setApplicationNightMode(int)
      */
     public void setNightMode(@NightMode int mode) {
         if (mService != null) {
             try {
                 mService.setNightMode(mode);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Sets and persist the night mode for this application.
+     * <p>
+     * The mode can be one of:
+     * <ul>
+     *   <li><em>{@link #MODE_NIGHT_NO}<em> sets the device into
+     *       {@code notnight} mode</li>
+     *   <li><em>{@link #MODE_NIGHT_YES}</em> sets the device into
+     *       {@code night} mode</li>
+     *   <li><em>{@link #MODE_NIGHT_CUSTOM}</em> automatically switches between
+     *       {@code night} and {@code notnight} based on the custom time set (or default)</li>
+     *   <li><em>{@link #MODE_NIGHT_AUTO}</em> automatically switches between
+     *       {@code night} and {@code notnight} based on the device's current
+     *       location and certain other sensors</li>
+     * </ul>
+     * <p>
+     * Changes to night mode take effect locally and will result in a configuration change
+     * (and potentially an Activity lifecycle event) being applied to this application. The mode
+     * is persisted for this application until it is either modified by the application, the
+     * user clears the data for the application, or this application is uninstalled.
+     * <p>
+     * Developers interested in a non-persistent app-local implementation of night mode should
+     * consider using {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)}
+     * to manage the -night qualifier locally.
+     *
+     * @param mode the night mode to set
+     * @see #setNightMode(int)
+     */
+    public void setApplicationNightMode(@NightMode int mode) {
+        if (mService != null) {
+            try {
+                mService.setApplicationNightMode(mode);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

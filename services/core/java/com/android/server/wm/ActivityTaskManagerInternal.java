@@ -574,4 +574,26 @@ public abstract class ActivityTaskManagerInternal {
      * @return Whether the package is the base of any locked task
      */
     public abstract boolean isBaseOfLockedTask(String packageName);
+
+    /**
+     * Create an interface to update configuration for an application.
+     */
+    public abstract PackageConfigurationUpdater createPackageConfigurationUpdater();
+
+    /**
+     * An interface to update configuration for an application, and will persist override
+     * configuration for this package.
+     */
+    public interface PackageConfigurationUpdater {
+        /**
+         * Sets the dark mode for the current application. This setting is persisted and will
+         * override the system configuration for this application.
+         */
+        PackageConfigurationUpdater setNightMode(int nightMode);
+
+        /**
+         * Commit changes.
+         */
+        void commit() throws RemoteException;
+    }
 }

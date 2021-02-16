@@ -23,7 +23,7 @@ import android.os.Vibrator;
 import androidx.annotation.NonNull;
 
 /** Fake implementation of {@link Vibrator} for service tests. */
-public final class FakeVibrator extends Vibrator {
+final class FakeVibrator extends Vibrator {
 
     private int mDefaultHapticFeedbackIntensity = Vibrator.VIBRATION_INTENSITY_MEDIUM;
     private int mDefaultNotificationIntensity = Vibrator.VIBRATION_INTENSITY_MEDIUM;

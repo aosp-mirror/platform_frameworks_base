@@ -41,12 +41,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.ContentObserver;
-import android.hardware.display.DisplayManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
@@ -82,6 +83,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class DisplayModeDirectorTest {
     // The tolerance within which we consider something approximately equals.
@@ -588,6 +590,12 @@ public class DisplayModeDirectorTest {
 
     @Test
     public void testSensorRegistration() {
+        // First, configure brightness zones or DMD won't register for sensor data.
+        final FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setRefreshRateInHighZone(60);
+        config.setHighDisplayBrightnessThresholds(new int[] { 255 });
+        config.setHighAmbientBrightnessThresholds(new int[] { 8000 });
+
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
         setPeakRefreshRate(90 /*fps*/);

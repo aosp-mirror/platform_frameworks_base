@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.hardware.display.BrightnessConfiguration;
+import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
@@ -40,6 +41,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class PersistentDataStoreTest {
     private PersistentDataStore mDataStore;

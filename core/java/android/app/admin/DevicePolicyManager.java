@@ -1300,10 +1300,11 @@ public class DevicePolicyManager {
      * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
      * organization-owned.
      *
-     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
-     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
-     * contain {@link #PROVISIONING_MODE_MANAGED_PROFILE} and {@link
-     * #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
+     * <p>Using this value indicates the admin app can only be provisioned in either a
+     * fully-managed device or a corporate-owned work profile. This will cause the admin app's
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity to have the {@link
+     * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
+     * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
      * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
      * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link

@@ -12940,17 +12940,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        final ClipData clipData = getClipboardManagerForUser().getPrimaryClip();
-        final ClipDescription description = clipData.getDescription();
+        final ClipDescription description =
+                getClipboardManagerForUser().getPrimaryClipDescription();
         final boolean isPlainType = description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
-        final CharSequence text = clipData.getItemAt(0).getText();
-        if (isPlainType && (text instanceof Spanned)) {
-            Spanned spanned = (Spanned) text;
-            if (TextUtils.hasStyleSpan(spanned)) {
-                return true;
-            }
-        }
-        return description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML);
+        return (isPlainType && description.isStyledText())
+                || description.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML);
     }
 
     boolean canProcessText() {

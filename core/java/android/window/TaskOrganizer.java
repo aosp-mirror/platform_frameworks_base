@@ -105,6 +105,12 @@ public class TaskOrganizer extends WindowOrganizer {
     public void removeStartingWindow(int taskId) {}
 
     /**
+     * Called when the Task want to copy the splash screen.
+     */
+    @BinderThread
+    public void copySplashScreenView(int taskId) {}
+
+    /**
      * Called when a task with the registered windowing mode can be controlled by this task
      * organizer. For non-root tasks, the leash may initially be hidden so it is up to the organizer
      * to show this task.
@@ -220,6 +226,11 @@ public class TaskOrganizer extends WindowOrganizer {
         @Override
         public void removeStartingWindow(int taskId) {
             mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskId));
+        }
+
+        @Override
+        public void copySplashScreenView(int taskId) {
+            mExecutor.execute(() -> TaskOrganizer.this.copySplashScreenView(taskId));
         }
 
         @Override

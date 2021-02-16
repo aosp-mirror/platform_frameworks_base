@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
+import android.window.SplashScreenView.SplashScreenViewParcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
@@ -157,6 +158,16 @@ public abstract class ClientTransactionHandler {
 
     /** Request that an activity enter picture-in-picture. */
     public abstract void handlePictureInPictureRequested(@NonNull ActivityClientRecord r);
+
+    /** Whether the activity want to handle splash screen exit animation */
+    public abstract boolean isHandleSplashScreenExit(@NonNull IBinder token);
+
+    /** Attach a splash screen window view to the top of the activity */
+    public abstract void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
+            @NonNull SplashScreenViewParcelable parcelable);
+
+    /** Hand over the splash screen window view to the activity */
+    public abstract void handOverSplashScreenView(@NonNull ActivityClientRecord r);
 
     /** Perform activity launch. */
     public abstract Activity handleLaunchActivity(@NonNull ActivityClientRecord r,

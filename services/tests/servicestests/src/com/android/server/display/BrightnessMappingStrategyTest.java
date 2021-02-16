@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
 import android.os.PowerManager;
+import android.platform.test.annotations.Presubmit;
 import android.util.MathUtils;
 import android.util.Spline;
 
@@ -42,6 +43,7 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BrightnessMappingStrategyTest {
 
