@@ -139,6 +139,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
+import com.android.internal.os.KernelCpuBpfTracking;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
 import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
@@ -1455,7 +1456,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuTimePerClusterFreq() {
-        if (KernelCpuTotalBpfMapReader.isSupported()) {
+        if (KernelCpuBpfTracking.isSupported()) {
             int tagId = FrameworkStatsLog.CPU_TIME_PER_CLUSTER_FREQ;
             PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                     .setAdditiveFields(new int[] {3})
@@ -1649,17 +1650,18 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuCyclesPerThreadGroupCluster() {
-        // TODO(b/173227907): Register only when supported.
-        int tagId = FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER;
-        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setAdditiveFields(new int[] {3, 4})
-                .build();
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                metadata,
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl
-        );
+        if (KernelCpuBpfTracking.isSupported()) {
+            int tagId = FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER;
+            PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                    .setAdditiveFields(new int[] {3, 4})
+                    .build();
+            mStatsManager.setPullAtomCallback(
+                    tagId,
+                    metadata,
+                    DIRECT_EXECUTOR,
+                    mStatsCallbackImpl
+            );
+        }
     }
 
     int pullCpuCyclesPerThreadGroupCluster(int atomTag, List<StatsEvent> pulledData) {
