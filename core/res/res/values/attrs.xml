@@ -6389,6 +6389,13 @@
         <!-- The radius of the ripple when fully expanded. By default, the
              radius is computed based on the size of the ripple's container. -->
         <attr name="radius" />
+        <!-- The style of the ripple drawable is solid by default -->
+        <attr name="rippleStyle">
+            <!-- Solid is the default style -->
+            <enum name="solid" value="0" />
+            <!-- Patterned style-->
+            <enum name="patterned" value="1" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="ScaleDrawable">

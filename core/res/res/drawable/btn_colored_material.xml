@@ -19,7 +19,8 @@
        android:insetTop="@dimen/button_inset_vertical_material"
        android:insetRight="@dimen/button_inset_horizontal_material"
        android:insetBottom="@dimen/button_inset_vertical_material">
-    <ripple android:color="?attr/colorControlHighlight">
+    <ripple android:color="?attr/colorControlHighlight"
+            android:rippleStyle="?attr/rippleStyle">
         <item>
             <shape android:shape="rectangle"
                    android:tint="@color/btn_colored_background_material">
