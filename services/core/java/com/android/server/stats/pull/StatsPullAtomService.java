@@ -2610,7 +2610,6 @@ public class StatsPullAtomService extends SystemService {
         try {
             // force procstats to flush & combine old files into one store
             long lastHighWaterMark = readProcStatsHighWaterMark(section);
-            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
 
             ProtoOutputStream[] protoStreams = new ProtoOutputStream[MAX_PROCSTATS_SHARDS];
             for (int i = 0; i < protoStreams.length; i++) {
@@ -2620,7 +2619,7 @@ public class StatsPullAtomService extends SystemService {
             ProcessStats procStats = new ProcessStats(false);
             // Force processStatsService to aggregate all in-storage and in-memory data.
             long highWaterMark = processStatsService.getCommittedStatsMerged(
-                    lastHighWaterMark, section, true, statsFiles, procStats);
+                    lastHighWaterMark, section, true, null, procStats);
             procStats.dumpAggregatedProtoForStatsd(protoStreams, MAX_PROCSTATS_RAW_SHARD_SIZE);
 
             for (int i = 0; i < protoStreams.length; i++) {
