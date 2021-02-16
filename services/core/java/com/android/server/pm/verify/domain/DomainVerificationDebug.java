@@ -38,8 +38,6 @@ import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
 
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 
 @SuppressWarnings("PointlessBooleanExpression")
@@ -202,8 +200,7 @@ public class DomainVerificationDebug {
                 printedHeader = true;
             }
 
-            boolean isLinkHandlingAllowed = userState == null
-                    || !userState.isDisallowLinkHandling();
+            boolean isLinkHandlingAllowed = userState == null || userState.isLinkHandlingAllowed();
 
             writer.increaseIndent();
             writer.print("User ");

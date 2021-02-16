@@ -16,6 +16,8 @@
 
 package com.android.server.pm.verify.domain;
 
+import static java.util.Collections.emptyList;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -26,6 +28,8 @@ import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
@@ -35,6 +39,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -62,6 +67,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -401,7 +407,7 @@ public class DomainVerificationService extends SystemService
             }
 
             pkgState.getOrCreateUserSelectionState(userId)
-                    .setDisallowLinkHandling(!allowed);
+                    .setLinkHandlingAllowed(allowed);
         }
 
         mConnection.scheduleWriteSettings();
@@ -423,11 +429,11 @@ public class DomainVerificationService extends SystemService
                         for (int userStateIndex = 0; userStateIndex < userStatesSize;
                                 userStateIndex++) {
                             userStates.valueAt(userStateIndex)
-                                    .setDisallowLinkHandling(!allowed);
+                                    .setLinkHandlingAllowed(allowed);
                         }
                     } else {
                         pkgState.getOrCreateUserSelectionState(userId)
-                                .setDisallowLinkHandling(!allowed);
+                                .setLinkHandlingAllowed(allowed);
                     }
                 }
 
@@ -440,7 +446,7 @@ public class DomainVerificationService extends SystemService
                 }
 
                 pkgState.getOrCreateUserSelectionState(userId)
-                        .setDisallowLinkHandling(!allowed);
+                        .setLinkHandlingAllowed(allowed);
             }
         }
 
@@ -468,6 +474,17 @@ public class DomainVerificationService extends SystemService
                 throw new InvalidDomainSetException(domainSetId, null,
                         InvalidDomainSetException.REASON_ID_INVALID);
             }
+
+            if (enabled) {
+                for (String domain : domains) {
+                    if (!getApprovedPackages(domain, userId, APPROVAL_LEVEL_LEGACY_ALWAYS + 1,
+                            mConnection::getPackageSettingLocked).first.isEmpty()) {
+                        throw new InvalidDomainSetException(domainSetId, null,
+                                InvalidDomainSetException.REASON_UNABLE_TO_APPROVE);
+                    }
+                }
+            }
+
             DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
                     false /* forAutoVerify */, callingUid, userId);
             DomainVerificationUserState userState = pkgState.getOrCreateUserSelectionState(userId);
@@ -589,10 +606,10 @@ public class DomainVerificationService extends SystemService
                 hostToUserSelectionMap.put(domains.valueAt(index), false);
             }
 
-            boolean openVerifiedLinks = false;
             DomainVerificationUserState userState = pkgState.getUserSelectionState(userId);
+            boolean linkHandlingAllowed = true;
             if (userState != null) {
-                openVerifiedLinks = !userState.isDisallowLinkHandling();
+                linkHandlingAllowed = userState.isLinkHandlingAllowed();
                 ArraySet<String> enabledHosts = userState.getEnabledHosts();
                 int hostsSize = enabledHosts.size();
                 for (int index = 0; index < hostsSize; index++) {
@@ -601,7 +618,7 @@ public class DomainVerificationService extends SystemService
             }
 
             return new DomainVerificationUserSelection(pkgState.getId(), packageName,
-                    UserHandle.of(userId), openVerifiedLinks, hostToUserSelectionMap);
+                    UserHandle.of(userId), linkHandlingAllowed, hostToUserSelectionMap);
         }
     }
 
@@ -683,7 +700,7 @@ public class DomainVerificationService extends SystemService
                     ArraySet<String> newEnabledHosts = new ArraySet<>(oldEnabledHosts);
                     newEnabledHosts.retainAll(newWebDomains);
                     DomainVerificationUserState newUserState = new DomainVerificationUserState(
-                            userId, newEnabledHosts, oldUserState.isDisallowLinkHandling());
+                            userId, newEnabledHosts, oldUserState.isLinkHandlingAllowed());
                     newUserStates.put(userId, newUserState);
                 }
             }
@@ -910,7 +927,7 @@ public class DomainVerificationService extends SystemService
         // This method is only used by DomainVerificationShell, which doesn't lock PMS, so it's
         // safe to pass mConnection directly here and lock PMS. This method is not exposed
         // to the general system server/PMS.
-        printState(writer, packageName, userId, mConnection);
+        printState(writer, packageName, userId, mConnection::getPackageSettingLocked);
     }
 
     @Override
@@ -919,7 +936,7 @@ public class DomainVerificationService extends SystemService
             @Nullable Function<String, PackageSetting> pkgSettingFunction)
             throws NameNotFoundException {
         if (pkgSettingFunction == null) {
-            pkgSettingFunction = mConnection;
+            pkgSettingFunction = mConnection::getPackageSettingLocked;
         }
 
         synchronized (mLock) {
@@ -1156,46 +1173,211 @@ public class DomainVerificationService extends SystemService
         mConnection.scheduleWriteSettings();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Resolving an Intent to an approved app happens in stages:
+     * <ol>
+     *     <li>Find all non-zero approved packages for the {@link Intent}'s domain</li>
+     *     <li>Filter to packages with the highest approval level, see {@link ApprovalLevel}</li>
+     *     <li>Filter out {@link ResolveInfo}s that don't match that approved packages</li>
+     *     <li>Take the approved packages with the latest install time</li>
+     *     <li>Take the ResolveInfo representing the Activity declared last in the manifest</li>
+     *     <li>Return remaining results if any exist</li>
+     * </ol>
+     */
+    @NonNull
     @Override
-    public boolean isApprovedForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
+    public Pair<List<ResolveInfo>, Integer> filterToApprovedApp(@NonNull Intent intent,
+            @NonNull List<ResolveInfo> infos, @UserIdInt int userId,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        String domain = intent.getData().getHost();
+
+        // Collect package names
+        ArrayMap<String, Integer> packageApprovals = new ArrayMap<>();
+        int infosSize = infos.size();
+        for (int index = 0; index < infosSize; index++) {
+            packageApprovals.put(infos.get(index).getComponentInfo().packageName,
+                    APPROVAL_LEVEL_NONE);
+        }
+
+        // Find all approval levels
+        int highestApproval = fillMapWithApprovalLevels(packageApprovals, domain, userId,
+                pkgSettingFunction);
+        if (highestApproval == APPROVAL_LEVEL_NONE) {
+            return Pair.create(emptyList(), highestApproval);
+        }
+
+        // Filter to highest, non-zero packages
+        ArraySet<String> approvedPackages = new ArraySet<>();
+        for (int index = 0; index < infosSize; index++) {
+            if (packageApprovals.valueAt(index) == highestApproval) {
+                approvedPackages.add(packageApprovals.keyAt(index));
+            }
+        }
+
+        ArraySet<String> filteredPackages = new ArraySet<>();
+        if (highestApproval == APPROVAL_LEVEL_LEGACY_ASK) {
+            // To maintain legacy behavior while the Settings API is not implemented,
+            // show the chooser if all approved apps are marked ask, skipping the
+            // last app, last declaration filtering.
+            filteredPackages.addAll(approvedPackages);
+        } else {
+            // Filter to last installed package
+            long latestInstall = Long.MIN_VALUE;
+            int approvedSize = approvedPackages.size();
+            for (int index = 0; index < approvedSize; index++) {
+                String packageName = approvedPackages.valueAt(index);
+                PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+                if (pkgSetting == null) {
+                    continue;
+                }
+                long installTime = pkgSetting.getFirstInstallTime();
+                if (installTime > latestInstall) {
+                    latestInstall = installTime;
+                    filteredPackages.clear();
+                    filteredPackages.add(packageName);
+                } else if (installTime == latestInstall) {
+                    filteredPackages.add(packageName);
+                }
+            }
+        }
+
+        // Filter to approved ResolveInfos
+        ArrayMap<String, List<ResolveInfo>> approvedInfos = new ArrayMap<>();
+        for (int index = 0; index < infosSize; index++) {
+            ResolveInfo info = infos.get(index);
+            String packageName = info.getComponentInfo().packageName;
+            if (filteredPackages.contains(packageName)) {
+                List<ResolveInfo> infosPerPackage = approvedInfos.get(packageName);
+                if (infosPerPackage == null) {
+                    infosPerPackage = new ArrayList<>();
+                    approvedInfos.put(packageName, infosPerPackage);
+                }
+                infosPerPackage.add(info);
+            }
+        }
+
+        List<ResolveInfo> finalList;
+        if (highestApproval == APPROVAL_LEVEL_LEGACY_ASK) {
+            // If legacy ask, skip the last declaration filtering
+            finalList = new ArrayList<>();
+            int size = approvedInfos.size();
+            for (int index = 0; index < size; index++) {
+                finalList.addAll(approvedInfos.valueAt(index));
+            }
+        } else {
+            // Find the last declared ResolveInfo per package
+            finalList = filterToLastDeclared(approvedInfos, pkgSettingFunction);
+        }
+
+        return Pair.create(finalList, highestApproval);
+    }
+
+    /**
+     * @return highest approval level found
+     */
+    private int fillMapWithApprovalLevels(@NonNull ArrayMap<String, Integer> inputMap,
+            @NonNull String domain, @UserIdInt int userId,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        int highestApproval = APPROVAL_LEVEL_NONE;
+        int size = inputMap.size();
+        for (int index = 0; index < size; index++) {
+            String packageName = inputMap.keyAt(index);
+            PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+            if (pkgSetting == null) {
+                inputMap.setValueAt(index, APPROVAL_LEVEL_NONE);
+                continue;
+            }
+            int approval = approvalLevelForDomain(pkgSetting, domain, userId, domain);
+            highestApproval = Math.max(highestApproval, approval);
+            inputMap.setValueAt(index, approval);
+        }
+
+        return highestApproval;
+    }
+
+    @NonNull
+    private List<ResolveInfo> filterToLastDeclared(
+            @NonNull ArrayMap<String, List<ResolveInfo>> inputMap,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        List<ResolveInfo> finalList = new ArrayList<>(inputMap.size());
+
+        int inputSize = inputMap.size();
+        for (int inputIndex = 0; inputIndex < inputSize; inputIndex++) {
+            String packageName = inputMap.keyAt(inputIndex);
+            List<ResolveInfo> infos = inputMap.valueAt(inputIndex);
+            PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+            AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
+            if (pkg == null) {
+                continue;
+            }
+
+            ResolveInfo result = null;
+            int highestIndex = -1;
+            int infosSize = infos.size();
+            for (int infoIndex = 0; infoIndex < infosSize; infoIndex++) {
+                ResolveInfo info = infos.get(infoIndex);
+                List<ParsedActivity> activities = pkg.getActivities();
+                int activitiesSize = activities.size();
+                for (int activityIndex = 0; activityIndex < activitiesSize; activityIndex++) {
+                    if (Objects.equals(activities.get(activityIndex).getComponentName(),
+                            info.getComponentInfo().getComponentName())) {
+                        if (activityIndex > highestIndex) {
+                            highestIndex = activityIndex;
+                            result = info;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // Shouldn't be null, but might as well be safe
+            if (result != null) {
+                finalList.add(result);
+            }
+        }
+
+        return finalList;
+    }
+
+    @Override
+    public int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
             @UserIdInt int userId) {
         String packageName = pkgSetting.name;
         if (!DomainVerificationUtils.isDomainVerificationIntent(intent)) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, intent, userId, false, "not valid intent");
             }
-            return false;
+            return APPROVAL_LEVEL_NONE;
         }
 
-        String host = intent.getData().getHost();
+        return approvalLevelForDomain(pkgSetting, intent.getData().getHost(), userId, intent);
+    }
+
+    /**
+     * @param debugObject Should be an {@link Intent} if checking for resolution or a {@link String}
+     *                    otherwise.
+     */
+    private int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull String host,
+            @UserIdInt int userId, @NonNull Object debugObject) {
+        String packageName = pkgSetting.name;
         final AndroidPackage pkg = pkgSetting.getPkg();
 
         // Should never be null, but if it is, skip this and assume that v2 is enabled
-        if (pkg != null) {
-            // To allow an instant app to immediately open domains after being installed by the
-            // user, auto approve them for any declared autoVerify domains.
-            if (pkgSetting.getInstantApp(userId)
-                    && mCollector.collectAutoVerifyDomains(pkg).contains(host)) {
-                return true;
-            }
-
-            if (!DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg, SETTINGS_API_V2)) {
-                int legacyState = mLegacySettings.getUserState(packageName, userId);
-                switch (legacyState) {
-                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
-                        // If nothing specifically set, assume v2 rules
-                        break;
-                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
-                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
-                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK:
-                        // With v2 split into 2 lists, always and undefined, the concept of whether
-                        // or not to ask is irrelevant. Assume the user wants this application to
-                        // open the domain.
-                        return true;
-                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER:
-                        // Never has the same semantics are before
-                        return false;
-                }
+        if (pkg != null && !DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg,
+                SETTINGS_API_V2)) {
+            switch (mLegacySettings.getUserState(packageName, userId)) {
+                case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+                    // If nothing specifically set, assume v2 rules
+                    break;
+                case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER:
+                    return APPROVAL_LEVEL_NONE;
+                case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK:
+                    return APPROVAL_LEVEL_LEGACY_ASK;
+                case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
+                    return APPROVAL_LEVEL_LEGACY_ALWAYS;
             }
         }
 
@@ -1203,59 +1385,76 @@ public class DomainVerificationService extends SystemService
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
                 if (DEBUG_APPROVAL) {
-                    debugApproval(packageName, intent, userId, false, "pkgState unavailable");
+                    debugApproval(packageName, debugObject, userId, false, "pkgState unavailable");
                 }
-                return false;
+                return APPROVAL_LEVEL_NONE;
+            }
+
+            DomainVerificationUserState userState = pkgState.getUserSelectionState(userId);
+
+            if (userState != null && !userState.isLinkHandlingAllowed()) {
+                if (DEBUG_APPROVAL) {
+                    debugApproval(packageName, debugObject, userId, false,
+                            "link handling not allowed");
+                }
+                return APPROVAL_LEVEL_NONE;
+            }
+
+            // The instant app branch must be run after the link handling check,
+            // since that should also disable instant apps if toggled
+            if (pkg != null) {
+                // To allow an instant app to immediately open domains after being installed by the
+                // user, auto approve them for any declared autoVerify domains.
+                if (pkgSetting.getInstantApp(userId)
+                        && mCollector.collectAutoVerifyDomains(pkg).contains(host)) {
+                    return APPROVAL_LEVEL_INSTANT_APP;
+                }
             }
 
             ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
-            DomainVerificationUserState userState = pkgState.getUserSelectionState(userId);
+            // Check if the exact host matches
+            Integer state = stateMap.get(host);
+            if (state != null && DomainVerificationManager.isStateVerified(state)) {
+                if (DEBUG_APPROVAL) {
+                    debugApproval(packageName, debugObject, userId, true,
+                            "host verified exactly");
+                }
+                return APPROVAL_LEVEL_VERIFIED;
+            }
 
-            // Only allow autoVerify approval if the user hasn't disabled it
-            if (userState == null || !userState.isDisallowLinkHandling()) {
-                // Check if the exact host matches
-                Integer state = stateMap.get(host);
-                if (state != null && DomainVerificationManager.isStateVerified(state)) {
-                    if (DEBUG_APPROVAL) {
-                        debugApproval(packageName, intent, userId, true, "host verified exactly");
-                    }
-                    return true;
+            // Otherwise see if the host matches a verified domain by wildcard
+            int stateMapSize = stateMap.size();
+            for (int index = 0; index < stateMapSize; index++) {
+                if (!DomainVerificationManager.isStateVerified(stateMap.valueAt(index))) {
+                    continue;
                 }
 
-                // Otherwise see if the host matches a verified domain by wildcard
-                int stateMapSize = stateMap.size();
-                for (int index = 0; index < stateMapSize; index++) {
-                    if (!DomainVerificationManager.isStateVerified(stateMap.valueAt(index))) {
-                        continue;
+                String domain = stateMap.keyAt(index);
+                if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
+                    if (DEBUG_APPROVAL) {
+                        debugApproval(packageName, debugObject, userId, true,
+                                "host verified by wildcard");
                     }
-
-                    String domain = stateMap.keyAt(index);
-                    if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
-                        if (DEBUG_APPROVAL) {
-                            debugApproval(packageName, intent, userId, true,
-                                    "host verified by wildcard");
-                        }
-                        return true;
-                    }
+                    return APPROVAL_LEVEL_VERIFIED;
                 }
             }
 
             // Check user state if available
             if (userState == null) {
                 if (DEBUG_APPROVAL) {
-                    debugApproval(packageName, intent, userId, false, "userState unavailable");
+                    debugApproval(packageName, debugObject, userId, false, "userState unavailable");
                 }
-                return false;
+                return APPROVAL_LEVEL_NONE;
             }
 
             // See if the user has approved the exact host
             ArraySet<String> enabledHosts = userState.getEnabledHosts();
             if (enabledHosts.contains(host)) {
                 if (DEBUG_APPROVAL) {
-                    debugApproval(packageName, intent, userId, true,
+                    debugApproval(packageName, debugObject, userId, true,
                             "host enabled by user exactly");
                 }
-                return true;
+                return APPROVAL_LEVEL_SELECTION;
             }
 
             // See if the host matches a user selection by wildcard
@@ -1264,24 +1463,85 @@ public class DomainVerificationService extends SystemService
                 String domain = enabledHosts.valueAt(index);
                 if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
                     if (DEBUG_APPROVAL) {
-                        debugApproval(packageName, intent, userId, true,
+                        debugApproval(packageName, debugObject, userId, true,
                                 "host enabled by user through wildcard");
                     }
-                    return true;
+                    return APPROVAL_LEVEL_SELECTION;
                 }
             }
 
             if (DEBUG_APPROVAL) {
-                debugApproval(packageName, intent, userId, false, "not approved");
+                debugApproval(packageName, debugObject, userId, false, "not approved");
             }
-            return false;
+            return APPROVAL_LEVEL_NONE;
         }
     }
 
-    private void debugApproval(@NonNull String packageName, @NonNull Intent intent,
+    /**
+     * @return the filtered list paired with the corresponding approval level
+     */
+    @NonNull
+    private Pair<List<String>, Integer> getApprovedPackages(@NonNull String domain,
+            @UserIdInt int userId, int minimumApproval,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction) {
+        int highestApproval = minimumApproval;
+        List<String> approvedPackages = emptyList();
+
+        synchronized (mLock) {
+            final int size = mAttachedPkgStates.size();
+            for (int index = 0; index < size; index++) {
+                DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
+                String packageName = pkgState.getPackageName();
+                PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+                if (pkgSetting == null) {
+                    continue;
+                }
+
+                int level = approvalLevelForDomain(pkgSetting, domain, userId, domain);
+                if (level < minimumApproval) {
+                    continue;
+                }
+
+                if (level > highestApproval) {
+                    approvedPackages.clear();
+                    approvedPackages = CollectionUtils.add(approvedPackages, packageName);
+                    highestApproval = level;
+                } else if (level == highestApproval) {
+                    approvedPackages = CollectionUtils.add(approvedPackages, packageName);
+                }
+            }
+        }
+
+        if (approvedPackages.isEmpty()) {
+            return Pair.create(approvedPackages, APPROVAL_LEVEL_NONE);
+        }
+
+        List<String> filteredPackages = new ArrayList<>();
+        long latestInstall = Long.MIN_VALUE;
+        final int approvedSize = approvedPackages.size();
+        for (int index = 0; index < approvedSize; index++) {
+            String packageName = approvedPackages.get(index);
+            PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+            if (pkgSetting == null) {
+                continue;
+            }
+            long installTime = pkgSetting.getFirstInstallTime();
+            if (installTime > latestInstall) {
+                latestInstall = installTime;
+                filteredPackages.clear();
+                filteredPackages.add(packageName);
+            } else if (installTime == latestInstall) {
+                filteredPackages.add(packageName);
+            }
+        }
+
+        return Pair.create(filteredPackages, highestApproval);
+    }
+
+    private void debugApproval(@NonNull String packageName, @NonNull Object debugObject,
             @UserIdInt int userId, boolean approved, @NonNull String reason) {
         String approvalString = approved ? "approved" : "denied";
-        Slog.d(TAG + "Approval", packageName + " was " + approvalString + " for " + intent
-                + " for user " + userId + ": " + reason);
+        Slog.d(TAG + "Approval", packageName + " was " + approvalString + " for "
+                + debugObject + " for user " + userId + ": " + reason);
     }
 }
