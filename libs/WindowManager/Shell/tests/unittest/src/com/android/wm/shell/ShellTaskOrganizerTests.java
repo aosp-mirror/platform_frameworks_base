@@ -106,11 +106,6 @@ public class ShellTaskOrganizerTests {
         public void onTaskVanished(RunningTaskInfo taskInfo) {
             vanished.add(taskInfo);
         }
-
-        @Override
-        public boolean supportSizeCompatUI() {
-            return true;
-        }
     }
 
     @Before
