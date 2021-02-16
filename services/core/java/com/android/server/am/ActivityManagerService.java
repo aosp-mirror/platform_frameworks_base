@@ -186,6 +186,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -5624,6 +5625,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
                 ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
+    }
+
+    @Override
+    public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,
+            final int modeFlags, IBinder callerToken) {
+        final int size = uris.size();
+        int[] res = new int[size];
+        // Default value DENIED.
+        Arrays.fill(res, PackageManager.PERMISSION_DENIED);
+
+        for (int i = 0; i < size; i++) {
+            final Uri uri = uris.get(i);
+            final int userId = ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+            res[i] = checkUriPermission(ContentProvider.getUriWithoutUserId(uri), pid, uid,
+                    modeFlags, userId, callerToken);
+        }
+        return res;
     }
 
     /**
