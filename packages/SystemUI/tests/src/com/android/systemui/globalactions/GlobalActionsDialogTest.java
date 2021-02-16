@@ -74,12 +74,14 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -135,6 +137,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock GlobalActionsPanelPlugin.PanelViewController mWalletController;
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
+    @Mock private UserTracker mUserTracker;
+    @Mock private SecureSettings mSecureSettings;
     private ControlsComponent mControlsComponent;
 
     private TestableLooper mTestableLooper;
@@ -149,9 +153,14 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         when(mUserContextProvider.getUserContext()).thenReturn(mContext);
         mControlsComponent = new ControlsComponent(
                 true,
+                mContext,
                 () -> mControlsController,
                 () -> mControlsUiController,
-                () -> mControlsListingController
+                () -> mControlsListingController,
+                mLockPatternUtils,
+                mKeyguardStateController,
+                mUserTracker,
+                mSecureSettings
         );
 
         mGlobalActionsDialog = new GlobalActionsDialog(mContext,
