@@ -27,6 +27,7 @@ import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
@@ -58,6 +59,8 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Message;
 import android.os.ParcelUuid;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -119,6 +122,15 @@ import java.util.concurrent.TimeUnit;
  * |         connected.         |---+
  * +----------------------------+
  * </pre>
+ *
+ * <p>All messages in VcnGatewayConnection <b>should</b> be enqueued using {@link
+ * #sendMessageAndAcquireWakeLock}. Careful consideration should be given to any uses of {@link
+ * #sendMessage} directly, as they are not guaranteed to be processed in a timely manner (due to the
+ * lack of WakeLocks).
+ *
+ * <p>Any attempt to remove messages from the Handler should be done using {@link
+ * #removeEqualMessages(int, Object)}. This is necessary to ensure that the WakeLock is correctly
+ * released when no messages remain in the Handler queue.
  *
  * @hide
  */
@@ -419,6 +431,21 @@ public class VcnGatewayConnection extends StateMachine {
 
     @Nullable private IpSecTunnelInterface mTunnelIface = null;
 
+    /**
+     * WakeLock to be held when processing messages on the Handler queue.
+     *
+     * <p>Used to prevent the device from going to sleep while there are VCN-related events to
+     * process for this VcnGatewayConnection.
+     *
+     * <p>Obtain a WakeLock when enquing messages onto the Handler queue. Once all messages in the
+     * Handler queue have been processed, the WakeLock can be released and cleared.
+     *
+     * <p>This WakeLock is also used for handling delayed messages by using WakeupMessages to send
+     * delayed messages to the Handler. When the WakeupMessage fires, it will obtain the WakeLock
+     * before enquing the delayed event to the Handler.
+     */
+    @NonNull private final VcnWakeLock mWakeLock;
+
     /** Running state of this VcnGatewayConnection. */
     private boolean mIsRunning = true;
 
@@ -518,6 +545,9 @@ public class VcnGatewayConnection extends StateMachine {
 
         mUnderlyingNetworkTrackerCallback = new VcnUnderlyingNetworkTrackerCallback();
 
+        mWakeLock =
+                mDeps.newWakeLock(mVcnContext.getContext(), PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
         mUnderlyingNetworkTracker =
                 mDeps.newUnderlyingNetworkTracker(
                         mVcnContext,
@@ -544,7 +574,7 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Once torn down, this VcnTunnel CANNOT be started again.
      */
     public void teardownAsynchronously() {
-        sendMessage(
+        sendMessageAndAcquireWakeLock(
                 EVENT_DISCONNECT_REQUESTED,
                 TOKEN_ALL,
                 new EventDisconnectRequestedInfo(DISCONNECT_REASON_TEARDOWN));
@@ -559,6 +589,8 @@ public class VcnGatewayConnection extends StateMachine {
         if (mTunnelIface != null) {
             mTunnelIface.close();
         }
+
+        releaseWakeLock();
 
         mUnderlyingNetworkTracker.teardown();
     }
@@ -576,13 +608,16 @@ public class VcnGatewayConnection extends StateMachine {
         mLastSnapshot = snapshot;
         mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
 
-        sendMessage(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
+        sendMessageAndAcquireWakeLock(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
     }
 
     private class VcnUnderlyingNetworkTrackerCallback implements UnderlyingNetworkTrackerCallback {
         @Override
         public void onSelectedUnderlyingNetworkChanged(
                 @Nullable UnderlyingNetworkRecord underlying) {
+            // TODO(b/180132994): explore safely removing this Thread check
+            mVcnContext.ensureRunningOnLooperThread();
+
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
             // If underlying is null, all underlying networks have been lost. Disconnect VCN after a
@@ -593,62 +628,189 @@ public class VcnGatewayConnection extends StateMachine {
                         TOKEN_ALL,
                         new EventDisconnectRequestedInfo(DISCONNECT_REASON_UNDERLYING_NETWORK_LOST),
                         TimeUnit.SECONDS.toMillis(NETWORK_LOSS_DISCONNECT_TIMEOUT_SECONDS));
-            } else if (getHandler() != null) {
-                // Cancel any existing disconnect due to loss of underlying network
-                // getHandler() can return null if the state machine has already quit. Since this is
-                // called from other classes, this condition must be verified.
-
-                getHandler()
-                        .removeEqualMessages(
-                                EVENT_DISCONNECT_REQUESTED,
-                                new EventDisconnectRequestedInfo(
-                                        DISCONNECT_REASON_UNDERLYING_NETWORK_LOST));
+            } else {
+                // Cancel any existing disconnect due to previous loss of underlying network
+                removeEqualMessages(
+                        EVENT_DISCONNECT_REQUESTED,
+                        new EventDisconnectRequestedInfo(
+                                DISCONNECT_REASON_UNDERLYING_NETWORK_LOST));
             }
 
-            sendMessage(
+            sendMessageAndAcquireWakeLock(
                     EVENT_UNDERLYING_NETWORK_CHANGED,
                     TOKEN_ALL,
                     new EventUnderlyingNetworkChangedInfo(underlying));
         }
     }
 
-    private void sendMessage(int what, int token, EventInfo data) {
+    private void acquireWakeLock() {
+        mVcnContext.ensureRunningOnLooperThread();
+
+        if (mIsRunning) {
+            mWakeLock.acquire();
+        }
+    }
+
+    private void releaseWakeLock() {
+        mVcnContext.ensureRunningOnLooperThread();
+
+        mWakeLock.release();
+    }
+
+    /**
+     * Attempt to release mWakeLock - this can only be done if the Handler is null (meaning the
+     * StateMachine has been shutdown and thus has no business keeping the WakeLock) or if there are
+     * no more messags left to process in the Handler queue (at which point the WakeLock can be
+     * released until more messages must be processed).
+     */
+    private void maybeReleaseWakeLock() {
+        final Handler handler = getHandler();
+        if (handler == null || !handler.hasMessagesOrCallbacks()) {
+            releaseWakeLock();
+        }
+    }
+
+    @Override
+    public void sendMessage(int what) {
+        Slog.wtf(
+                TAG,
+                "sendMessage should not be used in VcnGatewayConnection. See"
+                        + " sendMessageAndAcquireWakeLock()");
+        super.sendMessage(what);
+    }
+
+    @Override
+    public void sendMessage(int what, Object obj) {
+        Slog.wtf(
+                TAG,
+                "sendMessage should not be used in VcnGatewayConnection. See"
+                        + " sendMessageAndAcquireWakeLock()");
+        super.sendMessage(what, obj);
+    }
+
+    @Override
+    public void sendMessage(int what, int arg1) {
+        Slog.wtf(
+                TAG,
+                "sendMessage should not be used in VcnGatewayConnection. See"
+                        + " sendMessageAndAcquireWakeLock()");
+        super.sendMessage(what, arg1);
+    }
+
+    @Override
+    public void sendMessage(int what, int arg1, int arg2) {
+        Slog.wtf(
+                TAG,
+                "sendMessage should not be used in VcnGatewayConnection. See"
+                        + " sendMessageAndAcquireWakeLock()");
+        super.sendMessage(what, arg1, arg2);
+    }
+
+    @Override
+    public void sendMessage(int what, int arg1, int arg2, Object obj) {
+        Slog.wtf(
+                TAG,
+                "sendMessage should not be used in VcnGatewayConnection. See"
+                        + " sendMessageAndAcquireWakeLock()");
+        super.sendMessage(what, arg1, arg2, obj);
+    }
+
+    @Override
+    public void sendMessage(Message msg) {
+        Slog.wtf(
+                TAG,
+                "sendMessage should not be used in VcnGatewayConnection. See"
+                        + " sendMessageAndAcquireWakeLock()");
+        super.sendMessage(msg);
+    }
+
+    /**
+     * WakeLock-based alternative to {@link #sendMessage}. Use to guarantee that the device will not
+     * go to sleep before processing the sent message.
+     */
+    private void sendMessageAndAcquireWakeLock(int what, int token) {
+        acquireWakeLock();
+        super.sendMessage(what, token);
+    }
+
+    /**
+     * WakeLock-based alternative to {@link #sendMessage}. Use to guarantee that the device will not
+     * go to sleep before processing the sent message.
+     */
+    private void sendMessageAndAcquireWakeLock(int what, int token, EventInfo data) {
+        acquireWakeLock();
         super.sendMessage(what, token, ARG_NOT_PRESENT, data);
     }
 
-    private void sendMessage(int what, int token, int arg2, EventInfo data) {
+    /**
+     * WakeLock-based alternative to {@link #sendMessage}. Use to guarantee that the device will not
+     * go to sleep before processing the sent message.
+     */
+    private void sendMessageAndAcquireWakeLock(int what, int token, int arg2, EventInfo data) {
+        acquireWakeLock();
         super.sendMessage(what, token, arg2, data);
     }
 
+    // TODO: remove this method once WakupMessage is used instead
     private void sendMessageDelayed(int what, int token, EventInfo data, long timeout) {
         super.sendMessageDelayed(what, token, ARG_NOT_PRESENT, data, timeout);
     }
 
+    // TODO: remove this method once WakupMessage is used instead
     private void sendMessageDelayed(int what, int token, int arg2, EventInfo data, long timeout) {
         super.sendMessageDelayed(what, token, arg2, data, timeout);
     }
 
+    /**
+     * Removes all messages matching the given parameters, and attempts to release mWakeLock if the
+     * Handler is empty.
+     *
+     * @param what the Message.what value to be removed
+     */
+    private void removeEqualMessages(int what) {
+        removeEqualMessages(what, null /* obj */);
+    }
+
+    /**
+     * Removes all messages matching the given parameters, and attempts to release mWakeLock if the
+     * Handler is empty.
+     *
+     * @param what the Message.what value to be removed
+     * @param obj the Message.obj to to be removed, or null if all messages matching Message.what
+     *     should be removed
+     */
+    private void removeEqualMessages(int what, @Nullable Object obj) {
+        final Handler handler = getHandler();
+        if (handler != null) {
+            handler.removeEqualMessages(what, obj);
+        }
+
+        maybeReleaseWakeLock();
+    }
+
     private void sessionLost(int token, @Nullable Exception exception) {
-        sendMessage(EVENT_SESSION_LOST, token, new EventSessionLostInfo(exception));
+        sendMessageAndAcquireWakeLock(
+                EVENT_SESSION_LOST, token, new EventSessionLostInfo(exception));
     }
 
     private void sessionClosed(int token, @Nullable Exception exception) {
         // SESSION_LOST MUST be sent before SESSION_CLOSED to ensure that the SM moves to the
         // Disconnecting state.
         sessionLost(token, exception);
-        sendMessage(EVENT_SESSION_CLOSED, token);
+        sendMessageAndAcquireWakeLock(EVENT_SESSION_CLOSED, token);
     }
 
     private void childTransformCreated(
             int token, @NonNull IpSecTransform transform, int direction) {
-        sendMessage(
+        sendMessageAndAcquireWakeLock(
                 EVENT_TRANSFORM_CREATED,
                 token,
                 new EventTransformCreatedInfo(direction, transform));
     }
 
     private void childOpened(int token, @NonNull VcnChildSessionConfiguration childConfig) {
-        sendMessage(EVENT_SETUP_COMPLETED, token, new EventSetupCompletedInfo(childConfig));
+        sendMessageAndAcquireWakeLock(
+                EVENT_SETUP_COMPLETED, token, new EventSetupCompletedInfo(childConfig));
     }
 
     private abstract class BaseState extends State {
@@ -658,7 +820,7 @@ public class VcnGatewayConnection extends StateMachine {
                 enterState();
             } catch (Exception e) {
                 Slog.wtf(TAG, "Uncaught exception", e);
-                sendMessage(
+                sendMessageAndAcquireWakeLock(
                         EVENT_DISCONNECT_REQUESTED,
                         TOKEN_ALL,
                         new EventDisconnectRequestedInfo(
@@ -669,21 +831,46 @@ public class VcnGatewayConnection extends StateMachine {
         protected void enterState() throws Exception {}
 
         /**
+         * Returns whether the given token is valid.
+         *
+         * <p>By default, States consider any and all token to be 'valid'.
+         *
+         * <p>States should override this method if they want to restrict message handling to
+         * specific tokens.
+         */
+        protected boolean isValidToken(int token) {
+            return true;
+        }
+
+        /**
          * Top-level processMessage with safeguards to prevent crashing the System Server on non-eng
          * builds.
+         *
+         * <p>Here be dragons: processMessage() is final to ensure that mWakeLock is released once
+         * the Handler queue is empty. Future changes to processMessage() (or overrides to
+         * processMessage) MUST ensure that mWakeLock is correctly released.
          */
         @Override
-        public boolean processMessage(Message msg) {
+        public final boolean processMessage(Message msg) {
+            final int token = msg.arg1;
+            if (!isValidToken(token)) {
+                Slog.v(TAG, "Message called with obsolete token: " + token + "; what: " + msg.what);
+                return HANDLED;
+            }
+
             try {
                 processStateMsg(msg);
             } catch (Exception e) {
                 Slog.wtf(TAG, "Uncaught exception", e);
-                sendMessage(
+                sendMessageAndAcquireWakeLock(
                         EVENT_DISCONNECT_REQUESTED,
                         TOKEN_ALL,
                         new EventDisconnectRequestedInfo(
                                 DISCONNECT_REASON_INTERNAL_ERROR + e.toString()));
             }
+
+            // Attempt to release the WakeLock - only possible if the Handler queue is empty
+            maybeReleaseWakeLock();
 
             return HANDLED;
         }
@@ -696,7 +883,7 @@ public class VcnGatewayConnection extends StateMachine {
                 exitState();
             } catch (Exception e) {
                 Slog.wtf(TAG, "Uncaught exception", e);
-                sendMessage(
+                sendMessageAndAcquireWakeLock(
                         EVENT_DISCONNECT_REQUESTED,
                         TOKEN_ALL,
                         new EventDisconnectRequestedInfo(
@@ -800,24 +987,7 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     private abstract class ActiveBaseState extends BaseState {
-        /**
-         * Handles all incoming messages, discarding messages for previous networks.
-         *
-         * <p>States that handle mobility events may need to override this method to receive
-         * messages for all underlying networks.
-         */
         @Override
-        public boolean processMessage(Message msg) {
-            final int token = msg.arg1;
-            // Only process if a valid token is presented.
-            if (isValidToken(token)) {
-                return super.processMessage(msg);
-            }
-
-            Slog.v(TAG, "Message called with obsolete token: " + token + "; what: " + msg.what);
-            return HANDLED;
-        }
-
         protected boolean isValidToken(int token) {
             return (token == TOKEN_ALL || token == mCurrentToken);
         }
@@ -848,7 +1018,7 @@ public class VcnGatewayConnection extends StateMachine {
         protected void enterState() throws Exception {
             if (mIkeSession == null) {
                 Slog.wtf(TAG, "IKE session was already closed when entering Disconnecting state.");
-                sendMessage(EVENT_SESSION_CLOSED, mCurrentToken);
+                sendMessageAndAcquireWakeLock(EVENT_SESSION_CLOSED, mCurrentToken);
                 return;
             }
 
@@ -1229,7 +1399,7 @@ public class VcnGatewayConnection extends StateMachine {
 
                     // If new underlying is null, all networks were lost; go back to disconnected.
                     if (mUnderlying == null) {
-                        removeMessages(EVENT_RETRY_TIMEOUT_EXPIRED);
+                        removeEqualMessages(EVENT_RETRY_TIMEOUT_EXPIRED);
 
                         transitionTo(mDisconnectedState);
                         return;
@@ -1241,7 +1411,7 @@ public class VcnGatewayConnection extends StateMachine {
 
                     // Fallthrough
                 case EVENT_RETRY_TIMEOUT_EXPIRED:
-                    removeMessages(EVENT_RETRY_TIMEOUT_EXPIRED);
+                    removeEqualMessages(EVENT_RETRY_TIMEOUT_EXPIRED);
 
                     transitionTo(mConnectingState);
                     break;
@@ -1526,6 +1696,12 @@ public class VcnGatewayConnection extends StateMachine {
                     ikeSessionCallback,
                     childSessionCallback);
         }
+
+        /** Builds a new WakeLock. */
+        public VcnWakeLock newWakeLock(
+                @NonNull Context context, int wakeLockFlag, @NonNull String wakeLockTag) {
+            return new VcnWakeLock(context, wakeLockFlag, wakeLockTag);
+        }
     }
 
     /**
@@ -1603,6 +1779,36 @@ public class VcnGatewayConnection extends StateMachine {
         /** Sets the underlying network used by the IkeSession. */
         public void setNetwork(@NonNull Network network) {
             mImpl.setNetwork(network);
+        }
+    }
+
+    /** Proxy Implementation of WakeLock, used for testing. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class VcnWakeLock {
+        private final WakeLock mImpl;
+
+        public VcnWakeLock(@NonNull Context context, int flags, @NonNull String tag) {
+            final PowerManager powerManager = context.getSystemService(PowerManager.class);
+            mImpl = powerManager.newWakeLock(flags, tag);
+            mImpl.setReferenceCounted(false /* isReferenceCounted */);
+        }
+
+        /**
+         * Acquire this WakeLock.
+         *
+         * <p>Synchronize this action to minimize locking around WakeLock use.
+         */
+        public synchronized void acquire() {
+            mImpl.acquire();
+        }
+
+        /**
+         * Release this Wakelock.
+         *
+         * <p>Synchronize this action to minimize locking around WakeLock use.
+         */
+        public synchronized void release() {
+            mImpl.release();
         }
     }
 }
