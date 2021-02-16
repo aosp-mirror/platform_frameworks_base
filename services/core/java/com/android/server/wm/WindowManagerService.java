@@ -224,6 +224,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.ICrossWindowBlurEnabledListener;
 import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
@@ -755,6 +756,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private final PowerManager.WakeLock mScreenFrozenLock;
 
     final TaskSnapshotController mTaskSnapshotController;
+
+    final BlurController mBlurController = new BlurController();
 
     boolean mIsTouchDevice;
     boolean mIsFakeTouchDevice;
@@ -5689,6 +5692,18 @@ public class WindowManagerService extends IWindowManager.Stub
         return mWindowTracing.isEnabled();
     }
 
+    @Override
+    public boolean registerCrossWindowBlurEnabledListener(
+                ICrossWindowBlurEnabledListener listener) {
+        return mBlurController.registerCrossWindowBlurEnabledListener(listener);
+    }
+
+    @Override
+    public void unregisterCrossWindowBlurEnabledListener(
+                ICrossWindowBlurEnabledListener listener) {
+        mBlurController.unregisterCrossWindowBlurEnabledListener(listener);
+    }
+
     // -------------------------------------------------------------
     // Internals
     // -------------------------------------------------------------
@@ -6428,6 +6443,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
+        pw.print("  mBlurEnabled="); pw.println(mBlurController.mBlurEnabled);
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
                 if ( mLastFinishedFreezeSource != null) {

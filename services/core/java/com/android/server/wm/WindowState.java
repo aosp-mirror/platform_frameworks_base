@@ -5265,7 +5265,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
             getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
-        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || (mAttrs.flags & FLAG_BLUR_BEHIND) != 0)
+        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
                    && isVisibleNow() && !mHidden) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
@@ -5274,10 +5274,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 4. The WS is not hidden.
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
-            final int blurRadius =
-                    (mAttrs.flags & FLAG_BLUR_BEHIND) != 0 ? mAttrs.getBlurBehindRadius() : 0;
+            final int blurRadius = shouldDrawBlurBehind() ? mAttrs.getBlurBehindRadius() : 0;
             getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount, blurRadius);
         }
+    }
+
+    private boolean shouldDrawBlurBehind() {
+        return (mAttrs.flags & FLAG_BLUR_BEHIND) != 0 && mWmService.mBlurController.mBlurEnabled;
     }
 
     /**

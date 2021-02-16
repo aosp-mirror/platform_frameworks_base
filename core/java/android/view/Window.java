@@ -1720,10 +1720,18 @@ public abstract class Window {
      * which blurs the whole screen behind the window. Background blur blurs the screen behind
      * only within the bounds of the window.
      *
+     * Some devices might not support cross-window blur due to GPU limitations. It can also be
+     * disabled at runtime, e.g. during battery saving mode, when multimedia tunneling is used or
+     * when minimal post processing is requested. In such situations, no blur will be computed or
+     * drawn, resulting in a transparent window background. To avoid this, the app might want to
+     * change its theme to one that does not use blurs. To listen for cross-window blur
+     * enabled/disabled events, use {@link WindowManager#addCrossWindowBlurEnabledListener}.
+     *
      * @param blurRadius The blur radius to use for window background blur in pixels
      *
      * @see android.R.styleable#Window_windowBackgroundBlurRadius
      * @see WindowManager.LayoutParams#setBlurBehindRadius
+     * @see WindowManager#addCrossWindowBlurEnabledListener
      */
     public void setBackgroundBlurRadius(int blurRadius) {}
 
