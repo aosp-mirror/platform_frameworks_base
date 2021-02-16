@@ -545,6 +545,16 @@ package android.app.blob {
 
 }
 
+package android.app.contentsuggestions {
+
+  public final class ContentSuggestionsManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS) public void resetTemporaryService(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS) public void setDefaultServiceEnabled(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS) public void setTemporaryService(int, @NonNull String, int);
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictor {

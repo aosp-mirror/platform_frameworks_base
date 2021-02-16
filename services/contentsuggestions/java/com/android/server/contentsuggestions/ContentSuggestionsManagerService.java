@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.contentsuggestions.ClassificationsRequest;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IClassificationsCallback;
@@ -251,6 +252,23 @@ public class ContentSuggestionsManagerService extends
                 isDisabled = isDisabledLocked(userId);
             }
             receiver.send(isDisabled ? 0 : 1, null);
+        }
+
+        @Override
+        public void resetTemporaryService(@UserIdInt int userId) {
+            ContentSuggestionsManagerService.this.resetTemporaryService(userId);
+        }
+
+        @Override
+        public void setTemporaryService(
+                @UserIdInt int userId, @NonNull String serviceName, int duration) {
+            ContentSuggestionsManagerService.this.setTemporaryService(
+                    userId, serviceName, duration);
+        }
+
+        @Override
+        public void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+            ContentSuggestionsManagerService.this.setDefaultServiceEnabled(userId, enabled);
         }
 
         public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
