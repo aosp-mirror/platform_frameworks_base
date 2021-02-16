@@ -117,10 +117,11 @@ public class ContextHubClientCallback {
      * 4) {@link ContextHubClient} performs any cleanup required with the nanoapp
      * 5) Callback invoked with the nanoapp ID and {@link ContextHubManager#AUTHORIZATION_DENIED}.
      *    At this point, any further attempts of communication between the nanoapp and the
-     *    {@link ContextHubClient} will be dropped by the contexthub along with
-     *    {@link ContextHubManager#AUTHORIZATION_DENIED} being sent. The {@link ContextHubClient}
-     *    should assume no communciation can happen again until
-     *    {@link ContextHubManager#AUTHORIZATION_GRANTED} is received.
+     *    {@link ContextHubClient} will be dropped by the contexthub and a return value of
+     *    {@link ContextHubTransaction#RESULT_FAILED_PERMISSION_DENIED} will be used when calling
+     *    {@link ContextHubClient#sendMessageToNanoApp}. The {@link ContextHubClient} should assume
+     *    no communciation can happen again until {@link ContextHubManager#AUTHORIZATION_GRANTED} is
+     *    received.
      *
      * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp associated with the new
