@@ -18,3 +18,10 @@ package {
         "//frameworks/av/apex/testing",
     ],
 }
+
+sdk {
+    name: "media-module-sdk",
+    java_sdk_libs: [
+        "framework-media",
+    ],
+}

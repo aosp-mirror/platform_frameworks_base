@@ -170,12 +170,11 @@ public class VpnService extends Service {
             "android.net.VpnService.SUPPORTS_ALWAYS_ON";
 
     /**
-     * Use IConnectivityManager since those methods are hidden and not
-     * available in ConnectivityManager.
+     * Use IVpnManager since those methods are hidden and not available in VpnManager.
      */
-    private static IConnectivityManager getService() {
-        return IConnectivityManager.Stub.asInterface(
-                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+    private static IVpnManager getService() {
+        return IVpnManager.Stub.asInterface(
+                ServiceManager.getService(Context.VPN_MANAGEMENT_SERVICE));
     }
 
     /**
@@ -226,15 +225,15 @@ public class VpnService extends Service {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CONTROL_VPN)
     public static void prepareAndAuthorize(Context context) {
-        IConnectivityManager cm = getService();
+        IVpnManager vm = getService();
         String packageName = context.getPackageName();
         try {
             // Only prepare if we're not already prepared.
             int userId = context.getUserId();
-            if (!cm.prepareVpn(packageName, null, userId)) {
-                cm.prepareVpn(null, packageName, userId);
+            if (!vm.prepareVpn(packageName, null, userId)) {
+                vm.prepareVpn(null, packageName, userId);
             }
-            cm.setVpnPackageAuthorization(packageName, userId, VpnManager.TYPE_VPN_SERVICE);
+            vm.setVpnPackageAuthorization(packageName, userId, VpnManager.TYPE_VPN_SERVICE);
         } catch (RemoteException e) {
             // ignore
         }

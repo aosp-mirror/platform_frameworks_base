@@ -1300,10 +1300,11 @@ public class DevicePolicyManager {
      * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
      * organization-owned.
      *
-     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
-     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
-     * contain {@link #PROVISIONING_MODE_MANAGED_PROFILE} and {@link
-     * #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
+     * <p>Using this value indicates the admin app can only be provisioned in either a
+     * fully-managed device or a corporate-owned work profile. This will cause the admin app's
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity to have the {@link
+     * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
+     * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
      * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
      * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
@@ -13456,5 +13457,85 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * enable or disable USB data signaling for the device. When disabled, USB data connections
+     * (except from charging functions) are prohibited.
+     *
+     * <p> This API is not supported on all devices, the caller should call
+     * {@link #canUsbDataSignalingBeDisabled()} to check whether enabling or disabling USB data
+     * signaling is supported on the device.
+     *
+     * @param enabled whether USB data signaling should be enabled or not.
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     * @throws IllegalStateException if disabling USB data signaling is not supported or
+     *         if USB data signaling fails to be enabled/disabled.
+     */
+    public void setUsbDataSignalingEnabled(boolean enabled) {
+        throwIfParentInstance("setUsbDataSignalingEnabled");
+        if (mService != null) {
+            try {
+                mService.setUsbDataSignalingEnabled(mContext.getPackageName(), enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to return
+     * whether USB data signaling is currently enabled by the admin.
+     *
+     * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
+     */
+    public boolean isUsbDataSignalingEnabled() {
+        throwIfParentInstance("isUsbDataSignalingEnabled");
+        if (mService != null) {
+            try {
+                return mService.isUsbDataSignalingEnabled(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called by the system to check whether USB data signaling is currently enabled for this user.
+     *
+     * @param userId which user to check for.
+     * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isUsbDataSignalingEnabledForUser(@UserIdInt int userId) {
+        throwIfParentInstance("isUsbDataSignalingEnabledForUser");
+        if (mService != null) {
+            try {
+                return mService.isUsbDataSignalingEnabledForUser(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns whether enabling or disabling USB data signaling is supported on the device.
+     *
+     * @return {@code true} if the device supports enabling and disabling USB data signaling.
+     */
+    public boolean canUsbDataSignalingBeDisabled() {
+        throwIfParentInstance("canUsbDataSignalingBeDisabled");
+        if (mService != null) {
+            try {
+                return mService.canUsbDataSignalingBeDisabled();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

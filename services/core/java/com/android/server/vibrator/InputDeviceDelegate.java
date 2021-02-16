@@ -21,16 +21,14 @@ import android.hardware.input.InputManager;
 import android.os.CombinedVibrationEffect;
 import android.os.Handler;
 import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.util.SparseArray;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 
-/** Delegates vibrations to all connected {@link InputDevice} with available {@link Vibrator}. */
-// TODO(b/159207608): Make this package-private once vibrator services are moved to this package
-public final class InputDeviceDelegate implements InputManager.InputDeviceListener {
+/** Delegates vibrations to all connected {@link InputDevice} with one or more vibrators. */
+final class InputDeviceDelegate implements InputManager.InputDeviceListener {
     private static final String TAG = "InputDeviceDelegate";
 
     private final Object mLock = new Object();
@@ -38,7 +36,7 @@ public final class InputDeviceDelegate implements InputManager.InputDeviceListen
     private final InputManager mInputManager;
 
     @GuardedBy("mLock")
-    private final SparseArray<Vibrator> mInputDeviceVibrators = new SparseArray<>();
+    private final SparseArray<VibratorManager> mInputDeviceVibrators = new SparseArray<>();
 
     /**
      * Flag updated via {@link #updateInputDeviceVibrators(boolean)}, holding the value of {@link
@@ -47,7 +45,7 @@ public final class InputDeviceDelegate implements InputManager.InputDeviceListen
     @GuardedBy("mLock")
     private boolean mShouldVibrateInputDevices;
 
-    public InputDeviceDelegate(Context context, Handler handler) {
+    InputDeviceDelegate(Context context, Handler handler) {
         mHandler = handler;
         mInputManager = context.getSystemService(InputManager.class);
     }
@@ -81,32 +79,22 @@ public final class InputDeviceDelegate implements InputManager.InputDeviceListen
     }
 
     /**
-     * Vibrate all {@link InputDevice} with {@link Vibrator} available using given effect.
+     * Vibrate all {@link InputDevice} with vibrators using given effect.
      *
      * @return {@link #isAvailable()}
      */
     public boolean vibrateIfAvailable(int uid, String opPkg, CombinedVibrationEffect effect,
             String reason, VibrationAttributes attrs) {
         synchronized (mLock) {
-            // TODO(b/159207608): Pass on the combined vibration once InputManager is merged
-            if (effect instanceof CombinedVibrationEffect.Mono) {
-                VibrationEffect e = ((CombinedVibrationEffect.Mono) effect).getEffect();
-                if (e instanceof VibrationEffect.Prebaked) {
-                    VibrationEffect fallback = ((VibrationEffect.Prebaked) e).getFallbackEffect();
-                    if (fallback != null) {
-                        e = fallback;
-                    }
-                }
-                for (int i = 0; i < mInputDeviceVibrators.size(); i++) {
-                    mInputDeviceVibrators.valueAt(i).vibrate(uid, opPkg, e, reason, attrs);
-                }
+            for (int i = 0; i < mInputDeviceVibrators.size(); i++) {
+                mInputDeviceVibrators.valueAt(i).vibrate(uid, opPkg, effect, reason, attrs);
             }
             return mInputDeviceVibrators.size() > 0;
         }
     }
 
     /**
-     * Cancel vibration on all {@link InputDevice} with {@link Vibrator} available.
+     * Cancel vibration on all {@link InputDevice} with vibrators.
      *
      * @return {@link #isAvailable()}
      */
@@ -147,9 +135,9 @@ public final class InputDeviceDelegate implements InputManager.InputDeviceListen
                     if (device == null) {
                         continue;
                     }
-                    Vibrator vibrator = device.getVibrator();
-                    if (vibrator.hasVibrator()) {
-                        mInputDeviceVibrators.put(device.getId(), vibrator);
+                    VibratorManager vibratorManager = device.getVibratorManager();
+                    if (vibratorManager.getVibratorIds().length > 0) {
+                        mInputDeviceVibrators.put(device.getId(), vibratorManager);
                     }
                 }
             } else {
@@ -171,9 +159,9 @@ public final class InputDeviceDelegate implements InputManager.InputDeviceListen
                 mInputDeviceVibrators.remove(deviceId);
                 return;
             }
-            Vibrator vibrator = device.getVibrator();
-            if (vibrator.hasVibrator()) {
-                mInputDeviceVibrators.put(deviceId, vibrator);
+            VibratorManager vibratorManager = device.getVibratorManager();
+            if (vibratorManager.getVibratorIds().length > 0) {
+                mInputDeviceVibrators.put(device.getId(), vibratorManager);
             } else {
                 mInputDeviceVibrators.remove(deviceId);
             }

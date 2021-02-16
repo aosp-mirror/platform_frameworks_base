@@ -228,8 +228,5 @@ filegroup {
         "java/com/android/server/connectivity/QosCallbackAgentConnection.java",
         "java/com/android/server/connectivity/QosCallbackTracker.java",
         "java/com/android/server/connectivity/TcpKeepaliveController.java",
-        "java/com/android/server/connectivity/Vpn.java",
-        "java/com/android/server/connectivity/VpnIkev2Utils.java",
-        "java/com/android/server/net/LockdownVpnTracker.java",
     ],
 }

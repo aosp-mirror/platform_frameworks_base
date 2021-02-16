@@ -362,6 +362,12 @@
              surface when the app has not drawn any content into this area. One example is
              when the user is resizing a window of an activity in multi-window mode. -->
         <attr name="windowBackgroundFallback" format="reference|color" />
+        <!-- Blur the screen behind the window with the bounds of the window.
+             The radius defines the size of the neighbouring area, from which pixels will be
+             averaged to form the final color for each pixel in the region.
+             A radius of 0 means no blur. The higher the radius, the denser the blur.
+             Corresponds to {@link android.view.Window#setBackgroundBlurRadius}. -->
+        <attr name="windowBackgroundBlurRadius" format="dimension" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
         <!-- Flag indicating whether there should be no title on this window. -->
@@ -1966,6 +1972,7 @@
     <declare-styleable name="Window">
         <attr name="windowBackground" />
         <attr name="windowBackgroundFallback" />
+        <attr name="windowBackgroundBlurRadius" />
         <attr name="windowContentOverlay" />
         <attr name="windowFrame" />
         <attr name="windowNoTitle" />
@@ -2255,6 +2262,23 @@
             -->
             <enum name="always" value="3" />
         </attr>
+
+        <!-- The background color for the splash screen, if not specify then system will
+             calculate from windowBackground. -->
+        <attr name="windowSplashScreenBackground" format="color"/>
+
+        <!-- Replace an icon in the center of the starting window, if the object is animated
+             and drawable(e.g. AnimationDrawable, AnimatedVectorDrawable), then it will also
+             play the animation while showing the starting window. -->
+        <attr name="windowSplashScreenAnimatedIcon" format="reference"/>
+        <!-- The duration, in milliseconds, of the window splash screen icon animation duration
+             when playing the splash screen starting window. The maximum animation duration should
+             be limited below 1000ms. -->
+        <attr name="windowSplashScreenAnimationDuration" format="integer"/>
+
+        <!-- Place an drawable image in the bottom of the starting window, it can be used to
+             represent the branding of the application. -->
+        <attr name="windowSplashScreenBrandingImage" format="reference"/>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -9253,6 +9277,7 @@
         <attr name="shortcutShortLabel" format="reference" />
         <attr name="shortcutLongLabel" format="reference" />
         <attr name="shortcutDisabledMessage" format="reference" />
+        <attr name="splashScreenTheme" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="ShortcutCategories">

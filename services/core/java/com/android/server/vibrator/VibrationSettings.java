@@ -39,20 +39,18 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
-import com.android.server.VibratorServiceDumpProto;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Controls all the system settings related to vibration. */
-// TODO(b/159207608): Make this package-private once vibrator services are moved to this package
-public final class VibrationSettings {
+final class VibrationSettings {
     private static final String TAG = "VibrationSettings";
 
     private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = {0, 30, 100, 30};
 
     /** Listener for changes on vibration settings. */
-    public interface OnVibratorSettingsChanged {
+    interface OnVibratorSettingsChanged {
         /** Callback triggered when any of the vibrator settings change. */
         void onChange();
     }
@@ -86,7 +84,7 @@ public final class VibrationSettings {
     @GuardedBy("mLock")
     private boolean mLowPowerMode;
 
-    public VibrationSettings(Context context, Handler handler) {
+    VibrationSettings(Context context, Handler handler) {
         mContext = context;
         mVibrator = context.getSystemService(Vibrator.class);
         mAudioManager = context.getSystemService(AudioManager.class);
@@ -345,17 +343,17 @@ public final class VibrationSettings {
     /** Write current settings into given {@link ProtoOutputStream}. */
     public void dumpProto(ProtoOutputStream proto) {
         synchronized (mLock) {
-            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
+            proto.write(VibratorManagerServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
                     mHapticFeedbackIntensity);
-            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_DEFAULT_INTENSITY,
+            proto.write(VibratorManagerServiceDumpProto.HAPTIC_FEEDBACK_DEFAULT_INTENSITY,
                     mVibrator.getDefaultHapticFeedbackIntensity());
-            proto.write(VibratorServiceDumpProto.NOTIFICATION_INTENSITY,
+            proto.write(VibratorManagerServiceDumpProto.NOTIFICATION_INTENSITY,
                     mNotificationIntensity);
-            proto.write(VibratorServiceDumpProto.NOTIFICATION_DEFAULT_INTENSITY,
+            proto.write(VibratorManagerServiceDumpProto.NOTIFICATION_DEFAULT_INTENSITY,
                     mVibrator.getDefaultNotificationVibrationIntensity());
-            proto.write(VibratorServiceDumpProto.RING_INTENSITY,
+            proto.write(VibratorManagerServiceDumpProto.RING_INTENSITY,
                     mRingIntensity);
-            proto.write(VibratorServiceDumpProto.RING_DEFAULT_INTENSITY,
+            proto.write(VibratorManagerServiceDumpProto.RING_DEFAULT_INTENSITY,
                     mVibrator.getDefaultRingVibrationIntensity());
         }
     }

@@ -20,10 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.PropertyInvalidatedCache;
 import android.graphics.Point;
+import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +35,8 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+@SmallTest
+@Presubmit
 public class LogicalDisplayTest {
     private static final int DISPLAY_ID = 0;
     private static final int LAYER_STACK = 0;
@@ -51,6 +57,9 @@ public class LogicalDisplayTest {
         displayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
         when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(displayDeviceInfo);
+
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
 
         DisplayDeviceRepository repo = new DisplayDeviceRepository(
                 new DisplayManagerService.SyncRoot(),

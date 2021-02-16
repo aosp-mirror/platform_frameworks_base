@@ -160,6 +160,12 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
+     * Specific a theme for a splash screen window.
+     * @hide
+     */
+    public static final String KEY_SPLASH_SCREEN_THEME = "android.activity.splashScreenTheme";
+
+    /**
      * Callback for when the last frame of the animation is played.
      * @hide
      */
@@ -398,6 +404,7 @@ public class ActivityOptions {
     private IBinder mLaunchCookie;
     private IRemoteTransition mRemoteTransition;
     private boolean mOverrideTaskTransition;
+    private int mSplashScreenThemeResId;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1147,6 +1154,7 @@ public class ActivityOptions {
         mRemoteTransition = IRemoteTransition.Stub.asInterface(opts.getBinder(
                 KEY_REMOTE_TRANSITION));
         mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
+        mSplashScreenThemeResId = opts.getInt(KEY_SPLASH_SCREEN_THEME);
     }
 
     /**
@@ -1330,6 +1338,14 @@ public class ActivityOptions {
      */
     public boolean getLockTaskMode() {
         return mLockTaskMode;
+    }
+
+    /**
+     * Gets whether the activity want to be launched as other theme for the splash screen.
+     * @hide
+     */
+    public int getSplashScreenThemeResId() {
+        return mSplashScreenThemeResId;
     }
 
     /**
@@ -1837,6 +1853,9 @@ public class ActivityOptions {
         }
         if (mOverrideTaskTransition) {
             b.putBoolean(KEY_OVERRIDE_TASK_TRANSITION, mOverrideTaskTransition);
+        }
+        if (mSplashScreenThemeResId != 0) {
+            b.putInt(KEY_SPLASH_SCREEN_THEME, mSplashScreenThemeResId);
         }
         return b;
     }

@@ -496,6 +496,45 @@ public class StagedRollbackTest {
     }
 
     @Test
+    public void testWatchdogMonitorsAcrossReboots_Phase1_Install() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+        Install.single(TestApp.A1).commit();
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
+
+        Install.single(TestApp.ACrashing2).setEnableRollback().setStaged().commit();
+    }
+
+    @Test
+    public void testWatchdogMonitorsAcrossReboots_Phase2_VerifyInstall() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+
+        // Trigger rollback of test app.
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(5), false);
+
+        // The final crash that causes rollback will come from the host side.
+        RollbackUtils.sendCrashBroadcast(TestApp.A, 4);
+    }
+
+    @Test
+    public void testWatchdogMonitorsAcrossReboots_Phase3_VerifyRollback() {
+        assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        InstallUtils.processUserData(TestApp.A);
+
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                rm.getRecentlyCommittedRollbacks(), TestApp.A);
+        assertThat(rollback).isNotNull();
+        assertThat(rollback).packagesContainsExactly(
+                Rollback.from(TestApp.A2).to(TestApp.A1));
+        assertThat(rollback).causePackagesContainsExactly(TestApp.ACrashing2);
+        assertThat(rollback).isStaged();
+        assertThat(rollback.getCommittedSessionId()).isNotEqualTo(-1);
+    }
+
+    @Test
     public void hasMainlineModule() throws Exception {
         String pkgName = getModuleMetadataPackageName();
         boolean existed =  InstrumentationRegistry.getInstrumentation().getContext()

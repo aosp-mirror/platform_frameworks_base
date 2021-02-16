@@ -82,6 +82,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMA
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.wm.ActivityRecord.TRANSFER_SPLASH_SCREEN_COPYING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -3881,6 +3882,13 @@ class Task extends WindowContainer<WindowContainer> {
         });
     }
 
+    ActivityRecord getTopWaitSplashScreenActivity() {
+        return getActivity((r) -> {
+            return r.mHandleExitSplashScreen
+                    && r.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_COPYING;
+        });
+    }
+
     boolean isTopActivityFocusable() {
         final ActivityRecord r = topRunningActivity();
         return r != null ? r.isFocusable()
@@ -4267,6 +4275,9 @@ class Task extends WindowContainer<WindowContainer> {
             if (mainWindow != null) {
                 info.mainWindowLayoutParams = mainWindow.getAttrs();
             }
+            // If the developer has persist a different configuration, we need to override it to the
+            // starting window because persisted configuration does not effect to Task.
+            info.taskInfo.configuration.setTo(topActivity.getConfiguration());
         }
         final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
         if (topFullscreenActivity != null) {
@@ -6558,10 +6569,9 @@ class Task extends WindowContainer<WindowContainer> {
                 Slog.i(TAG, "Restarting because process died: " + next);
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
-                } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedRootTask != null
+                } else if (SHOW_APP_STARTING_PREVIEW && lastFocusedRootTask != null
                         && lastFocusedRootTask.isTopRootTaskInDisplayArea()) {
-                    next.showStartingWindow(null /* prev */, false /* newTask */,
-                            false /* taskSwitch */);
+                    next.showStartingWindow(false /* taskSwitch */);
                 }
                 mTaskSupervisor.startSpecificActivity(next, true, false);
                 return true;
@@ -6584,8 +6594,7 @@ class Task extends WindowContainer<WindowContainer> {
                 next.hasBeenLaunched = true;
             } else {
                 if (SHOW_APP_STARTING_PREVIEW) {
-                    next.showStartingWindow(null /* prev */, false /* newTask */,
-                            false /* taskSwich */);
+                    next.showStartingWindow(false /* taskSwich */);
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
@@ -6746,7 +6755,10 @@ class Task extends WindowContainer<WindowContainer> {
                         prev = null;
                     }
                 }
-                r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity));
+                final int splashScreenThemeResId = options != null
+                        ? options.getSplashScreenThemeResId() : 0;
+                r.showStartingWindow(prev, newTask, isTaskSwitch(r, focusedTopActivity),
+                        splashScreenThemeResId);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,

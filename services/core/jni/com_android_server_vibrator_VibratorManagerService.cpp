@@ -26,7 +26,7 @@
 
 #include <vibratorservice/VibratorManagerHalController.h>
 
-#include "com_android_server_VibratorManagerService.h"
+#include "com_android_server_vibrator_VibratorManagerService.h"
 
 namespace android {
 
@@ -64,7 +64,7 @@ private:
     const jobject mCallbackListener;
 };
 
-vibrator::ManagerHalController* android_server_VibratorManagerService_getManager() {
+vibrator::ManagerHalController* android_server_vibrator_VibratorManagerService_getManager() {
     std::lock_guard<std::mutex> lock(gManagerMutex);
     return gManager;
 }
@@ -156,10 +156,11 @@ static void nativeCancelSynced(JNIEnv* env, jclass /* clazz */, jlong servicePtr
     service->hal()->cancelSynced();
 }
 
+inline static constexpr auto sNativeInitMethodSignature =
+        "(Lcom/android/server/vibrator/VibratorManagerService$OnSyncedVibrationCompleteListener;)J";
+
 static const JNINativeMethod method_table[] = {
-        {"nativeInit",
-         "(Lcom/android/server/VibratorManagerService$OnSyncedVibrationCompleteListener;)J",
-         (void*)nativeInit},
+        {"nativeInit", sNativeInitMethodSignature, (void*)nativeInit},
         {"nativeGetFinalizer", "()J", (void*)nativeGetFinalizer},
         {"nativeGetCapabilities", "(J)J", (void*)nativeGetCapabilities},
         {"nativeGetVibratorIds", "(J)[I", (void*)nativeGetVibratorIds},
@@ -168,15 +169,15 @@ static const JNINativeMethod method_table[] = {
         {"nativeCancelSynced", "(J)V", (void*)nativeCancelSynced},
 };
 
-int register_android_server_VibratorManagerService(JavaVM* jvm, JNIEnv* env) {
+int register_android_server_vibrator_VibratorManagerService(JavaVM* jvm, JNIEnv* env) {
     sJvm = jvm;
     auto listenerClassName =
-            "com/android/server/VibratorManagerService$OnSyncedVibrationCompleteListener";
+            "com/android/server/vibrator/VibratorManagerService$OnSyncedVibrationCompleteListener";
     jclass listenerClass = FindClassOrDie(env, listenerClassName);
     sMethodIdOnComplete = GetMethodIDOrDie(env, listenerClass, "onComplete", "(J)V");
 
-    return jniRegisterNativeMethods(env, "com/android/server/VibratorManagerService", method_table,
-                                    NELEM(method_table));
+    return jniRegisterNativeMethods(env, "com/android/server/vibrator/VibratorManagerService",
+                                    method_table, NELEM(method_table));
 }
 
 }; // namespace android

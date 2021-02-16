@@ -110,6 +110,7 @@ import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
 import com.android.internal.R;
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.internal.policy.PhoneWindow.PanelFeatureState;
 import com.android.internal.policy.PhoneWindow.PhoneWindowMenuCallback;
 import com.android.internal.view.FloatingActionMode;
@@ -255,6 +256,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Drawable mOriginalBackgroundDrawable;
     private Drawable mLastOriginalBackgroundDrawable;
     private Drawable mResizingBackgroundDrawable;
+    private BackgroundBlurDrawable mBackgroundBlurDrawable;
 
     /**
      * Temporary holder for a window background when it is set before {@link #mWindow} is
@@ -280,9 +282,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private final Paint mLegacyNavigationBarBackgroundPaint = new Paint();
     private Insets mBackgroundInsets = Insets.NONE;
     private Insets mLastBackgroundInsets = Insets.NONE;
+    private int mLastBackgroundBlurRadius = 0;
     private boolean mDrawLegacyNavigationBarBackground;
 
     private PendingInsetsController mPendingInsetsController = new PendingInsetsController();
+    private final ViewTreeObserver.OnPreDrawListener mBackgroundBlurOnPreDrawListener = () -> {
+        updateBackgroundBlur();
+        return true;
+    };
 
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
@@ -1263,18 +1270,27 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mBackgroundInsets == null) {
             mBackgroundInsets = Insets.NONE;
         }
+
         if (mBackgroundInsets.equals(mLastBackgroundInsets)
+                && mWindow.mBackgroundBlurRadius == mLastBackgroundBlurRadius
                 && mLastOriginalBackgroundDrawable == mOriginalBackgroundDrawable) {
             return;
         }
-        if (mOriginalBackgroundDrawable == null || mBackgroundInsets.equals(Insets.NONE)) {
 
-            // Call super since we are intercepting setBackground on this class.
-            super.setBackgroundDrawable(mOriginalBackgroundDrawable);
-        } else {
+        Drawable destDrawable = mOriginalBackgroundDrawable;
+        if (mWindow.mBackgroundBlurRadius > 0 && getViewRootImpl() != null
+                && mWindow.isTranslucent()) {
+            if (mBackgroundBlurDrawable == null) {
+                mBackgroundBlurDrawable = getViewRootImpl().createBackgroundBlurDrawable();
+            }
+            destDrawable = new LayerDrawable(new Drawable[] {mBackgroundBlurDrawable,
+                                                             mOriginalBackgroundDrawable});
+            mLastBackgroundBlurRadius = mWindow.mBackgroundBlurRadius;
+        }
 
-            // Call super since we are intercepting setBackground on this class.
-            super.setBackgroundDrawable(new InsetDrawable(mOriginalBackgroundDrawable,
+
+        if (destDrawable != null && !mBackgroundInsets.equals(Insets.NONE)) {
+            destDrawable = new InsetDrawable(destDrawable,
                     mBackgroundInsets.left, mBackgroundInsets.top,
                     mBackgroundInsets.right, mBackgroundInsets.bottom) {
 
@@ -1286,10 +1302,30 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 public boolean getPadding(Rect padding) {
                     return getDrawable().getPadding(padding);
                 }
-            });
+            };
         }
+
+        // Call super since we are intercepting setBackground on this class.
+        super.setBackgroundDrawable(destDrawable);
+
         mLastBackgroundInsets = mBackgroundInsets;
         mLastOriginalBackgroundDrawable = mOriginalBackgroundDrawable;
+    }
+
+    private void updateBackgroundBlur() {
+        if (mBackgroundBlurDrawable == null) return;
+
+        // If the blur radius is 0, the blur region won't be sent to surface flinger, so we don't
+        // need to calculate the corner radius.
+        if (mWindow.mBackgroundBlurRadius > 0) {
+            if (mOriginalBackgroundDrawable != null) {
+                final Outline outline = new Outline();
+                mOriginalBackgroundDrawable.getOutline(outline);
+                mBackgroundBlurDrawable.setCornerRadius(outline.mMode == Outline.MODE_ROUND_RECT
+                                                           ? outline.getRadius() : 0);
+            }
+        }
+        mBackgroundBlurDrawable.setBlurRadius(mWindow.mBackgroundBlurRadius);
     }
 
     @Override
@@ -1722,6 +1758,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             cb.onAttachedToWindow();
         }
 
+        getViewTreeObserver().addOnPreDrawListener(mBackgroundBlurOnPreDrawListener);
+        updateBackgroundDrawable();
+
         if (mFeatureId == -1) {
             /*
              * The main window has been attached, try to restore any panels
@@ -1754,6 +1793,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (cb != null && mFeatureId < 0) {
             cb.onDetachedFromWindow();
         }
+
+        getViewTreeObserver().removeOnPreDrawListener(mBackgroundBlurOnPreDrawListener);
 
         if (mWindow.mDecorContentParent != null) {
             mWindow.mDecorContentParent.dismissPopups();

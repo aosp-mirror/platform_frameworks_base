@@ -1997,8 +1997,7 @@ class ActivityStarter {
 
         if (mMovedToFront) {
             // We moved the task to front, use starting window to hide initial drawn delay.
-            targetTaskTop.showStartingWindow(null /* prev */, false /* newTask */,
-                    true /* taskSwitch */);
+            targetTaskTop.showStartingWindow(true /* taskSwitch */);
         } else if (mDoResume) {
             // Make sure the root task and its belonging display are moved to topmost.
             mTargetRootTask.moveToFront("intentActivityFound");

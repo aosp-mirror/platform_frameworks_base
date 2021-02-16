@@ -474,6 +474,8 @@ applications that come with the platform
         <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
         <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
         <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
+        <!-- Permission required for CTS test - CtsRebootReadinessTestCases -->
+        <permission name="android.permission.SIGNAL_REBOOT_READINESS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

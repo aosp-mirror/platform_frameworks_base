@@ -173,4 +173,10 @@
 
     <!-- The width/height of the icon view on staring surface. -->
     <dimen name="starting_surface_icon_size">108dp</dimen>
+
+    <!-- The width of the brand image on staring surface. -->
+    <dimen name="starting_surface_brand_image_width">200dp</dimen>
+
+    <!-- The height of the brand image on staring surface. -->
+    <dimen name="starting_surface_brand_image_height">80dp</dimen>
 </resources>
