@@ -16,8 +16,6 @@
 
 package com.android.server.appsearch.external.localstorage;
 
-import static android.app.appsearch.AppSearchResult.RESULT_OK;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.expectThrows;
@@ -27,7 +25,7 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
-import android.app.appsearch.SetSchemaResult;
+import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.util.ArraySet;
@@ -66,14 +64,14 @@ public class AppSearchImplTest {
     @Before
     public void setUp() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
+
         // Give ourselves global query permissions
         mAppSearchImpl =
                 AppSearchImpl.create(
                         mTemporaryFolder.newFolder(),
                         context,
                         VisibilityStore.NO_OP_USER_ID,
-                        /*globalQuerierPackage
-                        =*/ context.getPackageName());
+                        /*globalQuerierPackage=*/ context.getPackageName());
     }
 
     // TODO(b/175430168) add test to verify reset is working properly.
@@ -425,18 +423,24 @@ public class AppSearchImplTest {
         GetOptimizeInfoResultProto optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs()).isEqualTo(0);
 
-        // delete 999 documents , we will reach the threshold to trigger optimize() in next
+        // delete 999 documents, we will reach the threshold to trigger optimize() in next
         // deletion.
         for (int i = 0; i < AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT - 1; i++) {
             mAppSearchImpl.remove("package", "database", "namespace", "uri" + i);
         }
 
-        // optimize() still not be triggered since we are in the interval to call getOptimizeInfo()
+        // Updates the check for optimize counter, checkForOptimize() will be triggered since
+        // CHECK_OPTIMIZE_INTERVAL is reached but optimize() won't since
+        // OPTIMIZE_THRESHOLD_DOC_COUNT is not.
+        mAppSearchImpl.checkForOptimize(
+                /*mutateBatchSize=*/ AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT - 1);
+
+        // Verify optimize() still not be triggered.
         optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs())
                 .isEqualTo(AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT - 1);
 
-        // Keep delete docs, will reach the interval this time and trigger optimize().
+        // Keep delete docs
         for (int i = AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT;
                 i
                         < AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT
@@ -444,6 +448,9 @@ public class AppSearchImplTest {
                 i++) {
             mAppSearchImpl.remove("package", "database", "namespace", "uri" + i);
         }
+        // updates the check for optimize counter, will reach both CHECK_OPTIMIZE_INTERVAL and
+        // OPTIMIZE_THRESHOLD_DOC_COUNT this time and trigger a optimize().
+        mAppSearchImpl.checkForOptimize(/*mutateBatchSize*/ AppSearchImpl.CHECK_OPTIMIZE_INTERVAL);
 
         // Verify optimize() is triggered
         optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
@@ -783,7 +790,7 @@ public class AppSearchImplTest {
                 Collections.singletonList(new AppSearchSchema.Builder("Email").build());
 
         // set email incompatible and delete text
-        SetSchemaResult setSchemaResult =
+        SetSchemaResponse setSchemaResponse =
                 mAppSearchImpl.setSchema(
                         "package",
                         "database1",
@@ -791,9 +798,8 @@ public class AppSearchImplTest {
                         /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                         /*schemasPackageAccessible=*/ Collections.emptyMap(),
                         /*forceOverride=*/ true);
-        assertThat(setSchemaResult.getDeletedSchemaTypes()).containsExactly("Text");
-        assertThat(setSchemaResult.getIncompatibleSchemaTypes()).containsExactly("Email");
-        assertThat(setSchemaResult.getResultCode()).isEqualTo(RESULT_OK);
+        assertThat(setSchemaResponse.getDeletedTypes()).containsExactly("Text");
+        assertThat(setSchemaResponse.getIncompatibleTypes()).containsExactly("Email");
     }
 
     @Test
@@ -836,7 +842,7 @@ public class AppSearchImplTest {
 
         final List<AppSearchSchema> finalSchemas =
                 Collections.singletonList(new AppSearchSchema.Builder("Email").build());
-        SetSchemaResult setSchemaResult =
+        SetSchemaResponse setSchemaResponse =
                 mAppSearchImpl.setSchema(
                         "package",
                         "database1",
@@ -846,7 +852,7 @@ public class AppSearchImplTest {
                         /*forceOverride=*/ false);
 
         // Check the Document type has been deleted.
-        assertThat(setSchemaResult.getDeletedSchemaTypes()).containsExactly("Document");
+        assertThat(setSchemaResponse.getDeletedTypes()).containsExactly("Document");
 
         // ForceOverride to delete.
         mAppSearchImpl.setSchema(
@@ -1045,5 +1051,137 @@ public class AppSearchImplTest {
                             GenericDocumentToProtoConverter.toGenericDocument(
                                     strippedDocumentProto.build()));
         }
+    }
+
+    @Test
+    public void testThrowsExceptionIfClosed() throws Exception {
+        Context context = ApplicationProvider.getApplicationContext();
+        AppSearchImpl appSearchImpl =
+                AppSearchImpl.create(
+                        mTemporaryFolder.newFolder(),
+                        context,
+                        VisibilityStore.NO_OP_USER_ID,
+                        /*globalQuerierPackage=*/ "");
+
+        // Initial check that we could do something at first.
+        List<AppSearchSchema> schemas =
+                Collections.singletonList(new AppSearchSchema.Builder("type").build());
+        appSearchImpl.setSchema(
+                "package",
+                "database",
+                schemas,
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false);
+
+        appSearchImpl.close();
+
+        // Check all our public APIs
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.setSchema(
+                            "package",
+                            "database",
+                            schemas,
+                            /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                            /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                            /*forceOverride=*/ false);
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.getSchema("package", "database");
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.putDocument(
+                            "package",
+                            "database",
+                            new GenericDocument.Builder<>("uri", "type")
+                                    .setNamespace("namespace")
+                                    .build());
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.getDocument(
+                            "package", "database", "namespace", "uri", Collections.emptyMap());
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.query(
+                            "package",
+                            "database",
+                            "query",
+                            new SearchSpec.Builder()
+                                    .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                                    .build());
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.globalQuery(
+                            "query",
+                            new SearchSpec.Builder()
+                                    .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                                    .build(),
+                            "package",
+                            /*callerUid=*/ 1);
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.getNextPage(/*nextPageToken=*/ 1L);
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.invalidateNextPageToken(/*nextPageToken=*/ 1L);
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.reportUsage(
+                            "package",
+                            "database",
+                            "namespace",
+                            "uri",
+                            /*usageTimestampMillis=*/ 1000L);
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.remove("package", "database", "namespace", "uri");
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.removeByQuery(
+                            "package",
+                            "database",
+                            "query",
+                            new SearchSpec.Builder()
+                                    .setTermMatch(TermMatchType.Code.PREFIX_VALUE)
+                                    .build());
+                });
+
+        expectThrows(
+                IllegalStateException.class,
+                () -> {
+                    appSearchImpl.persistToDisk();
+                });
     }
 }

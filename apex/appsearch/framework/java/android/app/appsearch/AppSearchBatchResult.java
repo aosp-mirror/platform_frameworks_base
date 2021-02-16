@@ -37,24 +37,36 @@ import java.util.Map;
 public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     @NonNull private final Map<KeyType, ValueType> mSuccesses;
     @NonNull private final Map<KeyType, AppSearchResult<ValueType>> mFailures;
+    @NonNull private final Map<KeyType, AppSearchResult<ValueType>> mAll;
 
     AppSearchBatchResult(
             @NonNull Map<KeyType, ValueType> successes,
-            @NonNull Map<KeyType, AppSearchResult<ValueType>> failures) {
+            @NonNull Map<KeyType, AppSearchResult<ValueType>> failures,
+            @NonNull Map<KeyType, AppSearchResult<ValueType>> all) {
         mSuccesses = successes;
         mFailures = failures;
+        mAll = all;
     }
 
     private AppSearchBatchResult(@NonNull Parcel in) {
-        mSuccesses = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
-        mFailures = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
+        mAll = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
+        Map<KeyType, ValueType> successes = new ArrayMap<>();
+        Map<KeyType, AppSearchResult<ValueType>> failures = new ArrayMap<>();
+        for (Map.Entry<KeyType, AppSearchResult<ValueType>> entry : mAll.entrySet()) {
+            if (entry.getValue().isSuccess()) {
+                successes.put(entry.getKey(), entry.getValue().getResultValue());
+            } else {
+                failures.put(entry.getKey(), entry.getValue());
+            }
+        }
+        mSuccesses = Collections.unmodifiableMap(successes);
+        mFailures = Collections.unmodifiableMap(failures);
     }
 
     /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeMap(mSuccesses);
-        dest.writeMap(mFailures);
+        dest.writeMap(mAll);
     }
 
     /** Returns {@code true} if this {@link AppSearchBatchResult} has no failures. */
@@ -63,8 +75,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     }
 
     /**
-     * Returns a {@link Map} of all successful keys mapped to the successful
-     * {@link AppSearchResult}s they produced.
+     * Returns a {@link Map} of all successful keys mapped to the successful {@link
+     * AppSearchResult}s they produced.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
@@ -85,7 +97,19 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     }
 
     /**
+     * Returns a {@link Map} of all keys mapped to the {@link AppSearchResult}s they produced.
+     *
+     * <p>The values of the {@link Map} will not be {@code null}.
+     * @hide
+     */
+    @NonNull
+    public Map<KeyType, AppSearchResult<ValueType>> getAll() {
+        return mAll;
+    }
+
+    /**
      * Asserts that this {@link AppSearchBatchResult} has no failures.
+     *
      * @hide
      */
     public void checkSuccess() {
@@ -133,6 +157,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     public static final class Builder<KeyType, ValueType> {
         private final Map<KeyType, ValueType> mSuccesses = new ArrayMap<>();
         private final Map<KeyType, AppSearchResult<ValueType>> mFailures = new ArrayMap<>();
+        private final Map<KeyType, AppSearchResult<ValueType>> mAll = new ArrayMap<>();
         private boolean mBuilt = false;
 
         /**
@@ -181,6 +206,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
                 mFailures.put(key, result);
                 mSuccesses.remove(key);
             }
+            mAll.put(key, result);
             return this;
         }
 
@@ -189,7 +215,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         public AppSearchBatchResult<KeyType, ValueType> build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
-            return new AppSearchBatchResult<>(mSuccesses, mFailures);
+            return new AppSearchBatchResult<>(mSuccesses, mFailures, mAll);
         }
     }
 }
