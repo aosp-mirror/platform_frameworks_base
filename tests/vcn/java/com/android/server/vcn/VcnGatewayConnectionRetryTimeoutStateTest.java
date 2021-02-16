@@ -91,4 +91,9 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
         assertEquals(mGatewayConnection.mConnectingState, mGatewayConnection.getCurrentState());
         verifyRetryTimeoutAlarmAndGetCallback(mFirstRetryInterval, true /* expectCanceled */);
     }
+
+    @Test
+    public void testSafemodeTimeoutNotifiesCallback() {
+        verifySafemodeTimeoutNotifiesCallback(mGatewayConnection.mRetryTimeoutState);
+    }
 }

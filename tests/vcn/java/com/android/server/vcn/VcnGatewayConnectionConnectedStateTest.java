@@ -34,8 +34,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.net.LinkProperties;
+import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 
 import androidx.test.filters.SmallTest;
@@ -70,6 +72,11 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testEnterStateCreatesNewIkeSession() throws Exception {
         verify(mDeps).newIkeSession(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testEnterStateDoesNotCancelSafemodeAlarm() {
+        verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
     }
 
     @Test
@@ -122,6 +129,9 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testChildOpenedRegistersNetwork() throws Exception {
+        // Verify scheduled but not canceled when entering ConnectedState
+        verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+
         final VcnChildSessionConfiguration mMockChildSessionConfig =
                 mock(VcnChildSessionConfiguration.class);
         doReturn(Collections.singletonList(TEST_INTERNAL_ADDR))
@@ -163,24 +173,41 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         for (int cap : mConfig.getAllExposedCapabilities()) {
             assertTrue(nc.hasCapability(cap));
         }
+
+        // Now that Vcn Network is up, notify it as validated and verify the Safemode alarm is
+        // canceled
+        mGatewayConnection.mNetworkAgent.onValidationStatus(
+                NetworkAgent.VALIDATION_STATUS_VALID, null /* redirectUri */);
+        verify(mSafemodeTimeoutAlarm).cancel();
     }
 
     @Test
     public void testChildSessionClosedTriggersDisconnect() throws Exception {
+        // Verify scheduled but not canceled when entering ConnectedState
+        verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+
         getChildSessionCallback().onClosed();
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
         verifyTeardownTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+
+        // Since network never validated, verify mSafemodeTimeoutAlarm not canceled
+        verifyNoMoreInteractions(mSafemodeTimeoutAlarm);
     }
 
     @Test
     public void testIkeSessionClosedTriggersDisconnect() throws Exception {
+        // Verify scheduled but not canceled when entering ConnectedState
+        verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+
         getIkeSessionCallback().onClosed();
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mRetryTimeoutState, mGatewayConnection.getCurrentState());
         verify(mIkeSession).close();
-        verifyTeardownTimeoutAlarmAndGetCallback(true /* expectCanceled */);
+
+        // Since network never validated, verify mSafemodeTimeoutAlarm not canceled
+        verifyNoMoreInteractions(mSafemodeTimeoutAlarm);
     }
 }
