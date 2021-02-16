@@ -64,7 +64,6 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -396,6 +395,7 @@ public class NotificationPanelViewController extends PanelViewController {
     // Used for two finger gesture as well as accessibility shortcut to QS.
     private boolean mQsExpandImmediate;
     private boolean mTwoFingerQsExpandPossible;
+    private String mHeaderDebugInfo;
 
     /**
      * If we are in a panel collapsing motion, we reset scrollY of our scroll view but still
@@ -3381,8 +3381,8 @@ public class NotificationPanelViewController extends PanelViewController {
         return mView.getHeight();
     }
 
-    public TextView getHeaderDebugInfo() {
-        return mView.findViewById(R.id.header_debug_info);
+    public void setHeaderDebugInfo(String text) {
+        if (DEBUG) mHeaderDebugInfo = text;
     }
 
     public void onThemeChanged() {
@@ -4045,6 +4045,8 @@ public class NotificationPanelViewController extends PanelViewController {
             p.setStrokeWidth(2);
             p.setStyle(Paint.Style.STROKE);
             canvas.drawLine(0, getMaxPanelHeight(), mView.getWidth(), getMaxPanelHeight(), p);
+            p.setTextSize(24);
+            if (mHeaderDebugInfo != null) canvas.drawText(mHeaderDebugInfo, 50, 100, p);
             p.setColor(Color.BLUE);
             canvas.drawLine(0, getExpandedHeight(), mView.getWidth(), getExpandedHeight(), p);
             p.setColor(Color.GREEN);
