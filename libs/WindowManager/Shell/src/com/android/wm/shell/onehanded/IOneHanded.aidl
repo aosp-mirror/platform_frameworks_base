@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.recents;
+package com.android.wm.shell.onehanded;
 
 /**
- * Listener interface that Launcher attaches to SystemUI to get split-screen callbacks.
+ * Interface that is exposed to remote callers to manipulate the OneHanded feature.
  */
-oneway interface ISplitScreenListener {
-    void onStagePositionChanged(int stage, int position);
-    void onTaskStageChanged(int taskId, int stage, boolean visible);
+interface IOneHanded {
+
+    /**
+     * Enters one handed mode.
+     */
+    oneway void startOneHanded() = 1;
+
+    /**
+     * Exits one handed mode.
+     */
+    oneway void stopOneHanded() = 2;
 }

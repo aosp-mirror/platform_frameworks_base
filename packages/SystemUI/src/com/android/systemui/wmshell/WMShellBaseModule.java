@@ -81,7 +81,7 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.startingsurface.StartingWindowController;
-import com.android.wm.shell.transition.RemoteTransitions;
+import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -399,8 +399,8 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static RemoteTransitions provideRemoteTransitions(Transitions transitions) {
-        return Transitions.asRemoteTransitions(transitions);
+    static ShellTransitions provideRemoteTransitions(Transitions transitions) {
+        return transitions.asRemoteTransitions();
     }
 
     @WMSingleton
@@ -521,10 +521,10 @@ public abstract class WMShellBaseModule {
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
-            Optional<StartingSurface> startingSurface,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
+            StartingWindowController startingWindow,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new ShellInitImpl(displayImeController,
                 dragAndDropController,
@@ -532,10 +532,10 @@ public abstract class WMShellBaseModule {
                 legacySplitScreenOptional,
                 splitScreenOptional,
                 appPairsOptional,
-                startingSurface,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 transitions,
+                startingWindow,
                 mainExecutor);
     }
 

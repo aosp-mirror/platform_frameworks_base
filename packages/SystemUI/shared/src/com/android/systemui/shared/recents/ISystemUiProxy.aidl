@@ -16,8 +16,6 @@
 
 package com.android.systemui.shared.recents;
 
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -25,14 +23,11 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.MotionEvent;
 
-import com.android.systemui.shared.recents.ISplitScreenListener;
-import com.android.systemui.shared.recents.IStartingWindowListener;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.RemoteTransitionCompat;
 
 /**
  * Temporary callbacks into SystemUI.
- * Next id = 44
  */
 interface ISystemUiProxy {
 
@@ -129,16 +124,6 @@ interface ISystemUiProxy {
     void onQuickSwitchToNewTask(int rotation) = 25;
 
     /**
-     * Start the one-handed mode.
-     */
-    void startOneHandedMode() = 26;
-
-    /**
-     * Stop the one-handed mode.
-     */
-    void stopOneHandedMode() = 27;
-
-    /**
      * Handle the provided image as if it was a screenshot.
      */
     void handleImageBundleAsScreenshot(in Bundle screenImageBundle, in Rect locationInScreen,
@@ -149,65 +134,5 @@ interface ISystemUiProxy {
      */
     void expandNotificationPanel() = 29;
 
-    /**
-     * Registers a RemoteTransitionCompat that will handle transitions. This parameter bundles an
-     * IRemoteTransition and a filter that must pass for it.
-     */
-    void registerRemoteTransition(in RemoteTransitionCompat remoteTransition) = 32;
-
-    /** Unegisters a RemoteTransitionCompat that will handle transitions. */
-    void unregisterRemoteTransition(in RemoteTransitionCompat remoteTransition) = 33;
-
-// SplitScreen APIs...copied from SplitScreen.java
-    /**
-     * Stage position isn't specified normally meaning to use what ever it is currently set to.
-     */
-    //int STAGE_POSITION_UNDEFINED = -1;
-    /**
-     * Specifies that a stage is positioned at the top half of the screen if
-     * in portrait mode or at the left half of the screen if in landscape mode.
-     */
-    //int STAGE_POSITION_TOP_OR_LEFT = 0;
-    /**
-     * Specifies that a stage is positioned at the bottom half of the screen if
-     * in portrait mode or at the right half of the screen if in landscape mode.
-     */
-    //int STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
-
-    /**
-     * Stage type isn't specified normally meaning to use what ever the default is.
-     * E.g. exit split-screen and launch the app in fullscreen.
-     */
-    //int STAGE_TYPE_UNDEFINED = -1;
-    /**
-     * The main stage type.
-     * @see MainStage
-     */
-    //int STAGE_TYPE_MAIN = 0;
-    /**
-     * The side stage type.
-     * @see SideStage
-     */
-    //int STAGE_TYPE_SIDE = 1;
-
-    void registerSplitScreenListener(in ISplitScreenListener listener) = 34;
-    void unregisterSplitScreenListener(in ISplitScreenListener listener) = 35;
-
-    /** Hides the side-stage if it is currently visible. */
-    void setSideStageVisibility(in boolean visible) = 36;
-    /** Removes the split-screen stages. */
-    void exitSplitScreen() = 37;
-    /** @param exitSplitScreenOnHide if to exit split-screen if both stages are not visible. */
-    void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) = 38;
-    void startTask(in int taskId, in int stage, in int position, in Bundle options) = 39;
-    void startShortcut(in String packageName, in String shortcutId, in int stage, in int position,
-            in Bundle options, in UserHandle user) = 40;
-    void startIntent(
-            in PendingIntent intent, in Intent fillInIntent, in int stage, in int position,
-            in Bundle options) = 41;
-    void removeFromSideStage(in int taskId) = 42;
-    /**
-     * Sets listener to get task launching callbacks.
-     */
-    void setStartingWindowListener(IStartingWindowListener listener) = 43;
+    // Next id = 44
 }

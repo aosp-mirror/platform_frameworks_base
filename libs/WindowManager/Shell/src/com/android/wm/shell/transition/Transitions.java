@@ -23,6 +23,8 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
+import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -51,6 +53,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -60,7 +63,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /** Plays transition animations */
-public class Transitions {
+public class Transitions implements RemoteCallable<Transitions> {
     static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
@@ -73,7 +76,7 @@ public class Transitions {
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
-    private final RemoteTransitionImpl mImpl = new RemoteTransitionImpl();
+    private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
@@ -86,10 +89,6 @@ public class Transitions {
 
     /** Keeps track of currently tracked transitions and all the animations associated with each */
     private final ArrayMap<IBinder, ActiveTransition> mActiveTransitions = new ArrayMap<>();
-
-    public static RemoteTransitions asRemoteTransitions(Transitions transitions) {
-        return transitions.mImpl;
-    }
 
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull Context context, @NonNull ShellExecutor mainExecutor,
@@ -126,6 +125,20 @@ public class Transitions {
         mRemoteTransitionHandler = null;
     }
 
+    public ShellTransitions asRemoteTransitions() {
+        return mImpl;
+    }
+
+    @Override
+    public Context getContext() {
+        return mContext;
+    }
+
+    @Override
+    public ShellExecutor getRemoteCallExecutor() {
+        return mMainExecutor;
+    }
+
     private void dispatchAnimScaleSetting(float scale) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             mHandlers.get(i).setAnimScaleSetting(scale);
@@ -134,8 +147,8 @@ public class Transitions {
 
     /** Create an empty/non-registering transitions object for system-ui tests. */
     @VisibleForTesting
-    public static RemoteTransitions createEmptyForTesting() {
-        return new RemoteTransitions() {
+    public static ShellTransitions createEmptyForTesting() {
+        return new ShellTransitions() {
             @Override
             public void registerRemote(@androidx.annotation.NonNull TransitionFilter filter,
                     @androidx.annotation.NonNull IRemoteTransition remoteTransition) {
@@ -426,21 +439,71 @@ public class Transitions {
         }
     }
 
+    /**
+     * The interface for calls from outside the Shell, within the host process.
+     */
     @ExternalThread
-    private class RemoteTransitionImpl implements RemoteTransitions {
+    private class ShellTransitionImpl implements ShellTransitions {
+        private IShellTransitionsImpl mIShellTransitions;
+
+        @Override
+        public IShellTransitions createExternalInterface() {
+            if (mIShellTransitions != null) {
+                mIShellTransitions.invalidate();
+            }
+            mIShellTransitions = new IShellTransitionsImpl(Transitions.this);
+            return mIShellTransitions;
+        }
+
         @Override
         public void registerRemote(@NonNull TransitionFilter filter,
                 @NonNull IRemoteTransition remoteTransition) {
             mMainExecutor.execute(() -> {
-                Transitions.this.registerRemote(filter, remoteTransition);
+                mRemoteTransitionHandler.addFiltered(filter, remoteTransition);
             });
         }
 
         @Override
         public void unregisterRemote(@NonNull IRemoteTransition remoteTransition) {
             mMainExecutor.execute(() -> {
-                Transitions.this.unregisterRemote(remoteTransition);
+                mRemoteTransitionHandler.removeFiltered(remoteTransition);
             });
+        }
+    }
+
+    /**
+     * The interface for calls from outside the host process.
+     */
+    @BinderThread
+    private static class IShellTransitionsImpl extends IShellTransitions.Stub {
+        private Transitions mTransitions;
+
+        IShellTransitionsImpl(Transitions transitions) {
+            mTransitions = transitions;
+        }
+
+        /**
+         * Invalidates this instance, preventing future calls from updating the controller.
+         */
+        void invalidate() {
+            mTransitions = null;
+        }
+
+        @Override
+        public void registerRemote(@NonNull TransitionFilter filter,
+                @NonNull IRemoteTransition remoteTransition) {
+            executeRemoteCallWithTaskPermission(mTransitions, "registerRemote",
+                    (transitions) -> {
+                        transitions.mRemoteTransitionHandler.addFiltered(filter, remoteTransition);
+                    });
+        }
+
+        @Override
+        public void unregisterRemote(@NonNull IRemoteTransition remoteTransition) {
+            executeRemoteCallWithTaskPermission(mTransitions, "unregisterRemote",
+                    (transitions) -> {
+                        transitions.mRemoteTransitionHandler.removeFiltered(remoteTransition);
+                    });
         }
     }
 
