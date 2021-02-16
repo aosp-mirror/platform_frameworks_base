@@ -285,6 +285,7 @@ public class NotificationLockscreenUserManagerImpl implements
         internalFilter.addAction(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);
         mContext.registerReceiver(mBaseBroadcastReceiver, internalFilter, PERMISSION_SELF, null);
 
+        mCurrentUserId = ActivityManager.getCurrentUser(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();
 
         mSettingsObserver.onChange(false);  // set up
