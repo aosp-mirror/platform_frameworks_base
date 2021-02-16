@@ -18,27 +18,27 @@ package android.content.pm.verify.domain;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-/** @hide */
+/**
+ * @hide
+ */
 public class DomainVerificationUtils {
 
     private static final int STRINGS_TARGET_BYTE_SIZE = IBinder.getSuggestedMaxIpcSizeBytes() / 2;
 
     /**
      * Write a map containing web hosts to the given parcel, using {@link Parcel#writeBlob(byte[])}
-     * if the limit exceeds {@link IBinder#getSuggestedMaxIpcSizeBytes()} / 2. This assumes that
-     * the written map is the only data structure in the caller that varies based on the host data
-     * set. Other data that will be written to the parcel after this method will not be considered
-     * in the calculation.
+     * if the limit exceeds {@link IBinder#getSuggestedMaxIpcSizeBytes()} / 2. This assumes that the
+     * written map is the only data structure in the caller that varies based on the host data set.
+     * Other data that will be written to the parcel after this method will not be considered in the
+     * calculation.
      */
     public static void writeHostMap(@NonNull Parcel dest, @NonNull Map<String, ?> map) {
         boolean targetSizeExceeded = false;

@@ -20,14 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainSet;
+import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
 import android.content.pm.verify.domain.DomainVerificationManagerImpl;
-import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationUserSelection;
 import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.os.ServiceSpecificException;
-import android.util.ArraySet;
 
 import java.util.List;
 import java.util.UUID;
@@ -99,6 +99,17 @@ class DomainVerificationManagerStub extends IDomainVerificationManager.Stub {
             String packageName, @UserIdInt int userId) {
         try {
             return mService.getDomainVerificationUserSelection(packageName, userId);
+        } catch (Exception e) {
+            throw rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public List<DomainOwner> getOwnersForDomain(@NonNull String domain,
+            @UserIdInt int userId) {
+        try {
+            return mService.getOwnersForDomain(domain, userId);
         } catch (Exception e) {
             throw rethrow(e);
         }

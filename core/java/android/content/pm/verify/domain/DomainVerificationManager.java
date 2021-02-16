@@ -239,7 +239,15 @@ public interface DomainVerificationManager {
      * {@link Context#createPackageContextAsUser(String, int, UserHandle)} should be used.
      *
      * Enabling an unverified domain will allow an application to open it, but this can only occur
-     * if no other app on the device is approved for the domain.
+     * if no other app on the device is approved for a higher approval level. This can queried
+     * using {@link #getOwnersForDomain(String)}.
+     *
+     * If all owners for a domain are {@link DomainOwner#isOverrideable()}, then calling this to
+     * enable that domain will disable all other owners.
+     *
+     * On the other hand, if any of the owners are non-overrideable, then this must be called with
+     * false for all of the other owners to disable them before the domain can be taken by a new
+     * owner.
      *
      * @param domainSetId See {@link DomainVerificationInfo#getIdentifier()}.
      * @param domains     The domains to toggle the state of.
@@ -274,6 +282,19 @@ public interface DomainVerificationManager {
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     DomainVerificationUserSelection getDomainVerificationUserSelection(@NonNull String packageName)
             throws NameNotFoundException;
+
+    /**
+     * For the given domain, return all apps which are approved to open it in a
+     * greater than 0 priority. This does not mean that all apps can actually open
+     * an Intent with that domain. That will be decided by the set of apps which
+     * are the highest priority level, ignoring all lower priority levels.
+     *
+     * By default the list will be returned ordered from lowest to highest
+     * priority.
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
+    List<DomainOwner> getOwnersForDomain(@NonNull String domain);
 
     /**
      * Thrown if a {@link DomainVerificationInfo#getIdentifier()}} or an associated set of domains
