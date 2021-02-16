@@ -24,6 +24,7 @@ import android.app.backup.FullBackupDataOutput;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
@@ -212,7 +213,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
-
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
@@ -1204,17 +1204,25 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private byte[] getSimSpecificSettingsData() {
-        SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
-        byte[] simSpecificData = subManager.getAllSimSpecificSettingsForBackup();
-        Log.i(TAG, "sim specific data of length + " + simSpecificData.length
+        byte[] simSpecificData = new byte[0];
+        PackageManager packageManager = getBaseContext().getPackageManager();
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
+            simSpecificData = subManager.getAllSimSpecificSettingsForBackup();
+            Log.i(TAG, "sim specific data of length + " + simSpecificData.length
                 + " successfully retrieved");
+        }
 
         return simSpecificData;
     }
 
     private void restoreSimSpecificSettings(byte[] data) {
-        SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
-        subManager.restoreAllSimSpecificSettingsFromBackup(data);
+        PackageManager packageManager = getBaseContext().getPackageManager();
+        boolean hasTelephony = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        if (hasTelephony) {
+            SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
+            subManager.restoreAllSimSpecificSettingsFromBackup(data);
+        }
     }
 
     private void updateWindowManagerIfNeeded(Integer previousDensity) {
