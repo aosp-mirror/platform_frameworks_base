@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ABORT_UNRECOGNIZED_OPCODE;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_INVALID;
@@ -49,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @Presubmit
@@ -1585,5 +1587,47 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(features.contains(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU)).isFalse();
         assertThat(features.contains(
                 Constants.RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU)).isFalse();
+    }
+
+    @Test
+    public void doesNotSupportRecordTvScreen() {
+        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_TV, mPlaybackLogicalAddress,
+                Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
+
+        mNativeWrapper.onCecMessage(recordTvScreen);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage featureAbort = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                mPlaybackLogicalAddress, ADDR_TV, Constants.MESSAGE_RECORD_TV_SCREEN,
+                ABORT_UNRECOGNIZED_OPCODE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(featureAbort);
+    }
+
+    @Test
+    public void shouldHandleUserControlPressedAndReleased() {
+        HdmiCecMessage userControlPressed = HdmiCecMessageBuilder.buildUserControlPressed(
+                ADDR_TV, mPlaybackLogicalAddress,
+                HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP);
+        HdmiCecMessage userControlReleased = HdmiCecMessageBuilder.buildUserControlReleased(
+                ADDR_TV, mPlaybackLogicalAddress);
+
+        mNativeWrapper.onCecMessage(userControlPressed);
+        mTestLooper.dispatchAll();
+
+        // Move past the follower safety timeout
+        mTestLooper.moveTimeForward(TimeUnit.SECONDS.toMillis(2));
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(userControlReleased);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage featureAbortPressed = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                mPlaybackLogicalAddress, ADDR_TV, Constants.MESSAGE_USER_CONTROL_PRESSED,
+                ABORT_UNRECOGNIZED_OPCODE);
+        HdmiCecMessage featureAbortReleased = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                mPlaybackLogicalAddress, ADDR_TV, Constants.MESSAGE_USER_CONTROL_RELEASED,
+                ABORT_UNRECOGNIZED_OPCODE);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbortPressed);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbortReleased);
     }
 }
