@@ -1471,11 +1471,17 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuTimePerClusterFreqLocked(int atomTag, List<StatsEvent> pulledData) {
-        boolean success = KernelCpuTotalBpfMapReader.read((cluster, freq, timeMs) -> {
-            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, cluster, freq, timeMs));
-        });
-        if (!success) {
+        int[] freqsClusters = KernelCpuBpfTracking.getFreqsClusters();
+        long[] freqs = KernelCpuBpfTracking.getFreqs();
+        long[] timesMs = KernelCpuTotalBpfMapReader.read();
+        if (timesMs == null) {
             return StatsManager.PULL_SKIP;
+        }
+        for (int freqIndex = 0; freqIndex < timesMs.length; ++freqIndex) {
+            int cluster = freqsClusters[freqIndex];
+            long freq = freqs[freqIndex];
+            long timeMs = timesMs[freqIndex];
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, cluster, freq, timeMs));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -1503,48 +1509,42 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuCyclesPerUidCluster() {
-        int tagId = FrameworkStatsLog.CPU_CYCLES_PER_UID_CLUSTER;
-        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setAdditiveFields(new int[] {3, 4, 5})
-                .build();
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                metadata,
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl
-        );
+        // If eBPF tracking is not support, the procfs fallback is used if the kernel knows about
+        // CPU frequencies.
+        if (KernelCpuBpfTracking.isSupported() || KernelCpuBpfTracking.getClusters() > 0) {
+            int tagId = FrameworkStatsLog.CPU_CYCLES_PER_UID_CLUSTER;
+            PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                    .setAdditiveFields(new int[] {3, 4, 5})
+                    .build();
+            mStatsManager.setPullAtomCallback(
+                    tagId,
+                    metadata,
+                    DIRECT_EXECUTOR,
+                    mStatsCallbackImpl
+            );
+        }
     }
 
     int pullCpuCyclesPerUidClusterLocked(int atomTag, List<StatsEvent> pulledData) {
-        // TODO(b/179485697): Remove power profile dependency.
         PowerProfile powerProfile = new PowerProfile(mContext);
-        // Frequency index to frequency mapping.
-        long[] freqs = mCpuUidFreqTimeReader.readFreqs(powerProfile);
-        // Frequency index to cluster mapping.
-        int[] freqClusters = new int[freqs.length];
-        // Frequency index to power mapping.
-        double[] freqPowers = new double[freqs.length];
-        // Number of clusters.
-        int clusters;
-
-        // Initialize frequency mappings.
+        int[] freqsClusters = KernelCpuBpfTracking.getFreqsClusters();
+        int clusters = KernelCpuBpfTracking.getClusters();
+        long[] freqs = KernelCpuBpfTracking.getFreqs();
+        double[] freqsPowers = new double[freqs.length];
+        // Initialize frequency power mapping.
         {
-            int cluster = 0;
             int freqClusterIndex = 0;
-            long lastFreq = -1;
+            int lastCluster = -1;
             for (int freqIndex = 0; freqIndex < freqs.length; ++freqIndex, ++freqClusterIndex) {
-                long currFreq = freqs[freqIndex];
-                if (currFreq <= lastFreq) {
-                    cluster++;
+                int cluster = freqsClusters[freqIndex];
+                if (cluster != lastCluster) {
                     freqClusterIndex = 0;
                 }
-                freqClusters[freqIndex] = cluster;
-                freqPowers[freqIndex] =
-                        powerProfile.getAveragePowerForCpuCore(cluster, freqClusterIndex);
-                lastFreq = currFreq;
-            }
+                lastCluster = cluster;
 
-            clusters = cluster + 1;
+                freqsPowers[freqIndex] =
+                        powerProfile.getAveragePowerForCpuCore(cluster, freqClusterIndex);
+            }
         }
 
         // Aggregate 0: mcycles, 1: runtime ms, 2: power profile estimate for the same uids for
@@ -1570,12 +1570,12 @@ public class StatsPullAtomService extends SystemService {
             }
 
             for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                int cluster = freqClusters[freqIndex];
+                int cluster = freqsClusters[freqIndex];
                 long timeMs = cpuFreqTimeMs[freqIndex];
                 values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES] += freqs[freqIndex] * timeMs;
                 values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES + 1] += timeMs;
                 values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES + 2] +=
-                        freqPowers[freqIndex] * timeMs;
+                        freqsPowers[freqIndex] * timeMs;
             }
         });
 
@@ -1665,34 +1665,6 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuCyclesPerThreadGroupCluster(int atomTag, List<StatsEvent> pulledData) {
-        // TODO(b/179485697): Remove power profile dependency.
-        PowerProfile powerProfile = new PowerProfile(mContext);
-        // Frequency index to frequency mapping.
-        long[] freqs = mCpuUidFreqTimeReader.readFreqs(powerProfile);
-        if (freqs == null) {
-            return StatsManager.PULL_SKIP;
-        }
-        // Frequency index to cluster mapping.
-        int[] freqClusters = new int[freqs.length];
-        // Number of clusters.
-        int clusters;
-
-        // Initialize frequency mappings.
-        {
-            int cluster = 0;
-            long lastFreq = -1;
-            for (int freqIndex = 0; freqIndex < freqs.length; ++freqIndex) {
-                long currFreq = freqs[freqIndex];
-                if (currFreq <= lastFreq) {
-                    cluster++;
-                }
-                freqClusters[freqIndex] = cluster;
-                lastFreq = currFreq;
-            }
-
-            clusters = cluster + 1;
-        }
-
         SystemServiceCpuThreadTimes times = LocalServices.getService(BatteryStatsInternal.class)
                 .getSystemServiceCpuThreadTimes();
         if (times == null) {
@@ -1701,22 +1673,24 @@ public class StatsPullAtomService extends SystemService {
 
         addCpuCyclesPerThreadGroupClusterAtoms(atomTag, pulledData,
                 FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER__THREAD_GROUP__SYSTEM_SERVER,
-                times.threadCpuTimesUs, clusters, freqs, freqClusters);
+                times.threadCpuTimesUs);
         addCpuCyclesPerThreadGroupClusterAtoms(atomTag, pulledData,
                 FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER__THREAD_GROUP__SYSTEM_SERVER_BINDER,
-                times.binderThreadCpuTimesUs, clusters, freqs, freqClusters);
+                times.binderThreadCpuTimesUs);
 
         return StatsManager.PULL_SUCCESS;
     }
 
     private static void addCpuCyclesPerThreadGroupClusterAtoms(
-            int atomTag, List<StatsEvent> pulledData, int threadGroup, long[] cpuTimesUs,
-            int clusters, long[] freqs, int[] freqClusters) {
+            int atomTag, List<StatsEvent> pulledData, int threadGroup, long[] cpuTimesUs) {
+        int[] freqsClusters = KernelCpuBpfTracking.getFreqsClusters();
+        int clusters = KernelCpuBpfTracking.getClusters();
+        long[] freqs = KernelCpuBpfTracking.getFreqs();
         long[] aggregatedCycles = new long[clusters];
         long[] aggregatedTimesUs = new long[clusters];
         for (int i = 0; i < cpuTimesUs.length; ++i) {
-            aggregatedCycles[freqClusters[i]] += freqs[i] * cpuTimesUs[i] / 1_000;
-            aggregatedTimesUs[freqClusters[i]] += cpuTimesUs[i];
+            aggregatedCycles[freqsClusters[i]] += freqs[i] * cpuTimesUs[i] / 1_000;
+            aggregatedTimesUs[freqsClusters[i]] += cpuTimesUs[i];
         }
         for (int cluster = 0; cluster < clusters; ++cluster) {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
