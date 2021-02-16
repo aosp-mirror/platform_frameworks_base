@@ -82,6 +82,15 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         default void onTaskInfoChanged(RunningTaskInfo taskInfo) {}
         default void onTaskVanished(RunningTaskInfo taskInfo) {}
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
+        /** Whether this task listener supports size compat UI. */
+        default boolean supportSizeCompatUI() {
+            return false;
+        }
+        /** Attaches the a child window surface to the task surface. */
+        default void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+            throw new IllegalStateException(
+                    "This task listener doesn't support child surface attachment.");
+        }
         default void dump(@NonNull PrintWriter pw, String prefix) {};
     }
 
@@ -358,8 +367,10 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             return;
         }
 
-        // The task is vanished, notify to remove size compat UI on this Task if there is any.
-        if (taskListener == null) {
+        // The task is vanished or doesn't support size compat UI, notify to remove size compat UI
+        // on this Task if there is any.
+        if (taskListener == null || !taskListener.supportSizeCompatUI()
+                || !taskInfo.topActivityInSizeCompat) {
             mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
                     null /* taskConfig */, null /* sizeCompatActivity*/,
                     null /* taskListener */);
@@ -367,10 +378,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         }
 
         mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
-                taskInfo.configuration.windowConfiguration.getBounds(),
-                // null if the top activity not in size compat.
-                taskInfo.topActivityInSizeCompat ? taskInfo.topActivityToken : null,
-                taskListener);
+                taskInfo.configuration, taskInfo.topActivityToken, taskListener);
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {
