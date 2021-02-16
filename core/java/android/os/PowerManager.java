@@ -1898,7 +1898,8 @@ public final class PowerManager {
      * These estimates will be displayed on system UI surfaces in place of the system computed
      * value.
      *
-     * Calling this requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * Calling this requires either the {@link android.Manifest.permission#DEVICE_POWER} or the
+     * {@link android.Manifest.permission#BATTERY_PREDICTION} permissions.
      *
      * @param timeRemaining  The time remaining as a {@link Duration}.
      * @param isPersonalized true if personalized based on device usage history, false otherwise.
@@ -1906,7 +1907,10 @@ public final class PowerManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.BATTERY_PREDICTION,
+            android.Manifest.permission.DEVICE_POWER
+    })
     public void setBatteryDischargePrediction(@NonNull Duration timeRemaining,
             boolean isPersonalized) {
         if (timeRemaining == null) {
