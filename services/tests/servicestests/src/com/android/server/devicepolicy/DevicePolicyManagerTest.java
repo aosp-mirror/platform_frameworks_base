@@ -89,6 +89,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
+import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -7000,6 +7001,82 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThrows(IllegalStateException.class,
                 () -> parentDpm.setPasswordQuality(admin1,
                         DevicePolicyManager.PASSWORD_QUALITY_COMPLEX));
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_noDeviceOwnerOrPoOfOrgOwnedDevice() {
+        assertThrows(SecurityException.class,
+                () -> dpm.setUsbDataSignalingEnabled(true));
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+        when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isTrue();
+
+        dpm.setUsbDataSignalingEnabled(false);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isFalse();
+    }
+
+    @Test
+    public void testIsUsbDataSignalingEnabledForUser_systemUser() throws Exception {
+        when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+        setDeviceOwner();
+        dpm.setUsbDataSignalingEnabled(false);
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+
+        assertThat(dpm.isUsbDataSignalingEnabledForUser(UserHandle.myUserId())).isFalse();
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_asPoOfOrgOwnedDevice() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isTrue();
+
+        dpm.setUsbDataSignalingEnabled(false);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isFalse();
+    }
+
+    @Test
+    public void testCanUsbDataSignalingBeDisabled_canBeDisabled() throws Exception {
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+
+        assertThat(dpm.canUsbDataSignalingBeDisabled()).isTrue();
+    }
+
+    @Test
+    public void testCanUsbDataSignalingBeDisabled_cannotBeDisabled() throws Exception {
+        setDeviceOwner();
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_2);
+
+        assertThat(dpm.canUsbDataSignalingBeDisabled()).isFalse();
+        assertThrows(IllegalStateException.class,
+                () -> dpm.setUsbDataSignalingEnabled(true));
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_noChangeToActiveAdmin()
+            throws Exception {
+        setDeviceOwner();
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+        boolean enabled = dpm.isUsbDataSignalingEnabled();
+
+        dpm.setUsbDataSignalingEnabled(true);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isEqualTo(enabled);
     }
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {

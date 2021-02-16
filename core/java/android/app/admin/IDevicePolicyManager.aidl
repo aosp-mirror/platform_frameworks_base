@@ -502,4 +502,9 @@ interface IDevicePolicyManager {
 
     void resetDefaultCrossProfileIntentFilters(int userId);
     boolean canAdminGrantSensorsPermissionsForUser(int userId);
+
+    void setUsbDataSignalingEnabled(String callerPackage, boolean enabled);
+    boolean isUsbDataSignalingEnabled(String callerPackage);
+    boolean isUsbDataSignalingEnabledForUser(int userId);
+    boolean canUsbDataSignalingBeDisabled();
 }
