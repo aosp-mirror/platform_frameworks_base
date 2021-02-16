@@ -778,7 +778,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private File mInheritedFilesBase;
     @GuardedBy("mLock")
-    private boolean mVerityFound;
+    private boolean mVerityFoundForApks;
 
     /**
      * Both flags should be guarded with mLock whenever changes need to be in lockstep.
@@ -2714,8 +2714,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Missing existing base package");
         }
-        // Default to require only if existing base has fs-verity.
-        mVerityFound = PackageManagerServiceUtils.isApkVerityEnabled()
+        // Default to require only if existing base apk has fs-verity.
+        mVerityFoundForApks = PackageManagerServiceUtils.isApkVerityEnabled()
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
                 && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath());
 
@@ -3010,34 +3010,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void maybeStageFsveritySignatureLocked(File origFile, File targetFile)
-            throws PackageManagerException {
+    private void maybeStageFsveritySignatureLocked(File origFile, File targetFile,
+            boolean fsVerityRequired) throws PackageManagerException {
         final File originalSignature = new File(
                 VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
-        // Make sure .fsv_sig exists when it should, then resolve and stage it.
         if (originalSignature.exists()) {
-            // mVerityFound can only change from false to true here during the staging loop. Since
-            // all or none of files should have .fsv_sig, this should only happen in the first time
-            // (or never), otherwise bail out.
-            if (!mVerityFound) {
-                mVerityFound = true;
-                if (mResolvedStagedFiles.size() > 1) {
-                    throw new PackageManagerException(INSTALL_FAILED_BAD_SIGNATURE,
-                            "Some file is missing fs-verity signature");
-                }
-            }
-        } else {
-            if (!mVerityFound) {
-                return;
-            }
+            final File stagedSignature = new File(
+                    VerityUtils.getFsveritySignatureFilePath(targetFile.getPath()));
+            stageFileLocked(originalSignature, stagedSignature);
+        } else if (fsVerityRequired) {
             throw new PackageManagerException(INSTALL_FAILED_BAD_SIGNATURE,
                     "Missing corresponding fs-verity signature to " + origFile);
         }
-
-        final File stagedSignature = new File(
-                VerityUtils.getFsveritySignatureFilePath(targetFile.getPath()));
-
-        stageFileLocked(originalSignature, stagedSignature);
     }
 
     @GuardedBy("mLock")
@@ -3056,7 +3040,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 DexMetadataHelper.buildDexMetadataPathForApk(targetFile.getName()));
 
         stageFileLocked(dexMetadataFile, targetDexMetadataFile);
-        maybeStageFsveritySignatureLocked(dexMetadataFile, targetDexMetadataFile);
+
+        // Also stage .dm.fsv_sig. .dm may be required to install with fs-verity signature on
+        // supported on older devices.
+        maybeStageFsveritySignatureLocked(dexMetadataFile, targetDexMetadataFile,
+                VerityUtils.isFsVeritySupported() && DexMetadataHelper.isFsVerityRequired());
     }
 
     private void storeBytesToInstallationFile(final String localPath, final String absolutePath,
@@ -3118,13 +3106,45 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
+    private boolean isFsVerityRequiredForApk(File origFile, File targetFile)
+            throws PackageManagerException {
+        if (mVerityFoundForApks) {
+            return true;
+        }
+
+        // We haven't seen .fsv_sig for any APKs. Treat it as not required until we see one.
+        final File originalSignature = new File(
+                VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
+        if (!originalSignature.exists()) {
+            return false;
+        }
+        mVerityFoundForApks = true;
+
+        // When a signature is found, also check any previous staged APKs since they also need to
+        // have fs-verity signature consistently.
+        for (File file : mResolvedStagedFiles) {
+            if (!file.getName().endsWith(".apk")) {
+                continue;
+            }
+            // Ignore the current targeting file.
+            if (targetFile.getName().equals(file.getName())) {
+                continue;
+            }
+            throw new PackageManagerException(INSTALL_FAILED_BAD_SIGNATURE,
+                    "Previously staged apk is missing fs-verity signature");
+        }
+        return true;
+    }
+
+    @GuardedBy("mLock")
     private void resolveAndStageFileLocked(File origFile, File targetFile, String splitName)
             throws PackageManagerException {
         stageFileLocked(origFile, targetFile);
 
-        // Stage fsverity signature if present.
-        maybeStageFsveritySignatureLocked(origFile, targetFile);
-        // Stage dex metadata (.dm) if present.
+        // Stage APK's fs-verity signature if present.
+        maybeStageFsveritySignatureLocked(origFile, targetFile,
+                isFsVerityRequiredForApk(origFile, targetFile));
+        // Stage dex metadata (.dm) and corresponding fs-verity signature if present.
         maybeStageDexMetadataLocked(origFile, targetFile);
         // Stage checksums (.digests) if present.
         maybeStageDigestsLocked(origFile, targetFile, splitName);
