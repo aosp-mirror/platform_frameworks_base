@@ -32,6 +32,12 @@
         android:visibility="gone" />
 
     <ViewStub
+        android:id="@+id/keyguard_qs_user_switch_stub"
+        android:layout="@layout/keyguard_qs_user_switch"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
+    <ViewStub
         android:id="@+id/keyguard_user_switcher_stub"
         android:layout="@layout/keyguard_user_switcher"
         android:layout_height="match_parent"
