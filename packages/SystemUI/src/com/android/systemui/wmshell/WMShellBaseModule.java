@@ -20,7 +20,6 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 
 import android.animation.AnimationHandler;
 import android.app.ActivityTaskManager;
-import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -73,7 +72,6 @@ import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
-import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -211,8 +209,8 @@ public abstract class WMShellBaseModule {
     @Provides
     static SizeCompatUIController provideSizeCompatUIController(Context context,
             DisplayController displayController, DisplayImeController imeController,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new SizeCompatUIController(context, displayController, imeController, mainExecutor);
+            SyncTransactionQueue syncQueue) {
+        return new SizeCompatUIController(context, displayController, imeController, syncQueue);
     }
 
     @WMSingleton
