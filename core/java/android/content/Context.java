@@ -93,6 +93,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -5725,6 +5726,32 @@ public abstract class Context {
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
             @Intent.AccessUriMode int modeFlags);
 
+    /**
+     * Determine whether a particular process and user ID has been granted
+     * permission to access a list of URIs.  This only checks for permissions
+     * that have been explicitly granted -- if the given process/uid has
+     * more general access to the URI's content provider then this check will
+     * always fail.
+     *
+     * @param uris The list of URIs that is being checked.
+     * @param pid The process ID being checked against.  Must be &gt; 0.
+     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * user, which will pass every permission check.
+     * @param modeFlags The access modes to check for the list of uris
+     *
+     * @return Array of permission grants corresponding to each entry in the list of uris.
+     * {@link PackageManager#PERMISSION_GRANTED} if the given pid/uid is allowed to access that uri,
+     * or {@link PackageManager#PERMISSION_DENIED} if it is not.
+     *
+     * @see #checkCallingUriPermission
+     */
+    @NonNull
+    @PackageManager.PermissionResult
+    public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,
+            @Intent.AccessUriMode int modeFlags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
     /** @hide */
     @SuppressWarnings("HiddenAbstractMethod")
     @PackageManager.PermissionResult
@@ -5755,6 +5782,32 @@ public abstract class Context {
     public abstract int checkCallingUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
+     * Determine whether the calling process and user ID has been
+     * granted permission to access a list of URIs.  This is basically
+     * the same as calling {@link #checkUriPermissions(List, int, int, int)}
+     * with the pid and uid returned by {@link
+     * android.os.Binder#getCallingPid} and {@link
+     * android.os.Binder#getCallingUid}.  One important difference is
+     * that if you are not currently processing an IPC, this function
+     * will always fail.
+     *
+     * @param uris The list of URIs that is being checked.
+     * @param modeFlags The access modes to check.
+     *
+     * @return Array of permission grants corresponding to each entry in the list of uris.
+     * {@link PackageManager#PERMISSION_GRANTED} if the given pid/uid is allowed to access that uri,
+     * or {@link PackageManager#PERMISSION_DENIED} if it is not.
+     *
+     * @see #checkUriPermission(Uri, int, int, int)
+     */
+    @NonNull
+    @PackageManager.PermissionResult
+    public int[] checkCallingUriPermissions(@NonNull List<Uri> uris,
+            @Intent.AccessUriMode int modeFlags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Determine whether the calling process of an IPC <em>or you</em> has been granted
      * permission to access a specific URI.  This is the same as
      * {@link #checkCallingUriPermission}, except it grants your own permissions
@@ -5773,6 +5826,28 @@ public abstract class Context {
     @PackageManager.PermissionResult
     public abstract int checkCallingOrSelfUriPermission(Uri uri,
             @Intent.AccessUriMode int modeFlags);
+
+    /**
+     * Determine whether the calling process of an IPC <em>or you</em> has been granted
+     * permission to access a list of URIs.  This is the same as
+     * {@link #checkCallingUriPermission}, except it grants your own permissions
+     * if you are not currently processing an IPC.  Use with care!
+     *
+     * @param uris The list of URIs that is being checked.
+     * @param modeFlags The access modes to check.
+     *
+     * @return Array of permission grants corresponding to each entry in the list of uris.
+     * {@link PackageManager#PERMISSION_GRANTED} if the given pid/uid is allowed to access that uri,
+     * or {@link PackageManager#PERMISSION_DENIED} if it is not.
+     *
+     * @see #checkCallingUriPermission
+     */
+    @NonNull
+    @PackageManager.PermissionResult
+    public int[] checkCallingOrSelfUriPermissions(@NonNull List<Uri> uris,
+            @Intent.AccessUriMode int modeFlags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Check both a Uri and normal permission.  This allows you to perform
