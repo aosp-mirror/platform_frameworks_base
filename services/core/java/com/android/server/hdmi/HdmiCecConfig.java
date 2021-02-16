@@ -411,6 +411,12 @@ public class HdmiCecConfig {
             case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE);
                 break;
+            case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
+                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
+                break;
+            case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
+                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
+                break;
         }
     }
 
@@ -447,6 +453,8 @@ public class HdmiCecConfig {
                 Global.HDMI_CEC_VERSION,
                 Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
+                Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
+                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
         };
         for (String setting: settings) {
             resolver.registerContentObserver(Global.getUriFor(setting), false,
