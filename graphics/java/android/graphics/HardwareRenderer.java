@@ -39,6 +39,7 @@ import android.view.IGraphicsStatsCallback;
 import android.view.NativeVectorDrawableAnimator;
 import android.view.PixelCopy;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.animation.AnimationUtils;
 
@@ -311,6 +312,16 @@ public class HardwareRenderer {
             throw new IllegalArgumentException("Surface is invalid. surface.isValid() == false.");
         }
         nSetSurface(mNativeProxy, surface, discardBuffer);
+    }
+
+    /**
+     * Sets the SurfaceControl to be used internally inside render thread
+     * @hide
+     * @param surfaceControl The surface control to pass to render thread in hwui.
+     *        If null, any previous references held in render thread will be discarded.
+    */
+    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl) {
+        nSetSurfaceControl(mNativeProxy, surfaceControl != null ? surfaceControl.mNativeObject : 0);
     }
 
     /**
@@ -1215,6 +1226,8 @@ public class HardwareRenderer {
     private static native void nSetName(long nativeProxy, String name);
 
     private static native void nSetSurface(long nativeProxy, Surface window, boolean discardBuffer);
+
+    private static native void nSetSurfaceControl(long nativeProxy, long nativeSurfaceControl);
 
     private static native boolean nPause(long nativeProxy);
 

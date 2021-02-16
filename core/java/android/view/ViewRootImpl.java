@@ -1375,6 +1375,7 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
                 mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent,
                         attrs.getTitle().toString());
+                mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 updateColorModeIfNeeded(attrs.getColorMode());
                 updateForceDarkMode();
                 if (mAttachInfo.mThreadedRenderer != null) {
@@ -1940,6 +1941,10 @@ public final class ViewRootImpl implements ViewParent,
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.destroy();
             mBlastBufferQueue = null;
+        }
+
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.setSurfaceControl(null);
         }
     }
 
@@ -7650,6 +7655,9 @@ public final class ViewRootImpl implements ViewParent,
                 if (blastSurface != null) {
                     mSurface.transferFrom(blastSurface);
                 }
+            }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
         } else {
             destroySurface();

@@ -20,6 +20,7 @@
 #include <SkBitmap.h>
 #include <android/native_window.h>
 #include <cutils/compiler.h>
+#include <android/surface_control.h>
 #include <utils/Functor.h>
 
 #include "../FrameMetricsObserver.h"
@@ -72,6 +73,7 @@ public:
     void setName(const char* name);
 
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
+    void setSurfaceControl(ASurfaceControl* surfaceControl);
     void allocateBuffers();
     bool pause();
     void setStopped(bool stopped);
