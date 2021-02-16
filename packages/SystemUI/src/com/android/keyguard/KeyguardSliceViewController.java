@@ -83,6 +83,10 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         public void onDensityOrFontScaleChanged() {
             mView.onDensityOrFontScaleChanged();
         }
+        @Override
+        public void onOverlayChanged() {
+            mView.onOverlayChanged();
+        }
     };
 
     Observer<Slice> mObserver = new Observer<Slice>() {
