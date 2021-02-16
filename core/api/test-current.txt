@@ -1348,6 +1348,12 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
+  public class NetworkPolicyManager {
+    method public boolean getRestrictBackground();
+    method @NonNull public static String resolveNetworkId(@NonNull android.net.wifi.WifiConfiguration);
+    method public void setRestrictBackground(boolean);
+  }
+
   public class NetworkStack {
     method public static void setServiceForTest(@Nullable android.os.IBinder);
   }
@@ -2723,6 +2729,10 @@ package android.window {
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
   }
 
+  public final class SplashScreenView extends android.widget.FrameLayout {
+    method @Nullable public android.view.View getBrandingView();
+  }
+
   public final class StartingWindowInfo implements android.os.Parcelable {
     ctor public StartingWindowInfo();
     method public int describeContents();
@@ -2742,6 +2752,7 @@ package android.window {
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
     method @BinderThread public void addStartingWindow(@NonNull android.window.StartingWindowInfo, @NonNull android.os.IBinder);
+    method @BinderThread public void copySplashScreenView(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void createRootTask(int, int, @Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);

@@ -16,6 +16,7 @@
 
 package com.android.server.storage;
 
+import static android.service.storage.ExternalStorageService.EXTRA_ANR_TIMEOUT_MS;
 import static android.service.storage.ExternalStorageService.EXTRA_ERROR;
 import static android.service.storage.ExternalStorageService.FLAG_SESSION_ATTRIBUTE_INDEXABLE;
 import static android.service.storage.ExternalStorageService.FLAG_SESSION_TYPE_FUSE;
@@ -143,6 +144,24 @@ public final class StorageUserConnection {
     }
 
     /**
+     * Called when {@code packageName} is about to ANR
+     *
+     * @return ANR dialog delay in milliseconds
+     */
+    public long getAnrDelayMillis(String packageName, int uid)
+            throws ExternalStorageServiceException {
+        synchronized (mSessionsLock) {
+            for (String sessionId : mSessions.keySet()) {
+                long delay = mActiveConnection.getAnrDelayMillis(packageName, uid);
+                if (delay > 0) {
+                    return delay;
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Removes a session without ending it or waiting for exit.
      *
      * This should only be used if the session has certainly been ended because the volume was
@@ -234,6 +253,9 @@ public final class StorageUserConnection {
         @GuardedBy("mLock")
         private final ArrayList<CompletableFuture<Void>> mOutstandingOps = new ArrayList<>();
 
+        @GuardedBy("mLock")
+        private final ArrayList<CompletableFuture<Long>> mOutstandingTimeoutOps = new ArrayList<>();
+
         @Override
         public void close() {
             ServiceConnection oldConnection = null;
@@ -250,6 +272,9 @@ public final class StorageUserConnection {
                 for (CompletableFuture<Void> op : mOutstandingOps) {
                     op.cancel(true);
                 }
+                for (CompletableFuture<Long> op : mOutstandingTimeoutOps) {
+                    op.cancel(true);
+                }
                 mOutstandingOps.clear();
             }
 
@@ -264,27 +289,44 @@ public final class StorageUserConnection {
             }
         }
 
-        private void waitForAsync(AsyncStorageServiceCall asyncCall) throws Exception {
-            CompletableFuture<IExternalStorageService> serviceFuture = connectIfNeeded();
+        private void waitForAsyncVoid(AsyncStorageServiceCall asyncCall) throws Exception {
             CompletableFuture<Void> opFuture = new CompletableFuture<>();
+            RemoteCallback callback = new RemoteCallback(result -> setResult(result, opFuture));
+
+            waitForAsync(asyncCall, callback, opFuture, mOutstandingOps,
+                    DEFAULT_REMOTE_TIMEOUT_SECONDS);
+        }
+
+        private long waitForAsyncLong(AsyncStorageServiceCall asyncCall) throws Exception {
+            CompletableFuture<Long> opFuture = new CompletableFuture<>();
+            RemoteCallback callback =
+                    new RemoteCallback(result -> setTimeoutResult(result, opFuture));
+
+            return waitForAsync(asyncCall, callback, opFuture, mOutstandingTimeoutOps,
+                    1 /* timeoutSeconds */);
+        }
+
+        private <T> T waitForAsync(AsyncStorageServiceCall asyncCall, RemoteCallback callback,
+                CompletableFuture<T> opFuture, ArrayList<CompletableFuture<T>> outstandingOps,
+                long timeoutSeconds) throws Exception {
+            CompletableFuture<IExternalStorageService> serviceFuture = connectIfNeeded();
 
             try {
                 synchronized (mLock) {
-                    mOutstandingOps.add(opFuture);
+                    outstandingOps.add(opFuture);
                 }
-                serviceFuture.thenCompose(service -> {
+                return serviceFuture.thenCompose(service -> {
                     try {
-                        asyncCall.run(service,
-                                new RemoteCallback(result -> setResult(result, opFuture)));
+                        asyncCall.run(service, callback);
                     } catch (RemoteException e) {
                         opFuture.completeExceptionally(e);
                     }
 
                     return opFuture;
-                }).get(DEFAULT_REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                }).get(timeoutSeconds, TimeUnit.SECONDS);
             } finally {
                 synchronized (mLock) {
-                    mOutstandingOps.remove(opFuture);
+                    outstandingOps.remove(opFuture);
                 }
             }
         }
@@ -292,9 +334,9 @@ public final class StorageUserConnection {
         public void startSession(Session session, ParcelFileDescriptor fd)
                 throws ExternalStorageServiceException {
             try {
-                waitForAsync((service, callback) -> service.startSession(session.sessionId,
+                waitForAsyncVoid((service, callback) -> service.startSession(session.sessionId,
                         FLAG_SESSION_TYPE_FUSE | FLAG_SESSION_ATTRIBUTE_INDEXABLE,
-                        fd, session.upperPath, session.lowerPath, callback));
+                                fd, session.upperPath, session.lowerPath, callback));
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to start session: " + session, e);
             } finally {
@@ -308,7 +350,7 @@ public final class StorageUserConnection {
 
         public void endSession(Session session) throws ExternalStorageServiceException {
             try {
-                waitForAsync((service, callback) ->
+                waitForAsyncVoid((service, callback) ->
                         service.endSession(session.sessionId, callback));
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to end session: " + session, e);
@@ -319,7 +361,7 @@ public final class StorageUserConnection {
         public void notifyVolumeStateChanged(String sessionId, StorageVolume vol) throws
                 ExternalStorageServiceException {
             try {
-                waitForAsync((service, callback) ->
+                waitForAsyncVoid((service, callback) ->
                         service.notifyVolumeStateChanged(sessionId, vol, callback));
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to notify volume state changed "
@@ -330,11 +372,32 @@ public final class StorageUserConnection {
         public void freeCache(String sessionId, String volumeUuid, long bytes)
                 throws ExternalStorageServiceException {
             try {
-                waitForAsync((service, callback) ->
+                waitForAsyncVoid((service, callback) ->
                         service.freeCache(sessionId, volumeUuid, bytes, callback));
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to free " + bytes
                         + " bytes for volumeUuid : " + volumeUuid, e);
+            }
+        }
+
+        public long getAnrDelayMillis(String packgeName, int uid)
+                throws ExternalStorageServiceException {
+            try {
+                return waitForAsyncLong((service, callback) ->
+                        service.getAnrDelayMillis(packgeName, uid, callback));
+            } catch (Exception e) {
+                throw new ExternalStorageServiceException("Failed to notify app not responding: "
+                        + packgeName, e);
+            }
+        }
+
+        private void setTimeoutResult(Bundle result, CompletableFuture<Long> future) {
+            ParcelableException ex = result.getParcelable(EXTRA_ERROR);
+            if (ex != null) {
+                future.completeExceptionally(ex);
+            } else {
+                long timeoutMs = result.getLong(EXTRA_ANR_TIMEOUT_MS);
+                future.complete(timeoutMs);
             }
         }
 

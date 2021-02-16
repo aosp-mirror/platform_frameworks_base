@@ -889,12 +889,6 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
-    "-1088782910": {
-      "message": "Translucent=%s Floating=%s ShowWallpaper=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1076978367": {
       "message": "thawRotation: mRotation=%d",
       "level": "VERBOSE",
@@ -1674,6 +1668,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
+    },
+    "-124316973": {
+      "message": "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STARTING_WINDOW",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-118786523": {
       "message": "Resume failed; resetting state to %s: %s",

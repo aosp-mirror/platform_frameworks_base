@@ -740,6 +740,7 @@ public class ClipData implements Parcelable {
         mIcon = null;
         mItems = new ArrayList<Item>();
         mItems.add(item);
+        mClipDescription.setIsStyledText(isStyledText());
     }
 
     /**
@@ -756,6 +757,7 @@ public class ClipData implements Parcelable {
         mIcon = null;
         mItems = new ArrayList<Item>();
         mItems.add(item);
+        mClipDescription.setIsStyledText(isStyledText());
     }
 
     /**
@@ -914,6 +916,9 @@ public class ClipData implements Parcelable {
             throw new NullPointerException("item is null");
         }
         mItems.add(item);
+        if (mItems.size() == 1) {
+            mClipDescription.setIsStyledText(isStyledText());
+        }
     }
 
     /**
@@ -1047,6 +1052,20 @@ public class ClipData implements Parcelable {
                 item.mUri = maybeAddUserId(item.mUri, contentUserHint);
             }
         }
+    }
+
+    private boolean isStyledText() {
+        if (mItems.isEmpty()) {
+            return false;
+        }
+        final CharSequence text = mItems.get(0).getText();
+        if (text instanceof Spanned) {
+            Spanned spanned = (Spanned) text;
+            if (TextUtils.hasStyleSpan(spanned)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -62,6 +62,16 @@ interface IUiModeManager {
     int getNightMode();
 
     /**
+     * Sets the dark mode for the given application. This setting is persisted and will override the
+     * system configuration for this application.
+     *   1 - notnight mode
+     *   2 - night mode
+     *   3 - automatic mode switching
+     * @throws RemoteException
+     */
+    void setApplicationNightMode(in int mode);
+
+    /**
      * Tells if UI mode is locked or not.
      */
     boolean isUiModeLocked();

@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -55,6 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @hide
  */
+@TestApi
 @SystemService(Context.NETWORK_POLICY_SERVICE)
 public class NetworkPolicyManager {
 
@@ -125,6 +127,7 @@ public class NetworkPolicyManager {
     public static final int RULE_REJECT_ALL = 1 << 6;
     /**
      * Reject traffic on all networks for restricted networking mode.
+     * @hide
      */
     public static final int RULE_REJECT_RESTRICTED_MODE = 1 << 10;
 
@@ -351,6 +354,7 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
+    @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setRestrictBackground(boolean restrictBackground) {
         try {
@@ -361,6 +365,7 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
+    @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean getRestrictBackground() {
         try {
@@ -506,6 +511,8 @@ public class NetworkPolicyManager {
 
     /**
      * Get multipath preference for the given network.
+     *
+     * @hide
      */
     public int getMultipathPreference(Network network) {
         try {
@@ -624,7 +631,9 @@ public class NetworkPolicyManager {
     }
 
     /** @hide */
-    public static String resolveNetworkId(WifiConfiguration config) {
+    @TestApi
+    @NonNull
+    public static String resolveNetworkId(@NonNull WifiConfiguration config) {
         return WifiInfo.sanitizeSsid(config.isPasspoint()
                 ? config.providerFriendlyName : config.SSID);
     }

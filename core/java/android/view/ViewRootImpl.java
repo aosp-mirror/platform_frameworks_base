@@ -2836,8 +2836,7 @@ public final class ViewRootImpl implements ViewParent,
                         mScroller.abortAnimation();
                     }
                     // Our surface is gone
-                    if (mAttachInfo.mThreadedRenderer != null &&
-                            mAttachInfo.mThreadedRenderer.isEnabled()) {
+                    if (isHardwareEnabled()) {
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
                 } else if ((surfaceReplaced
@@ -3923,8 +3922,15 @@ public final class ViewRootImpl implements ViewParent,
         };
     }
 
+    /**
+     * @hide
+     */
+    public boolean isHardwareEnabled() {
+        return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
+    }
+
     private boolean addFrameCompleteCallbackIfNeeded() {
-        if (mAttachInfo.mThreadedRenderer == null || !mAttachInfo.mThreadedRenderer.isEnabled()) {
+        if (!isHardwareEnabled()) {
             return false;
         }
 
@@ -4268,7 +4274,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean useAsyncReport = false;
         if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) {
-            if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
+            if (isHardwareEnabled()) {
                 // If accessibility focus moved, always invalidate the root.
                 boolean invalidateRoot = accessibilityFocusDirty || mInvalidateRootRequested;
                 mInvalidateRootRequested = false;

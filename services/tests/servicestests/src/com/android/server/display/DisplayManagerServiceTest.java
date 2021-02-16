@@ -45,7 +45,9 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.MessageQueue;
 import android.os.Process;
+import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
@@ -76,10 +78,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class DisplayManagerServiceTest {
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
@@ -193,8 +200,8 @@ public class DisplayManagerServiceTest {
         verify(mMockInputManagerInternal).setDisplayViewports(viewportCaptor.capture());
         List<DisplayViewport> viewports = viewportCaptor.getValue();
 
-        // Expect to receive 2 viewports: internal, and virtual
-        assertEquals(2, viewports.size());
+        // Expect to receive at least 2 viewports: at least 1 internal, and 1 virtual
+        assertTrue(viewports.size() >= 2);
 
         DisplayViewport virtualViewport = null;
         DisplayViewport internalViewport = null;
@@ -202,7 +209,10 @@ public class DisplayManagerServiceTest {
             DisplayViewport v = viewports.get(i);
             switch (v.type) {
                 case DisplayViewport.VIEWPORT_INTERNAL: {
+                    // If more than one internal viewport, this will get overwritten several times,
+                    // which for the purposes of this test is fine.
                     internalViewport = v;
+                    assertTrue(internalViewport.valid);
                     break;
                 }
                 case DisplayViewport.VIEWPORT_EXTERNAL: {
@@ -218,9 +228,6 @@ public class DisplayManagerServiceTest {
         // INTERNAL viewport gets created upon access.
         assertNotNull(internalViewport);
         assertNotNull(virtualViewport);
-
-        // INTERNAL
-        assertTrue(internalViewport.valid);
 
         // VIRTUAL
         assertEquals(height, virtualViewport.deviceHeight);
@@ -243,10 +250,12 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
         final int displayIds[] = bs.getDisplayIds();
-        assertEquals(1, displayIds.length);
-        final int displayId = displayIds[0];
-        DisplayInfo info = bs.getDisplayInfo(displayId);
-        assertEquals(info.type, Display.TYPE_INTERNAL);
+        final int size = displayIds.length;
+        assertTrue(size > 0);
+        for (int i = 0; i < size; i++) {
+            DisplayInfo info = bs.getDisplayInfo(displayIds[i]);
+            assertEquals(info.type, Display.TYPE_INTERNAL);
+        }
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
@@ -257,16 +266,22 @@ public class DisplayManagerServiceTest {
         verify(mMockInputManagerInternal).setDisplayViewports(viewportCaptor.capture());
         List<DisplayViewport> viewports = viewportCaptor.getValue();
 
-        // Expect to receive actual viewports: 1 internal
-        assertEquals(1, viewports.size());
+        // Due to the nature of foldables, we may have a different number of viewports than
+        // displays, just verify there's at least one.
+        final int viewportSize = viewports.size();
+        assertTrue(viewportSize > 0);
 
-        DisplayViewport internalViewport = viewports.get(0);
+        // Now verify that each viewport's displayId is valid.
+        Arrays.sort(displayIds);
+        for (int i = 0; i < viewportSize; i++) {
+            DisplayViewport internalViewport = viewports.get(i);
 
-        // INTERNAL is the only one actual display.
-        assertNotNull(internalViewport);
-        assertEquals(DisplayViewport.VIEWPORT_INTERNAL, internalViewport.type);
-        assertTrue(internalViewport.valid);
-        assertEquals(displayId, internalViewport.displayId);
+            // INTERNAL is the only one actual display.
+            assertNotNull(internalViewport);
+            assertEquals(DisplayViewport.VIEWPORT_INTERNAL, internalViewport.type);
+            assertTrue(internalViewport.valid);
+            assertTrue(Arrays.binarySearch(displayIds, internalViewport.displayId) >= 0);
+        }
     }
 
     @Test
@@ -486,7 +501,6 @@ public class DisplayManagerServiceTest {
      * Tests that collection of display color sampling results are sensible.
      */
     @Test
-    @FlakyTest(bugId = 172555744)
     public void testDisplayedContentSampling() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
@@ -937,8 +951,22 @@ public class DisplayManagerServiceTest {
         // Would prefer to call displayManager.onStart() directly here but it performs binderService
         // registration which triggers security exceptions when running from a test.
         handler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
-        // flush the handler
-        handler.runWithScissors(() -> {}, 0 /* now */);
+        waitForIdleHandler(handler, Duration.ofSeconds(1));
+    }
+
+    private void waitForIdleHandler(Handler handler, Duration timeout) {
+        final MessageQueue queue = handler.getLooper().getQueue();
+        final CountDownLatch latch = new CountDownLatch(1);
+        queue.addIdleHandler(() -> {
+            latch.countDown();
+            // Remove idle handler
+            return false;
+        });
+        try {
+            latch.await(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            fail("Interrupted unexpectedly: " + e);
+        }
     }
 
     private class FakeDisplayManagerCallback extends IDisplayManagerCallback.Stub {
