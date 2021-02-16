@@ -20,10 +20,6 @@
 
 namespace android {
 
-static jboolean KernelCpuTotalBpfMapReader_isSupported(JNIEnv *, jobject) {
-    return android::bpf::isTrackingUidTimesSupported() ? JNI_TRUE : JNI_FALSE;
-}
-
 static jboolean KernelCpuTotalBpfMapReader_read(JNIEnv *env, jobject, jobject callback) {
     jclass callbackClass = env->GetObjectClass(callback);
     jmethodID callbackMethod = env->GetMethodID(callbackClass, "accept", "(IIJ)V");
@@ -51,7 +47,6 @@ static jboolean KernelCpuTotalBpfMapReader_read(JNIEnv *env, jobject, jobject ca
 static const JNINativeMethod methods[] = {
         {"read", "(Lcom/android/internal/os/KernelCpuTotalBpfMapReader$Callback;)Z",
          (void *)KernelCpuTotalBpfMapReader_read},
-        {"isSupported", "()Z", (void *)KernelCpuTotalBpfMapReader_isSupported},
 };
 
 int register_com_android_internal_os_KernelCpuTotalBpfMapReader(JNIEnv *env) {
