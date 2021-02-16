@@ -59,6 +59,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
@@ -402,10 +403,12 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             showDataIcon |= mCurrentState.roaming;
             IconState statusIcon = new IconState(showDataIcon && !mCurrentState.airplaneMode,
                     getCurrentIconId(), contentDescription);
-            callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+            MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
+                    statusIcon, qsIcon, typeIcon, qsTypeIcon,
                     activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
                     description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
                     mCurrentState.roaming, showTriangle);
+            callback.setMobileDataIndicators(mobileDataIndicators);
         } else {
             boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
             IconState statusIcon = new IconState(
@@ -432,10 +435,12 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
             showDataIcon &= mCurrentState.isDefault || dataDisabled;
             int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
             boolean showTriangle = mCurrentState.enabled && !mCurrentState.airplaneMode;
-            callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+            MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
+                    statusIcon, qsIcon, typeIcon, qsTypeIcon,
                     activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
                     description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
                     mCurrentState.roaming, showTriangle);
+            callback.setMobileDataIndicators(mobileDataIndicators);
         }
     }
 

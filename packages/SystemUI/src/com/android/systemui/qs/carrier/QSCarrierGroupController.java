@@ -42,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 
 import java.util.function.Consumer;
 
@@ -74,30 +75,25 @@ public class QSCarrierGroupController {
     private final NetworkController.SignalCallback mSignalCallback =
             new NetworkController.SignalCallback() {
                 @Override
-                public void setMobileDataIndicators(NetworkController.IconState statusIcon,
-                        NetworkController.IconState qsIcon, int statusType, int qsType,
-                        boolean activityIn, boolean activityOut,
-                        CharSequence typeContentDescription,
-                        CharSequence typeContentDescriptionHtml, CharSequence description,
-                        boolean isWide, int subId, boolean roaming, boolean showTriangle) {
+                public void setMobileDataIndicators(MobileDataIndicators indicators) {
                     if (mProviderModel) {
                         return;
                     }
-                    int slotIndex = getSlotIndex(subId);
+                    int slotIndex = getSlotIndex(indicators.subId);
                     if (slotIndex >= SIM_SLOTS) {
                         Log.w(TAG, "setMobileDataIndicators - slot: " + slotIndex);
                         return;
                     }
                     if (slotIndex == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
-                        Log.e(TAG, "Invalid SIM slot index for subscription: " + subId);
+                        Log.e(TAG, "Invalid SIM slot index for subscription: " + indicators.subId);
                         return;
                     }
                     mInfos[slotIndex] = new CellSignalState(
-                            statusIcon.visible,
-                            statusIcon.icon,
-                            statusIcon.contentDescription,
-                            typeContentDescription.toString(),
-                            roaming
+                            indicators.statusIcon.visible,
+                            indicators.statusIcon.icon,
+                            indicators.statusIcon.contentDescription,
+                            indicators.typeContentDescription.toString(),
+                            indicators.roaming
                     );
                     mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
                 }

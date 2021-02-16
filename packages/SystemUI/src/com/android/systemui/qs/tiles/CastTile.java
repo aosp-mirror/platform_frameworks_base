@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -269,13 +270,10 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final NetworkController.SignalCallback mSignalCallback =
             new NetworkController.SignalCallback() {
                 @Override
-                public void setWifiIndicators(boolean enabled,
-                        NetworkController.IconState statusIcon,
-                        NetworkController.IconState qsIcon, boolean activityIn, boolean activityOut,
-                        String description, boolean isTransient, String statusLabel) {
+                public void setWifiIndicators(WifiIndicators indicators) {
                     // statusIcon.visible has the connected status information
-                    boolean enabledAndConnected =
-                            enabled && (qsIcon == null ? false : qsIcon.visible);
+                    boolean enabledAndConnected = indicators.enabled
+                            && (indicators.qsIcon == null ? false : indicators.qsIcon.visible);
                     if (enabledAndConnected != mWifiConnected) {
                         mWifiConnected = enabledAndConnected;
                         // Hotspot is not connected, so changes here should update

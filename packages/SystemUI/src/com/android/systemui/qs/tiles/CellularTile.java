@@ -56,6 +56,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import javax.inject.Inject;
@@ -264,21 +265,17 @@ public class CellularTile extends QSTileImpl<SignalState> {
         private final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
-                int qsType, boolean activityIn, boolean activityOut,
-                CharSequence typeContentDescription,
-                CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming, boolean showTriangle) {
-            if (qsIcon == null) {
+        public void setMobileDataIndicators(MobileDataIndicators indicators) {
+            if (indicators.qsIcon == null) {
                 // Not data sim, don't display.
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
-            mInfo.dataContentDescription =
-                    (description != null) ? typeContentDescriptionHtml : null;
-            mInfo.activityIn = activityIn;
-            mInfo.activityOut = activityOut;
-            mInfo.roaming = roaming;
+            mInfo.dataContentDescription = indicators.description != null
+                    ? indicators.typeContentDescriptionHtml : null;
+            mInfo.activityIn = indicators.activityIn;
+            mInfo.activityOut = indicators.activityOut;
+            mInfo.roaming = indicators.roaming;
             mInfo.multipleSubs = mController.getNumberSubscriptions() > 1;
             refreshState(mInfo);
         }
