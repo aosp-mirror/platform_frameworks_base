@@ -125,7 +125,7 @@ public class NetworkEventTest extends DpmTestBase {
     private List<NetworkEvent> fillHandlerWithFullBatchOfEvents(long startingId) throws Exception {
         // GIVEN a handler with events
         NetworkLoggingHandler handler = new NetworkLoggingHandler(new TestLooper().getLooper(),
-                mDpmTestable, startingId);
+                mDpmTestable, startingId, DpmMockContext.CALLER_USER_HANDLE);
         // GIVEN network events are sent to the handler.
         for (int i = 0; i < MAX_EVENTS_PER_BATCH; i++) {
             ConnectEvent event = new ConnectEvent("some_ip_address", 800, "com.google.foo",
