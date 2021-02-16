@@ -13358,24 +13358,11 @@ public class DevicePolicyManager {
      */
     public boolean canAdminGrantSensorsPermissions() {
         throwIfParentInstance("canAdminGrantSensorsPermissions");
-        return canAdminGrantSensorsPermissionsForUser(myUserId());
-    }
-
-    /**
-     * Returns true if the admin can control grants of sensors-related permissions, for
-     * a given user.
-     *
-     * @hide
-     * @param userId The ID of the user to check.
-     * @return if the admin may grant these permissions, false otherwise.
-     */
-    @SystemApi
-    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
         if (mService == null) {
             return false;
         }
         try {
-            return mService.canAdminGrantSensorsPermissionsForUser(userId);
+            return mService.canAdminGrantSensorsPermissionsForUser(myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
