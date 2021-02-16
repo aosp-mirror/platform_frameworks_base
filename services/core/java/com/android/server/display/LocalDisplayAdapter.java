@@ -229,8 +229,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             mBacklightAdapter = new BacklightAdapter(displayToken, isDefaultDisplay,
                     mSurfaceControlProxy);
-            mAllmSupported = SurfaceControl.getAutoLowLatencyModeSupport(displayToken);
-            mGameContentTypeSupported = SurfaceControl.getGameContentTypeSupport(displayToken);
             mDisplayDeviceConfig = null;
             // Defer configuration file loading
             BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
@@ -254,6 +252,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             changed |= updateColorModesLocked(dynamicInfo.supportedColorModes,
                     dynamicInfo.activeColorMode);
             changed |= updateHdrCapabilitiesLocked(dynamicInfo.hdrCapabilities);
+            changed |= updateAllmSupport(dynamicInfo.autoLowLatencyModeSupported);
+            changed |= updateGameContentTypeSupport(dynamicInfo.gameContentTypeSupported);
 
             if (changed) {
                 mHavePendingChanges = true;
@@ -520,6 +520,22 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 return false;
             }
             mHdrCapabilities = newHdrCapabilities;
+            return true;
+        }
+
+        private boolean updateAllmSupport(boolean supported) {
+            if (mAllmSupported == supported) {
+                return false;
+            }
+            mAllmSupported = supported;
+            return true;
+        }
+
+        private boolean updateGameContentTypeSupport(boolean supported) {
+            if (mGameContentTypeSupported == supported) {
+                return false;
+            }
+            mGameContentTypeSupported = supported;
             return true;
         }
 
