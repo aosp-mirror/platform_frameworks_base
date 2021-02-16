@@ -29,7 +29,7 @@ import android.view.View;
  * See {@link com.android.systemui.statusbar.phone.KeyguardBottomAreaView}.
  */
 public class KeyguardIndication {
-    @NonNull
+    @Nullable
     private final CharSequence mMessage;
     @NonNull
     private final ColorStateList mTextColor;
@@ -146,8 +146,13 @@ public class KeyguardIndication {
          * Build the KeyguardIndication.
          */
         public KeyguardIndication build() {
-            if (mMessage == null) throw new IllegalStateException("message must be set");
-            if (mTextColor == null) throw new IllegalStateException("text color must be set");
+            if (mMessage == null && mIcon == null) {
+                throw new IllegalStateException("message or icon must be set");
+            }
+            if (mTextColor == null) {
+                throw new IllegalStateException("text color must be set");
+            }
+
             return new KeyguardIndication(
                     mMessage, mTextColor, mIcon, mOnClickListener, mBackground);
         }
