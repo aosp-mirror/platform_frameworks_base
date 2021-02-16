@@ -16,9 +16,9 @@
 
 package com.android.server.vcn;
 
-import static com.android.server.vcn.VcnGatewayConnection.TEARDOWN_TIMEOUT_SECONDS;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import androidx.test.filters.SmallTest;
@@ -27,8 +27,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.concurrent.TimeUnit;
 
 /** Tests for VcnGatewayConnection.DisconnectedState */
 @RunWith(AndroidJUnit4.class)
@@ -40,6 +38,9 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
 
         mGatewayConnection.setIkeSession(mGatewayConnection.buildIkeSession());
 
+        // ensure that mGatewayConnection has an underlying Network before entering
+        // DisconnectingState
+        mGatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_2);
         mGatewayConnection.transitionTo(mGatewayConnection.mDisconnectingState);
         mTestLooper.dispatchAll();
     }
@@ -49,12 +50,22 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
         getIkeSessionCallback().onClosed();
         mTestLooper.dispatchAll();
 
-        assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
+        assertEquals(mGatewayConnection.mRetryTimeoutState, mGatewayConnection.getCurrentState());
+        verify(mMockIkeSession).close();
+        verify(mMockIkeSession, never()).kill();
+        verifyTeardownTimeoutAlarmAndGetCallback(true /* expectCanceled */);
     }
 
     @Test
     public void testTimeoutExpired() throws Exception {
-        mTestLooper.moveTimeForward(TimeUnit.SECONDS.toMillis(TEARDOWN_TIMEOUT_SECONDS));
+        Runnable delayedEvent =
+                verifyTeardownTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+
+        // Can't use mTestLooper to advance the time since VcnGatewayConnection uses WakeupMessages
+        // (which are mocked here). Directly invoke the runnable instead. This is still sufficient,
+        // since verifyTeardownTimeoutAlarmAndGetCallback() verifies the WakeupMessage was scheduled
+        // with the correct delay.
+        delayedEvent.run();
         mTestLooper.dispatchAll();
 
         verify(mMockIkeSession).kill();
@@ -67,5 +78,6 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
 
         // Should do nothing; already tearing down.
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verifyTeardownTimeoutAlarmAndGetCallback(false /* expectCanceled */);
     }
 }
