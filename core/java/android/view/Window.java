@@ -1703,6 +1703,30 @@ public abstract class Window {
     public abstract void setBackgroundDrawable(Drawable drawable);
 
     /**
+     * Blurs the screen behind the window within the bounds of the window.
+     *
+     * The density of the blur is set by the blur radius. The radius defines the size
+     * of the neighbouring area, from which pixels will be averaged to form the final
+     * color for each pixel. The operation approximates a Gaussian blur.
+     * A radius of 0 means no blur. The higher the radius, the denser the blur.
+     *
+     * The window background drawable is drawn on top of the blurred region. The blur
+     * region bounds and rounded corners will mimic those of the background drawable.
+     *
+     * For the blur region to be visible, the window has to be translucent. See
+     * {@link android.R.styleable#Window_windowIsTranslucent}.
+     *
+     * Note the difference with {@link android.view.WindowManager.LayoutParams#blurBehindRadius},
+     * which blurs the whole screen behind the window. Background blur blurs the screen behind
+     * only within the bounds of the window.
+     *
+     * @param blurRadius The blur radius to use for window background blur in pixels
+     *
+     * @see android.R.styleable#Window_windowBackgroundBlurRadius
+     */
+    public void setBackgroundBlurRadius(int blurRadius) {}
+
+    /**
      * Set the value for a drawable feature of this window, from a resource
      * identifier.  You must have called requestFeature(featureId) before
      * calling this function.

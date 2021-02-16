@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 /**
  * This class provides an interface for apps to manage platform VPN profiles
@@ -76,13 +78,19 @@ public class VpnManager {
     @Deprecated
     public static final int TYPE_VPN_LEGACY = 3;
 
+    /**
+     * Channel for VPN notifications.
+     * @hide
+     */
+    public static final String NOTIFICATION_CHANNEL_VPN = "VPN";
+
     /** @hide */
     @IntDef(value = {TYPE_VPN_NONE, TYPE_VPN_SERVICE, TYPE_VPN_PLATFORM, TYPE_VPN_LEGACY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface VpnType {}
 
     @NonNull private final Context mContext;
-    @NonNull private final IConnectivityManager mService;
+    @NonNull private final IVpnManager mService;
 
     private static Intent getIntentForConfirmation() {
         final Intent intent = new Intent();
@@ -101,9 +109,9 @@ public class VpnManager {
      *
      * @hide
      */
-    public VpnManager(@NonNull Context ctx, @NonNull IConnectivityManager service) {
+    public VpnManager(@NonNull Context ctx, @NonNull IVpnManager service) {
         mContext = checkNotNull(ctx, "missing Context");
-        mService = checkNotNull(service, "missing IConnectivityManager");
+        mService = checkNotNull(service, "missing IVpnManager");
     }
 
     /**
@@ -195,6 +203,19 @@ public class VpnManager {
     }
 
     /**
+     * Resets all VPN settings back to factory defaults.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void factoryReset() {
+        try {
+            mService.factoryReset();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Prepare for a VPN application.
      * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
      * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
@@ -234,6 +255,108 @@ public class VpnManager {
             String packageName, int userId, @VpnManager.VpnType int vpnType) {
         try {
             mService.setVpnPackageAuthorization(packageName, userId, vpnType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if a VPN app supports always-on mode.
+     *
+     * In order to support the always-on feature, an app has to
+     * <ul>
+     *     <li>target {@link VERSION_CODES#N API 24} or above, and
+     *     <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
+     *         meta-data field.
+     * </ul>
+     *
+     * @param userId The identifier of the user for whom the VPN app is installed.
+     * @param vpnPackage The canonical package name of the VPN app.
+     * @return {@code true} if and only if the VPN app exists and supports always-on mode.
+     * @hide
+     */
+    public boolean isAlwaysOnVpnPackageSupportedForUser(int userId, @Nullable String vpnPackage) {
+        try {
+            return mService.isAlwaysOnVpnPackageSupported(userId, vpnPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Configures an always-on VPN connection through a specific application.
+     * This connection is automatically granted and persisted after a reboot.
+     *
+     * <p>The designated package should declare a {@link VpnService} in its
+     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
+     *    otherwise the call will fail.
+     *
+     * @param userId The identifier of the user to set an always-on VPN for.
+     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
+     *                   to remove an existing always-on VPN configuration.
+     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
+     *        {@code false} otherwise.
+     * @param lockdownAllowlist The list of packages that are allowed to access network directly
+     *         when VPN is in lockdown mode but is not running. Non-existent packages are ignored so
+     *         this method must be called when a package that should be allowed is installed or
+     *         uninstalled.
+     * @return {@code true} if the package is set as always-on VPN controller;
+     *         {@code false} otherwise.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
+            boolean lockdownEnabled, @Nullable List<String> lockdownAllowlist) {
+        try {
+            return mService.setAlwaysOnVpnPackage(
+                    userId, vpnPackage, lockdownEnabled, lockdownAllowlist);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the package name of the currently set always-on VPN application.
+     * If there is no always-on VPN set, or the VPN is provided by the system instead
+     * of by an app, {@code null} will be returned.
+     *
+     * @return Package name of VPN controller responsible for always-on VPN,
+     *         or {@code null} if none is set.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    public String getAlwaysOnVpnPackageForUser(int userId) {
+        try {
+            return mService.getAlwaysOnVpnPackage(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return whether always-on VPN is in lockdown mode.
+     *
+     * @hide
+     **/
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    public boolean isVpnLockdownEnabled(int userId) {
+        try {
+            return mService.isVpnLockdownEnabled(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return the list of packages that are allowed to access network when always-on VPN is in
+     * lockdown mode but not connected. Returns {@code null} when VPN lockdown is not active.
+     *
+     * @hide
+     **/
+    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    public List<String> getVpnLockdownAllowlist(int userId) {
+        try {
+            return mService.getVpnLockdownAllowlist(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

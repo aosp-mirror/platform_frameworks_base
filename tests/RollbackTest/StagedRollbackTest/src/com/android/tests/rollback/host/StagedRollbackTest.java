@@ -153,13 +153,14 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().reboot();
         runPhase("testBadApkOnly_Phase2_VerifyInstall");
 
-        // Trigger rollback and wait for reboot to happen
-        runPhase("testBadApkOnly_Phase3_Crash");
+        // Launch the app to crash to trigger rollback
+        startActivity(TESTAPP_A);
+        // Wait for reboot to happen
         waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
 
         getDevice().waitForDeviceAvailable();
 
-        runPhase("testBadApkOnly_Phase4_VerifyRollback");
+        runPhase("testBadApkOnly_Phase3_VerifyRollback");
 
         assertThat(mLogger).eventOccurred(ROLLBACK_INITIATE, null, REASON_APP_CRASH, TESTAPP_A);
         assertThat(mLogger).eventOccurred(ROLLBACK_BOOT_TRIGGERED, null, null, null);
@@ -304,8 +305,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().reboot();
         // Verify apex was installed and then crash the apk
         runPhase("testRollbackApexWithApkCrashing_Phase2_Crash");
-        // Wait for crash to trigger rollback
-        waitForDeviceNotAvailable(5, TimeUnit.MINUTES);
+        // Launch the app to crash to trigger rollback
+        startActivity(TESTAPP_A);
+        // Wait for reboot to happen
+        waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
         getDevice().waitForDeviceAvailable();
         // Verify rollback occurred due to crash of apk-in-apex
         runPhase("testRollbackApexWithApkCrashing_Phase3_VerifyRollback");
@@ -551,6 +554,30 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         });
     }
 
+    /**
+     * Tests that packages are monitored across multiple reboots.
+     */
+    @Test
+    public void testWatchdogMonitorsAcrossReboots() throws Exception {
+        runPhase("testWatchdogMonitorsAcrossReboots_Phase1_Install");
+
+        // The first reboot will make the rollback available.
+        // Information about which packages are monitored will be persisted to a file before the
+        // second reboot, and read from disk after the second reboot.
+        getDevice().reboot();
+        getDevice().reboot();
+
+        runPhase("testWatchdogMonitorsAcrossReboots_Phase2_VerifyInstall");
+
+        // Launch the app to crash to trigger rollback
+        startActivity(TESTAPP_A);
+        // Wait for reboot to happen
+        waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
+        getDevice().waitForDeviceAvailable();
+
+        runPhase("testWatchdogMonitorsAcrossReboots_Phase3_VerifyRollback");
+    }
+
     private void pushTestApex() throws Exception {
         CompatibilityBuildHelper buildHelper = new CompatibilityBuildHelper(getBuild());
         final String fileName = APK_IN_APEX_TESTAPEX_NAME + "_v1.apex";
@@ -629,6 +656,12 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         } finally {
             getDevice().disableAdbRoot();
         }
+    }
+
+    private void startActivity(String packageName) throws Exception {
+        String cmd = "am start -S -a android.intent.action.MAIN "
+                + "-c android.intent.category.LAUNCHER " + packageName;
+        getDevice().executeShellCommand(cmd);
     }
 
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {

@@ -25,6 +25,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Binder;
@@ -37,9 +39,6 @@ import android.window.ITaskOrganizerController;
 import android.window.StartingWindowInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -111,23 +110,23 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     private final SizeCompatUIController mSizeCompatUI;
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
-        this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */);
+        this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */,
+                new StartingSurfaceDrawer(context, mainExecutor));
     }
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
             SizeCompatUIController sizeCompatUI) {
-        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI);
+        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI,
+                new StartingSurfaceDrawer(context, mainExecutor));
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context, @Nullable SizeCompatUIController sizeCompatUI) {
+            Context context, @Nullable SizeCompatUIController sizeCompatUI,
+            StartingSurfaceDrawer startingSurfaceDrawer) {
         super(taskOrganizerController, mainExecutor);
-        // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled
-        //  by a controller, that class should be create while porting
-        //  ActivityRecord#addStartingWindow to WMShell.
-        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, mainExecutor);
         mSizeCompatUI = sizeCompatUI;
+        mStartingSurfaceDrawer = startingSurfaceDrawer;
     }
 
     @Override
@@ -251,6 +250,11 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     @Override
     public void removeStartingWindow(int taskId) {
         mStartingSurfaceDrawer.removeStartingWindow(taskId);
+    }
+
+    @Override
+    public void copySplashScreenView(int taskId) {
+        mStartingSurfaceDrawer.copySplashScreenView(taskId);
     }
 
     @Override
