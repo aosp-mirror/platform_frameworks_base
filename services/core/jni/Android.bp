@@ -30,6 +30,7 @@ cc_library_static {
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
+        "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_gpu_GpuService.cpp",
         "com_android_server_HardwarePropertiesManagerService.cpp",
         "com_android_server_input_InputManagerService.cpp",
