@@ -402,6 +402,9 @@
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
     <uses-permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE" />
 
+    <!-- Permission required for CTS test - CtsRebootReadinessTestCases -->
+    <uses-permission android:name="android.permission.SIGNAL_REBOOT_READINESS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

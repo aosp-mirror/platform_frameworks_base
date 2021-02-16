@@ -21,10 +21,10 @@ import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
+import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_CHANNEL_VPN;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -171,6 +171,12 @@ public class Vpn {
      * profile is expected to be negligible in size.
      */
     @VisibleForTesting static final int MAX_VPN_PROFILE_SIZE_BYTES = 1 << 17; // 128kB
+
+    /**
+     * Network score that VPNs will announce to ConnectivityService.
+     * TODO: remove when the network scoring refactor lands.
+     */
+    private static final int VPN_DEFAULT_SCORE = 101;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -496,6 +502,11 @@ public class Vpn {
         updateAlwaysOnNotification(detailedState);
     }
 
+    private void resetNetworkCapabilities() {
+        mNetworkCapabilities.setUids(null);
+        mNetworkCapabilities.setTransportInfo(new VpnTransportInfo(VpnManager.TYPE_VPN_NONE));
+    }
+
     /**
      * Chooses whether to force all connections to go though VPN.
      *
@@ -518,6 +529,11 @@ public class Vpn {
         if (mAlwaysOn) {
             saveAlwaysOnPackage();
         }
+    }
+
+    /** Returns the package name that is currently prepared. */
+    public String getPackage() {
+        return mPackage;
     }
 
     /**
@@ -930,8 +946,7 @@ public class Vpn {
                 agentDisconnect();
                 jniReset(mInterface);
                 mInterface = null;
-                mNetworkCapabilities.setUids(null);
-                mNetworkCapabilities.setTransportInfo(null);
+                resetNetworkCapabilities();
             }
 
             // Revoke the connection or stop the VpnRunner.
@@ -1229,8 +1244,7 @@ public class Vpn {
         }
 
         mNetworkAgent = new NetworkAgent(mContext, mLooper, NETWORKTYPE /* logtag */,
-                mNetworkCapabilities, lp,
-                ConnectivityConstants.VPN_DEFAULT_SCORE, networkAgentConfig, mNetworkProvider) {
+                mNetworkCapabilities, lp, VPN_DEFAULT_SCORE, networkAgentConfig, mNetworkProvider) {
             @Override
             public void unwanted() {
                 // We are user controlled, not driven by NetworkRequest.
@@ -1744,8 +1758,7 @@ public class Vpn {
 
     private void cleanupVpnStateLocked() {
         mStatusIntent = null;
-        mNetworkCapabilities.setUids(null);
-        mNetworkCapabilities.setTransportInfo(null);
+        resetNetworkCapabilities();
         mConfig = null;
         mInterface = null;
 

@@ -34,7 +34,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
  */
 interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
-    oneway void activityResumed(in IBinder token);
+    oneway void activityResumed(in IBinder token, in boolean handleSplashScreenExit);
     oneway void activityTopResumedStateLost();
     /**
      * Notifies that the activity has completed paused. This call is not one-way because it can make
@@ -142,4 +142,7 @@ interface IActivityClientController {
      * on the back stack.
      */
     oneway void onBackPressedOnTaskRoot(in IBinder token);
+
+    /** Reports that the splash screen view has attached to activity.  */
+    oneway void splashScreenAttached(in IBinder token);
 }

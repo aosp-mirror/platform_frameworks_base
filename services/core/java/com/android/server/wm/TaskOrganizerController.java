@@ -117,8 +117,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return mTaskOrganizer.asBinder();
         }
 
-        void addStartingWindow(Task task, IBinder appToken) {
+        void addStartingWindow(Task task, IBinder appToken, int launchTheme) {
             final StartingWindowInfo info = task.getStartingWindowInfo();
+            if (launchTheme != 0) {
+                info.splashScreenThemeResId = launchTheme;
+            }
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
                     mTaskOrganizer.addStartingWindow(info, appToken);
@@ -134,6 +137,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     mTaskOrganizer.removeStartingWindow(task.mTaskId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
+                }
+            });
+        }
+
+        void copySplashScreenView(Task task) {
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                try {
+                    mTaskOrganizer.copySplashScreenView(task.mTaskId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending copyStartingWindowView callback", e);
                 }
             });
         }
@@ -232,12 +245,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             mUid = uid;
         }
 
-        void addStartingWindow(Task t, IBinder appToken) {
-            mOrganizer.addStartingWindow(t, appToken);
+        void addStartingWindow(Task t, IBinder appToken, int launchTheme) {
+            mOrganizer.addStartingWindow(t, appToken, launchTheme);
         }
 
         void removeStartingWindow(Task t) {
             mOrganizer.removeStartingWindow(t);
+        }
+
+        void copySplashScreenView(Task t) {
+            mOrganizer.copySplashScreenView(t);
         }
 
         /**
@@ -465,14 +482,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
     }
 
-    boolean addStartingWindow(Task task, IBinder appToken) {
+    boolean addStartingWindow(Task task, IBinder appToken, int launchTheme) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null || rootTask.mTaskOrganizer == null) {
             return false;
         }
         final TaskOrganizerState state =
                 mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.addStartingWindow(task, appToken);
+        state.addStartingWindow(task, appToken, launchTheme);
         return true;
     }
 
@@ -484,6 +501,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final TaskOrganizerState state =
                 mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
         state.removeStartingWindow(task);
+    }
+
+    boolean copySplashScreenView(Task task) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+            return false;
+        }
+        final TaskOrganizerState state =
+                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
+        state.copySplashScreenView(task);
+        return true;
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {

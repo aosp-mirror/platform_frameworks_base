@@ -2656,7 +2656,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void addStartingWindowsForVisibleActivities() {
         forAllActivities((r) -> {
             if (r.mVisibleRequested) {
-                r.showStartingWindow(null /* prev */, false /* newTask */, true /*taskSwitch*/);
+                r.showStartingWindow(true /*taskSwitch*/);
             }
         });
     }

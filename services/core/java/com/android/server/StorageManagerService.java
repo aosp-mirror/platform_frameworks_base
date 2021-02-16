@@ -939,9 +939,12 @@ class StorageManagerService extends IStorageManager.Stub
         if (transcodeEnabled) {
             LocalServices.getService(ActivityManagerInternal.class)
                     .registerAnrController((packageName, uid) -> {
-                        // TODO: Retrieve delay from ExternalStorageService that can check
-                        // transcoding status
-                        return SystemProperties.getInt("sys.fuse.transcode_anr_delay_ms", 0);
+                        try {
+                            return mStorageSessionController.getAnrDelayMillis(packageName, uid);
+                        } catch (ExternalStorageServiceException e) {
+                            Log.e(TAG, "Failed to get ANR delay for " + packageName, e);
+                            return 0;
+                        }
                     });
         }
     }

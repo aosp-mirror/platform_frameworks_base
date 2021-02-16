@@ -256,6 +256,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         onConfigurationChanged(atm.getGlobalConfiguration());
+        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mName);
     }
 
     public void setPid(int pid) {
@@ -800,6 +801,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
         return false;
+    }
+
+    void updateNightModeForAllActivities(int nightMode) {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = mActivities.get(i);
+            r.setOverrideNightMode(nightMode);
+        }
     }
 
     public void clearPackagePreferredForHomeActivities() {

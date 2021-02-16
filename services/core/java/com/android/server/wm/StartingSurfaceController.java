@@ -60,7 +60,7 @@ public class StartingSurfaceController {
 
         final Task task = activity.getTask();
         if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                activity.token)) {
+                activity.token, theme)) {
             return new ShellStartingSurface(task);
         }
         return null;
@@ -125,7 +125,8 @@ public class StartingSurfaceController {
             return mService.mTaskSnapshotController
                     .createStartingSurface(activity, taskSnapshot);
         }
-        mService.mAtmService.mTaskOrganizerController.addStartingWindow(task, activity.token);
+        mService.mAtmService.mTaskOrganizerController.addStartingWindow(task, activity.token,
+                0 /* launchTheme */);
         return new ShellStartingSurface(task);
     }
 

@@ -54,7 +54,7 @@ cc_library_static {
         "com_android_server_UsbMidiDevice.cpp",
         "com_android_server_UsbHostManager.cpp",
         "com_android_server_vibrator_VibratorController.cpp",
-        "com_android_server_VibratorManagerService.cpp",
+        "com_android_server_vibrator_VibratorManagerService.cpp",
         "com_android_server_PersistentDataBlockService.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
