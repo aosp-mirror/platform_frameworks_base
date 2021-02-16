@@ -456,11 +456,9 @@
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
-    <dimen name="volume_dialog_stream_padding">12dp</dimen>
+    <dimen name="volume_dialog_stream_padding">8dp</dimen>
 
     <dimen name="volume_dialog_panel_width">64dp</dimen>
-
-    <dimen name="volume_dialog_panel_width_half">32dp</dimen>
 
     <dimen name="volume_dialog_slider_height">116dp</dimen>
 
@@ -487,13 +485,6 @@
     <dimen name="volume_tool_tip_bottom_margin">32dp</dimen>
 
     <dimen name="volume_tool_tip_arrow_corner_radius">2dp</dimen>
-
-    <!-- Size of each item in the ringer selector drawer. -->
-    <dimen name="volume_ringer_drawer_item_size">64dp</dimen>
-    <dimen name="volume_ringer_drawer_item_size_half">32dp</dimen>
-
-    <!-- Size of the icon inside each item in the ringer selector drawer. -->
-    <dimen name="volume_ringer_drawer_icon_size">24dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
@@ -975,7 +966,7 @@
     <dimen name="volume_row_padding_start">4dp</dimen>
     <dimen name="volume_row_header_padding_start">16dp</dimen>
     <dimen name="volume_row_height">64dp</dimen>
-    <dimen name="volume_row_slider_height">192dp</dimen>
+    <dimen name="volume_row_slider_height">48dp</dimen>
     <dimen name="volume_row_slider_padding_start">12dp</dimen>
 
     <dimen name="volume_expander_margin_end">2dp</dimen>
