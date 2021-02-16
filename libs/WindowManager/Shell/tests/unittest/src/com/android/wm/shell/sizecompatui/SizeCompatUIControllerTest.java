@@ -16,23 +16,28 @@
 
 package com.android.wm.shell.sizecompatui;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.graphics.Rect;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.SyncTransactionQueue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,28 +55,34 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class SizeCompatUIControllerTest extends ShellTestCase {
     private static final int DISPLAY_ID = 0;
-
-    private final TestShellExecutor mShellMainExecutor = new TestShellExecutor();
+    private static final int TASK_ID = 12;
 
     private SizeCompatUIController mController;
     private @Mock DisplayController mMockDisplayController;
+    private @Mock DisplayLayout mMockDisplayLayout;
     private @Mock DisplayImeController mMockImeController;
-    private @Mock SizeCompatRestartButton mMockButton;
     private @Mock IBinder mMockActivityToken;
     private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
+    private @Mock SyncTransactionQueue mMockSyncQueue;
+    private @Mock SizeCompatUILayout mMockLayout;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(true).when(mMockButton).show();
 
+        doReturn(mMockDisplayLayout).when(mMockDisplayController).getDisplayLayout(anyInt());
+        doReturn(DISPLAY_ID).when(mMockLayout).getDisplayId();
+        doReturn(TASK_ID).when(mMockLayout).getTaskId();
         mController = new SizeCompatUIController(mContext, mMockDisplayController,
-                mMockImeController, mShellMainExecutor) {
+                mMockImeController, mMockSyncQueue) {
             @Override
-            SizeCompatRestartButton createRestartButton(Context context, int displayId) {
-                return mMockButton;
+            SizeCompatUILayout createLayout(Context context, int displayId, int taskId,
+                    Configuration taskConfig, IBinder activityToken,
+                    ShellTaskOrganizer.TaskListener taskListener) {
+                return mMockLayout;
             }
         };
+        spyOn(mController);
     }
 
     @Test
@@ -82,42 +93,72 @@ public class SizeCompatUIControllerTest extends ShellTestCase {
 
     @Test
     public void testOnSizeCompatInfoChanged() {
-        final int taskId = 12;
-        final Rect taskBounds = new Rect(0, 0, 1000, 2000);
+        final Configuration taskConfig = new Configuration();
 
-        // Verify that the restart button is added with non-null size compat activity.
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, taskId, taskBounds,
+        // Verify that the restart button is added with non-null size compat info.
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
                 mMockActivityToken, mMockTaskListener);
-        mShellMainExecutor.flushAll();
 
-        verify(mMockButton).show();
-        verify(mMockButton).updateLastTargetActivity(eq(mMockActivityToken));
+        verify(mController).createLayout(any(), eq(DISPLAY_ID), eq(TASK_ID), eq(taskConfig),
+                eq(mMockActivityToken), eq(mMockTaskListener));
 
-        // Verify that the restart button is removed with null size compat activity.
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, taskId, null, null, null);
+        // Verify that the restart button is updated with non-null new size compat info.
+        final Configuration newTaskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, newTaskConfig,
+                mMockActivityToken, mMockTaskListener);
 
-        mShellMainExecutor.flushAll();
-        verify(mMockButton).remove();
+        verify(mMockLayout).updateSizeCompatInfo(taskConfig, mMockActivityToken, mMockTaskListener,
+                false /* isImeShowing */);
+
+        // Verify that the restart button is removed with null size compat info.
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, null, null, mMockTaskListener);
+
+        verify(mMockLayout).release();
+    }
+
+    @Test
+    public void testOnDisplayRemoved() {
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
+                mMockActivityToken, mMockTaskListener);
+
+        mController.onDisplayRemoved(DISPLAY_ID + 1);
+
+        verify(mMockLayout, never()).release();
+
+        mController.onDisplayRemoved(DISPLAY_ID);
+
+        verify(mMockLayout).release();
+    }
+
+    @Test
+    public void testOnDisplayConfigurationChanged() {
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
+                mMockActivityToken, mMockTaskListener);
+
+        final Configuration newTaskConfig = new Configuration();
+        mController.onDisplayConfigurationChanged(DISPLAY_ID + 1, newTaskConfig);
+
+        verify(mMockLayout, never()).updateDisplayLayout(any());
+
+        mController.onDisplayConfigurationChanged(DISPLAY_ID, newTaskConfig);
+
+        verify(mMockLayout).updateDisplayLayout(mMockDisplayLayout);
     }
 
     @Test
     public void testChangeButtonVisibilityOnImeShowHide() {
-        final int taskId = 12;
-        final Rect taskBounds = new Rect(0, 0, 1000, 2000);
-        mController.onSizeCompatInfoChanged(DISPLAY_ID, taskId, taskBounds,
+        final Configuration taskConfig = new Configuration();
+        mController.onSizeCompatInfoChanged(DISPLAY_ID, TASK_ID, taskConfig,
                 mMockActivityToken, mMockTaskListener);
-        mShellMainExecutor.flushAll();
 
-        // Verify that the restart button is hidden when IME is visible.
-        doReturn(View.VISIBLE).when(mMockButton).getVisibility();
         mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
 
-        verify(mMockButton).setVisibility(eq(View.GONE));
+        verify(mMockLayout).updateImeVisibility(true);
 
-        // Verify that the restart button is visible when IME is hidden.
-        doReturn(View.GONE).when(mMockButton).getVisibility();
         mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
 
-        verify(mMockButton).setVisibility(eq(View.VISIBLE));
+        verify(mMockLayout).updateImeVisibility(false);
     }
 }
