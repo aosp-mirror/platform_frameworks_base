@@ -41,7 +41,7 @@ public class StartingSurfaceController {
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
     /** Set to {@code true} to enable shell starting surface drawer. */
     static final boolean DEBUG_ENABLE_SHELL_DRAWER =
-            SystemProperties.getBoolean("persist.debug.shell_starting_surface", false);
+            SystemProperties.getBoolean("persist.debug.shell_starting_surface", true);
     private final WindowManagerService mService;
 
     public StartingSurfaceController(WindowManagerService wm) {
