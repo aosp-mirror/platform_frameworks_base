@@ -194,6 +194,5 @@ android_app {
     dxflags: ["--multi-dex"],
     required: [
         "privapp_whitelist_com.android.systemui",
-        "checked-wm_shell_protolog.json",
     ],
 }

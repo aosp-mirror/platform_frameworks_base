@@ -366,7 +366,7 @@ public final class WMShell extends SystemUI
             switch (args[i]) {
                 case "enable-text": {
                     String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    int result = protoLogImpl.startTextLogging(mContext, groups, pw);
+                    int result = protoLogImpl.startTextLogging(groups, pw);
                     if (result == 0) {
                         pw.println("Starting logging on groups: " + Arrays.toString(groups));
                     }
