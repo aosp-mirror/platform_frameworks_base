@@ -240,6 +240,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -663,12 +664,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mRemoved;
 
-    /**
-     * Non-null if the last size compatibility mode activity is using non-native screen
-     * configuration. The activity is not able to put in multi-window mode, so it exists only one
-     * per display.
-     */
-    private ActivityRecord mLastCompatModeActivity;
+    /** Set of activities in foreground size compat mode. */
+    private Set<ActivityRecord> mActiveSizeCompatActivities = new ArraySet<>();
 
     // Used in updating the display size
     private Point mTmpDisplaySize = new Point();
@@ -5553,24 +5550,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Checks whether the given activity is in size compatibility mode and notifies the change. */
     void handleActivitySizeCompatModeIfNeeded(ActivityRecord r) {
         final Task organizedTask = r.getOrganizedTask();
-        if (!r.isState(RESUMED) || r.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
-                || organizedTask == null) {
-            // The callback is only interested in the foreground changes of fullscreen activity.
+        if (organizedTask == null) {
+            mActiveSizeCompatActivities.remove(r);
             return;
         }
-        // TODO(b/178327644) Update for per Task size compat
-        if (!r.inSizeCompatMode()) {
-            if (mLastCompatModeActivity != null) {
+
+        if (r.isState(RESUMED) && r.inSizeCompatMode()) {
+            if (mActiveSizeCompatActivities.add(r)) {
+                // Trigger task event for new size compat activity.
                 organizedTask.onSizeCompatActivityChanged();
             }
-            mLastCompatModeActivity = null;
             return;
         }
-        if (mLastCompatModeActivity == r) {
-            return;
+
+        if (mActiveSizeCompatActivities.remove(r)) {
+            // Trigger task event for activity no longer in foreground size compat.
+            organizedTask.onSizeCompatActivityChanged();
         }
-        mLastCompatModeActivity = r;
-        organizedTask.onSizeCompatActivityChanged();
     }
 
     boolean isUidPresent(int uid) {

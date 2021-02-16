@@ -130,6 +130,17 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    @Override
+    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        if (mRootTaskInfo.taskId == taskId) {
+            b.setParent(mRootLeash);
+        } else if (mChildrenLeashes.contains(taskId)) {
+            b.setParent(mChildrenLeashes.get(taskId));
+        } else {
+            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        }
+    }
+
     void setBounds(Rect bounds, WindowContainerTransaction wct) {
         wct.setBounds(mRootTaskInfo.token, bounds);
     }
