@@ -121,6 +121,7 @@ public class UserSwitcherController implements Dumpable {
     private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
+    public final DetailAdapter mUserDetailAdapter;
 
     @Inject
     public UserSwitcherController(Context context, KeyguardStateController keyguardStateController,
@@ -131,6 +132,7 @@ public class UserSwitcherController implements Dumpable {
         mBroadcastDispatcher = broadcastDispatcher;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
+        mUserDetailAdapter = new UserDetailAdapter(this, mContext, mUiEventLogger);
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
@@ -781,8 +783,19 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    public final DetailAdapter userDetailAdapter = new DetailAdapter() {
+    public static class UserDetailAdapter implements DetailAdapter {
         private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
+
+        private final UserSwitcherController mUserSwitcherController;
+        private final Context mContext;
+        private final UiEventLogger mUiEventLogger;
+
+        UserDetailAdapter(UserSwitcherController userSwitcherController, Context context,
+                UiEventLogger uiEventLogger) {
+            mUserSwitcherController = userSwitcherController;
+            mContext = context;
+            mUiEventLogger = uiEventLogger;
+        }
 
         @Override
         public CharSequence getTitle() {
@@ -794,7 +807,7 @@ public class UserSwitcherController implements Dumpable {
             UserDetailView v;
             if (!(convertView instanceof UserDetailView)) {
                 v = UserDetailView.inflate(context, parent, false);
-                v.createAndSetAdapter(UserSwitcherController.this, mUiEventLogger);
+                v.createAndSetAdapter(mUserSwitcherController, mUiEventLogger);
             } else {
                 v = (UserDetailView) convertView;
             }

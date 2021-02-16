@@ -311,7 +311,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     /** */
-    public void showDetailDapater(DetailAdapter detailAdapter, int x, int y) {
+    public void showDetailAdapter(DetailAdapter detailAdapter, int x, int y) {
         mView.showDetailAdapter(true, detailAdapter, new int[]{x, y});
     }
 
