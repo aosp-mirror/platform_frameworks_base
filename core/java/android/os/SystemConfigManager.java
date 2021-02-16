@@ -111,4 +111,22 @@ public class SystemConfigManager {
             return Collections.emptyMap();
         }
     }
+
+    /**
+     * Get uids which have been granted given permission in system configuration.
+     *
+     * The uids and assigning permissions are defined on data/etc/platform.xml
+     *
+     * @param permissionName The target permission.
+     * @return The uids have been granted given permission in system configuration.
+     */
+    @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    @NonNull
+    public int[] getSystemPermissionUids(@NonNull String permissionName) {
+        try {
+            return mInterface.getSystemPermissionUids(permissionName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
