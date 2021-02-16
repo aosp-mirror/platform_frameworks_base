@@ -316,14 +316,13 @@ Result DvrClient::flush() {
 Result DvrClient::close() {
     if (mTunerDvr != NULL) {
         Status s = mTunerDvr->close();
+        mTunerDvr = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mDvr != NULL) {
         Result res = mDvr->close();
-        if (res == Result::SUCCESS) {
-            mDvr = NULL;
-        }
+        mDvr = NULL;
         return res;
     }
 

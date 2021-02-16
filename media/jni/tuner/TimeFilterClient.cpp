@@ -126,11 +126,14 @@ long TimeFilterClient::getSourceTime() {
 Result TimeFilterClient::close() {
     if (mTunerTimeFilter != NULL) {
         Status s = mTunerTimeFilter->close();
+        mTunerTimeFilter = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mTimeFilter != NULL) {
-        return mTimeFilter->close();
+        Result res = mTimeFilter->close();
+        mTimeFilter = NULL;
+        return res;
     }
 
     return Result::INVALID_STATE;
