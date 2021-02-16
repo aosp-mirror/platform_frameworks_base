@@ -18,6 +18,10 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.View.GONE;
 
+import static androidx.constraintlayout.widget.ConstraintSet.END;
+import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
+import static androidx.constraintlayout.widget.ConstraintSet.START;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -65,6 +69,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -762,6 +768,10 @@ public class NotificationPanelViewController extends PanelViewController {
         });
 
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
+        // dynamically apply the split shade value overrides.
+        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+            updateResources();
+        }
     }
 
     @Override
@@ -870,11 +880,21 @@ public class NotificationPanelViewController extends PanelViewController {
             mNotificationStackScrollLayoutController.setLayoutParams(lp);
         }
 
+        // In order to change the constraints at runtime, all children of the Constraint Layout
+        // must have ids.
+        ensureAllViewsHaveIds(mNotificationContainerParent);
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(mNotificationContainerParent);
         if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
-            // In order to change the constraints at runtime, all children of the Constraint Layout
-            // must have ids.
-            ensureAllViewsHaveIds(mNotificationContainerParent);
+            constraintSet.connect(R.id.qs_frame, END, R.id.qs_edge_guideline, END);
+            constraintSet.connect(
+                    R.id.notification_stack_scroller, START,
+                    R.id.qs_edge_guideline, START);
+        } else {
+            constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
+            constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
         }
+        constraintSet.applyTo(mNotificationContainerParent);
     }
 
     private static void ensureAllViewsHaveIds(ViewGroup parentView) {
@@ -2007,6 +2027,10 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private float calculateQsTopPadding() {
+        // in split shade mode we want notifications to be directly below status bar
+        if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources) && !mKeyguardShowing) {
+            return 0f;
+        }
         if (mKeyguardShowing && (mQsExpandImmediate
                 || mIsExpanding && mQsExpandedWhenExpandingStarted)) {
 
@@ -2646,7 +2670,9 @@ public class NotificationPanelViewController extends PanelViewController {
         super.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
-            mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
+            if (!Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+                mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
+            }
         }
         if (mBarState == KEYGUARD || mBarState == StatusBarState.SHADE_LOCKED) {
             mAffordanceHelper.animateHideLeftRightIcon();
