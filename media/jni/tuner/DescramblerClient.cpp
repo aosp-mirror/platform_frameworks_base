@@ -101,14 +101,18 @@ Result DescramblerClient::removePid(DemuxPid pid, sp<FilterClient> optionalSourc
 Result DescramblerClient::close() {
     if (mTunerDescrambler != NULL) {
         Status s = mTunerDescrambler->close();
+        mTunerDescrambler = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mDescrambler != NULL) {
-        return mDescrambler->close();
+        Result res = mDescrambler->close();
+        mDescrambler = NULL;
+        return res;
     }
 
-    return Result::INVALID_STATE;}
+    return Result::INVALID_STATE;
+}
 
 /////////////// DescramblerClient Helper Methods ///////////////////////
 
