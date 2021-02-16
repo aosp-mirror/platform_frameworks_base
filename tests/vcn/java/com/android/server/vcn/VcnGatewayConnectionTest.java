@@ -145,4 +145,19 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
 
         verifyWakeLockReleased();
     }
+
+    @Test
+    public void testNonNullUnderlyingNetworkRecordUpdateCancelsAlarm() {
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(null);
+
+        verifyDisconnectRequestAlarmAndGetCallback(false /* expectCanceled */);
+
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
+
+        verify(mDisconnectRequestAlarm).cancel();
+    }
 }
