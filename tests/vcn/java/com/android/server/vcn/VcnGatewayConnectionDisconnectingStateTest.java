@@ -80,4 +80,9 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
         verifyTeardownTimeoutAlarmAndGetCallback(false /* expectCanceled */);
     }
+
+    @Test
+    public void testSafemodeTimeoutNotifiesCallback() {
+        verifySafemodeTimeoutNotifiesCallback(mGatewayConnection.mDisconnectingState);
+    }
 }
