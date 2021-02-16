@@ -19,7 +19,6 @@
 
 namespace android {
 
-int register_android_server_connectivity_Vpn(JNIEnv* env);
 int register_android_server_TestNetworkService(JNIEnv* env);
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void*) {
@@ -29,8 +28,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
-    if (register_android_server_connectivity_Vpn(env) < 0
-        || register_android_server_TestNetworkService(env) < 0) {
+    if (register_android_server_TestNetworkService(env) < 0) {
         return JNI_ERR;
     }
 
