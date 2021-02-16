@@ -1720,7 +1720,7 @@ public class StatsPullAtomService extends SystemService {
         }
         for (int cluster = 0; cluster < clusters; ++cluster) {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    atomTag, threadGroup, cluster, aggregatedCycles[cluster],
+                    atomTag, threadGroup, cluster, aggregatedCycles[cluster] / 1_000_000L,
                     aggregatedTimesUs[cluster] / 1_000));
         }
     }
