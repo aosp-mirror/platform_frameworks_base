@@ -926,4 +926,12 @@
     <dimen name="controls_thumbnail_image_max_height">140dp</dimen>
     <!-- The maximum width of a thumbnail in a ThumbnailTemplate. The image will be reduced to that width in case they are bigger.-->
     <dimen name="controls_thumbnail_image_max_width">280dp</dimen>
+
+    <!-- System-provided radius for the background view of app widgets. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_background_radius">16dp</dimen>
+    <!-- System-provided radius for inner views on app widgets. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_inner_radius">8dp</dimen>
+    <!-- System-provided padding for inner views on app widgets. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_internal_padding">16dp</dimen>
+
 </resources>
