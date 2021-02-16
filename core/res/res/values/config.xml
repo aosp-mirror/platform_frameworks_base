@@ -1946,6 +1946,8 @@
     <string name="config_systemAutomotiveProjection" translatable="false"></string>
     <!-- The name of the package that will hold the system cluster service role. -->
     <string name="config_systemAutomotiveCluster" translatable="false"></string>
+    <!-- The name of the package that will hold the system shell role. -->
+    <string name="config_systemShell" translatable="false">com.android.shell</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false"></string>

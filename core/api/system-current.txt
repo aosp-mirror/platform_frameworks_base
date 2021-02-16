@@ -341,6 +341,7 @@ package android {
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemGallery = 17039399; // 0x1040027
+    field public static final int config_systemShell = 17039402; // 0x104002a
   }
 
   public static final class R.style {
