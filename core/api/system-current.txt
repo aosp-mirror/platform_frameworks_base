@@ -680,6 +680,7 @@ package android.app {
   }
 
   public static class Notification.Action implements android.os.Parcelable {
+    field public static final int SEMANTIC_ACTION_CONVERSATION_IS_PHISHING = 12; // 0xc
     field public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11; // 0xb
   }
 
