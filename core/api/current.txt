@@ -1185,6 +1185,7 @@ package android {
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
+    field public static final int rippleStyle = 16844337; // 0x1010631
     field public static final int rollbackDataPolicy = 16844311; // 0x1010617
     field public static final int rotation = 16843558; // 0x1010326
     field public static final int rotationAnimation = 16844090; // 0x101053a
@@ -16533,9 +16534,13 @@ package android.graphics.drawable {
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
     ctor public RippleDrawable(@NonNull android.content.res.ColorStateList, @Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable);
     method public int getRadius();
+    method public int getRippleStyle();
     method public void setColor(android.content.res.ColorStateList);
     method public void setRadius(int);
+    method public void setRippleStyle(int) throws java.lang.IllegalArgumentException;
     field public static final int RADIUS_AUTO = -1; // 0xffffffff
+    field public static final int STYLE_PATTERNED = 1; // 0x1
+    field public static final int STYLE_SOLID = 0; // 0x0
   }
 
   public class RotateDrawable extends android.graphics.drawable.DrawableWrapper {
