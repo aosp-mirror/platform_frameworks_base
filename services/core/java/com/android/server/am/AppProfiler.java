@@ -1536,6 +1536,14 @@ public class AppProfiler {
                 totalPss -= totalMemtrackGraphics;
                 totalPss += dmabufMapped;
             }
+            // These are included in the totalExportedDmabuf above and hence do not need to be added
+            // to kernelUsed.
+            final long totalExportedDmabufHeap = Debug.getDmabufHeapTotalExportedKb();
+            if (totalExportedDmabufHeap >= 0) {
+                memInfoBuilder.append("DMA-BUF Heap: ");
+                memInfoBuilder.append(stringifyKBSize(totalExportedDmabufHeap));
+                memInfoBuilder.append("\n");
+            }
 
             final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
             if (totalDmabufHeapPool >= 0) {

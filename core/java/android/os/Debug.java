@@ -2566,6 +2566,14 @@ public final class Debug
     public static native long getDmabufTotalExportedKb();
 
     /**
+     * Return total memory size in kilobytes for DMA-BUFs exported from the DMA-BUF
+     * heaps frameworks or -1 in the case of an error.
+     *
+     * @hide
+     */
+    public static native long getDmabufHeapTotalExportedKb();
+
+    /**
      * Return memory size in kilobytes allocated for ION heaps or -1 if
      * /sys/kernel/ion/total_heaps_kb could not be read.
      *
