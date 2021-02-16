@@ -20,6 +20,8 @@ import android.os.ParcelFileDescriptor;
 import android.graphics.fonts.FontUpdateRequest;
 import android.text.FontConfig;
 
+import java.util.List;
+
 /**
  * System private interface for talking with
  * {@link com.android.server.graphics.fonts.FontManagerService}.
@@ -28,5 +30,7 @@ import android.text.FontConfig;
 interface IFontManager {
     FontConfig getFontConfig();
 
-    int updateFont(int baseVersion, in FontUpdateRequest request);
+    int updateFontFile(in FontUpdateRequest request, int baseVersion);
+
+    int updateFontFamily(in List<FontUpdateRequest> request, int baseVersion);
 }
