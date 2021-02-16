@@ -16,9 +16,9 @@
 
 package com.android.keyguard.dagger;
 
-import com.android.keyguard.KeyguardClockSwitchController;
-import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -26,20 +26,17 @@ import dagger.Subcomponent;
 /**
  * Subcomponent for helping work with KeyguardStatusView and its children.
  *
- * TODO: unify this with {@link KeyguardStatusBarViewComponent}
+ * TODO: unify this with {@link KeyguardStatusViewComponent}
  */
-@Subcomponent(modules = {KeyguardStatusViewModule.class})
-@KeyguardStatusViewScope
-public interface KeyguardStatusViewComponent {
-    /** Simple factory for {@link KeyguardStatusViewComponent}. */
+@Subcomponent(modules = {KeyguardStatusBarViewModule.class})
+@KeyguardStatusBarViewScope
+public interface KeyguardStatusBarViewComponent {
+    /** Simple factory for {@link KeyguardStatusBarViewComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        KeyguardStatusViewComponent build(@BindsInstance KeyguardStatusView presentation);
+        KeyguardStatusBarViewComponent build(@BindsInstance KeyguardStatusBarView view);
     }
 
-    /** Builds a {@link com.android.keyguard.KeyguardClockSwitchController}. */
-    KeyguardClockSwitchController getKeyguardClockSwitchController();
-
-    /** Builds a {@link com.android.keyguard.KeyguardStatusViewController}. */
-    KeyguardStatusViewController getKeyguardStatusViewController();
+    /** Builds a {@link KeyguardStatusViewController}. */
+    KeyguardStatusBarViewController getKeyguardStatusBarViewController();
 }
