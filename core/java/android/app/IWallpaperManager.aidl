@@ -17,9 +17,11 @@
 package android.app;
 
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
+import android.app.ILocalWallpaperColorConsumer;
 import android.app.WallpaperInfo;
 import android.content.ComponentName;
 import android.app.WallpaperColors;
@@ -160,6 +162,18 @@ interface IWallpaperManager {
      * @return colors of chosen wallpaper
      */
     WallpaperColors getWallpaperColors(int which, int userId, int displayId);
+
+    /**
+    * @hide
+    */
+    void removeOnLocalColorsChangedListener(
+            in ILocalWallpaperColorConsumer callback, int which, int userId, int displayId);
+
+    /**
+    * @hide
+    */
+    void addOnLocalColorsChangedListener(in ILocalWallpaperColorConsumer callback,
+                                    in List<RectF> regions, int which, int userId, int displayId);
 
     /**
      * Register a callback to receive color updates from a display
