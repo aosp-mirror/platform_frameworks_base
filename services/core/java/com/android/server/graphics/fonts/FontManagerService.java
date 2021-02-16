@@ -72,11 +72,11 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     @Override
-    public int updateFont(int baseVersion, @NonNull FontUpdateRequest request) {
+    public int updateFontFile(@NonNull FontUpdateRequest request, int baseVersion) {
+        Preconditions.checkArgumentNonnegative(baseVersion);
         Objects.requireNonNull(request);
         Objects.requireNonNull(request.getFd());
         Objects.requireNonNull(request.getSignature());
-        Preconditions.checkArgumentNonnegative(baseVersion);
         getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
                 "UPDATE_FONTS permission required.");
         try {
@@ -84,6 +84,21 @@ public final class FontManagerService extends IFontManager.Stub {
             return FontManager.RESULT_SUCCESS;
         } catch (SystemFontException e) {
             Slog.e(TAG, "Failed to update font file", e);
+            return e.getErrorCode();
+        }
+    }
+
+    @Override
+    public int updateFontFamily(@NonNull List<FontUpdateRequest> requests, int baseVersion) {
+        Preconditions.checkArgumentNonnegative(baseVersion);
+        Objects.requireNonNull(requests);
+        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
+                "UPDATE_FONTS permission required.");
+        try {
+            update(baseVersion, requests);
+            return FontManager.RESULT_SUCCESS;
+        } catch (SystemFontException e) {
+            Slog.e(TAG, "Failed to update font family", e);
             return e.getErrorCode();
         }
     }
