@@ -38,12 +38,15 @@ import java.util.Map;
 class FaceRemovalClient extends RemovalClient<Face, IBiometricsFace> {
     private static final String TAG = "FaceRemovalClient";
 
+    private final int mBiometricId;
+
     FaceRemovalClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<Face> utils,
             int sensorId, @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
+        super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FACE);
+        mBiometricId = biometricId;
     }
 
     @Override

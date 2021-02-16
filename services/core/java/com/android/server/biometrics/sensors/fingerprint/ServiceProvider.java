@@ -98,6 +98,10 @@ public interface ServiceProvider {
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
             @NonNull String opPackageName);
 
+    void scheduleRemoveAll(int sensorId, @NonNull IBinder token,
+            @NonNull IFingerprintServiceReceiver receiver, int userId,
+            @NonNull String opPackageName);
+
     void scheduleInternalCleanup(int sensorId, int userId);
 
     boolean isHardwareDetected(int sensorId);

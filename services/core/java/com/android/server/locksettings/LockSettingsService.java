@@ -2890,11 +2890,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         FingerprintManager mFingerprintManager = mInjector.getFingerprintManager();
         if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
             if (mFingerprintManager.hasEnrolledFingerprints(userId)) {
-                CountDownLatch latch = new CountDownLatch(1);
-                // For the purposes of M and N, groupId is the same as userId.
-                Fingerprint finger = new Fingerprint(null, userId, 0, 0);
-                mFingerprintManager.remove(finger, userId,
-                        fingerprintManagerRemovalCallback(latch));
+                final CountDownLatch latch = new CountDownLatch(1);
+                mFingerprintManager.removeAll(userId, fingerprintManagerRemovalCallback(latch));
                 try {
                     latch.await(10000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
@@ -2908,9 +2905,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         FaceManager mFaceManager = mInjector.getFaceManager();
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
             if (mFaceManager.hasEnrolledTemplates(userId)) {
-                CountDownLatch latch = new CountDownLatch(1);
-                Face face = new Face(null, 0, 0);
-                mFaceManager.remove(face, userId, faceManagerRemovalCallback(latch));
+                final CountDownLatch latch = new CountDownLatch(1);
+                mFaceManager.removeAll(userId, faceManagerRemovalCallback(latch));
                 try {
                     latch.await(10000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
@@ -2924,10 +2920,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             CountDownLatch latch) {
         return new FingerprintManager.RemovalCallback() {
             @Override
-            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence err) {
-                Slog.e(TAG, String.format(
-                        "Can't remove fingerprint %d in group %d. Reason: %s",
-                        fp.getBiometricId(), fp.getGroupId(), err));
+            public void onRemovalError(@Nullable Fingerprint fp, int errMsgId, CharSequence err) {
+                Slog.e(TAG, "Unable to remove fingerprint, error: " + err);
                 latch.countDown();
             }
 
@@ -2943,9 +2937,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private FaceManager.RemovalCallback faceManagerRemovalCallback(CountDownLatch latch) {
         return new FaceManager.RemovalCallback() {
             @Override
-            public void onRemovalError(Face face, int errMsgId, CharSequence err) {
-                Slog.e(TAG, String.format("Can't remove face %d. Reason: %s",
-                        face.getBiometricId(), err));
+            public void onRemovalError(@Nullable Face face, int errMsgId, CharSequence err) {
+                Slog.e(TAG, "Unable to remove face, error: " + err);
                 latch.countDown();
             }
 

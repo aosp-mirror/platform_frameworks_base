@@ -636,6 +636,23 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         });
     }
 
+    @Override
+    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token,
+            @NonNull IFingerprintServiceReceiver receiver, int userId,
+            @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            // For IBiometricsFingerprint@2.1, remove(0) means remove all enrollments
+            final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver),
+                    0 /* fingerprintId */, userId, opPackageName,
+                    FingerprintUtils.getLegacyInstance(mSensorId),
+                    mSensorProperties.sensorId, mAuthenticatorIds);
+            mScheduler.scheduleClientMonitor(client);
+        });
+    }
+
     private void scheduleInternalCleanup(int userId) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);

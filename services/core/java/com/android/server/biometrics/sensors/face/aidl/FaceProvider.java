@@ -468,6 +468,25 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @Override
     public void scheduleRemove(int sensorId, @NonNull IBinder token, int faceId, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
+        scheduleRemoveSpecifiedIds(sensorId, token, new int[] {faceId}, userId, receiver,
+                opPackageName);
+    }
+
+    @Override
+    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token, int userId,
+            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
+        final List<Face> faces = FaceUtils.getInstance(sensorId)
+                .getBiometricsForUser(mContext, userId);
+        final int[] faceIds = new int[faces.size()];
+        for (int i = 0; i < faces.size(); i++) {
+            faceIds[i] = faces.get(i).getBiometricId();
+        }
+
+        scheduleRemoveSpecifiedIds(sensorId, token, faceIds, userId, receiver, opPackageName);
+    }
+
+    private void scheduleRemoveSpecifiedIds(int sensorId, @NonNull IBinder token, int[] faceIds,
+            int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             final IFace daemon = getHalInstance();
             if (daemon == null) {
@@ -485,7 +504,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
                 final FaceRemovalClient client = new FaceRemovalClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
-                        new ClientMonitorCallbackConverter(receiver), faceId, userId,
+                        new ClientMonitorCallbackConverter(receiver), faceIds, userId,
                         opPackageName, FaceUtils.getInstance(sensorId), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
 

@@ -339,11 +339,11 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mService.setLockCredential(nonePassword(), newPattern("123654"), PRIMARY_USER_ID);
 
         // Verify fingerprint is removed
-        verify(mFingerprintManager).remove(any(), eq(PRIMARY_USER_ID), any());
-        verify(mFaceManager).remove(any(), eq(PRIMARY_USER_ID), any());
+        verify(mFingerprintManager).removeAll(eq(PRIMARY_USER_ID), any());
+        verify(mFaceManager).removeAll(eq(PRIMARY_USER_ID), any());
 
-        verify(mFingerprintManager).remove(any(), eq(MANAGED_PROFILE_USER_ID), any());
-        verify(mFaceManager).remove(any(), eq(MANAGED_PROFILE_USER_ID), any());
+        verify(mFingerprintManager).removeAll(eq(MANAGED_PROFILE_USER_ID), any());
+        verify(mFaceManager).removeAll(eq(MANAGED_PROFILE_USER_ID), any());
     }
 
     @Test

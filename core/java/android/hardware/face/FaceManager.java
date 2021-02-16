@@ -562,12 +562,23 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mService.remove(mToken, face.getBiometricId(), userId, mServiceReceiver,
                         mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.w(TAG, "Remote exception in remove: ", e);
-                if (callback != null) {
-                    callback.onRemovalError(face, FACE_ERROR_HW_UNAVAILABLE,
-                            getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
-                                0 /* vendorCode */));
-                }
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Removes all face templates for the given user.
+     * @hide
+     */
+    @RequiresPermission(MANAGE_BIOMETRIC)
+    public void removeAll(int userId, @NonNull RemovalCallback callback) {
+        if (mService != null) {
+            try {
+                mRemovalCallback = callback;
+                mService.removeAll(mToken, userId, mServiceReceiver, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }

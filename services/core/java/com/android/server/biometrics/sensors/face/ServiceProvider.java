@@ -109,6 +109,9 @@ public interface ServiceProvider {
     void scheduleRemove(int sensorId, @NonNull IBinder token, int faceId, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName);
 
+    void scheduleRemoveAll(int sensorId, @NonNull IBinder token, int userId,
+            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName);
+
     void scheduleResetLockout(int sensorId, int userId, @NonNull byte[] hardwareAuthToken);
 
     void scheduleSetFeature(int sensorId, @NonNull IBinder token, int userId, int feature,
