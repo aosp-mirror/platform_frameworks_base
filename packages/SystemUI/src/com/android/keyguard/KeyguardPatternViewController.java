@@ -31,7 +31,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
-import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
+import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -50,6 +50,7 @@ public class KeyguardPatternViewController
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
+    private final EmergencyButtonController mEmergencyButtonController;
     private final KeyguardMessageAreaController.Factory mMessageAreaControllerFactory;
 
     private KeyguardMessageAreaController mMessageAreaController;
@@ -179,11 +180,13 @@ public class KeyguardPatternViewController
             LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             LatencyTracker latencyTracker,
+            EmergencyButtonController emergencyButtonController,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory) {
-        super(view, securityMode, keyguardSecurityCallback);
+        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
+        mEmergencyButtonController = emergencyButtonController;
         mMessageAreaControllerFactory = messageAreaControllerFactory;
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = mMessageAreaControllerFactory.create(kma);
@@ -205,11 +208,7 @@ public class KeyguardPatternViewController
                 KeyguardUpdateMonitor.getCurrentUser()));
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
-
-        EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
-        if (button != null) {
-            button.setCallback(mEmergencyButtonCallback);
-        }
+        mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
 
         View cancelBtn = mView.findViewById(R.id.cancel_button);
         if (cancelBtn != null) {
@@ -224,10 +223,7 @@ public class KeyguardPatternViewController
     protected void onViewDetached() {
         super.onViewDetached();
         mLockPatternView.setOnPatternListener(null);
-        EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
-        if (button != null) {
-            button.setCallback(null);
-        }
+        mEmergencyButtonController.setEmergencyButtonCallback(null);
         View cancelBtn = mView.findViewById(R.id.cancel_button);
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(null);
