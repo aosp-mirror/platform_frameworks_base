@@ -876,6 +876,9 @@ public class PipTouchHandler {
                             < mPipBoundsState.getMaxSize().x
                             && mPipBoundsState.getBounds().height()
                             < mPipBoundsState.getMaxSize().y;
+                    if (mMenuController.isMenuVisible()) {
+                        mMenuController.hideMenu(false /* animate */, false /* resize */);
+                    }
                     if (toExpand) {
                         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                         animateToMaximizedState(null);
