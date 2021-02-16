@@ -72,7 +72,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.service.pm.PackageServiceDumpProto;
@@ -2615,6 +2614,8 @@ public final class Settings implements Watchable, Snappable {
         } else {
             serializer.attributeInt(null, "sharedUserId", pkg.appId);
         }
+        serializer.attributeFloat(null, "loadingProgress",
+                pkg.getIncrementalStates().getProgress());
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
@@ -3389,6 +3390,9 @@ public final class Settings implements Watchable, Snappable {
         if (ps.appId <= 0) {
             ps.appId = parser.getAttributeInt(null, "sharedUserId", 0);
         }
+        final float loadingProgress =
+                parser.getAttributeFloat(null, "loadingProgress", 0);
+        ps.setLoadingProgress(loadingProgress);
 
         int outerDepth = parser.getDepth();
         int type;
@@ -4582,7 +4586,7 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  installerAttributionTag=");
             pw.println(ps.installSource.installerAttributionTag);
         }
-        if (IncrementalManager.isIncrementalPath(ps.getPathString())) {
+        if (ps.isPackageLoading()) {
             pw.print(prefix); pw.println("  loadingProgress="
                     + (int) (ps.getIncrementalStates().getProgress() * 100) + "%");
         }
