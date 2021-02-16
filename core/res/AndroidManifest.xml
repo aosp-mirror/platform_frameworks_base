@@ -5477,6 +5477,9 @@
     <permission android:name="android.permission.SIGNAL_REBOOT_READINESS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows an application to get a People Tile preview for a given shortcut. -->
+    <permission android:name="android.permission.GET_PEOPLE_TILE_PREVIEW"
+        android:protectionLevel="signature|recents" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

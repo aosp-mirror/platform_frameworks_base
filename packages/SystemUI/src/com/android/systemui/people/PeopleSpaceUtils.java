@@ -49,6 +49,7 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -438,7 +439,7 @@ public class PeopleSpaceUtils {
     }
 
     /** Creates a {@link RemoteViews} for {@code tile}. */
-    private static RemoteViews createRemoteViews(Context context,
+    public static RemoteViews createRemoteViews(Context context,
             PeopleSpaceTile tile, int appWidgetId) {
         RemoteViews views;
         if (tile.getNotificationKey() != null) {
@@ -455,6 +456,9 @@ public class PeopleSpaceUtils {
             PeopleSpaceTile tile, int appWidgetId) {
         try {
             views.setTextViewText(R.id.name, tile.getUserName().toString());
+            views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
+            views.setBoolean(R.id.content_background, "setClipToOutline", true);
+
             views.setImageViewBitmap(
                     R.id.package_icon,
                     PeopleSpaceUtils.convertDrawableToBitmap(
@@ -462,8 +466,6 @@ public class PeopleSpaceUtils {
                                     tile.getPackageName())
                     )
             );
-            views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
-            views.setBoolean(R.id.content_background, "setClipToOutline", true);
 
             Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
             activityIntent.addFlags(
@@ -612,6 +614,22 @@ public class PeopleSpaceUtils {
                 .collect(Collectors.toList());
     }
 
+    /** Returns {@code PeopleSpaceTile} based on provided  {@ConversationChannel}. */
+    public static PeopleSpaceTile getTile(ConversationChannel channel, LauncherApps launcherApps) {
+        if (channel == null) {
+            Log.i(TAG, "ConversationChannel is null");
+            return null;
+        }
+
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(channel, launcherApps).build();
+        if (!PeopleSpaceUtils.shouldKeepConversation(tile)) {
+            Log.i(TAG, "PeopleSpaceTile is not valid");
+            return null;
+        }
+
+        return tile;
+    }
+
     /** Returns the last interaction time with the user specified by {@code PeopleSpaceTile}. */
     private static Long getLastInteraction(IPeopleManager peopleManager,
             PeopleSpaceTile tile) {
@@ -701,7 +719,7 @@ public class PeopleSpaceUtils {
      * </li>
      */
     public static boolean shouldKeepConversation(PeopleSpaceTile tile) {
-        return tile != null && tile.getUserName().length() != 0;
+        return tile != null && !TextUtils.isEmpty(tile.getUserName());
     }
 
     private static boolean hasBirthdayStatus(PeopleSpaceTile tile, Context context) {
@@ -792,8 +810,7 @@ public class PeopleSpaceUtils {
     private static void updateAppWidgetOptionsAndView(AppWidgetManager appWidgetManager,
             Context context, int appWidgetId, PeopleSpaceTile tile) {
         updateAppWidgetOptions(appWidgetManager, appWidgetId, tile);
-        RemoteViews views = createRemoteViews(context,
-                tile, appWidgetId);
+        RemoteViews views = createRemoteViews(context, tile, appWidgetId);
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
