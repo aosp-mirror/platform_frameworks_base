@@ -3082,32 +3082,45 @@
     <!-- color definitions go here -->
 
     <!-- Material design dynamic system palette:-->
-    <!-- Dominant color -->
-    <public name="system_main_0" />
-    <public name="system_main_50" />
-    <public name="system_main_100" />
-    <public name="system_main_200" />
-    <public name="system_main_300" />
-    <public name="system_main_400" />
-    <public name="system_main_500" />
-    <public name="system_main_600" />
-    <public name="system_main_700" />
-    <public name="system_main_800" />
-    <public name="system_main_900" />
-    <public name="system_main_1000" />
-    <!-- Accent color -->
-    <public name="system_accent_0" />
-    <public name="system_accent_50" />
-    <public name="system_accent_100" />
-    <public name="system_accent_200" />
-    <public name="system_accent_300" />
-    <public name="system_accent_400" />
-    <public name="system_accent_500" />
-    <public name="system_accent_600" />
-    <public name="system_accent_700" />
-    <public name="system_accent_800" />
-    <public name="system_accent_900" />
-    <public name="system_accent_1000" />
+    <!-- Primary color -->
+    <public name="system_primary_0" />
+    <public name="system_primary_50" />
+    <public name="system_primary_100" />
+    <public name="system_primary_200" />
+    <public name="system_primary_300" />
+    <public name="system_primary_400" />
+    <public name="system_primary_500" />
+    <public name="system_primary_600" />
+    <public name="system_primary_700" />
+    <public name="system_primary_800" />
+    <public name="system_primary_900" />
+    <public name="system_primary_1000" />
+    <!-- Secondary color -->
+    <public name="system_secondary_0" />
+    <public name="system_secondary_50" />
+    <public name="system_secondary_100" />
+    <public name="system_secondary_200" />
+    <public name="system_secondary_300" />
+    <public name="system_secondary_400" />
+    <public name="system_secondary_500" />
+    <public name="system_secondary_600" />
+    <public name="system_secondary_700" />
+    <public name="system_secondary_800" />
+    <public name="system_secondary_900" />
+    <public name="system_secondary_1000" />
+    <!-- Neutral color -->
+    <public name="system_neutral_0" />
+    <public name="system_neutral_50" />
+    <public name="system_neutral_100" />
+    <public name="system_neutral_200" />
+    <public name="system_neutral_300" />
+    <public name="system_neutral_400" />
+    <public name="system_neutral_500" />
+    <public name="system_neutral_600" />
+    <public name="system_neutral_700" />
+    <public name="system_neutral_800" />
+    <public name="system_neutral_900" />
+    <public name="system_neutral_1000" />
   </public-group>
 
   <public-group type="dimen" first-id="0x01050008">

@@ -16,6 +16,7 @@
 package com.android.systemui.theme;
 
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_NEUTRAL_PALETTE;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
 
 import android.annotation.Nullable;
@@ -83,8 +84,9 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     protected static final String TAG = "ThemeOverlayController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    protected static final int MAIN = 0;
-    protected static final int ACCENT = 1;
+    protected static final int PRIMARY = 0;
+    protected static final int SECONDARY = 1;
+    protected static final int NEUTRAL = 1;
 
     // If lock screen wallpaper colors should also be considered when selecting the theme.
     // Doing this has performance impact, given that overlays would need to be swapped when
@@ -111,9 +113,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     // Accent color extracted from wallpaper, NOT the color used on the overlay
     protected int mWallpaperAccentColor = Color.TRANSPARENT;
     // System colors overlay
-    private FabricatedOverlay mSystemOverlay;
+    private FabricatedOverlay mPrimaryOverlay;
     // Accent colors overlay
-    private FabricatedOverlay mAccentOverlay;
+    private FabricatedOverlay mSecondaryOverlay;
+    // Neutral system colors overlay
+    private FabricatedOverlay mNeutralOverlay;
 
     @Inject
     public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
@@ -232,12 +236,13 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         mWallpaperAccentColor = accentCandidate;
 
         if (mIsMonetEnabled) {
-            mSystemOverlay = getOverlay(mMainWallpaperColor, MAIN);
-            mAccentOverlay = getOverlay(mWallpaperAccentColor, ACCENT);
+            mPrimaryOverlay = getOverlay(mMainWallpaperColor, PRIMARY);
+            mSecondaryOverlay = getOverlay(mWallpaperAccentColor, SECONDARY);
+            mNeutralOverlay = getOverlay(mMainWallpaperColor, NEUTRAL);
             mNeedsOverlayCreation = true;
             if (DEBUG) {
-                Log.d(TAG, "fetched overlays. system: " + mSystemOverlay + " accent: "
-                        + mAccentOverlay);
+                Log.d(TAG, "fetched overlays. primary: " + mPrimaryOverlay + " secondary: "
+                        + mSecondaryOverlay + " neutral: " + mNeutralOverlay);
             }
         }
 
@@ -296,7 +301,9 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         if (mIsMonetEnabled && systemPalette != null && systemPalette.getPackageName() != null) {
             try {
                 int color = Integer.parseInt(systemPalette.getPackageName().toLowerCase(), 16);
-                mSystemOverlay = getOverlay(color, MAIN);
+                mPrimaryOverlay = getOverlay(color, PRIMARY);
+                // Neutral palette is always derived from primary color.
+                mNeutralOverlay = getOverlay(color, NEUTRAL);
                 mNeedsOverlayCreation = true;
                 categoryToPackage.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
             } catch (NumberFormatException e) {
@@ -309,7 +316,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         if (mIsMonetEnabled && accentPalette != null && accentPalette.getPackageName() != null) {
             try {
                 int color = Integer.parseInt(accentPalette.getPackageName().toLowerCase(), 16);
-                mAccentOverlay = getOverlay(color, ACCENT);
+                mSecondaryOverlay = getOverlay(color, SECONDARY);
                 mNeedsOverlayCreation = true;
                 categoryToPackage.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
             } catch (NumberFormatException e) {
@@ -320,12 +327,14 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         // Compatibility with legacy themes, where full packages were defined, instead of just
         // colors.
         if (!categoryToPackage.containsKey(OVERLAY_CATEGORY_SYSTEM_PALETTE)
-                && mSystemOverlay != null) {
-            categoryToPackage.put(OVERLAY_CATEGORY_SYSTEM_PALETTE, mSystemOverlay.getIdentifier());
+                && mPrimaryOverlay != null) {
+            categoryToPackage.put(OVERLAY_CATEGORY_SYSTEM_PALETTE, mPrimaryOverlay.getIdentifier());
+            categoryToPackage.put(OVERLAY_CATEGORY_NEUTRAL_PALETTE,
+                    mNeutralOverlay.getIdentifier());
         }
         if (!categoryToPackage.containsKey(OVERLAY_CATEGORY_ACCENT_COLOR)
-                && mAccentOverlay != null) {
-            categoryToPackage.put(OVERLAY_CATEGORY_ACCENT_COLOR, mAccentOverlay.getIdentifier());
+                && mSecondaryOverlay != null) {
+            categoryToPackage.put(OVERLAY_CATEGORY_ACCENT_COLOR, mSecondaryOverlay.getIdentifier());
         }
 
         Set<UserHandle> userHandles = Sets.newHashSet(UserHandle.of(currentUser));
@@ -342,7 +351,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         if (mNeedsOverlayCreation) {
             mNeedsOverlayCreation = false;
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, new FabricatedOverlay[] {
-                    mSystemOverlay, mAccentOverlay
+                    mPrimaryOverlay, mSecondaryOverlay, mNeutralOverlay
             }, userHandles);
         } else {
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, null, userHandles);
@@ -356,8 +365,9 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         pw.println("mSystemColors=" + mSystemColors);
         pw.println("mMainWallpaperColor=" + Integer.toHexString(mMainWallpaperColor));
         pw.println("mWallpaperAccentColor=" + Integer.toHexString(mWallpaperAccentColor));
-        pw.println("mSystemOverlayColor=" + mSystemOverlay);
-        pw.println("mAccentOverlayColor=" + mAccentOverlay);
+        pw.println("mPrimaryOverlay=" + mPrimaryOverlay);
+        pw.println("mSecondaryOverlay=" + mSecondaryOverlay);
+        pw.println("mNeutralOverlay=" + mNeutralOverlay);
         pw.println("mIsMonetEnabled=" + mIsMonetEnabled);
         pw.println("mNeedsOverlayCreation=" + mNeedsOverlayCreation);
     }
