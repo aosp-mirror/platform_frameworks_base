@@ -53,7 +53,7 @@ public class DomainVerificationPersistence {
 
     public static final String TAG_USER_STATE = "user-state";
     public static final String ATTR_USER_ID = "userId";
-    public static final String ATTR_DISALLOW_LINK_HANDLING = "disallowLinkHandling";
+    public static final String ATTR_ALLOW_LINK_HANDLING = "allowLinkHandling";
     public static final String TAG_ENABLED_HOSTS = "enabled-hosts";
     public static final String TAG_HOST = "host";
 
@@ -252,7 +252,7 @@ public class DomainVerificationPersistence {
             return null;
         }
 
-        boolean disallowLinkHandling = section.getBoolean(ATTR_DISALLOW_LINK_HANDLING);
+        boolean allowLinkHandling = section.getBoolean(ATTR_ALLOW_LINK_HANDLING, true);
         ArraySet<String> enabledHosts = new ArraySet<>();
 
         SettingsXml.ChildSection child = section.children();
@@ -260,7 +260,7 @@ public class DomainVerificationPersistence {
             readEnabledHosts(child, enabledHosts);
         }
 
-        return new DomainVerificationUserState(userId, enabledHosts, disallowLinkHandling);
+        return new DomainVerificationUserState(userId, enabledHosts, allowLinkHandling);
     }
 
     private static void readEnabledHosts(@NonNull SettingsXml.ReadSection section,
@@ -279,8 +279,8 @@ public class DomainVerificationPersistence {
         try (SettingsXml.WriteSection section =
                      parentSection.startSection(TAG_USER_STATE)
                              .attribute(ATTR_USER_ID, userState.getUserId())
-                             .attribute(ATTR_DISALLOW_LINK_HANDLING,
-                                     userState.isDisallowLinkHandling())) {
+                             .attribute(ATTR_ALLOW_LINK_HANDLING,
+                                     userState.isLinkHandlingAllowed())) {
             ArraySet<String> enabledHosts = userState.getEnabledHosts();
             if (!enabledHosts.isEmpty()) {
                 try (SettingsXml.WriteSection enabledHostsSection =
