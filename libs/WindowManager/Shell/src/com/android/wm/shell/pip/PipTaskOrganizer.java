@@ -66,7 +66,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.transition.Transitions;
@@ -973,7 +972,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         finishResizeForMenu(destinationBounds);
     }
 
-    private void finishResizeForMenu(Rect destinationBounds) {
+    /** Moves the PiP menu to the destination bounds. */
+    public void finishResizeForMenu(Rect destinationBounds) {
         mPipMenuController.movePipMenu(null, null, destinationBounds);
         mPipMenuController.updateMenuBounds(destinationBounds);
     }
