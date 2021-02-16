@@ -106,7 +106,7 @@ public class PipResizeGestureHandler {
     // For pinch-resize
     private boolean mThresholdCrossed0;
     private boolean mThresholdCrossed1;
-    private boolean mUsingPinchToZoom = false;
+    private boolean mUsingPinchToZoom = true;
     private float mAngle = 0;
     int mFirstIndex = -1;
     int mSecondIndex = -1;
@@ -139,7 +139,7 @@ public class PipResizeGestureHandler {
         mEnablePinchResize = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_PINCH_RESIZE,
-                /* defaultValue = */ false);
+                /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 mMainExecutor,
                 new DeviceConfig.OnPropertiesChangedListener() {
@@ -147,7 +147,7 @@ public class PipResizeGestureHandler {
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         if (properties.getKeyset().contains(PIP_PINCH_RESIZE)) {
                             mEnablePinchResize = properties.getBoolean(
-                                    PIP_PINCH_RESIZE, /* defaultValue = */ false);
+                                    PIP_PINCH_RESIZE, /* defaultValue = */ true);
                         }
                     }
                 });
