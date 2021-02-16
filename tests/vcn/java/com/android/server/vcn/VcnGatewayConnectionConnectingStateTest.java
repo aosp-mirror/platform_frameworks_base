@@ -106,4 +106,9 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
         verify(mIkeSession).close();
         verifyTeardownTimeoutAlarmAndGetCallback(true /* expectCanceled */);
     }
+
+    @Test
+    public void testSafemodeTimeoutNotifiesCallback() {
+        verifySafemodeTimeoutNotifiesCallback(mGatewayConnection.mConnectingState);
+    }
 }
