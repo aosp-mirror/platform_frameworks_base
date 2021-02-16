@@ -46,6 +46,21 @@ public interface DetailAdapter {
         return true;
     }
 
+    /**
+     * @return if detail panel should animate when shown or closed
+     */
+    default boolean shouldAnimate() {
+        return true;
+    }
+
+    /**
+     * @return true if the callback handled the event and wants to keep the detail panel open, false
+     * otherwise. Returning false will close the panel.
+     */
+    default boolean onDoneButtonClicked() {
+        return false;
+    }
+
     default UiEventLogger.UiEventEnum openDetailEvent() {
         return INVALID;
     }

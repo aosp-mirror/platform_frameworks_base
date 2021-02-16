@@ -58,6 +58,7 @@ import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.R;
@@ -70,6 +71,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -194,7 +196,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     @Mock
-    private KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponent;
+    private KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
+    @Mock
+    private KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
+    @Mock
+    private QSDetailDisplayer mQSDetailDisplayer;
     @Mock
     private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
     @Mock
@@ -305,7 +311,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
-                mKeyguardUserSwitcherComponent,
+                mKeyguardQsUserSwitchComponentFactory,
+                mKeyguardUserSwitcherComponentFactory,
+                mQSDetailDisplayer,
                 mGroupManager,
                 mNotificationAreaController,
                 mAuthController,
