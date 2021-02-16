@@ -1551,8 +1551,6 @@
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
 
-    <string name="volume_ringer_change">Tap to change ringer mode</string>
-
     <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
     <string name="volume_ringer_hint_mute">mute</string>
     <!-- Hint for accessibility. For example: double tap to unmute [CHAR_LIMIT=NONE] -->
