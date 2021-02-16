@@ -66,7 +66,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.transition.Transitions;
@@ -582,6 +581,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
                 null /* updateBoundsCallback */);
+    }
+
+    @Override
+    public boolean supportSizeCompatUI() {
+        // PIP doesn't support size compat.
+        return false;
     }
 
     @Override
