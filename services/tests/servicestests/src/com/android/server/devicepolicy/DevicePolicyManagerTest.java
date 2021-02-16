@@ -4329,6 +4329,68 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testSetNetworkLoggingEnabled_asPo() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        mContext.applicationInfo = new ApplicationInfo();
+        mContext.packageName = admin1.getPackageName();
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.S);
+        when(getServices().iipConnectivityMetrics
+                .addNetdEventCallback(anyInt(), anyObject())).thenReturn(true);
+
+        // Check no logs have been retrieved so far.
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Enable network logging
+        dpm.setNetworkLoggingEnabled(admin1, true);
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Retrieve the network logs and verify timestamp has been updated.
+        final long beforeRetrieval = System.currentTimeMillis();
+
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+
+        final long networkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
+        final long afterRetrieval = System.currentTimeMillis();
+        assertThat(networkLogRetrievalTime >= beforeRetrieval).isTrue();
+        assertThat(networkLogRetrievalTime <= afterRetrieval).isTrue();
+    }
+
+    @Test
+    public void testSetNetworkLoggingEnabled_asPoOfOrgOwnedDevice() throws Exception {
+        // Setup profile owner on organization-owned device
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        mContext.packageName = admin1.getPackageName();
+        mContext.applicationInfo = new ApplicationInfo();
+        when(getServices().iipConnectivityMetrics
+                .addNetdEventCallback(anyInt(), anyObject())).thenReturn(true);
+
+        // Check no logs have been retrieved so far.
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Enable network logging
+        dpm.setNetworkLoggingEnabled(admin1, true);
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Retrieve the network logs and verify timestamp has been updated.
+        final long beforeRetrieval = System.currentTimeMillis();
+
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+
+        final long networkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
+        final long afterRetrieval = System.currentTimeMillis();
+        assertThat(networkLogRetrievalTime >= beforeRetrieval).isTrue();
+        assertThat(networkLogRetrievalTime <= afterRetrieval).isTrue();
+    }
+
+    @Test
     public void testGetBindDeviceAdminTargetUsers() throws Exception {
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
 
