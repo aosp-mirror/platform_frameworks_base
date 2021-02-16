@@ -20,7 +20,15 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.Compatibility;
+import android.content.Context;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
+
+import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.IPlatformCompat;
+
+import java.util.Map;
 
 /**
  * CompatChanges APIs - to be used by platform code only (including mainline
@@ -89,4 +97,25 @@ public final class CompatChanges {
         return QUERY_CACHE.query(ChangeIdStateQuery.byUid(changeId, uid));
     }
 
+    /**
+     * Set an app compat override for a given package. This will check whether the caller is allowed
+     * to perform this operation on the given apk and build. Only the installer package is allowed
+     * to set overrides on a non-debuggable final build and a non-test apk.
+     *
+     * @param packageName The package name of the app in question.
+     * @param overrides A map from changeId to the override applied for this change id.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG)
+    public static void setPackageOverride(String packageName,
+            Map<Long, PackageOverride> overrides) {
+        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
+        try {
+            platformCompat.setOverridesFromInstaller(config, packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
 }
