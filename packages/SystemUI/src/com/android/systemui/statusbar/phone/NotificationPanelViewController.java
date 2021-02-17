@@ -196,7 +196,8 @@ public class NotificationPanelViewController extends PanelViewController {
             new MyOnHeadsUpChangedListener();
     private final HeightListener mHeightListener = new HeightListener();
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
-    private final StatusBarStateListener mStatusBarStateListener = new StatusBarStateListener();
+    @VisibleForTesting final StatusBarStateListener mStatusBarStateListener =
+            new StatusBarStateListener();
     private final ExpansionCallback mExpansionCallback = new ExpansionCallback();
     private final BiometricUnlockController mBiometricUnlockController;
     private final NotificationPanelView mView;
@@ -1852,7 +1853,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private void setQsExpanded(boolean expanded) {
+    @VisibleForTesting void setQsExpanded(boolean expanded) {
         boolean changed = mQsExpanded != expanded;
         if (changed) {
             mQsExpanded = expanded;
@@ -1955,8 +1956,10 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQsState() {
         mNotificationStackScrollLayoutController.setQsExpanded(mQsExpanded);
         mNotificationStackScrollLayoutController.setScrollingEnabled(
-                mBarState != KEYGUARD && (!mQsExpanded
-                        || mQsExpansionFromOverscroll));
+                mBarState != KEYGUARD
+                        && (!mQsExpanded
+                            || mQsExpansionFromOverscroll
+                            || Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)));
 
         if (mKeyguardUserSwitcherController != null && mQsExpanded
                 && !mStackScrollerOverscrolling) {
@@ -2236,13 +2239,16 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected boolean canCollapsePanelOnTouch() {
-        if (!isInSettings()) {
-            return mBarState == KEYGUARD
-                    || mIsPanelCollapseOnQQS
-                    || mNotificationStackScrollLayoutController.isScrolledToBottom();
-        } else {
+        if (!isInSettings() && mBarState == KEYGUARD) {
             return true;
         }
+
+        if (mNotificationStackScrollLayoutController.isScrolledToBottom()) {
+            return true;
+        }
+
+        return !Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)
+                && (isInSettings() || mIsPanelCollapseOnQQS);
     }
 
     @Override
@@ -3615,6 +3621,10 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationStackScrollLayout.OnOverscrollTopChangedListener {
         @Override
         public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
+            // When in split shade, overscroll shouldn't carry through to QS
+            if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+                return;
+            }
             cancelQsAnimation();
             if (!mQsExpansionEnabled) {
                 amount = 0f;
