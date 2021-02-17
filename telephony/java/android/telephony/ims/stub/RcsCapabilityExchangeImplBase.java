@@ -19,7 +19,6 @@ package android.telephony.ims.stub;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.net.Uri;
@@ -141,7 +140,7 @@ public class RcsCapabilityExchangeImplBase {
          * {@link #publishCapabilities(String, PublishResponseCallback)}.
          *
          * If this network response also contains a “Reason” header, then the
-         * {@link onNetworkResponse(int, String, int, String)} method should be used instead.
+         * {@link #onNetworkResponse(int, String, int, String)} method should be used instead.
          *
          * @param sipCode The SIP response code sent from the network for the operation
          * token specified.
@@ -160,7 +159,7 @@ public class RcsCapabilityExchangeImplBase {
 
         /**
          * Provide the framework with a subsequent network response update to
-         * {@link #publishCapabilities(RcsContactUceCapability, int)} that also
+         * {@link #publishCapabilities(String, PublishResponseCallback)} that also
          * includes a reason provided in the “reason” header. See RFC3326 for more
          * information.
          *
@@ -186,7 +185,6 @@ public class RcsCapabilityExchangeImplBase {
 
     /**
      * Interface used by the framework to respond to OPTIONS requests.
-     * @hide
      */
     public interface OptionsResponseCallback {
         /**
@@ -217,7 +215,7 @@ public class RcsCapabilityExchangeImplBase {
          * cases when the Telephony stack has crashed.
          */
         void onNetworkResponse(int sipCode, @NonNull String reason,
-                @Nullable List<String> theirCaps) throws ImsException;
+                @NonNull List<String> theirCaps) throws ImsException;
     }
 
     /**
@@ -243,7 +241,7 @@ public class RcsCapabilityExchangeImplBase {
 
         /**
          * Notify the framework of the response to the SUBSCRIBE request from
-         * {@link #subscribeForCapabilities(List<Uri>, SubscribeResponseCallback)}.
+         * {@link #subscribeForCapabilities(List, SubscribeResponseCallback)}.
          * <p>
          * If the carrier network responds to the SUBSCRIBE request with a 2XX response, then the
          * framework will expect the IMS stack to call {@link #onNotifyCapabilitiesUpdate},
@@ -251,7 +249,7 @@ public class RcsCapabilityExchangeImplBase {
          * subsequent NOTIFY responses to the subscription.
          *
          * If this network response also contains a “Reason” header, then the
-         * {@link onNetworkResponse(int, String, int, String)} method should be used instead.
+         * {@link #onNetworkResponse(int, String, int, String)} method should be used instead.
          *
          * @param sipCode The SIP response code sent from the network for the operation
          * token specified.
@@ -268,7 +266,7 @@ public class RcsCapabilityExchangeImplBase {
 
         /**
          * Notify the framework  of the response to the SUBSCRIBE request from
-         * {@link #subscribeForCapabilities(RcsContactUceCapability, int)} that also
+         * {@link #subscribeForCapabilities(List, SubscribeResponseCallback)} that also
          * includes a reason provided in the “reason” header. See RFC3326 for more
          * information.
          *
@@ -294,7 +292,8 @@ public class RcsCapabilityExchangeImplBase {
         /**
          * Notify the framework of the latest XML PIDF documents included in the network response
          * for the requested contacts' capabilities requested by the Framework using
-         * {@link RcsUceAdapter#requestCapabilities(Executor, List<Uri>, CapabilitiesCallback)}.
+         * {@link RcsUceAdapter#requestCapabilities(List, Executor,
+         * RcsUceAdapter.CapabilitiesCallback)}.
          * <p>
          * The expected format for the PIDF XML is defined in RFC3861. Each XML document must be a
          * "application/pidf+xml" object and start with a root <presence> element. For NOTIFY
@@ -336,7 +335,8 @@ public class RcsCapabilityExchangeImplBase {
 
         /**
          * The subscription associated with a previous
-         * {@link RcsUceAdapter#requestCapabilities(Executor, List<Uri>, CapabilitiesCallback)}
+         * {@link RcsUceAdapter#requestCapabilities(List, Executor,
+         * RcsUceAdapter.CapabilitiesCallback)}
          * operation has been terminated. This will mostly be due to the network sending a final
          * NOTIFY response due to the subscription expiring, but this may also happen due to a
          * network error.
@@ -427,12 +427,11 @@ public class RcsCapabilityExchangeImplBase {
      * Push one's own capabilities to a remote user via the SIP OPTIONS presence exchange mechanism
      * in order to receive the capabilities of the remote user in response.
      * <p>
-     * The implementer must call {@link #onNetworkResponse} to send the response of this
-     * query back to the framework.
+     * The implementer must use {@link OptionsResponseCallback} to send the response of
+     * this query from the network back to the framework.
      * @param contactUri The URI of the remote user that we wish to get the capabilities of.
      * @param myCapabilities The capabilities of this device to send to the remote user.
      * @param callback The callback of this request which is sent from the remote user.
-     * @hide
      */
     // executor used is defined in the constructor.
     @SuppressLint("ExecutorRegistration")
