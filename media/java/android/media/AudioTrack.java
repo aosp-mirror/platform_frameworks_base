@@ -565,6 +565,11 @@ public class AudioTrack extends PlayerBase
      */
     private int mOffloadPaddingFrames = 0;
 
+    /**
+     * The log session id used for metrics.
+     */
+    private String mLogSessionId;
+
     //--------------------------------
     // Used exclusively by native code
     //--------------------
@@ -3966,6 +3971,23 @@ public class AudioTrack extends PlayerBase
         }
     }
 
+    /**
+     * Sets a string handle to this AudioTrack for metrics collection.
+     *
+     * @param logSessionId a string which is used to identify this object
+     *        to the metrics service.
+     * @throws IllegalStateException if AudioTrack not initialized.
+     *
+     * @hide
+     */
+    public void setLogSessionId(@NonNull String logSessionId) {
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("track not initialized");
+        }
+        native_setLogSessionId(logSessionId);
+        mLogSessionId = logSessionId;
+    }
+
     //---------------------------------------------------------
     // Inner classes
     //--------------------
@@ -4201,6 +4223,7 @@ public class AudioTrack extends PlayerBase
     private native int native_get_audio_description_mix_level_db(float[] level);
     private native int native_set_dual_mono_mode(int dualMonoMode);
     private native int native_get_dual_mono_mode(int[] dualMonoMode);
+    private native void native_setLogSessionId(@NonNull String logSessionId);
 
     /**
      * Sets the audio service Player Interface Id.
