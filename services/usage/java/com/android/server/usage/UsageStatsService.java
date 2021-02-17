@@ -2212,6 +2212,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportLocusUpdate(@NonNull ComponentName activity, @UserIdInt int userId,
                 @Nullable LocusId locusId, @NonNull  IBinder appToken) {
+            if (locusId == null) return;
             Event event = new Event(LOCUS_ID_SET, SystemClock.elapsedRealtime());
             event.mLocusId = locusId.getId();
             event.mPackage = activity.getPackageName();

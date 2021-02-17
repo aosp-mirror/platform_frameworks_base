@@ -21,6 +21,7 @@ import static android.app.Notification.FLAG_BUBBLE;
 import android.app.Notification;
 import android.app.Notification.BubbleMetadata;
 import android.app.NotificationManager.Policy;
+import android.content.LocusId;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 
@@ -73,6 +74,11 @@ public class BubbleEntry {
     /** @return the group key in the {@link StatusBarNotification}. */
     public String getGroupKey() {
         return mSbn.getGroupKey();
+    }
+
+    /** @return the {@link LocusId} for this notification, if it exists. */
+    public LocusId getLocusId() {
+        return mSbn.getNotification().getLocusId();
     }
 
     /** @return the {@link BubbleMetadata} in the {@link StatusBarNotification}. */

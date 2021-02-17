@@ -279,6 +279,8 @@ public class BubbleController {
 
         mBubbleIconFactory = new BubbleIconFactory(context);
         mTaskOrganizer = organizer;
+        mTaskOrganizer.addLocusIdListener((taskId, locus, visible) ->
+                mBubbleData.onLocusVisibilityChanged(taskId, locus, visible));
 
         launcherApps.registerCallback(new LauncherApps.Callback() {
             @Override
@@ -1035,6 +1037,14 @@ public class BubbleController {
                 if (update.selectedBubble != null) {
                     mSysuiProxy.updateNotificationSuppression(update.selectedBubble.getKey());
                 }
+            }
+
+            if (update.suppressedBubble != null && mStackView != null) {
+                mStackView.setBubbleVisibility(update.suppressedBubble, false);
+            }
+
+            if (update.unsuppressedBubble != null && mStackView != null) {
+                mStackView.setBubbleVisibility(update.unsuppressedBubble, true);
             }
 
             // Expanding? Apply this last.

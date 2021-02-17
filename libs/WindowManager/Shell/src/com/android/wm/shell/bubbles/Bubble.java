@@ -28,6 +28,7 @@ import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -62,6 +63,9 @@ public class Bubble implements BubbleViewProvider {
     private final String mKey;
     @Nullable
     private final String mGroupKey;
+    @Nullable
+    private final LocusId mLocusId;
+
     private final Executor mMainExecutor;
 
     private long mLastUpdated;
@@ -163,13 +167,14 @@ public class Bubble implements BubbleViewProvider {
      */
     Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
-            int taskId, Executor mainExecutor) {
+            int taskId, @Nullable final String locus, Executor mainExecutor) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mMetadataShortcutId = shortcutInfo.getId();
         mShortcutInfo = shortcutInfo;
         mKey = key;
         mGroupKey = null;
+        mLocusId = locus != null ? new LocusId(locus) : null;
         mFlags = 0;
         mUser = shortcutInfo.getUserHandle();
         mPackageName = shortcutInfo.getPackage();
@@ -189,6 +194,7 @@ public class Bubble implements BubbleViewProvider {
             Executor mainExecutor) {
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
+        mLocusId = entry.getLocusId();
         mSuppressionListener = listener;
         mIntentCancelListener = intent -> {
             if (mIntent != null) {
@@ -214,6 +220,10 @@ public class Bubble implements BubbleViewProvider {
      */
     public String getGroupKey() {
         return mGroupKey;
+    }
+
+    public LocusId getLocusId() {
+        return mLocusId;
     }
 
     public UserHandle getUser() {
@@ -557,6 +567,14 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Whether this bubble is able to be suppressed (i.e. has the developer opted into the API to
+     * hide the bubble when in the same content).
+     */
+    boolean isSuppressable() {
+        return (mFlags & Notification.BubbleMetadata.FLAG_SHOULD_SUPPRESS_BUBBLE) != 0;
+    }
+
+    /**
      * Whether this notification conversation is important.
      */
     boolean isImportantConversation() {
@@ -576,6 +594,26 @@ public class Bubble implements BubbleViewProvider {
         }
 
         if (showInShade() != prevShowInShade && mSuppressionListener != null) {
+            mSuppressionListener.onBubbleNotificationSuppressionChange(this);
+        }
+    }
+
+    /**
+     * Sets whether this bubble should be suppressed from the stack.
+     */
+    public void setSuppressBubble(boolean suppressBubble) {
+        if (!isSuppressable()) {
+            Log.e(TAG, "calling setSuppressBubble on "
+                    + getKey() + " when bubble not suppressable");
+            return;
+        }
+        boolean prevSuppressed = isSuppressed();
+        if (suppressBubble) {
+            mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+        } else {
+            mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
+        }
+        if (prevSuppressed != suppressBubble && mSuppressionListener != null) {
             mSuppressionListener.onBubbleNotificationSuppressionChange(this);
         }
     }
