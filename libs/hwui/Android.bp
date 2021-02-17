@@ -357,11 +357,12 @@ cc_defaults {
         "libharfbuzz_ng",
         "liblog",
         "libminikin",
-        "libnativehelper",
         "libz",
         "libziparchive",
         "libjpeg",
     ],
+
+    static_libs: ["libnativehelper_lazy"],
 
     target: {
         android: {
