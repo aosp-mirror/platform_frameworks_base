@@ -17,6 +17,8 @@
 package android.app.people;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -53,6 +55,33 @@ public final class PeopleManager {
                 Context.PEOPLE_SERVICE));
     }
 
+    /**
+     * Returns whether a shortcut has a conversation associated.
+     *
+     * <p>Requires android.permission.READ_PEOPLE_DATA permission.
+     *
+     * <p>This method may return different results for the same shortcut over time, as an app adopts
+     * conversation features or if a user hasn't communicated with the conversation associated to
+     * the shortcut in a while, so the result should not be stored and relied on indefinitely by
+     * clients.
+     *
+     * @param packageName name of the package the conversation is part of
+     * @param shortcutId the shortcut id backing the conversation
+     * @return whether the {@shortcutId} is backed by a Conversation.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PEOPLE_DATA)
+    public boolean isConversation(@NonNull String packageName, @NonNull String shortcutId) {
+        Preconditions.checkStringNotEmpty(packageName);
+        Preconditions.checkStringNotEmpty(shortcutId);
+        try {
+            return mService.isConversation(packageName, mContext.getUserId(), shortcutId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Sets or updates a {@link ConversationStatus} for a conversation.
