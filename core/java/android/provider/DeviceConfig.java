@@ -525,6 +525,13 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_INTERACTION_JANK_MONITOR = "interaction_jank_monitor";
 
+    /**
+     * Namespace for game overlay related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_GAME_OVERLAY = "game_overlay";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
