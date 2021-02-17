@@ -3138,6 +3138,8 @@
     <public name="config_systemAutomotiveProjection" />
     <!-- @hide @SystemApi -->
     <public name="config_systemShell" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemContacts" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">
