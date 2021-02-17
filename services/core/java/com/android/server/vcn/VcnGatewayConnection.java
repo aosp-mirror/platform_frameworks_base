@@ -418,13 +418,13 @@ public class VcnGatewayConnection extends StateMachine {
     private static final int EVENT_SUBSCRIPTIONS_CHANGED = 9;
 
     /**
-     * Sent when this VcnGatewayConnection has entered Safemode.
+     * Sent when this VcnGatewayConnection has entered safe mode.
      *
-     * <p>A VcnGatewayConnection enters Safemode when it takes over {@link
+     * <p>A VcnGatewayConnection enters safe mode when it takes over {@link
      * #SAFEMODE_TIMEOUT_SECONDS} to enter {@link ConnectedState}.
      *
      * <p>When a VcnGatewayConnection enters safe mode, it will fire {@link
-     * VcnGatewayStatusCallback#onEnteredSafemode()} to notify its Vcn. The Vcn will then shut down
+     * VcnGatewayStatusCallback#onEnteredSafeMode()} to notify its Vcn. The Vcn will then shut down
      * its VcnGatewayConnectin(s).
      *
      * <p>Relevant in DisconnectingState, ConnectingState, ConnectedState (if the Vcn Network is not
@@ -432,7 +432,7 @@ public class VcnGatewayConnection extends StateMachine {
      *
      * @param arg1 The "all" token; this signal is always honored.
      */
-    private static final int EVENT_SAFEMODE_TIMEOUT_EXCEEDED = 10;
+    private static final int EVENT_SAFE_MODE_TIMEOUT_EXCEEDED = 10;
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
@@ -551,7 +551,7 @@ public class VcnGatewayConnection extends StateMachine {
     @Nullable private WakeupMessage mTeardownTimeoutAlarm;
     @Nullable private WakeupMessage mDisconnectRequestAlarm;
     @Nullable private WakeupMessage mRetryTimeoutAlarm;
-    @Nullable private WakeupMessage mSafemodeTimeoutAlarm;
+    @Nullable private WakeupMessage mSafeModeTimeoutAlarm;
 
     public VcnGatewayConnection(
             @NonNull VcnContext vcnContext,
@@ -638,7 +638,7 @@ public class VcnGatewayConnection extends StateMachine {
         cancelTeardownTimeoutAlarm();
         cancelDisconnectRequestAlarm();
         cancelRetryTimeoutAlarm();
-        cancelSafemodeAlarm();
+        cancelSafeModeAlarm();
 
         mUnderlyingNetworkTracker.teardown();
     }
@@ -928,27 +928,27 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void setSafemodeAlarm() {
+    void setSafeModeAlarm() {
         // Only schedule a NEW alarm if none is already set.
-        if (mSafemodeTimeoutAlarm != null) {
+        if (mSafeModeTimeoutAlarm != null) {
             return;
         }
 
-        final Message delayedMessage = obtainMessage(EVENT_SAFEMODE_TIMEOUT_EXCEEDED, TOKEN_ALL);
-        mSafemodeTimeoutAlarm =
+        final Message delayedMessage = obtainMessage(EVENT_SAFE_MODE_TIMEOUT_EXCEEDED, TOKEN_ALL);
+        mSafeModeTimeoutAlarm =
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
                         TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
     }
 
-    private void cancelSafemodeAlarm() {
-        if (mSafemodeTimeoutAlarm != null) {
-            mSafemodeTimeoutAlarm.cancel();
-            mSafemodeTimeoutAlarm = null;
+    private void cancelSafeModeAlarm() {
+        if (mSafeModeTimeoutAlarm != null) {
+            mSafeModeTimeoutAlarm.cancel();
+            mSafeModeTimeoutAlarm = null;
         }
 
-        removeEqualMessages(EVENT_SAFEMODE_TIMEOUT_EXCEEDED);
+        removeEqualMessages(EVENT_SAFE_MODE_TIMEOUT_EXCEEDED);
     }
 
     private void sessionLost(int token, @Nullable Exception exception) {
@@ -1125,7 +1125,7 @@ public class VcnGatewayConnection extends StateMachine {
                 Slog.wtf(TAG, "Active IKE Session or NetworkAgent in DisconnectedState");
             }
 
-            cancelSafemodeAlarm();
+            cancelSafeModeAlarm();
         }
 
         @Override
@@ -1153,7 +1153,7 @@ public class VcnGatewayConnection extends StateMachine {
         @Override
         protected void exitState() {
             // Safe to blindly set up, as it is cancelled and cleared on entering this state
-            setSafemodeAlarm();
+            setSafeModeAlarm();
         }
     }
 
@@ -1245,9 +1245,9 @@ public class VcnGatewayConnection extends StateMachine {
                         transitionTo(mDisconnectedState);
                     }
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1331,9 +1331,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1399,7 +1399,7 @@ public class VcnGatewayConnection extends StateMachine {
 
             // Validated connection, clear failed attempt counter
             mFailedAttempts = 0;
-            cancelSafemodeAlarm();
+            cancelSafeModeAlarm();
         }
 
         protected void applyTransform(
@@ -1517,9 +1517,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1575,7 +1575,7 @@ public class VcnGatewayConnection extends StateMachine {
         protected void exitState() {
             // Attempt to set the safe mode alarm - this requires the Vcn Network being validated
             // while in ConnectedState (which cancels the previous alarm)
-            setSafemodeAlarm();
+            setSafeModeAlarm();
         }
     }
 
@@ -1623,9 +1623,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);

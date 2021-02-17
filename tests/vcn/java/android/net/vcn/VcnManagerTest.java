@@ -26,24 +26,30 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
+import android.net.vcn.VcnManager.VcnStatusCallback;
 import android.net.vcn.VcnManager.VcnUnderlyingNetworkPolicyListener;
+import android.os.ParcelUuid;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 public class VcnManagerTest {
+    private static final ParcelUuid SUB_GROUP = new ParcelUuid(new UUID(0, 0));
     private static final Executor INLINE_EXECUTOR = Runnable::run;
 
     private IVcnManagementService mMockVcnManagementService;
     private VcnUnderlyingNetworkPolicyListener mMockPolicyListener;
+    private VcnStatusCallback mMockStatusCallback;
 
     private Context mContext;
     private VcnManager mVcnManager;
@@ -52,6 +58,7 @@ public class VcnManagerTest {
     public void setUp() {
         mMockVcnManagementService = mock(IVcnManagementService.class);
         mMockPolicyListener = mock(VcnUnderlyingNetworkPolicyListener.class);
+        mMockStatusCallback = mock(VcnStatusCallback.class);
 
         mContext = getContext();
         mVcnManager = new VcnManager(mContext, mMockVcnManagementService);
@@ -131,5 +138,61 @@ public class VcnManagerTest {
     @Test(expected = NullPointerException.class)
     public void testGetUnderlyingNetworkPolicyNullLinkProperties() throws Exception {
         mVcnManager.getUnderlyingNetworkPolicy(new NetworkCapabilities(), null);
+    }
+
+    @Test
+    public void testRegisterVcnStatusCallback() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+
+        ArgumentCaptor<IVcnStatusCallback> captor =
+                ArgumentCaptor.forClass(IVcnStatusCallback.class);
+        verify(mMockVcnManagementService)
+                .registerVcnStatusCallback(eq(SUB_GROUP), captor.capture(), any());
+
+        IVcnStatusCallback callbackWrapper = captor.getValue();
+        callbackWrapper.onEnteredSafeMode();
+        verify(mMockStatusCallback).onEnteredSafeMode();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRegisterVcnStatusCallbackAlreadyRegistered() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testRegisterVcnStatusCallbackNullSubscriptionGroup() throws Exception {
+        mVcnManager.registerVcnStatusCallback(null, INLINE_EXECUTOR, mMockStatusCallback);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testRegisterVcnStatusCallbackNullExecutor() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, null, mMockStatusCallback);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testRegisterVcnStatusCallbackNullCallback() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, null);
+    }
+
+    @Test
+    public void testUnregisterVcnStatusCallback() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+
+        mVcnManager.unregisterVcnStatusCallback(mMockStatusCallback);
+
+        verify(mMockVcnManagementService).unregisterVcnStatusCallback(any());
+    }
+
+    @Test
+    public void testUnregisterUnknownVcnStatusCallback() throws Exception {
+        mVcnManager.unregisterVcnStatusCallback(mMockStatusCallback);
+
+        verifyNoMoreInteractions(mMockVcnManagementService);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testUnregisterNullVcnStatusCallback() throws Exception {
+        mVcnManager.unregisterVcnStatusCallback(null);
     }
 }
