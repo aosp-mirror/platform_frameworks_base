@@ -81,9 +81,9 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowCom
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
-import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
+import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -143,8 +143,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    @Mock private SmartRepliesAndActions mSmartRepliesAndActions;
-    @Mock private InflatedSmartReplies mInflatedSmartReplies;
+    @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
+    @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
 
     private StatusBarNotification mSbn;
     private NotificationListenerService.RankingMap mRankingMap;
@@ -210,18 +210,18 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mock(ConversationNotificationProcessor.class),
                 mock(MediaFeatureFlag.class),
                 mBgExecutor,
-                new SmartRepliesAndActionsInflater() {
+                new SmartReplyStateInflater() {
                     @Override
-                    public SmartRepliesAndActions inflateRepliesAndActions(
-                            NotificationEntry entry) {
-                        return mSmartRepliesAndActions;
+                    public InflatedSmartReplyState inflateSmartReplyState(NotificationEntry entry) {
+                        return mInflatedSmartReplyState;
                     }
 
                     @Override
-                    public InflatedSmartReplies inflateSmartReplies(Context sysuiContext,
-                            Context notifPackageContext, NotificationEntry entry,
-                            SmartRepliesAndActions existingRepliesAndActions,
-                            SmartRepliesAndActions newRepliesAndActions) {
+                    public InflatedSmartReplyViewHolder inflateSmartReplyViewHolder(
+                            Context sysuiContext, Context notifPackageContext,
+                            NotificationEntry entry,
+                            InflatedSmartReplyState existingSmartReplyState,
+                            InflatedSmartReplyState newSmartReplyState) {
                         return mInflatedSmartReplies;
                     }
                 });

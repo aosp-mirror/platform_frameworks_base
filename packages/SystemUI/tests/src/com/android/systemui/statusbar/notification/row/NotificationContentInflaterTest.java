@@ -58,9 +58,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
-import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
+import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.tests.R;
 
 import org.junit.Assert;
@@ -88,23 +88,22 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
 
     @Mock private NotifRemoteViewCache mCache;
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
-    @Mock private SmartRepliesAndActions mSmartRepliesAndActions;
-    @Mock private InflatedSmartReplies mInflatedSmartReplies;
+    @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
+    @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
 
-    private final SmartRepliesAndActionsInflater mSmartRepliesAndActionsInflater =
-            new SmartRepliesAndActionsInflater() {
+    private final SmartReplyStateInflater mSmartReplyStateInflater =
+            new SmartReplyStateInflater() {
                 @Override
-                public InflatedSmartReplies inflateSmartReplies(Context sysuiContext,
-                        Context notifPackageContext, NotificationEntry entry,
-                        SmartRepliesAndActions existingRepliesAndActions,
-                        SmartRepliesAndActions newRepliesAndActions) {
+                public InflatedSmartReplyViewHolder inflateSmartReplyViewHolder(
+                        Context sysuiContext, Context notifPackageContext, NotificationEntry entry,
+                        InflatedSmartReplyState existingSmartReplyState,
+                        InflatedSmartReplyState newSmartReplyState) {
                     return mInflatedSmartReplies;
                 }
 
                 @Override
-                public SmartRepliesAndActions inflateRepliesAndActions(
-                        NotificationEntry entry) {
-                    return mSmartRepliesAndActions;
+                public InflatedSmartReplyState inflateSmartReplyState(NotificationEntry entry) {
+                    return mInflatedSmartReplyState;
                 }
             };
 
@@ -129,7 +128,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mConversationNotificationProcessor,
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
-                mSmartRepliesAndActionsInflater);
+                mSmartReplyStateInflater);
     }
 
     @Test
@@ -145,7 +144,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 FLAG_CONTENT_VIEW_ALL,
                 builder,
                 mContext,
-                mSmartRepliesAndActionsInflater);
+                mSmartReplyStateInflater);
         verify(builder).createHeadsUpContentView(true);
     }
 
@@ -162,7 +161,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 FLAG_CONTENT_VIEW_ALL,
                 builder,
                 mContext,
-                mSmartRepliesAndActionsInflater);
+                mSmartReplyStateInflater);
         verify(builder).createContentView(true);
     }
 

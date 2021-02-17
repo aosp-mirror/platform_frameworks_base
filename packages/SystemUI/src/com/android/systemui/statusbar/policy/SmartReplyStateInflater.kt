@@ -44,8 +44,7 @@ import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions.SuppressedActions
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState.SuppressedActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartButtonType
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartReplies
@@ -54,10 +53,10 @@ import javax.inject.Inject
 /** Returns whether we should show the smart reply view and its smart suggestions. */
 fun shouldShowSmartReplyView(
     entry: NotificationEntry,
-    smartRepliesAndActions: SmartRepliesAndActions
+    smartReplyState: InflatedSmartReplyState
 ): Boolean {
-    if (smartRepliesAndActions.smartReplies == null &&
-            smartRepliesAndActions.smartActions == null) {
+    if (smartReplyState.smartReplies == null &&
+            smartReplyState.smartActions == null) {
         // There are no smart replies and no smart actions.
         return false
     }
@@ -72,10 +71,10 @@ fun shouldShowSmartReplyView(
             .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false)
 }
 
-/** Determines if two [SmartRepliesAndActions] are visually similar. */
+/** Determines if two [InflatedSmartReplyState] are visually similar. */
 fun areSuggestionsSimilar(
-    left: SmartRepliesAndActions?,
-    right: SmartRepliesAndActions?
+    left: InflatedSmartReplyState?,
+    right: InflatedSmartReplyState?
 ): Boolean = when {
     left === right -> true
     left == null || right == null -> false
@@ -85,39 +84,39 @@ fun areSuggestionsSimilar(
     else -> !NotificationUiAdjustment.areDifferent(left.smartActionsList, right.smartActionsList)
 }
 
-interface SmartRepliesAndActionsInflater {
-    fun inflateRepliesAndActions(entry: NotificationEntry): SmartRepliesAndActions
+interface SmartReplyStateInflater {
+    fun inflateSmartReplyState(entry: NotificationEntry): InflatedSmartReplyState
 
-    fun inflateSmartReplies(
+    fun inflateSmartReplyViewHolder(
         sysuiContext: Context,
         notifPackageContext: Context,
         entry: NotificationEntry,
-        existingRepliesAndActions: SmartRepliesAndActions?,
-        newRepliesAndActions: SmartRepliesAndActions
-    ): InflatedSmartReplies
+        existingSmartReplyState: InflatedSmartReplyState?,
+        newSmartReplyState: InflatedSmartReplyState
+    ): InflatedSmartReplyViewHolder
 }
 
-/*internal*/ class SmartRepliesAndActionsInflaterImpl @Inject constructor(
+/*internal*/ class SmartReplyStateInflaterImpl @Inject constructor(
     private val constants: SmartReplyConstants,
     private val activityManagerWrapper: ActivityManagerWrapper,
     private val packageManagerWrapper: PackageManagerWrapper,
     private val devicePolicyManagerWrapper: DevicePolicyManagerWrapper,
     private val smartRepliesInflater: SmartReplyInflater,
     private val smartActionsInflater: SmartActionInflater
-) : SmartRepliesAndActionsInflater {
+) : SmartReplyStateInflater {
 
-    override fun inflateRepliesAndActions(entry: NotificationEntry): SmartRepliesAndActions =
+    override fun inflateSmartReplyState(entry: NotificationEntry): InflatedSmartReplyState =
             chooseSmartRepliesAndActions(entry)
 
-    override fun inflateSmartReplies(
+    override fun inflateSmartReplyViewHolder(
         sysuiContext: Context,
         notifPackageContext: Context,
         entry: NotificationEntry,
-        existingRepliesAndActions: SmartRepliesAndActions?,
-        newRepliesAndActions: SmartRepliesAndActions
-    ): InflatedSmartReplies {
-        if (!shouldShowSmartReplyView(entry, newRepliesAndActions)) {
-            return InflatedSmartReplies(
+        existingSmartReplyState: InflatedSmartReplyState?,
+        newSmartReplyState: InflatedSmartReplyState
+    ): InflatedSmartReplyViewHolder {
+        if (!shouldShowSmartReplyView(entry, newSmartReplyState)) {
+            return InflatedSmartReplyViewHolder(
                     null /* smartReplyView */,
                     null /* smartSuggestionButtons */)
         }
@@ -126,11 +125,11 @@ interface SmartRepliesAndActionsInflater {
         // scenarios where a user incorrectly cannot click smart buttons because the
         // notification is updated.
         val delayOnClickListener =
-                !areSuggestionsSimilar(existingRepliesAndActions, newRepliesAndActions)
+                !areSuggestionsSimilar(existingSmartReplyState, newSmartReplyState)
 
         val smartReplyView = SmartReplyView.inflate(sysuiContext, constants)
 
-        val smartReplies = newRepliesAndActions.smartReplies
+        val smartReplies = newSmartReplyState.smartReplies
         smartReplyView.setSmartRepliesGeneratedByAssistant(smartReplies?.fromAssistant ?: false)
         val smartReplyButtons = smartReplies?.let {
             smartReplies.choices.asSequence().mapIndexed { index, choice ->
@@ -144,7 +143,7 @@ interface SmartRepliesAndActionsInflater {
             }
         } ?: emptySequence()
 
-        val smartActionButtons = newRepliesAndActions.smartActions?.let { smartActions ->
+        val smartActionButtons = newSmartReplyState.smartActions?.let { smartActions ->
             val themedPackageContext =
                     ContextThemeWrapper(notifPackageContext, sysuiContext.theme)
             smartActions.actions.asSequence()
@@ -161,7 +160,7 @@ interface SmartRepliesAndActionsInflater {
                     }
         } ?: emptySequence()
 
-        return InflatedSmartReplies(
+        return InflatedSmartReplyViewHolder(
                 smartReplyView,
                 (smartReplyButtons + smartActionButtons).toList())
     }
@@ -172,7 +171,7 @@ interface SmartRepliesAndActionsInflater {
      * replies or actions generated by the NotificationAssistantService (NAS), and if the app
      * provides any smart actions we also don't show any NAS-generated replies or actions.
      */
-    fun chooseSmartRepliesAndActions(entry: NotificationEntry): SmartRepliesAndActions {
+    fun chooseSmartRepliesAndActions(entry: NotificationEntry): InflatedSmartReplyState {
         val notification = entry.sbn.notification
         val remoteInputActionPair = notification.findRemoteInputActionPair(false /* freeform */)
         val freeformRemoteInputActionPair =
@@ -182,7 +181,7 @@ interface SmartRepliesAndActionsInflater {
                 Log.d(TAG, "Smart suggestions not enabled, not adding suggestions for " +
                         entry.sbn.key)
             }
-            return SmartRepliesAndActions(null, null, null, false)
+            return InflatedSmartReplyState(null, null, null, false)
         }
         // Only use smart replies from the app if they target P or above. We have this check because
         // the smart reply API has been used for other things (Wearables) in the past. The API to
@@ -249,7 +248,7 @@ interface SmartRepliesAndActionsInflater {
             }
             suppressedActions = SuppressedActions(suppressedActionIndices)
         }
-        return SmartRepliesAndActions(smartReplies, smartActions, suppressedActions,
+        return InflatedSmartReplyState(smartReplies, smartActions, suppressedActions,
                 hasPhishingAction)
     }
 

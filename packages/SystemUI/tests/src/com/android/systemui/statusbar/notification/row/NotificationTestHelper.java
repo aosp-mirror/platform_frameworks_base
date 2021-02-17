@@ -66,8 +66,9 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies;
-import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
+import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.tests.R;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
@@ -465,19 +466,18 @@ public class NotificationTestHelper {
                 .build();
     }
 
-    private static class MockSmartReplyInflater implements SmartRepliesAndActionsInflater {
+    private static class MockSmartReplyInflater implements SmartReplyStateInflater {
         @Override
-        public InflatedSmartReplies.SmartRepliesAndActions inflateRepliesAndActions(
-                NotificationEntry entry) {
-            return mock(InflatedSmartReplies.SmartRepliesAndActions.class);
+        public InflatedSmartReplyState inflateSmartReplyState(NotificationEntry entry) {
+            return mock(InflatedSmartReplyState.class);
         }
 
         @Override
-        public InflatedSmartReplies inflateSmartReplies(Context sysuiContext,
+        public InflatedSmartReplyViewHolder inflateSmartReplyViewHolder(Context sysuiContext,
                 Context notifPackageContext, NotificationEntry entry,
-                InflatedSmartReplies.SmartRepliesAndActions existingRepliesAndActions,
-                InflatedSmartReplies.SmartRepliesAndActions newRepliesAndActions) {
-            return mock(InflatedSmartReplies.class);
+                InflatedSmartReplyState existingSmartReplyState,
+                InflatedSmartReplyState newSmartReplyState) {
+            return mock(InflatedSmartReplyViewHolder.class);
         }
     }
 }
