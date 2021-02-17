@@ -319,6 +319,21 @@ import java.util.function.Consumer;
     }
 
     /**
+     * Runs a command for each client that is attached to a hub with the given ID.
+     *
+     * @param contextHubId the ID of the hub
+     * @param callback     the command to invoke for the client
+     */
+    /* package */ void forEachClientOfHub(
+            int contextHubId, Consumer<ContextHubClientBroker> callback) {
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            if (broker.getAttachedContextHubId() == contextHubId) {
+                callback.accept(broker);
+            }
+        }
+    }
+
+    /**
      * Returns an available host endpoint ID.
      *
      * @returns an available host endpoint ID
@@ -355,20 +370,6 @@ import java.util.function.Consumer;
         forEachClientOfHub(contextHubId,
                 client -> client.sendMessageToClient(
                         message, nanoappPermissions, messagePermissions));
-    }
-
-    /**
-     * Runs a command for each client that is attached to a hub with the given ID.
-     *
-     * @param contextHubId the ID of the hub
-     * @param callback     the command to invoke for the client
-     */
-    private void forEachClientOfHub(int contextHubId, Consumer<ContextHubClientBroker> callback) {
-        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            if (broker.getAttachedContextHubId() == contextHubId) {
-                callback.accept(broker);
-            }
-        }
     }
 
     /**
