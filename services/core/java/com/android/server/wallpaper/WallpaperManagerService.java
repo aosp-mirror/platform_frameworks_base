@@ -31,7 +31,6 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.ILocalWallpaperColorConsumer;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
@@ -60,7 +59,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -87,10 +85,7 @@ import android.service.wallpaper.IWallpaperService;
 import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -110,6 +105,7 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.WindowManagerInternal;
@@ -140,8 +136,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private static final String TAG = "WallpaperManagerService";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_LIVE = true;
-    private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
-            new RectF(0, 0, 1, 1);
 
     public static class Lifecycle extends SystemService {
         private IWallpaperManagerService mService;
@@ -872,12 +866,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private final SparseBooleanArray mUserRestorecon = new SparseBooleanArray();
     private int mCurrentUserId = UserHandle.USER_NULL;
     private boolean mInAmbientMode;
-    private ArrayMap<IBinder, ArraySet<RectF>> mLocalColorCallbackAreas =
-            new ArrayMap<>();
-    private ArrayMap<RectF, RemoteCallbackList<ILocalWallpaperColorConsumer>>
-            mLocalColorAreaCallbacks = new ArrayMap<>();
-    private ArrayMap<Integer, ArraySet<RectF>> mLocalColorDisplayIdAreas = new ArrayMap<>();
-    private ArrayMap<IBinder, Integer> mLocalColorCallbackDisplayId = new ArrayMap<>();
 
     static class WallpaperData {
 
@@ -1288,32 +1276,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         @Override
-        public void onLocalWallpaperColorsChanged(RectF area, WallpaperColors colors,
-                int displayId) {
-            forEachDisplayConnector(displayConnector -> {
-                if (displayConnector.mDisplayId == displayId) {
-                    RemoteCallbackList<ILocalWallpaperColorConsumer> callbacks;
-                    ArrayMap<IBinder, Integer> callbackDisplayIds;
-                    synchronized (mLock) {
-                        callbacks = mLocalColorAreaCallbacks.get(area);
-                        callbackDisplayIds = new ArrayMap<>(mLocalColorCallbackDisplayId);
-                    }
-                    if (callbacks == null) return;
-                    callbacks.broadcast(c -> {
-                        try {
-                            int targetDisplayId =
-                                    callbackDisplayIds.get(c.asBinder());
-                            if (targetDisplayId == displayId) c.onColorsChanged(area, colors);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            });
-        }
-
-
-        @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized (mLock) {
                 Slog.w(TAG, "Wallpaper service gone: " + name);
@@ -1474,15 +1436,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     connector.mEngine.requestWallpaperColors();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to request wallpaper colors", e);
-                }
-
-                ArraySet<RectF> areas = mLocalColorDisplayIdAreas.get(displayId);
-                if (areas != null && areas.size() != 0) {
-                    try {
-                        connector.mEngine.addLocalColorsAreas(new ArrayList<>(areas));
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failed to register local colors areas", e);
-                    }
                 }
             }
         }
@@ -2385,115 +2338,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mKeyguardListener = cb;
         }
         return true;
-    }
-
-    private IWallpaperEngine getEngine(int which, int userId, int displayId) {
-        WallpaperData wallpaperData = findWallpaperAtDisplay(userId, displayId);
-        if (wallpaperData == null) return null;
-        IWallpaperEngine engine = null;
-        synchronized (mLock) {
-            for (int i = 0; i < wallpaperData.connection.mDisplayConnector.size(); i++) {
-                int id = wallpaperData.connection.mDisplayConnector.get(i).mDisplayId;
-                int currentWhich = wallpaperData.connection.mDisplayConnector.get(i).mDisplayId;
-                if (id != displayId && currentWhich != which) continue;
-                engine = wallpaperData.connection.mDisplayConnector.get(i).mEngine;
-                break;
-            }
-        }
-        return engine;
-    }
-
-    @Override
-    public void addOnLocalColorsChangedListener(@NonNull ILocalWallpaperColorConsumer callback,
-            @NonNull List<RectF> regions, int which, int userId, int displayId)
-            throws RemoteException {
-        if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
-            throw new IllegalArgumentException("which should be either FLAG_LOCK or FLAG_SYSTEM");
-        }
-        IWallpaperEngine engine = getEngine(which, userId, displayId);
-        if (engine == null) return;
-        ArrayList<RectF> validAreas = new ArrayList<>(regions.size());
-        synchronized (mLock) {
-            ArraySet<RectF> areas = mLocalColorCallbackAreas.get(callback);
-            if (areas == null) areas = new ArraySet<>(regions.size());
-            areas.addAll(regions);
-            mLocalColorCallbackAreas.put(callback.asBinder(), areas);
-        }
-        for (int i = 0; i < regions.size(); i++) {
-            if (!LOCAL_COLOR_BOUNDS.contains(regions.get(i))) {
-                continue;
-            }
-            RemoteCallbackList callbacks;
-            synchronized (mLock) {
-                callbacks = mLocalColorAreaCallbacks.get(
-                        regions.get(i));
-                if (callbacks == null) {
-                    callbacks = new RemoteCallbackList();
-                    mLocalColorAreaCallbacks.put(regions.get(i), callbacks);
-                }
-                mLocalColorCallbackDisplayId.put(callback.asBinder(), displayId);
-                ArraySet<RectF> displayAreas = mLocalColorDisplayIdAreas.get(displayId);
-                if (displayAreas == null) {
-                    displayAreas = new ArraySet<>(1);
-                    mLocalColorDisplayIdAreas.put(displayId, displayAreas);
-                }
-                displayAreas.add(regions.get(i));
-            }
-            validAreas.add(regions.get(i));
-            callbacks.register(callback);
-        }
-        engine.addLocalColorsAreas(validAreas);
-    }
-
-    @Override
-    public void removeOnLocalColorsChangedListener(
-            @NonNull ILocalWallpaperColorConsumer callback, int which, int userId,
-            int displayId) throws RemoteException {
-        if (which != FLAG_LOCK && which != FLAG_SYSTEM) {
-            throw new IllegalArgumentException("which should be either FLAG_LOCK or FLAG_SYSTEM");
-        }
-        final UserHandle callingUser = Binder.getCallingUserHandle();
-        if (callingUser.getIdentifier() != userId) {
-            throw new SecurityException("calling user id does not match");
-        }
-        final long identity = Binder.clearCallingIdentity();
-        ArrayList<RectF> removeAreas = new ArrayList<>();
-        ArrayList<Pair<RemoteCallbackList, ILocalWallpaperColorConsumer>>
-                callbacksToRemove = new ArrayList<>();
-        try {
-            synchronized (mLock) {
-                ArraySet<RectF> areas = mLocalColorCallbackAreas.remove(callback.asBinder());
-                mLocalColorCallbackDisplayId.remove(callback.asBinder());
-                if (areas == null) areas = new ArraySet<>();
-                for (RectF area : areas) {
-                    RemoteCallbackList callbacks = mLocalColorAreaCallbacks.get(area);
-                    if (callbacks == null) continue;
-                    callbacksToRemove.add(new Pair<>(callbacks, callback));
-                    if (callbacks.getRegisteredCallbackCount() == 0) {
-                        mLocalColorAreaCallbacks.remove(area);
-                        removeAreas.add(area);
-                    }
-                    ArraySet<RectF> displayAreas = mLocalColorDisplayIdAreas.get(displayId);
-                    if (displayAreas != null) {
-                        displayAreas.remove(area);
-                    }
-                }
-            }
-            for (int i = 0; i < callbacksToRemove.size(); i++) {
-                Pair<RemoteCallbackList, ILocalWallpaperColorConsumer>
-                        pair = callbacksToRemove.get(i);
-                pair.first.unregister(pair.second);
-            }
-        } catch (Exception e) {
-            // ignore any exception
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        if (removeAreas.size() == 0) return;
-        IWallpaperEngine engine = getEngine(which, userId, displayId);
-        if (engine == null) return;
-        engine.removeLocalColorsAreas(removeAreas);
     }
 
     @Override
