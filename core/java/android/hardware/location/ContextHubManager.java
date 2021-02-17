@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -849,9 +850,18 @@ public final class ContextHubManager {
             attributionTag = context.getAttributionTag();
         }
 
+        // Workaround for old APIs not providing a context
+        String packageName;
+        if (context != null) {
+            packageName = context.getPackageName();
+        } else {
+            packageName = ActivityThread.currentPackageName();
+        }
+
         IContextHubClient clientProxy;
         try {
-            clientProxy = mService.createClient(hubInfo.getId(), clientInterface, attributionTag);
+            clientProxy = mService.createClient(
+                    hubInfo.getId(), clientInterface, attributionTag, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
