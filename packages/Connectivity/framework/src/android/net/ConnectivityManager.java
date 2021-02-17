@@ -456,7 +456,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_WIFI      = TetheringManager.TETHERING_WIFI;
+    public static final int TETHERING_WIFI      = 0;
 
     /**
      * USB tethering type.
@@ -464,7 +464,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_USB       = TetheringManager.TETHERING_USB;
+    public static final int TETHERING_USB       = 1;
 
     /**
      * Bluetooth tethering type.
@@ -472,7 +472,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_BLUETOOTH = TetheringManager.TETHERING_BLUETOOTH;
+    public static final int TETHERING_BLUETOOTH = 2;
 
     /**
      * Wifi P2p tethering type.
@@ -2799,7 +2799,7 @@ public class ConnectivityManager {
      */
     @SystemApi
     @Deprecated
-    public static final int TETHER_ERROR_NO_ERROR = TetheringManager.TETHER_ERROR_NO_ERROR;
+    public static final int TETHER_ERROR_NO_ERROR = 0;
     /**
      * @deprecated Use {@link TetheringManager#TETHER_ERROR_UNKNOWN_IFACE}.
      * {@hide}
@@ -2875,8 +2875,7 @@ public class ConnectivityManager {
      */
     @SystemApi
     @Deprecated
-    public static final int TETHER_ERROR_PROVISION_FAILED =
-            TetheringManager.TETHER_ERROR_PROVISIONING_FAILED;
+    public static final int TETHER_ERROR_PROVISION_FAILED = 11;
     /**
      * @deprecated Use {@link TetheringManager#TETHER_ERROR_DHCPSERVER_ERROR}.
      * {@hide}
@@ -2890,8 +2889,7 @@ public class ConnectivityManager {
      */
     @SystemApi
     @Deprecated
-    public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN =
-            TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKNOWN;
+    public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN = 13;
 
     /**
      * Get a more detailed error code after a Tethering or Untethering
