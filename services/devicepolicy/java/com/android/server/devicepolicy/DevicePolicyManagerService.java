@@ -16723,6 +16723,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean canUsbDataSignalingBeDisabled() {
         return mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3);
+                mInjector.getUsbManager() != null
+                        && mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3
+        );
     }
 }
