@@ -20,32 +20,30 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:maxWidth="@dimen/toast_width"
     android:orientation="horizontal"
-    android:background="@drawable/toast_background"
-    android:backgroundTint="?android:attr/colorBackground"
+    android:gravity="center_vertical"
+    android:maxWidth="@*android:dimen/toast_width"
+    android:background="@android:drawable/toast_frame"
     android:layout_marginEnd="16dp"
     android:layout_marginStart="16dp"
-    android:gravity="center_vertical">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
-    <!-- Icon should be 24x24, make slightly larger to allow for shadowing, adjust via padding -->
     <ImageView
         android:id="@+id/icon"
-        android:alpha="@dimen/toast_icon_alpha"
-        android:padding="11.5dp"
-        android:layout_width="@dimen/toast_icon_size"
-        android:layout_height="@dimen/toast_icon_size"/>
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"/>
     <TextView
         android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="2"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="22dp"
-        android:textSize="@dimen/toast_text_size"
-        android:textColor="?android:attr/textColorPrimary"
-        android:fontFamily="@*android:string/config_headlineFontFamily"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:lineHeight="20sp"
+        android:textAppearance="@*android:style/TextAppearance.Toast"/>
 </LinearLayout>
