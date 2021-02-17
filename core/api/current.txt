@@ -7104,6 +7104,7 @@ package android.app.admin {
     method public boolean isUniqueDeviceAttestationSupported();
     method public boolean isUsbDataSignalingEnabled();
     method public boolean isUsingUnifiedPassword(@NonNull android.content.ComponentName);
+    method @NonNull public java.util.List<android.os.UserHandle> listForegroundAffiliatedUsers();
     method public void lockNow();
     method public void lockNow(int);
     method public int logoutUser(@NonNull android.content.ComponentName);
