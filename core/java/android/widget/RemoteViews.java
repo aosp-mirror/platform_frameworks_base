@@ -48,6 +48,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -99,6 +100,8 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
@@ -170,6 +173,11 @@ public class RemoteViews implements Parcelable, Filter {
      * {@link #RemoteViews(RemoteViews, RemoteViews)}.
      */
     private static final int MAX_NESTED_VIEWS = 10;
+
+    /**
+     * Maximum number of RemoteViews that can be specified in constructor.
+     */
+    private static final int MAX_INIT_VIEW_COUNT = 16;
 
     // The unique identifiers for each custom {@link Action}.
     private static final int SET_ON_CLICK_RESPONSE_TAG = 1;
@@ -290,7 +298,7 @@ public class RemoteViews implements Parcelable, Filter {
      * The resource ID of the layout file. (Added to the parcel)
      */
     @UnsupportedAppUsage
-    private final int mLayoutId;
+    private int mLayoutId;
 
     /**
      * The resource ID of the layout file in dark text mode. (Added to the parcel)
@@ -322,6 +330,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private static final int MODE_NORMAL = 0;
     private static final int MODE_HAS_LANDSCAPE_AND_PORTRAIT = 1;
+    private static final int MODE_HAS_SIZED_REMOTEVIEWS = 2;
 
     /**
      * Used in conjunction with the special constructor
@@ -331,12 +340,26 @@ public class RemoteViews implements Parcelable, Filter {
     private RemoteViews mLandscape = null;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private RemoteViews mPortrait = null;
+    /**
+     * List of RemoteViews with their ideal size. There must be at least two if the map is not null.
+     *
+     * The smallest remote view is always the last element in the list.
+     */
+    private List<RemoteViews> mSizedRemoteViews = null;
+
+    /**
+     * Ideal size for this RemoteViews.
+     *
+     * Only to be used on children views used in a {@link RemoteViews} with
+     * {@link RemoteViews#hasSizedRemoteViews()}.
+     */
+    private PointF mIdealSize = null;
 
     @ApplyFlags
     private int mApplyFlags = 0;
 
     /** Class cookies of the Parcel this instance was read from. */
-    private final Map<Class, Object> mClassCookies;
+    private Map<Class, Object> mClassCookies;
 
     private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = (view, pendingIntent, response)
             -> startPendingIntent(view, pendingIntent, response.getLaunchOptions(view));
@@ -2768,8 +2791,32 @@ public class RemoteViews implements Parcelable, Filter {
         mClassCookies = null;
     }
 
+    private boolean hasMultipleLayouts() {
+        return hasLandscapeAndPortraitLayouts() || hasSizedRemoteViews();
+    }
+
     private boolean hasLandscapeAndPortraitLayouts() {
         return (mLandscape != null) && (mPortrait != null);
+    }
+
+    private boolean hasSizedRemoteViews() {
+        return mSizedRemoteViews != null;
+    }
+
+    private @Nullable PointF getIdealSize() {
+        return mIdealSize;
+    }
+
+    private void setIdealSize(@Nullable PointF size) {
+        mIdealSize = size;
+    }
+
+    /**
+     * Finds the smallest view in {@code mSizedRemoteViews}.
+     * This method must not be called if {@code mSizedRemoteViews} is null.
+     */
+    private RemoteViews findSmallestRemoteView() {
+        return mSizedRemoteViews.get(mSizedRemoteViews.size() - 1);
     }
 
     /**
@@ -2778,13 +2825,16 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param landscape The RemoteViews to inflate in landscape configuration
      * @param portrait The RemoteViews to inflate in portrait configuration
+     * @throws IllegalArgumentException if either landscape or portrait are null or if they are
+     *   not from the same application
      */
     public RemoteViews(RemoteViews landscape, RemoteViews portrait) {
         if (landscape == null || portrait == null) {
-            throw new RuntimeException("Both RemoteViews must be non-null");
+            throw new IllegalArgumentException("Both RemoteViews must be non-null");
         }
         if (!landscape.hasSameAppInfo(portrait.mApplication)) {
-            throw new RuntimeException("Both RemoteViews must share the same package and user");
+            throw new IllegalArgumentException(
+                    "Both RemoteViews must share the same package and user");
         }
         mApplication = portrait.mApplication;
         mLayoutId = portrait.mLayoutId;
@@ -2802,9 +2852,84 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Create a new RemoteViews object that will inflate the layout with the closest size
+     * specification.
+     *
+     * The default remote views in that case is always the smallest one provided.
+     *
+     * @param remoteViews Mapping of size to layout.
+     * @throws IllegalArgumentException if the map is empty, there are more than
+     *   MAX_INIT_VIEW_COUNT layouts or the remote views are not all from the same application.
+     */
+    public RemoteViews(@NonNull Map<PointF, RemoteViews> remoteViews) {
+        if (remoteViews.isEmpty()) {
+            throw new IllegalArgumentException("The set of RemoteViews cannot be empty");
+        }
+        if (remoteViews.size() > MAX_INIT_VIEW_COUNT) {
+            throw new IllegalArgumentException("Too many RemoteViews in constructor");
+        }
+        if (remoteViews.size() == 1) {
+            initializeFrom(remoteViews.values().iterator().next());
+            return;
+        }
+        mBitmapCache = new BitmapCache();
+        mClassCookies = initializeSizedRemoteViews(
+                remoteViews.entrySet().stream().map(
+                        entry -> {
+                            entry.getValue().setIdealSize(entry.getKey());
+                            return entry.getValue();
+                        }
+                ).iterator()
+        );
+
+        RemoteViews smallestView = findSmallestRemoteView();
+        mApplication = smallestView.mApplication;
+        mLayoutId = smallestView.mLayoutId;
+        mLightBackgroundLayoutId = smallestView.mLightBackgroundLayoutId;
+    }
+
+    // Initialize mSizedRemoteViews and return the class cookies.
+    private Map<Class, Object> initializeSizedRemoteViews(Iterator<RemoteViews> remoteViews) {
+        List<RemoteViews> sizedRemoteViews = new ArrayList<>();
+        Map<Class, Object> classCookies = null;
+        float viewArea = Float.MAX_VALUE;
+        RemoteViews smallestView = null;
+        while (remoteViews.hasNext()) {
+            RemoteViews view = remoteViews.next();
+            PointF size = view.getIdealSize();
+            float newViewArea = size.x * size.y;
+            if (smallestView != null && !view.hasSameAppInfo(smallestView.mApplication)) {
+                throw new IllegalArgumentException(
+                        "All RemoteViews must share the same package and user");
+            }
+            if (smallestView == null || newViewArea < viewArea) {
+                if (smallestView != null) {
+                    sizedRemoteViews.add(smallestView);
+                }
+                viewArea = newViewArea;
+                smallestView = view;
+            } else {
+                sizedRemoteViews.add(view);
+            }
+            configureRemoteViewsAsChild(view);
+            view.setIdealSize(size);
+            if (classCookies == null) {
+                classCookies = view.mClassCookies;
+            }
+        }
+        sizedRemoteViews.add(smallestView);
+        mSizedRemoteViews = sizedRemoteViews;
+        return classCookies;
+    }
+
+    /**
      * Creates a copy of another RemoteViews.
      */
     public RemoteViews(RemoteViews src) {
+        initializeFrom(src);
+    }
+
+    private void initializeFrom(RemoteViews src) {
         mBitmapCache = src.mBitmapCache;
         mApplication = src.mApplication;
         mIsRoot = src.mIsRoot;
@@ -2812,10 +2937,18 @@ public class RemoteViews implements Parcelable, Filter {
         mLightBackgroundLayoutId = src.mLightBackgroundLayoutId;
         mApplyFlags = src.mApplyFlags;
         mClassCookies = src.mClassCookies;
+        mIdealSize = src.mIdealSize;
 
         if (src.hasLandscapeAndPortraitLayouts()) {
             mLandscape = new RemoteViews(src.mLandscape);
             mPortrait = new RemoteViews(src.mPortrait);
+        }
+
+        if (src.hasSizedRemoteViews()) {
+            mSizedRemoteViews = new ArrayList<>(src.mSizedRemoteViews.size());
+            for (RemoteViews srcView : src.mSizedRemoteViews) {
+                mSizedRemoteViews.add(new RemoteViews(srcView));
+            }
         }
 
         if (src.mActions != null) {
@@ -2867,10 +3000,29 @@ public class RemoteViews implements Parcelable, Filter {
         if (mode == MODE_NORMAL) {
             mApplication = parcel.readInt() == 0 ? info :
                     ApplicationInfo.CREATOR.createFromParcel(parcel);
+            mIdealSize = parcel.readInt() == 0 ? null : PointF.CREATOR.createFromParcel(parcel);
             mLayoutId = parcel.readInt();
             mLightBackgroundLayoutId = parcel.readInt();
 
             readActionsFromParcel(parcel, depth);
+        } else if (mode == MODE_HAS_SIZED_REMOTEVIEWS) {
+            int numViews = parcel.readInt();
+            if (numViews > MAX_INIT_VIEW_COUNT) {
+                throw new IllegalArgumentException(
+                        "Too many views in mapping from size to RemoteViews.");
+            }
+            List<RemoteViews> remoteViews = new ArrayList<>(numViews);
+            for (int i = 0; i < numViews; i++) {
+                RemoteViews view = new RemoteViews(parcel, mBitmapCache, info, depth,
+                        mClassCookies);
+                info = view.mApplication;
+                remoteViews.add(view);
+            }
+            initializeSizedRemoteViews(remoteViews.iterator());
+            RemoteViews smallestView = findSmallestRemoteView();
+            mApplication = smallestView.mApplication;
+            mLayoutId = smallestView.mLayoutId;
+            mLightBackgroundLayoutId = smallestView.mLightBackgroundLayoutId;
         } else {
             // MODE_HAS_LANDSCAPE_AND_PORTRAIT
             mLandscape = new RemoteViews(parcel, mBitmapCache, info, depth, mClassCookies);
@@ -2990,16 +3142,20 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private void setBitmapCache(BitmapCache bitmapCache) {
         mBitmapCache = bitmapCache;
-        if (!hasLandscapeAndPortraitLayouts()) {
+        if (hasSizedRemoteViews()) {
+            for (RemoteViews remoteView : mSizedRemoteViews) {
+                remoteView.setBitmapCache(bitmapCache);
+            }
+        } else if (hasLandscapeAndPortraitLayouts()) {
+            mLandscape.setBitmapCache(bitmapCache);
+            mPortrait.setBitmapCache(bitmapCache);
+        } else {
             if (mActions != null) {
                 final int count = mActions.size();
-                for (int i= 0; i < count; ++i) {
+                for (int i = 0; i < count; ++i) {
                     mActions.get(i).setBitmapCache(bitmapCache);
                 }
             }
-        } else {
-            mLandscape.setBitmapCache(bitmapCache);
-            mPortrait.setBitmapCache(bitmapCache);
         }
     }
 
@@ -3018,10 +3174,10 @@ public class RemoteViews implements Parcelable, Filter {
      * @param a The action to add
      */
     private void addAction(Action a) {
-        if (hasLandscapeAndPortraitLayouts()) {
-            throw new RuntimeException("RemoteViews specifying separate landscape and portrait" +
-                    " layouts cannot be modified. Instead, fully configure the landscape and" +
-                    " portrait layouts individually before constructing the combined layout.");
+        if (hasMultipleLayouts()) {
+            throw new RuntimeException("RemoteViews specifying separate layouts for orientation"
+                    + " or size cannot be modified. Instead, fully configure each layouts"
+                    + " individually before constructing the combined layout.");
         }
         if (mActions == null) {
             mActions = new ArrayList<>();
@@ -4100,12 +4256,77 @@ public class RemoteViews implements Parcelable, Filter {
             int orientation = context.getResources().getConfiguration().orientation;
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 return mLandscape;
-            } else {
-                return mPortrait;
             }
+            return mPortrait;
+        }
+        if (hasSizedRemoteViews()) {
+            return findSmallestRemoteView();
         }
         return this;
     }
+
+    /**
+     * Returns the square distance between two points.
+     *
+     * This is particularly useful when we only care about the ordering of the distances.
+     */
+    private static float squareDistance(PointF p1, PointF p2) {
+        float dx = p1.x - p2.x;
+        float dy = p1.y - p2.y;
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Returns whether the layout fits in the space available to the widget.
+     *
+     * A layout fits on a widget if the widget size is known (i.e. not null) and both dimensions
+     * are smaller than the ones of the widget, adding some padding to account for rounding errors.
+     */
+    private static boolean fitsIn(PointF sizeLayout, @Nullable PointF sizeWidget) {
+        return sizeWidget != null && (Math.ceil(sizeWidget.x) + 1 > sizeLayout.x)
+                && (Math.ceil(sizeWidget.y) + 1 > sizeLayout.y);
+    }
+
+    /**
+     * Returns the most appropriate {@link RemoteViews} given the context and, if not null, the
+     * size of the widget.
+     *
+     * If {@link RemoteViews#hasSizedRemoteViews()} returns true, the most appropriate view is
+     * the one that fits in the widget (according to {@link RemoteViews#fitsIn}) and has the
+     * diagonal the most similar to the widget. If no layout fits or the size of the widget is
+     * not specified, the one with the smallest area will be chosen.
+     */
+    private RemoteViews getRemoteViewsToApply(@NonNull Context context,
+            @Nullable PointF widgetSize) {
+        if (!hasSizedRemoteViews()) {
+            // If there isn't multiple remote views, fall back on the previous methods.
+            return getRemoteViewsToApply(context);
+        }
+        // Find the better remote view
+        RemoteViews bestFit = null;
+        float bestSqDist = Float.MAX_VALUE;
+        for (RemoteViews layout : mSizedRemoteViews) {
+            PointF layoutSize = layout.getIdealSize();
+            if (fitsIn(layoutSize, widgetSize)) {
+                if (bestFit == null) {
+                    bestFit = layout;
+                    bestSqDist = squareDistance(layoutSize, widgetSize);
+                } else {
+                    float newSqDist = squareDistance(layoutSize, widgetSize);
+                    if (newSqDist < bestSqDist) {
+                        bestFit = layout;
+                        bestSqDist = newSqDist;
+                    }
+                }
+            }
+        }
+        if (bestFit == null) {
+            Log.w(LOG_TAG, "Could not find a RemoteViews fitting the current size: " + widgetSize);
+            return findSmallestRemoteView();
+        }
+        return bestFit;
+    }
+
 
     /**
      * Inflates the view hierarchy represented by this object and applies
@@ -4124,7 +4345,13 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public View apply(Context context, ViewGroup parent, OnClickHandler handler) {
-        RemoteViews rvToApply = getRemoteViewsToApply(context);
+        return apply(context, parent, handler, null);
+    }
+
+    /** @hide */
+    public View apply(@NonNull Context context, @NonNull ViewGroup parent,
+            @Nullable OnClickHandler handler, @Nullable PointF size) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         View result = inflateView(context, rvToApply, parent);
         rvToApply.performApply(result, parent, handler);
@@ -4132,9 +4359,17 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /** @hide */
-    public View applyWithTheme(Context context, ViewGroup parent, OnClickHandler handler,
+    public View applyWithTheme(@NonNull Context context, @NonNull ViewGroup parent,
+            @Nullable OnClickHandler handler,
             @StyleRes int applyThemeResId) {
-        RemoteViews rvToApply = getRemoteViewsToApply(context);
+        return applyWithTheme(context, parent, handler, applyThemeResId, null);
+    }
+
+    /** @hide */
+    public View applyWithTheme(@NonNull Context context, @NonNull ViewGroup parent,
+            @Nullable OnClickHandler handler,
+            @StyleRes int applyThemeResId, @Nullable PointF size) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         View result = inflateView(context, rvToApply, parent, applyThemeResId);
         rvToApply.performApply(result, parent, handler);
@@ -4219,12 +4454,26 @@ public class RemoteViews implements Parcelable, Filter {
     /** @hide */
     public CancellationSignal applyAsync(Context context, ViewGroup parent,
             Executor executor, OnViewAppliedListener listener, OnClickHandler handler) {
-        return getAsyncApplyTask(context, parent, listener, handler).startTaskOnExecutor(executor);
+        return applyAsync(context, parent, executor, listener, handler, null);
+    }
+
+    /** @hide */
+    public CancellationSignal applyAsync(Context context, ViewGroup parent,
+            Executor executor, OnViewAppliedListener listener, OnClickHandler handler,
+            PointF size) {
+        return getAsyncApplyTask(context, parent, listener, handler, size).startTaskOnExecutor(
+                executor);
     }
 
     private AsyncApplyTask getAsyncApplyTask(Context context, ViewGroup parent,
             OnViewAppliedListener listener, OnClickHandler handler) {
-        return new AsyncApplyTask(getRemoteViewsToApply(context), parent, context, listener,
+        return getAsyncApplyTask(context, parent, listener, handler, null);
+    }
+
+    private AsyncApplyTask getAsyncApplyTask(Context context, ViewGroup parent,
+            OnViewAppliedListener listener, OnClickHandler handler, PointF size) {
+        return new AsyncApplyTask(getRemoteViewsToApply(context, size), parent, context,
+                listener,
                 handler, null);
     }
 
@@ -4341,12 +4590,18 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public void reapply(Context context, View v, OnClickHandler handler) {
-        RemoteViews rvToApply = getRemoteViewsToApply(context);
+        reapply(context, v, handler, null);
+    }
 
-        // In the case that a view has this RemoteViews applied in one orientation, is persisted
-        // across orientation change, and has the RemoteViews re-applied in the new orientation,
-        // we throw an exception, since the layouts may be completely unrelated.
-        if (hasLandscapeAndPortraitLayouts()) {
+    /** @hide */
+    public void reapply(Context context, View v, OnClickHandler handler, PointF size) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context, size);
+
+        // In the case that a view has this RemoteViews applied in one orientation or size, is
+        // persisted across change, and has the RemoteViews re-applied in a different situation
+        // (orientation or size), we throw an exception, since the layouts may be completely
+        // unrelated.
+        if (hasMultipleLayouts()) {
             if ((Integer) v.getTag(R.id.widget_frame) != rvToApply.getLayoutId()) {
                 throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
                         " that does not share the same root layout id.");
@@ -4377,12 +4632,18 @@ public class RemoteViews implements Parcelable, Filter {
     /** @hide */
     public CancellationSignal reapplyAsync(Context context, View v, Executor executor,
             OnViewAppliedListener listener, OnClickHandler handler) {
-        RemoteViews rvToApply = getRemoteViewsToApply(context);
+        return reapplyAsync(context, v, executor, listener, handler, null);
+    }
+
+    /** @hide */
+    public CancellationSignal reapplyAsync(Context context, View v, Executor executor,
+            OnViewAppliedListener listener, OnClickHandler handler, PointF size) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context, size);
 
         // In the case that a view has this RemoteViews applied in one orientation, is persisted
         // across orientation change, and has the RemoteViews re-applied in the new orientation,
         // we throw an exception, since the layouts may be completely unrelated.
-        if (hasLandscapeAndPortraitLayouts()) {
+        if (hasMultipleLayouts()) {
             if ((Integer) v.getTag(R.id.widget_frame) != rvToApply.getLayoutId()) {
                 throw new RuntimeException("Attempting to re-apply RemoteViews to a view that" +
                         " that does not share the same root layout id.");
@@ -4466,7 +4727,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        if (!hasLandscapeAndPortraitLayouts()) {
+        if (!hasMultipleLayouts()) {
             dest.writeInt(MODE_NORMAL);
             // We only write the bitmap cache if we are the root RemoteViews, as this cache
             // is shared by all children.
@@ -4479,9 +4740,26 @@ public class RemoteViews implements Parcelable, Filter {
                 dest.writeInt(1);
                 mApplication.writeToParcel(dest, flags);
             }
+            if (mIsRoot || mIdealSize == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                mIdealSize.writeToParcel(dest, flags);
+            }
             dest.writeInt(mLayoutId);
             dest.writeInt(mLightBackgroundLayoutId);
             writeActionsToParcel(dest);
+        } else if (hasSizedRemoteViews()) {
+            dest.writeInt(MODE_HAS_SIZED_REMOTEVIEWS);
+            if (mIsRoot) {
+                mBitmapCache.writeBitmapsToParcel(dest, flags);
+            }
+            int childFlags = flags;
+            dest.writeInt(mSizedRemoteViews.size());
+            for (RemoteViews view : mSizedRemoteViews) {
+                view.writeToParcel(dest, childFlags);
+                childFlags |= PARCELABLE_ELIDE_DUPLICATES;
+            }
         } else {
             dest.writeInt(MODE_HAS_LANDSCAPE_AND_PORTRAIT);
             // We only write the bitmap cache if we are the root RemoteViews, as this cache
@@ -4735,11 +5013,9 @@ public class RemoteViews implements Parcelable, Filter {
          * before starting the intent.
          *
          * @param fillIntent The intent which will be combined with the parent's PendingIntent in
-         *                  order to determine the behavior of the response
-         *
+         *                   order to determine the behavior of the response
          * @see RemoteViews#setPendingIntentTemplate(int, PendingIntent)
          * @see RemoteViews#setOnClickFillInIntent(int, Intent)
-         * @return
          */
         @NonNull
         public static RemoteResponse fromFillInIntent(@NonNull Intent fillIntent) {
@@ -4754,9 +5030,8 @@ public class RemoteViews implements Parcelable, Filter {
          * the epicenter for the exit Transition. The position of the associated shared element in
          * the launched Activity will be the epicenter of its entering Transition.
          *
-         * @param viewId The id of the view to be shared as part of the transition
+         * @param viewId            The id of the view to be shared as part of the transition
          * @param sharedElementName The shared element name for this view
-         *
          * @see ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])
          */
         @NonNull

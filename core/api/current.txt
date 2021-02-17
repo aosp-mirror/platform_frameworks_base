@@ -8309,6 +8309,7 @@ package android.appwidget {
   public class AppWidgetHostView extends android.widget.FrameLayout {
     ctor public AppWidgetHostView(android.content.Context);
     ctor public AppWidgetHostView(android.content.Context, int, int);
+    method public void clearCurrentSize();
     method public int getAppWidgetId();
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo();
     method public static android.graphics.Rect getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect);
@@ -8316,11 +8317,13 @@ package android.appwidget {
     method protected android.view.View getErrorView();
     method protected void prepareView(android.view.View);
     method public void setAppWidget(int, android.appwidget.AppWidgetProviderInfo);
+    method public void setCurrentSize(@NonNull android.graphics.PointF);
     method public void setExecutor(java.util.concurrent.Executor);
     method public void setOnLightBackground(boolean);
     method public void updateAppWidget(android.widget.RemoteViews);
     method public void updateAppWidgetOptions(android.os.Bundle);
-    method public void updateAppWidgetSize(android.os.Bundle, int, int, int, int);
+    method @Deprecated public void updateAppWidgetSize(android.os.Bundle, int, int, int, int);
+    method public void updateAppWidgetSize(@NonNull android.os.Bundle, @NonNull java.util.List<android.graphics.PointF>);
   }
 
   public class AppWidgetManager {
@@ -8373,6 +8376,7 @@ package android.appwidget {
     field public static final String OPTION_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
     field public static final String OPTION_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
     field public static final String OPTION_APPWIDGET_RESTORE_COMPLETED = "appWidgetRestoreCompleted";
+    field public static final String OPTION_APPWIDGET_SIZES = "appWidgetSizes";
   }
 
   public class AppWidgetProvider extends android.content.BroadcastReceiver {
@@ -54649,6 +54653,7 @@ package android.widget {
   public class RemoteViews implements android.view.LayoutInflater.Filter android.os.Parcelable {
     ctor public RemoteViews(String, int);
     ctor public RemoteViews(android.widget.RemoteViews, android.widget.RemoteViews);
+    ctor public RemoteViews(@NonNull java.util.Map<android.graphics.PointF,android.widget.RemoteViews>);
     ctor public RemoteViews(android.widget.RemoteViews);
     ctor public RemoteViews(android.os.Parcel);
     method public void addView(@IdRes int, android.widget.RemoteViews);
