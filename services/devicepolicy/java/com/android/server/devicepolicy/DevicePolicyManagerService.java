@@ -534,8 +534,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Strings logged with {@link
-     * com.android.internal.logging.nano.MetricsProto.MetricsEvent#PROVISIONING_ENTRY_POINT_ADB}
-     * and {@link DevicePolicyEnums#PROVISIONING_ENTRY_POINT_ADB}.
+     * com.android.internal.logging.nano.MetricsProto.MetricsEvent#PROVISIONING_ENTRY_POINT_ADB},
+     * {@link DevicePolicyEnums#PROVISIONING_ENTRY_POINT_ADB},
+     * {@link DevicePolicyEnums#SET_NETWORK_LOGGING_ENABLED} and
+     * {@link DevicePolicyEnums#RETRIEVE_NETWORK_LOGS}.
      */
     private static final String LOG_TAG_PROFILE_OWNER = "profile-owner";
     private static final String LOG_TAG_DEVICE_OWNER = "device-owner";
@@ -14212,9 +14214,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        final boolean isManagedProfileOwner = isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId());
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                && (isDeviceOwner(caller)
-                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
+                && (isDeviceOwner(caller) || isManagedProfileOwner))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
 
         synchronized (getLockObject()) {
@@ -14236,6 +14239,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .setAdmin(caller.getPackageName())
                     .setBoolean(/* isDelegate */ admin == null)
                     .setInt(enabled ? 1 : 0)
+                    .setStrings(isManagedProfileOwner
+                            ? LOG_TAG_PROFILE_OWNER : LOG_TAG_DEVICE_OWNER)
                     .write();
         }
     }
@@ -14392,9 +14397,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        final boolean isManagedProfileOwner = isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId());
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                &&  (isDeviceOwner(caller)
-                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
+                &&  (isDeviceOwner(caller) || isManagedProfileOwner))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
         if (mOwners.hasDeviceOwner()) {
             checkAllUsersAreAffiliatedWithDevice();
@@ -14408,6 +14414,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .createEvent(DevicePolicyEnums.RETRIEVE_NETWORK_LOGS)
                     .setAdmin(caller.getPackageName())
                     .setBoolean(/* isDelegate */ admin == null)
+                    .setStrings(isManagedProfileOwner
+                            ? LOG_TAG_PROFILE_OWNER : LOG_TAG_DEVICE_OWNER)
                     .write();
 
             final long currentTime = System.currentTimeMillis();
