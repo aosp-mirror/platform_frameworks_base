@@ -2511,10 +2511,9 @@
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
 
     <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
-         Default is carrier_config, but it should be set to modem if the modem is returning
-         predictive (instead of instantaneous) bandwidth estimate.
-         Values are carrier_config and modem. -->
-    <string name="config_bandwidthEstimateSource">carrier_config</string>
+         Default is bandwidth_estimator.
+         Values are bandwidth_estimator, carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
