@@ -43,6 +43,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -901,8 +902,30 @@ public final class JobServiceContext implements ServiceConnection {
         mTimeoutElapsed = sElapsedRealtimeClock.millis() + timeoutMillis;
     }
 
-
     private void removeOpTimeOutLocked() {
         mCallbackHandler.removeMessages(MSG_TIMEOUT);
+    }
+
+    void dumpLocked(IndentingPrintWriter pw, final long nowElapsed) {
+        if (mRunningJob == null) {
+            if (mStoppedReason != null) {
+                pw.print("inactive since ");
+                TimeUtils.formatDuration(mStoppedTime, nowElapsed, pw);
+                pw.print(", stopped because: ");
+                pw.println(mStoppedReason);
+            } else {
+                pw.println("inactive");
+            }
+        } else {
+            pw.println(mRunningJob.toShortString());
+
+            pw.increaseIndent();
+            pw.print("Running for: ");
+            TimeUtils.formatDuration(nowElapsed - mExecutionStartTimeElapsed, pw);
+            pw.print(", timeout at: ");
+            TimeUtils.formatDuration(mTimeoutElapsed - nowElapsed, pw);
+            pw.println();
+            pw.decreaseIndent();
+        }
     }
 }
