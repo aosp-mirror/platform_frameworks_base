@@ -46,6 +46,6 @@ public class VcnUnderlyingNetworkPolicyTest {
 
     @Test
     public void testParcelUnparcel() {
-        assertParcelSane(SAMPLE_NETWORK_POLICY, 2);
+        assertParcelSane(SAMPLE_NETWORK_POLICY, 1);
     }
 }
