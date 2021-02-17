@@ -26801,6 +26801,46 @@ package android.net.sip {
 
 }
 
+package android.net.vcn {
+
+  public final class VcnConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.net.vcn.VcnGatewayConnectionConfig> getGatewayConnectionConfigs();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnConfig> CREATOR;
+  }
+
+  public static final class VcnConfig.Builder {
+    ctor public VcnConfig.Builder(@NonNull android.content.Context);
+    method @NonNull public android.net.vcn.VcnConfig.Builder addGatewayConnectionConfig(@NonNull android.net.vcn.VcnGatewayConnectionConfig);
+    method @NonNull public android.net.vcn.VcnConfig build();
+  }
+
+  public final class VcnGatewayConnectionConfig {
+    method @NonNull public int[] getExposedCapabilities();
+    method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
+    method @NonNull public int[] getRequiredUnderlyingCapabilities();
+    method @NonNull public long[] getRetryInterval();
+  }
+
+  public static final class VcnGatewayConnectionConfig.Builder {
+    ctor public VcnGatewayConnectionConfig.Builder();
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addRequiredUnderlyingCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeRequiredUnderlyingCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryInterval(@NonNull long[]);
+  }
+
+  public class VcnManager {
+    method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
+  }
+
+}
+
 package android.nfc {
 
   public class FormatException extends java.lang.Exception {
