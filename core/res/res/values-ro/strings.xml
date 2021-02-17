@@ -582,6 +582,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dispozitivul nu are senzor de amprentă."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzorul este dezactivat temporar."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Folosiți amprenta pentru a continua"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Pictograma amprentă"</string>
@@ -1686,6 +1687,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizați comanda rapidă"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversarea culorilor"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corecția culorii"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Reduceți luminozitatea"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S-au apăsat lung tastele de volum. S-a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S-au apăsat lung tastele de volum. S-a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Apăsați ambele butoane de volum timp de trei secunde pentru a folosi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1911,6 +1913,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximizați"</string>
     <string name="close_button_text" msgid="10603510034455258">"Închideți"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Răspundeți"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Respingeți"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Încheiați"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Apel primit"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Apel în desfășurare"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Se filtrează un apel primit"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>

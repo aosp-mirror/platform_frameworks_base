@@ -538,10 +538,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utilitza maquinari biomètric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet que l\'aplicació faci servir maquinari biomètric per a l\'autenticació"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gestionar el maquinari d\'empremtes dactilars"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gestionar el maquinari d\'empremtes digitals"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permet que l\'aplicació invoqui mètodes per afegir i suprimir plantilles d\'empremtes dactilars que es puguin fer servir."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilitzar el maquinari d\'empremtes dactilars"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet que l\'aplicació faci servir maquinari d\'empremtes dactilars per a l\'autenticació"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"Utilitzar el maquinari d\'empremtes digitals"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet que l\'aplicació faci servir maquinari d\'empremtes digitals per a l\'autenticació"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar la teva col·lecció de música"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permet que l\'aplicació modifiqui la teva col·lecció de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar la teva col·lecció de vídeos"</string>
@@ -567,7 +567,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"L\'empremta digital s\'ha autenticat"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Cara autenticada; prem el botó per confirmar"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El maquinari per a empremtes dactilars no està disponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El maquinari d\'empremtes digitals no està disponible."</string>
     <string name="fingerprint_error_no_space" msgid="6126456006769817485">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
@@ -579,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes dactilars."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor està desactivat temporalment."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Fes servir l\'empremta digital per continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
@@ -1664,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió de colors"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció de color"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Reducció de la brillantor"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premudes les dues tecles de volum durant 3 segons per fer servir <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1880,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximitza"</string>
     <string name="close_button_text" msgid="10603510034455258">"Tanca"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Respon"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Rebutja"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Penja"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Trucada entrant"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Trucada en curs"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"S\'està filtrant una trucada entrant"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other">Seleccionats: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Seleccionats: <xliff:g id="COUNT_0">%1$d</xliff:g></item>
