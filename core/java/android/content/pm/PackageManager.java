@@ -3669,6 +3669,15 @@ public abstract class PackageManager {
     public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY =
             "android.hardware.keystore.limited_use_key";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * a Keystore implementation that can create application-specific attestation keys.
+     * See {@link android.security.keystore.KeyGenParameterSpec.Builder#setAttestKeyAlias}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_KEYSTORE_APP_ATTEST_KEY =
+            "android.hardware.keystore.app_attest_key";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
