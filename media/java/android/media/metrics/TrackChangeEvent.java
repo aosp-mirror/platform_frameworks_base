@@ -17,6 +17,7 @@
 package android.media.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -28,20 +29,29 @@ import java.util.Objects;
 
 /**
  * Playback track change event.
- * @hide
  */
-public final class TrackChangeEvent implements Parcelable {
+public final class TrackChangeEvent extends Event implements Parcelable {
+    /** The track is off. */
     public static final int TRACK_STATE_OFF = 0;
+    /** The track is on. */
     public static final int TRACK_STATE_ON = 1;
 
+    /** Unknown track change reason. */
     public static final int TRACK_CHANGE_REASON_UNKNOWN = 0;
+    /** Other track change reason. */
     public static final int TRACK_CHANGE_REASON_OTHER = 1;
+    /** Track change reason for initial state. */
     public static final int TRACK_CHANGE_REASON_INITIAL = 2;
+    /** Track change reason for manual changes. */
     public static final int TRACK_CHANGE_REASON_MANUAL = 3;
+    /** Track change reason for adaptive changes. */
     public static final int TRACK_CHANGE_REASON_ADAPTIVE = 4;
 
+    /** Audio track. */
     public static final int TRACK_TYPE_AUDIO = 0;
+    /** Video track. */
     public static final int TRACK_TYPE_VIDEO = 1;
+    /** Text track. */
     public static final int TRACK_TYPE_TEXT = 2;
 
     private final int mState;
@@ -50,7 +60,7 @@ public final class TrackChangeEvent implements Parcelable {
     private final @Nullable String mSampleMimeType;
     private final @Nullable String mCodecName;
     private final int mBitrate;
-    private final long mTimeSincePlaybackCreatedMillis;
+    private final long mTimeSinceCreatedMillis;
     private final int mType;
     private final @Nullable String mLanguage;
     private final @Nullable String mLanguageRegion;
@@ -96,7 +106,7 @@ public final class TrackChangeEvent implements Parcelable {
             @Nullable String sampleMimeType,
             @Nullable String codecName,
             int bitrate,
-            long timeSincePlaybackCreatedMillis,
+            long timeSinceCreatedMillis,
             int type,
             @Nullable String language,
             @Nullable String languageRegion,
@@ -110,7 +120,7 @@ public final class TrackChangeEvent implements Parcelable {
         this.mSampleMimeType = sampleMimeType;
         this.mCodecName = codecName;
         this.mBitrate = bitrate;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
         this.mType = type;
         this.mLanguage = language;
         this.mLanguageRegion = languageRegion;
@@ -120,34 +130,60 @@ public final class TrackChangeEvent implements Parcelable {
         this.mHeight = height;
     }
 
+    /**
+     * Gets track state.
+     */
     @TrackState
     public int getTrackState() {
         return mState;
     }
 
+    /**
+     * Gets track change reason.
+     */
     @TrackChangeReason
     public int getTrackChangeReason() {
         return mReason;
     }
 
+    /**
+     * Gets container MIME type.
+     */
     public @Nullable String getContainerMimeType() {
         return mContainerMimeType;
     }
 
+    /**
+     * Gets the MIME type of the video/audio/text samples.
+     */
     public @Nullable String getSampleMimeType() {
         return mSampleMimeType;
     }
 
+    /**
+     * Gets codec name.
+     */
     public @Nullable String getCodecName() {
         return mCodecName;
     }
 
+    /**
+     * Gets bitrate.
+     * @return the bitrate, or -1 if unknown.
+     */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getBitrate() {
         return mBitrate;
     }
 
-    public long getTimeSincePlaybackCreatedMillis() {
-        return mTimeSincePlaybackCreatedMillis;
+    /**
+     * Gets timestamp since the creation in milliseconds.
+     * @return the timestamp since the creation in milliseconds, or -1 if unknown.
+     */
+    @Override
+    @IntRange(from = -1)
+    public long getTimeSinceCreatedMillis() {
+        return mTimeSinceCreatedMillis;
     }
 
     @TrackType
@@ -155,26 +191,55 @@ public final class TrackChangeEvent implements Parcelable {
         return mType;
     }
 
+    /**
+     * Gets language code.
+     * @return a two-letter ISO 639-1 language code.
+     */
     public @Nullable String getLanguage() {
         return mLanguage;
     }
 
+
+    /**
+     * Gets language region code.
+     * @return an IETF BCP 47 optional language region subtag based on a two-letter country code.
+     */
     public @Nullable String getLanguageRegion() {
         return mLanguageRegion;
     }
 
+    /**
+     * Gets channel count.
+     * @return the channel count, or -1 if unknown.
+     */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getChannelCount() {
         return mChannelCount;
     }
 
+    /**
+     * Gets sample rate.
+     * @return the sample rate, or -1 if unknown.
+     */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getSampleRate() {
         return mSampleRate;
     }
 
+    /**
+     * Gets video width.
+     * @return the video width, or -1 if unknown.
+     */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getWidth() {
         return mWidth;
     }
 
+    /**
+     * Gets video height.
+     * @return the video height, or -1 if unknown.
+     */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getHeight() {
         return mHeight;
     }
@@ -194,7 +259,7 @@ public final class TrackChangeEvent implements Parcelable {
         if (mSampleMimeType != null) dest.writeString(mSampleMimeType);
         if (mCodecName != null) dest.writeString(mCodecName);
         dest.writeInt(mBitrate);
-        dest.writeLong(mTimeSincePlaybackCreatedMillis);
+        dest.writeLong(mTimeSinceCreatedMillis);
         dest.writeInt(mType);
         if (mLanguage != null) dest.writeString(mLanguage);
         if (mLanguageRegion != null) dest.writeString(mLanguageRegion);
@@ -218,7 +283,7 @@ public final class TrackChangeEvent implements Parcelable {
         String sampleMimeType = (flg & 0x8) == 0 ? null : in.readString();
         String codecName = (flg & 0x10) == 0 ? null : in.readString();
         int bitrate = in.readInt();
-        long timeSincePlaybackCreatedMillis = in.readLong();
+        long timeSinceCreatedMillis = in.readLong();
         int type = in.readInt();
         String language = (flg & 0x100) == 0 ? null : in.readString();
         String languageRegion = (flg & 0x200) == 0 ? null : in.readString();
@@ -233,7 +298,7 @@ public final class TrackChangeEvent implements Parcelable {
         this.mSampleMimeType = sampleMimeType;
         this.mCodecName = codecName;
         this.mBitrate = bitrate;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
         this.mType = type;
         this.mLanguage = language;
         this.mLanguageRegion = languageRegion;
@@ -256,38 +321,24 @@ public final class TrackChangeEvent implements Parcelable {
         }
     };
 
-
-
-    // Code below generated by codegen v1.0.22.
-    //
-    // DO NOT MODIFY!
-    // CHECKSTYLE:OFF Generated code
-    //
-    // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/media/java/android/media/metrics/TrackChangeEvent.java
-    //
-    // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
-    //   Settings > Editor > Code Style > Formatter Control
-    //@formatter:off
-
     @Override
     public String toString() {
-        return "TrackChangeEvent { " +
-                "state = " + mState + ", " +
-                "reason = " + mReason + ", " +
-                "containerMimeType = " + mContainerMimeType + ", " +
-                "sampleMimeType = " + mSampleMimeType + ", " +
-                "codecName = " + mCodecName + ", " +
-                "bitrate = " + mBitrate + ", " +
-                "timeSincePlaybackCreatedMillis = " + mTimeSincePlaybackCreatedMillis + ", " +
-                "type = " + mType + ", " +
-                "language = " + mLanguage + ", " +
-                "languageRegion = " + mLanguageRegion + ", " +
-                "channelCount = " + mChannelCount + ", " +
-                "sampleRate = " + mSampleRate + ", " +
-                "width = " + mWidth + ", " +
-                "height = " + mHeight +
-        " }";
+        return "TrackChangeEvent { "
+                + "state = " + mState + ", "
+                + "reason = " + mReason + ", "
+                + "containerMimeType = " + mContainerMimeType + ", "
+                + "sampleMimeType = " + mSampleMimeType + ", "
+                + "codecName = " + mCodecName + ", "
+                + "bitrate = " + mBitrate + ", "
+                + "timeSinceCreatedMillis = " + mTimeSinceCreatedMillis + ", "
+                + "type = " + mType + ", "
+                + "language = " + mLanguage + ", "
+                + "languageRegion = " + mLanguageRegion + ", "
+                + "channelCount = " + mChannelCount + ", "
+                + "sampleRate = " + mSampleRate + ", "
+                + "width = " + mWidth + ", "
+                + "height = " + mHeight
+                + " }";
     }
 
     @Override
@@ -301,7 +352,7 @@ public final class TrackChangeEvent implements Parcelable {
                 && Objects.equals(mSampleMimeType, that.mSampleMimeType)
                 && Objects.equals(mCodecName, that.mCodecName)
                 && mBitrate == that.mBitrate
-                && mTimeSincePlaybackCreatedMillis == that.mTimeSincePlaybackCreatedMillis
+                && mTimeSinceCreatedMillis == that.mTimeSinceCreatedMillis
                 && mType == that.mType
                 && Objects.equals(mLanguage, that.mLanguage)
                 && Objects.equals(mLanguageRegion, that.mLanguageRegion)
@@ -314,7 +365,7 @@ public final class TrackChangeEvent implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mState, mReason, mContainerMimeType, mSampleMimeType, mCodecName,
-                mBitrate, mTimeSincePlaybackCreatedMillis, mType, mLanguage, mLanguageRegion,
+                mBitrate, mTimeSinceCreatedMillis, mType, mLanguage, mLanguageRegion,
                 mChannelCount, mSampleRate, mWidth, mHeight);
     }
 
@@ -323,32 +374,33 @@ public final class TrackChangeEvent implements Parcelable {
      */
     public static final class Builder {
         // TODO: check track type for the setters.
-        private int mState;
-        private int mReason;
+        private int mState = TRACK_STATE_OFF;
+        private int mReason = TRACK_CHANGE_REASON_UNKNOWN;
         private @Nullable String mContainerMimeType;
         private @Nullable String mSampleMimeType;
         private @Nullable String mCodecName;
-        private int mBitrate;
-        private long mTimeSincePlaybackCreatedMillis;
-        private int mType;
+        private int mBitrate = -1;
+        private long mTimeSinceCreatedMillis = -1;
+        private final int mType;
         private @Nullable String mLanguage;
         private @Nullable String mLanguageRegion;
-        private int mChannelCount;
-        private int mSampleRate;
-        private int mWidth;
-        private int mHeight;
+        private int mChannelCount = -1;
+        private int mSampleRate = -1;
+        private int mWidth = -1;
+        private int mHeight = -1;
 
         private long mBuilderFieldsSet = 0L;
 
         /**
          * Creates a new Builder.
-         *
-         * @hide
          */
         public Builder(int type) {
             mType = type;
         }
 
+        /**
+         * Sets track state.
+         */
         public @NonNull Builder setTrackState(@TrackState int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x1;
@@ -356,6 +408,9 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets track change reason.
+         */
         public @NonNull Builder setTrackChangeReason(@TrackChangeReason int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2;
@@ -363,6 +418,9 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets container MIME type.
+         */
         public @NonNull Builder setContainerMimeType(@NonNull String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
@@ -370,6 +428,9 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the MIME type of the video/audio/text samples.
+         */
         public @NonNull Builder setSampleMimeType(@NonNull String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x8;
@@ -377,6 +438,9 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets codec name.
+         */
         public @NonNull Builder setCodecName(@NonNull String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x10;
@@ -384,27 +448,33 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
-        public @NonNull Builder setBitrate(int value) {
+        /**
+         * Sets bitrate in bits per second.
+         * @param value the bitrate in bits per second. -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setBitrate(@IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x20;
             mBitrate = value;
             return this;
         }
 
-        public @NonNull Builder setTimeSincePlaybackCreatedMillis(long value) {
+        /**
+         * Sets timestamp since the creation in milliseconds.
+         * @param value the timestamp since the creation in milliseconds.
+         *              -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x40;
-            mTimeSincePlaybackCreatedMillis = value;
+            mTimeSinceCreatedMillis = value;
             return this;
         }
 
-        public @NonNull Builder setTrackType(@TrackType int value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x80;
-            mType = value;
-            return this;
-        }
-
+        /**
+         * Sets language code.
+         * @param value a two-letter ISO 639-1 language code.
+         */
         public @NonNull Builder setLanguage(@NonNull String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x100;
@@ -412,6 +482,11 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets language region code.
+         * @param value an IETF BCP 47 optional language region subtag based on a two-letter country
+         *              code.
+         */
         public @NonNull Builder setLanguageRegion(@NonNull String value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x200;
@@ -419,28 +494,46 @@ public final class TrackChangeEvent implements Parcelable {
             return this;
         }
 
-        public @NonNull Builder setChannelCount(int value) {
+        /**
+         * Sets channel count.
+         * @param value the channel count. -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setChannelCount(
+                @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x400;
             mChannelCount = value;
             return this;
         }
 
-        public @NonNull Builder setSampleRate(int value) {
+        /**
+         * Sets sample rate.
+         * @param value the sample rate. -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setSampleRate(
+                @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x800;
             mSampleRate = value;
             return this;
         }
 
-        public @NonNull Builder setWidth(int value) {
+        /**
+         * Sets video width.
+         * @param value the video width. -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setWidth(@IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x1000;
             mWidth = value;
             return this;
         }
 
-        public @NonNull Builder setHeight(int value) {
+        /**
+         * Sets video height.
+         * @param value the video height. -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setHeight(@IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x2000;
             mHeight = value;
@@ -459,7 +552,7 @@ public final class TrackChangeEvent implements Parcelable {
                     mSampleMimeType,
                     mCodecName,
                     mBitrate,
-                    mTimeSincePlaybackCreatedMillis,
+                    mTimeSinceCreatedMillis,
                     mType,
                     mLanguage,
                     mLanguageRegion,
