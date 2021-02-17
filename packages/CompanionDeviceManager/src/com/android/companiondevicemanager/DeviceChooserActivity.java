@@ -165,6 +165,7 @@ public class DeviceChooserActivity extends Activity {
     protected void onStop() {
         super.onStop();
         if (!isFinishing() && !isChangingConfigurations()) {
+            Log.i(LOG_TAG, "onStop() - cancelling");
             cancel();
         }
     }
@@ -195,7 +196,6 @@ public class DeviceChooserActivity extends Activity {
         titleView.setText(title);
     }
 
-    //TODO put in resources xmls
     private ProgressBar getProgressBar() {
         final ProgressBar progressBar = new ProgressBar(this);
         progressBar.setForegroundGravity(Gravity.CENTER_HORIZONTAL);
