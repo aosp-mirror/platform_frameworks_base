@@ -93,7 +93,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Datu-konexioaren egoera"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Erantzungailuko mezuak"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi bidezko deiak"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wifi bidezko deiak"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIMaren egoera"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"SIM txartelaren lehentasun handiko jakinarazpenak"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
@@ -122,23 +122,23 @@
     <string name="roamingText11" msgid="5245687407203281407">"Ibiltaritzari buruzko jakinarazpena aktibatuta"</string>
     <string name="roamingText12" msgid="673537506362152640">"Ibiltaritzari buruzko jakinarazpena desaktibatuta"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Zerbitzu bila"</string>
-    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Ezin izan dira konfiguratu Wi‑Fi bidezko deiak"</string>
+    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Ezin izan dira konfiguratu wifi bidezko deiak"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"Wi-Fi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wi-Fi bidezko deiak Ezarpenak atalean. (Errore-kodea: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"Wifi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wifi bidezko deiak Ezarpenak atalean. (Errore-kodea: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Arazo bat izan da Wi‑Fi bidezko deiak zure operadorearekin erregistratzean: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Arazo bat izan da wifi bidezko deiak zure operadorearekin erregistratzean: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> operadorearen wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g> operadorearen wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"<xliff:g id="SPN">%s</xliff:g> WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> wifia"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi bidezko deiak | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifia"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi bidezko deiak"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>

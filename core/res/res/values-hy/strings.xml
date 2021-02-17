@@ -1421,7 +1421,7 @@
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Պաստառ"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Փոխել պաստառը"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Ծանուցման ունկնդիր"</string>
-    <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ունկնդրիչ"</string>
+    <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR ունկնիր"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Պայմանների մատակարար"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Ծանուցումների դասակարգման ծառայություն"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN-ը ակտիվացված է"</string>
