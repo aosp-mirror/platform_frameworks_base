@@ -398,6 +398,7 @@
 
     <!-- Permission required for CTS to test sensor privacy behavior -->
     <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
+    <uses-permission android:name="android.permission.OBSERVE_SENSOR_PRIVACY" />
 
     <!-- Permission needed for CTS test - CallLogTest -->
     <uses-permission android:name="com.android.voicemail.permission.READ_VOICEMAIL" />

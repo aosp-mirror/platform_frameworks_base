@@ -25,8 +25,8 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.SensorPrivacyManager
 import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
-import android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_CAMERA
-import android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE
+import android.hardware.SensorPrivacyManager.Sensors.CAMERA
+import android.hardware.SensorPrivacyManager.Sensors.MICROPHONE
 import android.os.Bundle
 import android.os.Handler
 import android.text.Html
@@ -81,7 +81,7 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
                 dismiss()
             }
         }
-        if (!sensorPrivacyManager.isIndividualSensorPrivacyEnabled(sensor)) {
+        if (!sensorPrivacyManager.isSensorPrivacyEnabled(sensor)) {
             finish()
             return
         }
@@ -89,9 +89,9 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
         mAlertParams.apply {
             try {
                 mMessage = Html.fromHtml(getString(when (sensor) {
-                    INDIVIDUAL_SENSOR_MICROPHONE ->
+                    MICROPHONE ->
                         R.string.sensor_privacy_start_use_mic_dialog_content
-                    INDIVIDUAL_SENSOR_CAMERA ->
+                    CAMERA ->
                         R.string.sensor_privacy_start_use_camera_dialog_content
                     else -> Resources.ID_NULL
                 }, packageManager.getApplicationInfo(sensorUsePackageName, 0)
@@ -102,9 +102,9 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
             }
 
             mIconId = when (sensor) {
-                INDIVIDUAL_SENSOR_MICROPHONE ->
+                MICROPHONE ->
                     com.android.internal.R.drawable.perm_group_microphone
-                INDIVIDUAL_SENSOR_CAMERA -> com.android.internal.R.drawable.perm_group_camera
+                CAMERA -> com.android.internal.R.drawable.perm_group_camera
                 else -> Resources.ID_NULL
             }
 
@@ -121,7 +121,7 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
     override fun onStart() {
         super.onStart()
 
-        sensorPrivacyManager.suppressIndividualSensorPrivacyReminders(sensorUsePackageName, true)
+        sensorPrivacyManager.suppressSensorPrivacyReminders(sensorUsePackageName, true)
         unsuppressImmediately = false
     }
 
@@ -156,11 +156,11 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
 
         if (unsuppressImmediately) {
             sensorPrivacyManager
-                    .suppressIndividualSensorPrivacyReminders(sensorUsePackageName, false)
+                    .suppressSensorPrivacyReminders(sensorUsePackageName, false)
         } else {
             Handler(mainLooper).postDelayed({
                 sensorPrivacyManager
-                        .suppressIndividualSensorPrivacyReminders(sensorUsePackageName, false)
+                        .suppressSensorPrivacyReminders(sensorUsePackageName, false)
             }, SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS)
         }
     }
@@ -170,7 +170,7 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
     }
 
     private fun disableSensorPrivacy() {
-        sensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(sensor, false)
+        sensorPrivacyManager.setSensorPrivacyForProfileGroup(sensor, false)
         unsuppressImmediately = true
         setResult(RESULT_OK)
     }

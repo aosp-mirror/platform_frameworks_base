@@ -16,10 +16,13 @@
 
 package com.android.systemui.qs.tiles;
 
-import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
+import static android.content.pm.PackageManager.FEATURE_CAMERA_TOGGLE;
+import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
+import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
@@ -58,8 +61,8 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
 
     @Override
     public boolean isAvailable() {
-        return /*getHost().getContext().getPackageManager().hasSystemFeature(FEATURE_CAMERA_TOGGLE)
-                && */whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+        return getHost().getContext().getPackageManager().hasSystemFeature(FEATURE_CAMERA_TOGGLE)
+                && whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 "camera_toggle_enabled",
                 false));
     }
@@ -75,7 +78,7 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
     }
 
     @Override
-    public int getSensorId() {
+    public @Sensor int getSensorId() {
         return CAMERA;
     }
 }
