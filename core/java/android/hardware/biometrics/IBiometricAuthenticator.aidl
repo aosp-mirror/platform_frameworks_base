@@ -20,6 +20,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
@@ -32,7 +33,7 @@ import android.hardware.face.Face;
 interface IBiometricAuthenticator {
 
     // Creates a test session
-    ITestSession createTestSession(String opPackageName);
+    ITestSession createTestSession(ITestSessionCallback callback, String opPackageName);
 
     // Retrieve static sensor properties
     SensorPropertiesInternal getSensorProperties(String opPackageName);
