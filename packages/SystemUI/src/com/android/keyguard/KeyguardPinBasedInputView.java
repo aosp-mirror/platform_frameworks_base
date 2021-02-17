@@ -24,14 +24,12 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 
 import com.android.internal.widget.LockscreenCredential;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -188,10 +186,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
             key.reloadColors();
         }
         mPasswordEntry.reloadColors();
-        int deleteColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
-                .getDefaultColor();
-        mDeleteButton.setImageTintList(ColorStateList.valueOf(deleteColor));
-
         mDeleteButton.reloadColors();
         mOkButton.reloadColors();
     }

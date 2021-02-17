@@ -17,7 +17,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
@@ -37,7 +37,7 @@ public class NumPadButton extends AlphaOptimizedImageButton {
     public NumPadButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mAnimator = new NumPadAnimator(context, (GradientDrawable) getBackground(),
+        mAnimator = new NumPadAnimator(context, (LayerDrawable) getBackground(),
                 attrs.getStyleAttribute());
     }
 
