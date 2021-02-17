@@ -104,4 +104,11 @@ public abstract class VcnControlPlaneConfig {
 
         return mConfigType == ((VcnControlPlaneConfig) o).mConfigType;
     }
+
+    /**
+     * Returns a deep copy of this object.
+     *
+     * @hide
+     */
+    public abstract VcnControlPlaneConfig copy();
 }

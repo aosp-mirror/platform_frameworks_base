@@ -18,6 +18,7 @@ package android.net.vcn;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import android.net.NetworkCapabilities;
@@ -57,17 +58,22 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int MAX_MTU = 1360;
 
+    public static final VcnControlPlaneConfig CONTROL_PLANE_CONFIG =
+            VcnControlPlaneIkeConfigTest.buildTestConfig();
+
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfig() {
         return buildTestConfigWithExposedCaps(EXPOSED_CAPS);
     }
 
+    private static VcnGatewayConnectionConfig.Builder newBuilder() {
+        return new VcnGatewayConnectionConfig.Builder(CONTROL_PLANE_CONFIG);
+    }
+
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(int... exposedCaps) {
         final VcnGatewayConnectionConfig.Builder builder =
-                new VcnGatewayConnectionConfig.Builder()
-                        .setRetryInterval(RETRY_INTERVALS_MS)
-                        .setMaxMtu(MAX_MTU);
+                newBuilder().setRetryInterval(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
 
         for (int caps : exposedCaps) {
             builder.addExposedCapability(caps);
@@ -81,9 +87,19 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
+    public void testBuilderRequiresNonNullControlPlaneConfig() {
+        try {
+            new VcnGatewayConnectionConfig.Builder(null).build();
+
+            fail("Expected exception due to invalid control plane config");
+        } catch (NullPointerException e) {
+        }
+    }
+
+    @Test
     public void testBuilderRequiresNonEmptyExposedCaps() {
         try {
-            new VcnGatewayConnectionConfig.Builder()
+            newBuilder()
                     .addRequiredUnderlyingCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     .build();
 
@@ -95,9 +111,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonEmptyUnderlyingCaps() {
         try {
-            new VcnGatewayConnectionConfig.Builder()
-                    .addExposedCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .build();
+            newBuilder().addExposedCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
 
             fail("Expected exception due to invalid required underlying capabilities");
         } catch (IllegalArgumentException e) {
@@ -107,7 +121,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonNullRetryInterval() {
         try {
-            new VcnGatewayConnectionConfig.Builder().setRetryInterval(null);
+            newBuilder().setRetryInterval(null);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -116,7 +130,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresNonEmptyRetryInterval() {
         try {
-            new VcnGatewayConnectionConfig.Builder().setRetryInterval(new long[0]);
+            newBuilder().setRetryInterval(new long[0]);
             fail("Expected exception due to invalid retryIntervalMs");
         } catch (IllegalArgumentException e) {
         }
@@ -125,8 +139,7 @@ public class VcnGatewayConnectionConfigTest {
     @Test
     public void testBuilderRequiresValidMtu() {
         try {
-            new VcnGatewayConnectionConfig.Builder()
-                    .setMaxMtu(VcnGatewayConnectionConfig.MIN_MTU_V6 - 1);
+            newBuilder().setMaxMtu(VcnGatewayConnectionConfig.MIN_MTU_V6 - 1);
             fail("Expected exception due to invalid mtu");
         } catch (IllegalArgumentException e) {
         }
@@ -143,6 +156,9 @@ public class VcnGatewayConnectionConfigTest {
         int[] underlyingCaps = config.getRequiredUnderlyingCapabilities();
         Arrays.sort(underlyingCaps);
         assertArrayEquals(UNDERLYING_CAPS, underlyingCaps);
+
+        assertEquals(CONTROL_PLANE_CONFIG, config.getControlPlaneConfig());
+        assertFalse(CONTROL_PLANE_CONFIG == config.getControlPlaneConfig());
 
         assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMs());
         assertEquals(MAX_MTU, config.getMaxMtu());
