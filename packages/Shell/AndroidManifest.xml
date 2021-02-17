@@ -406,6 +406,9 @@
     <!-- Permission required for CTS test - CtsRebootReadinessTestCases -->
     <uses-permission android:name="android.permission.SIGNAL_REBOOT_READINESS" />
 
+    <!-- Permission required for CTS test - PeopleManagerTest -->
+    <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

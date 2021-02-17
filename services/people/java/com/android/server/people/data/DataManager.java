@@ -58,6 +58,7 @@ import android.provider.Telephony.MmsSms;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -352,6 +353,14 @@ public class DataManager {
                 cs.addOrUpdate(builder.build());
             });
         });
+    }
+
+    /** Returns whether {@code shortcutId} is backed by Conversation. */
+    public boolean isConversation(String packageName, int userId, String shortcutId) {
+        ConversationChannel channel = getConversation(packageName, userId, shortcutId);
+        return channel != null
+                && channel.getShortcutInfo() != null
+                && !TextUtils.isEmpty(channel.getShortcutInfo().getLabel());
     }
 
     /**

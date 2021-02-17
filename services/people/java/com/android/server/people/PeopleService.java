@@ -16,6 +16,7 @@
 
 package com.android.server.people;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -29,6 +30,7 @@ import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.IPredictionCallback;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
@@ -181,6 +183,20 @@ public class PeopleService extends SystemService {
             enforceSystemOrRoot("remove all recent conversations");
             mDataManager.removeAllRecentConversations(
                     Binder.getCallingUserHandle().getIdentifier());
+        }
+
+        @Override
+        public boolean isConversation(String packageName, int userId, String shortcutId) {
+            enforceHasReadPeopleDataPermission();
+            handleIncomingUser(userId);
+            return mDataManager.isConversation(packageName, userId, shortcutId);
+        }
+
+        private void enforceHasReadPeopleDataPermission() throws SecurityException {
+            if (getContext().checkCallingPermission(Manifest.permission.READ_PEOPLE_DATA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Caller doesn't have READ_PEOPLE_DATA permission.");
+            }
         }
 
         @Override
