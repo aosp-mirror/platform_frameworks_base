@@ -219,7 +219,7 @@ void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
 void JankTracker::dumpFrames(int fd) {
     dprintf(fd, "\n\n---PROFILEDATA---\n");
     for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
-        dprintf(fd, "%s", FrameInfoNames[i].c_str());
+        dprintf(fd, "%s", FrameInfoNames[i]);
         dprintf(fd, ",");
     }
     for (size_t i = 0; i < mFrames.size(); i++) {

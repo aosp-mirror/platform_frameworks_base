@@ -484,7 +484,8 @@ void CanvasContext::draw() {
         // TODO(b/165985262): measure performance impact
         const auto vsyncId = mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
         if (vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
-            const auto inputEventId = mCurrentFrameInfo->get(FrameInfoIndex::NewestInputEvent);
+            const auto inputEventId =
+                    static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
             native_window_set_frame_timeline_info(mNativeSurface->getNativeWindow(), vsyncId,
                                                   inputEventId);
         }
@@ -591,7 +592,6 @@ void CanvasContext::draw() {
 }
 
 void CanvasContext::finishFrame(FrameInfo* frameInfo) {
-
     // TODO (b/169858044): Consolidate this into a single call.
     mJankTracker.finishFrame(*frameInfo);
     mJankTracker.finishGpuDraw(*frameInfo);

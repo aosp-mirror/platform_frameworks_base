@@ -20,13 +20,12 @@
 namespace android {
 namespace uirenderer {
 
-const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> FrameInfoNames = {
+const std::array FrameInfoNames{
         "Flags",
         "FrameTimelineVsyncId",
         "IntendedVsync",
         "Vsync",
-        "OldestInputEvent",
-        "NewestInputEvent",
+        "InputEventId",
         "HandleInputStart",
         "AnimationStart",
         "PerformTraversalsStart",
@@ -40,7 +39,8 @@ const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> Fram
         "DequeueBufferDuration",
         "QueueBufferDuration",
         "GpuCompleted",
-        "SwapBuffersCompleted"
+        "SwapBuffersCompleted",
+        "DisplayPresentTime",
 };
 
 static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 20,

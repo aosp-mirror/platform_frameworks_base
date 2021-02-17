@@ -28,15 +28,14 @@
 namespace android {
 namespace uirenderer {
 
-#define UI_THREAD_FRAME_INFO_SIZE 11
+static constexpr size_t UI_THREAD_FRAME_INFO_SIZE = 10;
 
 enum class FrameInfoIndex {
     Flags = 0,
     FrameTimelineVsyncId,
     IntendedVsync,
     Vsync,
-    OldestInputEvent,
-    NewestInputEvent,
+    InputEventId,
     HandleInputStart,
     AnimationStart,
     PerformTraversalsStart,
@@ -56,13 +55,14 @@ enum class FrameInfoIndex {
 
     GpuCompleted,
     SwapBuffersCompleted,
+    DisplayPresentTime,
 
     // Must be the last value!
     // Also must be kept in sync with FrameMetrics.java#FRAME_STATS_COUNT
     NumIndexes
 };
 
-extern const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> FrameInfoNames;
+extern const std::array<const char*, static_cast<int>(FrameInfoIndex::NumIndexes)> FrameInfoNames;
 
 namespace FrameInfoFlags {
 enum {
