@@ -287,7 +287,7 @@ public class PeopleSpaceUtils {
         SharedPreferences.Editor widgetEditor = widgetSp.edit();
         widgetEditor.putString(PeopleSpaceUtils.PACKAGE_NAME, tile.getPackageName());
         widgetEditor.putString(PeopleSpaceUtils.SHORTCUT_ID, tile.getId());
-        int userId = UserHandle.getUserHandleForUid(tile.getUid()).getIdentifier();
+        int userId = getUserId(tile);
         widgetEditor.putInt(PeopleSpaceUtils.USER_ID, userId);
         widgetEditor.apply();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
@@ -634,7 +634,7 @@ public class PeopleSpaceUtils {
     private static Long getLastInteraction(IPeopleManager peopleManager,
             PeopleSpaceTile tile) {
         try {
-            int userId = UserHandle.getUserHandleForUid(tile.getUid()).getIdentifier();
+            int userId = getUserId(tile);
             String pkg = tile.getPackageName();
             return peopleManager.getLastInteraction(pkg, userId, tile.getId());
         } catch (Exception e) {
@@ -882,5 +882,15 @@ public class PeopleSpaceUtils {
      */
     public static String getKey(String shortcutId, String packageName, int userId) {
         return shortcutId + "/" + userId + "/" + packageName;
+    }
+
+    /** Returns the userId associated with a {@link PeopleSpaceTile} */
+    public static int getUserId(PeopleSpaceTile tile) {
+        return getUserHandle(tile).getIdentifier();
+    }
+
+    /** Returns the {@link UserHandle} associated with a {@link PeopleSpaceTile} */
+    public static UserHandle getUserHandle(PeopleSpaceTile tile) {
+        return UserHandle.getUserHandleForUid(tile.getUid());
     }
 }
