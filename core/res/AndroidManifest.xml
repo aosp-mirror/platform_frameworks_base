@@ -3070,6 +3070,11 @@
     <permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to set, update and remove the credential management app.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP"
+        android:protectionLevel="signature" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
