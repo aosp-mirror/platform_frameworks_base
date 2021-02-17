@@ -140,7 +140,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
     }
 
     @Override
-    public void onSetRequest(ProviderRequest request) {
+    protected void onSetRequest(ProviderRequest request) {
         mRequest = request;
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);

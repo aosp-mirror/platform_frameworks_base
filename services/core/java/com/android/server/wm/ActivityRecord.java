@@ -5378,6 +5378,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
+        mDisplayContent.handleActivitySizeCompatModeIfNeeded(this);
         mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
     }
 

@@ -396,6 +396,28 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
+     * Check if USB data signaling (except from charging functions) is disabled by the admin.
+     * Only a device owner or a profile owner on an organization-owned managed profile can disable
+     * USB data signaling.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if USB data signaling is not disabled.
+     */
+    public static EnforcedAdmin checkIfUsbDataSignalingIsDisabled(Context context, int userId) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        if (dpm == null || dpm.isUsbDataSignalingEnabledForUser(userId)) {
+            return null;
+        } else {
+            EnforcedAdmin admin = getProfileOrDeviceOwner(context, getUserHandleOf(userId));
+            int managedProfileId = getManagedProfileId(context, userId);
+            if (admin == null && managedProfileId != UserHandle.USER_NULL) {
+                admin = getProfileOrDeviceOwner(context, getUserHandleOf(managedProfileId));
+            }
+            return admin;
+        }
+    }
+
+    /**
      * Check if {@param packageName} is restricted by the profile or device owner from using
      * metered data.
      *

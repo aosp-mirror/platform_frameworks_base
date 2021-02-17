@@ -18,11 +18,11 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.Nullable;
 import android.hardware.biometrics.face.V1_0.FaceError;
+import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.biometrics.face.V1_0.OptionalBool;
 import android.hardware.biometrics.face.V1_0.OptionalUint64;
 import android.hardware.biometrics.face.V1_0.Status;
-import android.hardware.biometrics.face.V1_1.IBiometricsFace;
 import android.os.NativeHandle;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -129,15 +129,4 @@ public class TestHal extends IBiometricsFace.Stub {
         return 0;
     }
 
-    @Override
-    public int enrollRemotely(ArrayList<Byte> hat, int timeoutSec,
-            ArrayList<Integer> disabledFeatures) {
-        return 0;
-    }
-
-    @Override
-    public int enroll_1_1(ArrayList<Byte> hat, int timeoutSec, ArrayList<Integer> disabledFeatures,
-            NativeHandle nativeHandle) {
-        return 0;
-    }
 }

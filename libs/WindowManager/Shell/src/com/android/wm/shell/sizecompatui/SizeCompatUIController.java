@@ -18,134 +18,166 @@ package com.android.wm.shell.sizecompatui;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Rect;
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.SyncTransactionQueue;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
- * Shows a restart-activity button on Task when the foreground activity is in size compatibility
- * mode.
+ * Controls to show/update restart-activity buttons on Tasks based on whether the foreground
+ * activities are in size compatibility mode.
  */
 public class SizeCompatUIController implements DisplayController.OnDisplaysChangedListener,
         DisplayImeController.ImePositionProcessor {
-    private static final String TAG = "SizeCompatUI";
+    private static final String TAG = "SizeCompatUIController";
+
+    /** Whether the IME is shown on display id. */
+    private final Set<Integer> mDisplaysWithIme = new ArraySet<>(1);
 
     /** The showing buttons by task id. */
-    private final SparseArray<SizeCompatRestartButton> mActiveButtons = new SparseArray<>(1);
+    private final SparseArray<SizeCompatUILayout> mActiveLayouts = new SparseArray<>(0);
+
     /** Avoid creating display context frequently for non-default display. */
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
 
-    @VisibleForTesting
     private final Context mContext;
-    private final ShellExecutor mMainExecutor;
     private final DisplayController mDisplayController;
     private final DisplayImeController mImeController;
+    private final SyncTransactionQueue mSyncQueue;
 
     /** Only show once automatically in the process life. */
     private boolean mHasShownHint;
 
-    @VisibleForTesting
     public SizeCompatUIController(Context context,
             DisplayController displayController,
             DisplayImeController imeController,
-            ShellExecutor mainExecutor) {
+            SyncTransactionQueue syncQueue) {
         mContext = context;
-        mMainExecutor = mainExecutor;
         mDisplayController = displayController;
         mImeController = imeController;
+        mSyncQueue = syncQueue;
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
     }
 
-    public void onSizeCompatInfoChanged(int displayId, int taskId, @Nullable Rect taskBounds,
-            @Nullable IBinder sizeCompatActivity,
+    /**
+     * Called when the Task info changed. Creates and updates the restart button if there is an
+     * activity in size compat, or removes the restart button if there is no size compat activity.
+     *
+     * @param displayId display the task and activity are in.
+     * @param taskId task the activity is in.
+     * @param taskConfig task config to place the restart button with.
+     * @param sizeCompatActivity the size compat activity in the task. Can be {@code null} if the
+     *                           top activity in this Task is not in size compat.
+     * @param taskListener listener to handle the Task Surface placement.
+     */
+    public void onSizeCompatInfoChanged(int displayId, int taskId,
+            @Nullable Configuration taskConfig, @Nullable IBinder sizeCompatActivity,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-        // TODO Draw button on Task surface
-        if (taskBounds == null || sizeCompatActivity == null || taskListener == null) {
+        if (taskConfig == null || sizeCompatActivity == null || taskListener == null) {
             // Null token means the current foreground activity is not in size compatibility mode.
-            removeRestartButton(taskId);
+            removeLayout(taskId);
+        } else if (mActiveLayouts.contains(taskId)) {
+            // Button already exists, update the button layout.
+            updateLayout(taskId, taskConfig, sizeCompatActivity, taskListener);
         } else {
-            updateRestartButton(displayId, taskId, sizeCompatActivity);
+            // Create a new restart button.
+            createLayout(displayId, taskId, taskConfig, sizeCompatActivity, taskListener);
         }
     }
 
     @Override
     public void onDisplayRemoved(int displayId) {
         mDisplayContextCache.remove(displayId);
-        for (int i = 0; i < mActiveButtons.size(); i++) {
-            final int taskId = mActiveButtons.keyAt(i);
-            final SizeCompatRestartButton button = mActiveButtons.get(taskId);
-            if (button != null && button.mDisplayId == displayId) {
-                removeRestartButton(taskId);
-            }
+
+        // Remove all buttons on the removed display.
+        final List<Integer> toRemoveTaskIds = new ArrayList<>();
+        forAllLayoutsOnDisplay(displayId, layout -> toRemoveTaskIds.add(layout.getTaskId()));
+        for (int i = toRemoveTaskIds.size() - 1; i >= 0; i--) {
+            removeLayout(toRemoveTaskIds.get(i));
         }
     }
 
     @Override
-    public void onImeVisibilityChanged(int displayId, boolean isShowing) {
-        final int newVisibility = isShowing ? View.GONE : View.VISIBLE;
-        for (int i = 0; i < mActiveButtons.size(); i++) {
-            final int taskId = mActiveButtons.keyAt(i);
-            final SizeCompatRestartButton button = mActiveButtons.get(taskId);
-            if (button == null || button.mDisplayId != displayId) {
-                continue;
-            }
-
-            // Hide the button when input method is showing.
-            if (button.getVisibility() != newVisibility) {
-                button.setVisibility(newVisibility);
-            }
-        }
+    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
+        forAllLayoutsOnDisplay(displayId, layout -> layout.updateDisplayLayout(displayLayout));
     }
 
-    private void updateRestartButton(int displayId, int taskId, IBinder activityToken) {
-        SizeCompatRestartButton restartButton = mActiveButtons.get(taskId);
-        if (restartButton != null) {
-            restartButton.updateLastTargetActivity(activityToken);
-            return;
+    @Override
+    public void onImeVisibilityChanged(int displayId, boolean isShowing) {
+        if (isShowing) {
+            mDisplaysWithIme.add(displayId);
+        } else {
+            mDisplaysWithIme.remove(displayId);
         }
 
+        // Hide the button when input method is showing.
+        forAllLayoutsOnDisplay(displayId, layout -> layout.updateImeVisibility(isShowing));
+    }
+
+    private boolean isImeShowingOnDisplay(int displayId) {
+        return mDisplaysWithIme.contains(displayId);
+    }
+
+    private void createLayout(int displayId, int taskId, Configuration taskConfig,
+            IBinder activityToken, ShellTaskOrganizer.TaskListener taskListener) {
         final Context context = getOrCreateDisplayContext(displayId);
         if (context == null) {
-            Log.i(TAG, "Cannot get context for display " + displayId);
+            Log.e(TAG, "Cannot get context for display " + displayId);
             return;
         }
 
-        restartButton = createRestartButton(context, displayId);
-        restartButton.updateLastTargetActivity(activityToken);
-        if (restartButton.show()) {
-            mActiveButtons.append(taskId, restartButton);
-        } else {
-            onDisplayRemoved(displayId);
-        }
+        final SizeCompatUILayout layout = createLayout(context, displayId, taskId, taskConfig,
+                activityToken, taskListener);
+        mActiveLayouts.put(taskId, layout);
+        layout.createSizeCompatButton(isImeShowingOnDisplay(displayId));
     }
 
     @VisibleForTesting
-    SizeCompatRestartButton createRestartButton(Context context, int displayId) {
-        final SizeCompatRestartButton button = new SizeCompatRestartButton(context, displayId,
+    SizeCompatUILayout createLayout(Context context, int displayId, int taskId,
+            Configuration taskConfig, IBinder activityToken,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        final SizeCompatUILayout layout = new SizeCompatUILayout(mSyncQueue, context, taskConfig,
+                taskId, activityToken, taskListener, mDisplayController.getDisplayLayout(displayId),
                 mHasShownHint);
         // Only show hint for the first time.
         mHasShownHint = true;
-        return button;
+        return layout;
     }
 
-    private void removeRestartButton(int taskId) {
-        final SizeCompatRestartButton button = mActiveButtons.get(taskId);
-        if (button != null) {
-            button.remove();
-            mActiveButtons.remove(taskId);
+    private void updateLayout(int taskId, Configuration taskConfig,
+            IBinder sizeCompatActivity,
+            ShellTaskOrganizer.TaskListener taskListener) {
+        final SizeCompatUILayout layout = mActiveLayouts.get(taskId);
+        if (layout == null) {
+            return;
+        }
+        layout.updateSizeCompatInfo(taskConfig, sizeCompatActivity, taskListener,
+                isImeShowingOnDisplay(layout.getDisplayId()));
+    }
+
+    private void removeLayout(int taskId) {
+        final SizeCompatUILayout layout = mActiveLayouts.get(taskId);
+        if (layout != null) {
+            layout.release();
+            mActiveLayouts.remove(taskId);
         }
     }
 
@@ -166,5 +198,15 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
             }
         }
         return context;
+    }
+
+    private void forAllLayoutsOnDisplay(int displayId, Consumer<SizeCompatUILayout> callback) {
+        for (int i = 0; i < mActiveLayouts.size(); i++) {
+            final int taskId = mActiveLayouts.keyAt(i);
+            final SizeCompatUILayout layout = mActiveLayouts.get(taskId);
+            if (layout != null && layout.getDisplayId() == displayId) {
+                callback.accept(layout);
+            }
+        }
     }
 }

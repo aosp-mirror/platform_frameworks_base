@@ -5,15 +5,22 @@ package com.android.server.compat.overrides {
     ctor public ChangeOverrides();
     method public long getChangeId();
     method public com.android.server.compat.overrides.ChangeOverrides.Deferred getDeferred();
+    method public com.android.server.compat.overrides.ChangeOverrides.Raw getRaw();
     method public com.android.server.compat.overrides.ChangeOverrides.Validated getValidated();
     method public void setChangeId(long);
     method public void setDeferred(com.android.server.compat.overrides.ChangeOverrides.Deferred);
+    method public void setRaw(com.android.server.compat.overrides.ChangeOverrides.Raw);
     method public void setValidated(com.android.server.compat.overrides.ChangeOverrides.Validated);
   }
 
   public static class ChangeOverrides.Deferred {
     ctor public ChangeOverrides.Deferred();
     method public java.util.List<com.android.server.compat.overrides.OverrideValue> getOverrideValue();
+  }
+
+  public static class ChangeOverrides.Raw {
+    ctor public ChangeOverrides.Raw();
+    method public java.util.List<com.android.server.compat.overrides.RawOverrideValue> getRawOverrideValue();
   }
 
   public static class ChangeOverrides.Validated {
@@ -32,6 +39,18 @@ package com.android.server.compat.overrides {
   public class Overrides {
     ctor public Overrides();
     method public java.util.List<com.android.server.compat.overrides.ChangeOverrides> getChangeOverrides();
+  }
+
+  public class RawOverrideValue {
+    ctor public RawOverrideValue();
+    method public boolean getEnabled();
+    method public long getMaxVersionCode();
+    method public long getMinVersionCode();
+    method public String getPackageName();
+    method public void setEnabled(boolean);
+    method public void setMaxVersionCode(long);
+    method public void setMinVersionCode(long);
+    method public void setPackageName(String);
   }
 
   public class XmlParser {

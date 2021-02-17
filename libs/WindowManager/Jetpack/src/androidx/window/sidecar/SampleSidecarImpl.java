@@ -84,7 +84,7 @@ class SampleSidecarImpl extends StubSidecar implements
 
     private List<SidecarDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
         List<SidecarDisplayFeature> features = new ArrayList<SidecarDisplayFeature>();
-        int displayId = activity.getDisplayId();
+        int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
             return features;

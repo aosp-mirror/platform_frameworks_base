@@ -77,10 +77,14 @@ public interface AppSearchSessionShim extends Closeable {
      *       android.app.appsearch.exceptions.AppSearchException} with the {@link
      *       AppSearchResult#RESULT_INVALID_SCHEMA} error code, all documents which are not
      *       compatible with the new schema will be deleted and the incompatible schema will be
-     *       applied.
+     *       applied. Incompatible types and deleted types will be set into {@link
+     *       SetSchemaResponse#getIncompatibleTypes()} and {@link
+     *       SetSchemaResponse#getDeletedTypes()}, respectively.
      *   <li>Add a {@link android.app.appsearch.AppSearchSchema.Migrator} for each incompatible type
      *       and make no deletion. The migrator will migrate documents from it's old schema version
-     *       to the new version. See the migration section below.
+     *       to the new version. Migrated types will be set into both {@link
+     *       SetSchemaResponse#getIncompatibleTypes()} and {@link
+     *       SetSchemaResponse#getMigratedTypes()}. See the migration section below.
      * </ul>
      *
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
@@ -109,10 +113,8 @@ public interface AppSearchSessionShim extends Closeable {
      * backwards-compatible, and stored documents won't have any observable changes.
      *
      * @param request The schema update request.
-     * @return The pending {@link SetSchemaResponse} of performing this operation. Success if the
-     *     the schema has been set and any migrations has been done. Otherwise, the failure {@link
-     *     android.app.appsearch.SetSchemaResponse.MigrationFailure} indicates which document is
-     *     fail to be migrated.
+     * @return A {@link ListenableFuture} with exception if we hit any error. Or the pending {@link
+     *     SetSchemaResponse} of performing this operation, if the schema has been successfully set.
      * @see android.app.appsearch.AppSearchSchema.Migrator
      * @see android.app.appsearch.AppSearchMigrationHelper.Transformer
      */
@@ -144,57 +146,79 @@ public interface AppSearchSessionShim extends Closeable {
     ListenableFuture<AppSearchBatchResult<String, Void>> put(@NonNull PutDocumentsRequest request);
 
     /**
-     * Retrieves {@link GenericDocument}s by URI.
+     * Gets {@link GenericDocument} objects by URIs and namespace from the {@link
+     * AppSearchSessionShim} database.
      *
-     * @param request {@link GetByUriRequest} containing URIs to be retrieved.
-     * @return The pending result of performing this operation. The keys of the returned {@link
-     *     AppSearchBatchResult} are the input URIs. The values are the returned {@link
-     *     GenericDocument}s on success, or a failed {@link AppSearchResult} otherwise. URIs that
-     *     are not found will return a failed {@link AppSearchResult} with a result code of {@link
-     *     AppSearchResult#RESULT_NOT_FOUND}.
+     * @param request a request containing URIs and namespace to get documents for.
+     * @return A {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
+     *     keys of the {@link AppSearchBatchResult} represent the input URIs from the {@link
+     *     GetByUriRequest} object. The values are either the corresponding {@link GenericDocument}
+     *     object for the URI on success, or an {@link AppSearchResult} object on failure. For
+     *     example, if a URI is not found, the value for that URI will be set to an {@link
+     *     AppSearchResult} object with result code: {@link AppSearchResult#RESULT_NOT_FOUND}.
      */
     @NonNull
     ListenableFuture<AppSearchBatchResult<String, GenericDocument>> getByUri(
             @NonNull GetByUriRequest request);
 
     /**
-     * Searches for documents based on a given query string.
+     * Retrieves documents from the open {@link AppSearchSessionShim} that match a given query
+     * string and type of search provided.
      *
-     * <p>Currently we support following features in the raw query format:
+     * <p>Query strings can be empty, contain one term with no operators, or contain multiple terms
+     * and operators.
+     *
+     * <p>For query strings that are empty, all documents that match the {@link SearchSpec} will be
+     * returned.
+     *
+     * <p>For query strings with a single term and no operators, documents that match the provided
+     * query string and {@link SearchSpec} will be returned.
+     *
+     * <p>The following operators are supported:
      *
      * <ul>
-     *   <li>AND
-     *       <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and ‘cat’”).
-     *       Example: hello world matches documents that have both ‘hello’ and ‘world’
+     *   <li>AND (implicit)
+     *       <p>AND is an operator that matches documents that contain <i>all</i> provided terms.
+     *       <p><b>NOTE:</b> A space between terms is treated as an "AND" operator. Explicitly
+     *       including "AND" in a query string will treat "AND" as a term, returning documents that
+     *       also contain "AND".
+     *       <p>Example: "apple AND banana" matches documents that contain the terms "apple", "and",
+     *       "banana".
+     *       <p>Example: "apple banana" matches documents that contain both "apple" and "banana".
+     *       <p>Example: "apple banana cherry" matches documents that contain "apple", "banana", and
+     *       "cherry".
      *   <li>OR
-     *       <p>OR joins (e.g. “match documents that have either the term ‘dog’ or ‘cat’”). Example:
-     *       dog OR puppy
-     *   <li>Exclusion
-     *       <p>Exclude a term (e.g. “match documents that do not have the term ‘dog’”). Example:
-     *       -dog excludes the term ‘dog’
-     *   <li>Grouping terms
-     *       <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
-     *       “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
-     *       Example: (dog puppy) (cat kitten) two one group containing two terms.
-     *   <li>Property restricts
-     *       <p>Specifies which properties of a document to specifically match terms in (e.g. “match
-     *       documents where the ‘subject’ property contains ‘important’”). Example:
-     *       subject:important matches documents with the term ‘important’ in the ‘subject’ property
-     *   <li>Schema type restricts
-     *       <p>This is similar to property restricts, but allows for restricts on top-level
-     *       document fields, such as schema_type. Clients should be able to limit their query to
-     *       documents of a certain schema_type (e.g. “match documents that are of the ‘Email’
-     *       schema_type”). Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will
-     *       match documents that contain the query term ‘dog’ and are of either the ‘Email’ schema
-     *       type or the ‘Video’ schema type.
+     *       <p>OR is an operator that matches documents that contain <i>any</i> provided term.
+     *       <p>Example: "apple OR banana" matches documents that contain either "apple" or
+     *       "banana".
+     *       <p>Example: "apple OR banana OR cherry" matches documents that contain any of "apple",
+     *       "banana", or "cherry".
+     *   <li>Exclusion (-)
+     *       <p>Exclusion (-) is an operator that matches documents that <i>do not</i> contain the
+     *       provided term.
+     *       <p>Example: "-apple" matches documents that do not contain "apple".
+     *   <li>Grouped Terms
+     *       <p>For queries that require multiple operators and terms, terms can be grouped into
+     *       subqueries. Subqueries are contained within an open "(" and close ")" parenthesis.
+     *       <p>Example: "(donut OR bagel) (coffee OR tea)" matches documents that contain either
+     *       "donut" or "bagel" and either "coffee" or "tea".
+     *   <li>Property Restricts
+     *       <p>For queries that require a term to match a specific {@link AppSearchSchema} property
+     *       of a document, a ":" must be included between the property name and the term.
+     *       <p>Example: "subject:important" matches documents that contain the term "important" in
+     *       the "subject" property.
      * </ul>
+     *
+     * <p>Additional search specifications, such as filtering by {@link AppSearchSchema} type or
+     * adding projection, can be set by calling the corresponding {@link SearchSpec.Builder} setter.
      *
      * <p>This method is lightweight. The heavy work will be done in {@link
      * SearchResultsShim#getNextPage()}.
      *
-     * @param queryExpression Query String to search.
-     * @param searchSpec Spec for setting filters, raw query etc.
-     * @return The search result of performing this operation.
+     * @param queryExpression query string to search.
+     * @param searchSpec spec for setting document filters, adding projection, setting term match
+     *     type, etc.
+     * @return a {@link SearchResultsShim} object for retrieved matched documents.
      */
     @NonNull
     SearchResultsShim search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
@@ -219,13 +243,22 @@ public interface AppSearchSessionShim extends Closeable {
     ListenableFuture<Void> reportUsage(@NonNull ReportUsageRequest request);
 
     /**
-     * Removes {@link GenericDocument}s from the index by URI.
+     * Removes {@link GenericDocument} objects by URIs and namespace from the {@link
+     * AppSearchSessionShim} database.
      *
-     * @param request Request containing URIs to be removed.
-     * @return The pending result of performing this operation. The keys of the returned {@link
-     *     AppSearchBatchResult} are the input URIs. The values are {@code null} on success, or a
-     *     failed {@link AppSearchResult} otherwise. URIs that are not found will return a failed
-     *     {@link AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
+     * <p>Removed documents will no longer be surfaced by {@link #search} or {@link #getByUri}
+     * calls.
+     *
+     * <p><b>NOTE:</b>By default, documents are removed via a soft delete operation. Once the
+     * document crosses the count threshold or byte usage threshold, the documents will be removed
+     * from disk.
+     *
+     * @param request {@link RemoveByUriRequest} with URIs and namespace to remove from the index.
+     * @return a {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
+     *     keys of the {@link AppSearchBatchResult} represent the input URIs from the {@link
+     *     RemoveByUriRequest} object. The values are either {@code null} on success, or a failed
+     *     {@link AppSearchResult} otherwise. URIs that are not found will return a failed {@link
+     *     AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
      */
     @NonNull
     ListenableFuture<AppSearchBatchResult<String, Void>> remove(

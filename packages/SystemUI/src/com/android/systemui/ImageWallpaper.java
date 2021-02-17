@@ -16,7 +16,10 @@
 
 package com.android.systemui;
 
+import android.app.WallpaperColors;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -26,13 +29,16 @@ import android.util.Log;
 import android.util.Size;
 import android.view.SurfaceHolder;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.glwallpaper.EglHelper;
-import com.android.systemui.glwallpaper.GLWallpaperRenderer;
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -45,8 +51,13 @@ public class ImageWallpaper extends WallpaperService {
     // We delayed destroy render context that subsequent render requests have chance to cancel it.
     // This is to avoid destroying then recreating render context in a very short time.
     private static final int DELAY_FINISH_RENDERING = 1000;
+    private static final @android.annotation.NonNull RectF LOCAL_COLOR_BOUNDS =
+            new RectF(0, 0, 1, 1);
     private static final boolean DEBUG = false;
+    private ArrayList<RectF> mLocalColorsToAdd = new ArrayList<>();
     private HandlerThread mWorker;
+    // scaled down version
+    private Bitmap mMiniBitmap;
 
     @Inject
     public ImageWallpaper() {
@@ -70,6 +81,7 @@ public class ImageWallpaper extends WallpaperService {
         super.onDestroy();
         mWorker.quitSafely();
         mWorker = null;
+        mMiniBitmap = null;
     }
 
     class GLEngine extends Engine {
@@ -80,7 +92,7 @@ public class ImageWallpaper extends WallpaperService {
         @VisibleForTesting
         static final int MIN_SURFACE_HEIGHT = 64;
 
-        private GLWallpaperRenderer mRenderer;
+        private ImageWallpaperRenderer mRenderer;
         private EglHelper mEglHelper;
         private final Runnable mFinishRenderingTask = this::finishRendering;
         private boolean mNeedRedraw;
@@ -101,6 +113,12 @@ public class ImageWallpaper extends WallpaperService {
             setFixedSizeAllowed(true);
             setOffsetNotificationsEnabled(false);
             updateSurfaceSize();
+            mMiniBitmap = null;
+            if (mWorker == null || mWorker.getThreadHandler() == null) {
+                updateMiniBitmap();
+            } else {
+                mWorker.getThreadHandler().post(this::updateMiniBitmap);
+            }
         }
 
         EglHelper getEglHelperInstance() {
@@ -109,6 +127,20 @@ public class ImageWallpaper extends WallpaperService {
 
         ImageWallpaperRenderer getRendererInstance() {
             return new ImageWallpaperRenderer(getDisplayContext());
+        }
+
+        private void updateMiniBitmap() {
+            mRenderer.useBitmap(b -> {
+                int size = Math.min(b.getWidth(), b.getHeight());
+                float scale = 1.0f;
+                if (size > MIN_SURFACE_WIDTH) {
+                    scale = (float) MIN_SURFACE_WIDTH / (float) size;
+                }
+                mMiniBitmap = Bitmap.createScaledBitmap(b, Math.round(scale * b.getWidth()),
+                        Math.round(scale * b.getHeight()), false);
+                computeAndNotifyLocalColors(mLocalColorsToAdd, mMiniBitmap);
+                mLocalColorsToAdd.clear();
+            });
         }
 
         private void updateSurfaceSize() {
@@ -126,12 +158,68 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDestroy() {
+            mMiniBitmap = null;
             mWorker.getThreadHandler().post(() -> {
                 mRenderer.finish();
                 mRenderer = null;
                 mEglHelper.finish();
                 mEglHelper = null;
             });
+        }
+
+
+
+        @Override
+        public boolean supportsLocalColorExtraction() {
+            return true;
+        }
+
+        @Override
+        public void addLocalColorsAreas(@NonNull List<RectF> regions) {
+            mWorker.getThreadHandler().post(() -> {
+                Bitmap bitmap = mMiniBitmap;
+                if (bitmap == null) {
+                    mLocalColorsToAdd.addAll(regions);
+                } else {
+                    computeAndNotifyLocalColors(regions, bitmap);
+                }
+            });
+        }
+
+        private void computeAndNotifyLocalColors(@NonNull List<RectF> regions, Bitmap b) {
+            List<WallpaperColors> colors = getLocalWallpaperColors(regions, b);
+            try {
+                notifyLocalColorsChanged(regions, colors);
+            } catch (RuntimeException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public void removeLocalColorsAreas(@NonNull List<RectF> regions) {
+            // No-OP
+        }
+
+        private List<WallpaperColors> getLocalWallpaperColors(@NonNull List<RectF> areas,
+                Bitmap b) {
+            List<WallpaperColors> colors = new ArrayList<>(areas.size());
+            for (int i = 0; i < areas.size(); i++) {
+                RectF area = areas.get(i);
+                if (area == null || !LOCAL_COLOR_BOUNDS.contains(area)) {
+                    colors.add(null);
+                    continue;
+                }
+                Rect subImage = new Rect(
+                        Math.round(area.left * b.getWidth()),
+                        Math.round(area.top * b.getHeight()),
+                        Math.round(area.right * b.getWidth()),
+                        Math.round(area.bottom * b.getHeight()));
+                Bitmap colorImg = Bitmap.createBitmap(b,
+                        subImage.left, subImage.top, subImage.width(), subImage.height());
+                WallpaperColors color = WallpaperColors.fromBitmap(colorImg);
+                colors.add(color);
+            }
+            return colors;
         }
 
         @Override

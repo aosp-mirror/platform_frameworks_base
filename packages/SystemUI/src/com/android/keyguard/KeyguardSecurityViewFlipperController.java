@@ -44,15 +44,18 @@ public class KeyguardSecurityViewFlipperController
     private final List<KeyguardInputViewController<KeyguardInputView>> mChildren =
             new ArrayList<>();
     private final LayoutInflater mLayoutInflater;
+    private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
     private final Factory mKeyguardSecurityViewControllerFactory;
 
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
             LayoutInflater layoutInflater,
-            KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory) {
+            KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory,
+            EmergencyButtonController.Factory emergencyButtonControllerFactory) {
         super(view);
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
         mLayoutInflater = layoutInflater;
+        mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
     }
 
     @Override
@@ -111,7 +114,8 @@ public class KeyguardSecurityViewFlipperController
 
         if (childController == null) {
             childController = new NullKeyguardInputViewController(
-                    securityMode, keyguardSecurityCallback);
+                    securityMode, keyguardSecurityCallback,
+                    mEmergencyButtonControllerFactory.create(null));
         }
 
         return childController;
@@ -140,8 +144,9 @@ public class KeyguardSecurityViewFlipperController
     private static class NullKeyguardInputViewController
             extends KeyguardInputViewController<KeyguardInputView> {
         protected NullKeyguardInputViewController(SecurityMode securityMode,
-                KeyguardSecurityCallback keyguardSecurityCallback) {
-            super(null, securityMode, keyguardSecurityCallback);
+                KeyguardSecurityCallback keyguardSecurityCallback,
+                EmergencyButtonController emergencyButtonController) {
+            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController);
         }
 
         @Override

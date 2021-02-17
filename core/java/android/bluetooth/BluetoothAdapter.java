@@ -1654,7 +1654,7 @@ public final class BluetoothAdapter {
         mContext = context;
     }
 
-    private String getOpPackageName() {
+    String getOpPackageName() {
         // Workaround for legacy API for getting a BluetoothAdapter not
         // passing a context
         if (mContext != null) {

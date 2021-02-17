@@ -25,6 +25,8 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
+import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 
 import android.animation.Animator;
@@ -250,6 +252,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
     private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
+    private ControlsComponent mControlsComponent;
     private Optional<ControlsController> mControlsControllerOptional;
     private final RingerModeTracker mRingerModeTracker;
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
@@ -338,6 +341,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mControlsComponent = controlsComponent;
         mControlsUiControllerOptional = controlsComponent.getControlsUiController();
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
@@ -387,7 +391,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     if (mDialog.mWalletViewController != null) {
                         mDialog.mWalletViewController.onDeviceLockStateChanged(!unlocked);
                     }
-                    if (!mDialog.isShowingControls() && shouldShowControls()) {
+                    if (!mDialog.isShowingControls()
+                            && mControlsComponent.getVisibility() == AVAILABLE) {
                         mDialog.showControls(mControlsUiControllerOptional.get());
                     }
                     if (unlocked) {
@@ -397,14 +402,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         });
 
-        if (controlsComponent.getControlsListingController().isPresent()) {
-            controlsComponent.getControlsListingController().get()
+        if (mControlsComponent.getControlsListingController().isPresent()) {
+            mControlsComponent.getControlsListingController().get()
                     .addCallback(list -> {
                         mControlsServiceInfos = list;
                         // This callback may occur after the dialog has been shown. If so, add
                         // controls into the already visible space or show the lock msg if needed.
                         if (mDialog != null) {
-                            if (!mDialog.isShowingControls() && shouldShowControls()) {
+                            if (!mDialog.isShowingControls()
+                                    && mControlsComponent.getVisibility() == AVAILABLE) {
                                 mDialog.showControls(mControlsUiControllerOptional.get());
                             } else if (shouldShowLockMessage(mDialog)) {
                                 mDialog.showLockMessage();
@@ -704,7 +710,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mDepthController.setShowingHomeControls(true);
         ControlsUiController uiController = null;
-        if (mControlsUiControllerOptional.isPresent() && shouldShowControls()) {
+        if (mControlsComponent.getVisibility() == AVAILABLE) {
             uiController = mControlsUiControllerOptional.get();
         }
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mOverflowAdapter,
@@ -2687,26 +2693,24 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return isPanelDebugModeEnabled(context);
     }
 
-    private boolean shouldShowControls() {
-        boolean showOnLockScreen = mShowLockScreenCardsAndControls && mLockPatternUtils
-                .getStrongAuthForUser(getCurrentUser().id) != STRONG_AUTH_REQUIRED_AFTER_BOOT;
-        return controlsAvailable()
-                && (mKeyguardStateController.isUnlocked() || showOnLockScreen);
-    }
-
     private boolean controlsAvailable() {
         return mDeviceProvisioned
-                && mControlsUiControllerOptional.isPresent()
-                && mControlsUiControllerOptional.get().getAvailable()
+                && mControlsComponent.isEnabled()
                 && !mControlsServiceInfos.isEmpty();
     }
 
     private boolean shouldShowLockMessage(ActionsDialog dialog) {
+        return mControlsComponent.getVisibility() == AVAILABLE_AFTER_UNLOCK
+                || isWalletAvailableAfterUnlock(dialog);
+    }
+
+    // Temporary while we move items out of the power menu
+    private boolean isWalletAvailableAfterUnlock(ActionsDialog dialog) {
         boolean isLockedAfterBoot = mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
                 == STRONG_AUTH_REQUIRED_AFTER_BOOT;
         return !mKeyguardStateController.isUnlocked()
                 && (!mShowLockScreenCardsAndControls || isLockedAfterBoot)
-                && (controlsAvailable() || dialog.isWalletViewAvailable());
+                && dialog.isWalletViewAvailable();
     }
 
     private void onPowerMenuLockScreenSettingsChanged() {

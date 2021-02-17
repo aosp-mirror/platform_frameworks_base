@@ -5138,10 +5138,15 @@ public final class PowerManagerService extends SystemService
             // Get current time before acquiring the lock so that the calculated end time is as
             // accurate as possible.
             final long nowElapsed = SystemClock.elapsedRealtime();
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.BATTERY_PREDICTION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, "setBatteryDischargePrediction");
+            }
 
             final long timeRemainingMs = timeRemaining.getDuration().toMillis();
-                // A non-positive number means the battery should be dead right now...
+            // A non-positive number means the battery should be dead right now...
             Preconditions.checkArgumentPositive(timeRemainingMs,
                     "Given time remaining is not positive: " + timeRemainingMs);
 

@@ -352,10 +352,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     return;
                 }
 
-                VibrationThread vibThread = new VibrationThread(vib, mVibrators, mWakeLock,
-                        mBatteryStatsService, mVibrationCallbacks);
-
-                ignoreStatus = shouldIgnoreVibrationForCurrentLocked(vibThread);
+                ignoreStatus = shouldIgnoreVibrationForCurrentLocked(vib);
                 if (ignoreStatus != null) {
                     endVibrationLocked(vib, ignoreStatus);
                     return;
@@ -366,7 +363,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     if (mCurrentVibration != null) {
                         mCurrentVibration.cancel();
                     }
-                    Vibration.Status status = startVibrationLocked(vibThread);
+                    Vibration.Status status = startVibrationLocked(vib);
                     if (status != Vibration.Status.RUNNING) {
                         endVibrationLocked(vib, status);
                     }
@@ -491,18 +488,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @GuardedBy("mLock")
-    private Vibration.Status startVibrationLocked(VibrationThread vibThread) {
+    private Vibration.Status startVibrationLocked(Vibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
-            Vibration vib = vibThread.getVibration();
             vib.updateEffect(mVibrationScaler.scale(vib.getEffect(), vib.attrs.getUsage()));
-
             boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
                     vib.uid, vib.opPkg, vib.getEffect(), vib.reason, vib.attrs);
-
             if (inputDevicesAvailable) {
                 return Vibration.Status.FORWARDED_TO_INPUT_DEVICES;
             }
+
+            VibrationThread vibThread = new VibrationThread(vib, mVibrators, mWakeLock,
+                    mBatteryStatsService, mVibrationCallbacks);
 
             if (mCurrentVibration == null) {
                 return startVibrationThreadLocked(vibThread);
@@ -595,8 +592,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @GuardedBy("mLock")
     @Nullable
-    private Vibration.Status shouldIgnoreVibrationForCurrentLocked(VibrationThread vibThread) {
-        if (vibThread.getVibration().isRepeating()) {
+    private Vibration.Status shouldIgnoreVibrationForCurrentLocked(Vibration vibration) {
+        if (vibration.isRepeating()) {
             // Repeating vibrations always take precedence.
             return null;
         }

@@ -168,6 +168,6 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     }
 
     protected DetailAdapter getUserDetailAdapter() {
-        return mUserSwitcherController.userDetailAdapter;
+        return mUserSwitcherController.mUserDetailAdapter;
     }
 }

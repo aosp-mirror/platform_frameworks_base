@@ -482,8 +482,7 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testHandleActivitySizeCompatModeChanged() {
         setUpDisplaySizeWithApp(1000, 2000);
         doReturn(true).when(mTask).isOrganized();
-        ActivityRecord activity = mActivity;
-        activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        mActivity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
         prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
         assertFitted();
 
@@ -499,12 +498,12 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Make the activity resizable again by restarting it
         clearInvocations(mTask);
-        activity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
-        activity.mVisibleRequested = true;
-        activity.restartProcessIfVisible();
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+        mActivity.mVisibleRequested = true;
+        mActivity.restartProcessIfVisible();
         // The full lifecycle isn't hooked up so manually set state to resumed
-        activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
-        mTask.mDisplayContent.handleActivitySizeCompatModeIfNeeded(activity);
+        mActivity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        mTask.mDisplayContent.handleActivitySizeCompatModeIfNeeded(mActivity);
 
         // Expect null token when switching to non-size-compat mode activity.
         verify(mTask).onSizeCompatActivityChanged();
@@ -512,6 +511,46 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertEquals(mActivity.appToken, taskInfo.topActivityToken);
         assertFalse(taskInfo.topActivityInSizeCompat);
+    }
+
+    @Test
+    public void testHandleActivitySizeCompatModeChangedOnDifferentTask() {
+        setUpDisplaySizeWithApp(1000, 2000);
+        doReturn(true).when(mTask).isOrganized();
+        mActivity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+        assertFitted();
+
+        // Resize the display so that the activity exercises size-compat mode.
+        resizeDisplay(mTask.mDisplayContent, 1000, 2500);
+
+        // Expect the exact token when the activity is in size compatibility mode.
+        verify(mTask).onSizeCompatActivityChanged();
+        ActivityManager.RunningTaskInfo taskInfo = mTask.getTaskInfo();
+
+        assertEquals(mActivity.appToken, taskInfo.topActivityToken);
+        assertTrue(taskInfo.topActivityInSizeCompat);
+
+        // Create another Task to hold another size compat activity.
+        clearInvocations(mTask);
+        final Task secondTask = new TaskBuilder(mSupervisor).setDisplay(mTask.getDisplayContent())
+                .setCreateActivity(true).build();
+        final ActivityRecord secondActivity = secondTask.getTopNonFinishingActivity();
+        doReturn(true).when(secondTask).isOrganized();
+        secondActivity.setState(Task.ActivityState.RESUMED,
+                "testHandleActivitySizeCompatModeChanged");
+        prepareUnresizable(secondActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Resize the display so that the activity exercises size-compat mode.
+        resizeDisplay(mTask.mDisplayContent, 1000, 3000);
+
+        // Expect the exact token when the activity is in size compatibility mode.
+        verify(secondTask).onSizeCompatActivityChanged();
+        verify(mTask, never()).onSizeCompatActivityChanged();
+        taskInfo = secondTask.getTaskInfo();
+
+        assertEquals(secondActivity.appToken, taskInfo.topActivityToken);
+        assertTrue(taskInfo.topActivityInSizeCompat);
     }
 
     @Test

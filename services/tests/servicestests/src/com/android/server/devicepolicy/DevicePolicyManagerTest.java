@@ -89,6 +89,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
+import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -4329,6 +4330,68 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testSetNetworkLoggingEnabled_asPo() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        mContext.applicationInfo = new ApplicationInfo();
+        mContext.packageName = admin1.getPackageName();
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.S);
+        when(getServices().iipConnectivityMetrics
+                .addNetdEventCallback(anyInt(), anyObject())).thenReturn(true);
+
+        // Check no logs have been retrieved so far.
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Enable network logging
+        dpm.setNetworkLoggingEnabled(admin1, true);
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Retrieve the network logs and verify timestamp has been updated.
+        final long beforeRetrieval = System.currentTimeMillis();
+
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+
+        final long networkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
+        final long afterRetrieval = System.currentTimeMillis();
+        assertThat(networkLogRetrievalTime >= beforeRetrieval).isTrue();
+        assertThat(networkLogRetrievalTime <= afterRetrieval).isTrue();
+    }
+
+    @Test
+    public void testSetNetworkLoggingEnabled_asPoOfOrgOwnedDevice() throws Exception {
+        // Setup profile owner on organization-owned device
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        mContext.packageName = admin1.getPackageName();
+        mContext.applicationInfo = new ApplicationInfo();
+        when(getServices().iipConnectivityMetrics
+                .addNetdEventCallback(anyInt(), anyObject())).thenReturn(true);
+
+        // Check no logs have been retrieved so far.
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Enable network logging
+        dpm.setNetworkLoggingEnabled(admin1, true);
+        assertThat(dpm.getLastNetworkLogRetrievalTime()).isEqualTo(-1);
+
+        // Retrieve the network logs and verify timestamp has been updated.
+        final long beforeRetrieval = System.currentTimeMillis();
+
+        dpm.retrieveNetworkLogs(admin1, 0 /* batchToken */);
+
+        final long networkLogRetrievalTime = dpm.getLastNetworkLogRetrievalTime();
+        final long afterRetrieval = System.currentTimeMillis();
+        assertThat(networkLogRetrievalTime >= beforeRetrieval).isTrue();
+        assertThat(networkLogRetrievalTime <= afterRetrieval).isTrue();
+    }
+
+    @Test
     public void testGetBindDeviceAdminTargetUsers() throws Exception {
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
 
@@ -6938,6 +7001,82 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThrows(IllegalStateException.class,
                 () -> parentDpm.setPasswordQuality(admin1,
                         DevicePolicyManager.PASSWORD_QUALITY_COMPLEX));
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_noDeviceOwnerOrPoOfOrgOwnedDevice() {
+        assertThrows(SecurityException.class,
+                () -> dpm.setUsbDataSignalingEnabled(true));
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+        when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isTrue();
+
+        dpm.setUsbDataSignalingEnabled(false);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isFalse();
+    }
+
+    @Test
+    public void testIsUsbDataSignalingEnabledForUser_systemUser() throws Exception {
+        when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+        setDeviceOwner();
+        dpm.setUsbDataSignalingEnabled(false);
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+
+        assertThat(dpm.isUsbDataSignalingEnabledForUser(UserHandle.myUserId())).isFalse();
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_asPoOfOrgOwnedDevice() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isTrue();
+
+        dpm.setUsbDataSignalingEnabled(false);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isFalse();
+    }
+
+    @Test
+    public void testCanUsbDataSignalingBeDisabled_canBeDisabled() throws Exception {
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+
+        assertThat(dpm.canUsbDataSignalingBeDisabled()).isTrue();
+    }
+
+    @Test
+    public void testCanUsbDataSignalingBeDisabled_cannotBeDisabled() throws Exception {
+        setDeviceOwner();
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_2);
+
+        assertThat(dpm.canUsbDataSignalingBeDisabled()).isFalse();
+        assertThrows(IllegalStateException.class,
+                () -> dpm.setUsbDataSignalingEnabled(true));
+    }
+
+    @Test
+    public void testSetUsbDataSignalingEnabled_noChangeToActiveAdmin()
+            throws Exception {
+        setDeviceOwner();
+        when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
+        boolean enabled = dpm.isUsbDataSignalingEnabled();
+
+        dpm.setUsbDataSignalingEnabled(true);
+
+        assertThat(dpm.isUsbDataSignalingEnabled()).isEqualTo(enabled);
     }
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {

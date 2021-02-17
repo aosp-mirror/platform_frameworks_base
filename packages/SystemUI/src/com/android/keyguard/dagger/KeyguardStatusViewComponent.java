@@ -25,6 +25,8 @@ import dagger.Subcomponent;
 
 /**
  * Subcomponent for helping work with KeyguardStatusView and its children.
+ *
+ * TODO: unify this with {@link KeyguardStatusBarViewComponent}
  */
 @Subcomponent(modules = {KeyguardStatusViewModule.class})
 @KeyguardStatusViewScope

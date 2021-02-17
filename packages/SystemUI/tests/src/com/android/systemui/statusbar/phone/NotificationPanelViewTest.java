@@ -48,6 +48,8 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -58,6 +60,8 @@ import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
+import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.R;
@@ -70,6 +74,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -194,13 +199,23 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     @Mock
-    private KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponent;
+    private KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
+    @Mock
+    private KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
+    @Mock
+    private QSDetailDisplayer mQSDetailDisplayer;
     @Mock
     private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
+    @Mock
+    private KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
+    @Mock
+    private KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
     @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock
     private KeyguardStatusViewController mKeyguardStatusViewController;
+    @Mock
+    private KeyguardStatusBarViewController mKeyguardStatusBarViewController;
     @Mock
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock
@@ -216,14 +231,13 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
-    private NotificationsQuickSettingsContainer mNotificationContainerParent;
-    @Mock
     private AmbientState mAmbientState;
     @Mock
     private UserManager mUserManager;
 
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
+    private NotificationsQuickSettingsContainer mNotificationContainerParent;
 
     @Before
     public void setup() {
@@ -256,6 +270,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
         when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
+        mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
         when(mView.findViewById(R.id.notification_container_parent))
                 .thenReturn(mNotificationContainerParent);
         FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
@@ -289,6 +304,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 new ViewGroup.LayoutParams(600, 400));
         when(mNotificationStackScrollLayoutController.getLayoutParams()).thenReturn(
                 new ViewGroup.LayoutParams(600, 400));
+        when(mKeyguardStatusBarViewComponentFactory.build(any()))
+                .thenReturn(mKeyguardStatusBarViewComponent);
+        when(mKeyguardStatusBarViewComponent.getKeyguardStatusBarViewController())
+                .thenReturn(mKeyguardStatusBarViewController);
 
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
@@ -305,7 +324,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
-                mKeyguardUserSwitcherComponent,
+                mKeyguardQsUserSwitchComponentFactory,
+                mKeyguardUserSwitcherComponentFactory,
+                mKeyguardStatusBarViewComponentFactory,
+                mQSDetailDisplayer,
                 mGroupManager,
                 mNotificationAreaController,
                 mAuthController,
@@ -432,21 +454,61 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testAllChildrenOfNotificationContainer_haveIds() {
-        when(mNotificationContainerParent.getChildCount()).thenReturn(2);
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
 
-        View view1 = new View(mContext);
-        view1.setId(1);
-        when(mNotificationContainerParent.getChildAt(0)).thenReturn(view1);
-
-        View view2 = mock(View.class);
-        when(mNotificationContainerParent.getChildAt(1)).thenReturn(view2);
+        mNotificationContainerParent.addView(newViewWithId(1));
+        mNotificationContainerParent.addView(newViewWithId(View.NO_ID));
 
         mNotificationPanelViewController.updateResources();
 
         assertThat(mNotificationContainerParent.getChildAt(0).getId()).isEqualTo(1);
         assertThat(mNotificationContainerParent.getChildAt(1).getId()).isNotEqualTo(View.NO_ID);
+    }
+
+    @Test
+    public void testSinglePaneShadeLayout_isAlignedToParent() {
+        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
+        mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
+
+        mNotificationPanelViewController.updateResources();
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(mNotificationContainerParent);
+        ConstraintSet.Layout qsFrameLayout = constraintSet.getConstraint(R.id.qs_frame).layout;
+        ConstraintSet.Layout stackScrollerLayout = constraintSet.getConstraint(
+                R.id.notification_stack_scroller).layout;
+        assertThat(qsFrameLayout.endToEnd).isEqualTo(ConstraintSet.PARENT_ID);
+        assertThat(stackScrollerLayout.startToStart).isEqualTo(ConstraintSet.PARENT_ID);
+    }
+
+    @Test
+    public void testSplitShadeLayout_isAlignedToGuideline() {
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
+        mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
+
+        mNotificationPanelViewController.updateResources();
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(mNotificationContainerParent);
+        ConstraintSet.Layout qsFrameLayout = constraintSet.getConstraint(R.id.qs_frame).layout;
+        ConstraintSet.Layout stackScrollerLayout = constraintSet.getConstraint(
+                R.id.notification_stack_scroller).layout;
+        assertThat(qsFrameLayout.endToEnd).isEqualTo(R.id.qs_edge_guideline);
+        assertThat(stackScrollerLayout.startToStart).isEqualTo(R.id.qs_edge_guideline);
+    }
+
+    private View newViewWithId(int id) {
+        View view = new View(mContext);
+        view.setId(id);
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        // required as cloning ConstraintSet fails if view doesn't have layout params
+        view.setLayoutParams(layoutParams);
+        return view;
     }
 
     private void onTouchEvent(MotionEvent ev) {

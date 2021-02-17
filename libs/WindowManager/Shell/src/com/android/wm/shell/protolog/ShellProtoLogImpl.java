@@ -28,6 +28,7 @@ import com.android.wm.shell.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 
 import org.json.JSONException;
@@ -109,10 +110,10 @@ public class ShellProtoLogImpl extends BaseProtoLogImpl {
         return sServiceInstance;
     }
 
-    public int startTextLogging(Context context, String[] groups, PrintWriter pw) {
-        try {
-            mViewerConfig.loadViewerConfig(
-                    context.getResources().openRawResource(R.raw.wm_shell_protolog));
+    public int startTextLogging(String[] groups, PrintWriter pw) {
+        try (InputStream is =
+                     getClass().getClassLoader().getResourceAsStream("wm_shell_protolog.json")){
+            mViewerConfig.loadViewerConfig(is);
             return setLogging(true /* setTextLogging */, true, pw, groups);
         } catch (IOException e) {
             Log.i(TAG, "Unable to load log definitions: IOException while reading "

@@ -133,6 +133,7 @@ void CanvasContext::removeRenderNode(RenderNode* node) {
 void CanvasContext::destroy() {
     stopDrawing();
     setSurface(nullptr);
+    setSurfaceControl(nullptr);
     freePrefetchedLayers();
     destroyHardwareResources();
     mAnimationContext->destroy();
@@ -171,6 +172,19 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
         mNativeSurface = nullptr;
     }
     setupPipelineSurface();
+}
+
+void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
+    if (surfaceControl == mSurfaceControl) return;
+
+    auto funcs = mRenderThread.getASurfaceControlFunctions();
+    if (mSurfaceControl != nullptr) {
+        funcs.releaseFunc(mSurfaceControl);
+    }
+    mSurfaceControl = surfaceControl;
+    if (mSurfaceControl != nullptr) {
+        funcs.acquireFunc(mSurfaceControl);
+    }
 }
 
 void CanvasContext::setupPipelineSurface() {

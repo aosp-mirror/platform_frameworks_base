@@ -568,7 +568,7 @@ public final class SensorPrivacyService extends SystemService {
                                     // User may no longer exist or isn't set
                                     continue;
                                 }
-                                int sensor = parser.getAttributeIndex(null, XML_ATTRIBUTE_SENSOR);
+                                int sensor = parser.getAttributeInt(null, XML_ATTRIBUTE_SENSOR);
                                 boolean isEnabled = parser.getAttributeBoolean(null,
                                         XML_ATTRIBUTE_ENABLED);
                                 SparseBooleanArray userIndividualEnabled = individualEnabled.get(

@@ -11718,8 +11718,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or delegated app with {@link #DELEGATION_NETWORK_LOGGING} to
-     * control the network logging feature.
+     * Called by a device owner, profile owner of a managed profile or delegated app with
+     * {@link #DELEGATION_NETWORK_LOGGING} to control the network logging feature.
+     *
+     * <p> When network logging is enabled by a profile owner, the network logs will only include
+     * work profile network activity, not activity on the personal profile.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
@@ -11759,7 +11762,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if called by a delegated app.
      * @param enabled whether network logging should be enabled or not.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or profile owner.
      * @see #setAffiliationIds
      * @see #retrieveNetworkLogs
      */
@@ -11773,14 +11776,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Return whether network logging is enabled by a device owner.
+     * Return whether network logging is enabled by a device owner or profile owner of
+     * a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Can only
      * be {@code null} if the caller is a delegated app with {@link #DELEGATION_NETWORK_LOGGING}
      * or has MANAGE_USERS permission.
-     * @return {@code true} if network logging is enabled by device owner, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner and caller has
-     * no MANAGE_USERS permission
+     * @return {@code true} if network logging is enabled by device owner or profile owner,
+     * {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner or profile owner and
+     * caller has no MANAGE_USERS permission
      */
     public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isNetworkLoggingEnabled");
@@ -11792,9 +11797,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or delegated app with {@link #DELEGATION_NETWORK_LOGGING} to retrieve
-     * the most recent batch of network logging events.
-     * A device owner has to provide a batchToken provided as part of
+     * Called by device owner, profile owner of a managed profile or delegated app with
+     * {@link #DELEGATION_NETWORK_LOGGING} to retrieve the most recent batch of
+     * network logging events.
+     *
+     * <p> When network logging is enabled by a profile owner, the network logs will only include
+     * work profile network activity, not activity on the personal profile.
+     *
+     * A device owner or profile owner has to provide a batchToken provided as part of
      * {@link DeviceAdminReceiver#onNetworkLogsAvailable} callback. If the token doesn't match the
      * token of the most recent available batch of logs, {@code null} will be returned.
      *
@@ -11806,11 +11816,11 @@ public class DevicePolicyManager {
      * after the device device owner has been notified via
      * {@link DeviceAdminReceiver#onNetworkLogsAvailable}.
      *
-     * <p>If a secondary user or profile is created, calling this method will throw a
-     * {@link SecurityException} until all users become affiliated again. It will also no longer be
-     * possible to retrieve the network logs batch with the most recent batchToken provided
-     * by {@link DeviceAdminReceiver#onNetworkLogsAvailable}. See
-     * {@link DevicePolicyManager#setAffiliationIds}.
+     * <p>If the caller is not a profile owner and a secondary user or profile is created, calling
+     * this method will throw a {@link SecurityException} until all users become affiliated again.
+     * It will also no longer be possible to retrieve the network logs batch with the most recent
+     * batchToken provided by {@link DeviceAdminReceiver#onNetworkLogsAvailable}.
+     * See {@link DevicePolicyManager#setAffiliationIds}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if called by a delegated app.
@@ -11818,8 +11828,9 @@ public class DevicePolicyManager {
      * @return A new batch of network logs which is a list of {@link NetworkEvent}. Returns
      *        {@code null} if the batch represented by batchToken is no longer available or if
      *        logging is disabled.
-     * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device.
+     * @throws SecurityException if {@code admin} is not a device owner, profile owner or if the
+     * {@code admin} is not a profile owner and there is at least one profile or secondary user
+     * that is not affiliated with the device.
      * @see #setAffiliationIds
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
      */
@@ -11938,11 +11949,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the system to get the time at which the device owner last retrieved network logging
-     * events.
+     * Called by the system to get the time at which the device owner or profile owner of a
+     * managed profile last retrieved network logging events.
      *
-     * @return the time at which the device owner most recently retrieved network logging events, in
-     *         milliseconds since epoch; -1 if network logging events were never retrieved.
+     * @return the time at which the device owner or profile owner most recently retrieved network
+     *         logging events, in milliseconds since epoch; -1 if network logging events were
+     *         never retrieved.
      * @throws SecurityException if the caller is not the device owner, does not hold the
      *         MANAGE_USERS permission and is not the system.
      *
@@ -13358,26 +13370,93 @@ public class DevicePolicyManager {
      */
     public boolean canAdminGrantSensorsPermissions() {
         throwIfParentInstance("canAdminGrantSensorsPermissions");
-        return canAdminGrantSensorsPermissionsForUser(myUserId());
-    }
-
-    /**
-     * Returns true if the admin can control grants of sensors-related permissions, for
-     * a given user.
-     *
-     * @hide
-     * @param userId The ID of the user to check.
-     * @return if the admin may grant these permissions, false otherwise.
-     */
-    @SystemApi
-    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
         if (mService == null) {
             return false;
         }
         try {
-            return mService.canAdminGrantSensorsPermissionsForUser(userId);
+            return mService.canAdminGrantSensorsPermissionsForUser(myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * enable or disable USB data signaling for the device. When disabled, USB data connections
+     * (except from charging functions) are prohibited.
+     *
+     * <p> This API is not supported on all devices, the caller should call
+     * {@link #canUsbDataSignalingBeDisabled()} to check whether enabling or disabling USB data
+     * signaling is supported on the device.
+     *
+     * @param enabled whether USB data signaling should be enabled or not.
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     * @throws IllegalStateException if disabling USB data signaling is not supported or
+     *         if USB data signaling fails to be enabled/disabled.
+     */
+    public void setUsbDataSignalingEnabled(boolean enabled) {
+        throwIfParentInstance("setUsbDataSignalingEnabled");
+        if (mService != null) {
+            try {
+                mService.setUsbDataSignalingEnabled(mContext.getPackageName(), enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to return
+     * whether USB data signaling is currently enabled by the admin.
+     *
+     * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
+     */
+    public boolean isUsbDataSignalingEnabled() {
+        throwIfParentInstance("isUsbDataSignalingEnabled");
+        if (mService != null) {
+            try {
+                return mService.isUsbDataSignalingEnabled(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called by the system to check whether USB data signaling is currently enabled for this user.
+     *
+     * @param userId which user to check for.
+     * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isUsbDataSignalingEnabledForUser(@UserIdInt int userId) {
+        throwIfParentInstance("isUsbDataSignalingEnabledForUser");
+        if (mService != null) {
+            try {
+                return mService.isUsbDataSignalingEnabledForUser(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns whether enabling or disabling USB data signaling is supported on the device.
+     *
+     * @return {@code true} if the device supports enabling and disabling USB data signaling.
+     */
+    public boolean canUsbDataSignalingBeDisabled() {
+        throwIfParentInstance("canUsbDataSignalingBeDisabled");
+        if (mService != null) {
+            try {
+                return mService.canUsbDataSignalingBeDisabled();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

@@ -84,6 +84,19 @@ void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
     });
 }
 
+void RenderProxy::setSurfaceControl(ASurfaceControl* surfaceControl) {
+    auto funcs = mRenderThread.getASurfaceControlFunctions();
+    if (surfaceControl) {
+        funcs.acquireFunc(surfaceControl);
+    }
+    mRenderThread.queue().post([this, control = surfaceControl, funcs]() mutable {
+        mContext->setSurfaceControl(control);
+        if (control) {
+            funcs.releaseFunc(control);
+        }
+    });
+}
+
 void RenderProxy::allocateBuffers() {
     mRenderThread.queue().post([=]() { mContext->allocateBuffers(); });
 }
