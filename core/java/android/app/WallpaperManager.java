@@ -66,6 +66,7 @@ import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
@@ -107,6 +108,8 @@ public class WallpaperManager {
     private static boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
+    private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
+            new RectF(0, 0, 1, 1);
 
     /** {@hide} */
     private static final String PROP_WALLPAPER = "ro.config.wallpaper";
@@ -309,6 +312,8 @@ public class WallpaperManager {
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
         private Handler mMainLooperHandler;
+        private ArrayMap<LocalWallpaperColorConsumer, ILocalWallpaperColorConsumer>
+                mLocalColorCallbacks = new ArrayMap<>();
 
         Globals(IWallpaperManager service, Looper looper) {
             mService = service;
@@ -347,6 +352,40 @@ public class WallpaperManager {
                     }
                 }
                 mColorListeners.add(new Pair<>(callback, handler));
+            }
+        }
+
+        private ILocalWallpaperColorConsumer wrap(LocalWallpaperColorConsumer callback) {
+            ILocalWallpaperColorConsumer callback2 = new ILocalWallpaperColorConsumer.Stub() {
+                @Override
+                public void onColorsChanged(RectF area, WallpaperColors colors) {
+                    callback.onColorsChanged(area, colors);
+                }
+            };
+            mLocalColorCallbacks.put(callback, callback2);
+            return callback2;
+        }
+
+        public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
+                @NonNull List<RectF> regions, int which, int userId, int displayId) {
+            try {
+                mService.addOnLocalColorsChangedListener(wrap(callback) , regions, which,
+                                                         userId, displayId);
+            } catch (RemoteException e) {
+                // Can't get colors, connection lost.
+            }
+        }
+
+        public void removeOnColorsChangedListener(
+                @NonNull LocalWallpaperColorConsumer callback, int which, int userId,
+                int displayId) {
+            ILocalWallpaperColorConsumer callback2 = mLocalColorCallbacks.remove(callback);
+            if (callback2 == null) return;
+            try {
+                mService.removeOnLocalColorsChangedListener(
+                        callback2, which, userId, displayId);
+            } catch (RemoteException e) {
+                // Can't get colors, connection lost.
             }
         }
 
@@ -1054,6 +1093,29 @@ public class WallpaperManager {
     public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
         assertUiContext("getWallpaperColors");
         return sGlobals.getWallpaperColors(which, userId, mContext.getDisplayId());
+    }
+
+    /**
+     * @hide
+     */
+    public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
+            List<RectF> regions) throws IllegalArgumentException {
+        for (RectF region : regions) {
+            if (!LOCAL_COLOR_BOUNDS.contains(region)) {
+                throw new IllegalArgumentException("Regions must be within bounds "
+                        + LOCAL_COLOR_BOUNDS);
+            }
+        }
+        sGlobals.addOnColorsChangedListener(callback, regions, FLAG_SYSTEM,
+                                                 mContext.getUserId(), mContext.getDisplayId());
+    }
+
+    /**
+     * @hide
+     */
+    public void removeOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback) {
+        sGlobals.removeOnColorsChangedListener(callback, FLAG_SYSTEM, mContext.getUserId(),
+                mContext.getDisplayId());
     }
 
     /**
@@ -2201,5 +2263,19 @@ public class WallpaperManager {
         default void onColorsChanged(WallpaperColors colors, int which, int userId) {
             onColorsChanged(colors, which);
         }
+    }
+
+    /**
+     * Callback to update a consumer with a local color change
+     * @hide
+     */
+    public interface LocalWallpaperColorConsumer {
+
+        /**
+         * Gets called when a color of an area gets updated
+         * @param area
+         * @param colors
+         */
+        void onColorsChanged(RectF area, WallpaperColors colors);
     }
 }
