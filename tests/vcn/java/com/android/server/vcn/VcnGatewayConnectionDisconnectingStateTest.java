@@ -82,7 +82,7 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
     }
 
     @Test
-    public void testSafemodeTimeoutNotifiesCallback() {
-        verifySafemodeTimeoutNotifiesCallback(mGatewayConnection.mDisconnectingState);
+    public void testSafeModeTimeoutNotifiesCallback() {
+        verifySafeModeTimeoutNotifiesCallback(mGatewayConnection.mDisconnectingState);
     }
 }

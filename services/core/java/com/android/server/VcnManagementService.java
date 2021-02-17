@@ -22,6 +22,7 @@ import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubsc
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -29,6 +30,7 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.IVcnManagementService;
+import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
@@ -54,6 +56,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.LocationPermissionChecker;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
@@ -124,6 +127,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @hide
  */
+// TODO(b/180451994): ensure all incoming + outgoing calls have a cleared calling identity
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
 
@@ -147,6 +151,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private final TelephonySubscriptionTracker mTelephonySubscriptionTracker;
     @NonNull private final VcnContext mVcnContext;
 
+    /** Can only be assigned when {@link #systemReady()} is called, since it uses AppOpsManager. */
+    @Nullable private LocationPermissionChecker mLocationPermissionChecker;
+
     @GuardedBy("mLock")
     @NonNull
     private final Map<ParcelUuid, VcnConfig> mConfigs = new ArrayMap<>();
@@ -168,6 +175,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull
     private final Map<IBinder, PolicyListenerBinderDeath> mRegisteredPolicyListeners =
             new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    @NonNull
+    private final Map<IBinder, VcnStatusCallbackInfo> mRegisteredStatusCallbacks = new ArrayMap<>();
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     VcnManagementService(@NonNull Context context, @NonNull Dependencies deps) {
@@ -293,14 +304,19 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 @NonNull ParcelUuid subscriptionGroup,
                 @NonNull VcnConfig config,
                 @NonNull TelephonySubscriptionSnapshot snapshot,
-                @NonNull VcnSafemodeCallback safemodeCallback) {
-            return new Vcn(vcnContext, subscriptionGroup, config, snapshot, safemodeCallback);
+                @NonNull VcnSafeModeCallback safeModeCallback) {
+            return new Vcn(vcnContext, subscriptionGroup, config, snapshot, safeModeCallback);
         }
 
         /** Gets the subId indicated by the given {@link WifiInfo}. */
         public int getSubIdForWifiInfo(@NonNull WifiInfo wifiInfo) {
             // TODO(b/178501049): use the subId indicated by WifiInfo#getSubscriptionId
             return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        }
+
+        /** Creates a new LocationPermissionChecker for the provided Context. */
+        public LocationPermissionChecker newLocationPermissionChecker(@NonNull Context context) {
+            return new LocationPermissionChecker(context);
         }
     }
 
@@ -309,6 +325,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         mContext.getSystemService(ConnectivityManager.class)
                 .registerNetworkProvider(mNetworkProvider);
         mTelephonySubscriptionTracker.register();
+        mLocationPermissionChecker = mDeps.newLocationPermissionChecker(mVcnContext.getContext());
     }
 
     private void enforcePrimaryUser() {
@@ -440,12 +457,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         // TODO(b/176939047): Support multiple VCNs active at the same time, or limit to one active
         //                    VCN.
 
-        final VcnSafemodeCallbackImpl safemodeCallback =
-                new VcnSafemodeCallbackImpl(subscriptionGroup);
+        final VcnSafeModeCallbackImpl safeModeCallback =
+                new VcnSafeModeCallbackImpl(subscriptionGroup);
 
         final Vcn newInstance =
                 mDeps.newVcn(
-                        mVcnContext, subscriptionGroup, config, mLastSnapshot, safemodeCallback);
+                        mVcnContext, subscriptionGroup, config, mLastSnapshot, safeModeCallback);
         mVcns.put(subscriptionGroup, newInstance);
 
         // Now that a new VCN has started, notify all registered listeners to refresh their
@@ -548,6 +565,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     public Map<ParcelUuid, Vcn> getAllVcns() {
         synchronized (mLock) {
             return Collections.unmodifiableMap(mVcns);
+        }
+    }
+
+    /** Get current VcnStatusCallbacks for testing purposes. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public Map<IBinder, VcnStatusCallbackInfo> getAllStatusCallbacks() {
+        synchronized (mLock) {
+            return Collections.unmodifiableMap(mRegisteredStatusCallbacks);
         }
     }
 
@@ -672,22 +697,109 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         return new VcnUnderlyingNetworkPolicy(false /* isTearDownRequested */, networkCapabilities);
     }
 
-    /** Callback for signalling when a Vcn has entered Safemode. */
-    public interface VcnSafemodeCallback {
-        /** Called by a Vcn to signal that it has entered Safemode. */
-        void onEnteredSafemode();
+    /** Binder death recipient used to remove registered VcnStatusCallbacks. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    class VcnStatusCallbackInfo implements Binder.DeathRecipient {
+        @NonNull final ParcelUuid mSubGroup;
+        @NonNull final IVcnStatusCallback mCallback;
+        @NonNull final String mPkgName;
+        final int mUid;
+
+        private VcnStatusCallbackInfo(
+                @NonNull ParcelUuid subGroup,
+                @NonNull IVcnStatusCallback callback,
+                @NonNull String pkgName,
+                int uid) {
+            mSubGroup = subGroup;
+            mCallback = callback;
+            mPkgName = pkgName;
+            mUid = uid;
+        }
+
+        @Override
+        public void binderDied() {
+            Log.e(TAG, "app died without unregistering VcnStatusCallback");
+            unregisterVcnStatusCallback(mCallback);
+        }
     }
 
-    /** VcnSafemodeCallback is used by Vcns to notify VcnManagementService on entering Safemode. */
-    private class VcnSafemodeCallbackImpl implements VcnSafemodeCallback {
+    /** Registers the provided callback for receiving VCN status updates. */
+    @Override
+    public void registerVcnStatusCallback(
+            @NonNull ParcelUuid subGroup,
+            @NonNull IVcnStatusCallback callback,
+            @NonNull String opPkgName) {
+        final int callingUid = mDeps.getBinderCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            requireNonNull(subGroup, "subGroup must not be null");
+            requireNonNull(callback, "callback must not be null");
+            requireNonNull(opPkgName, "opPkgName must not be null");
+
+            mContext.getSystemService(AppOpsManager.class).checkPackage(callingUid, opPkgName);
+
+            final IBinder cbBinder = callback.asBinder();
+            final VcnStatusCallbackInfo cbInfo =
+                    new VcnStatusCallbackInfo(
+                            subGroup, callback, opPkgName, mDeps.getBinderCallingUid());
+
+            try {
+                cbBinder.linkToDeath(cbInfo, 0 /* flags */);
+            } catch (RemoteException e) {
+                // Remote binder already died - don't add to mRegisteredStatusCallbacks and exit
+                return;
+            }
+
+            synchronized (mLock) {
+                if (mRegisteredStatusCallbacks.containsKey(cbBinder)) {
+                    throw new IllegalStateException(
+                            "Attempting to register a callback that is already in use");
+                }
+
+                mRegisteredStatusCallbacks.put(cbBinder, cbInfo);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /** Unregisters the provided callback from receiving future VCN status updates. */
+    @Override
+    public void unregisterVcnStatusCallback(@NonNull IVcnStatusCallback callback) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            requireNonNull(callback, "callback must not be null");
+
+            final IBinder cbBinder = callback.asBinder();
+            synchronized (mLock) {
+                VcnStatusCallbackInfo cbInfo = mRegisteredStatusCallbacks.remove(cbBinder);
+
+                if (cbInfo != null) {
+                    cbBinder.unlinkToDeath(cbInfo, 0 /* flags */);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    // TODO(b/180452282): Make name more generic and implement directly with VcnManagementService
+    /** Callback for signalling when a Vcn has entered safe mode. */
+    public interface VcnSafeModeCallback {
+        /** Called by a Vcn to signal that it has entered safe mode. */
+        void onEnteredSafeMode();
+    }
+
+    /** VcnSafeModeCallback is used by Vcns to notify VcnManagementService on entering safe mode. */
+    private class VcnSafeModeCallbackImpl implements VcnSafeModeCallback {
         @NonNull private final ParcelUuid mSubGroup;
 
-        private VcnSafemodeCallbackImpl(@NonNull final ParcelUuid subGroup) {
+        private VcnSafeModeCallbackImpl(@NonNull final ParcelUuid subGroup) {
             mSubGroup = Objects.requireNonNull(subGroup, "Missing subGroup");
         }
 
         @Override
-        public void onEnteredSafemode() {
+        public void onEnteredSafeMode() {
             synchronized (mLock) {
                 // Ignore if this subscription group doesn't exist anymore
                 if (!mVcns.containsKey(mSubGroup)) {
@@ -695,6 +807,27 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 }
 
                 notifyAllPolicyListenersLocked();
+
+                // Notify all registered StatusCallbacks for this subGroup
+                for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
+                    if (!mSubGroup.equals(cbInfo.mSubGroup)) {
+                        continue;
+                    }
+                    if (!mLastSnapshot.packageHasPermissionsForSubscriptionGroup(
+                            mSubGroup, cbInfo.mPkgName)) {
+                        continue;
+                    }
+
+                    if (!mLocationPermissionChecker.checkLocationPermission(
+                            cbInfo.mPkgName,
+                            "VcnStatusCallback" /* featureId */,
+                            cbInfo.mUid,
+                            null /* message */)) {
+                        continue;
+                    }
+
+                    Binder.withCleanCallingIdentity(() -> cbInfo.mCallback.onEnteredSafeMode());
+                }
             }
         }
     }
