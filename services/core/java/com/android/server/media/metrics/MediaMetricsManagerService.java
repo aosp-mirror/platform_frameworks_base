@@ -83,7 +83,14 @@ public final class MediaMetricsManagerService extends SystemService {
         @Override
         public void reportPlaybackStateEvent(
                 String sessionId, PlaybackStateEvent event, int userId) {
-            // TODO: log it to statsd
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(322)
+                    .writeString(sessionId)
+                    .writeInt(event.getState())
+                    .writeLong(event.getTimeSinceCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
         }
 
         @Override

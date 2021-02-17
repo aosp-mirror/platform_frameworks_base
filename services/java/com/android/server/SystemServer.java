@@ -138,6 +138,7 @@ import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
 import com.android.server.location.LocationManagerService;
 import com.android.server.media.MediaRouterService;
+import com.android.server.media.metrics.MediaMetricsManagerService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -2391,6 +2392,10 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartPeopleService");
             mSystemServiceManager.startService(PeopleService.class);
+            t.traceEnd();
+
+            t.traceBegin("StartMediaMetricsManager");
+            mSystemServiceManager.startService(MediaMetricsManagerService.class);
             t.traceEnd();
         }
 
