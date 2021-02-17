@@ -41,6 +41,7 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
     private static final String FP_DATA_DIR = "fpdata";
 
     private final int mCurrentUserId;
+    private final boolean mForceUpdateAuthenticatorId;
     private final boolean mHasEnrolledBiometrics;
     private final Map<Integer, Long> mAuthenticatorIds;
     private File mDirectory;
@@ -48,11 +49,12 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
     FingerprintUpdateActiveUserClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, int userId,
             @NonNull String owner, int sensorId, int currentUserId, boolean hasEnrolledBiometrics,
-            @NonNull Map<Integer, Long> authenticatorIds) {
+            @NonNull Map<Integer, Long> authenticatorIds, boolean forceUpdateAuthenticatorId) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
                 BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mCurrentUserId = currentUserId;
+        mForceUpdateAuthenticatorId = forceUpdateAuthenticatorId;
         mHasEnrolledBiometrics = hasEnrolledBiometrics;
         mAuthenticatorIds = authenticatorIds;
     }
@@ -61,7 +63,7 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
     public void start(@NonNull Callback callback) {
         super.start(callback);
 
-        if (mCurrentUserId == getTargetUserId()) {
+        if (mCurrentUserId == getTargetUserId() && !mForceUpdateAuthenticatorId) {
             Slog.d(TAG, "Already user: " + mCurrentUserId + ", returning");
             callback.onClientFinished(this, true /* success */);
             return;
