@@ -994,10 +994,12 @@ public class ConnectivityServiceTest {
         // Used to collect the networks requests managed by this factory. This is a duplicate of
         // the internal information stored in the NetworkFactory (which is private).
         private SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
+        private final HandlerThread mHandlerSendingRequests;
 
         public MockNetworkFactory(Looper looper, Context context, String logTag,
-                NetworkCapabilities filter) {
+                NetworkCapabilities filter, HandlerThread threadSendingRequests) {
             super(looper, context, logTag, filter);
+            mHandlerSendingRequests = threadSendingRequests;
         }
 
         public int getMyRequestCount() {
@@ -1051,7 +1053,8 @@ public class ConnectivityServiceTest {
         public void terminate() {
             super.terminate();
             // Make sure there are no remaining requests unaccounted for.
-            assertNull(mRequestHistory.poll(TIMEOUT_MS, r -> true));
+            HandlerUtils.waitForIdle(mHandlerSendingRequests, TIMEOUT_MS);
+            assertNull(mRequestHistory.poll(0, r -> true));
         }
 
         // Trigger releasing the request as unfulfillable
@@ -2764,7 +2767,7 @@ public class ConnectivityServiceTest {
         final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
         handlerThread.start();
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
-                mServiceContext, "testFactory", filter);
+                mServiceContext, "testFactory", filter, mCsHandlerThread);
         testFactory.setScoreFilter(40);
         ConditionVariable cv = testFactory.getNetworkStartedCV();
         testFactory.register();
@@ -2872,7 +2875,7 @@ public class ConnectivityServiceTest {
         // does not crash.
         for (int i = 0; i < 100; i++) {
             final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
-                    mServiceContext, "testFactory", filter);
+                    mServiceContext, "testFactory", filter, mCsHandlerThread);
             // Register the factory and don't be surprised when the default request arrives.
             testFactory.register();
             testFactory.expectRequestAdd();
@@ -4122,7 +4125,7 @@ public class ConnectivityServiceTest {
                 .addTransportType(TRANSPORT_CELLULAR)
                 .addCapability(NET_CAPABILITY_INTERNET);
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
-                mServiceContext, "testFactory", filter);
+                mServiceContext, "testFactory", filter, mCsHandlerThread);
         testFactory.setScoreFilter(40);
 
         // Register the factory and expect it to start looking for a network.
@@ -4469,7 +4472,7 @@ public class ConnectivityServiceTest {
                 .addTransportType(TRANSPORT_WIFI)
                 .addCapability(NET_CAPABILITY_INTERNET);
         final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
-                mServiceContext, "testFactory", filter);
+                mServiceContext, "testFactory", filter, mCsHandlerThread);
         testFactory.setScoreFilter(40);
 
         // Register the factory and expect it to receive the default request.
