@@ -50,6 +50,8 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -363,6 +365,12 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         return wrapper;
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver result) {
+        new ContextHubShellCommand(mContext, this).exec(this, in, out, err, args, callback, result);
     }
 
     @Override
@@ -931,6 +939,16 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println(mTransactionManager);
 
         // dump eventLog
+    }
+
+    /* package */ void denyClientAuthState(int contextHubId, String packageName, long nanoAppId) {
+        mClientManager.forEachClientOfHub(contextHubId, client -> {
+            if (client.getPackageName().equals(packageName)) {
+                client.updateNanoAppAuthState(
+                        nanoAppId, false /* hasPermissions */, false /* gracePeriodExpired */,
+                        true /* forceDenied */);
+            }
+        });
     }
 
     private void dump(ProtoOutputStream proto) {
