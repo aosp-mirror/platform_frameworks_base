@@ -19,11 +19,11 @@ package com.android.server.location.contexthub;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
-import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.contexthub.V1_0.Result;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubManager;
@@ -39,6 +39,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.server.location.ClientBrokerProto;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -67,7 +68,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /*
      * The proxy to talk to the Context Hub HAL.
      */
-    private final IContexthub mContextHubProxy;
+    private final IContextHubWrapper mContextHubProxy;
 
     /*
      * The manager that registered this client.
@@ -94,6 +95,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * True if the client is still registered with the Context Hub Service, false otherwise.
      */
     private boolean mRegistered = true;
+
+    /**
+     * String containing an attribution tag that was denoted in the {@link Context} of the
+     * creator of this broker. This is used when attributing the permissions usage of the broker.
+     */
+    private @Nullable String mAttributionTag;
 
     /*
      * Internal interface used to invoke client callbacks.
@@ -176,9 +183,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /* package */ ContextHubClientBroker(
-            Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
-            ContextHubInfo contextHubInfo, short hostEndPointId,
-            IContextHubClientCallback callback) {
+            Context context, IContextHubWrapper contextHubProxy,
+            ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
+            short hostEndPointId, IContextHubClientCallback callback, String attributionTag) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
@@ -187,15 +194,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mCallbackInterface = callback;
         mPendingIntentRequest = new PendingIntentRequest();
         mPackage = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
+        mAttributionTag = attributionTag;
 
         mHasAccessContextHubPermission = context.checkCallingPermission(
                 Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
     }
 
     /* package */ ContextHubClientBroker(
-            Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
-            ContextHubInfo contextHubInfo, short hostEndPointId, PendingIntent pendingIntent,
-            long nanoAppId) {
+            Context context, IContextHubWrapper contextHubProxy,
+            ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
+            short hostEndPointId, PendingIntent pendingIntent, long nanoAppId,
+            String attributionTag) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
@@ -203,6 +212,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mHostEndPointId = hostEndPointId;
         mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
         mPackage = pendingIntent.getCreatorPackage();
+        mAttributionTag = attributionTag;
 
         mHasAccessContextHubPermission = context.checkCallingPermission(
                 Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
@@ -227,7 +237,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
             int contextHubId = mAttachedContextHubInfo.getId();
             try {
-                result = mContextHubProxy.sendMessageToHub(contextHubId, messageToNanoApp);
+                // TODO(166846988): Fill in host permissions before sending a message.
+                result = mContextHubProxy.sendMessageToHub(
+                        contextHubId, messageToNanoApp,
+                        new ArrayList<String>() /* hostPermissions */);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
                         + contextHubId + ")", e);
@@ -260,6 +273,21 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @Override
     public void binderDied() {
         onClientExit();
+    }
+
+    /**
+     * Used to override the attribution tag with a newer value if a PendingIntent broker is
+     * retrieved.
+     */
+    /* package */ void setAttributionTag(String attributionTag) {
+        mAttributionTag = attributionTag;
+    }
+
+    /**
+     * @return the attribution tag associated with this broker.
+     */
+    /* package */ String getAttributionTag() {
+        return mAttributionTag;
     }
 
     /**
@@ -508,6 +536,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         String out = "[ContextHubClient ";
         out += "endpointID: " + getHostEndPointId() + ", ";
         out += "contextHub: " + getAttachedContextHubId() + ", ";
+        if (mAttributionTag != null) {
+            out += "attributionTag: " + getAttributionTag() + ", ";
+        }
         if (mPendingIntentRequest.isValid()) {
             out += "intentCreatorPackage: " + mPackage + ", ";
             out += "nanoAppId: 0x" + Long.toHexString(mPendingIntentRequest.getNanoAppId());
