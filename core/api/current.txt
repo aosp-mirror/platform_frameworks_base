@@ -24074,13 +24074,49 @@ package android.media.effect {
 
 package android.media.metrics {
 
+  public abstract class Event {
+    ctor protected Event(long);
+    method @IntRange(from=0xffffffff) public long getTimeSinceCreatedMillis();
+  }
+
   public class MediaMetricsManager {
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
+    field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
   public final class PlaybackSession implements java.lang.AutoCloseable {
     method public void close();
     method @NonNull public String getId();
+    method public void reportPlaybackStateEvent(@NonNull android.media.metrics.PlaybackStateEvent);
+  }
+
+  public final class PlaybackStateEvent extends android.media.metrics.Event implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getState();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackStateEvent> CREATOR;
+    field public static final int STATE_ABANDONED = 15; // 0xf
+    field public static final int STATE_BUFFERING = 6; // 0x6
+    field public static final int STATE_ENDED = 11; // 0xb
+    field public static final int STATE_FAILED = 13; // 0xd
+    field public static final int STATE_INTERRUPTED_BY_AD = 14; // 0xe
+    field public static final int STATE_JOINING_BACKGROUND = 1; // 0x1
+    field public static final int STATE_JOINING_FOREGROUND = 2; // 0x2
+    field public static final int STATE_NOT_STARTED = 0; // 0x0
+    field public static final int STATE_PAUSED = 4; // 0x4
+    field public static final int STATE_PAUSED_BUFFERING = 7; // 0x7
+    field public static final int STATE_PLAYING = 3; // 0x3
+    field public static final int STATE_SEEKING = 5; // 0x5
+    field public static final int STATE_STOPPED = 12; // 0xc
+    field public static final int STATE_SUPPRESSED = 9; // 0x9
+    field public static final int STATE_SUPPRESSED_BUFFERING = 10; // 0xa
+  }
+
+  public static final class PlaybackStateEvent.Builder {
+    ctor public PlaybackStateEvent.Builder();
+    method @NonNull public android.media.metrics.PlaybackStateEvent build();
+    method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setState(int);
+    method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
   }
 
 }
