@@ -16,6 +16,8 @@
 
 package android.app.people;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -25,12 +27,18 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Pair;
+import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * This class allows interaction with conversation and people data.
@@ -40,11 +48,18 @@ public final class PeopleManager {
 
     private static final String LOG_TAG = PeopleManager.class.getSimpleName();
 
-    @NonNull
-    private final Context mContext;
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public Map<ConversationListener, Pair<Executor, IConversationListener>>
+            mConversationListeners = new HashMap<>();
 
     @NonNull
-    private final IPeopleManager mService;
+    private Context mContext;
+
+    @NonNull
+    private IPeopleManager mService;
 
     /**
      * @hide
@@ -53,6 +68,15 @@ public final class PeopleManager {
         mContext = context;
         mService = IPeopleManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
                 Context.PEOPLE_SERVICE));
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public PeopleManager(@NonNull Context context, IPeopleManager service) {
+        mContext = context;
+        mService = service;
     }
 
     /**
@@ -66,9 +90,8 @@ public final class PeopleManager {
      * clients.
      *
      * @param packageName name of the package the conversation is part of
-     * @param shortcutId the shortcut id backing the conversation
+     * @param shortcutId  the shortcut id backing the conversation
      * @return whether the {@shortcutId} is backed by a Conversation.
-     *
      * @hide
      */
     @SystemApi
@@ -94,8 +117,7 @@ public final class PeopleManager {
      *
      * @param conversationId the {@link ShortcutInfo#getId() id} of the shortcut backing the
      *                       conversation that has an active status
-     * @param status the current status for the given conversation
-     *
+     * @param status         the current status for the given conversation
      * @return whether the role is available in the system
      */
     public void addOrUpdateStatus(@NonNull String conversationId,
@@ -115,8 +137,8 @@ public final class PeopleManager {
      *
      * @param conversationId the {@link ShortcutInfo#getId() id} of the shortcut backing the
      *                       conversation that has an active status
-     * @param statusId the {@link ConversationStatus#getId() id} of a published status for the given
-     *                 conversation
+     * @param statusId       the {@link ConversationStatus#getId() id} of a published status for the
+     *                       given conversation
      */
     public void clearStatus(@NonNull String conversationId, @NonNull String statusId) {
         Preconditions.checkStringNotEmpty(conversationId);
@@ -155,7 +177,7 @@ public final class PeopleManager {
         try {
             final ParceledListSlice<ConversationStatus> parceledList
                     = mService.getStatuses(
-                            mContext.getPackageName(), mContext.getUserId(), conversationId);
+                    mContext.getPackageName(), mContext.getUserId(), conversationId);
             if (parceledList != null) {
                 return parceledList.getList();
             }
@@ -163,5 +185,104 @@ public final class PeopleManager {
             throw e.rethrowFromSystemServer();
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Listeners for conversation changes.
+     *
+     * @hide
+     */
+    public interface ConversationListener {
+        /**
+         * Triggers when the conversation registered for a listener has been updated.
+         *
+         * @param conversation The conversation with modified data
+         * @see IPeopleManager#registerConversationListener(String, int, String,
+         * android.app.people.ConversationListener)
+         *
+         * <p>Only system root and SysUI have access to register the listener.
+         */
+        default void onConversationUpdate(@NonNull ConversationChannel conversation) {
+        }
+    }
+
+    /**
+     * Register a listener to watch for changes to the conversation identified by {@code
+     * packageName}, {@code userId}, and {@code shortcutId}.
+     *
+     * @param packageName The package name to match and filter the conversation to send updates for.
+     * @param userId      The user ID to match and filter the conversation to send updates for.
+     * @param shortcutId  The shortcut ID to match and filter the conversation to send updates for.
+     * @param listener    The listener to register to receive conversation updates.
+     * @param executor    {@link Executor} to handle the listeners. To dispatch listeners to the
+     *                    main thread of your application, you can use
+     *                    {@link android.content.Context#getMainExecutor()}.
+     * @hide
+     */
+    public void registerConversationListener(String packageName, int userId, String shortcutId,
+            ConversationListener listener, Executor executor) {
+        requireNonNull(listener, "Listener cannot be null");
+        requireNonNull(packageName, "Package name cannot be null");
+        requireNonNull(shortcutId, "Shortcut ID cannot be null");
+        synchronized (mConversationListeners) {
+            IConversationListener proxy = (IConversationListener) new ConversationListenerProxy(
+                    executor, listener);
+            try {
+                mService.registerConversationListener(
+                        packageName, userId, shortcutId, proxy);
+                mConversationListeners.put(listener,
+                        new Pair<>(executor, proxy));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregisters the listener previously registered to watch conversation changes.
+     *
+     * @param listener The listener to register to receive conversation updates.
+     * @hide
+     */
+    public void unregisterConversationListener(
+            ConversationListener listener) {
+        requireNonNull(listener, "Listener cannot be null");
+
+        synchronized (mConversationListeners) {
+            if (mConversationListeners.containsKey(listener)) {
+                IConversationListener proxy = mConversationListeners.remove(listener).second;
+                try {
+                    mService.unregisterConversationListener(proxy);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * Listener proxy class for {@link ConversationListener}
+     *
+     * @hide
+     */
+    private static class ConversationListenerProxy extends
+            IConversationListener.Stub {
+        private final Executor mExecutor;
+        private final ConversationListener mListener;
+
+        ConversationListenerProxy(Executor executor, ConversationListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onConversationUpdate(@NonNull ConversationChannel conversation) {
+            if (mListener == null || mExecutor == null) {
+                // Binder is dead.
+                Slog.e(LOG_TAG, "Binder is dead");
+                return;
+            }
+            mExecutor.execute(() -> mListener.onConversationUpdate(conversation));
+        }
     }
 }
