@@ -351,6 +351,7 @@ applications that come with the platform
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <!-- Needed for test only -->
         <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD" />
+        <permission name="android.permission.PERFORM_IMS_SINGLE_REGISTRATION" />
         <permission name="android.permission.POWER_SAVER" />
         <permission name="android.permission.READ_CARRIER_APP_INFO"/>
         <permission name="android.permission.READ_FRAME_BUFFER"/>
