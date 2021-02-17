@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 The Android Open Source Project
+  ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,42 +24,33 @@
         android:id="@+id/people_tile"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <include layout="@layout/punctuation_layout"/>
         <RelativeLayout
             android:gravity="start"
             android:id="@+id/column_one"
-            android:paddingVertical="8dp"
+            android:paddingVertical="10dp"
             android:paddingStart="8dp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
-            <LinearLayout
-                android:orientation="horizontal"
-                android:id="@+id/content_background"
-                android:background="@drawable/people_space_content_background"
+            <TextView
+                android:id="@+id/subtext"
+                android:layout_toStartOf="@+id/content_layout"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:layout_width="60dp"
-                android:layout_height="60dp">
-                <ImageView
-                    android:id="@+id/image"
-                    android:gravity="center"
-                    android:background="@drawable/people_space_content_background"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scaleType="centerCrop"/>
-                <ImageView
-                    android:id="@+id/status_defined_icon"
-                    android:gravity="start|top"
-                    android:layout_marginStart="-52dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"/>
-            </LinearLayout>
+                android:gravity="top|start"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="12sp"
+                android:maxWidth="60dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"/>
             <LinearLayout
                 android:orientation="horizontal"
                 android:id="@+id/avatar_and_app_icon"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
-                android:paddingStart="4dp"
                 android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -94,9 +85,10 @@
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/content_layout"
-            android:paddingTop="10dp"
             android:paddingBottom="4dp"
-            android:paddingHorizontal="8dp"
+            android:paddingStart="4dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="8dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@id/column_one"
@@ -105,14 +97,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <TextView
-                android:id="@+id/status"
+                android:id="@+id/content"
                 android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
                 android:textColor="?android:attr/textColorPrimary"
+                android:gravity="top|end"
                 android:textSize="12sp"
-                android:layout_width="wrap_content"
+                android:paddingTop="2dp"
+                android:paddingEnd="4dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:ellipsize="end"/>
+            <LinearLayout
+                android:id="@+id/content_background"
+                android:background="@drawable/people_space_content_background"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/image"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="44dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerCrop"/>
+            </LinearLayout>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/person_label"
@@ -126,17 +134,6 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/time"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="12sp"
-                android:paddingVertical="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:visibility="gone"
-                android:ellipsize="end"/>
             <ImageView
                 android:id="@+id/availability"
                 android:layout_width="10dp"
