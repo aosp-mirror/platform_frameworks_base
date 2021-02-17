@@ -194,28 +194,20 @@ SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint) {
     return filterPaint(std::move(paint));
 }
 
-static SkDrawLooper* get_looper(const Paint* paint) {
+static BlurDrawLooper* get_looper(const Paint* paint) {
     return paint ? paint->getLooper() : nullptr;
 }
 
 template <typename Proc>
-void applyLooper(SkDrawLooper* looper, const SkPaint* paint, Proc proc) {
+void applyLooper(BlurDrawLooper* looper, const SkPaint* paint, Proc proc) {
     if (looper) {
-        SkSTArenaAlloc<256> alloc;
-        SkDrawLooper::Context* ctx = looper->makeContext(&alloc);
-        if (ctx) {
-            SkDrawLooper::Context::Info info;
-            for (;;) {
-                SkPaint p;
-                if (paint) {
-                    p = *paint;
-                }
-                if (!ctx->next(&info, &p)) {
-                    break;
-                }
-                proc(info.fTranslate.fX, info.fTranslate.fY, &p);
-            }
+        SkPaint p;
+        if (paint) {
+            p = *paint;
         }
+        looper->apply(p, [&](SkPoint offset, const SkPaint& modifiedPaint) {
+            proc(offset.fX, offset.fY, &modifiedPaint);
+        });
     } else {
         proc(0, 0, paint);
     }
