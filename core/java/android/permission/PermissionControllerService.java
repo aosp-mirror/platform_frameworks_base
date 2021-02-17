@@ -16,9 +16,7 @@
 
 package android.permission;
 
-import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
-import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_ONLY_WHEN_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_WHEN_SYSTEM;
 
@@ -259,6 +257,8 @@ public abstract class PermissionControllerService extends Service {
     }
 
     /**
+     * @deprecated See {@link #onSetRuntimePermissionGrantStateByDeviceAdmin(String,
+     * AdminPermissionControlParams, Consumer)}.
      * Set the runtime permission state from a device admin.
      *
      * @param callerPackageName The package name of the admin requesting the change
@@ -267,11 +267,26 @@ public abstract class PermissionControllerService extends Service {
      * @param grantState State to set the permission into
      * @param callback Callback waiting for whether the state could be set or not
      */
+    @Deprecated
     @BinderThread
     public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(
             @NonNull String callerPackageName, @NonNull String packageName,
             @NonNull String permission, @PermissionGrantState int grantState,
             @NonNull Consumer<Boolean> callback);
+
+    /**
+     * Set the runtime permission state from a device admin.
+     *
+     * @param callerPackageName The package name of the admin requesting the change
+     * @param params Parameters of admin request.
+     * @param callback Callback waiting for whether the state could be set or not
+     */
+    @BinderThread
+    public void onSetRuntimePermissionGrantStateByDeviceAdmin(
+            @NonNull String callerPackageName, @NonNull AdminPermissionControlParams params,
+            @NonNull Consumer<Boolean> callback) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
 
     /**
      * Called when a package is considered inactive based on the criteria given by
@@ -468,32 +483,26 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName,
-                    String packageName, String permission, int grantState,
+            public void setRuntimePermissionGrantStateByDeviceAdminFromParams(
+                    String callerPackageName, AdminPermissionControlParams params,
                     AndroidFuture callback) {
                 checkStringNotEmpty(callerPackageName);
-                checkStringNotEmpty(packageName);
-                checkStringNotEmpty(permission);
-                checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
-                        || grantState == PERMISSION_GRANT_STATE_DENIED
-                        || grantState == PERMISSION_GRANT_STATE_DEFAULT);
-                checkNotNull(callback);
-
-                if (grantState == PERMISSION_GRANT_STATE_DENIED) {
+                if (params.getGrantState() == PERMISSION_GRANT_STATE_DENIED) {
                     enforceSomePermissionsGrantedToCaller(
                             Manifest.permission.GRANT_RUNTIME_PERMISSIONS);
                 }
 
-                if (grantState == PERMISSION_GRANT_STATE_DENIED) {
+                if (params.getGrantState() == PERMISSION_GRANT_STATE_DENIED) {
                     enforceSomePermissionsGrantedToCaller(
                             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
                 }
 
                 enforceSomePermissionsGrantedToCaller(
                         Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+                checkNotNull(callback);
 
                 onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
-                        packageName, permission, grantState, callback::complete);
+                        params, callback::complete);
             }
 
             @Override
