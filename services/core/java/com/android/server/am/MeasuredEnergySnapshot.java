@@ -25,6 +25,7 @@ import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,6 +38,8 @@ import java.io.PrintWriter;
 @VisibleForTesting
 public class MeasuredEnergySnapshot {
     private static final String TAG = "MeasuredEnergySnapshot";
+
+    private static final int MILLIVOLTS_PER_VOLT = 1000;
 
     public static final long UNAVAILABLE = -1L;
 
@@ -62,6 +65,14 @@ public class MeasuredEnergySnapshot {
     private final SparseLongArray mMeasuredEnergySnapshots;
 
     /**
+     * Voltage snapshots, mapping {@link EnergyConsumer#id} to voltage (mV) from the last time
+     * each {@link EnergyConsumer} was updated.
+     *
+     * see {@link mMeasuredEnergySnapshots}.
+     */
+    private final SparseIntArray mVoltageSnapshots;
+
+    /**
      * Energy snapshots <b>per uid</b> from the last time each {@link EnergyConsumer} of type
      * {@link EnergyConsumerType#OTHER} was updated.
      * It maps each OTHER {@link EnergyConsumer#id} to a SparseLongArray, which itself maps each
@@ -80,6 +91,7 @@ public class MeasuredEnergySnapshot {
     MeasuredEnergySnapshot(@NonNull SparseArray<EnergyConsumer> idToConsumerMap) {
         mEnergyConsumers = idToConsumerMap;
         mMeasuredEnergySnapshots = new SparseLongArray(mEnergyConsumers.size());
+        mVoltageSnapshots = new SparseIntArray(mEnergyConsumers.size());
 
         mNumCpuClusterOrdinals = calculateNumOrdinals(EnergyConsumerType.CPU_CLUSTER,
                 idToConsumerMap);
@@ -95,19 +107,19 @@ public class MeasuredEnergySnapshot {
         return mNumOtherOrdinals;
     }
 
-    /** Class for returning measured energy delta data. */
+    /** Class for returning the relevant data calculated from the measured energy delta */
     static class MeasuredEnergyDeltaData {
-        /** The energyUJ for {@link EnergyConsumerType#DISPLAY}. */
-        public long displayEnergyUJ = UNAVAILABLE;
+        /** The chargeUC for {@link EnergyConsumerType#DISPLAY}. */
+        public long displayChargeUC = UNAVAILABLE;
 
-        /** The energyUJ for {@link EnergyConsumerType#CPU_CLUSTER}s. */
-        public long[] cpuClusterEnergiesUJ = null;
+        /** The chargeUC for {@link EnergyConsumerType#CPU_CLUSTER}s. */
+        public long[] cpuClusterChargeUC = null;
 
-        /** Map of {@link EnergyConsumerType#OTHER} ordinals to their total energyUJ. */
-        public @Nullable long[] otherTotalEnergyUJ = null;
+        /** Map of {@link EnergyConsumerType#OTHER} ordinals to their total chargeUC. */
+        public @Nullable long[] otherTotalChargeUC = null;
 
-        /** Map of {@link EnergyConsumerType#OTHER} ordinals to their {uid->energyUJ} maps. */
-        public @Nullable SparseLongArray[] otherUidEnergiesUJ = null;
+        /** Map of {@link EnergyConsumerType#OTHER} ordinals to their {uid->chargeUC} maps. */
+        public @Nullable SparseLongArray[] otherUidChargesUC = null;
     }
 
     /**
@@ -116,17 +128,26 @@ public class MeasuredEnergySnapshot {
      *
      * @param ecrs EnergyConsumerResults for some (possibly not all) {@link EnergyConsumer}s.
      *             Consumers that are not present are ignored (they are *not* treated as 0).
+     * @param voltageMV current voltage.
      *
      * @return a MeasuredEnergyDeltaData, containing maps from the updated consumers to
-     *         their corresponding energy deltas.
+     *         their corresponding charge deltas.
      *         Fields with no interesting data (consumers not present in ecrs or with no energy
      *         difference) will generally be left as their default values.
-     *         otherTotalEnergyUJ and otherUidEnergiesUJ are always either both null or both of
+     *         otherTotalChargeUC and otherUidChargesUC are always either both null or both of
      *         length {@link #getNumOtherOrdinals()}.
      *         Returns null, if ecrs is null or empty.
      */
-    public @Nullable MeasuredEnergyDeltaData updateAndGetDelta(EnergyConsumerResult[] ecrs) {
+    public @Nullable MeasuredEnergyDeltaData updateAndGetDelta(EnergyConsumerResult[] ecrs,
+            int voltageMV) {
         if (ecrs == null || ecrs.length == 0) {
+            return null;
+        }
+        if (voltageMV <= 0) {
+            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMV
+                    + " mV) when taking measured energy snapshot");
+            // TODO (b/181685156): consider adding the nominal voltage to power profile and
+            //  falling back to it if measured voltage is unavailable.
             return null;
         }
         final MeasuredEnergyDeltaData output = new MeasuredEnergyDeltaData();
@@ -146,12 +167,15 @@ public class MeasuredEnergySnapshot {
             final int type = consumer.type;
             final int ordinal = consumer.ordinal;
 
-            // Look up, and update, the old energy information about this consumer.
+            // Look up, and update, the old energy and voltage information about this consumer.
             final long oldEnergyUJ = mMeasuredEnergySnapshots.get(consumerId, UNAVAILABLE);
+            final int oldVoltageMV = mVoltageSnapshots.get(consumerId);
             mMeasuredEnergySnapshots.put(consumerId, newEnergyUJ);
-            final SparseLongArray otherUidEnergies
-                    = updateAndGetDeltaForTypeOther(consumer, newAttributions);
+            mVoltageSnapshots.put(consumerId, voltageMV);
 
+            final int avgVoltageMV = (oldVoltageMV + voltageMV + 1) / 2;
+            final SparseLongArray otherUidCharges =
+                    updateAndGetDeltaForTypeOther(consumer, newAttributions, avgVoltageMV);
             // Everything is fully done being updated. We now calculate the delta for returning.
 
             // NB: Since sum(attribution.energyUWs)<=energyUWs we assume that if deltaEnergy==0
@@ -160,32 +184,36 @@ public class MeasuredEnergySnapshot {
 
             if (oldEnergyUJ < 0) continue; // Generally happens only on initialization.
             if (newEnergyUJ == oldEnergyUJ) continue;
+
             final long deltaUJ = newEnergyUJ - oldEnergyUJ;
-            if (deltaUJ < 0) {
-                Slog.e(TAG, "EnergyConsumer " + consumer.name + ": new energy (" + newEnergyUJ
-                        + ") < old energy (" + oldEnergyUJ + "). Skipping. ");
+            if (deltaUJ < 0 || oldVoltageMV <= 0) {
+                Slog.e(TAG, "Bad data! EnergyConsumer " + consumer.name
+                        + ": new energy (" + newEnergyUJ + ") < old energy (" + oldEnergyUJ
+                        + "), new voltage (" + voltageMV + "), old voltage (" + oldVoltageMV
+                        + "). Skipping. ");
                 continue;
             }
 
+            final long deltaChargeUC = calculateChargeConsumedUC(deltaUJ, avgVoltageMV);
             switch (type) {
                 case EnergyConsumerType.DISPLAY:
-                    output.displayEnergyUJ = deltaUJ;
+                    output.displayChargeUC = deltaChargeUC;
                     break;
 
                 case EnergyConsumerType.CPU_CLUSTER:
-                    if (output.cpuClusterEnergiesUJ == null) {
-                        output.cpuClusterEnergiesUJ = new long[mNumCpuClusterOrdinals];
+                    if (output.cpuClusterChargeUC == null) {
+                        output.cpuClusterChargeUC = new long[mNumCpuClusterOrdinals];
                     }
-                    output.cpuClusterEnergiesUJ[ordinal] = deltaUJ;
+                    output.cpuClusterChargeUC[ordinal] = deltaChargeUC;
                     break;
 
                 case EnergyConsumerType.OTHER:
-                    if (output.otherTotalEnergyUJ == null) {
-                        output.otherTotalEnergyUJ = new long[getNumOtherOrdinals()];
-                        output.otherUidEnergiesUJ = new SparseLongArray[getNumOtherOrdinals()];
+                    if (output.otherTotalChargeUC == null) {
+                        output.otherTotalChargeUC = new long[getNumOtherOrdinals()];
+                        output.otherUidChargesUC = new SparseLongArray[getNumOtherOrdinals()];
                     }
-                    output.otherTotalEnergyUJ[ordinal] = deltaUJ;
-                    output.otherUidEnergiesUJ[ordinal] = otherUidEnergies;
+                    output.otherTotalChargeUC[ordinal] = deltaChargeUC;
+                    output.otherUidChargesUC[ordinal] = otherUidCharges;
                     break;
                 default:
                     Slog.w(TAG, "Ignoring consumer " + consumer.name + " of unknown type " + type);
@@ -198,19 +226,21 @@ public class MeasuredEnergySnapshot {
     /**
      * For a consumer of type {@link EnergyConsumerType#OTHER}, updates
      * {@link #mAttributionSnapshots} with freshly measured energies (per uid) and returns the
-     * difference (delta) between the previously stored values and the passed-in values.
+     * charge consumed (in microcouloumbs) between the previously stored values and the passed-in
+     * values.
      *
      * @param consumerInfo a consumer of type {@link EnergyConsumerType#OTHER}.
      * @param newAttributions Record of uids and their new energyUJ values.
      *                        Any uid not present is treated as having energy 0.
      *                        If null or empty, all uids are treated as having energy 0.
-     * @return A map (in the sense of {@link MeasuredEnergyDeltaData#otherUidEnergiesUJ} for this
-     *         consumer) of uid -> energyDelta, with all uids that have a non-zero energyDelta.
+     * @param avgVoltageMV The average voltage since the last snapshot.
+     * @return A map (in the sense of {@link MeasuredEnergyDeltaData#otherUidChargesUC} for this
+     *         consumer) of uid -> chargeDelta, with all uids that have a non-zero chargeDelta.
      *         Returns null if no delta available to calculate.
      */
     private @Nullable SparseLongArray updateAndGetDeltaForTypeOther(
             @NonNull EnergyConsumer consumerInfo,
-            @Nullable EnergyConsumerAttribution[] newAttributions) {
+            @Nullable EnergyConsumerAttribution[] newAttributions, int avgVoltageMV) {
 
         if (consumerInfo.type != EnergyConsumerType.OTHER) {
             return null;
@@ -233,8 +263,8 @@ public class MeasuredEnergySnapshot {
             return null;
         }
 
-        // Map uid -> energyDelta. No initial capacity since many deltas might be 0.
-        final SparseLongArray uidEnergyDeltas = new SparseLongArray();
+        // Map uid -> chargeDelta. No initial capacity since many deltas might be 0.
+        final SparseLongArray uidChargeDeltas = new SparseLongArray();
 
         for (EnergyConsumerAttribution newAttribution : newAttributions) {
             final int uid = newAttribution.uid;
@@ -247,14 +277,17 @@ public class MeasuredEnergySnapshot {
             if (oldEnergyUJ < 0) continue;
             if (newEnergyUJ == oldEnergyUJ) continue;
             final long deltaUJ = newEnergyUJ - oldEnergyUJ;
-            if (deltaUJ < 0) {
+            if (deltaUJ < 0 || avgVoltageMV <= 0) {
                 Slog.e(TAG, "EnergyConsumer " + consumerInfo.name + ": new energy (" + newEnergyUJ
-                        + ") but old energy (" + oldEnergyUJ + "). Skipping. ");
+                        + ") but old energy (" + oldEnergyUJ + "). Average voltage (" + avgVoltageMV
+                        + ")Skipping. ");
                 continue;
             }
-            uidEnergyDeltas.put(uid, deltaUJ);
+
+            final long deltaChargeUC = calculateChargeConsumedUC(deltaUJ, avgVoltageMV);
+            uidChargeDeltas.put(uid, deltaChargeUC);
         }
-        return uidEnergyDeltas;
+        return uidChargeDeltas;
     }
 
     /** Dump debug data. */
@@ -271,7 +304,9 @@ public class MeasuredEnergySnapshot {
         for (int i = 0; i < mMeasuredEnergySnapshots.size(); i++) {
             final int id = mMeasuredEnergySnapshots.keyAt(i);
             final long energyUJ = mMeasuredEnergySnapshots.valueAt(i);
-            pw.println(String.format("    Consumer %d has energy %d uJ}", id, energyUJ));
+            final long voltageMV = mVoltageSnapshots.valueAt(i);
+            pw.println(String.format("    Consumer %d has energy %d uJ at %d mV", id, energyUJ,
+                    voltageMV));
         }
         pw.println("List of the " + mNumOtherOrdinals + " OTHER EnergyConsumers:");
         pw.println("    " + mAttributionSnapshots);
@@ -290,4 +325,12 @@ public class MeasuredEnergySnapshot {
         }
         return numOrdinals;
     }
+
+    /** Calculate charge consumption (in microcouloumbs) from a given energy and voltage */
+    private long calculateChargeConsumedUC(long deltaEnergyUJ, int avgVoltageMV) {
+        // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
+        // since the last snapshot. Round up to the nearest whole long.
+        return (deltaEnergyUJ * MILLIVOLTS_PER_VOLT + (avgVoltageMV + 1) / 2) / avgVoltageMV;
+    }
+
 }

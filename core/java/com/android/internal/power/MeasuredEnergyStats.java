@@ -17,7 +17,7 @@
 package com.android.internal.power;
 
 
-import static android.os.BatteryStats.ENERGY_DATA_UNAVAILABLE;
+import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -34,8 +34,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Tracks the measured energy usage of various subsystems according to their
- * {@link StandardEnergyBucket} or custom energy bucket (which is tied to
+ * Tracks the measured charge consumption of various subsystems according to their
+ * {@link StandardPowerBucket} or custom power bucket (which is tied to
  * {@link android.hardware.power.stats.EnergyConsumer.ordinal}).
  *
  * This class doesn't use a TimeBase, and instead requires manually decisions about when to
@@ -46,53 +46,53 @@ public class MeasuredEnergyStats {
     private static final String TAG = "MeasuredEnergyStats";
 
     // Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} MUST be updated if standard
-    // energy bucket integers are modified/added/removed.
-    public static final int ENERGY_BUCKET_UNKNOWN = -1;
-    public static final int ENERGY_BUCKET_SCREEN_ON = 0;
-    public static final int ENERGY_BUCKET_SCREEN_DOZE = 1;
-    public static final int ENERGY_BUCKET_SCREEN_OTHER = 2;
-    public static final int ENERGY_BUCKET_CPU = 3;
-    public static final int NUMBER_STANDARD_ENERGY_BUCKETS = 4; // Buckets above this are custom.
+    // power bucket integers are modified/added/removed.
+    public static final int POWER_BUCKET_UNKNOWN = -1;
+    public static final int POWER_BUCKET_SCREEN_ON = 0;
+    public static final int POWER_BUCKET_SCREEN_DOZE = 1;
+    public static final int POWER_BUCKET_SCREEN_OTHER = 2;
+    public static final int POWER_BUCKET_CPU = 3;
+    public static final int NUMBER_STANDARD_POWER_BUCKETS = 4; // Buckets above this are custom.
 
-    @IntDef(prefix = {"ENERGY_BUCKET_"}, value = {
-            ENERGY_BUCKET_UNKNOWN,
-            ENERGY_BUCKET_SCREEN_ON,
-            ENERGY_BUCKET_SCREEN_DOZE,
-            ENERGY_BUCKET_SCREEN_OTHER,
-            ENERGY_BUCKET_CPU,
+    @IntDef(prefix = {"POWER_BUCKET_"}, value = {
+            POWER_BUCKET_UNKNOWN,
+            POWER_BUCKET_SCREEN_ON,
+            POWER_BUCKET_SCREEN_DOZE,
+            POWER_BUCKET_SCREEN_OTHER,
+            POWER_BUCKET_CPU,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StandardEnergyBucket {
+    public @interface StandardPowerBucket {
     }
 
     /**
-     * Total energy (in microjoules) that an energy bucket (including both
-     * {@link StandardEnergyBucket} and custom buckets) has accumulated since the last reset.
-     * Values MUST be non-zero or ENERGY_DATA_UNAVAILABLE. Accumulation only occurs
+     * Total charge (in microcoulombs) that a power bucket (including both
+     * {@link StandardPowerBucket} and custom buckets) has accumulated since the last reset.
+     * Values MUST be non-zero or POWER_DATA_UNAVAILABLE. Accumulation only occurs
      * while the necessary conditions are satisfied (e.g. on battery).
      *
-     * Energy for both {@link StandardEnergyBucket}s and custom energy buckets are stored in this
+     * Charge for both {@link StandardPowerBucket}s and custom power buckets are stored in this
      * array, and may internally both referred to as 'buckets'. This is an implementation detail;
      * externally, we differentiate between these two data sources.
      *
      * Warning: Long array is used for access speed. If the number of supported subsystems
      * becomes large, consider using an alternate data structure such as a SparseLongArray.
      */
-    private final long[] mAccumulatedEnergiesMicroJoules;
+    private final long[] mAccumulatedChargeMicroCoulomb;
 
     /**
-     * Creates a MeasuredEnergyStats set to support the provided energy buckets.
-     * supportedStandardBuckets must be of size {@link #NUMBER_STANDARD_ENERGY_BUCKETS}.
-     * numCustomBuckets >= 0 is the number of (non-standard) custom energy buckets on the device.
+     * Creates a MeasuredEnergyStats set to support the provided power buckets.
+     * supportedStandardBuckets must be of size {@link #NUMBER_STANDARD_POWER_BUCKETS}.
+     * numCustomBuckets >= 0 is the number of (non-standard) custom power buckets on the device.
      */
     public MeasuredEnergyStats(boolean[] supportedStandardBuckets, int numCustomBuckets) {
-        final int numTotalBuckets = NUMBER_STANDARD_ENERGY_BUCKETS + numCustomBuckets;
-        mAccumulatedEnergiesMicroJoules = new long[numTotalBuckets];
-        // Initialize to all zeros where supported, otherwise ENERGY_DATA_UNAVAILABLE.
+        final int numTotalBuckets = NUMBER_STANDARD_POWER_BUCKETS + numCustomBuckets;
+        mAccumulatedChargeMicroCoulomb = new long[numTotalBuckets];
+        // Initialize to all zeros where supported, otherwise POWER_DATA_UNAVAILABLE.
         // All custom buckets are, by definition, supported, so their values stay at 0.
-        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_ENERGY_BUCKETS; stdBucket++) {
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
             if (!supportedStandardBuckets[stdBucket]) {
-                mAccumulatedEnergiesMicroJoules[stdBucket] = ENERGY_DATA_UNAVAILABLE;
+                mAccumulatedChargeMicroCoulomb[stdBucket] = POWER_DATA_UNAVAILABLE;
             }
         }
     }
@@ -103,12 +103,12 @@ public class MeasuredEnergyStats {
      */
     private MeasuredEnergyStats(MeasuredEnergyStats template) {
         final int numIndices = template.getNumberOfIndices();
-        mAccumulatedEnergiesMicroJoules = new long[numIndices];
-        // Initialize to all zeros where supported, otherwise ENERGY_DATA_UNAVAILABLE.
+        mAccumulatedChargeMicroCoulomb = new long[numIndices];
+        // Initialize to all zeros where supported, otherwise POWER_DATA_UNAVAILABLE.
         // All custom buckets are, by definition, supported, so their values stay at 0.
-        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_ENERGY_BUCKETS; stdBucket++) {
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
             if (!template.isIndexSupported(stdBucket)) {
-                mAccumulatedEnergiesMicroJoules[stdBucket] = ENERGY_DATA_UNAVAILABLE;
+                mAccumulatedChargeMicroCoulomb[stdBucket] = POWER_DATA_UNAVAILABLE;
             }
         }
     }
@@ -126,20 +126,20 @@ public class MeasuredEnergyStats {
      * See {@link #createAndReadSummaryFromParcel(Parcel, MeasuredEnergyStats)}.
      */
     private MeasuredEnergyStats(int numIndices) {
-        mAccumulatedEnergiesMicroJoules = new long[numIndices];
+        mAccumulatedChargeMicroCoulomb = new long[numIndices];
     }
 
     /** Construct from parcel. */
     public MeasuredEnergyStats(Parcel in) {
         final int size = in.readInt();
-        mAccumulatedEnergiesMicroJoules = new long[size];
-        in.readLongArray(mAccumulatedEnergiesMicroJoules);
+        mAccumulatedChargeMicroCoulomb = new long[size];
+        in.readLongArray(mAccumulatedChargeMicroCoulomb);
     }
 
     /** Write to parcel */
     public void writeToParcel(Parcel out) {
-        out.writeInt(mAccumulatedEnergiesMicroJoules.length);
-        out.writeLongArray(mAccumulatedEnergiesMicroJoules);
+        out.writeInt(mAccumulatedChargeMicroCoulomb.length);
+        out.writeLongArray(mAccumulatedChargeMicroCoulomb);
     }
 
     /**
@@ -155,11 +155,11 @@ public class MeasuredEnergyStats {
         final int numWrittenEntries = in.readInt();
         for (int entry = 0; entry < numWrittenEntries; entry++) {
             final int index = in.readInt();
-            final long energyUJ = in.readLong();
+            final long chargeUC = in.readLong();
             if (overwriteAvailability) {
-                mAccumulatedEnergiesMicroJoules[index] = energyUJ;
+                mAccumulatedChargeMicroCoulomb[index] = chargeUC;
             } else {
-                setValueIfSupported(index, energyUJ);
+                setValueIfSupported(index, chargeUC);
             }
         }
     }
@@ -174,14 +174,14 @@ public class MeasuredEnergyStats {
         final int posOfNumWrittenEntries = out.dataPosition();
         out.writeInt(0);
         int numWrittenEntries = 0;
-        // Write only the supported buckets (with non-zero energy, if applicable).
-        for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
-            final long energy = mAccumulatedEnergiesMicroJoules[index];
-            if (energy < 0) continue;
-            if (energy == 0 && skipZero) continue;
+        // Write only the supported buckets (with non-zero charge, if applicable).
+        for (int index = 0; index < mAccumulatedChargeMicroCoulomb.length; index++) {
+            final long charge = mAccumulatedChargeMicroCoulomb[index];
+            if (charge < 0) continue;
+            if (charge == 0 && skipZero) continue;
 
             out.writeInt(index);
-            out.writeLong(mAccumulatedEnergiesMicroJoules[index]);
+            out.writeLong(charge);
             numWrittenEntries++;
         }
         final int currPos = out.dataPosition();
@@ -192,80 +192,82 @@ public class MeasuredEnergyStats {
 
     /** Get number of possible buckets, including both standard and custom ones. */
     private int getNumberOfIndices() {
-        return mAccumulatedEnergiesMicroJoules.length;
+        return mAccumulatedChargeMicroCoulomb.length;
     }
 
-    /** Updates the given standard energy bucket with the given energy if accumulate is true. */
-    public void updateStandardBucket(@StandardEnergyBucket int bucket, long energyDeltaUJ) {
+
+    /** Updates the given standard power bucket with the given charge if accumulate is true. */
+    public void updateStandardBucket(@StandardPowerBucket int bucket, long chargeDeltaUC) {
         checkValidStandardBucket(bucket);
-        updateEntry(bucket, energyDeltaUJ);
+        updateEntry(bucket, chargeDeltaUC);
     }
 
-    /** Updates the given custom energy bucket with the given energy if accumulate is true. */
-    public void updateCustomBucket(int customBucket, long energyDeltaUJ) {
+    /** Updates the given custom power bucket with the given charge if accumulate is true. */
+    public void updateCustomBucket(int customBucket, long chargeDeltaUC) {
         if (!isValidCustomBucket(customBucket)) {
             Slog.e(TAG, "Attempted to update invalid custom bucket " + customBucket);
             return;
         }
         final int index = customBucketToIndex(customBucket);
-        updateEntry(index, energyDeltaUJ);
+        updateEntry(index, chargeDeltaUC);
     }
 
-    /** Updates the given index with the given energy if accumulate is true. */
-    private void updateEntry(int index, long energyDeltaUJ) {
-        if (mAccumulatedEnergiesMicroJoules[index] >= 0L) {
-            mAccumulatedEnergiesMicroJoules[index] += energyDeltaUJ;
+    /** Updates the given index with the given charge if accumulate is true. */
+    private void updateEntry(int index, long chargeDeltaUC) {
+        if (mAccumulatedChargeMicroCoulomb[index] >= 0L) {
+            mAccumulatedChargeMicroCoulomb[index] += chargeDeltaUC;
         } else {
-            Slog.wtf(TAG, "Attempting to add " + energyDeltaUJ + " to unavailable bucket "
+            Slog.wtf(TAG, "Attempting to add " + chargeDeltaUC + " to unavailable bucket "
                     + getBucketName(index) + " whose value was "
-                    + mAccumulatedEnergiesMicroJoules[index]);
+                    + mAccumulatedChargeMicroCoulomb[index]);
         }
     }
 
     /**
-     * Return accumulated energy (in microjoules) for a standard energy bucket since last reset.
-     * Returns {@link android.os.BatteryStats#ENERGY_DATA_UNAVAILABLE} if this data is unavailable.
-     * @throws IllegalArgumentException if no such {@link StandardEnergyBucket}.
+     * Return accumulated charge (in microcouloumb) for a standard power bucket since last reset.
+     * Returns {@link android.os.BatteryStats#POWER_DATA_UNAVAILABLE} if this data is unavailable.
+     * @throws IllegalArgumentException if no such {@link StandardPowerBucket}.
      */
-    public long getAccumulatedStandardBucketEnergy(@StandardEnergyBucket int bucket) {
+    public long getAccumulatedStandardBucketCharge(@StandardPowerBucket int bucket) {
         checkValidStandardBucket(bucket);
-        return mAccumulatedEnergiesMicroJoules[bucket];
+        return mAccumulatedChargeMicroCoulomb[bucket];
     }
 
     /**
-     * Return accumulated energy (in microjoules) for the a custom energy bucket since last reset.
-     * Returns {@link android.os.BatteryStats#ENERGY_DATA_UNAVAILABLE} if this data is unavailable.
+     * Return accumulated charge (in microcoulomb) for the a custom power bucket since last
+     * reset.
+     * Returns {@link android.os.BatteryStats#POWER_DATA_UNAVAILABLE} if this data is unavailable.
      */
     @VisibleForTesting
-    public long getAccumulatedCustomBucketEnergy(int customBucket) {
+    public long getAccumulatedCustomBucketCharge(int customBucket) {
         if (!isValidCustomBucket(customBucket)) {
-            return ENERGY_DATA_UNAVAILABLE;
+            return POWER_DATA_UNAVAILABLE;
         }
-        return mAccumulatedEnergiesMicroJoules[customBucketToIndex(customBucket)];
+        return mAccumulatedChargeMicroCoulomb[customBucketToIndex(customBucket)];
     }
 
     /**
-     * Return accumulated energies (in microjoules) for all custom energy buckets since last reset.
+     * Return accumulated charge (in microcoulomb) for all custom power buckets since last reset.
      */
-    public @NonNull long[] getAccumulatedCustomBucketEnergies() {
-        final long[] energies = new long[getNumberCustomEnergyBuckets()];
-        for (int bucket = 0; bucket < energies.length; bucket++) {
-            energies[bucket] = mAccumulatedEnergiesMicroJoules[customBucketToIndex(bucket)];
+    public @NonNull long[] getAccumulatedCustomBucketCharges() {
+        final long[] charges = new long[getNumberCustomPowerBuckets()];
+        for (int bucket = 0; bucket < charges.length; bucket++) {
+            charges[bucket] = mAccumulatedChargeMicroCoulomb[customBucketToIndex(bucket)];
         }
-        return energies;
+        return charges;
     }
 
     /**
-     * Map {@link android.view.Display} STATE_ to corresponding {@link StandardEnergyBucket}.
+     * Map {@link android.view.Display} STATE_ to corresponding {@link StandardPowerBucket}.
      */
-    public static @StandardEnergyBucket int getDisplayEnergyBucket(int screenState) {
+    public static @StandardPowerBucket int getDisplayPowerBucket(int screenState) {
         if (Display.isOnState(screenState)) {
-            return ENERGY_BUCKET_SCREEN_ON;
+            return POWER_BUCKET_SCREEN_ON;
         }
         if (Display.isDozeState(screenState)) {
-            return ENERGY_BUCKET_SCREEN_DOZE;
+            return POWER_BUCKET_SCREEN_DOZE;
         }
-        return ENERGY_BUCKET_SCREEN_OTHER;
+        return POWER_BUCKET_SCREEN_OTHER;
     }
 
     /**
@@ -282,9 +284,9 @@ public class MeasuredEnergyStats {
         // Check if any MeasuredEnergyStats exists on the parcel
         if (arraySize == 0) return null;
 
-        final int numCustomBuckets = arraySize - NUMBER_STANDARD_ENERGY_BUCKETS;
+        final int numCustomBuckets = arraySize - NUMBER_STANDARD_POWER_BUCKETS;
         final MeasuredEnergyStats stats = new MeasuredEnergyStats(
-                new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], numCustomBuckets);
+                new boolean[NUMBER_STANDARD_POWER_BUCKETS], numCustomBuckets);
         stats.readSummaryFromParcel(in, true);
         return stats;
     }
@@ -339,8 +341,8 @@ public class MeasuredEnergyStats {
 
     /** Returns true iff any of the buckets are supported and non-zero. */
     private boolean containsInterestingData() {
-        for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
-            if (mAccumulatedEnergiesMicroJoules[index] > 0) return true;
+        for (int index = 0; index < mAccumulatedChargeMicroCoulomb.length; index++) {
+            if (mAccumulatedChargeMicroCoulomb[index] > 0) return true;
         }
         return false;
     }
@@ -361,7 +363,7 @@ public class MeasuredEnergyStats {
         stats.writeSummaryToParcel(dest, skipZero);
     }
 
-    /** Reset accumulated energy. */
+    /** Reset accumulated charges. */
     private void reset() {
         final int numIndices = getNumberOfIndices();
         for (int index = 0; index < numIndices; index++) {
@@ -369,42 +371,42 @@ public class MeasuredEnergyStats {
         }
     }
 
-    /** Reset accumulated energy of the given stats. */
+    /** Reset accumulated charges of the given stats. */
     public static void resetIfNotNull(@Nullable MeasuredEnergyStats stats) {
         if (stats != null) stats.reset();
     }
 
     /** If the index is AVAILABLE, overwrite its value; otherwise leave it as UNAVAILABLE. */
     private void setValueIfSupported(int index, long value) {
-        if (mAccumulatedEnergiesMicroJoules[index] != ENERGY_DATA_UNAVAILABLE) {
-            mAccumulatedEnergiesMicroJoules[index] = value;
+        if (mAccumulatedChargeMicroCoulomb[index] != POWER_DATA_UNAVAILABLE) {
+            mAccumulatedChargeMicroCoulomb[index] = value;
         }
     }
 
     /**
-     * Check if measuring the energy of the given bucket is supported by this device.
-     * @throws IllegalArgumentException if not a valid {@link StandardEnergyBucket}.
+     * Check if measuring the charge consumption of the given bucket is supported by this device.
+     * @throws IllegalArgumentException if not a valid {@link StandardPowerBucket}.
      */
-    public boolean isStandardBucketSupported(@StandardEnergyBucket int bucket) {
+    public boolean isStandardBucketSupported(@StandardPowerBucket int bucket) {
         checkValidStandardBucket(bucket);
         return isIndexSupported(bucket);
     }
 
     private boolean isIndexSupported(int index) {
-        return mAccumulatedEnergiesMicroJoules[index] != ENERGY_DATA_UNAVAILABLE;
+        return mAccumulatedChargeMicroCoulomb[index] != POWER_DATA_UNAVAILABLE;
     }
 
-    /** Check if the supported energy buckets are precisely those given. */
+    /** Check if the supported power buckets are precisely those given. */
     public boolean isSupportEqualTo(
             @NonNull boolean[] queriedStandardBuckets, int numCustomBuckets) {
 
         final int numBuckets = getNumberOfIndices();
         // TODO(b/178504428): Detect whether custom buckets have changed qualitatively, not just
         //                    quantitatively, and treat as mismatch if so.
-        if (numBuckets != NUMBER_STANDARD_ENERGY_BUCKETS + numCustomBuckets) {
+        if (numBuckets != NUMBER_STANDARD_POWER_BUCKETS + numCustomBuckets) {
             return false;
         }
-        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_ENERGY_BUCKETS; stdBucket++) {
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_POWER_BUCKETS; stdBucket++) {
             if (isStandardBucketSupported(stdBucket) != queriedStandardBuckets[stdBucket]) {
                 return false;
             }
@@ -415,14 +417,14 @@ public class MeasuredEnergyStats {
     /** Dump debug data. */
     public void dump(PrintWriter pw) {
         pw.print("   ");
-        for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
+        for (int index = 0; index < mAccumulatedChargeMicroCoulomb.length; index++) {
             pw.print(getBucketName(index));
             pw.print(" : ");
-            pw.print(mAccumulatedEnergiesMicroJoules[index]);
+            pw.print(mAccumulatedChargeMicroCoulomb[index]);
             if (!isIndexSupported(index)) {
                 pw.print(" (unsupported)");
             }
-            if (index != mAccumulatedEnergiesMicroJoules.length - 1) {
+            if (index != mAccumulatedChargeMicroCoulomb.length - 1) {
                 pw.print(", ");
             }
         }
@@ -435,38 +437,38 @@ public class MeasuredEnergyStats {
      */
     private static String getBucketName(int index) {
         if (isValidStandardBucket(index)) {
-            return DebugUtils.valueToString(MeasuredEnergyStats.class, "ENERGY_BUCKET_", index);
+            return DebugUtils.valueToString(MeasuredEnergyStats.class, "POWER_BUCKET_", index);
         }
         return "CUSTOM_" + indexToCustomBucket(index);
     }
 
-    /** Get the number of custom energy buckets on this device. */
-    public int getNumberCustomEnergyBuckets() {
-        return mAccumulatedEnergiesMicroJoules.length - NUMBER_STANDARD_ENERGY_BUCKETS;
+    /** Get the number of custom power buckets on this device. */
+    public int getNumberCustomPowerBuckets() {
+        return mAccumulatedChargeMicroCoulomb.length - NUMBER_STANDARD_POWER_BUCKETS;
     }
 
     private static int customBucketToIndex(int customBucket) {
-        return customBucket + NUMBER_STANDARD_ENERGY_BUCKETS;
+        return customBucket + NUMBER_STANDARD_POWER_BUCKETS;
     }
 
     private static int indexToCustomBucket(int index) {
-        return index - NUMBER_STANDARD_ENERGY_BUCKETS;
+        return index - NUMBER_STANDARD_POWER_BUCKETS;
     }
 
-    private static void checkValidStandardBucket(@StandardEnergyBucket int bucket) {
+    private static void checkValidStandardBucket(@StandardPowerBucket int bucket) {
         if (!isValidStandardBucket(bucket)) {
-            throw new IllegalArgumentException("Illegal StandardEnergyBucket " + bucket);
+            throw new IllegalArgumentException("Illegal StandardPowerBucket " + bucket);
         }
     }
 
-    private static boolean isValidStandardBucket(@StandardEnergyBucket int bucket) {
-        return bucket >= 0 && bucket < NUMBER_STANDARD_ENERGY_BUCKETS;
+    private static boolean isValidStandardBucket(@StandardPowerBucket int bucket) {
+        return bucket >= 0 && bucket < NUMBER_STANDARD_POWER_BUCKETS;
     }
 
     /** Returns whether the given custom bucket is valid (exists) on this device. */
     @VisibleForTesting
     public boolean isValidCustomBucket(int customBucket) {
         return customBucket >= 0
-                && customBucketToIndex(customBucket) < mAccumulatedEnergiesMicroJoules.length;
+                && customBucketToIndex(customBucket) < mAccumulatedChargeMicroCoulomb.length;
     }
 }

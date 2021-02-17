@@ -123,10 +123,10 @@ public class BatteryUsageStatsProvider {
         final long realtimeUs = mStats.mClocks.elapsedRealtime() * 1000;
         final long uptimeUs = mStats.mClocks.uptimeMillis() * 1000;
 
-        final long[] customMeasuredEnergiesMicroJoules =
-                mStats.getCustomMeasuredEnergiesMicroJoules();
-        final int customPowerComponentCount = customMeasuredEnergiesMicroJoules != null
-                ? customMeasuredEnergiesMicroJoules.length
+        final long[] customMeasuredChargesUC =
+                mStats.getCustomConsumerMeasuredBatteryConsumptionUC();
+        final int customPowerComponentCount = customMeasuredChargesUC != null
+                ? customMeasuredChargesUC.length
                 : 0;
 
         // TODO(b/174186358): read extra time component number from configuration
