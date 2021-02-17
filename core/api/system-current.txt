@@ -8328,22 +8328,8 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean);
   }
 
-  public final class SimPhonebookContract {
-    method @NonNull public static String getEfUriPath(int);
-    field public static final String SUBSCRIPTION_ID_PATH_SEGMENT = "subid";
-  }
-
-  public static final class SimPhonebookContract.ElementaryFiles {
-    field public static final String EF_ADN_PATH_SEGMENT = "adn";
-    field public static final String EF_FDN_PATH_SEGMENT = "fdn";
-    field public static final String EF_SDN_PATH_SEGMENT = "sdn";
-    field public static final String ELEMENTARY_FILES_PATH_SEGMENT = "elementary_files";
-  }
-
   public static final class SimPhonebookContract.SimRecords {
-    field public static final String EXTRA_NAME_VALIDATION_RESULT = "android.provider.extra.NAME_VALIDATION_RESULT";
     field public static final String QUERY_ARG_PIN2 = "android:query-arg-pin2";
-    field public static final String VALIDATE_NAME_PATH_SEGMENT = "validate_name";
   }
 
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
