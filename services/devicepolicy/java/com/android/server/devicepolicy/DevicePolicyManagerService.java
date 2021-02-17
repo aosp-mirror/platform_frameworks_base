@@ -247,6 +247,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.AdminPermissionControlParams;
 import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.provider.CalendarContract;
@@ -7891,6 +7892,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             updateDeviceOwnerLocked();
             setDeviceOwnershipSystemPropertyLocked();
 
+            //TODO(b/180371154): when provisionFullyManagedDevice is used in tests, remove this
+            // hard-coded default value setting.
+            if (isAdb(caller)) {
+                activeAdmin.mAdminCanGrantSensorsPermissions = true;
+                mPolicyCache.setAdminCanGrantSensorsPermissions(userId, true);
+                saveSettingsLocked(userId);
+            }
+
             mInjector.binderWithCleanCallingIdentity(() -> {
                 // Restrict adding a managed profile when a device owner is set on the device.
                 // That is to prevent the co-existence of a managed profile and a device owner
@@ -12643,9 +12652,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
+                    AdminPermissionControlParams permissionParams =
+                            new AdminPermissionControlParams(packageName, permission, grantState,
+                                    canAdminGrantSensorsPermissionsForUser(caller.getUserId()));
                     mInjector.getPermissionControllerManager(caller.getUserHandle())
                             .setRuntimePermissionGrantStateByDeviceAdmin(caller.getPackageName(),
-                                    packageName, permission, grantState, mContext.getMainExecutor(),
+                                    permissionParams, mContext.getMainExecutor(),
                                     (permissionWasSet) -> {
                                         if (isPostQAdmin && !permissionWasSet) {
                                             callback.sendResult(null);
