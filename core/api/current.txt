@@ -31638,6 +31638,7 @@ package android.os {
     method public boolean isQuietModeEnabled(android.os.UserHandle);
     method public boolean isSystemUser();
     method public boolean isUserAGoat();
+    method public boolean isUserForeground();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public boolean isUserRunning(android.os.UserHandle);
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public boolean isUserRunningOrStopping(android.os.UserHandle);
     method public boolean isUserUnlocked();
