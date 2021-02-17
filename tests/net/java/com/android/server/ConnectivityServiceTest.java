@@ -4173,6 +4173,7 @@ public class ConnectivityServiceTest {
             // ...  and cell data to be torn down after nascent network timeout.
             cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent,
                     mService.mNascentDelayMs + TEST_CALLBACK_TIMEOUT_MS);
+            waitForIdle();
             assertLength(1, mCm.getAllNetworks());
         } finally {
             testFactory.terminate();
