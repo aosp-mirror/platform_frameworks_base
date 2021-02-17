@@ -31,6 +31,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.IdRes;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.res.Configuration;
@@ -262,8 +263,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
-        when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
         mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
+        mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
+        mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
         when(mView.findViewById(R.id.notification_container_parent))
                 .thenReturn(mNotificationContainerParent);
         FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
@@ -293,10 +295,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardClockSwitchController);
         when(mKeyguardStatusViewComponent.getKeyguardStatusViewController())
                 .thenReturn(mKeyguardStatusViewController);
-        when(mQsFrame.getLayoutParams()).thenReturn(
-                new ViewGroup.LayoutParams(600, 400));
-        when(mNotificationStackScrollLayoutController.getLayoutParams()).thenReturn(
-                new ViewGroup.LayoutParams(600, 400));
 
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
@@ -442,7 +440,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
     @Test
     public void testAllChildrenOfNotificationContainer_haveIds() {
-        enableDualPaneShade();
+        enableSplitShade();
+        mNotificationContainerParent.removeAllViews();
         mNotificationContainerParent.addView(newViewWithId(1));
         mNotificationContainerParent.addView(newViewWithId(View.NO_ID));
 
@@ -455,35 +454,59 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Test
     public void testSinglePaneShadeLayout_isAlignedToParent() {
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
-        mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
-        mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
 
         mNotificationPanelViewController.updateResources();
 
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(mNotificationContainerParent);
-        ConstraintSet.Layout qsFrameLayout = constraintSet.getConstraint(R.id.qs_frame).layout;
-        ConstraintSet.Layout stackScrollerLayout = constraintSet.getConstraint(
-                R.id.notification_stack_scroller).layout;
-        assertThat(qsFrameLayout.endToEnd).isEqualTo(ConstraintSet.PARENT_ID);
-        assertThat(stackScrollerLayout.startToStart).isEqualTo(ConstraintSet.PARENT_ID);
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
+                .isEqualTo(ConstraintSet.PARENT_ID);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
+                .isEqualTo(ConstraintSet.PARENT_ID);
     }
 
     @Test
     public void testSplitShadeLayout_isAlignedToGuideline() {
-        enableDualPaneShade();
-        mNotificationContainerParent.addView(newViewWithId(R.id.qs_frame));
-        mNotificationContainerParent.addView(newViewWithId(R.id.notification_stack_scroller));
+        enableSplitShade();
 
         mNotificationPanelViewController.updateResources();
 
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(mNotificationContainerParent);
-        ConstraintSet.Layout qsFrameLayout = constraintSet.getConstraint(R.id.qs_frame).layout;
-        ConstraintSet.Layout stackScrollerLayout = constraintSet.getConstraint(
-                R.id.notification_stack_scroller).layout;
-        assertThat(qsFrameLayout.endToEnd).isEqualTo(R.id.qs_edge_guideline);
-        assertThat(stackScrollerLayout.startToStart).isEqualTo(R.id.qs_edge_guideline);
+        assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
+                .isEqualTo(R.id.qs_edge_guideline);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
+                .isEqualTo(R.id.qs_edge_guideline);
+    }
+
+    @Test
+    public void testSinglePaneShadeLayout_childrenHaveConstantWidth() {
+        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).mWidth)
+                .isEqualTo(mResources.getDimensionPixelSize(R.dimen.qs_panel_width));
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).mWidth)
+                .isEqualTo(mResources.getDimensionPixelSize(R.dimen.notification_panel_width));
+    }
+
+    @Test
+    public void testSplitShadeLayout_childrenHaveZeroWidth() {
+        enableSplitShade();
+
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).mWidth).isEqualTo(0);
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).mWidth).isEqualTo(0);
+    }
+
+    @Test
+    public void testOnDragDownEvent_horizontalTranslationIsZeroForSplitShade() {
+        when(mNotificationStackScrollLayoutController.getWidth()).thenReturn(350f);
+        when(mView.getWidth()).thenReturn(800);
+        enableSplitShade();
+
+        onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN,
+                200f /* x position */, 0f, 0));
+
+        verify(mQsFrame).setTranslationX(0);
     }
 
     private View newViewWithId(int id) {
@@ -496,19 +519,13 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         return view;
     }
 
-    @Test
-    public void testOnDragDownEvent_horizontalTranslationIsZeroForDualPaneShade() {
-        when(mNotificationStackScrollLayoutController.getWidth()).thenReturn(350f);
-        when(mView.getWidth()).thenReturn(800);
-        enableDualPaneShade();
-
-        onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN,
-                200f /* x position */, 0f, 0));
-
-        verify(mQsFrame).setTranslationX(0);
+    private ConstraintSet.Layout getConstraintSetLayout(@IdRes int id) {
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(mNotificationContainerParent);
+        return constraintSet.getConstraint(id).layout;
     }
 
-    private void enableDualPaneShade() {
+    private void enableSplitShade() {
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
         when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
     }

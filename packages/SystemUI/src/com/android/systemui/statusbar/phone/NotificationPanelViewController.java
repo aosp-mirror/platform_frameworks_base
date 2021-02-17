@@ -867,25 +867,16 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void updateResources() {
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
-        ViewGroup.LayoutParams lp = mQsFrame.getLayoutParams();
-        if (lp.width != qsWidth) {
-            lp.width = qsWidth;
-            mQsFrame.setLayoutParams(lp);
-        }
-
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
-        lp = mNotificationStackScrollLayoutController.getLayoutParams();
-        if (lp.width != panelWidth) {
-            lp.width = panelWidth;
-            mNotificationStackScrollLayoutController.setLayoutParams(lp);
-        }
 
-        // In order to change the constraints at runtime, all children of the Constraint Layout
-        // must have ids.
+        // To change the constraints at runtime, all children of the ConstraintLayout must have ids
         ensureAllViewsHaveIds(mNotificationContainerParent);
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(mNotificationContainerParent);
         if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+            // width = 0 to take up all available space within constraints
+            qsWidth = 0;
+            panelWidth = 0;
             constraintSet.connect(R.id.qs_frame, END, R.id.qs_edge_guideline, END);
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
@@ -894,6 +885,8 @@ public class NotificationPanelViewController extends PanelViewController {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
         }
+        constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
+        constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
         constraintSet.applyTo(mNotificationContainerParent);
     }
 
