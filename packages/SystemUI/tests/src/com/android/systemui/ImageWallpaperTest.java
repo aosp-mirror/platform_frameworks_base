@@ -100,7 +100,6 @@ public class ImageWallpaperTest extends SysuiTestCase {
         return new ImageWallpaper() {
             @Override
             public Engine onCreateEngine() {
-                onCreate();
                 return new GLEngine(mHandler) {
                     @Override
                     public Context getDisplayContext() {
