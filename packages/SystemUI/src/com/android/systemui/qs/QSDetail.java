@@ -72,6 +72,7 @@ public class QSDetail extends LinearLayout {
     private boolean mFullyExpanded;
     private QuickStatusBarHeader mHeader;
     private boolean mTriggeredExpand;
+    private boolean mShouldAnimate;
     private int mOpenX;
     private int mOpenY;
     private boolean mAnimatingOpen;
@@ -108,16 +109,6 @@ public class QSDetail extends LinearLayout {
         updateDetailText();
 
         mClipper = new QSDetailClipper(this);
-
-        final OnClickListener doneListener = new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                announceForAccessibility(
-                        mContext.getString(R.string.accessibility_desc_quick_settings));
-                mQsPanelController.closeDetail();
-            }
-        };
-        mDetailDoneButton.setOnClickListener(doneListener);
     }
 
     /** */
@@ -169,6 +160,7 @@ public class QSDetail extends LinearLayout {
     public void handleShowingDetail(final DetailAdapter adapter, int x, int y,
             boolean toggleQs) {
         final boolean showingDetail = adapter != null;
+        final boolean wasShowingDetail = mDetailAdapter != null;
         setClickable(showingDetail);
         if (showingDetail) {
             setupDetailHeader(adapter);
@@ -178,6 +170,7 @@ public class QSDetail extends LinearLayout {
             } else {
                 mTriggeredExpand = false;
             }
+            mShouldAnimate = adapter.shouldAnimate();
             mOpenX = x;
             mOpenY = y;
         } else {
@@ -190,10 +183,10 @@ public class QSDetail extends LinearLayout {
             }
         }
 
-        boolean visibleDiff = (mDetailAdapter != null) != (adapter != null);
-        if (!visibleDiff && mDetailAdapter == adapter) return;  // already in right state
-        AnimatorListener listener = null;
-        if (adapter != null) {
+        boolean visibleDiff = wasShowingDetail != showingDetail;
+        if (!visibleDiff && !wasShowingDetail) return;  // already in right state
+        AnimatorListener listener;
+        if (showingDetail) {
             int viewCacheIndex = adapter.getMetricsCategory();
             View detailView = adapter.createDetailView(mContext, mDetailViews.get(viewCacheIndex),
                     mDetailContent);
@@ -213,7 +206,7 @@ public class QSDetail extends LinearLayout {
             listener = mHideGridContentWhenDone;
             setVisibility(View.VISIBLE);
         } else {
-            if (mDetailAdapter != null) {
+            if (wasShowingDetail) {
                 Dependency.get(MetricsLogger.class).hidden(mDetailAdapter.getMetricsCategory());
                 mUiEventLogger.log(mDetailAdapter.closeDetailEvent());
             }
@@ -227,7 +220,15 @@ public class QSDetail extends LinearLayout {
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
-        animateDetailVisibleDiff(x, y, visibleDiff, listener);
+        if (mShouldAnimate) {
+            animateDetailVisibleDiff(x, y, visibleDiff, listener);
+        } else {
+            if (showingDetail) {
+                showImmediately();
+            } else {
+                hideImmediately();
+            }
+        }
     }
 
     protected void animateDetailVisibleDiff(int x, int y, boolean visibleDiff, AnimatorListener listener) {
@@ -245,6 +246,17 @@ public class QSDetail extends LinearLayout {
         }
     }
 
+    void showImmediately() {
+        setVisibility(VISIBLE);
+        mClipper.cancelAnimator();
+        mClipper.showBackground();
+    }
+
+    public void hideImmediately() {
+        mClipper.cancelAnimator();
+        setVisibility(View.GONE);
+    }
+
     protected void setupDetailFooter(DetailAdapter adapter) {
         final Intent settingsIntent = adapter.getSettingsIntent();
         mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
@@ -254,6 +266,13 @@ public class QSDetail extends LinearLayout {
             mUiEventLogger.log(adapter.moreSettingsEvent());
             Dependency.get(ActivityStarter.class)
                     .postStartActivityDismissingKeyguard(settingsIntent, 0);
+        });
+        mDetailDoneButton.setOnClickListener(v -> {
+            announceForAccessibility(
+                    mContext.getString(R.string.accessibility_desc_quick_settings));
+            if (!adapter.onDoneButtonClicked()) {
+                mQsPanelController.closeDetail();
+            }
         });
     }
 

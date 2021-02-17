@@ -25,7 +25,6 @@ cc_library_shared {
     ],
     srcs: [
         "jni/com_android_server_TestNetworkService.cpp",
-        "jni/com_android_server_connectivity_Vpn.cpp",
         "jni/onload.cpp",
     ],
     shared_libs: [

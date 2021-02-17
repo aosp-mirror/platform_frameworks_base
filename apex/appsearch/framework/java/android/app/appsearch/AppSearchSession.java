@@ -108,54 +108,85 @@ public final class AppSearchSession implements Closeable {
      * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
      * types of schema modifications are always safe and are made without deleting any existing
      * documents:
+     *
      * <ul>
-     *     <li>Addition of new types
-     *     <li>Addition of new
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} or
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED} properties to a
-     *         type
-     *     <li>Changing the cardinality of a data type to be less restrictive (e.g. changing an
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} property into a
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED} property.
+     *   <li>Addition of new types
+     *   <li>Addition of new {@link AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} or
+     *       {@link AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED} properties to a
+     *       type
+     *   <li>Changing the cardinality of a data type to be less restrictive (e.g. changing an {@link
+     *       AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} property into a {@link
+     *       AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED} property.
      * </ul>
      *
      * <p>The following types of schema changes are not backwards-compatible:
-     * <ul>
-     *     <li>Removal of an existing type
-     *     <li>Removal of a property from a type
-     *     <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
-     *     <li>For properties of {@code Document} type, changing the schema type of
-     *         {@code Document}s of that property
-     *     <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} property into a
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED} property).
-     *     <li>Adding a
-     *         {@link AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED} property.
-     * </ul>
-     * <p>Supplying a schema with such changes will, by default, result in this call returning an
-     * {@link AppSearchResult} with a code of {@link AppSearchResult#RESULT_INVALID_SCHEMA} and an
-     * error message describing the incompatibility. In this case the previously set schema will
-     * remain active.
      *
-     * <p>If you need to make non-backwards-compatible changes as described above, you can set the
-     * {@link SetSchemaRequest.Builder#setForceOverride} method to {@code true}. In this case,
-     * instead of returning an {@link AppSearchResult} with the
-     * {@link AppSearchResult#RESULT_INVALID_SCHEMA} error code, all documents which are not
-     * compatible with the new schema will be deleted and the incompatible schema will be applied.
+     * <ul>
+     *   <li>Removal of an existing type
+     *   <li>Removal of a property from a type
+     *   <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
+     *   <li>For properties of {@code Document} type, changing the schema type of {@code Document}s
+     *       of that property
+     *   <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an {@link
+     *       AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} property into a {@link
+     *       AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED} property).
+     *   <li>Adding a {@link AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED} property.
+     * </ul>
+     *
+     * <p>Supplying a schema with such changes will, by default, result in this call completing its
+     * future with an {@link android.app.appsearch.exceptions.AppSearchException} with a code of
+     * {@link AppSearchResult#RESULT_INVALID_SCHEMA} and a message describing the incompatibility.
+     * In this case the previously set schema will remain active.
+     *
+     * <p>If you need to make non-backwards-compatible changes as described above, you can either:
+     *
+     * <ul>
+     *   <li>Set the {@link SetSchemaRequest.Builder#setForceOverride} method to {@code true}. In
+     *       this case, instead of completing its future with an {@link
+     *       android.app.appsearch.exceptions.AppSearchException} with the {@link
+     *       AppSearchResult#RESULT_INVALID_SCHEMA} error code, all documents which are not
+     *       compatible with the new schema will be deleted and the incompatible schema will be
+     *       applied. Incompatible types and deleted types will be set into {@link
+     *       SetSchemaResponse#getIncompatibleTypes()} and {@link
+     *       SetSchemaResponse#getDeletedTypes()}, respectively.
+     *   <li>Add a {@link android.app.appsearch.AppSearchSchema.Migrator} for each incompatible type
+     *       and make no deletion. The migrator will migrate documents from it's old schema version
+     *       to the new version. Migrated types will be set into both {@link
+     *       SetSchemaResponse#getIncompatibleTypes()} and {@link
+     *       SetSchemaResponse#getMigratedTypes()}. See the migration section below.
+     * </ul>
      *
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
      * efficiently.
      *
-     * <p>By default, documents are visible on platform surfaces. To opt out, call
-     * {@link SetSchemaRequest.Builder#setSchemaTypeVisibilityForSystemUi} with {@code visible} as
-     * false. Any visibility settings apply only to the schemas that are included in the
-     * {@code request}. Visibility settings for a schema type do not persist across
-     * {@link #setSchema} calls.
+     * <p>By default, documents are visible on platform surfaces. To opt out, call {@code
+     * SetSchemaRequest.Builder#setPlatformSurfaceable} with {@code surfaceable} as false. Any
+     * visibility settings apply only to the schemas that are included in the {@code request}.
+     * Visibility settings for a schema type do not apply or persist across {@link
+     * SetSchemaRequest}s.
      *
-     * @param request  The schema update request.
+     * <p>Migration: make non-backwards-compatible changes will delete all stored documents in old
+     * schema. You can save your documents by setting {@link
+     * android.app.appsearch.AppSearchSchema.Migrator} via the {@link
+     * SetSchemaRequest.Builder#setMigrator} for each type you want to save.
+     *
+     * <p>{@link android.app.appsearch.AppSearchSchema.Migrator#onDowngrade} or {@link
+     * android.app.appsearch.AppSearchSchema.Migrator#onUpgrade} will be triggered if the version
+     * number of the schema stored in AppSearch is different with the version in the request.
+     *
+     * <p>If any error or Exception occurred in the {@link
+     * android.app.appsearch.AppSearchSchema.Migrator#onDowngrade}, {@link
+     * android.app.appsearch.AppSearchSchema.Migrator#onUpgrade} or {@link
+     * android.app.appsearch.AppSearchMigrationHelper.Transformer#transform}, the migration will be
+     * terminated, the setSchema request will be rejected unless the schema changes are
+     * backwards-compatible, and stored documents won't have any observable changes.
+     *
+     * @param request The schema update request.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
+     * @see android.app.appsearch.AppSearchSchema.Migrator
+     * @see android.app.appsearch.AppSearchMigrationHelper.Transformer
      */
     public void setSchema(
             @NonNull SetSchemaRequest request,
@@ -193,11 +224,9 @@ public final class AppSearchSession implements Closeable {
                             executor.execute(() -> {
                                 if (result.isSuccess()) {
                                     callback.accept(
-                                            // TODO(b/151178558) implement Migration in platform.
+                                            // TODO(b/177266929) implement Migration in platform.
                                             AppSearchResult.newSuccessfulResult(
-                                                    new SetSchemaResponse.Builder().setResultCode(
-                                                            result.getResultCode())
-                                                            .build()));
+                                                    new SetSchemaResponse.Builder().build()));
                                 } else {
                                     callback.accept(result);
                                 }
@@ -256,7 +285,7 @@ public final class AppSearchSession implements Closeable {
      * <p>Each {@link GenericDocument}'s {@code schemaType} field must be set to the name of a
      * schema type previously registered via the {@link #setSchema} method.
      *
-     * @param request  {@link PutDocumentsRequest} containing documents to be indexed
+     * @param request {@link PutDocumentsRequest} containing documents to be indexed
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive pending result of performing this operation. The keys
      *                 of the returned {@link AppSearchBatchResult} are the URIs of the input
@@ -297,9 +326,10 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Retrieves {@link GenericDocument}s by URI.
+     * Gets {@link GenericDocument} objects by URIs and namespace from the {@link AppSearchSession}
+     * database.
      *
-     * @param request  {@link GetByUriRequest} containing URIs to be retrieved.
+     * @param request a request containing URIs and namespace to get documents for.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive the pending result of performing this operation. The keys
      *                 of the returned {@link AppSearchBatchResult} are the input URIs. The values
@@ -377,48 +407,65 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Searches a document based on a given query string.
+     * Retrieves documents from the open {@link AppSearchSession} that match a given query string
+     * and type of search provided.
      *
-     * <p>Currently we support following features in the raw query format:
+     * <p>Query strings can be empty, contain one term with no operators, or contain multiple terms
+     * and operators.
+     *
+     * <p>For query strings that are empty, all documents that match the {@link SearchSpec} will be
+     * returned.
+     *
+     * <p>For query strings with a single term and no operators, documents that match the provided
+     * query string and {@link SearchSpec} will be returned.
+     *
+     * <p>The following operators are supported:
+     *
      * <ul>
-     *     <li>AND
-     *     <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and
-     *     ‘cat’”).
-     *     Example: hello world matches documents that have both ‘hello’ and ‘world’
-     *     <li>OR
-     *     <p>OR joins (e.g. “match documents that have either the term ‘dog’ or
-     *     ‘cat’”).
-     *     Example: dog OR puppy
-     *     <li>Exclusion
-     *     <p>Exclude a term (e.g. “match documents that do
-     *     not have the term ‘dog’”).
-     *     Example: -dog excludes the term ‘dog’
-     *     <li>Grouping terms
-     *     <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
-     *     “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
-     *     Example: (dog puppy) (cat kitten) two one group containing two terms.
-     *     <li>Property restricts
-     *     <p> Specifies which properties of a document to specifically match terms in (e.g.
-     *     “match documents where the ‘subject’ property contains ‘important’”).
-     *     Example: subject:important matches documents with the term ‘important’ in the
-     *     ‘subject’ property
-     *     <li>Schema type restricts
-     *     <p>This is similar to property restricts, but allows for restricts on top-level document
-     *     fields, such as schema_type. Clients should be able to limit their query to documents of
-     *     a certain schema_type (e.g. “match documents that are of the ‘Email’ schema_type”).
-     *     Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will match documents
-     *     that contain the query term ‘dog’ and are of either the ‘Email’ schema type or the
-     *     ‘Video’ schema type.
+     *   <li>AND (implicit)
+     *       <p>AND is an operator that matches documents that contain <i>all</i> provided terms.
+     *       <p><b>NOTE:</b> A space between terms is treated as an "AND" operator. Explicitly
+     *       including "AND" in a query string will treat "AND" as a term, returning documents that
+     *       also contain "AND".
+     *       <p>Example: "apple AND banana" matches documents that contain the terms "apple", "and",
+     *       "banana".
+     *       <p>Example: "apple banana" matches documents that contain both "apple" and "banana".
+     *       <p>Example: "apple banana cherry" matches documents that contain "apple", "banana", and
+     *       "cherry".
+     *   <li>OR
+     *       <p>OR is an operator that matches documents that contain <i>any</i> provided term.
+     *       <p>Example: "apple OR banana" matches documents that contain either "apple" or
+     *       "banana".
+     *       <p>Example: "apple OR banana OR cherry" matches documents that contain any of "apple",
+     *       "banana", or "cherry".
+     *   <li>Exclusion (-)
+     *       <p>Exclusion (-) is an operator that matches documents that <i>do not</i> contain the
+     *       provided term.
+     *       <p>Example: "-apple" matches documents that do not contain "apple".
+     *   <li>Grouped Terms
+     *       <p>For queries that require multiple operators and terms, terms can be grouped into
+     *       subqueries. Subqueries are contained within an open "(" and close ")" parenthesis.
+     *       <p>Example: "(donut OR bagel) (coffee OR tea)" matches documents that contain either
+     *       "donut" or "bagel" and either "coffee" or "tea".
+     *   <li>Property Restricts
+     *       <p>For queries that require a term to match a specific {@link AppSearchSchema} property
+     *       of a document, a ":" must be included between the property name and the term.
+     *       <p>Example: "subject:important" matches documents that contain the term "important" in
+     *       the "subject" property.
      * </ul>
      *
-     * <p> This method is lightweight. The heavy work will be done in
-     * {@link SearchResults#getNextPage}.
+     * <p>Additional search specifications, such as filtering by {@link AppSearchSchema} type or
+     * adding projection, can be set by calling the corresponding {@link SearchSpec.Builder} setter.
      *
-     * @param queryExpression Query String to search.
-     * @param searchSpec      Spec for setting filters, raw query etc.
+     * <p>This method is lightweight. The heavy work will be done in {@link
+     * SearchResults#getNextPage}.
+     *
+     * @param queryExpression query string to search.
+     * @param searchSpec spec for setting document filters, adding projection, setting term match
+     *     type, etc.
      * @param executor        Executor on which to invoke the callback of the following request
      *                        {@link SearchResults#getNextPage}.
-     * @return The search result of performing this operation.
+     * @return a {@link SearchResults} object for retrieved matched documents.
      */
     @NonNull
     public SearchResults search(
@@ -440,8 +487,8 @@ public final class AppSearchSession implements Closeable {
      *
      * <p>For each call to {@link #reportUsage}, AppSearch updates usage count and usage recency
      * metrics for that particular document. These metrics are used for ordering {@link #search}
-     * results by the {@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} and
-     * {@link SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} ranking strategies.
+     * results by the {@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} and {@link
+     * SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} ranking strategies.
      *
      * <p>Reporting usage of a document is optional.
      *
@@ -479,9 +526,17 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Removes {@link GenericDocument}s from the index by URI.
+     * Removes {@link GenericDocument} objects by URIs and namespace from the {@link
+     * AppSearchSession} database.
      *
-     * @param request  Request containing URIs to be removed.
+     * <p>Removed documents will no longer be surfaced by {@link #search} or {@link #getByUri}
+     * calls.
+     *
+     * <p><b>NOTE:</b>By default, documents are removed via a soft delete operation. Once the
+     * document crosses the count threshold or byte usage threshold, the documents will be removed
+     * from disk.
+     *
+     * @param request {@link RemoveByUriRequest} with URIs and namespace to remove from the index.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive the pending result of performing this operation. The keys
      *                 of the returned {@link AppSearchBatchResult} are the input URIs. The values
@@ -520,19 +575,18 @@ public final class AppSearchSession implements Closeable {
 
     /**
      * Removes {@link GenericDocument}s from the index by Query. Documents will be removed if they
-     * match the {@code queryExpression} in given namespaces and schemaTypes which is set via
-     * {@link SearchSpec.Builder#addFilterNamespaces} and
-     * {@link SearchSpec.Builder#addFilterSchemas}.
+     * match the {@code queryExpression} in given namespaces and schemaTypes which is set via {@link
+     * SearchSpec.Builder#addFilterNamespaces} and {@link SearchSpec.Builder#addFilterSchemas}.
      *
-     * <p> An empty {@code queryExpression} matches all documents.
+     * <p>An empty {@code queryExpression} matches all documents.
      *
-     * <p> An empty set of namespaces or schemaTypes matches all namespaces or schemaTypes in
-     * the current database.
+     * <p>An empty set of namespaces or schemaTypes matches all namespaces or schemaTypes in the
+     * current database.
      *
      * @param queryExpression Query String to search.
-     * @param searchSpec      Spec containing schemaTypes, namespaces and query expression indicates
-     *                        how document will be removed. All specific about how to scoring,
-     *                        ordering, snippeting and resulting will be ignored.
+     * @param searchSpec Spec containing schemaTypes, namespaces and query expression indicates how
+     *     document will be removed. All specific about how to scoring, ordering, snippeting and
+     *     resulting will be ignored.
      * @param executor        Executor on which to invoke the callback.
      * @param callback        Callback to receive errors resulting from removing the documents. If
      *                        the operation succeeds, the callback will be invoked with

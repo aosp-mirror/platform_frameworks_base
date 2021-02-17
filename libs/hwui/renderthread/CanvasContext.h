@@ -112,6 +112,7 @@ public:
     void setSwapBehavior(SwapBehavior swapBehavior);
 
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
+    void setSurfaceControl(ASurfaceControl* surfaceControl);
     bool pauseSurface();
     void setStopped(bool stopped);
     bool hasSurface() const { return mNativeSurface.get(); }
@@ -218,6 +219,9 @@ private:
 
     RenderThread& mRenderThread;
     std::unique_ptr<ReliableSurface> mNativeSurface;
+    // The SurfaceControl reference is passed from ViewRootImpl, can be set to
+    // NULL to remove the reference
+    ASurfaceControl* mSurfaceControl = nullptr;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;

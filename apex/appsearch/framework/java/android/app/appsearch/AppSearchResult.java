@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -35,19 +36,21 @@ import java.util.Objects;
  */
 public final class AppSearchResult<ValueType> implements Parcelable {
     /**
-     * Result codes from {@link AppSearchManager} methods.
+     * Result codes from {@link AppSearchSession} methods.
+     *
      * @hide
      */
-    @IntDef(value = {
-            RESULT_OK,
-            RESULT_UNKNOWN_ERROR,
-            RESULT_INTERNAL_ERROR,
-            RESULT_INVALID_ARGUMENT,
-            RESULT_IO_ERROR,
-            RESULT_OUT_OF_SPACE,
-            RESULT_NOT_FOUND,
-            RESULT_INVALID_SCHEMA,
-    })
+    @IntDef(
+            value = {
+                RESULT_OK,
+                RESULT_UNKNOWN_ERROR,
+                RESULT_INTERNAL_ERROR,
+                RESULT_INVALID_ARGUMENT,
+                RESULT_IO_ERROR,
+                RESULT_OUT_OF_SPACE,
+                RESULT_NOT_FOUND,
+                RESULT_INVALID_SCHEMA,
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
 
@@ -60,21 +63,21 @@ public final class AppSearchResult<ValueType> implements Parcelable {
     /**
      * An internal error occurred within AppSearch, which the caller cannot address.
      *
-     * This error may be considered similar to {@link IllegalStateException}
+     * <p>This error may be considered similar to {@link IllegalStateException}
      */
     public static final int RESULT_INTERNAL_ERROR = 2;
 
     /**
      * The caller supplied invalid arguments to the call.
      *
-     * This error may be considered similar to {@link IllegalArgumentException}.
+     * <p>This error may be considered similar to {@link IllegalArgumentException}.
      */
     public static final int RESULT_INVALID_ARGUMENT = 3;
 
     /**
      * An issue occurred reading or writing to storage. The call might succeed if repeated.
      *
-     * This error may be considered similar to {@link java.io.IOException}.
+     * <p>This error may be considered similar to {@link java.io.IOException}.
      */
     public static final int RESULT_IO_ERROR = 4;
 
@@ -127,7 +130,7 @@ public final class AppSearchResult<ValueType> implements Parcelable {
     /**
      * Returns the result value associated with this result, if it was successful.
      *
-     * <p>See the documentation of the particular {@link AppSearchManager} call producing this
+     * <p>See the documentation of the particular {@link AppSearchSession} call producing this
      * {@link AppSearchResult} for what is placed in the result value by that call.
      *
      * @throws IllegalStateException if this {@link AppSearchResult} is not successful.
@@ -145,8 +148,8 @@ public final class AppSearchResult<ValueType> implements Parcelable {
      *
      * <p>If {@link #isSuccess} is {@code true}, the error message is always {@code null}. The error
      * message may be {@code null} even if {@link #isSuccess} is {@code false}. See the
-     * documentation of the particular {@link AppSearchManager} call producing this
-     * {@link AppSearchResult} for what is returned by {@link #getErrorMessage}.
+     * documentation of the particular {@link AppSearchSession} call producing this {@link
+     * AppSearchResult} for what is returned by {@link #getErrorMessage}.
      */
     @Nullable
     public String getErrorMessage() {
@@ -205,6 +208,7 @@ public final class AppSearchResult<ValueType> implements Parcelable {
 
     /**
      * Creates a new successful {@link AppSearchResult}.
+     *
      * @hide
      */
     @NonNull
@@ -215,6 +219,7 @@ public final class AppSearchResult<ValueType> implements Parcelable {
 
     /**
      * Creates a new failed {@link AppSearchResult}.
+     *
      * @hide
      */
     @NonNull
@@ -227,6 +232,8 @@ public final class AppSearchResult<ValueType> implements Parcelable {
     @NonNull
     public static <ValueType> AppSearchResult<ValueType> throwableToFailedResult(
             @NonNull Throwable t) {
+        Log.d("AppSearchResult", "Converting throwable to failed result.", t);
+
         if (t instanceof AppSearchException) {
             return ((AppSearchException) t).toAppSearchResult();
         }
@@ -241,6 +248,6 @@ public final class AppSearchResult<ValueType> implements Parcelable {
         } else {
             resultCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
         }
-        return AppSearchResult.newFailedResult(resultCode, t.toString());
+        return AppSearchResult.newFailedResult(resultCode, t.getMessage());
     }
 }

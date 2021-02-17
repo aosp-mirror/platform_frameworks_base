@@ -193,7 +193,6 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
-import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -462,6 +461,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -2586,49 +2586,42 @@ public class PackageManagerService extends IPackageManager.Stub
                 Intent intent, int matchFlags, List<ResolveInfo> candidates,
                 CrossProfileDomainInfo xpDomainInfo, int userId, boolean debug) {
             final ArrayList<ResolveInfo> result = new ArrayList<>();
-            final ArrayList<ResolveInfo> alwaysList = new ArrayList<>();
-            final ArrayList<ResolveInfo> undefinedList = new ArrayList<>();
             final ArrayList<ResolveInfo> matchAllList = new ArrayList<>();
-            final int count = candidates.size();
-            // First, try to use linked apps. Partition the candidates into four lists:
-            // one for the final results, one for the "do not use ever", one for "undefined status"
-            // and finally one for "browser app type".
-            for (int n=0; n<count; n++) {
-                ResolveInfo info = candidates.get(n);
-                String packageName = info.activityInfo.packageName;
-                PackageSetting ps = mSettings.getPackageLPr(packageName);
-                if (ps != null) {
-                    // Add to the special match all list (Browser use case)
-                    if (info.handleAllWebDataURI) {
-                        matchAllList.add(info);
-                        continue;
-                    }
 
-                    boolean isAlways = mDomainVerificationManager
-                            .isApprovedForDomain(ps, intent, userId);
-                    if (isAlways) {
-                        alwaysList.add(info);
-                    } else {
-                        undefinedList.add(info);
-                    }
-                    continue;
+            final int count = candidates.size();
+            // First, try to use approved apps.
+            for (int n = 0; n < count; n++) {
+                ResolveInfo info = candidates.get(n);
+                // Add to the special match all list (Browser use case)
+                if (info.handleAllWebDataURI) {
+                    matchAllList.add(info);
                 }
             }
+
+            Pair<List<ResolveInfo>, Integer> infosAndLevel = mDomainVerificationManager
+                    .filterToApprovedApp(intent, candidates, userId, mSettings::getPackageLPr);
+            List<ResolveInfo> approvedInfos = infosAndLevel.first;
+            Integer highestApproval = infosAndLevel.second;
 
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            // First try to add the "always" resolution(s) for the current user, if any
-            if (alwaysList.size() > 0) {
-                result.addAll(alwaysList);
+            // If no apps are approved for the domain, resolve only to browsers
+            if (approvedInfos.isEmpty()) {
+                // If the other profile has a result, include that and delegate to ResolveActivity
+                if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
+                        > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
+                    result.add(xpDomainInfo.resolveInfo);
+                } else {
+                    includeBrowser = true;
+                }
             } else {
-                // Add all undefined apps as we want them to appear in the disambiguation dialog.
-                result.addAll(undefinedList);
-                // Maybe add one for the other profile.
-                if (xpDomainInfo != null && xpDomainInfo.wereAnyDomainsVerificationApproved) {
+                result.addAll(approvedInfos);
+
+                // If the other profile has an app that's of equal or higher approval, add it
+                if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel >= highestApproval) {
                     result.add(xpDomainInfo.resolveInfo);
                 }
-                includeBrowser = true;
             }
 
             if (includeBrowser) {
@@ -2676,9 +2669,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
-                // If there is nothing selected, add all candidates and remove the ones that the
-                //user
-                // has explicitly put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state
+                // If there is nothing selected, add all candidates
                 if (result.size() == 0) {
                     result.addAll(candidates);
                 }
@@ -2780,10 +2771,12 @@ public class PackageManagerService extends IPackageManager.Stub
                             sourceUserId, parentUserId);
                 }
 
-                result.wereAnyDomainsVerificationApproved |= mDomainVerificationManager
-                        .isApprovedForDomain(ps, intent, riTargetUser.targetUserId);
+                result.highestApprovalLevel = Math.max(mDomainVerificationManager
+                        .approvalLevelForDomain(ps, intent, riTargetUser.targetUserId),
+                        result.highestApprovalLevel);
             }
-            if (result != null && !result.wereAnyDomainsVerificationApproved) {
+            if (result != null && result.highestApprovalLevel
+                    <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
                 return null;
             }
             return result;
@@ -3026,9 +3019,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (mDomainVerificationManager.isApprovedForDomain(ps, intent, userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                                userId)) {
                             if (DEBUG_INSTANT) {
-                                Slog.v(TAG, "Instant app approvd for intent; pkg: "
+                                Slog.v(TAG, "Instant app approved for intent; pkg: "
                                         + packageName);
                             }
                             localInstantApp = info;
@@ -3953,7 +3947,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (mDomainVerificationManager.isApprovedForDomain(ps, intent, userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                                userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
                                         + ", approved");
@@ -9369,8 +9364,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
-                        if (ps != null && mDomainVerificationManager
-                                .isApprovedForDomain(ps, intent, userId)) {
+                        if (ps != null && hasAnyDomainApproval(mDomainVerificationManager, ps,
+                                intent, userId)) {
                             return ri;
                         }
                     }
@@ -9417,6 +9412,19 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return null;
+    }
+
+    /**
+     * Do NOT use for intent resolution filtering. That should be done with
+     * {@link DomainVerificationManagerInternal#filterToApprovedApp(Intent, List, int, Function)}.
+     *
+     * @return if the package is approved at any non-zero level for the domain in the intent
+     */
+    private static boolean hasAnyDomainApproval(
+            @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
+            @NonNull Intent intent, @UserIdInt int userId) {
+        return manager.approvalLevelForDomain(pkgSetting, intent, userId)
+                > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
     /**
@@ -9862,7 +9870,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static class CrossProfileDomainInfo {
         /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
         ResolveInfo resolveInfo;
-        boolean wereAnyDomainsVerificationApproved;
+        int highestApprovalLevel = DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
     private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,

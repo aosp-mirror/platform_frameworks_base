@@ -21,7 +21,8 @@
        android:insetBottom="@dimen/button_inset_vertical_material">
     <layer-list android:paddingMode="stack">
         <item>
-            <ripple android:color="?attr/colorControlHighlight">
+            <ripple android:color="?attr/colorControlHighlight"
+                android:rippleStyle="?attr/rippleStyle">
                 <item>
                     <shape android:shape="rectangle"
                            android:tint="?attr/colorButtonNormal">

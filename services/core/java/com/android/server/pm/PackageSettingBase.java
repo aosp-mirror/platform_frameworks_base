@@ -783,6 +783,10 @@ public abstract class PackageSettingBase extends SettingBase {
         incrementalStates.onStorageHealthStatusChanged(status);
     }
 
+    public long getFirstInstallTime() {
+        return firstInstallTime;
+    }
+
     protected PackageSettingBase updateFrom(PackageSettingBase other) {
         super.copyFrom(other);
         setPath(other.getPath());

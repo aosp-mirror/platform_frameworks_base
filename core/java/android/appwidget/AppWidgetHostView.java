@@ -16,6 +16,7 @@
 
 package android.appwidget;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -29,6 +30,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,6 +55,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -89,6 +92,7 @@ public class AppWidgetHostView extends FrameLayout {
     int mLayoutId = -1;
     private OnClickHandler mOnClickHandler;
     private boolean mOnLightBackground;
+    PointF mCurrentSize = null;
 
     private Executor mAsyncExecutor;
     private CancellationSignal mLastExecutionSignal;
@@ -268,7 +272,8 @@ public class AppWidgetHostView extends FrameLayout {
      * Provide guidance about the size of this widget to the AppWidgetManager. The widths and
      * heights should correspond to the full area the AppWidgetHostView is given. Padding added by
      * the framework will be accounted for automatically. This information gets embedded into the
-     * AppWidget options and causes a callback to the AppWidgetProvider.
+     * AppWidget options and causes a callback to the AppWidgetProvider. In addition, the list of
+     * sizes is explicitly set to an empty list.
      * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
      * @param newOptions The bundle of options, in addition to the size information,
@@ -277,11 +282,94 @@ public class AppWidgetHostView extends FrameLayout {
      * @param minHeight The maximum height in dips that the widget will be displayed at.
      * @param maxWidth The maximum width in dips that the widget will be displayed at.
      * @param maxHeight The maximum height in dips that the widget will be displayed at.
-     *
+     * @deprecated use {@link AppWidgetHostView#updateAppWidgetSize(Bundle, List)} instead.
      */
+    @Deprecated
     public void updateAppWidgetSize(Bundle newOptions, int minWidth, int minHeight, int maxWidth,
             int maxHeight) {
         updateAppWidgetSize(newOptions, minWidth, minHeight, maxWidth, maxHeight, false);
+    }
+
+    /**
+     * Provide guidance about the size of this widget to the AppWidgetManager. The sizes should
+     * correspond to the full area the AppWidgetHostView is given. Padding added by the framework
+     * will be accounted for automatically.
+     *
+     * This method will update the option bundle with the list of sizes and the min/max bounds for
+     * width and height.
+     *
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
+     *
+     * @param newOptions The bundle of options, in addition to the size information.
+     * @param sizes Sizes, in dips, the widget may be displayed at without calling the provider
+     *              again. Typically, this will be size of the widget in landscape and portrait.
+     *              On some foldables, this might include the size on the outer and inner screens.
+     */
+    public void updateAppWidgetSize(@NonNull Bundle newOptions, @NonNull List<PointF> sizes) {
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(mContext);
+
+        Rect padding = getDefaultPadding();
+        float density = getResources().getDisplayMetrics().density;
+
+        float xPaddingDips = (padding.left + padding.right) / density;
+        float yPaddingDips = (padding.top + padding.bottom) / density;
+
+        ArrayList<PointF> paddedSizes = new ArrayList<>(sizes.size());
+        float minWidth = Float.MAX_VALUE;
+        float maxWidth = 0;
+        float minHeight = Float.MAX_VALUE;
+        float maxHeight = 0;
+        for (int i = 0; i < sizes.size(); i++) {
+            PointF size = sizes.get(i);
+            PointF paddedPoint = new PointF(Math.max(0.f, size.x - xPaddingDips),
+                    Math.max(0.f, size.y - yPaddingDips));
+            paddedSizes.add(paddedPoint);
+            minWidth = Math.min(minWidth, paddedPoint.x);
+            maxWidth = Math.max(maxWidth, paddedPoint.x);
+            minHeight = Math.min(minHeight, paddedPoint.y);
+            maxHeight = Math.max(maxHeight, paddedPoint.y);
+        }
+        if (paddedSizes.equals(
+                widgetManager.getAppWidgetOptions(mAppWidgetId).<PointF>getParcelableArrayList(
+                        AppWidgetManager.OPTION_APPWIDGET_SIZES))) {
+            return;
+        }
+        Bundle options = newOptions.deepCopy();
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, (int) minWidth);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, (int) minHeight);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, (int) maxWidth);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, (int) maxHeight);
+        options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, paddedSizes);
+        updateAppWidgetOptions(options);
+    }
+
+    /**
+     * Set the current size of the widget. This should be the full area the AppWidgetHostView is
+     * given. Padding added by the framework will be accounted for automatically.
+     *
+     * This size will be used to choose the appropriate layout the next time the {@link RemoteViews}
+     * is re-inflated, if it was created with {@link RemoteViews#RemoteViews(Map)} .
+     */
+    public void setCurrentSize(@NonNull PointF size) {
+        Rect padding = getDefaultPadding();
+        float density = getResources().getDisplayMetrics().density;
+        float xPaddingDips = (padding.left + padding.right) / density;
+        float yPaddingDips = (padding.top + padding.bottom) / density;
+        PointF newSize = new PointF(size.x - xPaddingDips, size.y - yPaddingDips);
+        if (!newSize.equals(mCurrentSize)) {
+            mCurrentSize = newSize;
+            mLayoutId = -1; // Prevents recycling the view.
+        }
+    }
+
+    /**
+     * Clear the current size, indicating it is not currently known.
+     */
+    public void clearCurrentSize() {
+        if (mCurrentSize != null) {
+            mCurrentSize = null;
+            mLayoutId = -1;
+        }
     }
 
     /**
@@ -322,6 +410,8 @@ public class AppWidgetHostView extends FrameLayout {
             newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newMinHeight);
             newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newMaxWidth);
             newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newMaxHeight);
+            newOptions.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,
+                    new ArrayList<PointF>());
             updateAppWidgetOptions(newOptions);
         }
     }
@@ -440,7 +530,7 @@ public class AppWidgetHostView extends FrameLayout {
             // Try normal RemoteView inflation
             if (content == null) {
                 try {
-                    content = remoteViews.apply(mContext, this, mOnClickHandler);
+                    content = remoteViews.apply(mContext, this, mOnClickHandler, mCurrentSize);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {
                     exception = e;
@@ -492,7 +582,8 @@ public class AppWidgetHostView extends FrameLayout {
                         mView,
                         mAsyncExecutor,
                         new ViewApplyListener(remoteViews, layoutId, true),
-                        mOnClickHandler);
+                        mOnClickHandler,
+                        mCurrentSize);
             } catch (Exception e) {
                 // Reapply failed. Try apply
             }
@@ -502,7 +593,8 @@ public class AppWidgetHostView extends FrameLayout {
                     this,
                     mAsyncExecutor,
                     new ViewApplyListener(remoteViews, layoutId, false),
-                    mOnClickHandler);
+                    mOnClickHandler,
+                    mCurrentSize);
         }
     }
 
@@ -533,7 +625,8 @@ public class AppWidgetHostView extends FrameLayout {
                         AppWidgetHostView.this,
                         mAsyncExecutor,
                         new ViewApplyListener(mViews, mLayoutId, false),
-                        mOnClickHandler);
+                        mOnClickHandler,
+                        mCurrentSize);
             } else {
                 applyContent(null, false, e);
             }

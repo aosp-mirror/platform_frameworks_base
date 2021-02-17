@@ -72,7 +72,7 @@ class SampleExtensionImpl extends StubExtension implements
 
     private List<ExtensionDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
         List<ExtensionDisplayFeature> features = new ArrayList<>();
-        int displayId = activity.getDisplayId();
+        int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
             return features;

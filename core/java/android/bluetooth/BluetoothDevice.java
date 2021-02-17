@@ -1236,7 +1236,8 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.createBond(this, transport, oobData);
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            return service.createBond(this, transport, oobData, adapter.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1391,6 +1392,31 @@ public final class BluetoothDevice implements Parcelable {
             }
         }
         return BOND_NONE;
+    }
+
+    /**
+     * Checks whether this bluetooth device is associated with CDM and meets the criteria to skip
+     * the bluetooth pairing dialog because it has been already consented by the CDM prompt.
+     *
+     * @return true if we can bond without the dialog, false otherwise
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean canBondWithoutDialog() {
+        final IBluetooth service = sService;
+        if (service == null) {
+            Log.e(TAG, "BT not enabled. Cannot check if we can skip pairing dialog");
+            return false;
+        }
+        try {
+            if (DBG) Log.d(TAG, "canBondWithoutDialog, device: " + this);
+            return service.canBondWithoutDialog(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
     }
 
     /**

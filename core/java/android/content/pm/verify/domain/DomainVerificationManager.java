@@ -238,8 +238,8 @@ public interface DomainVerificationManager {
      * permissions must be acquired and
      * {@link Context#createPackageContextAsUser(String, int, UserHandle)} should be used.
      *
-     * This will be combined with the verification status and other system state to determine which
-     * application is launched to handle an app link.
+     * Enabling an unverified domain will allow an application to open it, but this can only occur
+     * if no other app on the device is approved for the domain.
      *
      * @param domainSetId See {@link DomainVerificationInfo#getIdentifier()}.
      * @param domains     The domains to toggle the state of.
@@ -290,13 +290,15 @@ public interface DomainVerificationManager {
         public static final int REASON_ID_INVALID = 2;
         public static final int REASON_SET_NULL_OR_EMPTY = 3;
         public static final int REASON_UNKNOWN_DOMAIN = 4;
+        public static final int REASON_UNABLE_TO_APPROVE = 5;
 
         /** @hide */
         @IntDef({
                 REASON_ID_NULL,
                 REASON_ID_INVALID,
                 REASON_SET_NULL_OR_EMPTY,
-                REASON_UNKNOWN_DOMAIN
+                REASON_UNKNOWN_DOMAIN,
+                REASON_UNABLE_TO_APPROVE
         })
         public @interface Reason {
         }
@@ -313,6 +315,8 @@ public interface DomainVerificationManager {
                 case REASON_UNKNOWN_DOMAIN:
                     return "Domain set contains value that was not declared by the target package "
                             + packageName;
+                case REASON_UNABLE_TO_APPROVE:
+                    return "Domain set contains value that was owned by another package";
                 default:
                     return "Unknown failure";
             }

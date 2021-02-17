@@ -111,10 +111,11 @@ public class KeyguardPasswordViewController
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker,
             InputMethodManager inputMethodManager,
+            EmergencyButtonController emergencyButtonController,
             @Main DelayableExecutor mainExecutor,
             @Main Resources resources) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker);
+                messageAreaControllerFactory, latencyTracker, emergencyButtonController);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mMainExecutor = mainExecutor;

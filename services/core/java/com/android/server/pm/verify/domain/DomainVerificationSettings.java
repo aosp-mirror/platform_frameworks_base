@@ -23,7 +23,6 @@ import android.content.pm.verify.domain.DomainVerificationState;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -229,14 +228,14 @@ class DomainVerificationSettings {
             DomainVerificationUserState oldUserState =
                     oldSelectionStates.get(UserHandle.USER_SYSTEM);
 
-            boolean disallowLinkHandling = newUserState.isDisallowLinkHandling();
+            boolean linkHandlingAllowed = newUserState.isLinkHandlingAllowed();
             if (oldUserState == null) {
                 oldUserState = new DomainVerificationUserState(UserHandle.USER_SYSTEM,
-                        newEnabledHosts, disallowLinkHandling);
+                        newEnabledHosts, linkHandlingAllowed);
                 oldSelectionStates.put(UserHandle.USER_SYSTEM, oldUserState);
             } else {
                 oldUserState.addHosts(newEnabledHosts)
-                        .setDisallowLinkHandling(disallowLinkHandling);
+                        .setLinkHandlingAllowed(linkHandlingAllowed);
             }
         }
     }

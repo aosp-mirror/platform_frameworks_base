@@ -41,7 +41,7 @@ import java.util.Arrays;
 
 /**
  * Face-specific enroll client supporting the {@link android.hardware.biometrics.face.V1_0}
- * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
+ * HIDL interface.
  */
 public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
 
@@ -103,18 +103,9 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
             disabledFeatures.add(disabledFeature);
         }
 
-        android.hardware.biometrics.face.V1_1.IBiometricsFace daemon11 =
-                android.hardware.biometrics.face.V1_1.IBiometricsFace.castFrom(getFreshDaemon());
         try {
-            final int status;
-            if (daemon11 != null) {
-                status = daemon11.enroll_1_1(token, mTimeoutSec, disabledFeatures, mSurfaceHandle);
-            } else if (mSurfaceHandle == null) {
-                status = getFreshDaemon().enroll(token, mTimeoutSec, disabledFeatures);
-            } else {
-                Slog.e(TAG, "enroll(): surface is only supported in @1.1 HAL");
-                status = BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS;
-            }
+            final int status = getFreshDaemon().enroll(token, mTimeoutSec, disabledFeatures);
+
             if (status != Status.OK) {
                 onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
                 mCallback.onClientFinished(this, false /* success */);

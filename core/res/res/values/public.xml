@@ -3071,6 +3071,7 @@
     <public name="windowSplashScreenAnimationDuration"/>
     <public name="windowSplashScreenBrandingImage"/>
     <public name="splashScreenTheme" />
+    <public name="rippleStyle" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
@@ -3111,6 +3112,11 @@
 
   <public-group type="dimen" first-id="0x01050008">
     <!-- dimension definitions go here -->
+
+    <!-- System-provided dimensions for app widgets. -->
+    <public name="system_app_widget_background_radius" />
+    <public name="system_app_widget_inner_radius" />
+    <public name="system_app_widget_internal_padding" />
   </public-group>
 
   <public-group type="bool" first-id="0x01110007">
@@ -3126,6 +3132,8 @@
     <public name="config_systemAutomotiveCluster" />
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveProjection" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemShell" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

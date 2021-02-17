@@ -189,6 +189,13 @@ static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
     }
 }
 
+static void android_view_ThreadedRenderer_setSurfaceControl(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong surfaceControlPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    ASurfaceControl* surfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControlPtr);
+    proxy->setSurfaceControl(surfaceControl);
+}
+
 static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -671,6 +678,8 @@ static const JNINativeMethod gMethods[] = {
         {"nSetName", "(JLjava/lang/String;)V", (void*)android_view_ThreadedRenderer_setName},
         {"nSetSurface", "(JLandroid/view/Surface;Z)V",
          (void*)android_view_ThreadedRenderer_setSurface},
+        {"nSetSurfaceControl", "(JJ)V",
+         (void*)android_view_ThreadedRenderer_setSurfaceControl},
         {"nPause", "(J)Z", (void*)android_view_ThreadedRenderer_pause},
         {"nSetStopped", "(JZ)V", (void*)android_view_ThreadedRenderer_setStopped},
         {"nSetLightAlpha", "(JFF)V", (void*)android_view_ThreadedRenderer_setLightAlpha},

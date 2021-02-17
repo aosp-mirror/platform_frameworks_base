@@ -35,8 +35,8 @@ import java.util.function.Consumer;
 /**
  * SearchResults are a returned object from a query API.
  *
- * <p>Each {@link SearchResult} contains a document and may contain other fields like snippets
- * based on request.
+ * <p>Each {@link SearchResult} contains a document and may contain other fields like snippets based
+ * on request.
  *
  * <p>Should close this object after finish fetching results.
  *
@@ -89,8 +89,8 @@ public class SearchResults implements Closeable {
     /**
      * Gets a whole page of {@link SearchResult}s.
      *
-     * <p>Re-call this method to get next page of {@link SearchResult}, until it returns an
-     * empty list.
+     * <p>Re-call this method to get next page of {@link SearchResult}, until it returns an empty
+     * list.
      *
      * <p>The page size is set by {@link SearchSpec.Builder#setResultCountPerPage}.
      *
