@@ -18,6 +18,7 @@ android_app {
     name: "CameraExtensionsProxy",
     srcs: ["src/**/*.java"],
     libs: ["androidx.camera.extensions.stub"],
+    optional_uses_libs: ["androidx.camera.extensions.impl"],
     platform_apis: true,
     certificate: "platform",
 }
