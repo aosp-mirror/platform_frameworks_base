@@ -34,7 +34,7 @@ import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
 
-import com.android.server.VcnManagementService.VcnSafemodeCallback;
+import com.android.server.VcnManagementService.VcnSafeModeCallback;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.VcnNetworkProvider.NetworkRequestListener;
@@ -56,7 +56,7 @@ public class VcnTest {
     private VcnContext mVcnContext;
     private TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     private VcnNetworkProvider mVcnNetworkProvider;
-    private VcnSafemodeCallback mVcnSafemodeCallback;
+    private VcnSafeModeCallback mVcnSafeModeCallback;
     private Vcn.Dependencies mDeps;
 
     private ArgumentCaptor<VcnGatewayStatusCallback> mGatewayStatusCallbackCaptor;
@@ -72,7 +72,7 @@ public class VcnTest {
         mVcnContext = mock(VcnContext.class);
         mSubscriptionSnapshot = mock(TelephonySubscriptionSnapshot.class);
         mVcnNetworkProvider = mock(VcnNetworkProvider.class);
-        mVcnSafemodeCallback = mock(VcnSafemodeCallback.class);
+        mVcnSafeModeCallback = mock(VcnSafeModeCallback.class);
         mDeps = mock(Vcn.Dependencies.class);
 
         mTestLooper = new TestLooper();
@@ -104,7 +104,7 @@ public class VcnTest {
                         TEST_SUB_GROUP,
                         mConfig,
                         mSubscriptionSnapshot,
-                        mVcnSafemodeCallback,
+                        mVcnSafeModeCallback,
                         mDeps);
     }
 
@@ -148,7 +148,7 @@ public class VcnTest {
     }
 
     @Test
-    public void testGatewayEnteringSafemodeNotifiesVcn() {
+    public void testGatewayEnteringSafeModeNotifiesVcn() {
         final NetworkRequestListener requestListener = verifyAndGetRequestListener();
         for (final int capability : VcnGatewayConnectionConfigTest.EXPOSED_CAPS) {
             startVcnGatewayWithCapabilities(requestListener, capability);
@@ -168,16 +168,17 @@ public class VcnTest {
                         any(),
                         mGatewayStatusCallbackCaptor.capture());
 
-        // Doesn't matter which callback this gets - any Gateway entering Safemode should shut down
+        // Doesn't matter which callback this gets - any Gateway entering safe mode should shut down
         // all Gateways
         final VcnGatewayStatusCallback statusCallback = mGatewayStatusCallbackCaptor.getValue();
-        statusCallback.onEnteredSafemode();
+        statusCallback.onEnteredSafeMode();
         mTestLooper.dispatchAll();
 
+        assertFalse(mVcn.isActive());
         for (final VcnGatewayConnection gatewayConnection : gatewayConnections) {
             verify(gatewayConnection).teardownAsynchronously();
         }
         verify(mVcnNetworkProvider).unregisterListener(requestListener);
-        verify(mVcnSafemodeCallback).onEnteredSafemode();
+        verify(mVcnSafeModeCallback).onEnteredSafeMode();
     }
 }
