@@ -55,6 +55,7 @@ enum class FrameInfoIndex {
     QueueBufferDuration,
 
     GpuCompleted,
+    SwapBuffersCompleted,
 
     // Must be the last value!
     // Also must be kept in sync with FrameMetrics.java#FRAME_STATS_COUNT
@@ -119,6 +120,10 @@ public:
     }
 
     void markSwapBuffers() { set(FrameInfoIndex::SwapBuffers) = systemTime(SYSTEM_TIME_MONOTONIC); }
+
+    void markSwapBuffersCompleted() {
+        set(FrameInfoIndex::SwapBuffersCompleted) = systemTime(SYSTEM_TIME_MONOTONIC);
+    }
 
     void markFrameCompleted() { set(FrameInfoIndex::FrameCompleted) = systemTime(SYSTEM_TIME_MONOTONIC); }
 

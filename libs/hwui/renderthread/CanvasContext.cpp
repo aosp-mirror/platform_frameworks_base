@@ -178,12 +178,16 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
     if (surfaceControl == mSurfaceControl) return;
 
     auto funcs = mRenderThread.getASurfaceControlFunctions();
+
     if (mSurfaceControl != nullptr) {
+        funcs.unregisterListenerFunc(this, &onSurfaceStatsAvailable);
         funcs.releaseFunc(mSurfaceControl);
     }
     mSurfaceControl = surfaceControl;
+    mExpectSurfaceStats = surfaceControl != nullptr;
     if (mSurfaceControl != nullptr) {
         funcs.acquireFunc(mSurfaceControl);
+        funcs.registerListenerFunc(surfaceControl, this, &onSurfaceStatsAvailable);
     }
 }
 
@@ -332,8 +336,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     // just keep using the previous frame's structure instead
     if (!wasSkipped(mCurrentFrameInfo)) {
         mCurrentFrameInfo = mJankTracker.startFrame();
-        mLast4FrameInfos.next().first = mCurrentFrameInfo;
     }
+
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
     mCurrentFrameInfo->set(FrameInfoIndex::SyncQueued) = syncQueued;
     mCurrentFrameInfo->markSyncStart();
@@ -538,17 +542,14 @@ void CanvasContext::draw() {
         }
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = swap.queueDuration;
-        mLast4FrameInfos[-1].second = frameCompleteNr;
         mHaveNewSurface = false;
         mFrameNumber = -1;
     } else {
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
-        mLast4FrameInfos[-1].second = -1;
     }
 
-    // TODO: Use a fence for real completion?
-    mCurrentFrameInfo->markFrameCompleted();
+    mCurrentFrameInfo->markSwapBuffersCompleted();
 
 #if LOG_FRAMETIME_MMA
     float thisFrame = mCurrentFrameInfo->duration(FrameInfoIndex::IssueDrawCommandsStart,
@@ -572,28 +573,71 @@ void CanvasContext::draw() {
         mFrameCompleteCallbacks.clear();
     }
 
-    mJankTracker.finishFrame(*mCurrentFrameInfo);
-    if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
-        mFrameMetricsReporter->reportFrameMetrics(mCurrentFrameInfo->data());
-    }
-
-    if (mLast4FrameInfos.size() == mLast4FrameInfos.capacity()) {
-        // By looking 4 frames back, we guarantee all SF stats are available. There are at
-        // most 3 buffers in BufferQueue. Surface object keeps stats for the last 8 frames.
-        FrameInfo* forthBehind = mLast4FrameInfos.front().first;
-        int64_t composedFrameId = mLast4FrameInfos.front().second;
-        nsecs_t acquireTime = -1;
-        if (mNativeSurface) {
-            native_window_get_frame_timestamps(mNativeSurface->getNativeWindow(), composedFrameId,
-                                               nullptr, &acquireTime, nullptr, nullptr, nullptr,
-                                               nullptr, nullptr, nullptr, nullptr);
+    if (requireSwap) {
+        if (mExpectSurfaceStats) {
+            std::lock_guard lock(mLast4FrameInfosMutex);
+            std::pair<FrameInfo*, int64_t>& next = mLast4FrameInfos.next();
+            next.first = mCurrentFrameInfo;
+            next.second = frameCompleteNr;
+        } else {
+            mCurrentFrameInfo->markFrameCompleted();
+            mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
+                    = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
+            finishFrame(mCurrentFrameInfo);
         }
-        // Ignore default -1, NATIVE_WINDOW_TIMESTAMP_INVALID and NATIVE_WINDOW_TIMESTAMP_PENDING
-        forthBehind->set(FrameInfoIndex::GpuCompleted) = acquireTime > 0 ? acquireTime : -1;
-        mJankTracker.finishGpuDraw(*forthBehind);
     }
 
     mRenderThread.cacheManager().onFrameCompleted();
+}
+
+void CanvasContext::finishFrame(FrameInfo* frameInfo) {
+
+    // TODO (b/169858044): Consolidate this into a single call.
+    mJankTracker.finishFrame(*frameInfo);
+    mJankTracker.finishGpuDraw(*frameInfo);
+
+    // TODO (b/169858044): Move this into JankTracker to adjust deadline when queue is
+    // double-stuffed.
+    if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
+        mFrameMetricsReporter->reportFrameMetrics(frameInfo->data());
+    }
+}
+
+void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* control,
+            ASurfaceControlStats* stats) {
+
+    CanvasContext* instance = static_cast<CanvasContext*>(context);
+
+    const ASurfaceControlFunctions& functions =
+            instance->mRenderThread.getASurfaceControlFunctions();
+
+    nsecs_t gpuCompleteTime = functions.getAcquireTimeFunc(stats);
+    uint64_t frameNumber = functions.getFrameNumberFunc(stats);
+
+    FrameInfo* frameInfo = nullptr;
+    {
+        std::lock_guard(instance->mLast4FrameInfosMutex);
+        for (size_t i = 0; i < instance->mLast4FrameInfos.size(); i++) {
+            if (instance->mLast4FrameInfos[i].second == frameNumber) {
+                frameInfo = instance->mLast4FrameInfos[i].first;
+                break;
+            }
+        }
+    }
+    if (frameInfo != nullptr) {
+        if (gpuCompleteTime == -1) {
+            gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
+        }
+        if (gpuCompleteTime < frameInfo->get(FrameInfoIndex::SwapBuffers)) {
+            // TODO (b/180488606): Investigate why this can happen for first frames.
+            ALOGW("Impossible GPU complete time swapBuffers=%" PRIi64 " gpuComplete=%" PRIi64,
+                    frameInfo->get(FrameInfoIndex::SwapBuffers), gpuCompleteTime);
+            gpuCompleteTime = frameInfo->get(FrameInfoIndex::SwapBuffersCompleted);
+        }
+        frameInfo->set(FrameInfoIndex::FrameCompleted) = gpuCompleteTime;
+        frameInfo->set(FrameInfoIndex::GpuCompleted) = gpuCompleteTime;
+        instance->finishFrame(frameInfo);
+    }
 }
 
 // Called by choreographer to do an RT-driven animation

@@ -46439,8 +46439,10 @@ package android.view {
     method public long getMetric(int);
     field public static final int ANIMATION_DURATION = 2; // 0x2
     field public static final int COMMAND_ISSUE_DURATION = 6; // 0x6
+    field public static final int DEADLINE = 13; // 0xd
     field public static final int DRAW_DURATION = 4; // 0x4
     field public static final int FIRST_DRAW_FRAME = 9; // 0x9
+    field public static final int GPU_DURATION = 12; // 0xc
     field public static final int INPUT_HANDLING_DURATION = 1; // 0x1
     field public static final int INTENDED_VSYNC_TIMESTAMP = 10; // 0xa
     field public static final int LAYOUT_MEASURE_DURATION = 3; // 0x3
