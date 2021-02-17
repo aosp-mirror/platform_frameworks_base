@@ -1869,13 +1869,13 @@ public class DevicePolicyManager {
     /**
      * Grants access to {@link #setNetworkLoggingEnabled}, {@link #isNetworkLoggingEnabled} and
      * {@link #retrieveNetworkLogs}. Once granted the delegated app will start receiving
-     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner will no longer
-     * receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
+     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner or Profile Owner
+     * will no longer receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
      * There can be at most one app that has this delegation.
      * If another app already had delegated network logging access,
      * it will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner.
+     * <p> Can only be granted by Device Owner or Profile Owner of a managed profile.
      */
     public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
 
