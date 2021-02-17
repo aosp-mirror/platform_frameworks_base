@@ -40,7 +40,7 @@
     <dimen name="keyguard_security_view_top_margin">8dp</dimen>
     <dimen name="keyguard_security_view_lateral_margin">36dp</dimen>
 
-    <dimen name="keyguard_eca_top_margin">24dp</dimen>
+    <dimen name="keyguard_eca_top_margin">18dp</dimen>
 
     <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
          Should be 0 on devices with plenty of room (e.g. tablets) -->
