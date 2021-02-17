@@ -182,6 +182,8 @@ public class RequestSync {
                 mExtras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
             } else if (opt.equals("--rc") || opt.equals("--require-charging")) {
                 mExtras.putBoolean(ContentResolver.SYNC_EXTRAS_REQUIRE_CHARGING, true);
+            } else if (opt.equals("--ej") || opt.equals("--schedule-as-ej")) {
+                mExtras.putBoolean(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, true);
             } else if (opt.equals("-e") || opt.equals("--es") || opt.equals("--extra-string")) {
                 final String key = nextArgRequired();
                 final String value = nextArgRequired();
