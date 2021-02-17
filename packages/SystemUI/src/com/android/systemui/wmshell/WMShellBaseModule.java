@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.R;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -97,7 +98,12 @@ import dagger.Provides;
 @Module
 public abstract class WMShellBaseModule {
 
-    private static final boolean ENABLE_SHELL_MAIN_THREAD = false;
+    /**
+     * Returns whether to enable a separate shell thread for the shell features.
+     */
+    private static boolean enableShellMainThread(Context context) {
+        return context.getResources().getBoolean(R.bool.config_enableShellMainThread);
+    }
 
     //
     // Shell Concurrency - Components used for managing threading in the Shell and SysUI
@@ -120,8 +126,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     @ShellMainThread
-    public static Handler provideShellMainHandler(@Main Handler sysuiMainHandler) {
-        if (ENABLE_SHELL_MAIN_THREAD) {
+    public static Handler provideShellMainHandler(Context context, @Main Handler sysuiMainHandler) {
+        if (enableShellMainThread(context)) {
              HandlerThread mainThread = new HandlerThread("wmshell.main");
              mainThread.start();
              return mainThread.getThreadHandler();
@@ -135,9 +141,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     @ShellMainThread
-    public static ShellExecutor provideShellMainExecutor(@ShellMainThread Handler mainHandler,
-            @Main ShellExecutor sysuiMainExecutor) {
-        if (ENABLE_SHELL_MAIN_THREAD) {
+    public static ShellExecutor provideShellMainExecutor(Context context,
+            @ShellMainThread Handler mainHandler, @Main ShellExecutor sysuiMainExecutor) {
+        if (enableShellMainThread(context)) {
             return new HandlerExecutor(mainHandler);
         }
         return sysuiMainExecutor;
