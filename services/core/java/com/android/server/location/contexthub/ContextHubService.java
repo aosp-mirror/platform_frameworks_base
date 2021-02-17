@@ -945,8 +945,8 @@ public class ContextHubService extends IContextHubService.Stub {
         mClientManager.forEachClientOfHub(contextHubId, client -> {
             if (client.getPackageName().equals(packageName)) {
                 client.updateNanoAppAuthState(
-                        nanoAppId, false /* hasPermissions */, false /* gracePeriodExpired */,
-                        true /* forceDenied */);
+                        nanoAppId, Collections.emptyList() /* nanoappPermissions */,
+                        false /* gracePeriodExpired */, true /* forceDenied */);
             }
         });
     }
