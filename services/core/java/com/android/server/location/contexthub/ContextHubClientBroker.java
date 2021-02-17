@@ -425,6 +425,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
     }
 
+    /* package */ String getPackageName() {
+        return mPackage;
+    }
+
     /**
      * Used to override the attribution tag with a newer value if a PendingIntent broker is
      * retrieved.
@@ -645,6 +649,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private void updateNanoAppAuthState(
             long nanoAppId, boolean hasPermissions, boolean gracePeriodExpired) {
+        updateNanoAppAuthState(
+                nanoAppId, hasPermissions, gracePeriodExpired, false /* forceDenied */);
+    }
+
+    /* package */ void updateNanoAppAuthState(
+            long nanoAppId, boolean hasPermissions, boolean gracePeriodExpired,
+            boolean forceDenied) {
         int curAuthState;
         int newAuthState;
         synchronized (mMessageChannelNanoappIdMap) {
@@ -655,7 +666,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             // GRANTED -> DENIED_GRACE_PERIOD only if permissions have been lost
             // DENIED_GRACE_PERIOD -> DENIED only if the grace period expires
             // DENIED/DENIED_GRACE_PERIOD -> GRANTED only if permissions are granted again
-            if (gracePeriodExpired) {
+            // any state -> DENIED if "forceDenied" is true
+            if (forceDenied) {
+                newAuthState = AUTHORIZATION_DENIED;
+            } else if (gracePeriodExpired) {
                 if (curAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
                     newAuthState = AUTHORIZATION_DENIED;
                 }
@@ -667,13 +681,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 }
             }
 
-            if (newAuthState == AUTHORIZATION_GRANTED) {
+            if (newAuthState != AUTHORIZATION_DENIED_GRACE_PERIOD) {
                 AuthStateDenialTimer timer = mNappToAuthTimerMap.remove(nanoAppId);
                 if (timer != null) {
                     timer.cancel();
                 }
-            } else if (curAuthState == AUTHORIZATION_GRANTED
-                    && newAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
+            } else if (curAuthState == AUTHORIZATION_GRANTED) {
                 AuthStateDenialTimer timer =
                         new AuthStateDenialTimer(this, nanoAppId, Looper.getMainLooper());
                 mNappToAuthTimerMap.put(nanoAppId, timer);
