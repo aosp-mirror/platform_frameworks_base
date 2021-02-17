@@ -39207,16 +39207,22 @@ package android.telecom {
   }
 
   public static class CallScreeningService.CallResponse {
+    method public int getCallComposerAttachmentsToShow();
     method public boolean getDisallowCall();
     method public boolean getRejectCall();
     method public boolean getSilenceCall();
     method public boolean getSkipCallLog();
     method public boolean getSkipNotification();
+    field public static final int CALL_COMPOSER_ATTACHMENT_LOCATION = 2; // 0x2
+    field public static final int CALL_COMPOSER_ATTACHMENT_PICTURE = 1; // 0x1
+    field public static final int CALL_COMPOSER_ATTACHMENT_PRIORITY = 8; // 0x8
+    field public static final int CALL_COMPOSER_ATTACHMENT_SUBJECT = 4; // 0x4
   }
 
   public static class CallScreeningService.CallResponse.Builder {
     ctor public CallScreeningService.CallResponse.Builder();
     method public android.telecom.CallScreeningService.CallResponse build();
+    method @NonNull public android.telecom.CallScreeningService.CallResponse.Builder setCallComposerAttachmentsToShow(int);
     method public android.telecom.CallScreeningService.CallResponse.Builder setDisallowCall(boolean);
     method public android.telecom.CallScreeningService.CallResponse.Builder setRejectCall(boolean);
     method @NonNull public android.telecom.CallScreeningService.CallResponse.Builder setSilenceCall(boolean);
