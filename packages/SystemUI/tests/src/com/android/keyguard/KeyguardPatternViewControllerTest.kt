@@ -49,8 +49,6 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mLatencyTracker: LatencyTracker
     @Mock
-    private lateinit var mEmergencyButtonController: EmergencyButtonController
-    @Mock
     private lateinit
     var mKeyguardMessageAreaControllerFactory: KeyguardMessageAreaController.Factory
     @Mock
@@ -74,8 +72,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
                 .thenReturn(mKeyguardMessageAreaController)
         mKeyguardPatternViewController = KeyguardPatternViewController(mKeyguardPatternView,
         mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
-                mLatencyTracker, mEmergencyButtonController,
-                mKeyguardMessageAreaControllerFactory)
+                mLatencyTracker, mKeyguardMessageAreaControllerFactory)
     }
 
     @Test
