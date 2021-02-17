@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -1957,12 +1958,32 @@ public class LocationManager {
      * allowed} for your app.
      */
     public void addTestProvider(@NonNull String provider, @NonNull ProviderProperties properties) {
+        addTestProvider(provider, properties, Collections.emptySet());
+    }
+
+    /**
+     * Creates a test location provider and adds it to the set of active providers. This provider
+     * will replace any provider with the same name that exists prior to this call.
+     *
+     * @param provider the provider name
+     * @param properties the provider properties
+     * @param locationTags the attribution tags for accessing location from the provider
+     *
+     * @throws IllegalArgumentException if provider is null
+     * @throws IllegalArgumentException if properties is null
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
+     */
+    public void addTestProvider(@NonNull String provider, @NonNull ProviderProperties properties,
+            @NonNull Set<String> locationTags) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
         Preconditions.checkArgument(properties != null, "invalid null properties");
+        Preconditions.checkArgument(locationTags != null, "invalid null location tags");
 
         try {
-            mService.addTestProvider(provider, properties, mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+            mService.addTestProvider(provider, properties, new ArrayList<>(locationTags),
+                    mContext.getOpPackageName(), mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

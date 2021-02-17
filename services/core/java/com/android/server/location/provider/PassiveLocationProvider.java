@@ -47,7 +47,8 @@ public class PassiveLocationProvider extends AbstractLocationProvider {
 
     public PassiveLocationProvider(Context context) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR, CallerIdentity.fromContext(context), PROPERTIES);
+        super(DIRECT_EXECUTOR, CallerIdentity.fromContext(context), PROPERTIES,
+                /*locationTags*/ null);
         setAllowed(true);
     }
 
