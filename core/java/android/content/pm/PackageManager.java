@@ -1059,15 +1059,11 @@ public abstract class PackageManager {
 
     /**
      * A value to indicate the lack of CUJ information, disabling all installation scenario logic.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_DEFAULT = 0;
 
     /**
      * Installation scenario providing the fastest “install button to launch" experience possible.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_FAST = 1;
 
@@ -1084,8 +1080,6 @@ public abstract class PackageManager {
      * less optimized applications.  The device state (e.g. memory usage or battery status) should
      * not be considered when making this decision as those factors are taken into account by the
      * Package Manager when acting on the installation scenario.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_BULK = 2;
 
@@ -1096,8 +1090,6 @@ public abstract class PackageManager {
      * operation that are marked BULK_SECONDARY, the faster the entire bulk operation will be.
      *
      * See the comments for INSTALL_SCENARIO_BULK for more information.
-     *
-     * @hide
      */
     public static final int INSTALL_SCENARIO_BULK_SECONDARY = 3;
 

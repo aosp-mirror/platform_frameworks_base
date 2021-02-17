@@ -1990,6 +1990,13 @@ public class PackageInstaller {
             this.forceQueryableOverride = true;
         }
 
+        /**
+         * Sets the install scenario for this session, which describes the expected user journey.
+         */
+        public void setInstallScenario(@InstallScenario int installScenario) {
+            this.installScenario = installScenario;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
