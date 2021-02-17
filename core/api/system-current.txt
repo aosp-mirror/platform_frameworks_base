@@ -272,6 +272,7 @@ package android {
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
+    field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
     field public static final String WIFI_ACCESS_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS";
@@ -14212,10 +14213,10 @@ package android.uwb {
   }
 
   public final class RangingSession implements java.lang.AutoCloseable {
-    method public void close();
-    method public void reconfigure(@NonNull android.os.PersistableBundle);
-    method public void start(@NonNull android.os.PersistableBundle);
-    method public void stop();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void close();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void reconfigure(@NonNull android.os.PersistableBundle);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void start(@NonNull android.os.PersistableBundle);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void stop();
   }
 
   public static interface RangingSession.Callback {
@@ -14251,18 +14252,18 @@ package android.uwb {
   }
 
   public final class UwbManager {
-    method public long elapsedRealtimeResolutionNanos();
-    method public int getAngleOfArrivalSupport();
-    method public int getMaxRemoteDevicesPerInitiatorSession();
-    method public int getMaxRemoteDevicesPerResponderSession();
-    method public int getMaxSimultaneousSessions();
-    method @NonNull public android.os.PersistableBundle getSpecificationInfo();
-    method @NonNull public java.util.List<java.lang.Integer> getSupportedChannelNumbers();
-    method @NonNull public java.util.Set<java.lang.Integer> getSupportedPreambleCodeIndices();
-    method public boolean isRangingSupported();
-    method @NonNull public AutoCloseable openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
-    method public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
-    method public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public long elapsedRealtimeResolutionNanos();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getAngleOfArrivalSupport();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerInitiatorSession();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerResponderSession();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxSimultaneousSessions();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public android.os.PersistableBundle getSpecificationInfo();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.List<java.lang.Integer> getSupportedChannelNumbers();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.Set<java.lang.Integer> getSupportedPreambleCodeIndices();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public boolean isRangingSupported();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public AutoCloseable openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
     field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D = 2; // 0x2
     field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL = 3; // 0x3
     field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL = 4; // 0x4
