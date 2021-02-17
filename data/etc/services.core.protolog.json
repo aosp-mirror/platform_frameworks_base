@@ -1075,12 +1075,6 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
-    "-856025122": {
-      "message": "SURFACE transparentRegionHint=%s: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-855366859": {
       "message": "        merging children in from %s: %s",
       "level": "VERBOSE",
@@ -2821,12 +2815,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "1217926207": {
-      "message": "Activity not running, resuming next.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
-    },
     "1219600119": {
       "message": "addWindow: win=%s Callers=%s",
       "level": "DEBUG",
@@ -3327,6 +3315,12 @@
     },
     "1837992242": {
       "message": "Executing finish of activity: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
+    "1847414670": {
+      "message": "Activity not running or entered PiP, resuming next.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
