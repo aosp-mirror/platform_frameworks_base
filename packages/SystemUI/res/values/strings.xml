@@ -2813,8 +2813,26 @@
     <string name="less_than_timestamp" translatable="false">Less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
     <!-- Timestamp for notification when over a certain time window [CHAR LIMIT=120] -->
     <string name="over_timestamp" translatable="false">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
-    <!-- Status text for a birthday today [CHAR LIMIT=120] -->
-    <string name="birthday_status" translatable="false">Today is their birthday!</string>
+    <!-- Status text for a birthday today [CHAR LIMIT=30] -->
+    <string name="birthday_status" translatable="false">Birthday</string>
+    <!-- Status text for an upcoming birthday [CHAR LIMIT=30] -->
+    <string name="upcoming_birthday_status" translatable="false">Birthday soon</string>
+    <!-- Status text for an anniversary [CHAR LIMIT=30] -->
+    <string name="anniversary_status" translatable="false">Anniversary</string>
+    <!-- Status text for sharing location [CHAR LIMIT=30] -->
+    <string name="location_status" translatable="false">Sharing location</string>
+    <!-- Status text for a new story posted [CHAR LIMIT=30] -->
+    <string name="new_story_status" translatable="false">New story</string>
+    <!-- Status text for watching a video [CHAR LIMIT=30] -->
+    <string name="video_status" translatable="false">Watching</string>
+    <!-- Status text for listening to audio [CHAR LIMIT=30] -->
+    <string name="audio_status" translatable="false">Listening</string>
+    <!-- Status text for playing a game [CHAR LIMIT=30] -->
+    <string name="game_status" translatable="false">Playing</string>
+    <!-- Empty user name before user has selected a friend [CHAR LIMIT=30] -->
+    <string name="empty_user_name" translatable="false">Your friend</string>
+    <!-- Empty status shown before user has selected a friend [CHAR LIMIT=30] -->
+    <string name="empty_status" translatable="false">Their status</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->
