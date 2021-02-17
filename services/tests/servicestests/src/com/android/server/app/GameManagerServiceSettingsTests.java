@@ -90,7 +90,7 @@ public class GameManagerServiceSettingsTests {
         writeGameServiceXml();
     }
 
-    private void verifyGameServiceSettingsData(Settings settings) {
+    private void verifyGameServiceSettingsData(GameManagerSettings settings) {
         assertThat(settings.getGameModeLocked(PACKAGE_NAME_1), is(1));
         assertThat(settings.getGameModeLocked(PACKAGE_NAME_2), is(2));
         assertThat(settings.getGameModeLocked(PACKAGE_NAME_3), is(3));
@@ -107,7 +107,7 @@ public class GameManagerServiceSettingsTests {
         /* write out files and read */
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
-        Settings settings = new Settings(context.getFilesDir());
+        GameManagerSettings settings = new GameManagerSettings(context.getFilesDir());
         assertThat(settings.readPersistentDataLocked(), is(true));
         verifyGameServiceSettingsData(settings);
     }
@@ -118,7 +118,7 @@ public class GameManagerServiceSettingsTests {
         // write out files and read
         writeOldFiles();
         final Context context = InstrumentationRegistry.getContext();
-        Settings settings = new Settings(context.getFilesDir());
+        GameManagerSettings settings = new GameManagerSettings(context.getFilesDir());
         assertThat(settings.readPersistentDataLocked(), is(true));
 
         // write out, read back in and verify the same
