@@ -279,8 +279,8 @@ import javax.security.auth.x500.X500Principal;
  * }
  */
 public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAuthArgs {
-
-    private static final X500Principal DEFAULT_CERT_SUBJECT = new X500Principal("CN=fake");
+    private static final X500Principal DEFAULT_CERT_SUBJECT =
+            new X500Principal("CN=Android Keystore Key");
     private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
     private static final Date DEFAULT_CERT_NOT_BEFORE = new Date(0L); // Jan 1 1970
     private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
@@ -317,6 +317,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mUnlockedDeviceRequired;
     private final boolean mCriticalToDeviceEncryption;
     private final int mMaxUsageCount;
+    private final String mAttestKeyAlias;
     /*
      * ***NOTE***: All new fields MUST also be added to the following:
      * ParcelableKeyGenParameterSpec class.
@@ -358,7 +359,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean userConfirmationRequired,
             boolean unlockedDeviceRequired,
             boolean criticalToDeviceEncryption,
-            int maxUsageCount) {
+            int maxUsageCount,
+            String attestKeyAlias) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -413,6 +415,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mUnlockedDeviceRequired = unlockedDeviceRequired;
         mCriticalToDeviceEncryption = criticalToDeviceEncryption;
         mMaxUsageCount = maxUsageCount;
+        mAttestKeyAlias = attestKeyAlias;
     }
 
     /**
@@ -869,6 +872,18 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
+     * Returns the alias of the attestation key that will be used to sign the attestation
+     * certificate of the generated key.  Note that an attestation certificate will only be
+     * generated if an attestation challenge is set.
+     *
+     * @see Builder#setAttestKeyAlias(String)
+     */
+    @Nullable
+    public String getAttestKeyAlias() {
+        return mAttestKeyAlias;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -906,6 +921,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mUnlockedDeviceRequired = false;
         private boolean mCriticalToDeviceEncryption = false;
         private int mMaxUsageCount = KeyProperties.UNRESTRICTED_USAGE_COUNT;
+        private String mAttestKeyAlias = null;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -975,6 +991,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mUnlockedDeviceRequired = sourceSpec.isUnlockedDeviceRequired();
             mCriticalToDeviceEncryption = sourceSpec.isCriticalToDeviceEncryption();
             mMaxUsageCount = sourceSpec.getMaxUsageCount();
+            mAttestKeyAlias = sourceSpec.getAttestKeyAlias();
         }
 
         /**
@@ -1695,6 +1712,28 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
+         * Sets the alias of the attestation key that will be used to sign the attestation
+         * certificate for the generated key pair, if an attestation challenge is set with {@link
+         * #setAttestationChallenge}.  If an attestKeyAlias is set but no challenge, {@link
+         * java.security.KeyPairGenerator#initialize} will throw {@link
+         * java.security.InvalidAlgorithmParameterException}.
+         *
+         * <p>If the attestKeyAlias is set to null (the default), Android Keystore will select an
+         * appropriate system-provided attestation signing key.  If not null, the alias must
+         * reference an Android Keystore Key that was created with {@link
+         * android.security.keystore.KeyProperties#PURPOSE_ATTEST_KEY}, or key generation will throw
+         * {@link java.security.InvalidAlgorithmParameterException}.
+         *
+         * @param attestKeyAlias the alias of the attestation key to be used to sign the
+         *        attestation certificate.
+         */
+        @NonNull
+        public Builder setAttestKeyAlias(@Nullable String attestKeyAlias) {
+            mAttestKeyAlias = attestKeyAlias;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1731,7 +1770,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mUserConfirmationRequired,
                     mUnlockedDeviceRequired,
                     mCriticalToDeviceEncryption,
-                    mMaxUsageCount);
+                    mMaxUsageCount,
+                    mAttestKeyAlias);
         }
     }
 }
