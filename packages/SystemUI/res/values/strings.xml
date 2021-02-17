@@ -247,6 +247,10 @@
     <string name="screenshot_dismiss_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
     <string name="screenshot_preview_description">Screenshot preview</string>
+    <!-- Content description for the top boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
+    <string name="screenshot_top_boundary">Top boundary</string>
+    <!-- Content description for the bottom boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
+    <string name="screenshot_bottom_boundary">Bottom boundary</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
