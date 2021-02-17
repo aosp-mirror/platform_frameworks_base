@@ -5496,6 +5496,12 @@
     <permission android:name="android.permission.GET_PEOPLE_TILE_PREVIEW"
         android:protectionLevel="signature|recents" />
 
+    <!-- @hide @SystemApi Allows an application to retrieve whether shortcut is backed by a
+         Conversation.
+         TODO(b/180412052): STOPSHIP: Define a role so it can be granted to Shell and AiAi. -->
+    <permission android:name="android.permission.READ_PEOPLE_DATA"
+                android:protectionLevel="signature|appPredictor|recents"/>
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

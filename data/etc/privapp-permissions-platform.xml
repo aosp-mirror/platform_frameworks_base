@@ -478,6 +478,8 @@ applications that come with the platform
         <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
         <!-- Permission required for CTS test - CtsRebootReadinessTestCases -->
         <permission name="android.permission.SIGNAL_REBOOT_READINESS" />
+        <!-- Permission required for CTS test - PeopleManagerTest -->
+        <permission name="android.permission.READ_PEOPLE_DATA" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
