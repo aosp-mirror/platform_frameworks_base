@@ -16,11 +16,17 @@
 package com.android.server.location.contexthub;
 
 import android.annotation.Nullable;
+import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_1.Setting;
 import android.hardware.contexthub.V1_1.SettingValue;
+import android.hardware.contexthub.V1_2.IContexthubCallback;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pair;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -87,6 +93,24 @@ public abstract class IContextHubWrapper {
     }
 
     /**
+     * Calls the appropriate getHubs function depending on the HAL version.
+     */
+    public abstract Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException;
+
+    /**
+     * Calls the appropriate registerCallback function depending on the HAL version.
+     */
+    public abstract void registerCallback(
+            int hubId, IContexthubCallback callback) throws RemoteException;
+
+    /**
+     * Calls the appropriate sendMessageToHub function depending on the HAL version.
+     */
+    public abstract int sendMessageToHub(
+            int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
+            ArrayList<String> hostPermissions) throws RemoteException;
+
+    /**
      * @return A valid instance of Contexthub HAL 1.0.
      */
     public abstract android.hardware.contexthub.V1_0.IContexthub getHub();
@@ -148,6 +172,21 @@ public abstract class IContextHubWrapper {
             mHub = hub;
         }
 
+        public Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException {
+            return new Pair(mHub.getHubs(), new ArrayList<String>());
+        }
+
+        public void registerCallback(
+                int hubId, IContexthubCallback callback) throws RemoteException {
+            mHub.registerCallback(hubId, callback);
+        }
+
+        public int sendMessageToHub(
+                int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
+                ArrayList<String> hostPermissions) throws RemoteException {
+            return mHub.sendMessageToHub(hubId, message);
+        }
+
         public android.hardware.contexthub.V1_0.IContexthub getHub() {
             return mHub;
         }
@@ -186,6 +225,21 @@ public abstract class IContextHubWrapper {
 
         ContextHubWrapperV1_1(android.hardware.contexthub.V1_1.IContexthub hub) {
             mHub = hub;
+        }
+
+        public Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException {
+            return new Pair(mHub.getHubs(), new ArrayList<String>());
+        }
+
+        public void registerCallback(
+                int hubId, IContexthubCallback callback) throws RemoteException {
+            mHub.registerCallback(hubId, callback);
+        }
+
+        public int sendMessageToHub(
+                int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
+                ArrayList<String> hostPermissions) throws RemoteException {
+            return mHub.sendMessageToHub(hubId, message);
         }
 
         public android.hardware.contexthub.V1_0.IContexthub getHub() {
@@ -227,11 +281,40 @@ public abstract class IContextHubWrapper {
         }
     }
 
-    private static class ContextHubWrapperV1_2 extends IContextHubWrapper {
-        private android.hardware.contexthub.V1_2.IContexthub mHub;
+    private static class ContextHubWrapperV1_2 extends IContextHubWrapper
+            implements android.hardware.contexthub.V1_2.IContexthub.getHubs_1_2Callback {
+        private final android.hardware.contexthub.V1_2.IContexthub mHub;
+
+        private Pair<List<ContextHub>, List<String>> mHubInfo =
+                new Pair<>(Collections.emptyList(), Collections.emptyList());
 
         ContextHubWrapperV1_2(android.hardware.contexthub.V1_2.IContexthub hub) {
             mHub = hub;
+        }
+
+        @Override
+        public void onValues(ArrayList<ContextHub> hubs, ArrayList<String> supportedPermissions) {
+            mHubInfo = new Pair(hubs, supportedPermissions);
+        }
+
+        public Pair<List<ContextHub>, List<String>> getHubs() throws RemoteException {
+            mHub.getHubs_1_2(this);
+            return mHubInfo;
+        }
+
+        public void registerCallback(
+                int hubId, IContexthubCallback callback) throws RemoteException {
+            mHub.registerCallback_1_2(hubId, callback);
+        }
+
+        public int sendMessageToHub(
+                int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
+                ArrayList<String> hostPermissions) throws RemoteException {
+            android.hardware.contexthub.V1_2.ContextHubMsg newMessage =
+                    new android.hardware.contexthub.V1_2.ContextHubMsg();
+            newMessage.msg_1_0 = message;
+            newMessage.permissions = hostPermissions;
+            return mHub.sendMessageToHub_1_2(hubId, newMessage);
         }
 
         public android.hardware.contexthub.V1_0.IContexthub getHub() {
