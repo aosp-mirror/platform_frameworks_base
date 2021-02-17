@@ -181,7 +181,10 @@ public class SettingsXml {
         }
 
         private void moveToFirstTag() throws IOException, XmlPullParserException {
-            // Move to first tag
+            if (mParser.getEventType() == XmlPullParser.START_TAG) {
+                return;
+            }
+
             int type;
             //noinspection StatementWithEmptyBody
             while ((type = mParser.next()) != XmlPullParser.START_TAG
