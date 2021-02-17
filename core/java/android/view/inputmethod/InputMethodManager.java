@@ -749,7 +749,7 @@ public final class InputMethodManager {
         @Override
         public boolean hasActiveConnection(View view) {
             synchronized (mH) {
-                if (!hasServedByInputMethodLocked(view)) {
+                if (!hasServedByInputMethodLocked(view) || mCurMethod == null) {
                     return false;
                 }
 
@@ -763,6 +763,17 @@ public final class InputMethodManager {
     /** @hide */
     public DelegateImpl getDelegate() {
         return mDelegate;
+    }
+
+    /**
+     * Checks whether the active input connection (if any) is for the given view.
+     *
+     * @hide
+     * @see ImeFocusController#getImmDelegate()#hasActiveInputConnection(View)
+     */
+    @TestApi
+    public boolean hasActiveInputConnection(@Nullable View view) {
+        return mDelegate.hasActiveConnection(view);
     }
 
     private View getServedViewLocked() {

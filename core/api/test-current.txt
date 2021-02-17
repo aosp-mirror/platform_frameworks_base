@@ -2570,6 +2570,7 @@ package android.view.inputmethod {
 
   public final class InputMethodManager {
     method public int getDisplayId();
+    method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method public boolean isInputMethodPickerShown();
   }
 
