@@ -148,8 +148,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wi-Fi เท่านั้น"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"การสำรองข้อมูลการโทรจาก <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> หลังผ่านไป <xliff:g id="TIME_DELAY">{2}</xliff:g> วินาที"</string>
@@ -1666,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"การแก้สี"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"ลดความสว่าง"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1882,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"ขยายใหญ่สุด"</string>
     <string name="close_button_text" msgid="10603510034455258">"ปิด"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"รับสาย"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"ปฏิเสธ"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"วางสาย"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"สายเรียกเข้า"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"สายที่สนทนาอยู่"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"กำลังสกรีนสายเรียกเข้า"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other">เลือกไว้ <xliff:g id="COUNT_1">%1$d</xliff:g> รายการ</item>
       <item quantity="one">เลือกไว้ <xliff:g id="COUNT_0">%1$d</xliff:g> รายการ</item>
