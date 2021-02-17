@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -28,6 +29,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -102,7 +104,8 @@ public interface ServiceProvider {
             @NonNull IFingerprintServiceReceiver receiver, int userId,
             @NonNull String opPackageName);
 
-    void scheduleInternalCleanup(int sensorId, int userId);
+    void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable BaseClientMonitor.Callback callback);
 
     boolean isHardwareDetected(int sensorId);
 
@@ -137,5 +140,6 @@ public interface ServiceProvider {
     void dumpInternal(int sensorId, @NonNull PrintWriter pw);
 
     @NonNull
-    ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
+    ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName);
 }

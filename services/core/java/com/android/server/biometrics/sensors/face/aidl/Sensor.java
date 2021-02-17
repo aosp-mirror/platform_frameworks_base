@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.AuthenticationFrame;
 import android.hardware.biometrics.face.EnrollmentFrame;
 import android.hardware.biometrics.face.Error;
@@ -460,8 +461,9 @@ public class Sensor implements IBinder.DeathRecipient {
         }
     }
 
-    @NonNull ITestSession createTestSession() {
-        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, mProvider, this);
+    @NonNull ITestSession createTestSession(@NonNull ITestSessionCallback callback) {
+        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, callback,
+                mProvider, this);
     }
 
     void createNewSession(@NonNull IFace daemon, int sensorId, int userId)

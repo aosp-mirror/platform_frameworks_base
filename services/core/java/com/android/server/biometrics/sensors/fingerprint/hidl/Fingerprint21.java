@@ -30,6 +30,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -158,7 +159,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
         public void onUserSwitching(int newUserId) {
-            scheduleInternalCleanup(newUserId);
+            scheduleInternalCleanup(newUserId, null /* callback */);
         }
     };
 
@@ -437,7 +438,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         Slog.d(TAG, "Fingerprint HAL ready, HAL ID: " + halId);
         if (halId != 0) {
             scheduleLoadAuthenticatorIds();
-            scheduleInternalCleanup(ActivityManager.getCurrentUser());
+            scheduleInternalCleanup(ActivityManager.getCurrentUser(), null /* callback */);
         } else {
             Slog.e(TAG, "Unable to set callback");
             mDaemon = null;
@@ -653,7 +654,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         });
     }
 
-    private void scheduleInternalCleanup(int userId) {
+    private void scheduleInternalCleanup(int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -663,13 +665,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mContext, mLazyDaemon, userId, mContext.getOpPackageName(),
                     mSensorProperties.sensorId, enrolledList,
                     FingerprintUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
-            mScheduler.scheduleClientMonitor(client);
+            mScheduler.scheduleClientMonitor(client, callback);
         });
     }
 
     @Override
-    public void scheduleInternalCleanup(int sensorId, int userId) {
-        scheduleInternalCleanup(userId);
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
+        scheduleInternalCleanup(userId, callback);
     }
 
     @Override
@@ -849,8 +852,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @NonNull
     @Override
-    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, this,
+    public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName) {
+        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, callback, this,
                 mHalResultController);
     }
 }

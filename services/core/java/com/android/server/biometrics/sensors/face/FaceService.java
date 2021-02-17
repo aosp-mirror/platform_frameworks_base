@@ -31,6 +31,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
@@ -133,7 +134,8 @@ public class FaceService extends SystemService implements BiometricServiceCallba
      */
     private final class FaceServiceWrapper extends IFaceService.Stub {
         @Override
-        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+                @NonNull String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -143,7 +145,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 return null;
             }
 
-            return provider.createTestSession(sensorId, opPackageName);
+            return provider.createTestSession(sensorId, callback, opPackageName);
         }
 
         @Override

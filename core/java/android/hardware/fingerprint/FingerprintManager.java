@@ -154,7 +154,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public BiometricTestSession createTestSession(int sensorId) {
         try {
             return new BiometricTestSession(mContext, sensorId,
-                    mService.createTestSession(sensorId, mContext.getOpPackageName()));
+                    (context, sensorId1, callback) -> mService
+                            .createTestSession(sensorId1, callback, context.getOpPackageName()));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
