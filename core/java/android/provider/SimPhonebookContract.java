@@ -262,7 +262,7 @@ public final class SimPhonebookContract {
         @WorkerThread
         public static int getEncodedNameLength(
                 @NonNull ContentResolver resolver, @NonNull String name) {
-            name = Objects.requireNonNull(name);
+            Objects.requireNonNull(name);
             Bundle result = resolver.call(AUTHORITY, GET_ENCODED_NAME_LENGTH_METHOD_NAME, name,
                     null);
             if (result == null || !result.containsKey(EXTRA_ENCODED_NAME_LENGTH)) {
