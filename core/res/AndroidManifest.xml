@@ -1313,11 +1313,13 @@
         android:protectionLevel="dangerous|instant" />
 
     <!-- ====================================================================== -->
-    <!-- Permissions for accessing the UCE Service                              -->
+    <!-- Permissions for accessing the vendor UCE Service                              -->
     <!-- ====================================================================== -->
 
     <!-- @hide Allows an application to Access UCE-Presence.
          <p>Protection level: signature|privileged
+         @deprecated Framework should no longer use this permission to access the vendor UCE service
+         using AIDL, it is instead implemented by RcsCapabilityExchangeImplBase
     -->
     <permission android:name="android.permission.ACCESS_UCE_PRESENCE_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
@@ -1325,6 +1327,8 @@
 
     <!-- @hide Allows an application to Access UCE-OPTIONS.
          <p>Protection level: signature|privileged
+         @deprecated Framework should no longer use this permission to access the vendor UCE service
+         using AIDL, it is instead implemented by RcsCapabilityExchangeImplBase
     -->
     <permission android:name="android.permission.ACCESS_UCE_OPTIONS_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
@@ -2462,6 +2466,15 @@
     -->
     <permission android:name="android.permission.BIND_GBA_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- Required for an Application to access APIs related to RCS User Capability Exchange.
+         <p> This permission is only granted to system applications fulfilling the SMS, Dialer, and
+         Contacts app roles.
+         <p>Protection level: internal|role
+         @SystemApi
+         @hide -->
+    <permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"
+        android:protectionLevel="internal|role" />
 
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
