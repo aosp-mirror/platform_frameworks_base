@@ -4973,12 +4973,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void onUserAdded(int userId) {
-        mPermissionMonitor.onUserAdded(userId);
+    private void onUserAdded(UserHandle user) {
+        mPermissionMonitor.onUserAdded(user);
     }
 
-    private void onUserRemoved(int userId) {
-        mPermissionMonitor.onUserRemoved(userId);
+    private void onUserRemoved(UserHandle user) {
+        mPermissionMonitor.onUserRemoved(user);
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -4986,15 +4986,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public void onReceive(Context context, Intent intent) {
             ensureRunningOnConnectivityServiceThread();
             final String action = intent.getAction();
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            final UserHandle user = intent.getParcelableExtra(Intent.EXTRA_USER);
 
-            // UserId should be filled for below intents, check the existence.
-            if (userId == UserHandle.USER_NULL) return;
+            // User should be filled for below intents, check the existence.
+            if (user == null) {
+                Log.wtf(TAG, intent.getAction() + " broadcast without EXTRA_USER");
+                return;
+            }
 
             if (Intent.ACTION_USER_ADDED.equals(action)) {
-                onUserAdded(userId);
+                onUserAdded(user);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                onUserRemoved(userId);
+                onUserRemoved(user);
             }  else {
                 Log.wtf(TAG, "received unexpected intent: " + action);
             }
