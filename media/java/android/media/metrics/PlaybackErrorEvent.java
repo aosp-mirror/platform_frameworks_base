@@ -17,8 +17,10 @@
 package android.media.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,17 +29,19 @@ import java.util.Objects;
 
 /**
  * Playback error event.
- * @hide
  */
-public final class PlaybackErrorEvent implements Parcelable {
+public final class PlaybackErrorEvent extends Event implements Parcelable {
+    /** Unknown error code. */
     public static final int ERROR_CODE_UNKNOWN = 0;
+    /** Error code for other errors */
     public static final int ERROR_CODE_OTHER = 1;
+    /** Error code for runtime errors */
     public static final int ERROR_CODE_RUNTIME = 2;
 
     private final @Nullable String mExceptionStack;
     private final int mErrorCode;
     private final int mSubErrorCode;
-    private final long mTimeSincePlaybackCreatedMillis;
+    private final long mTimeSinceCreatedMillis;
 
 
     /** @hide */
@@ -59,11 +63,11 @@ public final class PlaybackErrorEvent implements Parcelable {
             @Nullable String exceptionStack,
             int errorCode,
             int subErrorCode,
-            long timeSincePlaybackCreatedMillis) {
+            long timeSinceCreatedMillis) {
         this.mExceptionStack = exceptionStack;
         this.mErrorCode = errorCode;
         this.mSubErrorCode = subErrorCode;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
     }
 
     /** @hide */
@@ -72,17 +76,32 @@ public final class PlaybackErrorEvent implements Parcelable {
         return mExceptionStack;
     }
 
+
+    /**
+     * Gets error code.
+     */
     @ErrorCode
     public int getErrorCode() {
         return mErrorCode;
     }
 
+
+    /**
+     * Gets sub error code.
+     */
+    @IntRange(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE)
     public int getSubErrorCode() {
         return mSubErrorCode;
     }
 
-    public long getTimeSincePlaybackCreatedMillis() {
-        return mTimeSincePlaybackCreatedMillis;
+    /**
+     * Gets the timestamp since creation in milliseconds.
+     * @return the timestamp since the playback is created, or -1 if unknown.
+     */
+    @Override
+    @IntRange(from = -1)
+    public long getTimeSinceCreatedMillis() {
+        return mTimeSinceCreatedMillis;
     }
 
     @Override
@@ -91,7 +110,7 @@ public final class PlaybackErrorEvent implements Parcelable {
                 + "exceptionStack = " + mExceptionStack + ", "
                 + "errorCode = " + mErrorCode + ", "
                 + "subErrorCode = " + mSubErrorCode + ", "
-                + "timeSincePlaybackCreatedMillis = " + mTimeSincePlaybackCreatedMillis
+                + "timeSinceCreatedMillis = " + mTimeSinceCreatedMillis
                 + " }";
     }
 
@@ -103,13 +122,13 @@ public final class PlaybackErrorEvent implements Parcelable {
         return Objects.equals(mExceptionStack, that.mExceptionStack)
                 && mErrorCode == that.mErrorCode
                 && mSubErrorCode == that.mSubErrorCode
-                && mTimeSincePlaybackCreatedMillis == that.mTimeSincePlaybackCreatedMillis;
+                && mTimeSinceCreatedMillis == that.mTimeSinceCreatedMillis;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mExceptionStack, mErrorCode, mSubErrorCode,
-                mTimeSincePlaybackCreatedMillis);
+            mTimeSinceCreatedMillis);
     }
 
     @Override
@@ -120,7 +139,7 @@ public final class PlaybackErrorEvent implements Parcelable {
         if (mExceptionStack != null) dest.writeString(mExceptionStack);
         dest.writeInt(mErrorCode);
         dest.writeInt(mSubErrorCode);
-        dest.writeLong(mTimeSincePlaybackCreatedMillis);
+        dest.writeLong(mTimeSinceCreatedMillis);
     }
 
     @Override
@@ -134,13 +153,14 @@ public final class PlaybackErrorEvent implements Parcelable {
         String exceptionStack = (flg & 0x1) == 0 ? null : in.readString();
         int errorCode = in.readInt();
         int subErrorCode = in.readInt();
-        long timeSincePlaybackCreatedMillis = in.readLong();
+        long timeSinceCreatedMillis = in.readLong();
 
         this.mExceptionStack = exceptionStack;
         this.mErrorCode = errorCode;
         this.mSubErrorCode = subErrorCode;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
     }
+
 
     public static final @NonNull Parcelable.Creator<PlaybackErrorEvent> CREATOR =
             new Parcelable.Creator<PlaybackErrorEvent>() {
@@ -162,27 +182,18 @@ public final class PlaybackErrorEvent implements Parcelable {
         private @Nullable Exception mException;
         private int mErrorCode;
         private int mSubErrorCode;
-        private long mTimeSincePlaybackCreatedMillis;
+        private long mTimeSinceCreatedMillis = -1;
 
         /**
          * Creates a new Builder.
-         *
-         * @hide
          */
-        public Builder(
-                @Nullable Exception exception,
-                int errorCode,
-                int subErrorCode,
-                long timeSincePlaybackCreatedMillis) {
-            mException = exception;
-            mErrorCode = errorCode;
-            mSubErrorCode = subErrorCode;
-            mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        public Builder() {
         }
 
         /**
          * Sets the {@link Exception} object.
          */
+        @SuppressLint("MissingGetterMatchingBuilder") // Exception is not parcelable.
         public @NonNull Builder setException(@NonNull Exception value) {
             mException = value;
             return this;
@@ -199,16 +210,19 @@ public final class PlaybackErrorEvent implements Parcelable {
         /**
          * Sets sub error code.
          */
-        public @NonNull Builder setSubErrorCode(int value) {
+        public @NonNull Builder setSubErrorCode(
+                @IntRange(from = Integer.MIN_VALUE, to = Integer.MAX_VALUE) int value) {
             mSubErrorCode = value;
             return this;
         }
 
         /**
-         * Set the timestamp in milliseconds.
+         * Set the timestamp since creation in milliseconds.
+         * @param value the timestamp since the creation in milliseconds.
+         *              -1 indicates the value is unknown.
          */
-        public @NonNull Builder setTimeSincePlaybackCreatedMillis(long value) {
-            mTimeSincePlaybackCreatedMillis = value;
+        public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
+            mTimeSinceCreatedMillis = value;
             return this;
         }
 
@@ -227,7 +241,7 @@ public final class PlaybackErrorEvent implements Parcelable {
                     stack,
                     mErrorCode,
                     mSubErrorCode,
-                    mTimeSincePlaybackCreatedMillis);
+                    mTimeSinceCreatedMillis);
             return o;
         }
     }
