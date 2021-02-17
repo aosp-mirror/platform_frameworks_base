@@ -81,7 +81,7 @@ public class GnssManagerService {
         mGnssNative = gnssNative;
 
         mGnssMetrics = new GnssMetrics(mContext, IBatteryStats.Stub.asInterface(
-                ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+                ServiceManager.getService(BatteryStats.SERVICE_NAME)), mGnssNative);
 
         mGnssLocationProvider = new GnssLocationProvider(mContext, injector, mGnssNative,
                 mGnssMetrics);
