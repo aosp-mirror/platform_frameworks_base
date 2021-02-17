@@ -51,13 +51,15 @@ public class MeasuredEnergyStats {
     public static final int ENERGY_BUCKET_SCREEN_ON = 0;
     public static final int ENERGY_BUCKET_SCREEN_DOZE = 1;
     public static final int ENERGY_BUCKET_SCREEN_OTHER = 2;
-    public static final int NUMBER_STANDARD_ENERGY_BUCKETS = 3; // Buckets above this are custom.
+    public static final int ENERGY_BUCKET_CPU = 3;
+    public static final int NUMBER_STANDARD_ENERGY_BUCKETS = 4; // Buckets above this are custom.
 
     @IntDef(prefix = {"ENERGY_BUCKET_"}, value = {
             ENERGY_BUCKET_UNKNOWN,
             ENERGY_BUCKET_SCREEN_ON,
             ENERGY_BUCKET_SCREEN_DOZE,
             ENERGY_BUCKET_SCREEN_OTHER,
+            ENERGY_BUCKET_CPU,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StandardEnergyBucket {

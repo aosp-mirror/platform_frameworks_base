@@ -43,6 +43,9 @@ public class MeasuredEnergySnapshot {
     /** Map of {@link EnergyConsumer#id} to its corresponding {@link EnergyConsumer}. */
     private final SparseArray<EnergyConsumer> mEnergyConsumers;
 
+    /** Number of ordinals for {@link EnergyConsumerType#CPU_CLUSTER}. */
+    private final int mNumCpuClusterOrdinals;
+
     /** Number of ordinals for {@link EnergyConsumerType#OTHER}. */
     private final int mNumOtherOrdinals;
 
@@ -78,7 +81,9 @@ public class MeasuredEnergySnapshot {
         mEnergyConsumers = idToConsumerMap;
         mMeasuredEnergySnapshots = new SparseLongArray(mEnergyConsumers.size());
 
-        mNumOtherOrdinals = calculateNumOtherOrdinals(idToConsumerMap);
+        mNumCpuClusterOrdinals = calculateNumOrdinals(EnergyConsumerType.CPU_CLUSTER,
+                idToConsumerMap);
+        mNumOtherOrdinals = calculateNumOrdinals(EnergyConsumerType.OTHER, idToConsumerMap);
         mAttributionSnapshots = new SparseArray<>(mNumOtherOrdinals);
     }
 
@@ -94,6 +99,9 @@ public class MeasuredEnergySnapshot {
     static class MeasuredEnergyDeltaData {
         /** The energyUJ for {@link EnergyConsumerType#DISPLAY}. */
         public long displayEnergyUJ = UNAVAILABLE;
+
+        /** The energyUJ for {@link EnergyConsumerType#CPU_CLUSTER}s. */
+        public long[] cpuClusterEnergiesUJ = null;
 
         /** Map of {@link EnergyConsumerType#OTHER} ordinals to their total energyUJ. */
         public @Nullable long[] otherTotalEnergyUJ = null;
@@ -163,6 +171,14 @@ public class MeasuredEnergySnapshot {
                 case EnergyConsumerType.DISPLAY:
                     output.displayEnergyUJ = deltaUJ;
                     break;
+
+                case EnergyConsumerType.CPU_CLUSTER:
+                    if (output.cpuClusterEnergiesUJ == null) {
+                        output.cpuClusterEnergiesUJ = new long[mNumCpuClusterOrdinals];
+                    }
+                    output.cpuClusterEnergiesUJ[ordinal] = deltaUJ;
+                    break;
+
                 case EnergyConsumerType.OTHER:
                     if (output.otherTotalEnergyUJ == null) {
                         output.otherTotalEnergyUJ = new long[getNumOtherOrdinals()];
@@ -262,15 +278,16 @@ public class MeasuredEnergySnapshot {
         pw.println();
     }
 
-    /** Determines the number of ordinals for {@link EnergyConsumerType#OTHER}. */
-    private static int calculateNumOtherOrdinals(SparseArray<EnergyConsumer> idToConsumer) {
+    /** Determines the number of ordinals for a given {@link EnergyConsumerType}. */
+    private static int calculateNumOrdinals(@EnergyConsumerType int type,
+            SparseArray<EnergyConsumer> idToConsumer) {
         if (idToConsumer == null) return 0;
-        int numOtherOrdinals = 0;
+        int numOrdinals = 0;
         final int size = idToConsumer.size();
         for (int idx = 0; idx < size; idx++) {
             final EnergyConsumer consumer = idToConsumer.valueAt(idx);
-            if (consumer.type == EnergyConsumerType.OTHER) numOtherOrdinals++;
+            if (consumer.type == type) numOrdinals++;
         }
-        return numOtherOrdinals;
+        return numOrdinals;
     }
 }

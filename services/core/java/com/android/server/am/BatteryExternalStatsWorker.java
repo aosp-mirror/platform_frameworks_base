@@ -620,7 +620,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     onBattery = mStats.isOnBatteryLocked();
                     onBatteryScreenOff = mStats.isOnBatteryScreenOffLocked();
                 }
-                mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff);
+
+                final long[] cpuClusterEnergiesUJ;
+                if (measuredEnergyDeltas == null) {
+                    cpuClusterEnergiesUJ = null;
+                } else {
+                    cpuClusterEnergiesUJ = measuredEnergyDeltas.cpuClusterEnergiesUJ;
+                }
+                mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff, cpuClusterEnergiesUJ);
             }
 
             if (updateFlags == UPDATE_ALL) {
@@ -804,6 +811,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON] = true;
                     buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE] = true;
                     buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_OTHER] = true;
+                    break;
+                case EnergyConsumerType.CPU_CLUSTER:
+                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_CPU] = true;
                     break;
             }
         }

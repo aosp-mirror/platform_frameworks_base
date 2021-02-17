@@ -169,7 +169,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 193;
+    static final int VERSION = 194;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1009,6 +1009,8 @@ public class BatteryStatsImpl extends BatteryStats {
     protected @Nullable MeasuredEnergyStats mGlobalMeasuredEnergyStats;
     /** Last known screen state. Needed for apportioning display energy. */
     int mScreenStateAtLastEnergyMeasurement = Display.STATE_UNKNOWN;
+    /** Cpu Power calculator for attributing measured cpu energy to uids */
+    @Nullable CpuPowerCalculator mCpuPowerCalculator = null;
 
     /**
      * These provide time bases that discount the time the device is plugged
@@ -12170,6 +12172,84 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Accumulate Cpu energy and distribute it to the correct state and the apps.
+     * Only call if device is on battery.
+     *
+     * @param clusterEnergiesUJ amount of energy (microjoules) used by each Cpu Cluster
+     * @param accumulator collection of calculated uid cpu power consumption to smear
+     *                    clusterEnergiesUJ against.
+     */
+    @GuardedBy("this")
+    private void updateCpuEnergyLocked(@NonNull long[] clusterEnergiesUJ,
+            @NonNull CpuDeltaPowerAccumulator accumulator) {
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG,
+                    "Updating cpu cluster stats: " + clusterEnergiesUJ.toString());
+        }
+        if (mGlobalMeasuredEnergyStats == null) {
+            return;
+        }
+
+        final int numClusters = clusterEnergiesUJ.length;
+        long totalCpuEnergyUJ = 0;
+        for (int i = 0; i < numClusters; i++) {
+            totalCpuEnergyUJ += clusterEnergiesUJ[i];
+        }
+        if (totalCpuEnergyUJ <= 0) return;
+
+        mGlobalMeasuredEnergyStats.updateStandardBucket(MeasuredEnergyStats.ENERGY_BUCKET_CPU,
+                totalCpuEnergyUJ);
+
+        // Calculate the measured energy/calculated charge ratio for each cluster to normalize
+        // each uid's estimated power usage against actual power usage for a given cluster.
+        final double[] clusterEnergyChargeRatio = new double[numClusters];
+        for (int cluster = 0; cluster < numClusters; cluster++) {
+            final double totalClusterChargeMah = accumulator.totalClusterChargesMah[cluster];
+            if (totalClusterChargeMah <= 0.0) {
+                // This cluster did not have any work on it, since last update.
+                // Avoid dividing by zero.
+                clusterEnergyChargeRatio[cluster] = 0.0;
+            } else {
+                clusterEnergyChargeRatio[cluster] =
+                        clusterEnergiesUJ[cluster] / accumulator.totalClusterChargesMah[cluster];
+            }
+        }
+
+        // Assign and distribute power usage to apps based on their calculated cpu cluster charge.
+        final long uidChargeArraySize = accumulator.perUidCpuClusterChargesMah.size();
+        for (int i = 0; i < uidChargeArraySize; i++) {
+            final Uid uid = accumulator.perUidCpuClusterChargesMah.keyAt(i);
+            final double[] uidClusterChargesMah = accumulator.perUidCpuClusterChargesMah.valueAt(i);
+
+            // Iterate each cpu cluster and sum the proportional measured cpu cluster energy to
+            // get the total cpu energy used by a uid.
+            long uidCpuEnergyUJ = 0;
+            for (int cluster = 0; cluster < numClusters; cluster++) {
+                final double uidClusterChargeMah = uidClusterChargesMah[cluster];
+
+                // Proportionally allocate the measured cpu cluster energy to a uid using the
+                // measured energy/calculated charge ratio. Add 0.5 to round the proportional
+                // energy double to the nearest long value.
+                final long uidClusterEnergyUJ =
+                        (long) (uidClusterChargeMah * clusterEnergyChargeRatio[cluster]
+                                + 0.5);
+
+                uidCpuEnergyUJ += uidClusterEnergyUJ;
+            }
+
+            if (uidCpuEnergyUJ < 0) {
+                Slog.wtf(TAG,
+                        "Unexpected proportional measured energy (" + uidCpuEnergyUJ + ") for uid "
+                                + uid.mUid);
+                continue;
+            }
+
+            uid.addEnergyToStandardBucketLocked(uidCpuEnergyUJ,
+                    MeasuredEnergyStats.ENERGY_BUCKET_CPU);
+        }
+    }
+
+    /**
      * Accumulate Display energy and distribute it to the correct state and the apps.
      *
      * NOTE: The algorithm used makes the strong assumption that app foreground activity time
@@ -12416,6 +12496,64 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Object for calculating and accumulating the estimated cpu power used while reading the
+     * various cpu kernel files.
+     */
+    @VisibleForTesting
+    public static class CpuDeltaPowerAccumulator {
+        // Keeps track of total charge used per cluster.
+        public final double[] totalClusterChargesMah;
+        // Keeps track of charge used per cluster per uid.
+        public final ArrayMap<Uid, double[]> perUidCpuClusterChargesMah;
+
+        private final CpuPowerCalculator mCalculator;
+        private Uid mCachedUid = null;
+        private double[] mUidClusterCache = null;
+
+        CpuDeltaPowerAccumulator(CpuPowerCalculator calculator, int nClusters) {
+            mCalculator = calculator;
+            totalClusterChargesMah = new double[nClusters];
+            perUidCpuClusterChargesMah = new ArrayMap<>();
+        }
+
+        /** Add per cpu cluster durations to the currently cached uid. */
+        public void addCpuClusterDurationsMs(Uid uid, long[] durationsMs) {
+            final double[] uidChargesMah = getOrCreateUidCpuClusterCharges(uid);
+            for (int cluster = 0; cluster < durationsMs.length; cluster++) {
+                final double estimatedDeltaMah = mCalculator.calculatePerCpuClusterPowerMah(cluster,
+                        durationsMs[cluster]);
+                uidChargesMah[cluster] += estimatedDeltaMah;
+                totalClusterChargesMah[cluster] += estimatedDeltaMah;
+            }
+        }
+
+        /** Add per speed per cpu cluster durations to the currently cached uid. */
+        public void addCpuClusterSpeedDurationsMs(Uid uid, int cluster, int speed,
+                long durationsMs) {
+            final double[] uidChargesMah = getOrCreateUidCpuClusterCharges(uid);
+            final double estimatedDeltaMah = mCalculator.calculatePerCpuFreqPowerMah(cluster, speed,
+                    durationsMs);
+            uidChargesMah[cluster] += estimatedDeltaMah;
+            totalClusterChargesMah[cluster] += estimatedDeltaMah;
+        }
+
+        private double[] getOrCreateUidCpuClusterCharges(Uid uid) {
+            // Repeated additions on the same uid is very likely.
+            // Skip a lookup if getting the same uid as the last get.
+            if (uid == mCachedUid) return mUidClusterCache;
+
+            double[] uidChargesMah = perUidCpuClusterChargesMah.get(uid);
+            if (uidChargesMah == null) {
+                uidChargesMah = new double[totalClusterChargesMah.length];
+                perUidCpuClusterChargesMah.put(uid, uidChargesMah);
+            }
+            mCachedUid = uid;
+            mUidClusterCache = uidChargesMah;
+            return uidChargesMah;
+        }
+    }
+
+    /**
      * Read and distribute CPU usage across apps. If their are partial wakelocks being held
      * and we are on battery with screen off, we give more of the cpu time to those apps holding
      * wakelocks. If the screen is on, we just assign the actual cpu time an app used.
@@ -12424,7 +12562,8 @@ public class BatteryStatsImpl extends BatteryStats {
      * buckets.
      */
     @GuardedBy("this")
-    public void updateCpuTimeLocked(boolean onBattery, boolean onBatteryScreenOff) {
+    public void updateCpuTimeLocked(boolean onBattery, boolean onBatteryScreenOff,
+            long[] measuredCpuClusterEnergiesUJ) {
         if (mPowerProfile == null) {
             return;
         }
@@ -12478,21 +12617,48 @@ public class BatteryStatsImpl extends BatteryStats {
         mUserInfoProvider.refreshUserIds();
         final SparseLongArray updatedUids = mCpuUidFreqTimeReader.perClusterTimesAvailable()
                 ? null : new SparseLongArray();
+
+        final CpuDeltaPowerAccumulator powerAccumulator;
+        if (mGlobalMeasuredEnergyStats != null
+                && mGlobalMeasuredEnergyStats.isStandardBucketSupported(
+                MeasuredEnergyStats.ENERGY_BUCKET_CPU) && mCpuPowerCalculator != null) {
+            if (measuredCpuClusterEnergiesUJ == null) {
+                Slog.wtf(TAG,
+                        "ENERGY_BUCKET_CPU supported but no measured Cpu Cluster energy reported "
+                                + "on updateCpuTimeLocked!");
+                powerAccumulator = null;
+            } else {
+                // Cpu Measured Energy is supported, create an object to accumulate the estimated
+                // energy consumption since the last cpu update
+                final int numClusters = mPowerProfile.getNumCpuClusters();
+                powerAccumulator = new CpuDeltaPowerAccumulator(mCpuPowerCalculator, numClusters);
+            }
+        } else {
+            powerAccumulator = null;
+        }
+
         readKernelUidCpuTimesLocked(partialTimersToConsider, updatedUids, onBattery);
         // updatedUids=null means /proc/uid_time_in_state provides snapshots of per-cluster cpu
         // freqs, so no need to approximate these values.
         if (updatedUids != null) {
-            updateClusterSpeedTimes(updatedUids, onBattery);
+            updateClusterSpeedTimes(updatedUids, onBattery, powerAccumulator);
         }
-        readKernelUidCpuFreqTimesLocked(partialTimersToConsider, onBattery, onBatteryScreenOff);
+        readKernelUidCpuFreqTimesLocked(partialTimersToConsider, onBattery, onBatteryScreenOff,
+                powerAccumulator);
         mNumAllUidCpuTimeReads += 2;
         if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+            // Cpu Active times do not get any info ony how to attribute measured Cpu Cluster
+            // energy, so not need to provide the powerAccumulator
             readKernelUidCpuActiveTimesLocked(onBattery);
-            readKernelUidCpuClusterTimesLocked(onBattery);
+            readKernelUidCpuClusterTimesLocked(onBattery, powerAccumulator);
             mNumAllUidCpuTimeReads += 2;
         }
 
         updateSystemServerThreadStats();
+
+        if (powerAccumulator != null) {
+            updateCpuEnergyLocked(measuredCpuClusterEnergiesUJ, powerAccumulator);
+        }
     }
 
     /**
@@ -12579,12 +12745,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
     /**
      * Take snapshot of cpu times (aggregated over all uids) at different frequencies and
-     * calculate cpu times spent by each uid at different frequencies.
+     * calculate cpu times spent by each uid at different frequencies. Will also add estimated
+     * power consumptions, if powerAccumulator data structure is provided.
      *
-     * @param updatedUids The uids for which times spent at different frequencies are calculated.
+     * @param updatedUids  The uids for which times spent at different frequencies are calculated.
+     * @param onBattery whether or not this is onBattery
+     * @param powerAccumulator object to accumulate the estimated cluster energy.
      */
     @VisibleForTesting
-    public void updateClusterSpeedTimes(@NonNull SparseLongArray updatedUids, boolean onBattery) {
+    public void updateClusterSpeedTimes(@NonNull SparseLongArray updatedUids, boolean onBattery,
+            @Nullable CpuDeltaPowerAccumulator powerAccumulator) {
         long totalCpuClustersTimeMs = 0;
         // Read the time spent for each cluster at various cpu frequencies.
         final long[][] clusterSpeedTimesMs = new long[mKernelCpuSpeedReaders.length][];
@@ -12626,9 +12796,15 @@ public class BatteryStatsImpl extends BatteryStats {
                         if (cpuSpeeds[speed] == null) {
                             cpuSpeeds[speed] = new LongSamplingCounter(mOnBatteryTimeBase);
                         }
-                        cpuSpeeds[speed].addCountLocked(appCpuTimeUs
+                        final long deltaSpeedCount = appCpuTimeUs
                                 * clusterSpeedTimesMs[cluster][speed]
-                                / totalCpuClustersTimeMs, onBattery);
+                                / totalCpuClustersTimeMs;
+                        cpuSpeeds[speed].addCountLocked(deltaSpeedCount, onBattery);
+
+                        if (powerAccumulator != null) {
+                            powerAccumulator.addCpuClusterSpeedDurationsMs(u, cluster,
+                                    speed, deltaSpeedCount);
+                        }
                     }
                 }
             }
@@ -12750,13 +12926,18 @@ public class BatteryStatsImpl extends BatteryStats {
 
     /**
      * Take a snapshot of the cpu times spent by each uid in each freq and update the
-     * corresponding counters.
+     * corresponding counters.  Will also add estimated power consumptions, if powerAccumulator
+     * data structure is provided.
      *
      * @param partialTimers The wakelock holders among which the cpu freq times will be distributed.
+     * @param onBattery whether or not this is onBattery
+     * @param onBatteryScreenOff whether or not this is onBattery with the screen off.
+     * @param powerAccumulator object to accumulate the estimated cluster energy.
      */
     @VisibleForTesting
     public void readKernelUidCpuFreqTimesLocked(@Nullable ArrayList<StopwatchTimer> partialTimers,
-            boolean onBattery, boolean onBatteryScreenOff) {
+            boolean onBattery, boolean onBatteryScreenOff,
+            @Nullable CpuDeltaPowerAccumulator powerAccumulator) {
         final boolean perClusterTimesAvailable =
                 mCpuUidFreqTimeReader.perClusterTimesAvailable();
         final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
@@ -12765,7 +12946,9 @@ public class BatteryStatsImpl extends BatteryStats {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
         final List<Integer> uidsToRemove = new ArrayList<>();
-        mCpuUidFreqTimeReader.readDelta(false, (uid, cpuFreqTimeMs) -> {
+        // If power is being accumulated for attribution, data needs to be read immediately.
+        final boolean forceRead = powerAccumulator != null;
+        mCpuUidFreqTimeReader.readDelta(forceRead, (uid, cpuFreqTimeMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 uidsToRemove.add(uid);
@@ -12828,6 +13011,11 @@ public class BatteryStatsImpl extends BatteryStats {
                             appAllocationUs = cpuFreqTimeMs[freqIndex] * 1000;
                         }
                         cpuTimesUs[speed].addCountLocked(appAllocationUs, onBattery);
+
+                        if (powerAccumulator != null) {
+                            powerAccumulator.addCpuClusterSpeedDurationsMs(u, cluster,
+                                    speed, appAllocationUs / 1000);
+                        }
                         freqIndex++;
                     }
                 }
@@ -12868,6 +13056,11 @@ public class BatteryStatsImpl extends BatteryStats {
                                 mWakeLockAllocationsUs[cluster][speed] / (numWakelocks - i);
                         cpuTimeUs[speed].addCountLocked(allocationUs, onBattery);
                         mWakeLockAllocationsUs[cluster][speed] -= allocationUs;
+
+                        if (powerAccumulator != null) {
+                            powerAccumulator.addCpuClusterSpeedDurationsMs(u, cluster,
+                                    speed, allocationUs / 1000);
+                        }
                     }
                 }
             }
@@ -12910,14 +13103,21 @@ public class BatteryStatsImpl extends BatteryStats {
 
     /**
      * Take a snapshot of the cpu cluster times spent by each uid and update the corresponding
-     * counters.
+     * counters. Will also add estimated power consumptions, if powerAccumulator data structure
+     * is provided.
+     *
+     * @param onBattery whether or not this is onBattery
+     * @param powerAccumulator object to accumulate the estimated cluster energy.
      */
     @VisibleForTesting
-    public void readKernelUidCpuClusterTimesLocked(boolean onBattery) {
+    public void readKernelUidCpuClusterTimesLocked(boolean onBattery,
+            @Nullable CpuDeltaPowerAccumulator powerAccumulator) {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
         final List<Integer> uidsToRemove = new ArrayList<>();
-        mCpuUidClusterTimeReader.readDelta(false, (uid, cpuClusterTimesMs) -> {
+        // If power is being accumulated for attribution, data needs to be read immediately.
+        final boolean forceRead = powerAccumulator != null;
+        mCpuUidClusterTimeReader.readDelta(forceRead, (uid, cpuClusterTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 uidsToRemove.add(uid);
@@ -12931,6 +13131,10 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, startTimeMs);
             u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesMs, onBattery);
+
+            if (powerAccumulator != null) {
+                powerAccumulator.addCpuClusterDurationsMs(u, cpuClusterTimesMs);
+            }
         });
         for (int uid : uidsToRemove) {
             mCpuUidClusterTimeReader.removeUid(uid);
@@ -14000,13 +14204,19 @@ public class BatteryStatsImpl extends BatteryStats {
                 // Measured energy buckets no longer supported, wipe out the existing data.
                 supportedBucketMismatch = true;
             }
-        } else if (mGlobalMeasuredEnergyStats == null) {
-            mGlobalMeasuredEnergyStats
-                    = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-            return;
         } else {
-            supportedBucketMismatch = !mGlobalMeasuredEnergyStats.isSupportEqualTo(
-                    supportedStandardBuckets, numCustomBuckets);
+            if (mGlobalMeasuredEnergyStats == null) {
+                mGlobalMeasuredEnergyStats =
+                        new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
+                return;
+            } else {
+                supportedBucketMismatch = !mGlobalMeasuredEnergyStats.isSupportEqualTo(
+                        supportedStandardBuckets, numCustomBuckets);
+            }
+
+            if (supportedStandardBuckets[MeasuredEnergyStats.ENERGY_BUCKET_CPU]) {
+                mCpuPowerCalculator = new CpuPowerCalculator(mPowerProfile);
+            }
         }
 
         if (supportedBucketMismatch) {

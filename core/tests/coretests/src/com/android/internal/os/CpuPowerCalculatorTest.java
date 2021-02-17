@@ -126,7 +126,7 @@ public class CpuPowerCalculatorTest {
             return null;
         }).when(mMockKernelCpuUidClusterTimeReader).readDelta(any());
 
-        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true);
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
 
         mStatsRule.getUidStats(APP_UID1).getProcessStatsLocked("foo").addCpuTimeLocked(4321, 1234);
         mStatsRule.getUidStats(APP_UID1).getProcessStatsLocked("bar").addCpuTimeLocked(5432, 2345);
