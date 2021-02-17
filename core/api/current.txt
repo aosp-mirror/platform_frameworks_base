@@ -12206,6 +12206,7 @@ package android.content.pm {
     method public void setAutoRevokePermissionsMode(boolean);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
+    method public void setInstallScenario(int);
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
@@ -12534,6 +12535,10 @@ package android.content.pm {
     field public static final int INSTALL_REASON_POLICY = 1; // 0x1
     field public static final int INSTALL_REASON_UNKNOWN = 0; // 0x0
     field public static final int INSTALL_REASON_USER = 4; // 0x4
+    field public static final int INSTALL_SCENARIO_BULK = 2; // 0x2
+    field public static final int INSTALL_SCENARIO_BULK_SECONDARY = 3; // 0x3
+    field public static final int INSTALL_SCENARIO_DEFAULT = 0; // 0x0
+    field public static final int INSTALL_SCENARIO_FAST = 1; // 0x1
     field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_APEX = 1073741824; // 0x40000000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
