@@ -17,9 +17,13 @@
 package com.android.server.location.contexthub;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.hardware.location.ContextHubManager.AUTHORIZATION_DENIED;
+import static android.hardware.location.ContextHubManager.AUTHORIZATION_DENIED_GRACE_PERIOD;
+import static android.hardware.location.ContextHubManager.AUTHORIZATION_GRANTED;
 
 import android.Manifest;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -30,19 +34,21 @@ import android.hardware.location.ContextHubManager;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
+import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoAppMessage;
+import android.hardware.location.NanoAppState;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.location.ClientBrokerProto;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -52,13 +58,52 @@ import java.util.function.Supplier;
  * notification callbacks. This class implements the IContextHubClient object, and the implemented
  * APIs must be thread-safe.
  *
+ * Additionally, this class is responsible for enforcing permissions usage and attribution are
+ * handled appropriately for a given client. In general, this works as follows:
+ *
+ * Client sending a message to a nanoapp:
+ * 1) When initially sending a message to nanoapps, clients are by default in a grace period state
+ *    which allows them to always send their first message to nanoapps. This is done to allow
+ *    clients (especially callback clients) to reset their conection to the nanoapp if they are
+ *    killed / restarted (e.g. following a permission revocation).
+ * 2) After the initial message is sent, a check of permissions state is performed. If the
+ *    client doesn't have permissions to communicate, it is placed into the denied grace period
+ *    state and notified so that it can clean up its communication before it is completely denied
+ *    access.
+ * 3) For subsequent messages, the auth state is checked synchronously and messages are denied if
+ *    the client is denied authorization
+ *
+ * Client receiving a message from a nanoapp:
+ * 1) If a nanoapp sends a message to the client, the authentication state is checked synchronously.
+ *    If there has been no message between the two before, the auth state is assumed granted.
+ * 2) The broker then checks that the client has all permissions the nanoapp requires and attributes
+ *    all permissions required to consume the message being sent. If both of those checks pass, then
+ *    the message is delivered. Otherwise, it's dropped.
+ *
+ * Client losing or gaining permissions (callback client):
+ * 1) Clients are killed when they lose permissions. This will cause callback clients to completely
+ *    disconnect from the service. When they are restarted, their initial message will still be
+ *    be allowed through and their permissions will be rechecked at that time.
+ * 2) If they gain a permission, the broker will notify them if that permission allows them to
+ *    communicate with a nanoapp again.
+ *
+ * Client losing or gaining permissions (PendingIntent client):
+ * 1) Unlike callback clients, PendingIntent clients are able to maintain their connection to the
+ *    service when they are killed. In their case, they will receive notifications of the broker
+ *    that they have been denied required permissions or gain required permissions.
+ *
  * TODO: Consider refactoring this class via inheritance
  *
  * @hide
  */
 public class ContextHubClientBroker extends IContextHubClient.Stub
-        implements IBinder.DeathRecipient {
+        implements IBinder.DeathRecipient, AppOpsManager.OnOpChangedListener {
     private static final String TAG = "ContextHubClientBroker";
+
+    /**
+     * Message used by noteOp when this client receives a message from a nanoapp.
+     */
+    private static final String RECEIVE_MSG_NOTE = "NanoappMessageDelivery ";
 
     /*
      * The context of the service.
@@ -119,6 +164,26 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private final String mPackage;
 
+    /**
+     * The PID associated with this client.
+     */
+    private final int mPid;
+
+    /**
+     * The UID associated with this client.
+     */
+    private final int mUid;
+
+    /**
+     * Manager used for noting permissions usage of this broker.
+     */
+    private final AppOpsManager mAppOpsManager;
+
+    /**
+     * Manager used to queue transactions to the context hub.
+     */
+    private final ContextHubTransactionManager mTransactionManager;
+
     /*
      * True if a PendingIntent has been cancelled.
      */
@@ -130,11 +195,44 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final boolean mHasAccessContextHubPermission;
 
     /*
-     * The set of nanoapp IDs that represent the group of nanoapps this client has a messaging
-     * channel with, i.e. has sent or received messages from this particular nanoapp.
+     * Map containing all nanoapps this client has a messaging channel with and whether it is
+     * allowed to communicate over that channel. A channel is defined to have been opened if the
+     * client has sent or received messages from the particular nanoapp.
      */
-    private final Set<Long> mMessageChannelNanoappIdSet =
-            Collections.newSetFromMap(new ConcurrentHashMap<Long, Boolean>());
+    private final Map<Long, Integer> mMessageChannelNanoappIdMap =
+            new ConcurrentHashMap<Long, Integer>();
+
+    /**
+     * Map containing all nanoapps that have active auth state denial timers.
+     */
+    private final Map<Long, AuthStateDenialTimer> mNappToAuthTimerMap =
+            new ConcurrentHashMap<Long, AuthStateDenialTimer>();
+
+    /**
+     * Callback used to obtain the latest set of nanoapp permissions and verify this client has
+     * each nanoapps permissions granted.
+     */
+    private final IContextHubTransactionCallback mQueryPermsCallback =
+            new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onTransactionComplete(int result) {
+            }
+
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+                if (result != ContextHubTransaction.RESULT_SUCCESS && nanoAppStateList != null) {
+                    Log.e(TAG, "Permissions query failed, but still received nanoapp state");
+                } else if (nanoAppStateList != null) {
+                    for (NanoAppState state : nanoAppStateList) {
+                        if (mMessageChannelNanoappIdMap.containsKey(state.getNanoAppId())) {
+                            List<String> permissions = state.getNanoAppPermissions();
+                            updateNanoAppAuthState(state.getNanoAppId(),
+                                    hasPermissions(permissions), false /* gracePeriodExpired */);
+                        }
+                    }
+                }
+            }
+        };
 
     /*
      * Helper class to manage registered PendingIntent requests from the client.
@@ -182,40 +280,57 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
     }
 
-    /* package */ ContextHubClientBroker(
-            Context context, IContextHubWrapper contextHubProxy,
+    private ContextHubClientBroker(Context context, IContextHubWrapper contextHubProxy,
             ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
-            short hostEndPointId, IContextHubClientCallback callback, String attributionTag) {
+            short hostEndPointId, IContextHubClientCallback callback, String attributionTag,
+            ContextHubTransactionManager transactionManager, PendingIntent pendingIntent,
+            long nanoAppId, String packageName) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
         mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
         mCallbackInterface = callback;
-        mPendingIntentRequest = new PendingIntentRequest();
-        mPackage = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
+        if (pendingIntent == null) {
+            mPendingIntentRequest = new PendingIntentRequest();
+        } else {
+            mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
+        }
+        mPackage = packageName;
         mAttributionTag = attributionTag;
+        mTransactionManager = transactionManager;
 
+        mPid = Binder.getCallingPid();
+        mUid = Binder.getCallingUid();
         mHasAccessContextHubPermission = context.checkCallingPermission(
                 Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
+
+        startMonitoringOpChanges();
+    }
+
+    /* package */ ContextHubClientBroker(
+            Context context, IContextHubWrapper contextHubProxy,
+            ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
+            short hostEndPointId, IContextHubClientCallback callback, String attributionTag,
+            ContextHubTransactionManager transactionManager, String packageName) {
+        this(context, contextHubProxy, clientManager, contextHubInfo, hostEndPointId, callback,
+                attributionTag, transactionManager, null /* pendingIntent */, 0 /* nanoAppId */,
+                packageName);
     }
 
     /* package */ ContextHubClientBroker(
             Context context, IContextHubWrapper contextHubProxy,
             ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
             short hostEndPointId, PendingIntent pendingIntent, long nanoAppId,
-            String attributionTag) {
-        mContext = context;
-        mContextHubProxy = contextHubProxy;
-        mClientManager = clientManager;
-        mAttachedContextHubInfo = contextHubInfo;
-        mHostEndPointId = hostEndPointId;
-        mPendingIntentRequest = new PendingIntentRequest(pendingIntent, nanoAppId);
-        mPackage = pendingIntent.getCreatorPackage();
-        mAttributionTag = attributionTag;
+            String attributionTag, ContextHubTransactionManager transactionManager) {
+        this(context, contextHubProxy, clientManager, contextHubInfo, hostEndPointId,
+                null /* callback */, attributionTag, transactionManager, pendingIntent, nanoAppId,
+                pendingIntent.getCreatorPackage());
+    }
 
-        mHasAccessContextHubPermission = context.checkCallingPermission(
-                Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
+    private void startMonitoringOpChanges() {
+        mAppOpsManager.startWatchingMode(AppOpsManager.OP_NONE, mPackage, this);
     }
 
     /**
@@ -229,18 +344,44 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     public int sendMessageToNanoApp(NanoAppMessage message) {
         ContextHubServiceUtil.checkPermissions(mContext);
 
+        int authState;
+        synchronized (mMessageChannelNanoappIdMap) {
+            // Default to the granted auth state. The true auth state will be checked async if it's
+            // not denied.
+            authState = mMessageChannelNanoappIdMap.getOrDefault(
+                    message.getNanoAppId(), AUTHORIZATION_GRANTED);
+            if (authState == AUTHORIZATION_DENIED) {
+                return ContextHubTransaction.RESULT_FAILED_PERMISSION_DENIED;
+            }
+        }
+
         int result;
         if (isRegistered()) {
-            mMessageChannelNanoappIdSet.add(message.getNanoAppId());
+            // Even though the auth state is currently not denied, query the nanoapp permissions
+            // async and verify that the host app currently holds all the requisite permissions.
+            // This can't be done synchronously due to the async query that needs to be performed to
+            // obtain the nanoapp permissions.
+            boolean initialNanoappMessage = false;
+            synchronized (mMessageChannelNanoappIdMap) {
+                if (mMessageChannelNanoappIdMap.get(message.getNanoAppId()) == null) {
+                    mMessageChannelNanoappIdMap.put(message.getNanoAppId(), AUTHORIZATION_GRANTED);
+                    initialNanoappMessage = true;
+                }
+            }
+
+            if (initialNanoappMessage) {
+                // Only check permissions the first time a nanoapp is queried since nanoapp
+                // permissions don't currently change at runtime. If the host permission changes
+                // later, that'll be checked by onOpChanged.
+                checkNanoappPermsAsync();
+            }
+
             ContextHubMsg messageToNanoApp =
                     ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
 
             int contextHubId = mAttachedContextHubInfo.getId();
             try {
-                // TODO(166846988): Fill in host permissions before sending a message.
-                result = mContextHubProxy.sendMessageToHub(
-                        contextHubId, messageToNanoApp,
-                        new ArrayList<String>() /* hostPermissions */);
+                result = mContextHubProxy.sendMessageToHub(contextHubId, messageToNanoApp);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
                         + contextHubId + ")", e);
@@ -273,6 +414,15 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @Override
     public void binderDied() {
         onClientExit();
+    }
+
+    @Override
+    public void onOpChanged(String op, String packageName) {
+        if (packageName.equals(mPackage)) {
+            if (!mMessageChannelNanoappIdMap.isEmpty()) {
+                checkNanoappPermsAsync();
+            }
+        }
     }
 
     /**
@@ -308,15 +458,39 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * Sends a message to the client associated with this object.
      *
      * @param message the message that came from a nanoapp
+     * @param nanoappPermissions permissions required to communicate with the nanoapp sending this
+     * message
+     * @param messagePermissions permissions required to consume the message being delivered. These
+     * permissions are what will be attributed to the client through noteOp.
      */
-    /* package */ void sendMessageToClient(NanoAppMessage message) {
-        mMessageChannelNanoappIdSet.add(message.getNanoAppId());
+    /* package */ void sendMessageToClient(
+            NanoAppMessage message, List<String> nanoappPermissions,
+            List<String> messagePermissions) {
+        long nanoAppId = message.getNanoAppId();
+
+        int authState = mMessageChannelNanoappIdMap.getOrDefault(nanoAppId, AUTHORIZATION_GRANTED);
+
+        // If in the grace period, the host may not receive any messages containing permissions
+        // covered data.
+        if (authState == AUTHORIZATION_DENIED_GRACE_PERIOD && !messagePermissions.isEmpty()) {
+            Log.e(TAG, "Dropping message from " + Long.toHexString(nanoAppId) + ". " + mPackage
+                    + " in grace period and napp msg has permissions");
+            return;
+        }
+
+        if (authState == AUTHORIZATION_DENIED || !hasPermissions(nanoappPermissions)
+                || !notePermissions(messagePermissions, RECEIVE_MSG_NOTE + nanoAppId)) {
+            Log.e(TAG, "Dropping message from " + Long.toHexString(nanoAppId) + ". " + mPackage
+                    + " doesn't have permission");
+            return;
+        }
+
         invokeCallback(callback -> callback.onMessageFromNanoApp(message));
 
         Supplier<Intent> supplier =
-                () -> createIntent(ContextHubManager.EVENT_NANOAPP_MESSAGE, message.getNanoAppId())
+                () -> createIntent(ContextHubManager.EVENT_NANOAPP_MESSAGE, nanoAppId)
                         .putExtra(ContextHubManager.EXTRA_MESSAGE, message);
-        sendPendingIntent(supplier, message.getNanoAppId());
+        sendPendingIntent(supplier, nanoAppId);
     }
 
     /**
@@ -325,6 +499,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param nanoAppId the ID of the nanoapp that was loaded.
      */
     /* package */ void onNanoAppLoaded(long nanoAppId) {
+        // Check the latest state to see if the loaded nanoapp's permissions changed such that the
+        // host app can communicate with it again.
+        checkNanoappPermsAsync();
+
         invokeCallback(callback -> callback.onNanoAppLoaded(nanoAppId));
         sendPendingIntent(
                 () -> createIntent(ContextHubManager.EVENT_NANOAPP_LOADED, nanoAppId), nanoAppId);
@@ -392,10 +570,133 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
+     * Checks that this client has all of the provided permissions.
+     *
+     * @param permissions list of permissions to check
+     * @return true if the client has all of the permissions granted
+     */
+    /* package */ boolean hasPermissions(List<String> permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkPermission(permission, mPid, mUid) != PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Attributes the provided permissions to the package of this client.
+     *
+     * @param permissions list of permissions covering data the client is about to receive
+     * @param noteMessage message that should be noted alongside permissions attribution to
+     * facilitate debugging
+     * @return true if client has ability to use all of the provided permissions
+     */
+    /* package */ boolean notePermissions(List<String> permissions, String noteMessage) {
+        for (String permission : permissions) {
+            int opCode = mAppOpsManager.permissionToOpCode(permission);
+            if (opCode != AppOpsManager.OP_NONE) {
+                if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
+                        != AppOpsManager.MODE_ALLOWED) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * @return true if the client is a PendingIntent client that has been cancelled.
      */
     /* package */ boolean isPendingIntentCancelled() {
         return mIsPendingIntentCancelled.get();
+    }
+
+    /**
+     * Handles timer expiry for a client whose auth state with a nanoapp was previously in the grace
+     * period.
+     */
+    /* package */ void handleAuthStateTimerExpiry(long nanoAppId) {
+        AuthStateDenialTimer timer;
+        synchronized (mMessageChannelNanoappIdMap) {
+            timer = mNappToAuthTimerMap.remove(nanoAppId);
+        }
+
+        if (timer != null) {
+            updateNanoAppAuthState(
+                    nanoAppId, false /* hasPermissions */, true /* gracePeriodExpired */);
+        }
+    }
+
+    /**
+     * Verifies this client has the permissions to communicate with all of the nanoapps it has
+     * communicated with in the past.
+     */
+    private void checkNanoappPermsAsync() {
+        ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
+                mAttachedContextHubInfo.getId(), mQueryPermsCallback, mPackage);
+        mTransactionManager.addTransaction(transaction);
+    }
+
+    /**
+     * Updates the latest authentication state for this client to be able to communicate with the
+     * given nanoapp.
+     */
+    private void updateNanoAppAuthState(
+            long nanoAppId, boolean hasPermissions, boolean gracePeriodExpired) {
+        int curAuthState;
+        int newAuthState;
+        synchronized (mMessageChannelNanoappIdMap) {
+            curAuthState = mMessageChannelNanoappIdMap.getOrDefault(
+                    nanoAppId, AUTHORIZATION_GRANTED);
+            newAuthState = curAuthState;
+            // The below logic ensures that only the following transitions are possible:
+            // GRANTED -> DENIED_GRACE_PERIOD only if permissions have been lost
+            // DENIED_GRACE_PERIOD -> DENIED only if the grace period expires
+            // DENIED/DENIED_GRACE_PERIOD -> GRANTED only if permissions are granted again
+            if (gracePeriodExpired) {
+                if (curAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
+                    newAuthState = AUTHORIZATION_DENIED;
+                }
+            } else {
+                if (curAuthState == AUTHORIZATION_GRANTED && !hasPermissions) {
+                    newAuthState = AUTHORIZATION_DENIED_GRACE_PERIOD;
+                } else if (curAuthState != AUTHORIZATION_GRANTED && hasPermissions) {
+                    newAuthState = AUTHORIZATION_GRANTED;
+                }
+            }
+
+            if (newAuthState == AUTHORIZATION_GRANTED) {
+                AuthStateDenialTimer timer = mNappToAuthTimerMap.remove(nanoAppId);
+                if (timer != null) {
+                    timer.cancel();
+                }
+            } else if (curAuthState == AUTHORIZATION_GRANTED
+                    && newAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
+                AuthStateDenialTimer timer =
+                        new AuthStateDenialTimer(this, nanoAppId, Looper.getMainLooper());
+                mNappToAuthTimerMap.put(nanoAppId, timer);
+                timer.start();
+            }
+
+            if (curAuthState != newAuthState) {
+                mMessageChannelNanoappIdMap.put(nanoAppId, newAuthState);
+            }
+        }
+        if (curAuthState != newAuthState) {
+            // Don't send the callback in the synchronized block or it could end up in a deadlock.
+            sendAuthStateCallback(nanoAppId, newAuthState);
+        }
+    }
+
+    private void sendAuthStateCallback(long nanoAppId, int authState) {
+        invokeCallback(callback -> callback.onClientAuthorizationChanged(nanoAppId, authState));
+
+        Supplier<Intent> supplier =
+                () -> createIntent(ContextHubManager.EVENT_CLIENT_AUTHORIZATION, nanoAppId)
+                        .putExtra(ContextHubManager.EXTRA_CLIENT_AUTHORIZATION_STATE, authState);
+        sendPendingIntent(supplier, nanoAppId);
     }
 
     /**
@@ -507,6 +808,20 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             mClientManager.unregisterClient(mHostEndPointId);
             mRegistered = false;
         }
+        mAppOpsManager.stopWatchingMode(this);
+    }
+
+    private String authStateToString(@ContextHubManager.AuthorizationState int state) {
+        switch (state) {
+            case AUTHORIZATION_DENIED:
+                return "DENIED";
+            case AUTHORIZATION_DENIED_GRACE_PERIOD:
+                return "DENIED_GRACE_PERIOD";
+            case AUTHORIZATION_GRANTED:
+                return "GRANTED";
+            default:
+                return "UNKNOWN";
+        }
     }
 
     /**
@@ -545,11 +860,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         } else {
             out += "package: " + mPackage;
         }
-        if (mMessageChannelNanoappIdSet.size() > 0) {
+        if (mMessageChannelNanoappIdMap.size() > 0) {
             out += " messageChannelNanoappSet: (";
-            Iterator<Long> it = mMessageChannelNanoappIdSet.iterator();
+            Iterator<Map.Entry<Long, Integer>> it =
+                    mMessageChannelNanoappIdMap.entrySet().iterator();
             while (it.hasNext()) {
-                out += "0x" + Long.toHexString(it.next());
+                Map.Entry<Long, Integer> entry = it.next();
+                out += "0x" + Long.toHexString(entry.getKey()) + " auth state: "
+                        + authStateToString(entry.getValue());
                 if (it.hasNext()) {
                     out += ",";
                 }

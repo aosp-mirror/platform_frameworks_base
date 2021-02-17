@@ -106,9 +106,8 @@ public abstract class IContextHubWrapper {
     /**
      * Calls the appropriate sendMessageToHub function depending on the HAL version.
      */
-    public abstract int sendMessageToHub(
-            int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
-            ArrayList<String> hostPermissions) throws RemoteException;
+    public abstract int sendMessageToHub(int hubId,
+            android.hardware.contexthub.V1_0.ContextHubMsg message) throws RemoteException;
 
     /**
      * @return A valid instance of Contexthub HAL 1.0.
@@ -181,9 +180,8 @@ public abstract class IContextHubWrapper {
             mHub.registerCallback(hubId, callback);
         }
 
-        public int sendMessageToHub(
-                int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
-                ArrayList<String> hostPermissions) throws RemoteException {
+        public int sendMessageToHub(int hubId,
+                android.hardware.contexthub.V1_0.ContextHubMsg message) throws RemoteException {
             return mHub.sendMessageToHub(hubId, message);
         }
 
@@ -236,9 +234,8 @@ public abstract class IContextHubWrapper {
             mHub.registerCallback(hubId, callback);
         }
 
-        public int sendMessageToHub(
-                int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
-                ArrayList<String> hostPermissions) throws RemoteException {
+        public int sendMessageToHub(int hubId,
+                android.hardware.contexthub.V1_0.ContextHubMsg message) throws RemoteException {
             return mHub.sendMessageToHub(hubId, message);
         }
 
@@ -307,13 +304,11 @@ public abstract class IContextHubWrapper {
             mHub.registerCallback_1_2(hubId, callback);
         }
 
-        public int sendMessageToHub(
-                int hubId, android.hardware.contexthub.V1_0.ContextHubMsg message,
-                ArrayList<String> hostPermissions) throws RemoteException {
+        public int sendMessageToHub(int hubId,
+                android.hardware.contexthub.V1_0.ContextHubMsg message) throws RemoteException {
             android.hardware.contexthub.V1_2.ContextHubMsg newMessage =
                     new android.hardware.contexthub.V1_2.ContextHubMsg();
             newMessage.msg_1_0 = message;
-            newMessage.permissions = hostPermissions;
             return mHub.sendMessageToHub_1_2(hubId, newMessage);
         }
 

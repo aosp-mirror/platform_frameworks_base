@@ -36,6 +36,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -136,8 +137,7 @@ import java.util.function.Consumer;
         }
     }
 
-    /* package */ ContextHubClientManager(
-            Context context, IContextHubWrapper contextHubProxy) {
+    /* package */ ContextHubClientManager(Context context, IContextHubWrapper contextHubProxy) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
     }
@@ -155,13 +155,15 @@ import java.util.function.Consumer;
      */
     /* package */ IContextHubClient registerClient(
             ContextHubInfo contextHubInfo, IContextHubClientCallback clientCallback,
-            String attributionTag) {
+            String attributionTag, ContextHubTransactionManager transactionManager,
+            String packageName) {
         ContextHubClientBroker broker;
         synchronized (this) {
             short hostEndPointId = getHostEndPointId();
             broker = new ContextHubClientBroker(
                     mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
-                    hostEndPointId, clientCallback, attributionTag);
+                    hostEndPointId, clientCallback, attributionTag, transactionManager,
+                    packageName);
             mHostEndPointIdToClientMap.put(hostEndPointId, broker);
             mRegistrationRecordDeque.add(
                     new RegistrationRecord(broker.toString(), ACTION_REGISTERED));
@@ -194,7 +196,7 @@ import java.util.function.Consumer;
      */
     /* package */ IContextHubClient registerClient(
             ContextHubInfo contextHubInfo, PendingIntent pendingIntent, long nanoAppId,
-            String attributionTag) {
+            String attributionTag, ContextHubTransactionManager transactionManager) {
         ContextHubClientBroker broker;
         String registerString = "Regenerated";
         synchronized (this) {
@@ -204,7 +206,8 @@ import java.util.function.Consumer;
                 short hostEndPointId = getHostEndPointId();
                 broker = new ContextHubClientBroker(
                         mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
-                        hostEndPointId, pendingIntent, nanoAppId, attributionTag);
+                        hostEndPointId, pendingIntent, nanoAppId, attributionTag,
+                        transactionManager);
                 mHostEndPointIdToClientMap.put(hostEndPointId, broker);
                 registerString = "Registered";
                 mRegistrationRecordDeque.add(
@@ -224,9 +227,14 @@ import java.util.function.Consumer;
      * Handles a message sent from a nanoapp.
      *
      * @param contextHubId the ID of the hub where the nanoapp sent the message from
-     * @param message      the message send by a nanoapp
+     * @param message the message send by a nanoapp
+     * @param nanoappPermissions the set of permissions the nanoapp holds
+     * @param messagePermissions the set of permissions that should be used for attributing
+     * permissions when this message is consumed by a client
      */
-    /* package */ void onMessageFromNanoApp(int contextHubId, ContextHubMsg message) {
+    /* package */ void onMessageFromNanoApp(
+            int contextHubId, ContextHubMsg message, List<String> nanoappPermissions,
+            List<String> messagePermissions) {
         NanoAppMessage clientMessage = ContextHubServiceUtil.createNanoAppMessage(message);
 
         if (DEBUG_LOG_ENABLED) {
@@ -234,11 +242,19 @@ import java.util.function.Consumer;
         }
 
         if (clientMessage.isBroadcastMessage()) {
-            broadcastMessage(contextHubId, clientMessage);
+            // Broadcast messages shouldn't be sent with any permissions tagged per CHRE API
+            // requirements.
+            if (!messagePermissions.isEmpty()) {
+                Log.wtf(TAG, "Received broadcast message with permissions from " + message.appName);
+            }
+
+            broadcastMessage(
+                    contextHubId, clientMessage, nanoappPermissions, messagePermissions);
         } else {
             ContextHubClientBroker proxy = mHostEndPointIdToClientMap.get(message.hostEndPoint);
             if (proxy != null) {
-                proxy.sendMessageToClient(clientMessage);
+                proxy.sendMessageToClient(
+                        clientMessage, nanoappPermissions, messagePermissions);
             } else {
                 Log.e(TAG, "Cannot send message to unregistered client (host endpoint ID = "
                         + message.hostEndPoint + ")");
@@ -333,8 +349,12 @@ import java.util.function.Consumer;
      * @param contextHubId the ID of the hub where the nanoapp sent the message from
      * @param message      the message send by a nanoapp
      */
-    private void broadcastMessage(int contextHubId, NanoAppMessage message) {
-        forEachClientOfHub(contextHubId, client -> client.sendMessageToClient(message));
+    private void broadcastMessage(
+            int contextHubId, NanoAppMessage message, List<String> nanoappPermissions,
+            List<String> messagePermissions) {
+        forEachClientOfHub(contextHubId,
+                client -> client.sendMessageToClient(
+                        message, nanoappPermissions, messagePermissions));
     }
 
     /**

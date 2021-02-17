@@ -60,7 +60,8 @@ interface IContextHubService {
 
     // Creates a client to send and receive messages
     IContextHubClient createClient(
-            int contextHubId, in IContextHubClientCallback client, in String attributionTag);
+            int contextHubId, in IContextHubClientCallback client, in String attributionTag,
+            in String packageName);
 
     // Creates a PendingIntent-based client to send and receive messages
     IContextHubClient createPendingIntentClient(
