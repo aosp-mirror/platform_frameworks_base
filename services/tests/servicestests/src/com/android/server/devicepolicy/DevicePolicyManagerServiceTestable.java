@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
+import android.hardware.usb.UsbManager;
 import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
@@ -241,6 +242,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         LockPatternUtils newLockPatternUtils() {
             return services.lockPatternUtils;
+        }
+
+        @Override
+        UsbManager getUsbManager() {
+            return services.usbManager;
         }
 
         @Override

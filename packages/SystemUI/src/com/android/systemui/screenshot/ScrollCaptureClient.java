@@ -95,6 +95,17 @@ public class ScrollCaptureClient {
             this.requested = request;
             this.captured = captured;
         }
+
+        @Override
+        public String toString() {
+            return "CaptureResult{"
+                    + "requested=" + requested
+                    + " (" + requested.width() + "x" + requested.height() + ")"
+                    + ", captured=" + captured
+                    + " (" + captured.width() + "x" + captured.height() + ")"
+                    + ", image=" + image
+                    + '}';
+        }
     }
 
     /**

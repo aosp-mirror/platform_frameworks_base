@@ -181,6 +181,21 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerState {}
 
+    /** @hide */
+    public static String playerStateToString(@PlayerState int state) {
+        switch (state) {
+            case PLAYER_STATE_UNKNOWN: return "PLAYER_STATE_UNKNOWN";
+            case PLAYER_STATE_RELEASED: return "PLAYER_STATE_RELEASED";
+            case PLAYER_STATE_IDLE: return "PLAYER_STATE_IDLE";
+            case PLAYER_STATE_STARTED: return "PLAYER_STATE_STARTED";
+            case PLAYER_STATE_PAUSED: return "PLAYER_STATE_PAUSED";
+            case PLAYER_STATE_STOPPED: return "PLAYER_STATE_STOPPED";
+            case PLAYER_UPDATE_DEVICE_ID: return "PLAYER_UPDATE_DEVICE_ID";
+            default:
+                return "invalid state " + state;
+        }
+    }
+
     // immutable data
     private final int mPlayerIId;
 

@@ -244,6 +244,7 @@ class DomainVerificationSettingsMutationTest {
                     this[0] = PackageUserState()
                 }
             }
+            whenever(getInstantApp(anyInt())) { false }
         }
     }
 

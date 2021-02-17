@@ -745,6 +745,38 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public int getUsbHalVersion() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                return mPortManager.getUsbHalVersion();
+            } else {
+                return UsbManager.USB_HAL_NOT_SUPPORTED;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public boolean enableUsbDataSignal(boolean enable) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (mPortManager != null) {
+                return mPortManager.enableUsbDataSignal(enable);
+            } else {
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void setUsbDeviceConnectionHandler(ComponentName usbDeviceConnectionHandler) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         synchronized (mLock) {

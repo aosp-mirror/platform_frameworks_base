@@ -253,7 +253,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
                 && result.captured.height() < result.requested.height();
         boolean finish = false;
 
-        if (partialResult) {
+        if (partialResult || emptyResult) {
             // Potentially reached a vertical boundary. Extend in the other direction.
             switch (mDirection) {
                 case DOWN:

@@ -10780,6 +10780,13 @@ public final class Settings {
                 "location_ignore_settings_package_whitelist";
 
         /**
+         * Whether to throttle location when the device is in doze and still.
+         * @hide
+         */
+        public static final String LOCATION_ENABLE_STATIONARY_THROTTLE =
+                "location_enable_stationary_throttle";
+
+        /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide

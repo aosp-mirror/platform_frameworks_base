@@ -55,7 +55,11 @@ public class UsbCommand extends Svc.Command {
                 + "       svc usb getGadgetHalVersion\n"
                 + "         Gets current Gadget Hal Version\n"
                 + "         possible values of Hal version are any of 'unknown', 'V1_0', 'V1_1',\n"
-                + "         'V1_2'\n";
+                + "         'V1_2'\n"
+                + "       svc usb getUsbHalVersion\n"
+                + "         Gets current USB Hal Version\n"
+                + "         possible values of Hal version are any of 'unknown', 'V1_0', 'V1_1',\n"
+                + "         'V1_2', 'V1_3'\n";
     }
 
     @Override
@@ -107,6 +111,25 @@ public class UsbCommand extends Svc.Command {
                     System.err.println(
                             UsbManager.usbGadgetHalVersionToString(
                                     usbMgr.getGadgetHalVersion()));
+                } catch (RemoteException e) {
+                    System.err.println("Error communicating with UsbManager: " + e);
+                }
+                return;
+            } else if ("getUsbHalVersion".equals(args[1])) {
+                try {
+                    int version = usbMgr.getUsbHalVersion();
+
+                    if (version == 13) {
+                        System.err.println("V1_3");
+                    } else if (version == 12) {
+                        System.err.println("V1_2");
+                    } else if (version == 11) {
+                        System.err.println("V1_1");
+                    } else if (version == 10) {
+                        System.err.println("V1_0");
+                    } else {
+                        System.err.println("unknown");
+                    }
                 } catch (RemoteException e) {
                     System.err.println("Error communicating with UsbManager: " + e);
                 }

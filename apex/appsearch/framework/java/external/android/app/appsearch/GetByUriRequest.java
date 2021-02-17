@@ -31,7 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Encapsulates a request to retrieve documents by namespace and URI.
+ * Encapsulates a request to retrieve documents by namespace and URIs from the {@link
+ * AppSearchSession} database.
  *
  * @see AppSearchSession#getByUri
  */
@@ -56,13 +57,13 @@ public final class GetByUriRequest {
         mTypePropertyPathsMap = Preconditions.checkNotNull(typePropertyPathsMap);
     }
 
-    /** Returns the namespace to get documents from. */
+    /** Returns the namespace attached to the request. */
     @NonNull
     public String getNamespace() {
         return mNamespace;
     }
 
-    /** Returns the URIs to get from the namespace. */
+    /** Returns the set of URIs attached to the request. */
     @NonNull
     public Set<String> getUris() {
         return Collections.unmodifiableSet(mUris);
@@ -100,7 +101,11 @@ public final class GetByUriRequest {
         return mTypePropertyPathsMap;
     }
 
-    /** Builder for {@link GetByUriRequest} objects. */
+    /**
+     * Builder for {@link GetByUriRequest} objects.
+     *
+     * <p>Once {@link #build} is called, the instance can no longer be used.
+     */
     public static final class Builder {
         private String mNamespace = GenericDocument.DEFAULT_NAMESPACE;
         private final Set<String> mUris = new ArraySet<>();
@@ -108,9 +113,12 @@ public final class GetByUriRequest {
         private boolean mBuilt = false;
 
         /**
-         * Sets which namespace these documents will be retrieved from.
+         * Sets the namespace to retrieve documents for.
          *
-         * <p>If this is not set, it defaults to {@link GenericDocument#DEFAULT_NAMESPACE}.
+         * <p>If this is not called, the namespace defaults to {@link
+         * GenericDocument#DEFAULT_NAMESPACE}.
+         *
+         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder setNamespace(@NonNull String namespace) {
@@ -120,14 +128,22 @@ public final class GetByUriRequest {
             return this;
         }
 
-        /** Adds one or more URIs to the request. */
+        /**
+         * Adds one or more URIs to the request.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public Builder addUris(@NonNull String... uris) {
             Preconditions.checkNotNull(uris);
             return addUris(Arrays.asList(uris));
         }
 
-        /** Adds one or more URIs to the request. */
+        /**
+         * Adds a collection of URIs to the request.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public Builder addUris(@NonNull Collection<String> uris) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
@@ -149,7 +165,8 @@ public final class GetByUriRequest {
          * GetByUriRequest#PROJECTION_SCHEMA_TYPE_WILDCARD}, then those property paths will apply to
          * all results, excepting any types that have their own, specific property paths set.
          *
-         * <p>{@see SearchSpec.Builder#addProjection(String, String...)}
+         * @throws IllegalStateException if the builder has already been used.
+         *     <p>{@see SearchSpec.Builder#addProjection(String, String...)}
          */
         @NonNull
         public Builder addProjection(@NonNull String schemaType, @NonNull String... propertyPaths) {
@@ -170,7 +187,8 @@ public final class GetByUriRequest {
          * GetByUriRequest#PROJECTION_SCHEMA_TYPE_WILDCARD}, then those property paths will apply to
          * all results, excepting any types that have their own, specific property paths set.
          *
-         * <p>{@see SearchSpec.Builder#addProjection(String, String...)}
+         * @throws IllegalStateException if the builder has already been used.
+         *     <p>{@see SearchSpec.Builder#addProjection(String, String...)}
          */
         @NonNull
         public Builder addProjection(
@@ -187,7 +205,11 @@ public final class GetByUriRequest {
             return this;
         }
 
-        /** Builds a new {@link GetByUriRequest}. */
+        /**
+         * Builds a new {@link GetByUriRequest}.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public GetByUriRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

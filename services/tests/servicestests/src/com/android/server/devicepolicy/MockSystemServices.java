@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.hardware.usb.UsbManager;
 import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
@@ -119,6 +120,7 @@ public class MockSystemServices {
     public final CrossProfileApps crossProfileApps;
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
     public final AppOpsManager appOpsManager;
+    public final UsbManager usbManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -163,6 +165,7 @@ public class MockSystemServices {
         crossProfileApps = mock(CrossProfileApps.class);
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
         appOpsManager = mock(AppOpsManager.class);
+        usbManager = mock(UsbManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());

@@ -23,6 +23,7 @@ import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.hardware.HardwareBuffer;
 import android.os.Handler;
@@ -201,6 +202,25 @@ public class ImageWriter implements AutoCloseable {
         // nativeInit and before getEstimatedNativeAllocBytes().
         if (format == ImageFormat.UNKNOWN) {
             format = SurfaceUtils.getSurfaceFormat(surface);
+        }
+        // Several public formats use the same native HAL_PIXEL_FORMAT_BLOB. The native
+        // allocation estimation sequence depends on the public formats values. To avoid
+        // possible errors, convert where necessary.
+        if (format == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) {
+            int surfaceDataspace = SurfaceUtils.getSurfaceDataspace(surface);
+            switch (surfaceDataspace) {
+                case StreamConfigurationMap.HAL_DATASPACE_DEPTH:
+                    format = ImageFormat.DEPTH_POINT_CLOUD;
+                    break;
+                case StreamConfigurationMap.HAL_DATASPACE_DYNAMIC_DEPTH:
+                    format = ImageFormat.DEPTH_JPEG;
+                    break;
+                case StreamConfigurationMap.HAL_DATASPACE_HEIF:
+                    format = ImageFormat.HEIC;
+                    break;
+                default:
+                    format = ImageFormat.JPEG;
+            }
         }
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue

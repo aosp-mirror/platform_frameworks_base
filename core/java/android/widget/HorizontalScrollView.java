@@ -89,7 +89,7 @@ public class HorizontalScrollView extends FrameLayout {
      */
     @NonNull
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124053130)
-    private EdgeEffect mEdgeGlowLeft = new EdgeEffect(getContext());
+    private EdgeEffect mEdgeGlowLeft;
 
     /**
      * Tracks the state of the bottom edge glow.
@@ -98,7 +98,7 @@ public class HorizontalScrollView extends FrameLayout {
      * setting it via reflection and they need to keep working until they target Q.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124052619)
-    private EdgeEffect mEdgeGlowRight = new EdgeEffect(getContext());
+    private EdgeEffect mEdgeGlowRight;
 
     /**
      * Position of the last motion event.
@@ -186,6 +186,8 @@ public class HorizontalScrollView extends FrameLayout {
     public HorizontalScrollView(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mEdgeGlowLeft = new EdgeEffect(context, attrs);
+        mEdgeGlowRight = new EdgeEffect(context, attrs);
         initScrollView();
 
         final TypedArray a = context.obtainStyledAttributes(
@@ -631,7 +633,15 @@ public class HorizontalScrollView extends FrameLayout {
                 * otherwise don't.  mScroller.isFinished should be false when
                 * being flinged.
                 */
-                mIsBeingDragged = !mScroller.isFinished();
+                mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowLeft.isFinished()
+                        || !mEdgeGlowRight.isFinished();
+                // Catch the edge effect if it is active.
+                if (!mEdgeGlowLeft.isFinished()) {
+                    mEdgeGlowLeft.onPullDistance(0f, 1f - ev.getY() / getHeight());
+                }
+                if (!mEdgeGlowRight.isFinished()) {
+                    mEdgeGlowRight.onPullDistance(0f, ev.getY() / getHeight());
+                }
                 break;
             }
 
@@ -675,7 +685,8 @@ public class HorizontalScrollView extends FrameLayout {
                 if (getChildCount() == 0) {
                     return false;
                 }
-                if ((mIsBeingDragged = !mScroller.isFinished())) {
+                if ((mIsBeingDragged = !mScroller.isFinished() || !mEdgeGlowRight.isFinished()
+                        || !mEdgeGlowLeft.isFinished())) {
                     final ViewParent parent = getParent();
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
@@ -721,11 +732,25 @@ public class HorizontalScrollView extends FrameLayout {
                     mLastMotionX = x;
 
                     final int oldX = mScrollX;
-                    final int oldY = mScrollY;
                     final int range = getScrollRange();
                     final int overscrollMode = getOverScrollMode();
                     final boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS ||
                             (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+
+                    final float displacement = ev.getY(activePointerIndex) / getHeight();
+                    if (canOverscroll) {
+                        int consumed = 0;
+                        if (deltaX < 0 && mEdgeGlowRight.getDistance() != 0f) {
+                            consumed = Math.round(getHeight()
+                                    * mEdgeGlowRight.onPullDistance((float) deltaX / getWidth(),
+                                    displacement));
+                        } else if (deltaX > 0 && mEdgeGlowLeft.getDistance() != 0f) {
+                            consumed = Math.round(-getHeight()
+                                    * mEdgeGlowLeft.onPullDistance((float) -deltaX / getWidth(),
+                                    1 - displacement));
+                        }
+                        deltaX -= consumed;
+                    }
 
                     // Calling overScrollBy will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
@@ -735,17 +760,17 @@ public class HorizontalScrollView extends FrameLayout {
                         mVelocityTracker.clear();
                     }
 
-                    if (canOverscroll) {
+                    if (canOverscroll && deltaX != 0f) {
                         final int pulledToX = oldX + deltaX;
                         if (pulledToX < 0) {
-                            mEdgeGlowLeft.onPull((float) deltaX / getWidth(),
-                                    1.f - ev.getY(activePointerIndex) / getHeight());
+                            mEdgeGlowLeft.onPullDistance((float) -deltaX / getWidth(),
+                                    1.f - displacement);
                             if (!mEdgeGlowRight.isFinished()) {
                                 mEdgeGlowRight.onRelease();
                             }
                         } else if (pulledToX > range) {
-                            mEdgeGlowRight.onPull((float) deltaX / getWidth(),
-                                    ev.getY(activePointerIndex) / getHeight());
+                            mEdgeGlowRight.onPullDistance((float) deltaX / getWidth(),
+                                    displacement);
                             if (!mEdgeGlowLeft.isFinished()) {
                                 mEdgeGlowLeft.onRelease();
                             }

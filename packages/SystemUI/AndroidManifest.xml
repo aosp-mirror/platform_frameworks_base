@@ -600,6 +600,14 @@
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported="false" />
 
+        <!-- ContentProvider that returns a People Tile preview for a given shortcut -->
+        <provider
+            android:name="com.android.systemui.people.PeopleProvider"
+            android:authorities="com.android.systemui.people.PeopleProvider"
+            android:exported="true"
+            android:permission="android.permission.GET_PEOPLE_TILE_PREVIEW">
+        </provider>
+
         <!-- a gallery of delicious treats -->
         <service
             android:name=".DessertCaseDream"

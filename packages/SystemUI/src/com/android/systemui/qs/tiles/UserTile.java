@@ -82,7 +82,7 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
 
     @Override
     public DetailAdapter getDetailAdapter() {
-        return mUserSwitcherController.userDetailAdapter;
+        return mUserSwitcherController.mUserDetailAdapter;
     }
 
     @Override

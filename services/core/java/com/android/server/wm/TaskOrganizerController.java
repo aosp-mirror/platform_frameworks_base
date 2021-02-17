@@ -674,7 +674,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // Remove and add for re-ordering.
             mPendingTaskEvents.remove(pending);
         }
-        pending.mForce = force;
+        pending.mForce |= force;
         mPendingTaskEvents.add(pending);
     }
 

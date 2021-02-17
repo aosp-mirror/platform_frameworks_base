@@ -22,16 +22,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.Size;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
@@ -59,6 +57,9 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class PipTouchHandlerTest extends ShellTestCase {
 
+    private static final int INSET = 10;
+    private static final int PIP_LENGTH = 100;
+
     private PipTouchHandler mPipTouchHandler;
 
     @Mock
@@ -85,8 +86,9 @@ public class PipTouchHandlerTest extends ShellTestCase {
     private PipMotionHelper mMotionHelper;
     private PipResizeGestureHandler mPipResizeGestureHandler;
 
+    private DisplayLayout mDisplayLayout;
     private Rect mInsetBounds;
-    private Rect mMinBounds;
+    private Rect mPipBounds;
     private Rect mCurBounds;
     private boolean mFromImeAdjustment;
     private boolean mFromShelfAdjustment;
@@ -109,12 +111,18 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipTouchHandler.setPipMotionHelper(mMotionHelper);
         mPipTouchHandler.setPipResizeGestureHandler(mPipResizeGestureHandler);
 
-        // Assume a display of 1000 x 1000
-        // inset of 10
-        mInsetBounds = new Rect(10, 10, 990, 990);
+        mDisplayLayout = new DisplayLayout(mContext, mContext.getDisplay());
+        mPipBoundsState.setDisplayLayout(mDisplayLayout);
+        mInsetBounds = new Rect(mPipBoundsState.getDisplayBounds().left + INSET,
+                mPipBoundsState.getDisplayBounds().top + INSET,
+                mPipBoundsState.getDisplayBounds().right - INSET,
+                mPipBoundsState.getDisplayBounds().bottom - INSET);
         // minBounds of 100x100 bottom right corner
-        mMinBounds = new Rect(890, 890, 990, 990);
-        mCurBounds = new Rect(mMinBounds);
+        mPipBounds = new Rect(mPipBoundsState.getDisplayBounds().right - INSET - PIP_LENGTH,
+                mPipBoundsState.getDisplayBounds().bottom - INSET - PIP_LENGTH,
+                mPipBoundsState.getDisplayBounds().right - INSET,
+                mPipBoundsState.getDisplayBounds().bottom - INSET);
+        mCurBounds = new Rect(mPipBounds);
         mFromImeAdjustment = false;
         mFromShelfAdjustment = false;
         mDisplayRotation = 0;
@@ -122,37 +130,23 @@ public class PipTouchHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void updateMovementBounds_minBounds() {
-        Rect expectedMinMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(mMinBounds, mInsetBounds, expectedMinMovementBounds,
+    public void updateMovementBounds_minMaxBounds() {
+        final int shorterLength = Math.min(mPipBoundsState.getDisplayBounds().width(),
+                mPipBoundsState.getDisplayBounds().height());
+        Rect expectedMovementBounds = new Rect();
+        mPipBoundsAlgorithm.getMovementBounds(mPipBounds, mInsetBounds, expectedMovementBounds,
                 0);
 
-        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
+        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mPipBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
 
-        assertEquals(expectedMinMovementBounds, mPipBoundsState.getNormalMovementBounds());
+        assertEquals(expectedMovementBounds, mPipBoundsState.getNormalMovementBounds());
         verify(mPipResizeGestureHandler, times(1))
-                .updateMinSize(mMinBounds.width(), mMinBounds.height());
-    }
+                .updateMinSize(mPipBounds.width(), mPipBounds.height());
 
-    @Test
-    public void updateMovementBounds_maxBounds() {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        Size maxSize = mPipBoundsAlgorithm.getSizeForAspectRatio(1,
-                mContext.getResources().getDimensionPixelSize(
-                        R.dimen.pip_expanded_shortest_edge_size), displaySize.x, displaySize.y);
-        Rect maxBounds = new Rect(0, 0, maxSize.getWidth(), maxSize.getHeight());
-        Rect expectedMaxMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(maxBounds, mInsetBounds, expectedMaxMovementBounds,
-                0);
-
-        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
-                mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
-
-        assertEquals(expectedMaxMovementBounds, mPipBoundsState.getExpandedMovementBounds());
         verify(mPipResizeGestureHandler, times(1))
-                .updateMaxSize(maxBounds.width(), maxBounds.height());
+                .updateMaxSize(shorterLength - 2 * mInsetBounds.left,
+                        shorterLength - 2 * mInsetBounds.left);
     }
 
     @Test
@@ -160,7 +154,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mFromImeAdjustment = true;
         mPipTouchHandler.onImeVisibilityChanged(true /* imeVisible */, mImeHeight);
 
-        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
+        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mPipBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
 
         verify(mMotionHelper, times(1)).animateToOffset(any(), anyInt());

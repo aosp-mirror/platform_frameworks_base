@@ -27,7 +27,7 @@ import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 /**
  * Face-specific revokeChallenge client supporting the {@link android.hardware.biometrics.face.V1_0}
- * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
+ * HIDL interface.
  */
 public class FaceRevokeChallengeClient extends RevokeChallengeClient<IBiometricsFace> {
 

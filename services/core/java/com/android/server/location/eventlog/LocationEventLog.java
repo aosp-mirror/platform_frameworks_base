@@ -60,7 +60,8 @@ public class LocationEventLog extends LocalEventLog {
     private static final int EVENT_PROVIDER_UPDATE_REQUEST = 6;
     private static final int EVENT_PROVIDER_RECEIVE_LOCATION = 7;
     private static final int EVENT_PROVIDER_DELIVER_LOCATION = 8;
-    private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 9;
+    private static final int EVENT_PROVIDER_STATIONARY_THROTTLED = 9;
+    private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 10;
 
     @GuardedBy("mAggregateStats")
     private final ArrayMap<String, ArrayMap<String, AggregateStats>> mAggregateStats;
@@ -167,6 +168,11 @@ public class LocationEventLog extends LocalEventLog {
         getAggregateStats(provider, identity.getPackageName()).markLocationDelivered();
     }
 
+    /** Logs that a provider has entered or exited stationary throttling. */
+    public void logProviderStationaryThrottled(String provider, boolean throttled) {
+        addLogEvent(EVENT_PROVIDER_STATIONARY_THROTTLED, provider, throttled);
+    }
+
     /** Logs that the location power save mode has changed. */
     public void logLocationPowerSaveMode(
             @LocationPowerSaveMode int locationPowerSaveMode) {
@@ -198,6 +204,9 @@ public class LocationEventLog extends LocalEventLog {
             case EVENT_PROVIDER_DELIVER_LOCATION:
                 return new ProviderDeliverLocationEvent(timeDelta, (String) args[0],
                         (Integer) args[1], (CallerIdentity) args[2]);
+            case EVENT_PROVIDER_STATIONARY_THROTTLED:
+                return new ProviderStationaryThrottledEvent(timeDelta, (String) args[0],
+                        (Boolean) args[1]);
             case EVENT_LOCATION_POWER_SAVE_MODE_CHANGE:
                 return new LocationPowerSaveModeEvent(timeDelta, (Integer) args[0]);
             default:
@@ -329,6 +338,23 @@ public class LocationEventLog extends LocalEventLog {
         public String getLogString() {
             return mProvider + " provider delivered location[" + mNumLocations + "] to "
                     + mIdentity;
+        }
+    }
+
+    private static final class ProviderStationaryThrottledEvent extends ProviderEvent {
+
+        private final boolean mStationaryThrottled;
+
+        private ProviderStationaryThrottledEvent(long timeDelta, String provider,
+                boolean stationaryThrottled) {
+            super(timeDelta, provider);
+            mStationaryThrottled = stationaryThrottled;
+        }
+
+        @Override
+        public String getLogString() {
+            return mProvider + " provider stationary/idle " + (mStationaryThrottled ? "throttled"
+                    : "unthrottled");
         }
     }
 

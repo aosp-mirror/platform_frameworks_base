@@ -45,6 +45,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Manages set of updatable font files.
@@ -182,8 +183,12 @@ final class UpdatableFontDir {
             List<FontConfig.FontFamily> fontFamilies = config.fontFamilies;
             for (int i = 0; i < fontFamilies.size(); i++) {
                 FontConfig.FontFamily fontFamily = fontFamilies.get(i);
-                // Ignore failures as updated fonts may be obsoleted by system OTA update.
-                addFontFamily(fontFamily);
+                try {
+                    addFontFamily(fontFamily);
+                } catch (SystemFontException e) {
+                    // Ignore failures as updated fonts may be obsoleted by system OTA update.
+                    Slog.i(TAG, "Obsolete font family: " + fontFamily.getName());
+                }
             }
             success = true;
         } catch (Throwable t) {
@@ -236,10 +241,7 @@ final class UpdatableFontDir {
                                 request.getFd().getFileDescriptor(), request.getSignature());
                         break;
                     case FontUpdateRequest.TYPE_UPDATE_FONT_FAMILY:
-                        // TODO: define error code.
-                        if (!addFontFamily(request.getFontFamily())) {
-                            throw new IllegalArgumentException("Invalid font family");
-                        }
+                        addFontFamily(request.getFontFamily());
                         break;
                 }
             }
@@ -495,18 +497,15 @@ final class UpdatableFontDir {
      * Unnamed font families are used as other named font family's fallback fonts to guarantee a
      * complete glyph coverage.
      */
-    private boolean addFontFamily(FontConfig.FontFamily fontFamily) {
-        if (fontFamily.getName() == null) {
-            Slog.e(TAG, "Name is null.");
-            return false;
-        }
+    private void addFontFamily(FontConfig.FontFamily fontFamily) throws SystemFontException {
+        Objects.requireNonNull(fontFamily.getName());
         FontConfig.FontFamily resolvedFontFamily = resolveFontFiles(fontFamily);
         if (resolvedFontFamily == null) {
-            Slog.e(TAG, "Required fonts are not available");
-            return false;
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_FONT_NOT_FOUND,
+                    "Required fonts are not available");
         }
         mFontFamilyMap.put(resolvedFontFamily.getName(), resolvedFontFamily);
-        return true;
     }
 
     @Nullable
