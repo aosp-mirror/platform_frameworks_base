@@ -43,6 +43,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-2093859262": {
+      "message": "setClientVisible: %s clientVisible=%b Callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowToken.java"
+    },
     "-2072089308": {
       "message": "Attempted to add window with token that is a sub-window: %s.  Aborting.",
       "level": "WARN",
@@ -822,12 +828,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/NonAppWindowAnimationAdapter.java"
-    },
-    "-1144293044": {
-      "message": "SURFACE SET FREEZE LAYER: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
     "-1142279614": {
       "message": "Looking for focus: %s, flags=%d, canReceive=%b, reason=%s",
@@ -1831,6 +1831,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "63329306": {
+      "message": "commitVisibility: %s: visible=%b mVisibleRequested=%b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WallpaperWindowToken.java"
+    },
     "73987756": {
       "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
       "level": "INFO",
@@ -2460,6 +2466,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "691515534": {
+      "message": "  Commit wallpaper becoming invisible: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "693423992": {
       "message": "setAnimationLocked: setting mFocusMayChange true",

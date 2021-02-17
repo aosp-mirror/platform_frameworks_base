@@ -4822,7 +4822,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mWallpaperController.hideDeferredWallpapersIfNeeded();
+        mWallpaperController.hideDeferredWallpapersIfNeededLegacy();
 
         onAppTransitionDone();
 

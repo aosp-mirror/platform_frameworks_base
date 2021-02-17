@@ -580,9 +580,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private Task mLastParent;
 
-    // Have we told the window clients to show themselves?
-    private boolean mClientVisible;
-
     boolean firstWindowDrawn;
     /** Whether the visible window(s) of this activity is drawn. */
     private boolean mReportedDrawn;
@@ -998,7 +995,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.print(prefix); pw.print("mOrientation=");
         pw.println(ActivityInfo.screenOrientationToString(mOrientation));
         pw.println(prefix + "mVisibleRequested=" + mVisibleRequested
-                + " mVisible=" + mVisible + " mClientVisible=" + mClientVisible
+                + " mVisible=" + mVisible + " mClientVisible=" + isClientVisible()
                 + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
                 + " reportedDrawn=" + mReportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
@@ -1695,7 +1692,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         keysPaused = false;
         inHistory = false;
         nowVisible = false;
-        mClientVisible = true;
+        super.setClientVisible(true);
         idle = false;
         hasBeenLaunched = false;
         mTaskSupervisor = supervisor;
@@ -3735,7 +3732,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     setVisibleRequested(true);
                     mVisibleSetFromTransferredStartingWindow = true;
                 }
-                setClientVisible(fromActivity.mClientVisible);
+                setClientVisible(fromActivity.isClientVisible());
 
                 if (fromActivity.isAnimating()) {
                     transferAnimation(fromActivity);
@@ -5836,18 +5833,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mReportedDrawn;
     }
 
-    boolean isClientVisible() {
-        return mClientVisible;
-    }
-
+    @Override
     void setClientVisible(boolean clientVisible) {
-        if (mClientVisible == clientVisible || (!clientVisible && mDeferHidingClient)) {
-            return;
-        }
+        // TODO(shell-transitions): Remove mDeferHidingClient once everything is shell-transitions.
+        //                          pip activities should just remain in clientVisible.
+        if (!clientVisible && mDeferHidingClient) return;
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "setClientVisible: %s clientVisible=%b Callers=%s", this, clientVisible,
                 Debug.getCallers(5));
-        mClientVisible = clientVisible;
+        super.setClientVisible(clientVisible);
         sendAppVisibilityToClients();
     }
 
@@ -8134,7 +8128,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(TRANSLUCENT, !occludesParent());
         proto.write(VISIBLE, mVisible);
         proto.write(VISIBLE_REQUESTED, mVisibleRequested);
-        proto.write(CLIENT_VISIBLE, mClientVisible);
+        proto.write(CLIENT_VISIBLE, isClientVisible());
         proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
         proto.write(REPORTED_DRAWN, mReportedDrawn);
         proto.write(REPORTED_VISIBLE, reportedVisible);
