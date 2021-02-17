@@ -2231,7 +2231,7 @@ public class PackageInstaller {
         /** {@hide} */
         public @InstallReason int installReason;
         /** {@hide} */
-        public @InstallReason int installScenario;
+        public @InstallScenario int installScenario;
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public long sizeBytes;
