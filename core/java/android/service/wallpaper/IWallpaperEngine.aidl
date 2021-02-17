@@ -16,10 +16,7 @@
 
 package android.service.wallpaper;
 
-import android.app.ILocalWallpaperColorConsumer;
-import android.app.WallpaperColors;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.os.Bundle;
 
@@ -42,6 +39,4 @@ oneway interface IWallpaperEngine {
     void destroy();
     void setZoomOut(float scale);
     void scalePreview(in Rect positionInWindow);
-    void removeLocalColorsAreas(in List<RectF> regions);
-    void addLocalColorsAreas(in List<RectF> regions);
 }
