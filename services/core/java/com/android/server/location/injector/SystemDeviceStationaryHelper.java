@@ -16,6 +16,9 @@
 
 package com.android.server.location.injector;
 
+import android.os.Binder;
+
+import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 
@@ -26,19 +29,35 @@ import java.util.Objects;
  */
 public class SystemDeviceStationaryHelper extends DeviceStationaryHelper {
 
-    private final DeviceIdleInternal mDeviceIdle;
+    private DeviceIdleInternal mDeviceIdle;
 
-    public SystemDeviceStationaryHelper() {
+    public SystemDeviceStationaryHelper() {}
+
+    public void onSystemReady() {
         mDeviceIdle = Objects.requireNonNull(LocalServices.getService(DeviceIdleInternal.class));
     }
 
     @Override
     public void addListener(DeviceIdleInternal.StationaryListener listener) {
-        mDeviceIdle.registerStationaryListener(listener);
+        Preconditions.checkState(mDeviceIdle != null);
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mDeviceIdle.registerStationaryListener(listener);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
     public void removeListener(DeviceIdleInternal.StationaryListener listener) {
-        mDeviceIdle.unregisterStationaryListener(listener);
+        Preconditions.checkState(mDeviceIdle != null);
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mDeviceIdle.unregisterStationaryListener(listener);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 }
