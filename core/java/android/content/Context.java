@@ -3521,6 +3521,7 @@ public abstract class Context {
             APPWIDGET_SERVICE,
             //@hide: VOICE_INTERACTION_MANAGER_SERVICE,
             //@hide: BACKUP_SERVICE,
+            REBOOT_READINESS_SERVICE,
             ROLLBACK_SERVICE,
             DROPBOX_SERVICE,
             //@hide: DEVICE_IDLE_CONTROLLER,
@@ -4741,6 +4742,17 @@ public abstract class Context {
      */
     @SystemApi
     public static final String ROLLBACK_SERVICE = "rollback";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.scheduling.RebootReadinessManagerService} for communicating
+     * with the reboot readiness detector.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String REBOOT_READINESS_SERVICE = "reboot_readiness";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
