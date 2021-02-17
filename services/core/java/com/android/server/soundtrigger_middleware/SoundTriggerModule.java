@@ -29,7 +29,6 @@ import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.RecognitionStatus;
 import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundModelType;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
@@ -246,68 +245,58 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
         @Override
         public int loadModel(@NonNull SoundModel model) {
-            // We must do this outside the lock, to avoid possible deadlocks with the remote process
-            // that provides the audio sessions, which may also be calling into us.
-            SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
-                    mAudioSessionProvider.acquireSession();
-
-            try {
-                synchronized (SoundTriggerModule.this) {
+            synchronized (SoundTriggerModule.this) {
+                SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
+                        mAudioSessionProvider.acquireSession();
+                try {
                     checkValid();
                     Model loadedModel = new Model();
-                    int result = loadedModel.load(model, audioSession);
-                    return result;
+                    return loadedModel.load(model, audioSession);
+                } catch (Exception e) {
+                    // We must do this outside the lock, to avoid possible deadlocks with the remote
+                    // process that provides the audio sessions, which may also be calling into us.
+                    try {
+                        mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
+                    } catch (Exception ee) {
+                        Log.e(TAG, "Failed to release session.", ee);
+                    }
+                    throw e;
                 }
-            } catch (Exception e) {
-                // We must do this outside the lock, to avoid possible deadlocks with the remote
-                // process that provides the audio sessions, which may also be calling into us.
-                try {
-                    mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
-                } catch (Exception ee) {
-                    Log.e(TAG, "Failed to release session.", ee);
-                }
-                throw e;
             }
         }
 
         @Override
         public int loadPhraseModel(@NonNull PhraseSoundModel model) {
-            // We must do this outside the lock, to avoid possible deadlocks with the remote process
-            // that provides the audio sessions, which may also be calling into us.
-            SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
-                    mAudioSessionProvider.acquireSession();
-
-            try {
-                synchronized (SoundTriggerModule.this) {
+            synchronized (SoundTriggerModule.this) {
+                SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
+                        mAudioSessionProvider.acquireSession();
+                try {
                     checkValid();
                     Model loadedModel = new Model();
                     int result = loadedModel.load(model, audioSession);
                     Log.d(TAG, String.format("loadPhraseModel()->%d", result));
                     return result;
+                } catch (Exception e) {
+                    // We must do this outside the lock, to avoid possible deadlocks with the remote
+                    // process that provides the audio sessions, which may also be calling into us.
+                    try {
+                        mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
+                    } catch (Exception ee) {
+                        Log.e(TAG, "Failed to release session.", ee);
+                    }
+                    throw e;
                 }
-            } catch (Exception e) {
-                // We must do this outside the lock, to avoid possible deadlocks with the remote
-                // process that provides the audio sessions, which may also be calling into us.
-                try {
-                    mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
-                } catch (Exception ee) {
-                    Log.e(TAG, "Failed to release session.", ee);
-                }
-                throw e;
             }
         }
 
         @Override
         public void unloadModel(int modelHandle) {
-            int sessionId;
             synchronized (SoundTriggerModule.this) {
+                int sessionId;
                 checkValid();
                 sessionId = mLoadedModels.get(modelHandle).unload();
+                mAudioSessionProvider.releaseSession(sessionId);
             }
-
-            // We must do this outside the lock, to avoid possible deadlocks with the remote process
-            // that provides the audio sessions, which may also be calling into us.
-            mAudioSessionProvider.releaseSession(sessionId);
         }
 
         @Override
@@ -389,7 +378,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         private class Model implements ISoundTriggerHw2.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
-            private int mModelType = SoundModelType.UNKNOWN;
             private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession mSession;
 
             private @NonNull
@@ -404,7 +392,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
             private int load(@NonNull SoundModel model,
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
-                mModelType = model.type;
                 mSession = audioSession;
                 ISoundTriggerHw.SoundModel hidlModel = ConversionUtil.aidl2hidlSoundModel(model);
 
@@ -416,7 +403,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
             private int load(@NonNull PhraseSoundModel model,
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
-                mModelType = model.common.type;
                 mSession = audioSession;
                 ISoundTriggerHw.PhraseSoundModel hidlModel =
                         ConversionUtil.aidl2hidlPhraseSoundModel(model);
@@ -486,6 +472,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             @Override
             public void recognitionCallback(
                     @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent) {
+                ISoundTriggerCallback callback;
                 RecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlRecognitionEvent(recognitionEvent);
                 aidlEvent.captureSession = mSession.mSessionHandle;
@@ -493,10 +480,13 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                     if (aidlEvent.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
                     }
+                    callback = mCallback;
                 }
                 // The callback must be invoked outside of the lock.
                 try {
-                    mCallback.onRecognition(mHandle, aidlEvent);
+                    if (callback != null) {
+                        callback.onRecognition(mHandle, aidlEvent);
+                    }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
                     throw e.rethrowAsRuntimeException();
@@ -504,8 +494,9 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             }
 
             @Override
-            public void phraseRecognitionCallback(@NonNull
-                            ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent) {
+            public void phraseRecognitionCallback(
+                    @NonNull ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent) {
+                ISoundTriggerCallback callback;
                 PhraseRecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlPhraseRecognitionEvent(phraseRecognitionEvent);
                 aidlEvent.common.captureSession = mSession.mSessionHandle;
@@ -514,11 +505,14 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                     if (aidlEvent.common.status != RecognitionStatus.FORCED) {
                         setState(ModelState.LOADED);
                     }
+                    callback = mCallback;
                 }
 
                 // The callback must be invoked outside of the lock.
                 try {
-                    mCallback.onPhraseRecognition(mHandle, aidlEvent);
+                    if (callback != null) {
+                        mCallback.onPhraseRecognition(mHandle, aidlEvent);
+                    }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
                     throw e.rethrowAsRuntimeException();
@@ -527,9 +521,16 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
             @Override
             public void modelUnloaded(int modelHandle) {
-                // There is no change in state, just propagate upward.
+                ISoundTriggerCallback callback;
+                synchronized (SoundTriggerModule.this) {
+                    callback = mCallback;
+                }
+
+                // The callback must be invoked outside of the lock.
                 try {
-                    mCallback.onModelUnloaded(modelHandle);
+                    if (callback != null) {
+                        callback.onModelUnloaded(modelHandle);
+                    }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
                     throw e.rethrowAsRuntimeException();

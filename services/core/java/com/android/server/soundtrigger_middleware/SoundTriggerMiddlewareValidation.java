@@ -46,9 +46,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is a decorator of an {@link ISoundTriggerMiddlewareService}, which enforces correct usage by
@@ -88,7 +85,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * }
  * </pre></code>
  * Following this patterns ensures a consistent and rigorous handling of all aspects associated
- * with client-server separation.
+ * with client-server separation. Notable exceptions are stopRecognition() and unloadModel(), which
+ * follow slightly more complicated rules for synchronization (see README.md for details).
  * <p>
  * <b>Exception handling approach:</b><br>
  * We make sure all client faults (argument and state validation) happen first, and
@@ -114,8 +112,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     }
 
     private class ModuleState {
-        final @NonNull
-        SoundTriggerModuleProperties properties;
+        final @NonNull SoundTriggerModuleProperties properties;
         Set<Session> sessions = new HashSet<>();
 
         private ModuleState(@NonNull SoundTriggerModuleProperties properties) {
@@ -123,12 +120,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
     }
 
-    private final @NonNull
-    ISoundTriggerMiddlewareInternal mDelegate;
+    private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
     private Map<Integer, ModuleState> mModules;
 
-    public SoundTriggerMiddlewareValidation(
-            @NonNull ISoundTriggerMiddlewareInternal delegate) {
+    public SoundTriggerMiddlewareValidation(@NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = delegate;
     }
 
@@ -148,8 +143,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
      * }
      * </pre></code>
      */
-    static @NonNull
-    RuntimeException handleException(@NonNull Exception e) {
+    static @NonNull RuntimeException handleException(@NonNull Exception e) {
         if (e instanceof RecoverableException) {
             throw new ServiceSpecificException(((RecoverableException) e).errorCode,
                     e.getMessage());
@@ -160,8 +154,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     }
 
     @Override
-    public @NonNull
-    SoundTriggerModuleDescriptor[] listModules() {
+    public @NonNull SoundTriggerModuleDescriptor[] listModules() {
         // Input validation (always valid).
 
         synchronized (this) {
@@ -195,8 +188,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     }
 
     @Override
-    public @NonNull
-    ISoundTriggerModule attach(int handle,
+    public @NonNull ISoundTriggerModule attach(int handle,
             @NonNull ISoundTriggerCallback callback) {
         // Input validation.
         Objects.requireNonNull(callback);
@@ -284,7 +276,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
 
         /** Activity state. */
-        private final AtomicInteger mActivityState = new AtomicInteger(Activity.LOADED.ordinal());
+        Activity activityState = Activity.LOADED;
 
         /** Human-readable description of the model. */
         final String description;
@@ -329,24 +321,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             Preconditions.checkArgumentInRange(value, range.minInclusive, range.maxInclusive,
                     "value");
         }
-
-        /**
-         * Update support state for the given parameter for this model.
-         *
-         * @param modelParam The parameter key.
-         * @param range      The parameter value range, or null if not supported.
-         */
-        void updateParameterSupport(int modelParam, @Nullable ModelParameterRange range) {
-            parameterSupport.put(modelParam, range);
-        }
-
-        Activity getActivityState() {
-            return Activity.values()[mActivityState.get()];
-        }
-
-        void setActivityState(Activity activity) {
-            mActivityState.set(activity.ordinal());
-        }
     }
 
     /**
@@ -355,13 +329,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
      */
     private class Session extends ISoundTriggerModule.Stub {
         private ISoundTriggerModule mDelegate;
-        // While generally all the fields of this class must be changed under a lock, an exception
-        // is made for the specific case of changing a model state from ACTIVE to LOADED, which
-        // may happen as result of a recognition callback. This would happen atomically and is
-        // necessary in order to avoid deadlocks associated with locking from within callbacks
-        // possibly originating from the audio server.
-        private final @NonNull
-        ConcurrentMap<Integer, ModelState> mLoadedModels = new ConcurrentHashMap<>();
+        private final @NonNull Map<Integer, ModelState> mLoadedModels = new HashMap<>();
         private final int mHandle;
         private ModuleStatus mState = ModuleStatus.ALIVE;
         private final CallbackWrapper mCallbackWrapper;
@@ -429,7 +397,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         @Override
         public void unloadModel(int modelHandle) {
             // Input validation (always valid).
-
             synchronized (SoundTriggerMiddlewareValidation.this) {
                 // State validation.
                 if (mState == ModuleStatus.DETACHED) {
@@ -440,21 +407,24 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 if (modelState == null) {
                     throw new IllegalStateException("Invalid handle: " + modelHandle);
                 }
-                ModelState.Activity activityState = modelState.getActivityState();
                 // To avoid race conditions, we treat LOADED and PREEMPTED exactly the same.
-                if (activityState != ModelState.Activity.LOADED
-                        && activityState != ModelState.Activity.PREEMPTED) {
+                if (modelState.activityState != ModelState.Activity.LOADED
+                        && modelState.activityState != ModelState.Activity.PREEMPTED) {
                     throw new IllegalStateException("Model with handle: " + modelHandle
                             + " has invalid state for unloading");
                 }
+            }
 
-                // From here on, every exception isn't client's fault.
-                try {
-                    mDelegate.unloadModel(modelHandle);
-                    mLoadedModels.remove(modelHandle);
-                } catch (Exception e) {
-                    throw handleException(e);
-                }
+            // From here on, every exception isn't client's fault.
+            try {
+                // Calling the delegate must be done outside the lock.
+                mDelegate.unloadModel(modelHandle);
+            } catch (Exception e) {
+                throw handleException(e);
+            }
+
+            synchronized (SoundTriggerMiddlewareValidation.this) {
+                mLoadedModels.remove(modelHandle);
             }
         }
 
@@ -473,23 +443,19 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 if (modelState == null) {
                     throw new IllegalStateException("Invalid handle: " + modelHandle);
                 }
-                ModelState.Activity activityState = modelState.getActivityState();
+                ModelState.Activity activityState = modelState.activityState;
                 // To avoid race conditions, we treat LOADED and PREEMPTED exactly the same.
                 if (activityState != ModelState.Activity.LOADED
-                    && activityState != ModelState.Activity.PREEMPTED) {
+                        && activityState != ModelState.Activity.PREEMPTED) {
                     throw new IllegalStateException("Model with handle: " + modelHandle
                             + " has invalid state for starting recognition");
                 }
 
                 // From here on, every exception isn't client's fault.
                 try {
-                    // Normally, we would set the state after the operation succeeds. However, since
-                    // the activity state may be reset outside of the lock, we set it here first,
-                    // and reset it in case of exception.
-                    modelState.setActivityState(ModelState.Activity.ACTIVE);
                     mDelegate.startRecognition(modelHandle, config);
+                    modelState.activityState = ModelState.Activity.ACTIVE;
                 } catch (Exception e) {
-                    modelState.setActivityState(activityState);
                     throw handleException(e);
                 }
             }
@@ -515,16 +481,32 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 try {
                     // If the activity state is INTERCEPTED, we skip delegating the command, but
                     // still consider the call valid.
-                    ModelState.Activity activityState = modelState.getActivityState();
-                    if (activityState != ModelState.Activity.INTERCEPTED) {
-                        mDelegate.stopRecognition(modelHandle);
-                    }
-                    // After the call, the state is LOADED, unless it has been first preempted.
-                    if (activityState != ModelState.Activity.PREEMPTED) {
-                        modelState.setActivityState(ModelState.Activity.LOADED);
+                    if (modelState.activityState == ModelState.Activity.INTERCEPTED) {
+                        modelState.activityState = ModelState.Activity.LOADED;
+                        return;
                     }
                 } catch (Exception e) {
                     throw handleException(e);
+                }
+            }
+
+            // Calling the delegate's stop must be done without the lock.
+            try {
+                mDelegate.stopRecognition(modelHandle);
+            } catch (Exception e) {
+                throw handleException(e);
+            }
+
+            synchronized (SoundTriggerMiddlewareValidation.this) {
+                ModelState modelState = mLoadedModels.get(modelHandle);
+                if (modelState == null) {
+                    // The model was unloaded while we let go of the lock.
+                    return;
+                }
+
+                // After the call, the state is LOADED, unless it has been first preempted.
+                if (modelState.activityState != ModelState.Activity.PREEMPTED) {
+                    modelState.activityState = ModelState.Activity.LOADED;
                 }
             }
         }
@@ -549,7 +531,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 try {
                     // If the activity state is LOADED or INTERCEPTED, we skip delegating the
                     // command, but still consider the call valid.
-                    if (modelState.getActivityState() == ModelState.Activity.ACTIVE) {
+                    if (modelState.activityState == ModelState.Activity.ACTIVE) {
                         mDelegate.forceRecognitionEvent(modelHandle);
                     }
                 } catch (Exception e) {
@@ -631,7 +613,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 try {
                     ModelParameterRange result = mDelegate.queryModelParameterSupport(modelHandle,
                             modelParam);
-                    modelState.updateParameterSupport(modelParam, result);
+                    modelState.parameterSupport.put(modelParam, result);
                     return result;
                 } catch (Exception e) {
                     throw handleException(e);
@@ -689,7 +671,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 for (Map.Entry<Integer, ModelState> entry : mLoadedModels.entrySet()) {
                     pw.print(entry.getKey());
                     pw.print('\t');
-                    pw.print(entry.getValue().getActivityState().name());
+                    pw.print(entry.getValue().activityState.name());
                     pw.print('\t');
                     pw.print(entry.getValue().description);
                     pw.println();
@@ -720,26 +702,22 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
             @Override
             public void onRecognition(int modelHandle, @NonNull RecognitionEvent event) {
-                // We cannot obtain a lock on SoundTriggerMiddlewareValidation.this, since this call
-                // might be coming from the audio server (via setCaptureState()) while it is holding
-                // a lock that is also acquired while loading / unloading models. Thus, we require a
-                // strict locking order here, where obtaining our lock must always come first.
-                // To avoid this problem, we use an atomic model activity state. There is a risk
-                // of the model not being in the mLoadedModels map here, since it might have been
-                // stopped / unloaded while the event was in flight.
-                ModelState modelState = mLoadedModels.get(modelHandle);
-                if (modelState != null) {
+                synchronized (SoundTriggerMiddlewareValidation.this) {
+                    ModelState modelState = mLoadedModels.get(modelHandle);
                     if (event.status != RecognitionStatus.FORCED) {
-                        modelState.setActivityState(ModelState.Activity.LOADED);
+                        modelState.activityState = ModelState.Activity.LOADED;
                     }
-                    try {
-                        mCallback.onRecognition(modelHandle, event);
-                    } catch (Exception e) {
-                        // Dead client will be handled by binderDied() - no need to handle here.
-                        // In any case, client callbacks are considered best effort.
-                        Log.e(TAG, "Client callback exception.", e);
+                }
+
+                // Calling the delegate callback must be done outside the lock.
+                try {
+                    mCallback.onRecognition(modelHandle, event);
+                } catch (Exception e) {
+                    Log.w(TAG, "Client callback exception.", e);
+                    synchronized (SoundTriggerMiddlewareValidation.this) {
+                        ModelState modelState = mLoadedModels.get(modelHandle);
                         if (event.status != RecognitionStatus.FORCED) {
-                            modelState.setActivityState(ModelState.Activity.INTERCEPTED);
+                            modelState.activityState = ModelState.Activity.INTERCEPTED;
                         }
                     }
                 }
@@ -748,26 +726,22 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             @Override
             public void onPhraseRecognition(int modelHandle,
                     @NonNull PhraseRecognitionEvent event) {
-                // We cannot obtain a lock on SoundTriggerMiddlewareValidation.this, since this call
-                // might be coming from the audio server (via setCaptureState()) while it is holding
-                // a lock that is also acquired while loading / unloading models. Thus, we require a
-                // strict locking order here, where obtaining our lock must always come first.
-                // To avoid this problem, we use an atomic model activity state. There is a risk
-                // of the model not being in the mLoadedModels map here, since it might have been
-                // stopped / unloaded while the event was in flight.
-                ModelState modelState = mLoadedModels.get(modelHandle);
-                if (modelState != null) {
+                synchronized (SoundTriggerMiddlewareValidation.this) {
+                    ModelState modelState = mLoadedModels.get(modelHandle);
                     if (event.common.status != RecognitionStatus.FORCED) {
-                        modelState.setActivityState(ModelState.Activity.LOADED);
+                        modelState.activityState = ModelState.Activity.LOADED;
                     }
-                    try {
-                        mCallback.onPhraseRecognition(modelHandle, event);
-                    } catch (Exception e) {
-                        // Dead client will be handled by binderDied() - no need to handle here.
-                        // In any case, client callbacks are considered best effort.
-                        Log.e(TAG, "Client callback exception.", e);
+                }
+
+                // Calling the delegate callback must be done outside the lock.
+                try {
+                    mCallback.onPhraseRecognition(modelHandle, event);
+                } catch (Exception e) {
+                    Log.w(TAG, "Client callback exception.", e);
+                    synchronized (SoundTriggerMiddlewareValidation.this) {
+                        ModelState modelState = mLoadedModels.get(modelHandle);
                         if (event.common.status != RecognitionStatus.FORCED) {
-                            modelState.setActivityState(ModelState.Activity.INTERCEPTED);
+                            modelState.activityState = ModelState.Activity.INTERCEPTED;
                         }
                     }
                 }
@@ -775,16 +749,16 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
             @Override
             public void onModelUnloaded(int modelHandle) {
-                ModelState modelState = mLoadedModels.get(modelHandle);
-                if (modelState != null) {
-                    modelState.setActivityState(ModelState.Activity.PREEMPTED);
-                    try {
-                        mCallback.onModelUnloaded(modelHandle);
-                    } catch (Exception e) {
-                        // Dead client will be handled by binderDied() - no need to handle here.
-                        // In any case, client callbacks are considered best effort.
-                        Log.e(TAG, "Client callback exception.", e);
-                    }
+                synchronized (SoundTriggerMiddlewareValidation.this) {
+                    ModelState modelState = mLoadedModels.get(modelHandle);
+                    modelState.activityState = ModelState.Activity.PREEMPTED;
+                }
+
+                // Calling the delegate callback must be done outside the lock.
+                try {
+                    mCallback.onModelUnloaded(modelHandle);
+                } catch (Exception e) {
+                    Log.w(TAG, "Client callback exception.", e);
                 }
             }
 
@@ -823,8 +797,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                         // Gracefully stop all active recognitions and unload the models.
                         for (Map.Entry<Integer, ModelState> entry :
                                 mLoadedModels.entrySet()) {
-                            if (entry.getValue().getActivityState()
-                                    == ModelState.Activity.ACTIVE) {
+                            if (entry.getValue().activityState == ModelState.Activity.ACTIVE) {
                                 mDelegate.stopRecognition(entry.getKey());
                             }
                             mDelegate.unloadModel(entry.getKey());
