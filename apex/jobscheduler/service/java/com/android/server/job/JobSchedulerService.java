@@ -339,6 +339,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
             boolean apiQuotaScheduleUpdated = false;
             boolean concurrencyUpdated = false;
+            boolean runtimeUpdated = false;
             for (int controller = 0; controller < mControllers.size(); controller++) {
                 final StateController sc = mControllers.get(controller);
                 sc.prepareForUpdatedConstantsLocked();
@@ -376,6 +377,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
                         case Constants.KEY_CONN_PREFETCH_RELAX_FRAC:
                             mConstants.updateConnectivityConstantsLocked();
+                            break;
+                        case Constants.KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS:
+                        case Constants.KEY_RUNTIME_MIN_GUARANTEE_MS:
+                        case Constants.KEY_RUNTIME_MIN_EJ_GUARANTEE_MS:
+                            if (!runtimeUpdated) {
+                                mConstants.updateRuntimeConstantsLocked();
+                                runtimeUpdated = true;
+                            }
                             break;
                         default:
                             if (name.startsWith(JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY)
@@ -432,6 +441,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 "aq_schedule_return_failure";
 
+        private static final String KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS =
+                "runtime_free_quota_max_limit_ms";
+        private static final String KEY_RUNTIME_MIN_GUARANTEE_MS = "runtime_min_guarantee_ms";
+        private static final String KEY_RUNTIME_MIN_EJ_GUARANTEE_MS = "runtime_min_ej_guarantee_ms";
+
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
@@ -445,6 +459,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        @VisibleForTesting
+        public static final long DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS = 30 * MINUTE_IN_MILLIS;
+        @VisibleForTesting
+        public static final long DEFAULT_RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
+        @VisibleForTesting
+        public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -509,6 +529,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         public boolean API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT;
 
+        /** The maximum amount of time we will let a job run for when quota is "free". */
+        public long RUNTIME_FREE_QUOTA_MAX_LIMIT_MS = DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
+
+        /**
+         * The minimum amount of time we try to guarantee regular jobs will run for.
+         */
+        public long RUNTIME_MIN_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_GUARANTEE_MS;
+
+        /**
+         * The minimum amount of time we try to guarantee EJs will run for.
+         */
+        public long RUNTIME_MIN_EJ_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS;
+
         private void updateBatchingConstantsLocked() {
             MIN_READY_NON_ACTIVE_JOBS_COUNT = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
@@ -568,6 +601,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT);
         }
 
+        private void updateRuntimeConstantsLocked() {
+            DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    KEY_RUNTIME_MIN_GUARANTEE_MS, KEY_RUNTIME_MIN_EJ_GUARANTEE_MS);
+
+            // Make sure min runtime for regular jobs is at least 10 minutes.
+            RUNTIME_MIN_GUARANTEE_MS = Math.max(10 * MINUTE_IN_MILLIS,
+                    properties.getLong(
+                            KEY_RUNTIME_MIN_GUARANTEE_MS, DEFAULT_RUNTIME_MIN_GUARANTEE_MS));
+            // Make sure min runtime for expedited jobs is at least one minute.
+            RUNTIME_MIN_EJ_GUARANTEE_MS = Math.max(MINUTE_IN_MILLIS,
+                    properties.getLong(
+                            KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS));
+            RUNTIME_FREE_QUOTA_MAX_LIMIT_MS = Math.max(RUNTIME_MIN_GUARANTEE_MS,
+                    properties.getLong(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                            DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS));
+        }
+
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
@@ -590,6 +642,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     API_QUOTA_SCHEDULE_THROW_EXCEPTION).println();
             pw.print(KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT,
                     API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT).println();
+
+            pw.print(KEY_RUNTIME_MIN_GUARANTEE_MS, RUNTIME_MIN_GUARANTEE_MS).println();
+            pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
+            pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                    .println();
 
             pw.decreaseIndent();
         }
@@ -1602,7 +1659,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * time of the job to be the time of completion (i.e. the time at which this function is
      * called).
      * <p>This could be inaccurate b/c the job can run for as long as
-     * {@link com.android.server.job.JobServiceContext#DEFAULT_EXECUTING_TIMESLICE_MILLIS}, but
+     * {@link Constants#DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS}, but
      * will lead to underscheduling at least, rather than if we had taken the last execution time
      * to be the start of the execution.
      *
@@ -2213,11 +2270,24 @@ public class JobSchedulerService extends com.android.server.SystemService
         return isComponentUsable(job);
     }
 
+    /** Returns the minimum amount of time we should let this job run before timing out. */
+    public long getMinJobExecutionGuaranteeMs(JobStatus job) {
+        synchronized (mLock) {
+            if (job.shouldTreatAsExpeditedJob()) {
+                // Don't guarantee RESTRICTED jobs more than 5 minutes.
+                return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
+                        ? mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS
+                        : Math.min(mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS, 5 * MINUTE_IN_MILLIS);
+            } else {
+                return mConstants.RUNTIME_MIN_GUARANTEE_MS;
+            }
+        }
+    }
+
     /** Returns the maximum amount of time this job could run for. */
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
-            return Math.min(mQuotaController.getMaxJobExecutionTimeMsLocked(job),
-                    JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS);
+            return mQuotaController.getMaxJobExecutionTimeMsLocked(job);
         }
     }
 
