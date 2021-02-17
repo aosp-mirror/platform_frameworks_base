@@ -103,6 +103,26 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         assertEquals(info.loadDescription(mTestContext), "widget description string");
     }
 
+    public void testParseSizeConfiguration() {
+        AppWidgetProviderInfo info =
+                mManager.getInstalledProvidersForPackage(mPkgName, null).get(0);
+
+        assertThat(info.minWidth).isEqualTo(getDimensionResource(R.dimen.widget_min_width));
+        assertThat(info.minHeight).isEqualTo(getDimensionResource(R.dimen.widget_min_height));
+        assertThat(info.minResizeWidth)
+                .isEqualTo(getDimensionResource(R.dimen.widget_min_resize_width));
+        assertThat(info.minResizeHeight)
+                .isEqualTo(getDimensionResource(R.dimen.widget_min_resize_height));
+        assertThat(info.maxResizeWidth)
+                .isEqualTo(getDimensionResource(R.dimen.widget_max_resize_width));
+        assertThat(info.maxResizeHeight)
+                .isEqualTo(getDimensionResource(R.dimen.widget_max_resize_height));
+        assertThat(info.targetCellWidth)
+                .isEqualTo(getIntegerResource(R.integer.widget_target_cell_width));
+        assertThat(info.targetCellHeight)
+                .isEqualTo(getIntegerResource(R.integer.widget_target_cell_height));
+    }
+
     public void testRequestPinAppWidget_otherProvider() {
         ComponentName otherProvider = null;
         for (AppWidgetProviderInfo provider : mManager.getInstalledProviders()) {
@@ -323,6 +343,14 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         CountDownLatch latch = new CountDownLatch(1);
         new Handler(mTestContext.getMainLooper()).post(latch::countDown);
         latch.await();
+    }
+
+    private int getDimensionResource(int resId) {
+        return mTestContext.getResources().getDimensionPixelSize(resId);
+    }
+
+    private int getIntegerResource(int resId) {
+        return mTestContext.getResources().getInteger(resId);
     }
 
     private class TestContext extends ContextWrapper {
