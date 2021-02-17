@@ -481,6 +481,8 @@ cc_defaults {
 
     target: {
         android: {
+            header_libs: ["libandroid_headers_private" ],
+
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
                 "pipeline/skia/ATraceMemoryDump.cpp",
@@ -568,6 +570,7 @@ cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
     test_suites: ["device-tests"],
+    header_libs: ["libandroid_headers_private"],
     target: {
         android: {
             shared_libs: [
@@ -605,7 +608,6 @@ cc_test {
     shared_libs: [
         "libmemunreachable",
     ],
-
     srcs: [
         "tests/unit/main.cpp",
         "tests/unit/ABitmapTests.cpp",
