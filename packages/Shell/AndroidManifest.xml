@@ -345,6 +345,12 @@
     <!-- Permissions required for CTS test - AdbManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_DEBUGGING" />
 
+    <!-- Permission required for CTS test - CtsTelephonyTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE" />
+
+    <!-- Permission required for CTS test - CtsTelephonyTestCases -->
+    <uses-permission android:name="android.permission.PERFORM_IMS_SINGLE_REGISTRATION" />
+
     <!-- Permission needed for CTS test - DisplayTest -->
     <uses-permission android:name="android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS" />
 
