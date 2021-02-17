@@ -46,7 +46,7 @@ import java.util.ArrayList;
 
 /**
  * Face-specific authentication client supporting the {@link android.hardware.biometrics.face.V1_0}
- * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
+ * HIDL interface.
  */
 class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
