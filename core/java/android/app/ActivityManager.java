@@ -511,6 +511,7 @@ public class ActivityManager {
     /** @hide Process is hosting the current top activities.  Note that this covers
      * all activities that are visible to the user. */
     @UnsupportedAppUsage
+    @TestApi
     public static final int PROCESS_STATE_TOP = ProcessStateEnum.TOP;
 
     /** @hide Process is bound to a TOP app. */
@@ -518,6 +519,7 @@ public class ActivityManager {
 
     /** @hide Process is hosting a foreground service. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @TestApi
     public static final int PROCESS_STATE_FOREGROUND_SERVICE = ProcessStateEnum.FOREGROUND_SERVICE;
 
     /** @hide Process is hosting a foreground service due to a system binding. */
@@ -617,6 +619,7 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
     /** @hide Process can access network despite any power saving resrictions */
+    @TestApi
     public static final int PROCESS_CAPABILITY_NETWORK = 1 << 3;
 
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
@@ -3429,6 +3432,36 @@ public class ActivityManager {
      */
     public static boolean isLowMemoryKillReportSupported() {
         return SystemProperties.getBoolean("persist.sys.lmk.reportkills", false);
+    }
+
+    /**
+     * Returns the process state of this uid.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public int getUidProcessState(int uid) {
+        try {
+            return getService().getUidProcessState(uid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the process capability of this uid.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public @ProcessCapability int getUidProcessCapabilities(int uid) {
+        try {
+            return getService().getUidProcessCapabilities(uid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
