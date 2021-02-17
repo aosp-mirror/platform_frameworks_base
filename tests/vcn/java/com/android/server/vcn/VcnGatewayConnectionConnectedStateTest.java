@@ -128,6 +128,20 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
+    public void testMigratedTransformsAreApplied() throws Exception {
+        getChildSessionCallback()
+                .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
+        mTestLooper.dispatchAll();
+
+        for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT}) {
+            verify(mIpSecSvc)
+                    .applyTunnelModeTransform(
+                            eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(direction), anyInt(), any());
+        }
+        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+    }
+
+    @Test
     public void testChildOpenedRegistersNetwork() throws Exception {
         // Verify scheduled but not canceled when entering ConnectedState
         verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
