@@ -45,7 +45,6 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports playback metrics.
-     * @hide
      */
     public void reportPlaybackMetrics(@NonNull PlaybackMetrics metrics) {
         mManager.reportPlaybackMetrics(mId, metrics);
@@ -60,9 +59,8 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports network event.
-     * @hide
      */
-    public void reportNetworkEvent(NetworkEvent event) {
+    public void reportNetworkEvent(@NonNull NetworkEvent event) {
         mManager.reportNetworkEvent(mId, event);
     }
 
@@ -75,9 +73,8 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports track change event.
-     * @hide
      */
-    public void reportTrackChangeEvent(TrackChangeEvent event) {
+    public void reportTrackChangeEvent(@NonNull TrackChangeEvent event) {
         mManager.reportTrackChangeEvent(mId, event);
     }
 
