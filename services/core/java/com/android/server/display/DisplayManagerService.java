@@ -423,7 +423,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
-        mLogicalDisplayMapper = new LogicalDisplayMapper(context, mDisplayDeviceRepo,
+        mLogicalDisplayMapper = new LogicalDisplayMapper(mDisplayDeviceRepo,
                 new LogicalDisplayListener());
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
         mBrightnessSynchronizer = new BrightnessSynchronizer(mContext);
@@ -1178,7 +1178,10 @@ public final class DisplayManagerService extends SystemService {
 
     private void handleLogicalDisplayRemovedLocked(@NonNull LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
-        mDisplayPowerControllers.removeReturnOld(displayId).stop();
+        final DisplayPowerController dpc = mDisplayPowerControllers.removeReturnOld(displayId);
+        if (dpc != null) {
+            dpc.stop();
+        }
         mDisplayStates.delete(displayId);
         mDisplayBrightnesses.delete(displayId);
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
@@ -1200,9 +1203,6 @@ public final class DisplayManagerService extends SystemService {
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-            // TODO - b/170498827 The rules regarding what display state to apply to each
-            // display will depend on the configuration/mapping of logical displays.
-            // Clean up LogicalDisplay.isEnabled() mechanism once this is fixed.
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
             final int state;
             final int displayId = display.getDisplayIdLocked();

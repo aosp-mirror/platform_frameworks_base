@@ -1,0 +1,34 @@
+// Signature format: 2.0
+package com.android.server.display.config.layout {
+
+  public class Display {
+    ctor public Display();
+    method public java.math.BigInteger getAddress();
+    method public boolean getEnabled();
+    method public boolean getIsDefault();
+    method public void setAddress(java.math.BigInteger);
+    method public void setEnabled(boolean);
+    method public void setIsDefault(boolean);
+  }
+
+  public class Layout {
+    ctor public Layout();
+    method public java.util.List<com.android.server.display.config.layout.Display> getDisplay();
+    method public java.math.BigInteger getState();
+    method public void setState(java.math.BigInteger);
+  }
+
+  public class Layouts {
+    ctor public Layouts();
+    method public java.util.List<com.android.server.display.config.layout.Layout> getLayout();
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static com.android.server.display.config.layout.Layouts read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

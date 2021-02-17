@@ -16,17 +16,26 @@
 
 package com.android.server.display;
 
-import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
-import android.text.TextUtils;
+import android.os.Environment;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayAddress;
 
+import com.android.server.display.config.layout.Layouts;
+import com.android.server.display.config.layout.XmlParser;
 import com.android.server.display.layout.Layout;
 
-import java.util.Arrays;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.datatype.DatatypeConfigurationException;
 
 /**
  * Mapping from device states into {@link Layout}s. This allows us to map device
@@ -39,11 +48,14 @@ class DeviceStateToLayoutMap {
 
     public static final int STATE_DEFAULT = DeviceStateManager.INVALID_DEVICE_STATE;
 
+    private static final String CONFIG_FILE_PATH =
+            "etc/displayconfig/display_layout_configuration.xml";
+
     private final SparseArray<Layout> mLayoutMap = new SparseArray<>();
 
-    DeviceStateToLayoutMap(Context context) {
-        mLayoutMap.append(STATE_DEFAULT, new Layout());
-        loadFoldedDisplayConfig(context);
+    DeviceStateToLayoutMap() {
+        loadLayoutsFromConfig();
+        createLayout(STATE_DEFAULT);
     }
 
     public void dumpLocked(IndentingPrintWriter ipw) {
@@ -76,48 +88,36 @@ class DeviceStateToLayoutMap {
     }
 
     /**
-     * Loads config.xml-specified folded configurations for foldable devices.
+     * Reads display-layout-configuration files to get the layouts to use for this device.
      */
-    private void loadFoldedDisplayConfig(Context context) {
-        final String[] strDisplayIds = context.getResources().getStringArray(
-                com.android.internal.R.array.config_internalFoldedPhysicalDisplayIds);
-        if (strDisplayIds.length != 2 || TextUtils.isEmpty(strDisplayIds[0])
-                || TextUtils.isEmpty(strDisplayIds[1])) {
-            Slog.w(TAG, "Folded display configuration invalid: [" + Arrays.toString(strDisplayIds)
-                    + "]");
+    private void loadLayoutsFromConfig() {
+        final File configFile = Environment.buildPath(
+                Environment.getVendorDirectory(), CONFIG_FILE_PATH);
+
+        if (!configFile.exists()) {
             return;
         }
 
-        final long[] displayIds;
-        try {
-            displayIds = new long[] {
-                Long.parseLong(strDisplayIds[0]),
-                Long.parseLong(strDisplayIds[1])
-            };
-        } catch (NumberFormatException nfe) {
-            Slog.w(TAG, "Folded display config non numerical: " + Arrays.toString(strDisplayIds));
-            return;
-        }
-
-        final int[] foldedDeviceStates = context.getResources().getIntArray(
-                com.android.internal.R.array.config_foldedDeviceStates);
-        final int[] unfoldedDeviceStates = context.getResources().getIntArray(
-                com.android.internal.R.array.config_unfoldedDeviceStates);
-        // Only add folded states if folded state config is not empty
-        if (foldedDeviceStates.length == 0 || unfoldedDeviceStates.length == 0) {
-            return;
-        }
-
-        for (int state : foldedDeviceStates) {
-            // Create the folded state layout
-            createLayout(state).createDisplayLocked(
-                    DisplayAddress.fromPhysicalDisplayId(displayIds[0]), true /*isDefault*/);
-        }
-
-        for (int state : unfoldedDeviceStates) {
-            // Create the unfolded state layout
-            createLayout(state).createDisplayLocked(
-                    DisplayAddress.fromPhysicalDisplayId(displayIds[1]), true /*isDefault*/);
+        Slog.i(TAG, "Loading display layouts from " + configFile);
+        try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
+            final Layouts layouts = XmlParser.read(in);
+            if (layouts == null) {
+                Slog.i(TAG, "Display layout config not found: " + configFile);
+                return;
+            }
+            for (com.android.server.display.config.layout.Layout l : layouts.getLayout()) {
+                final int state = l.getState().intValue();
+                final Layout layout = createLayout(state);
+                for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
+                    layout.createDisplayLocked(
+                            DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
+                            d.getIsDefault(),
+                            d.getEnabled());
+                }
+            }
+        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
+            Slog.e(TAG, "Encountered an error while reading/parsing display layout config file: "
+                    + configFile, e);
         }
     }
 }
