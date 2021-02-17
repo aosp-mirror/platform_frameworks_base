@@ -21634,6 +21634,7 @@ package android.media {
     method @android.media.MediaDrm.HdcpLevel public int getConnectedHdcpLevel();
     method public android.media.MediaDrm.CryptoSession getCryptoSession(@NonNull byte[], @NonNull String, @NonNull String);
     method @NonNull public android.media.MediaDrm.KeyRequest getKeyRequest(@NonNull byte[], @Nullable byte[], @Nullable String, int, @Nullable java.util.HashMap<java.lang.String,java.lang.String>) throws android.media.NotProvisionedException;
+    method @NonNull public java.util.List<android.media.MediaDrm.LogMessage> getLogMessages();
     method @android.media.MediaDrm.HdcpLevel public int getMaxHdcpLevel();
     method public static int getMaxSecurityLevel();
     method public int getMaxSessionCount();
@@ -21740,6 +21741,12 @@ package android.media {
     field public static final int STATUS_PENDING = 3; // 0x3
     field public static final int STATUS_USABLE = 0; // 0x0
     field public static final int STATUS_USABLE_IN_FUTURE = 5; // 0x5
+  }
+
+  public static class MediaDrm.LogMessage {
+    field @NonNull public final String message;
+    field public final int priority;
+    field public final long timestampMillis;
   }
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
