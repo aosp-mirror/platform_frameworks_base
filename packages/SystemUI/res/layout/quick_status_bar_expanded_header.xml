@@ -54,16 +54,4 @@
         android:paddingBottom="10dp"
         android:importantForAccessibility="yes" />
 
-    <TextView
-        android:id="@+id/header_debug_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="sans-serif-condensed"
-        android:padding="2dp"
-        android:textColor="#00A040"
-        android:textSize="11dp"
-        android:textStyle="bold"
-        android:visibility="invisible"/>
-
 </com.android.systemui.qs.QuickStatusBarHeader>
