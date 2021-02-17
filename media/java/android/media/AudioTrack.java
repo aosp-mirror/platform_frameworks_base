@@ -837,6 +837,7 @@ public class AudioTrack extends PlayerBase
         }
 
         baseRegisterPlayer(mSessionId);
+        native_setPlayerIId(mPlayerIId); // mPlayerIId now ready to send to native AudioTrack.
     }
 
     /**
@@ -4200,6 +4201,20 @@ public class AudioTrack extends PlayerBase
     private native int native_get_audio_description_mix_level_db(float[] level);
     private native int native_set_dual_mono_mode(int dualMonoMode);
     private native int native_get_dual_mono_mode(int[] dualMonoMode);
+
+    /**
+     * Sets the audio service Player Interface Id.
+     *
+     * The playerIId does not change over the lifetime of the client
+     * Java AudioTrack and is set automatically on creation.
+     *
+     * This call informs the native AudioTrack for metrics logging purposes.
+     *
+     * @param id the value reported by AudioManager when registering the track.
+     *           A value of -1 indicates invalid - the playerIId was never set.
+     * @throws IllegalStateException if AudioTrack not initialized.
+     */
+    private native void native_setPlayerIId(int playerIId);
 
     //---------------------------------------------------------
     // Utility methods
