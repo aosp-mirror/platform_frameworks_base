@@ -53,9 +53,8 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports error event.
-     * @hide
      */
-    public void reportPlaybackErrorEvent(PlaybackErrorEvent event) {
+    public void reportPlaybackErrorEvent(@NonNull PlaybackErrorEvent event) {
         mManager.reportPlaybackErrorEvent(mId, event);
     }
 

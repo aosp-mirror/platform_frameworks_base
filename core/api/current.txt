@@ -24100,9 +24100,30 @@ package android.media.metrics {
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
+  public final class PlaybackErrorEvent extends android.media.metrics.Event implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getErrorCode();
+    method @IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) public int getSubErrorCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackErrorEvent> CREATOR;
+    field public static final int ERROR_CODE_OTHER = 1; // 0x1
+    field public static final int ERROR_CODE_RUNTIME = 2; // 0x2
+    field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class PlaybackErrorEvent.Builder {
+    ctor public PlaybackErrorEvent.Builder();
+    method @NonNull public android.media.metrics.PlaybackErrorEvent build();
+    method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setErrorCode(int);
+    method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setException(@NonNull Exception);
+    method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setSubErrorCode(@IntRange(from=java.lang.Integer.MIN_VALUE, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
+  }
+
   public final class PlaybackSession implements java.lang.AutoCloseable {
     method public void close();
     method @NonNull public String getId();
+    method public void reportPlaybackErrorEvent(@NonNull android.media.metrics.PlaybackErrorEvent);
     method public void reportPlaybackStateEvent(@NonNull android.media.metrics.PlaybackStateEvent);
   }
 
