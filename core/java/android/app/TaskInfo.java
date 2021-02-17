@@ -343,7 +343,9 @@ public class TaskInfo {
                 // TopActivityToken and bounds are important if top activity is in size compat
                 && (!topActivityInSizeCompat || topActivityToken.equals(that.topActivityToken))
                 && (!topActivityInSizeCompat || configuration.windowConfiguration.getBounds()
-                    .equals(that.configuration.windowConfiguration.getBounds()));
+                    .equals(that.configuration.windowConfiguration.getBounds()))
+                && (!topActivityInSizeCompat || configuration.getLayoutDirection()
+                    == that.configuration.getLayoutDirection());
     }
 
     /**

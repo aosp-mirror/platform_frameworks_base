@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 /**
  * Face-specific resetLockout client supporting the {@link android.hardware.biometrics.face.V1_0}
- * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
+ * HIDL interface.
  */
 public class FaceResetLockoutClient extends HalClientMonitor<IBiometricsFace> {
 

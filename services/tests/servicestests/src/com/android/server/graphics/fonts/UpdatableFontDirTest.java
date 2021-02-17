@@ -684,8 +684,8 @@ public final class UpdatableFontDirTest {
                     newAddFontFamilyRequest("<family lang='en'>"
                             + "  <font>test.ttf</font>"
                             + "</family>")));
-            fail("Expect IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
+            fail("Expect NullPointerException");
+        } catch (NullPointerException e) {
             // Expect
         }
     }
@@ -703,9 +703,10 @@ public final class UpdatableFontDirTest {
             dir.update(Arrays.asList(newAddFontFamilyRequest("<family name='test'>"
                     + "  <font>test.ttf</font>"
                     + "</family>")));
-            fail("Expect IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // Expect
+            fail("Expect SystemFontException");
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode())
+                    .isEqualTo(FontManager.RESULT_ERROR_FONT_NOT_FOUND);
         }
     }
 

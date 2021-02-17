@@ -1356,6 +1356,7 @@ public class MediaPlayer extends PlayerBase
     }
 
     private void startImpl() {
+        baseStart(0); // unknown device at this point
         stayAwake(true);
         _start();
     }
@@ -1381,6 +1382,7 @@ public class MediaPlayer extends PlayerBase
     public void stop() throws IllegalStateException {
         stayAwake(false);
         _stop();
+        baseStop();
     }
 
     private native void _stop() throws IllegalStateException;
@@ -1394,6 +1396,7 @@ public class MediaPlayer extends PlayerBase
     public void pause() throws IllegalStateException {
         stayAwake(false);
         _pause();
+        basePause();
     }
 
     private native void _pause() throws IllegalStateException;
@@ -3479,7 +3482,8 @@ public class MediaPlayer extends PlayerBase
             case MEDIA_STOPPED:
                 {
                     tryToDisableNativeRoutingCallback();
-                    baseStop();
+                    // FIXME see b/179218630
+                    //baseStop();
                     TimeProvider timeProvider = mTimeProvider;
                     if (timeProvider != null) {
                         timeProvider.onStopped();
@@ -3489,15 +3493,17 @@ public class MediaPlayer extends PlayerBase
 
             case MEDIA_STARTED:
                 {
-                    baseStart(native_getRoutedDeviceId());
+                    // FIXME see b/179218630
+                    //baseStart(native_getRoutedDeviceId());
                     tryToEnableNativeRoutingCallback();
                 }
                 // fall through
             case MEDIA_PAUSED:
                 {
-                    if (msg.what == MEDIA_PAUSED) {
-                        basePause();
-                    }
+                    // FIXME see b/179218630
+                    //if (msg.what == MEDIA_PAUSED) {
+                    //    basePause();
+                    //}
                     TimeProvider timeProvider = mTimeProvider;
                     if (timeProvider != null) {
                         timeProvider.onPaused(msg.what == MEDIA_PAUSED);

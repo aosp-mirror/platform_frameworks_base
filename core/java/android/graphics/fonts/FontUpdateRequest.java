@@ -19,13 +19,17 @@ package android.graphics.fonts;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.text.FontConfig;
 
+import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a font update request. Currently only font install request is supported.
@@ -78,6 +82,26 @@ public final class FontUpdateRequest implements Parcelable {
         mFd = null;
         mSignature = null;
         mFontFamily = fontFamily;
+    }
+
+    public FontUpdateRequest(@NonNull String postScriptName,
+            @NonNull List<FontFamilyUpdateRequest.Font> variations) {
+        // TODO: Serialize the request directly instead of reusing FontConfig.FontFamily.
+        this(createFontFamily(postScriptName, variations));
+    }
+
+    private static FontConfig.FontFamily createFontFamily(@NonNull String postScriptName,
+            @NonNull List<FontFamilyUpdateRequest.Font> fonts) {
+        List<FontConfig.Font> configFonts = new ArrayList<>(fonts.size());
+        for (FontFamilyUpdateRequest.Font font : fonts) {
+            // TODO: Support .otf.
+            configFonts.add(new FontConfig.Font(new File(font.getPostScriptName() + ".ttf"), null,
+                    font.getStyle(), 0 /* index */,
+                    FontVariationAxis.toFontVariationSettings(font.getAxes()),
+                    null /* fontFamilyName */));
+        }
+        return new FontConfig.FontFamily(configFonts, postScriptName,
+                LocaleList.getEmptyLocaleList(), FontConfig.FontFamily.VARIANT_DEFAULT);
     }
 
     protected FontUpdateRequest(Parcel in) {

@@ -569,7 +569,12 @@ public class Location implements Parcelable {
 
     /** @hide */
     public long getElapsedRealtimeAgeMillis() {
-        return NANOSECONDS.toMillis(getElapsedRealtimeAgeNanos());
+        return getElapsedRealtimeAgeMillis(SystemClock.elapsedRealtime());
+    }
+
+    /** @hide */
+    public long getElapsedRealtimeAgeMillis(long referenceRealtimeMs) {
+        return referenceRealtimeMs - NANOSECONDS.toMillis(mElapsedRealtimeNanos);
     }
 
     /**

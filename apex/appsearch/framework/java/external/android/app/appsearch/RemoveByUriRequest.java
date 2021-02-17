@@ -27,7 +27,8 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Encapsulates a request to remove documents by namespace and URI.
+ * Encapsulates a request to remove documents by namespace and URIs from the {@link
+ * AppSearchSession} database.
  *
  * @see AppSearchSession#remove
  */
@@ -46,22 +47,28 @@ public final class RemoveByUriRequest {
         return mNamespace;
     }
 
-    /** Returns the URIs of documents to remove from the namespace. */
+    /** Returns the set of URIs attached to the request. */
     @NonNull
     public Set<String> getUris() {
         return Collections.unmodifiableSet(mUris);
     }
 
-    /** Builder for {@link RemoveByUriRequest} objects. */
+    /**
+     * Builder for {@link RemoveByUriRequest} objects.
+     *
+     * <p>Once {@link #build} is called, the instance can no longer be used.
+     */
     public static final class Builder {
         private String mNamespace = GenericDocument.DEFAULT_NAMESPACE;
         private final Set<String> mUris = new ArraySet<>();
         private boolean mBuilt = false;
 
         /**
-         * Sets which namespace these documents will be removed from.
+         * Sets the namespace to remove documents for.
          *
          * <p>If this is not set, it defaults to {@link GenericDocument#DEFAULT_NAMESPACE}.
+         *
+         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder setNamespace(@NonNull String namespace) {
@@ -71,14 +78,22 @@ public final class RemoveByUriRequest {
             return this;
         }
 
-        /** Adds one or more URIs to the request. */
+        /**
+         * Adds one or more URIs to the request.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public Builder addUris(@NonNull String... uris) {
             Preconditions.checkNotNull(uris);
             return addUris(Arrays.asList(uris));
         }
 
-        /** Adds one or more URIs to the request. */
+        /**
+         * Adds a collection of URIs to the request.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public Builder addUris(@NonNull Collection<String> uris) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
@@ -87,7 +102,11 @@ public final class RemoveByUriRequest {
             return this;
         }
 
-        /** Builds a new {@link RemoveByUriRequest}. */
+        /**
+         * Builds a new {@link RemoveByUriRequest}.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public RemoveByUriRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

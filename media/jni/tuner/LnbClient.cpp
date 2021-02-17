@@ -113,11 +113,14 @@ Result LnbClient::sendDiseqcMessage(vector<uint8_t> diseqcMessage) {
 Result LnbClient::close() {
     if (mTunerLnb != NULL) {
         Status s = mTunerLnb->close();
+        mTunerLnb = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
-        return mLnb->close();
+        Result res = mLnb->close();
+        mLnb = NULL;
+        return res;
     }
 
     return Result::INVALID_STATE;

@@ -264,8 +264,8 @@ public final class PlaybackActivityMonitor
      */
     public void playerEvent(int piid, int event, int deviceId, int binderUid) {
         if (DEBUG) {
-            Log.v(TAG, String.format("playerEvent(piid=%d, deviceId=%d, event=%d)",
-                    piid, deviceId, event));
+            Log.v(TAG, String.format("playerEvent(piid=%d, deviceId=%d, event=%s)",
+                    piid, deviceId, AudioPlaybackConfiguration.playerStateToString(event)));
         }
         final boolean change;
         synchronized(mPlayerLock) {

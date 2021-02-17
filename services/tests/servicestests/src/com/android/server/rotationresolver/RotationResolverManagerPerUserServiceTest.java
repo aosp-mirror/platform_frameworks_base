@@ -19,15 +19,21 @@ package com.android.server.rotationresolver;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.rotationresolver.RotationResolverInternal;
 import android.view.Surface;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -41,75 +47,81 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 public class RotationResolverManagerPerUserServiceTest {
-
-    @Mock
-    Context mContext;
+    private static final String PACKAGE_NAME = "test_pkg";
+    private static final String CLASS_NAME = "test_class";
 
     @Mock
     RotationResolverInternal.RotationResolverCallbackInternal mMockCallbackInternal;
-
     @Mock
-    ComponentName mMockComponentName;
+    PackageManager mMockPackageManager;
 
+    private Context mContext;
     private CancellationSignal mCancellationSignal;
-
-    private RotationResolverManagerPerUserService mSpyService;
+    private RotationResolverManagerPerUserService mService;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
-        // setup context mock
+        // setup context.
+        mContext = spy(ApplicationProvider.getApplicationContext());
+        doReturn(PACKAGE_NAME).when(mMockPackageManager).getRotationResolverPackageName();
+        doReturn(createTestingResolveInfo()).when(mMockPackageManager).resolveServiceAsUser(any(),
+                anyInt(), anyInt());
+        doReturn(mMockPackageManager).when(mContext).getPackageManager();
         doReturn(true).when(mContext).bindServiceAsUser(any(), any(), anyInt(), any());
 
         // setup a spy for the RotationResolverManagerPerUserService.
         final RotationResolverManagerService mainService = new RotationResolverManagerService(
                 mContext);
-        final RotationResolverManagerPerUserService mService =
-                new RotationResolverManagerPerUserService(mainService, /* Lock */ new Object(),
-                        mContext.getUserId());
+        mService = new RotationResolverManagerPerUserService(mainService, /* Lock */ new Object(),
+                mContext.getUserId());
 
         mCancellationSignal = new CancellationSignal();
-        mSpyService = Mockito.spy(mService);
 
-        mSpyService.mCurrentRequest = new RemoteRotationResolverService.RotationRequest(
+        this.mService.mCurrentRequest = new RemoteRotationResolverService.RotationRequest(
                 mMockCallbackInternal, Surface.ROTATION_0, Surface.ROTATION_0, "", 1000L,
                 mCancellationSignal);
 
-        mSpyService.getMaster().mIsServiceEnabled = true;
+        this.mService.getMaster().mIsServiceEnabled = true;
 
-        mSpyService.mRemoteService = new MockRemoteRotationResolverService(mContext,
-                mMockComponentName, mContext.getUserId(),
+        ComponentName componentName = new ComponentName(PACKAGE_NAME, CLASS_NAME);
+        this.mService.mRemoteService = new MockRemoteRotationResolverService(mContext,
+                componentName, mContext.getUserId(),
                 /* idleUnbindTimeoutMs */60000L,
                 /* Lock */ new Object());
     }
 
     @Test
     public void testResolveRotation_callOnSuccess() {
-        doReturn(true).when(mSpyService).isServiceAvailableLocked();
-        mSpyService.mCurrentRequest = null;
+        mService.mCurrentRequest = null;
 
         RotationResolverInternal.RotationResolverCallbackInternal callbackInternal =
                 Mockito.mock(RotationResolverInternal.RotationResolverCallbackInternal.class);
 
-        mSpyService.resolveRotationLocked(callbackInternal, Surface.ROTATION_0, Surface.ROTATION_0,
+        mService.resolveRotationLocked(callbackInternal, Surface.ROTATION_0, Surface.ROTATION_0,
                 "", 1000L, mCancellationSignal);
         verify(callbackInternal).onSuccess(anyInt());
     }
 
     @Test
     public void testResolveRotation_noCrashWhenCancelled() {
-        doReturn(true).when(mSpyService).isServiceAvailableLocked();
-
         RotationResolverInternal.RotationResolverCallbackInternal callbackInternal =
                 Mockito.mock(RotationResolverInternal.RotationResolverCallbackInternal.class);
 
         final CancellationSignal cancellationSignal = new CancellationSignal();
-        mSpyService.resolveRotationLocked(callbackInternal, Surface.ROTATION_0, Surface.ROTATION_0,
+        mService.resolveRotationLocked(callbackInternal, Surface.ROTATION_0, Surface.ROTATION_0,
                 "", 1000L, cancellationSignal);
         cancellationSignal.cancel();
+    }
 
-        verify(mSpyService.mCurrentRequest).cancelInternal();
+    private ResolveInfo createTestingResolveInfo() {
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = new ServiceInfo();
+        resolveInfo.serviceInfo.packageName = PACKAGE_NAME;
+        resolveInfo.serviceInfo.name = CLASS_NAME;
+        resolveInfo.serviceInfo.permission = Manifest.permission.BIND_ROTATION_RESOLVER_SERVICE;
+        return resolveInfo;
     }
 
     static class MockRemoteRotationResolverService extends RemoteRotationResolverService {

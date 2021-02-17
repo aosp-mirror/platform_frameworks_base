@@ -1917,9 +1917,18 @@ public final class StreamConfigurationMap {
             (3 << HAL_DATASPACE_TRANSFER_SHIFT) |
             (1 << HAL_DATASPACE_RANGE_SHIFT);
 
-    private static final int HAL_DATASPACE_DEPTH = 0x1000;
-    private static final int HAL_DATASPACE_DYNAMIC_DEPTH = 0x1002;
-    private static final int HAL_DATASPACE_HEIF = 0x1003;
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_DEPTH = 0x1000;
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_DYNAMIC_DEPTH = 0x1002;
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_HEIF = 0x1003;
     private static final long DURATION_20FPS_NS = 50000000L;
     /**
      * @see #getDurations(int, int)

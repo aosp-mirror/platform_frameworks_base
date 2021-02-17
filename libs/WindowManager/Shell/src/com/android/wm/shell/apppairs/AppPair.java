@@ -214,6 +214,19 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
     }
 
     @Override
+    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        if (getRootTaskId() == taskId) {
+            b.setParent(mRootTaskLeash);
+        } else if (getTaskId1() == taskId) {
+            b.setParent(mTaskLeash1);
+        } else if (getTaskId2() == taskId) {
+            b.setParent(mTaskLeash2);
+        } else {
+            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        }
+    }
+
+    @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";

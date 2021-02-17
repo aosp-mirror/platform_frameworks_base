@@ -375,17 +375,29 @@ public class PhonePipMenuController implements PipMenuController {
     }
 
     /**
-     * Hides the menu activity.
+     * Hides the menu view.
      */
     public void hideMenu() {
+        hideMenu(true /* animate */, true /* resize */);
+    }
+
+    /**
+     * Hides the menu view.
+     *
+     * @param animate whether to animate the menu fadeout
+     * @param resize whether or not to resize the PiP with the state change
+     */
+    public void hideMenu(boolean animate, boolean resize) {
         final boolean isMenuVisible = isMenuVisible();
         if (DEBUG) {
             Log.d(TAG, "hideMenu() state=" + mMenuState
                     + " isMenuVisible=" + isMenuVisible
+                    + " animate=" + animate
+                    + " resize=" + resize
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         if (isMenuVisible) {
-            mPipMenuView.hideMenu();
+            mPipMenuView.hideMenu(animate, resize);
         }
     }
 
@@ -401,15 +413,6 @@ public class PhonePipMenuController implements PipMenuController {
             }
             mPipMenuView.hideMenu(onEndCallback);
         }
-    }
-
-    /**
-     * Preemptively mark the menu as invisible, used when we are directly manipulating the pinned
-     * stack and don't want to trigger a resize which can animate the stack in a conflicting way
-     * (ie. when manually expanding or dismissing).
-     */
-    public void hideMenuWithoutResize() {
-        onMenuStateChanged(MENU_STATE_NONE, false /* resize */, null /* callback */);
     }
 
     /**

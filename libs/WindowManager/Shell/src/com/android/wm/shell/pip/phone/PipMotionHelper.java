@@ -325,7 +325,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
-        mMenuController.hideMenuWithoutResize();
+        mMenuController.hideMenu(false /* animate */, false /* resize */);
         mPipTaskOrganizer.exitPip(skipAnimation ? 0 : LEAVE_PIP_DURATION);
     }
 
@@ -338,7 +338,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "removePip: callers=\n" + Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
-        mMenuController.hideMenuWithoutResize();
+        mMenuController.hideMenu(true /* animate*/, false /* resize */);
         mPipTaskOrganizer.removePip();
     }
 

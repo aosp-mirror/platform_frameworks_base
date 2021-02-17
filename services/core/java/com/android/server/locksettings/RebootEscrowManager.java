@@ -146,6 +146,7 @@ class RebootEscrowManager {
             RebootEscrowProviderInterface rebootEscrowProvider;
             if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
                     "server_based_ror_enabled", false)) {
+                Slog.i(TAG, "Using server based resume on reboot");
                 rebootEscrowProvider = new RebootEscrowProviderServerBasedImpl(mContext, mStorage);
             } else {
                 rebootEscrowProvider = new RebootEscrowProviderHalImpl();
@@ -272,6 +273,10 @@ class RebootEscrowManager {
         // generated before reboot. Note that we will clear the escrow key even if the keystore key
         // is null.
         SecretKey kk = mKeyStoreManager.getKeyStoreEncryptionKey();
+        if (kk == null) {
+            Slog.i(TAG, "Failed to load the key for resume on reboot from key store.");
+        }
+
         RebootEscrowKey escrowKey;
         try {
             escrowKey = getAndClearRebootEscrowKey(kk);
@@ -281,7 +286,7 @@ class RebootEscrowManager {
             return;
         }
 
-        if (kk == null || escrowKey == null) {
+        if (escrowKey == null) {
             onGetRebootEscrowKeyFailed(users);
             return;
         }

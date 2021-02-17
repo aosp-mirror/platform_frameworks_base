@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import android.cts.install.lib.host.InstallUtilsHost;
+import android.platform.test.annotations.LargeTest;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.ddmlib.Log;
@@ -201,6 +202,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
     // Test rollback-app command waits for staged sessions to be ready
     @Test
+    @LargeTest
     public void testAdbRollbackAppWaitsForStagedReady() throws Exception {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());

@@ -29,6 +29,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
+import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
+import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -62,7 +64,11 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module(subcomponents = {KeyguardStatusViewComponent.class, KeyguardUserSwitcherComponent.class},
+@Module(subcomponents = {
+        KeyguardQsUserSwitchComponent.class,
+        KeyguardStatusBarViewComponent.class,
+        KeyguardStatusViewComponent.class,
+        KeyguardUserSwitcherComponent.class},
         includes = {FalsingModule.class})
 public class KeyguardModule {
     /**

@@ -89,7 +89,6 @@ public class PipMenuView extends FrameLayout {
     private static final boolean ENABLE_RESIZE_HANDLE = false;
 
     private int mMenuState;
-    private boolean mResize = true;
     private boolean mAllowMenuTimeout = true;
     private boolean mAllowTouches = true;
 
@@ -329,16 +328,21 @@ public class PipMenuView extends FrameLayout {
         hideMenu(null);
     }
 
+    void hideMenu(boolean animate, boolean resize) {
+        hideMenu(null, true /* notifyMenuVisibility */, animate, resize);
+    }
+
     void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* animate */);
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, true /* animate */,
+                true /* resize */);
     }
 
     private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
-            boolean animate) {
+            boolean animate, boolean resize) {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedHide();
             if (notifyMenuVisibility) {
-                notifyMenuStateChange(MENU_STATE_NONE, mResize, null);
+                notifyMenuStateChange(MENU_STATE_NONE, resize, null);
             }
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
@@ -469,7 +473,8 @@ public class PipMenuView extends FrameLayout {
     private void expandPip() {
         // Do not notify menu visibility when hiding the menu, the controller will do this when it
         // handles the message
-        hideMenu(mController::onPipExpand, false /* notifyMenuVisibility */, true /* animate */);
+        hideMenu(mController::onPipExpand, false /* notifyMenuVisibility */, true /* animate */,
+                true /* resize */);
     }
 
     private void dismissPip() {
@@ -479,7 +484,8 @@ public class PipMenuView extends FrameLayout {
         final boolean animate = mMenuState != MENU_STATE_CLOSE;
         // Do not notify menu visibility when hiding the menu, the controller will do this when it
         // handles the message
-        hideMenu(mController::onPipDismiss, false /* notifyMenuVisibility */, animate);
+        hideMenu(mController::onPipDismiss, false /* notifyMenuVisibility */, animate,
+                true /* resize */);
     }
 
     private void showSettings() {

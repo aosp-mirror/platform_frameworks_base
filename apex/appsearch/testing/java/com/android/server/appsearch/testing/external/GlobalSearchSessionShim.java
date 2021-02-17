@@ -27,43 +27,26 @@ import java.io.Closeable;
  */
 public interface GlobalSearchSessionShim extends Closeable {
     /**
-     * Searches across all documents in the storage based on a given query string.
+     * Retrieves documents from all AppSearch databases that the querying application has access to.
      *
-     * <p>Currently we support following features in the raw query format:
+     * <p>Applications can be granted access to documents by specifying {@link
+     * SetSchemaRequest.Builder#setSchemaTypeVisibilityForPackage}, or {@link
+     * SetSchemaRequest.Builder#setDocumentClassVisibilityForPackage} when building a schema.
      *
-     * <ul>
-     *   <li>AND
-     *       <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and ‘cat’”).
-     *       Example: hello world matches documents that have both ‘hello’ and ‘world’
-     *   <li>OR
-     *       <p>OR joins (e.g. “match documents that have either the term ‘dog’ or ‘cat’”). Example:
-     *       dog OR puppy
-     *   <li>Exclusion
-     *       <p>Exclude a term (e.g. “match documents that do not have the term ‘dog’”). Example:
-     *       -dog excludes the term ‘dog’
-     *   <li>Grouping terms
-     *       <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
-     *       “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
-     *       Example: (dog puppy) (cat kitten) two one group containing two terms.
-     *   <li>Property restricts
-     *       <p>Specifies which properties of a document to specifically match terms in (e.g. “match
-     *       documents where the ‘subject’ property contains ‘important’”). Example:
-     *       subject:important matches documents with the term ‘important’ in the ‘subject’ property
-     *   <li>Schema type restricts
-     *       <p>This is similar to property restricts, but allows for restricts on top-level
-     *       document fields, such as schema_type. Clients should be able to limit their query to
-     *       documents of a certain schema_type (e.g. “match documents that are of the ‘Email’
-     *       schema_type”). Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will
-     *       match documents that contain the query term ‘dog’ and are of either the ‘Email’ schema
-     *       type or the ‘Video’ schema type.
-     * </ul>
+     * <p>Document access can also be granted to system UIs by specifying {@link
+     * SetSchemaRequest.Builder#setSchemaTypeVisibilityForSystemUi}, or {@link
+     * SetSchemaRequest.Builder#setDocumentClassVisibilityForSystemUi} when building a schema.
+     *
+     * <p>See {@link AppSearchSessionShim#search(String, SearchSpec)} for a detailed explanation on
+     * forming a query string.
      *
      * <p>This method is lightweight. The heavy work will be done in {@link
      * SearchResultsShim#getNextPage()}.
      *
-     * @param queryExpression Query String to search.
-     * @param searchSpec Spec for setting filters, raw query etc.
-     * @return The search result of performing this operation.
+     * @param queryExpression query string to search.
+     * @param searchSpec spec for setting document filters, adding projection, setting term match
+     *     type, etc.
+     * @return a {@link SearchResultsShim} object for retrieved matched documents.
      */
     @NonNull
     SearchResultsShim search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);

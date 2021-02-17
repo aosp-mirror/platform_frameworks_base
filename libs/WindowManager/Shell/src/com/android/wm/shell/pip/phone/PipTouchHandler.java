@@ -63,8 +63,9 @@ import java.util.function.Consumer;
  * the PIP.
  */
 public class PipTouchHandler {
+    @VisibleForTesting static final float MINIMUM_SIZE_PERCENT = 0.4f;
+
     private static final String TAG = "PipTouchHandler";
-    private static final float MINIMUM_SIZE_PERCENT = 0.4f;
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
 
     // Allow PIP to resize to a slightly bigger state upon touch
@@ -876,6 +877,9 @@ public class PipTouchHandler {
                             < mPipBoundsState.getMaxSize().x
                             && mPipBoundsState.getBounds().height()
                             < mPipBoundsState.getMaxSize().y;
+                    if (mMenuController.isMenuVisible()) {
+                        mMenuController.hideMenu(false /* animate */, false /* resize */);
+                    }
                     if (toExpand) {
                         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                         animateToMaximizedState(null);
