@@ -59,6 +59,26 @@ ASurfaceControlFunctions::ASurfaceControlFunctions() {
     releaseFunc = (ASC_release) dlsym(handle_, "ASurfaceControl_release");
     LOG_ALWAYS_FATAL_IF(releaseFunc == nullptr,
             "Failed to find required symbol ASurfaceControl_release!");
+
+    registerListenerFunc = (ASC_registerSurfaceStatsListener) dlsym(handle_,
+            "ASurfaceControl_registerSurfaceStatsListener");
+    LOG_ALWAYS_FATAL_IF(registerListenerFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_registerSurfaceStatsListener!");
+
+    unregisterListenerFunc = (ASC_unregisterSurfaceStatsListener) dlsym(handle_,
+            "ASurfaceControl_unregisterSurfaceStatsListener");
+    LOG_ALWAYS_FATAL_IF(unregisterListenerFunc == nullptr,
+            "Failed to find required symbol ASurfaceControl_unregisterSurfaceStatsListener!");
+
+    getAcquireTimeFunc = (ASCStats_getAcquireTime) dlsym(handle_,
+            "ASurfaceControlStats_getAcquireTime");
+    LOG_ALWAYS_FATAL_IF(getAcquireTimeFunc == nullptr,
+            "Failed to find required symbol ASurfaceControlStats_getAcquireTime!");
+
+    getFrameNumberFunc = (ASCStats_getFrameNumber) dlsym(handle_,
+            "ASurfaceControlStats_getFrameNumber");
+    LOG_ALWAYS_FATAL_IF(getFrameNumberFunc == nullptr,
+            "Failed to find required symbol ASurfaceControlStats_getFrameNumber!");
 }
 
 void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
@@ -146,7 +166,8 @@ RenderThread::RenderThread()
         , mFrameCallbackTaskPending(false)
         , mRenderState(nullptr)
         , mEglManager(nullptr)
-        , mFunctorManager(WebViewFunctorManager::instance()) {
+        , mFunctorManager(WebViewFunctorManager::instance())
+        , mGlobalProfileData(mJankDataMutex) {
     Properties::load();
     start("RenderThread");
 }
