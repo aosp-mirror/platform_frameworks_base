@@ -17,6 +17,7 @@
 package android.content.pm.verify.domain;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Parcelable;
@@ -30,18 +31,18 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Contains the user selection state for a package. This means all web HTTP(S) domains
- * declared by a package in its manifest, whether or not they were marked for auto
- * verification.
+ * Contains the user selection state for a package. This means all web HTTP(S) domains declared by a
+ * package in its manifest, whether or not they were marked for auto verification.
  * <p>
  * By default, all apps are allowed to automatically open links with domains that they've
- * successfully verified against. This is reflected by {@link #isLinkHandlingAllowed()}.
- * The user can decide to disable this, disallowing the application from opening these
- * links.
+ * successfully verified against. This is reflected by {@link #isLinkHandlingAllowed()}. The user
+ * can decide to disable this, disallowing the application from opening all links. Note that the
+ * toggle affects <b>all</b> links and is not based on the verification state of the domains.
  * <p>
- * Separately, independent of this toggle, the user can choose specific domains to allow
- * an app to open, which is reflected as part of {@link #getHostToUserSelectionMap()},
- * which maps the domain name to the true/false state of whether it was enabled by the user.
+ * Assuming the toggle is enabled, the user can also select additional unverified domains to grant
+ * to the application to open, which is reflected in {@link #getHostToUserSelectionMap()}. But only
+ * a single application can be approved for a domain unless the applications are both approved. If
+ * another application is approved, the user will not be allowed to enable the domain.
  * <p>
  * These values can be changed through the
  * {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String,
@@ -105,7 +106,8 @@ public final class DomainVerificationUserSelection implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/domain/verify/DomainVerificationUserSelection.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain
+    // /DomainVerificationUserSelection.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -216,7 +218,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
-    public boolean equals(@android.annotation.Nullable Object o) {
+    public boolean equals(@Nullable Object o) {
         // You can override field equality logic by defining either of the methods like:
         // boolean fieldNameEquals(DomainVerificationUserSelection other) { ... }
         // boolean fieldNameEquals(FieldType otherValue) { ... }
@@ -328,9 +330,9 @@ public final class DomainVerificationUserSelection implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1611799495498L,
+            time = 1612829797220L,
             codegenVersion = "1.0.22",
-            sourceFile = "frameworks/base/core/java/android/content/pm/domain/verify/DomainVerificationUserSelection.java",
+            sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserSelection.java",
             inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Boolean> mHostToUserSelectionMap\nclass DomainVerificationUserSelection extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}

@@ -132,10 +132,32 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
 
     @Test
     public void testSubscriptionSnapshotUpdateNotifiesUnderlyingNetworkTracker() {
+        verifyWakeLockSetUp();
+
         final TelephonySubscriptionSnapshot updatedSnapshot =
                 mock(TelephonySubscriptionSnapshot.class);
         mGatewayConnection.updateSubscriptionSnapshot(updatedSnapshot);
 
         verify(mUnderlyingNetworkTracker).updateSubscriptionSnapshot(eq(updatedSnapshot));
+        verifyWakeLockAcquired();
+
+        mTestLooper.dispatchAll();
+
+        verifyWakeLockReleased();
+    }
+
+    @Test
+    public void testNonNullUnderlyingNetworkRecordUpdateCancelsAlarm() {
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(null);
+
+        verifyDisconnectRequestAlarmAndGetCallback(false /* expectCanceled */);
+
+        mGatewayConnection
+                .getUnderlyingNetworkTrackerCallback()
+                .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
+
+        verify(mDisconnectRequestAlarm).cancel();
     }
 }

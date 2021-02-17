@@ -224,6 +224,9 @@ easier.
         <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
         <item name="colorForeground">@color/foreground_device_default_dark</item>
         <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
+
+        <!-- Ripple style-->
+        <item name="rippleStyle">solid</item>
     </style>
 
     <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />

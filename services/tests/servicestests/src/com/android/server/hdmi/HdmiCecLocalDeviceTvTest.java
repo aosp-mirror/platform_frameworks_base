@@ -15,9 +15,11 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ABORT_UNRECOGNIZED_OPCODE;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
+import static com.android.server.hdmi.Constants.ADDR_RECORDER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
@@ -483,5 +485,19 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_TV,
                 ADDR_AUDIO_SYSTEM);
         assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+    }
+
+    @Test
+    public void supportsRecordTvScreen() {
+        HdmiCecMessage recordTvScreen = new HdmiCecMessage(ADDR_RECORDER_1, mTvLogicalAddress,
+                Constants.MESSAGE_RECORD_TV_SCREEN, HdmiCecMessage.EMPTY_PARAM);
+
+        mNativeWrapper.onCecMessage(recordTvScreen);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage featureAbort = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                mTvLogicalAddress, ADDR_RECORDER_1, Constants.MESSAGE_RECORD_TV_SCREEN,
+                ABORT_UNRECOGNIZED_OPCODE);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(featureAbort);
     }
 }

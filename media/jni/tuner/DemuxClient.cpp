@@ -216,14 +216,13 @@ Result DemuxClient::disconnectCiCam() {
 Result DemuxClient::close() {
     if (mTunerDemux != NULL) {
         Status s = mTunerDemux->close();
+        mDemux = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mDemux != NULL) {
         Result res = mDemux->close();
-        if (res == Result::SUCCESS) {
-            mDemux = NULL;
-        }
+        mDemux = NULL;
         return res;
     }
 

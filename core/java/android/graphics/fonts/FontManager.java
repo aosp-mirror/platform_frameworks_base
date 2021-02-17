@@ -35,6 +35,8 @@ import com.android.internal.graphics.fonts.IFontManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -58,7 +60,7 @@ public class FontManager {
                     RESULT_ERROR_VERIFICATION_FAILURE, RESULT_ERROR_VERSION_MISMATCH,
                     RESULT_ERROR_INVALID_FONT_FILE, RESULT_ERROR_INVALID_FONT_NAME,
                     RESULT_ERROR_DOWNGRADING, RESULT_ERROR_FAILED_UPDATE_CONFIG,
-                    RESULT_ERROR_FONT_UPDATER_DISABLED, RESULT_ERROR_REMOTE_EXCEPTION })
+                    RESULT_ERROR_FONT_UPDATER_DISABLED, RESULT_ERROR_FONT_NOT_FOUND })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
 
@@ -131,9 +133,10 @@ public class FontManager {
     public static final int RESULT_ERROR_VERSION_MISMATCH = -8;
 
     /**
-     * Indicates a failure due to IPC communication.
+     * Indicates a failure occurred because a font with the specified PostScript name could not be
+     * found.
      */
-    public static final int RESULT_ERROR_REMOTE_EXCEPTION = -9;
+    public static final int RESULT_ERROR_FONT_NOT_FOUND = -9;
 
     /**
      * Indicates a failure of opening font file.
@@ -205,42 +208,40 @@ public class FontManager {
     }
 
     /**
-     * Update system installed font file.
+     * Update a system installed font file.
      *
      * <p>
-     * To protect devices, system font updater relies on the Linux Kernel feature called fs-verity.
-     * If the device is not ready for fs-verity, {@link #RESULT_ERROR_FONT_UPDATER_DISABLED} will be
+     * To protect devices, system font updater relies on a Linux Kernel feature called fs-verity.
+     * If the device does not support fs-verity, {@link #RESULT_ERROR_FONT_UPDATER_DISABLED} will be
      * returned.
      *
-     * Android only accepts OpenType compliant font files. If other font files are provided,
+     * <p>Android only accepts OpenType compliant font files. If other font files are provided,
      * {@link #RESULT_ERROR_INVALID_FONT_FILE} will be returned.
      *
-     * The font file to be updated is identified by PostScript name stored in name table. If the
-     * font file doesn't have PostScript name entry, {@link #RESULT_ERROR_INVALID_FONT_NAME} will be
-     * returned.
+     * <p>The font file to be updated is identified by PostScript name stored in the name table. If
+     * the font file doesn't have PostScript name entry, {@link #RESULT_ERROR_INVALID_FONT_NAME}
+     * will be returned.
      *
-     * The entire font file is verified with the given signature for the system installed
-     * certificate. If the system cannot verify the font contents,
+     * <p>The entire font file is verified with the given signature using system installed
+     * certificates. If the system cannot verify the font file contents,
      * {@link #RESULT_ERROR_VERIFICATION_FAILURE} will be returned.
      *
-     * The font file must have newer or equal revision number in the head table. In other words, the
-     * downgrading font file is not allowed. If the older font file is provided,
+     * <p>The font file must have a newer revision number in the head table. In other words, it is
+     * not allowed to downgrade a font file. If an older font file is provided,
      * {@link #RESULT_ERROR_DOWNGRADING} will be returned.
      *
-     * The caller must specify the base config version for keeping consist system configuration. If
-     * the system configuration is updated for some reason between you get config with
-     * {@link #getFontConfig()} and calling this method, {@link #RESULT_ERROR_VERSION_MISMATCH} will
-     * be returned. Get the latest font configuration by calling {@link #getFontConfig()} again and
-     * try with the latest config version again.
+     * <p>The caller must specify the base config version for keeping the font configuration
+     * consistent. If the font configuration is updated for some reason between the time you get
+     * a configuration with {@link #getFontConfig()} and the time when you call this method,
+     * {@link #RESULT_ERROR_VERSION_MISMATCH} will be returned. Get the latest font configuration by
+     * calling {@link #getFontConfig()} and call this method again with the latest config version.
      *
-     * @param pfd A file descriptor of the font file.
-     * @param signature A PKCS#7 detached signature for verifying entire font files.
-     * @param baseVersion A base config version to be updated. You can get latest config version by
-     *                    {@link FontConfig#getConfigVersion()} via {@link #getFontConfig()}. If the
-     *                    system has newer config version, the update will fail with
-     *                    {@link #RESULT_ERROR_VERSION_MISMATCH}. Try to get the latest config and
-     *                    try update again.
-     * @return result code.
+     * @param request A {@link FontFileUpdateRequest} to execute.
+     * @param baseVersion A base config version to be updated. You can get the latest config version
+     *                    by {@link FontConfig#getConfigVersion()} via {@link #getFontConfig()}. If
+     *                    the system has a newer config version, the update will fail with
+     *                    {@link #RESULT_ERROR_VERSION_MISMATCH}.
+     * @return A result code.
      *
      * @see FontConfig#getConfigVersion()
      * @see #getFontConfig()
@@ -253,18 +254,88 @@ public class FontManager {
      * @see #RESULT_ERROR_DOWNGRADING
      * @see #RESULT_ERROR_FAILED_UPDATE_CONFIG
      * @see #RESULT_ERROR_FONT_UPDATER_DISABLED
-     * @see #RESULT_ERROR_REMOTE_EXCEPTION
      */
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS) public @ResultCode int updateFontFile(
+            @NonNull FontFileUpdateRequest request, @IntRange(from = 0) int baseVersion) {
+        try {
+            return mIFontManager.updateFontFile(new FontUpdateRequest(
+                    request.getParcelFileDescriptor(), request.getSignature()), baseVersion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #updateFontFile(FontFileUpdateRequest, int)}
+     */
+    // TODO: Remove this API before Developer Preview 3.
+    @Deprecated
     @RequiresPermission(Manifest.permission.UPDATE_FONTS) public @ResultCode int updateFontFile(
             @NonNull ParcelFileDescriptor pfd,
             @NonNull byte[] signature,
             @IntRange(from = 0) int baseVersion
     ) {
+        return updateFontFile(new FontFileUpdateRequest(pfd, signature), baseVersion);
+    }
+
+
+    /**
+     * Update or add system wide font families.
+     *
+     * <p>This method will update existing font families or add new font families. The updated
+     * font family definitions will be used when creating {@link android.graphics.Typeface} objects
+     * with using {@link android.graphics.Typeface#create(String, int)} specifying the family name,
+     * or through XML resources. Note that system fallback fonts cannot be modified by this method.
+     * Apps must use {@link android.graphics.Typeface.CustomFallbackBuilder} to use custom fallback
+     * fonts.
+     *
+     * <p>Font files can be updated by including {@link FontFileUpdateRequest} to {@code request}
+     * via {@link FontFamilyUpdateRequest.Builder#addFontFileUpdateRequest(FontFileUpdateRequest)}.
+     * The same constraints as {@link #updateFontFile} will apply when updating font files.
+     *
+     * <p>The caller must specify the base config version for keeping the font configuration
+     * consistent. If the font configuration is updated for some reason between the time you get
+     * a configuration with {@link #getFontConfig()} and the time when you call this method,
+     * {@link #RESULT_ERROR_VERSION_MISMATCH} will be returned. Get the latest font configuration by
+     * calling {@link #getFontConfig()} and call this method again with the latest config version.
+     *
+     * @param request A {@link FontFamilyUpdateRequest} to execute.
+     * @param baseVersion A base config version to be updated. You can get the latest config version
+     *                    by {@link FontConfig#getConfigVersion()} via {@link #getFontConfig()}. If
+     *                    the system has a newer config version, the update will fail with
+     *                    {@link #RESULT_ERROR_VERSION_MISMATCH}.
+     * @return A result code.
+     * @see FontConfig#getConfigVersion()
+     * @see #getFontConfig()
+     * @see #RESULT_SUCCESS
+     * @see #RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE
+     * @see #RESULT_ERROR_VERIFICATION_FAILURE
+     * @see #RESULT_ERROR_VERSION_MISMATCH
+     * @see #RESULT_ERROR_INVALID_FONT_FILE
+     * @see #RESULT_ERROR_INVALID_FONT_NAME
+     * @see #RESULT_ERROR_DOWNGRADING
+     * @see #RESULT_ERROR_FAILED_UPDATE_CONFIG
+     * @see #RESULT_ERROR_FONT_UPDATER_DISABLED
+     * @see #RESULT_ERROR_FONT_NOT_FOUND
+     */
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS) public @ResultCode int updateFontFamily(
+            @NonNull FontFamilyUpdateRequest request, @IntRange(from = 0) int baseVersion) {
+        List<FontUpdateRequest> requests = new ArrayList<>();
+        List<FontFileUpdateRequest> fontFileUpdateRequests = request.getFontFileUpdateRequests();
+        for (int i = 0; i < fontFileUpdateRequests.size(); i++) {
+            FontFileUpdateRequest fontFile = fontFileUpdateRequests.get(i);
+            requests.add(new FontUpdateRequest(fontFile.getParcelFileDescriptor(),
+                    fontFile.getSignature()));
+        }
+        List<FontFamilyUpdateRequest.FontFamily> fontFamilies = request.getFontFamilies();
+        for (int i = 0; i < fontFamilies.size(); i++) {
+            FontFamilyUpdateRequest.FontFamily fontFamily = fontFamilies.get(i);
+            requests.add(new FontUpdateRequest(fontFamily.getName(), fontFamily.getFonts()));
+        }
         try {
-            return mIFontManager.updateFont(baseVersion, new FontUpdateRequest(pfd, signature));
+            return mIFontManager.updateFontFamily(requests, baseVersion);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call updateFont API", e);
-            return RESULT_ERROR_REMOTE_EXCEPTION;
+            throw e.rethrowFromSystemServer();
         }
     }
 

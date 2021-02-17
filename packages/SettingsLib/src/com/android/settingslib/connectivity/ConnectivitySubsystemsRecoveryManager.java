@@ -196,7 +196,7 @@ public class ConnectivitySubsystemsRecoveryManager {
     }
 
     private void stopTrackingWifiRestart() {
-        mWifiManager.unregisterWifiSubsystemRestartTrackingCallback(
+        mWifiManager.unregisterSubsystemRestartTrackingCallback(
                 mWifiSubsystemRestartTrackingCallback);
     }
 

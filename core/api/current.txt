@@ -1185,6 +1185,7 @@ package android {
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
+    field public static final int rippleStyle = 16844337; // 0x1010631
     field public static final int rollbackDataPolicy = 16844311; // 0x1010617
     field public static final int rotation = 16843558; // 0x1010326
     field public static final int rotationAnimation = 16844090; // 0x101053a
@@ -1746,6 +1747,9 @@ package android {
     field public static final int dialog_min_width_minor = 17104900; // 0x1050004
     field public static final int notification_large_icon_height = 17104902; // 0x1050006
     field public static final int notification_large_icon_width = 17104901; // 0x1050005
+    field public static final int system_app_widget_background_radius = 17104904; // 0x1050008
+    field public static final int system_app_widget_inner_radius = 17104905; // 0x1050009
+    field public static final int system_app_widget_internal_padding = 17104906; // 0x105000a
     field public static final int thumbnail_height = 17104897; // 0x1050001
     field public static final int thumbnail_width = 17104898; // 0x1050002
   }
@@ -8307,6 +8311,7 @@ package android.appwidget {
   public class AppWidgetHostView extends android.widget.FrameLayout {
     ctor public AppWidgetHostView(android.content.Context);
     ctor public AppWidgetHostView(android.content.Context, int, int);
+    method public void clearCurrentSize();
     method public int getAppWidgetId();
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo();
     method public static android.graphics.Rect getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect);
@@ -8314,11 +8319,13 @@ package android.appwidget {
     method protected android.view.View getErrorView();
     method protected void prepareView(android.view.View);
     method public void setAppWidget(int, android.appwidget.AppWidgetProviderInfo);
+    method public void setCurrentSize(@NonNull android.graphics.PointF);
     method public void setExecutor(java.util.concurrent.Executor);
     method public void setOnLightBackground(boolean);
     method public void updateAppWidget(android.widget.RemoteViews);
     method public void updateAppWidgetOptions(android.os.Bundle);
-    method public void updateAppWidgetSize(android.os.Bundle, int, int, int, int);
+    method @Deprecated public void updateAppWidgetSize(android.os.Bundle, int, int, int, int);
+    method public void updateAppWidgetSize(@NonNull android.os.Bundle, @NonNull java.util.List<android.graphics.PointF>);
   }
 
   public class AppWidgetManager {
@@ -8371,6 +8378,7 @@ package android.appwidget {
     field public static final String OPTION_APPWIDGET_MIN_HEIGHT = "appWidgetMinHeight";
     field public static final String OPTION_APPWIDGET_MIN_WIDTH = "appWidgetMinWidth";
     field public static final String OPTION_APPWIDGET_RESTORE_COMPLETED = "appWidgetRestoreCompleted";
+    field public static final String OPTION_APPWIDGET_SIZES = "appWidgetSizes";
   }
 
   public class AppWidgetProvider extends android.content.BroadcastReceiver {
@@ -10239,12 +10247,15 @@ package android.content {
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public boolean bindServiceAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
     method @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)") public abstract int checkCallingOrSelfPermission(@NonNull String);
     method @CheckResult(suggest="#enforceCallingOrSelfUriPermission(Uri,int,String)") public abstract int checkCallingOrSelfUriPermission(android.net.Uri, int);
+    method @NonNull public int[] checkCallingOrSelfUriPermissions(@NonNull java.util.List<android.net.Uri>, int);
     method @CheckResult(suggest="#enforceCallingPermission(String,String)") public abstract int checkCallingPermission(@NonNull String);
     method @CheckResult(suggest="#enforceCallingUriPermission(Uri,int,String)") public abstract int checkCallingUriPermission(android.net.Uri, int);
+    method @NonNull public int[] checkCallingUriPermissions(@NonNull java.util.List<android.net.Uri>, int);
     method @CheckResult(suggest="#enforcePermission(String,int,int,String)") public abstract int checkPermission(@NonNull String, int, int);
     method public abstract int checkSelfPermission(@NonNull String);
     method @CheckResult(suggest="#enforceUriPermission(Uri,int,int,String)") public abstract int checkUriPermission(android.net.Uri, int, int, int);
     method @CheckResult(suggest="#enforceUriPermission(Uri,String,String,int,int,int,String)") public abstract int checkUriPermission(@Nullable android.net.Uri, @Nullable String, @Nullable String, int, int, int);
+    method @NonNull public int[] checkUriPermissions(@NonNull java.util.List<android.net.Uri>, int, int, int);
     method @Deprecated public abstract void clearWallpaper() throws java.io.IOException;
     method @NonNull public android.content.Context createAttributionContext(@Nullable String);
     method public abstract android.content.Context createConfigurationContext(@NonNull android.content.res.Configuration);
@@ -16529,9 +16540,13 @@ package android.graphics.drawable {
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
     ctor public RippleDrawable(@NonNull android.content.res.ColorStateList, @Nullable android.graphics.drawable.Drawable, @Nullable android.graphics.drawable.Drawable);
     method public int getRadius();
+    method public int getRippleStyle();
     method public void setColor(android.content.res.ColorStateList);
     method public void setRadius(int);
+    method public void setRippleStyle(int) throws java.lang.IllegalArgumentException;
     field public static final int RADIUS_AUTO = -1; // 0xffffffff
+    field public static final int STYLE_PATTERNED = 1; // 0x1
+    field public static final int STYLE_SOLID = 0; // 0x0
   }
 
   public class RotateDrawable extends android.graphics.drawable.DrawableWrapper {
@@ -39814,7 +39829,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handleMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handleMmi(String, android.telecom.PhoneAccountHandle);
-    method public boolean hasCompanionInCallServiceAccess();
+    method public boolean hasManageOngoingCallsPermission();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isInCall();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isInManagedCall();
     method public boolean isIncomingCallPermitted(android.telecom.PhoneAccountHandle);
@@ -54649,6 +54664,7 @@ package android.widget {
   public class RemoteViews implements android.view.LayoutInflater.Filter android.os.Parcelable {
     ctor public RemoteViews(String, int);
     ctor public RemoteViews(android.widget.RemoteViews, android.widget.RemoteViews);
+    ctor public RemoteViews(@NonNull java.util.Map<android.graphics.PointF,android.widget.RemoteViews>);
     ctor public RemoteViews(android.widget.RemoteViews);
     ctor public RemoteViews(android.os.Parcel);
     method public void addView(@IdRes int, android.widget.RemoteViews);

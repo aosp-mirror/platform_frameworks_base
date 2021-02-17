@@ -78,6 +78,16 @@ struct VsyncSource {
     virtual ~VsyncSource() {}
 };
 
+typedef void (*ASC_acquire)(ASurfaceControl* control);
+typedef void (*ASC_release)(ASurfaceControl* control);
+
+struct ASurfaceControlFunctions {
+    ASurfaceControlFunctions();
+
+    ASC_acquire acquireFunc;
+    ASC_release releaseFunc;
+};
+
 class ChoreographerSource;
 class DummyVsyncSource;
 
@@ -120,6 +130,10 @@ public:
     void destroyRenderingContext();
 
     void preload();
+
+    const ASurfaceControlFunctions& getASurfaceControlFunctions() {
+        return mASurfaceControlFunctions;
+    }
 
     /**
      * isCurrent provides a way to query, if the caller is running on
@@ -189,6 +203,8 @@ private:
     sk_sp<GrDirectContext> mGrContext;
     CacheManager* mCacheManager;
     sp<VulkanManager> mVkManager;
+
+    ASurfaceControlFunctions mASurfaceControlFunctions;
 };
 
 } /* namespace renderthread */

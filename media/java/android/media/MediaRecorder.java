@@ -149,6 +149,19 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * Sets the log session ID for MediaRecorder.
+     *
+     * <p>The log session ID is a random 32-byte hexadecimal string that is used for monitoring the
+     * MediaRecorder performance.</p>
+     *
+     * @param id the global ID for monitoring the MediaRecorder performance
+     * @hide
+     */
+    public void setLogSessionId(@NonNull String id) {
+        setParameter("log-session-id=" + id);
+    }
+
+    /**
      * Sets a {@link android.hardware.Camera} to use for recording.
      *
      * <p>Use this function to switch quickly between preview and capture mode without a teardown of

@@ -83,9 +83,8 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
     private final INetd mNetd;
     private final Dependencies mDeps;
 
-    // Values are User IDs.
     @GuardedBy("this")
-    private final Set<Integer> mUsers = new HashSet<>();
+    private final Set<UserHandle> mUsers = new HashSet<>();
 
     // Keys are app uids. Values are true for SYSTEM permission and false for NETWORK permission.
     @GuardedBy("this")
@@ -173,10 +172,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             netdPermsUids.put(uid, netdPermsUids.get(uid) | otherNetdPerms);
         }
 
-        final List<UserHandle> users = mUserManager.getUserHandles(true /* excludeDying */);
-        for (UserHandle user : users) {
-            mUsers.add(user.getIdentifier());
-        }
+        mUsers.addAll(mUserManager.getUserHandles(true /* excludeDying */));
 
         final SparseArray<ArraySet<String>> systemPermission =
                 SystemConfig.getInstance().getSystemPermissions();
@@ -259,16 +255,15 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         return array;
     }
 
-    private void update(Set<Integer> users, Map<Integer, Boolean> apps, boolean add) {
+    private void update(Set<UserHandle> users, Map<Integer, Boolean> apps, boolean add) {
         List<Integer> network = new ArrayList<>();
         List<Integer> system = new ArrayList<>();
         for (Entry<Integer, Boolean> app : apps.entrySet()) {
             List<Integer> list = app.getValue() ? system : network;
-            for (int user : users) {
-                final UserHandle handle = UserHandle.of(user);
-                if (handle == null) continue;
+            for (UserHandle user : users) {
+                if (user == null) continue;
 
-                list.add(UserHandle.getUid(handle, app.getKey()));
+                list.add(UserHandle.getUid(user, app.getKey()));
             }
         }
         try {
@@ -291,14 +286,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
      *
      * @hide
      */
-    public synchronized void onUserAdded(int user) {
-        if (user < 0) {
-            loge("Invalid user in onUserAdded: " + user);
-            return;
-        }
+    public synchronized void onUserAdded(@NonNull UserHandle user) {
         mUsers.add(user);
 
-        Set<Integer> users = new HashSet<>();
+        Set<UserHandle> users = new HashSet<>();
         users.add(user);
         update(users, mApps, true);
     }
@@ -310,14 +301,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
      *
      * @hide
      */
-    public synchronized void onUserRemoved(int user) {
-        if (user < 0) {
-            loge("Invalid user in onUserRemoved: " + user);
-            return;
-        }
+    public synchronized void onUserRemoved(@NonNull UserHandle user) {
         mUsers.remove(user);
 
-        Set<Integer> users = new HashSet<>();
+        Set<UserHandle> users = new HashSet<>();
         users.add(user);
         update(users, mApps, false);
     }

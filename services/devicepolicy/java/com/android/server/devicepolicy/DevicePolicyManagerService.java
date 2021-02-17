@@ -422,10 +422,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DELEGATION_CERT_SELECTION,
     };
 
-    // Subset of delegations that can only be delegated by Device Owner.
-    private static final List<String> DEVICE_OWNER_DELEGATIONS = Arrays.asList(new String[] {
-            DELEGATION_NETWORK_LOGGING,
-    });
+    // Subset of delegations that can only be delegated by Device Owner or Profile Owner of a
+    // managed profile.
+    private static final List<String> DEVICE_OWNER_OR_MANAGED_PROFILE_OWNER_DELEGATIONS =
+            Arrays.asList(new String[]{
+                    DELEGATION_NETWORK_LOGGING,
+            });
 
     // Subset of delegations that only one single package within a given user can hold
     private static final List<String> EXCLUSIVE_DELEGATIONS = Arrays.asList(new String[] {
@@ -782,8 +784,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
              * however it's too early in the boot process to register with IIpConnectivityMetrics
              * to listen for events.
              */
-            if (Intent.ACTION_USER_STARTED.equals(action)
-                    && userHandle == mOwners.getDeviceOwnerUserId()) {
+            if (Intent.ACTION_USER_STARTED.equals(action) && userHandle == UserHandle.USER_SYSTEM) {
                 synchronized (getLockObject()) {
                     if (isNetworkLoggingEnabledInternalLocked()) {
                         setNetworkLoggingActiveInternal(true);
@@ -5885,10 +5886,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         // Retrieve the user ID of the calling process.
         final int userId = caller.getUserId();
-        final boolean hasDoDelegation = !Collections.disjoint(scopes, DEVICE_OWNER_DELEGATIONS);
         // Ensure calling process is device/profile owner.
-        if (hasDoDelegation) {
-            Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        if (!Collections.disjoint(scopes, DEVICE_OWNER_OR_MANAGED_PROFILE_OWNER_DELEGATIONS)) {
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                    || (isProfileOwner(caller) && isManagedProfile(caller.getUserId())));
         } else {
             Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
         }
@@ -7533,6 +7534,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         sendActiveAdminCommand(action, extras, deviceOwnerUserId, receiverComponent);
     }
 
+    void sendDeviceOwnerOrProfileOwnerCommand(String action, Bundle extras, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+        }
+        ComponentName receiverComponent = null;
+        if (action.equals(DeviceAdminReceiver.ACTION_NETWORK_LOGS_AVAILABLE)) {
+            receiverComponent = resolveDelegateReceiver(DELEGATION_NETWORK_LOGGING, action, userId);
+        }
+        if (receiverComponent == null) {
+            receiverComponent = getOwnerComponent(userId);
+        }
+        sendActiveAdminCommand(action, extras, userId, receiverComponent);
+    }
+
     private void sendProfileOwnerCommand(String action, Bundle extras, @UserIdInt int userId) {
         sendActiveAdminCommand(action, extras, userId,
                 mOwners.getProfileOwnerComponent(userId));
@@ -8357,6 +8372,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(userId, true);
         applyManagedProfileRestrictionIfDeviceOwnerLocked();
+        setNetworkLoggingActiveInternal(false);
     }
 
     @Override
@@ -14184,7 +14200,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
-        Preconditions.checkCallAuthorization((caller.hasAdminComponent() && isDeviceOwner(caller))
+        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                && (isDeviceOwner(caller)
+                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
 
         synchronized (getLockObject()) {
@@ -14192,11 +14210,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // already in the requested state
                 return;
             }
-            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            deviceOwner.isNetworkLoggingEnabled = enabled;
+            final ActiveAdmin activeAdmin = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+            activeAdmin.isNetworkLoggingEnabled = enabled;
             if (!enabled) {
-                deviceOwner.numNetworkLoggingNotifications = 0;
-                deviceOwner.lastNetworkLoggingNotificationTimeMs = 0;
+                activeAdmin.numNetworkLoggingNotifications = 0;
+                activeAdmin.lastNetworkLoggingNotificationTimeMs = 0;
             }
             saveSettingsLocked(caller.getUserId());
             setNetworkLoggingActiveInternal(enabled);
@@ -14214,7 +14232,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             mInjector.binderWithCleanCallingIdentity(() -> {
                 if (active) {
-                    mNetworkLogger = new NetworkLogger(this, mInjector.getPackageManagerInternal());
+                    if (mNetworkLogger == null) {
+                        final int affectedUserId = getNetworkLoggingAffectedUser();
+                        mNetworkLogger = new NetworkLogger(this,
+                                mInjector.getPackageManagerInternal(),
+                                affectedUserId == UserHandle.USER_SYSTEM
+                                        ? UserHandle.USER_ALL : affectedUserId);
+                    }
                     if (!mNetworkLogger.startNetworkLogging()) {
                         mNetworkLogger = null;
                         Slog.wtf(LOG_TAG, "Network logging could not be started due to the logging"
@@ -14232,6 +14256,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             });
         }
+    }
+
+    private @UserIdInt int getNetworkLoggingAffectedUser() {
+        synchronized (getLockObject()) {
+            if (mOwners.hasDeviceOwner()) {
+                return mOwners.getDeviceOwnerUserId();
+            } else {
+                return mInjector.binderWithCleanCallingIdentity(
+                        () -> getManagedUserId(UserHandle.USER_SYSTEM));
+            }
+        }
+    }
+
+    private ActiveAdmin getNetworkLoggingControllingAdminLocked() {
+        int affectedUserId = getNetworkLoggingAffectedUser();
+        if (affectedUserId < 0) {
+            return null;
+        }
+        return getDeviceOrProfileOwnerAdminLocked(affectedUserId);
     }
 
     @Override
@@ -14254,10 +14297,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @GuardedBy("getLockObject()")
     private void maybePauseDeviceWideLoggingLocked() {
         if (!areAllUsersAffiliatedWithDeviceLocked()) {
-            Slog.i(LOG_TAG, "There are unaffiliated users, network logging will be "
-                    + "paused if enabled.");
-            if (mNetworkLogger != null) {
-                mNetworkLogger.pause();
+            if (mOwners.hasDeviceOwner()) {
+                Slog.i(LOG_TAG, "There are unaffiliated users, network logging will be "
+                        + "paused if enabled.");
+                if (mNetworkLogger != null) {
+                    mNetworkLogger.pause();
+                }
             }
             if (!isOrganizationOwnedDeviceWithManagedProfile()) {
                 Slog.i(LOG_TAG, "Not org-owned managed profile device, security logging will be "
@@ -14276,7 +14321,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (allUsersAffiliated || orgOwnedProfileDevice) {
                 mSecurityLogMonitor.resume();
             }
-            if (allUsersAffiliated) {
+            // If there is no device owner, then per-user network logging may be enabled for the
+            // managed profile. In which case, all users do not need to be affiliated.
+            if (allUsersAffiliated || !mOwners.hasDeviceOwner()) {
                 if (mNetworkLogger != null) {
                     mNetworkLogger.resume();
                 }
@@ -14303,7 +14350,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
-        Preconditions.checkCallAuthorization((caller.hasAdminComponent() &&  isDeviceOwner(caller))
+        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                &&  (isDeviceOwner(caller)
+                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING))
                 || hasCallingOrSelfPermission(permission.MANAGE_USERS));
 
@@ -14313,8 +14362,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isNetworkLoggingEnabledInternalLocked() {
-        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        return (deviceOwner != null) && deviceOwner.isNetworkLoggingEnabled;
+        ActiveAdmin activeAdmin = getNetworkLoggingControllingAdminLocked();
+        return (activeAdmin != null) && activeAdmin.isNetworkLoggingEnabled;
     }
 
     /*
@@ -14331,9 +14380,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
-        Preconditions.checkCallAuthorization((caller.hasAdminComponent() &&  isDeviceOwner(caller))
+        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                &&  (isDeviceOwner(caller)
+                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
-        checkAllUsersAreAffiliatedWithDevice();
+        if (mOwners.hasDeviceOwner()) {
+            checkAllUsersAreAffiliatedWithDevice();
+        }
 
         synchronized (getLockObject()) {
             if (mNetworkLogger == null || !isNetworkLoggingEnabledInternalLocked()) {
@@ -14346,34 +14399,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .write();
 
             final long currentTime = System.currentTimeMillis();
-            DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
+            DevicePolicyData policyData = getUserData(caller.getUserId());
             if (currentTime > policyData.mLastNetworkLogsRetrievalTime) {
                 policyData.mLastNetworkLogsRetrievalTime = currentTime;
-                saveSettingsLocked(UserHandle.USER_SYSTEM);
+                saveSettingsLocked(caller.getUserId());
             }
             return mNetworkLogger.retrieveLogs(batchToken);
         }
     }
 
     private void sendNetworkLoggingNotificationLocked() {
-        final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        if (deviceOwner == null || !deviceOwner.isNetworkLoggingEnabled) {
+        ensureLocked();
+        final ActiveAdmin activeAdmin = getNetworkLoggingControllingAdminLocked();
+        if (activeAdmin == null || !activeAdmin.isNetworkLoggingEnabled) {
             return;
         }
-        if (deviceOwner.numNetworkLoggingNotifications >=
-                ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
+        if (activeAdmin.numNetworkLoggingNotifications
+                >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
             return;
         }
         final long now = System.currentTimeMillis();
-        if (now - deviceOwner.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
+        if (now - activeAdmin.lastNetworkLoggingNotificationTimeMs < MS_PER_DAY) {
             return;
         }
-        deviceOwner.numNetworkLoggingNotifications++;
-        if (deviceOwner.numNetworkLoggingNotifications
+        activeAdmin.numNetworkLoggingNotifications++;
+        if (activeAdmin.numNetworkLoggingNotifications
                 >= ActiveAdmin.DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN) {
-            deviceOwner.lastNetworkLoggingNotificationTimeMs = 0;
+            activeAdmin.lastNetworkLoggingNotificationTimeMs = 0;
         } else {
-            deviceOwner.lastNetworkLoggingNotificationTimeMs = now;
+            activeAdmin.lastNetworkLoggingNotificationTimeMs = now;
         }
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
@@ -14393,7 +14447,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .bigText(mContext.getString(R.string.network_logging_notification_text)))
                 .build();
         mInjector.getNotificationManager().notify(SystemMessage.NOTE_NETWORK_LOGGING, notification);
-        saveSettingsLocked(mOwners.getDeviceOwnerUserId());
+        saveSettingsLocked(activeAdmin.getUserHandle().getIdentifier());
     }
 
     /**
@@ -14457,8 +14511,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public long getLastNetworkLogRetrievalTime() {
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || canManageUsers(caller));
-        return getUserData(UserHandle.USER_SYSTEM).mLastNetworkLogsRetrievalTime;
+
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller)
+                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))
+                || canManageUsers(caller));
+        final int affectedUserId = getNetworkLoggingAffectedUser();
+        return affectedUserId >= 0 ? getUserData(affectedUserId).mLastNetworkLogsRetrievalTime : -1;
     }
 
     @Override

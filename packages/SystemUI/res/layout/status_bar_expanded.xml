@@ -32,6 +32,12 @@
         android:visibility="gone" />
 
     <ViewStub
+        android:id="@+id/keyguard_qs_user_switch_stub"
+        android:layout="@layout/keyguard_qs_user_switch"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+
+    <ViewStub
         android:id="@+id/keyguard_user_switcher_stub"
         android:layout="@layout/keyguard_user_switcher"
         android:layout_height="match_parent"
@@ -62,6 +68,13 @@
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
         />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/qs_edge_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            systemui:layout_constraintGuide_percent="0.5"
+            android:orientation="vertical"/>
 
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"

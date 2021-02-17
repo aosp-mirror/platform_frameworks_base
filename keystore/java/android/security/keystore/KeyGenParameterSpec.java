@@ -236,6 +236,47 @@ import javax.security.auth.x500.X500Principal;
  * keyStore.load(null);
  * key = (SecretKey) keyStore.getKey("key2", null);
  * }</pre>
+ *
+ * <p><h3 id="example:ecdh">Example: EC key for ECDH key agreement</h3>
+ * This example illustrates how to generate an elliptic curve key pair, used to establish a shared
+ * secret with another party using ECDH key agreement.
+ * <pre> {@code
+ * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+ *         KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
+ * keyPairGenerator.initialize(
+ *         new KeyGenParameterSpec.Builder(
+ *             "eckeypair",
+ *             KeyProperties.PURPOSE_AGREE_KEY)
+ *             .setAlgorithmParameterSpec(new ECGenParameterSpec("secp256r1"))
+ *             .build());
+ * KeyPair myKeyPair = keyPairGenerator.generateKeyPair();
+ *
+ * // Exchange public keys with server. A new ephemeral key MUST be used for every message.
+ * PublicKey serverEphemeralPublicKey; // Ephemeral key received from server.
+ *
+ * // Create a shared secret based on our private key and the other party's public key.
+ * KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH", "AndroidKeyStore");
+ * keyAgreement.init(myKeyPair.getPrivate());
+ * keyAgreement.doPhase(serverEphemeralPublicKey, true);
+ * byte[] sharedSecret = keyAgreement.generateSecret();
+ *
+ * // sharedSecret cannot safely be used as a key yet. We must run it through a key derivation
+ * // function with some other data: "salt" and "info". Salt is an optional random value,
+ * // omitted in this example. It's good practice to include both public keys and any other
+ * // key negotiation data in info. Here we use the public keys and a label that indicates
+ * // messages encrypted with this key are coming from the server.
+ * byte[] salt = {};
+ * ByteArrayOutputStream info = new ByteArrayOutputStream();
+ * info.write("ECDH secp256r1 AES-256-GCM-SIV\0".getBytes(StandardCharsets.UTF_8));
+ * info.write(myKeyPair.getPublic().getEncoded());
+ * info.write(serverEphemeralPublicKey.getEncoded());
+ *
+ * // This example uses the Tink library and the HKDF key derivation function.
+ * AesGcmSiv key = new AesGcmSiv(Hkdf.computeHkdf(
+ *         "HMACSHA256", sharedSecret, salt, info.toByteArray(), 32));
+ * byte[] associatedData = {};
+ * return key.decrypt(ciphertext, associatedData);
+ * }
  */
 public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAuthArgs {
 

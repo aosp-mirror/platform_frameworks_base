@@ -22,6 +22,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -47,7 +48,7 @@ public class NumPadKey extends ViewGroup {
     private int mTextViewResId;
     private PasswordTextView mTextView;
 
-    private final NumPadAnimator mAnimator;
+    private NumPadAnimator mAnimator;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -131,6 +132,17 @@ public class NumPadKey extends ViewGroup {
     }
 
     /**
+     * By default, the new layout will be enabled. Invoking will revert to the old style
+     */
+    public void disableNewLayout() {
+        findViewById(R.id.klondike_text).setVisibility(View.VISIBLE);
+        mAnimator = null;
+        ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(), R.style.NumPadKey);
+        setBackground(getContext().getResources().getDrawable(
+                R.drawable.ripple_drawable_pin, ctw.getTheme()));
+    }
+
+    /**
      * Reload colors from resources.
      **/
     public void reloadColors() {
@@ -141,7 +153,7 @@ public class NumPadKey extends ViewGroup {
         mDigitText.setTextColor(textColor);
         mKlondikeText.setTextColor(klondikeColor);
 
-        mAnimator.reloadColors(getContext());
+        if (mAnimator != null) mAnimator.reloadColors(getContext());
     }
 
     @Override
@@ -150,14 +162,14 @@ public class NumPadKey extends ViewGroup {
             doHapticKeyClick();
         }
 
-        mAnimator.start();
+        if (mAnimator != null) mAnimator.start();
 
         return super.onTouchEvent(event);
     }
 
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
-        mAnimator.updateMargin((ViewGroup.MarginLayoutParams) params);
+        if (mAnimator != null) mAnimator.updateMargin((ViewGroup.MarginLayoutParams) params);
 
         super.setLayoutParams(params);
     }
@@ -167,8 +179,12 @@ public class NumPadKey extends ViewGroup {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
-        // Set width/height to the same value to ensure a smooth circle for the bg
-        setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth());
+        // Set width/height to the same value to ensure a smooth circle for the bg, but shrink
+        // the height to match the old pin bouncer
+        int width = getMeasuredWidth();
+        int height = mAnimator == null ? (int) (width * .75f) : width;
+
+        setMeasuredDimension(getMeasuredWidth(), height);
     }
 
     @Override
@@ -187,7 +203,7 @@ public class NumPadKey extends ViewGroup {
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
 
-        mAnimator.onLayout(b - t);
+        if (mAnimator != null) mAnimator.onLayout(b - t);
     }
 
     @Override

@@ -33,8 +33,7 @@ import java.util.Map;
 
 /**
  * Face-specific internal cleanup client supporting the
- * {@link android.hardware.biometrics.face.V1_0} and {@link android.hardware.biometrics.face.V1_1}
- * HIDL interfaces.
+ * {@link android.hardware.biometrics.face.V1_0} HIDL interface.
  */
 class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsFace> {
 

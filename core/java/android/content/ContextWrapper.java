@@ -53,6 +53,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -905,6 +906,13 @@ public class ContextWrapper extends Context {
         return mBase.checkUriPermission(uri, pid, uid, modeFlags);
     }
 
+    @NonNull
+    @Override
+    public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,
+            int modeFlags) {
+        return mBase.checkUriPermissions(uris, pid, uid, modeFlags);
+    }
+
     /** @hide */
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, IBinder callerToken) {
@@ -916,9 +924,21 @@ public class ContextWrapper extends Context {
         return mBase.checkCallingUriPermission(uri, modeFlags);
     }
 
+    @NonNull
+    @Override
+    public int[] checkCallingUriPermissions(@NonNull List<Uri> uris, int modeFlags) {
+        return mBase.checkCallingUriPermissions(uris, modeFlags);
+    }
+
     @Override
     public int checkCallingOrSelfUriPermission(Uri uri, int modeFlags) {
         return mBase.checkCallingOrSelfUriPermission(uri, modeFlags);
+    }
+
+    @NonNull
+    @Override
+    public int[] checkCallingOrSelfUriPermissions(@NonNull List<Uri> uris, int modeFlags) {
+        return mBase.checkCallingOrSelfUriPermissions(uris, modeFlags);
     }
 
     @Override

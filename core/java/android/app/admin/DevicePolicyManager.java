@@ -1869,13 +1869,13 @@ public class DevicePolicyManager {
     /**
      * Grants access to {@link #setNetworkLoggingEnabled}, {@link #isNetworkLoggingEnabled} and
      * {@link #retrieveNetworkLogs}. Once granted the delegated app will start receiving
-     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner will no longer
-     * receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
+     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner or Profile Owner
+     * will no longer receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
      * There can be at most one app that has this delegation.
      * If another app already had delegated network logging access,
      * it will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner.
+     * <p> Can only be granted by Device Owner or Profile Owner of a managed profile.
      */
     public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
 
@@ -11796,8 +11796,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or delegated app with {@link #DELEGATION_NETWORK_LOGGING} to
-     * control the network logging feature.
+     * Called by a device owner, profile owner of a managed profile or delegated app with
+     * {@link #DELEGATION_NETWORK_LOGGING} to control the network logging feature.
+     *
+     * <p> When network logging is enabled by a profile owner, the network logs will only include
+     * work profile network activity, not activity on the personal profile.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
@@ -11837,7 +11840,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if called by a delegated app.
      * @param enabled whether network logging should be enabled or not.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or profile owner.
      * @see #setAffiliationIds
      * @see #retrieveNetworkLogs
      */
@@ -11851,14 +11854,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Return whether network logging is enabled by a device owner.
+     * Return whether network logging is enabled by a device owner or profile owner of
+     * a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Can only
      * be {@code null} if the caller is a delegated app with {@link #DELEGATION_NETWORK_LOGGING}
      * or has MANAGE_USERS permission.
-     * @return {@code true} if network logging is enabled by device owner, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner and caller has
-     * no MANAGE_USERS permission
+     * @return {@code true} if network logging is enabled by device owner or profile owner,
+     * {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner or profile owner and
+     * caller has no MANAGE_USERS permission
      */
     public boolean isNetworkLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isNetworkLoggingEnabled");
@@ -11870,9 +11875,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or delegated app with {@link #DELEGATION_NETWORK_LOGGING} to retrieve
-     * the most recent batch of network logging events.
-     * A device owner has to provide a batchToken provided as part of
+     * Called by device owner, profile owner of a managed profile or delegated app with
+     * {@link #DELEGATION_NETWORK_LOGGING} to retrieve the most recent batch of
+     * network logging events.
+     *
+     * <p> When network logging is enabled by a profile owner, the network logs will only include
+     * work profile network activity, not activity on the personal profile.
+     *
+     * A device owner or profile owner has to provide a batchToken provided as part of
      * {@link DeviceAdminReceiver#onNetworkLogsAvailable} callback. If the token doesn't match the
      * token of the most recent available batch of logs, {@code null} will be returned.
      *
@@ -11884,11 +11894,11 @@ public class DevicePolicyManager {
      * after the device device owner has been notified via
      * {@link DeviceAdminReceiver#onNetworkLogsAvailable}.
      *
-     * <p>If a secondary user or profile is created, calling this method will throw a
-     * {@link SecurityException} until all users become affiliated again. It will also no longer be
-     * possible to retrieve the network logs batch with the most recent batchToken provided
-     * by {@link DeviceAdminReceiver#onNetworkLogsAvailable}. See
-     * {@link DevicePolicyManager#setAffiliationIds}.
+     * <p>If the caller is not a profile owner and a secondary user or profile is created, calling
+     * this method will throw a {@link SecurityException} until all users become affiliated again.
+     * It will also no longer be possible to retrieve the network logs batch with the most recent
+     * batchToken provided by {@link DeviceAdminReceiver#onNetworkLogsAvailable}.
+     * See {@link DevicePolicyManager#setAffiliationIds}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if called by a delegated app.
@@ -11896,8 +11906,9 @@ public class DevicePolicyManager {
      * @return A new batch of network logs which is a list of {@link NetworkEvent}. Returns
      *        {@code null} if the batch represented by batchToken is no longer available or if
      *        logging is disabled.
-     * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device.
+     * @throws SecurityException if {@code admin} is not a device owner, profile owner or if the
+     * {@code admin} is not a profile owner and there is at least one profile or secondary user
+     * that is not affiliated with the device.
      * @see #setAffiliationIds
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
      */
@@ -12016,11 +12027,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the system to get the time at which the device owner last retrieved network logging
-     * events.
+     * Called by the system to get the time at which the device owner or profile owner of a
+     * managed profile last retrieved network logging events.
      *
-     * @return the time at which the device owner most recently retrieved network logging events, in
-     *         milliseconds since epoch; -1 if network logging events were never retrieved.
+     * @return the time at which the device owner or profile owner most recently retrieved network
+     *         logging events, in milliseconds since epoch; -1 if network logging events were
+     *         never retrieved.
      * @throws SecurityException if the caller is not the device owner, does not hold the
      *         MANAGE_USERS permission and is not the system.
      *
@@ -13436,24 +13448,11 @@ public class DevicePolicyManager {
      */
     public boolean canAdminGrantSensorsPermissions() {
         throwIfParentInstance("canAdminGrantSensorsPermissions");
-        return canAdminGrantSensorsPermissionsForUser(myUserId());
-    }
-
-    /**
-     * Returns true if the admin can control grants of sensors-related permissions, for
-     * a given user.
-     *
-     * @hide
-     * @param userId The ID of the user to check.
-     * @return if the admin may grant these permissions, false otherwise.
-     */
-    @SystemApi
-    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
         if (mService == null) {
             return false;
         }
         try {
-            return mService.canAdminGrantSensorsPermissionsForUser(userId);
+            return mService.canAdminGrantSensorsPermissionsForUser(myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

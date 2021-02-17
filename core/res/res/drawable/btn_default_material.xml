@@ -15,6 +15,7 @@
 -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="?attr/colorControlHighlight">
+        android:color="?attr/colorControlHighlight"
+        android:rippleStyle="?attr/rippleStyle">
     <item android:drawable="@drawable/btn_default_mtrl_shape" />
 </ripple>

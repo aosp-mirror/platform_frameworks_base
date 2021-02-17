@@ -90,6 +90,7 @@ public final class AppSearchSchema {
      * <p>This method creates a new list when called.
      */
     @NonNull
+    @SuppressWarnings("MixedMutabilityReturnType")
     public List<PropertyConfig> getProperties() {
         ArrayList<Bundle> propertyBundles =
                 mBundle.getParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD);
