@@ -4704,6 +4704,13 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AutomaticZenRule> CREATOR;
   }
 
+  public final class BackgroundServiceStartNotAllowedException extends android.app.ServiceStartNotAllowedException implements android.os.Parcelable {
+    ctor public BackgroundServiceStartNotAllowedException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.BackgroundServiceStartNotAllowedException> CREATOR;
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(@NonNull android.content.Context);
     ctor public DatePickerDialog(@NonNull android.content.Context, @StyleRes int);
@@ -4947,6 +4954,13 @@ package android.app {
     method @Deprecated public void setListAdapter(android.widget.ExpandableListAdapter);
     method @Deprecated public boolean setSelectedChild(int, int, boolean);
     method @Deprecated public void setSelectedGroup(int);
+  }
+
+  public final class ForegroundServiceStartNotAllowedException extends android.app.ServiceStartNotAllowedException implements android.os.Parcelable {
+    ctor public ForegroundServiceStartNotAllowedException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ForegroundServiceStartNotAllowedException> CREATOR;
   }
 
   @Deprecated public class Fragment implements android.content.ComponentCallbacks2 android.view.View.OnCreateContextMenuListener {
@@ -6522,6 +6536,9 @@ package android.app {
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
     field public static final int STOP_FOREGROUND_DETACH = 2; // 0x2
     field public static final int STOP_FOREGROUND_REMOVE = 1; // 0x1
+  }
+
+  public abstract class ServiceStartNotAllowedException extends java.lang.IllegalStateException {
   }
 
   public abstract class SharedElementCallback {

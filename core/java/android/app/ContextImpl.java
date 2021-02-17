@@ -1794,7 +1794,7 @@ class ContextImpl extends Context {
                             "Unable to start service " + service
                             + ": " + cn.getClassName());
                 } else if (cn.getPackageName().equals("?")) {
-                    throw new IllegalStateException(
+                    throw ServiceStartNotAllowedException.newInstance(requireForeground,
                             "Not allowed to start service " + service + ": " + cn.getClassName());
                 }
             }

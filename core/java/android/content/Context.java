@@ -3117,8 +3117,18 @@ public abstract class Context {
      *
      * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
-     * @throws IllegalStateException If the application is in a state where the service
-     * can not be started (such as not in the foreground in a state when services are allowed).
+     * @throws IllegalStateException
+     * Before Android {@link android.os.Build.VERSION_CODES#S},
+     * if the application is in a state where the service
+     * can not be started (such as not in the foreground in a state when services are allowed),
+     * {@link IllegalStateException} was thrown.
+     * @throws android.app.BackgroundServiceStartNotAllowedException
+     * On Android {@link android.os.Build.VERSION_CODES#S} and later,
+     * if the application is in a state where the service
+     * can not be started (such as not in the foreground in a state when services are allowed),
+     * {@link android.app.BackgroundServiceStartNotAllowedException} is thrown
+     * This excemption extends {@link IllegalStateException}, so apps can
+     * use {@code catch (IllegalStateException)} to catch both.
      *
      * @see #stopService
      * @see #bindService
@@ -3149,7 +3159,8 @@ public abstract class Context {
      * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
      *
-     * @throws IllegalStateException If the caller app's targeting API is
+     * @throws android.app.ForegroundServiceStartNotAllowedException
+     * If the caller app's targeting API is
      * {@link android.os.Build.VERSION_CODES#S} or later, and the foreground service is restricted
      * from start due to background restriction.
      *
