@@ -26,7 +26,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BinderInternal.CallSession;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 /** Collects statistics about Binder call latency per calling API and method. */
@@ -34,18 +33,25 @@ public class BinderLatencyObserver {
     private static final String TAG = "BinderLatencyObserver";
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
 
-    // This is not the final data structure - we will eventually store latency histograms instead of
-    // raw samples as it is much more memory / disk space efficient.
-    // TODO(b/179999191): change this to store the histogram.
-    // TODO(b/179999191): pre allocate the array size so we would not have to resize this.
+    // Histogram buckets parameters.
+    public static final int BUCKET_COUNT_DEFAULT = 100;
+    public static final int FIRST_BUCKET_SIZE_DEFAULT = 5;
+    public static final float BUCKET_SCALE_FACTOR_DEFAULT = 1.125f;
+
     @GuardedBy("mLock")
-    private final ArrayMap<LatencyDims, ArrayList<Long>> mLatencySamples = new ArrayMap<>();
+    private final ArrayMap<LatencyDims, int[]> mLatencyHistograms = new ArrayMap<>();
     private final Object mLock = new Object();
 
     // Sampling period to control how often to track CPU usage. 1 means all calls, 100 means ~1 out
     // of 100 requests.
     private int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
+
+    private int mBucketCount = BUCKET_COUNT_DEFAULT;
+    private int mFirstBucketSize = FIRST_BUCKET_SIZE_DEFAULT;
+    private float mBucketScaleFactor = BUCKET_SCALE_FACTOR_DEFAULT;
+
     private final Random mRandom;
+    private BinderLatencyBuckets mLatencyBuckets;
 
     /** Injector for {@link BinderLatencyObserver}. */
     public static class Injector {
@@ -56,6 +62,8 @@ public class BinderLatencyObserver {
 
     public BinderLatencyObserver(Injector injector) {
         mRandom = injector.getRandomGenerator();
+        mLatencyBuckets = new BinderLatencyBuckets(
+            mBucketCount, mFirstBucketSize, mBucketScaleFactor);
     }
 
     /** Should be called when a Binder call completes, will store latency data. */
@@ -67,12 +75,21 @@ public class BinderLatencyObserver {
         LatencyDims dims = new LatencyDims(s.binderClass, s.transactionCode);
         long callDuration = getElapsedRealtimeMicro() - s.timeStarted;
 
+        // Find the bucket this sample should go to.
+        int bucketIdx = mLatencyBuckets.sampleToBucket(
+                callDuration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) callDuration);
+
         synchronized (mLock) {
-            if (!mLatencySamples.containsKey(dims)) {
-                mLatencySamples.put(dims, new ArrayList<Long>());
+            int[] buckets = mLatencyHistograms.get(dims);
+            if (buckets == null) {
+                buckets = new int[mBucketCount];
+                mLatencyHistograms.put(dims, buckets);
             }
 
-            mLatencySamples.get(dims).add(callDuration);
+            // Increment the correct bucket.
+            if (buckets[bucketIdx] < Integer.MAX_VALUE) {
+                buckets[bucketIdx] += 1;
+            }
         }
     }
 
@@ -100,10 +117,26 @@ public class BinderLatencyObserver {
         }
     }
 
+    /** Updates the histogram buckets parameters. */
+    public void setHistogramBucketsParams(
+            int bucketCount, int firstBucketSize, float bucketScaleFactor) {
+        synchronized (mLock) {
+            if (bucketCount != mBucketCount || firstBucketSize != mFirstBucketSize
+                    || bucketScaleFactor != mBucketScaleFactor) {
+                mBucketCount = bucketCount;
+                mFirstBucketSize = firstBucketSize;
+                mBucketScaleFactor = bucketScaleFactor;
+                mLatencyBuckets = new BinderLatencyBuckets(
+                    mBucketCount, mFirstBucketSize, mBucketScaleFactor);
+                reset();
+            }
+        }
+    }
+
     /** Resets the sample collection. */
     public void reset() {
         synchronized (mLock) {
-            mLatencySamples.clear();
+            mLatencyHistograms.clear();
         }
     }
 
@@ -151,7 +184,7 @@ public class BinderLatencyObserver {
     }
 
     @VisibleForTesting
-    public ArrayMap<LatencyDims, ArrayList<Long>> getLatencySamples() {
-        return mLatencySamples;
+    public ArrayMap<LatencyDims, int[]> getLatencyHistograms() {
+        return mLatencyHistograms;
     }
 }

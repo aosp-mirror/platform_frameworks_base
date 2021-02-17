@@ -764,7 +764,7 @@ public class BinderCallsStatsTest {
         bcs.elapsedTime += 20;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
-        assertEquals(1, bcs.getLatencyObserver().getLatencySamples().size());
+        assertEquals(1, bcs.getLatencyObserver().getLatencyHistograms().size());
     }
 
     @Test
@@ -778,7 +778,7 @@ public class BinderCallsStatsTest {
         bcs.elapsedTime += 20;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
-        assertEquals(0, bcs.getLatencyObserver().getLatencySamples().size());
+        assertEquals(0, bcs.getLatencyObserver().getLatencyHistograms().size());
     }
 
     class TestBinderCallsStats extends BinderCallsStats {

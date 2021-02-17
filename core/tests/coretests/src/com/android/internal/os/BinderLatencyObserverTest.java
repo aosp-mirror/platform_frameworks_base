@@ -33,7 +33,6 @@ import com.android.internal.os.BinderLatencyObserver.LatencyDims;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -44,6 +43,7 @@ public class BinderLatencyObserverTest {
     @Test
     public void testLatencyCollectionWithMultipleClasses() {
         TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
+        blo.setHistogramBucketsParams(5, 5, 1.125f);
 
         Binder binder = new Binder();
         CallSession callSession = new CallSession();
@@ -51,20 +51,24 @@ public class BinderLatencyObserverTest {
         callSession.transactionCode = 1;
         blo.callEnded(callSession);
         blo.callEnded(callSession);
+        blo.callEnded(callSession);
         callSession.transactionCode = 2;
         blo.callEnded(callSession);
+        blo.callEnded(callSession);
 
-        ArrayMap<LatencyDims, ArrayList<Long>> latencySamples = blo.getLatencySamples();
-        assertEquals(2, latencySamples.keySet().size());
-        assertThat(latencySamples.get(new LatencyDims(binder.getClass(), 1)))
-            .containsExactlyElementsIn(Arrays.asList(1L, 2L));
-        assertThat(latencySamples.get(new LatencyDims(binder.getClass(), 2))).containsExactly(3L);
+        ArrayMap<LatencyDims, int[]> latencyHistograms = blo.getLatencyHistograms();
+        assertEquals(2, latencyHistograms.keySet().size());
+        assertThat(latencyHistograms.get(new LatencyDims(binder.getClass(), 1)))
+            .asList().containsExactly(2, 0, 1, 0, 0).inOrder();
+        assertThat(latencyHistograms.get(new LatencyDims(binder.getClass(), 2)))
+            .asList().containsExactly(0, 0, 0, 0, 2).inOrder();
     }
 
     @Test
     public void testSampling() {
         TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
         blo.setSamplingInterval(2);
+        blo.setHistogramBucketsParams(5, 5, 1.125f);
 
         Binder binder = new Binder();
         CallSession callSession = new CallSession();
@@ -74,17 +78,58 @@ public class BinderLatencyObserverTest {
         callSession.transactionCode = 2;
         blo.callEnded(callSession);
 
-        ArrayMap<LatencyDims, ArrayList<Long>> latencySamples = blo.getLatencySamples();
-        assertEquals(1, latencySamples.size());
-        LatencyDims dims = latencySamples.keySet().iterator().next();
+        ArrayMap<LatencyDims, int[]> latencyHistograms = blo.getLatencyHistograms();
+        assertEquals(1, latencyHistograms.size());
+        LatencyDims dims = latencyHistograms.keySet().iterator().next();
         assertEquals(binder.getClass(), dims.getBinderClass());
         assertEquals(1, dims.getTransactionCode());
-        ArrayList<Long> values = latencySamples.get(dims);
-        assertThat(values).containsExactly(1L);
+        assertThat(latencyHistograms.get(dims)).asList().containsExactly(1, 0, 0, 0, 0).inOrder();
+    }
+
+    @Test
+    public void testTooCallLengthOverflow() {
+        TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
+        blo.setElapsedTime(2L + (long) Integer.MAX_VALUE);
+        blo.setHistogramBucketsParams(5, 5, 1.125f);
+
+        Binder binder = new Binder();
+        CallSession callSession = new CallSession();
+        callSession.binderClass = binder.getClass();
+        callSession.transactionCode = 1;
+        blo.callEnded(callSession);
+
+        // The long call should be capped to maxint (to not overflow) and placed in the last bucket.
+        assertThat(blo.getLatencyHistograms()
+            .get(new LatencyDims(binder.getClass(), 1)))
+            .asList().containsExactly(0, 0, 0, 0, 1)
+            .inOrder();
+    }
+
+    @Test
+    public void testHistogramBucketOverflow() {
+        TestBinderLatencyObserver blo = new TestBinderLatencyObserver();
+        blo.setHistogramBucketsParams(3, 5, 1.125f);
+
+        Binder binder = new Binder();
+        CallSession callSession = new CallSession();
+        callSession.binderClass = binder.getClass();
+        callSession.transactionCode = 1;
+        blo.callEnded(callSession);
+
+        LatencyDims dims = new LatencyDims(binder.getClass(), 1);
+        // Fill the buckets with maxint.
+        Arrays.fill(blo.getLatencyHistograms().get(dims), Integer.MAX_VALUE);
+        assertThat(blo.getLatencyHistograms().get(dims))
+            .asList().containsExactly(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        // Try to add another sample.
+        blo.callEnded(callSession);
+        // Make sure the buckets don't overflow.
+        assertThat(blo.getLatencyHistograms().get(dims))
+            .asList().containsExactly(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     public static class TestBinderLatencyObserver extends BinderLatencyObserver {
-        private long mElapsedTimeCallCount = 0;
+        private long mElapsedTime = 0;
 
         TestBinderLatencyObserver() {
             // Make random generator not random.
@@ -104,7 +149,12 @@ public class BinderLatencyObserverTest {
 
         @Override
         protected long getElapsedRealtimeMicro() {
-            return ++mElapsedTimeCallCount;
+            mElapsedTime += 2;
+            return mElapsedTime;
+        }
+
+        public void setElapsedTime(long time) {
+            mElapsedTime = time;
         }
     }
 }

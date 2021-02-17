@@ -133,6 +133,12 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_Latency_data";
         private static final String SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY =
                 "latency_observer_sampling_interval";
+        private static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY =
+                "latency_histogram_bucket_count";
+        private static final String SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY =
+                "latency_histogram_first_bucket_size";
+        private static final String SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY =
+                "latency_histogram_bucket_scale_factor";
 
         private boolean mEnabled;
         private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
@@ -190,9 +196,20 @@ public class BinderCallsStatsService extends Binder {
                     mParser.getBoolean(SETTINGS_COLLECT_LATENCY_DATA_KEY,
                     BinderCallsStats.DEFAULT_COLLECT_LATENCY_DATA));
             // Binder latency observer settings.
-            mBinderCallsStats.getLatencyObserver().setSamplingInterval(mParser.getInt(
+            BinderLatencyObserver binderLatencyObserver = mBinderCallsStats.getLatencyObserver();
+            binderLatencyObserver.setSamplingInterval(mParser.getInt(
                     SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY,
                     BinderLatencyObserver.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
+            binderLatencyObserver.setHistogramBucketsParams(
+                    mParser.getInt(
+                        SETTINGS_LATENCY_HISTOGRAM_BUCKET_COUNT_KEY,
+                        BinderLatencyObserver.BUCKET_COUNT_DEFAULT),
+                    mParser.getInt(
+                        SETTINGS_LATENCY_HISTOGRAM_FIRST_BUCKET_SIZE_KEY,
+                        BinderLatencyObserver.FIRST_BUCKET_SIZE_DEFAULT),
+                    mParser.getFloat(
+                        SETTINGS_LATENCY_HISTOGRAM_BUCKET_SCALE_FACTOR_KEY,
+                        BinderLatencyObserver.BUCKET_SCALE_FACTOR_DEFAULT));
 
 
             final boolean enabled =
