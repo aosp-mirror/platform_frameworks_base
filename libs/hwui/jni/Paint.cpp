@@ -25,7 +25,6 @@
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 
-#include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
@@ -39,6 +38,7 @@
 #include "unicode/ushape.h"
 #include "utils/Blur.h"
 
+#include <hwui/BlurDrawLooper.h>
 #include <hwui/MinikinSkia.h>
 #include <hwui/MinikinUtils.h>
 #include <hwui/Paint.h>
@@ -964,13 +964,13 @@ namespace PaintGlue {
         }
         else {
             SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-            paint->setLooper(SkBlurDrawLooper::Make(color, cs.get(), sigma, dx, dy));
+            paint->setLooper(BlurDrawLooper::Make(color, cs.get(), sigma, {dx, dy}));
         }
     }
 
     static jboolean hasShadowLayer(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        return paint->getLooper() && paint->getLooper()->asABlurShadow(nullptr);
+        return paint->getLooper() != nullptr;
     }
 
     static jboolean equalsForTextMeasurement(CRITICAL_JNI_PARAMS_COMMA jlong lPaint, jlong rPaint) {
