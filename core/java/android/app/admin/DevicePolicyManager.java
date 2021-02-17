@@ -13357,6 +13357,7 @@ public class DevicePolicyManager {
             }
         }
     }
+
     /**
      * Returns true if the caller is running on a device where the admin can grant
      * permissions related to device sensors.
@@ -13458,5 +13459,23 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the list of {@link #isAffiliatedUser() affiliated} users running on foreground.
+     *
+     * @return list of {@link #isAffiliatedUser() affiliated} users running on foreground.
+     *
+     * @throws SecurityException if the calling application is not a device owner
+     */
+    @NonNull
+    public List<UserHandle> listForegroundAffiliatedUsers() {
+        if (mService == null) return Collections.emptyList();
+
+        try {
+            return mService.listForegroundAffiliatedUsers();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 }
