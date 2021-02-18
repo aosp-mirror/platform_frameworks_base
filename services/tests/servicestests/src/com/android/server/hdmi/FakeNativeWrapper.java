@@ -58,6 +58,7 @@ final class FakeNativeWrapper implements NativeWrapper {
     private int mMyPhysicalAddress = 0;
     private HdmiPortInfo[] mHdmiPortInfo = null;
     private HdmiCecController.HdmiCecCallback mCallback = null;
+    private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
 
     @Override
     public String nativeInit() {
@@ -96,7 +97,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetVersion() {
-        return HdmiControlManager.HDMI_CEC_VERSION_2_0;
+        return mCecVersion;
     }
 
     @Override
@@ -130,6 +131,10 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setPortConnectionStatus(int port, boolean connected) {
         mPortConnectionStatus.put(port, connected);
+    }
+
+    public void setCecVersion(@HdmiControlManager.HdmiCecVersion int cecVersion) {
+        mCecVersion = cecVersion;
     }
 
     public void onCecMessage(HdmiCecMessage hdmiCecMessage) {
