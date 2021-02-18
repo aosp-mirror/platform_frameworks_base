@@ -1869,13 +1869,13 @@ public class DevicePolicyManager {
     /**
      * Grants access to {@link #setNetworkLoggingEnabled}, {@link #isNetworkLoggingEnabled} and
      * {@link #retrieveNetworkLogs}. Once granted the delegated app will start receiving
-     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner will no longer
-     * receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
+     * DelegatedAdminReceiver.onNetworkLogsAvailable() callback, and Device owner or Profile Owner
+     * will no longer receive the DeviceAdminReceiver.onNetworkLogsAvailable() callback.
      * There can be at most one app that has this delegation.
      * If another app already had delegated network logging access,
      * it will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner.
+     * <p> Can only be granted by Device Owner or Profile Owner of a managed profile.
      */
     public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
 
@@ -13357,6 +13357,7 @@ public class DevicePolicyManager {
             }
         }
     }
+
     /**
      * Returns true if the caller is running on a device where the admin can grant
      * permissions related to device sensors.
@@ -13458,5 +13459,23 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the list of {@link #isAffiliatedUser() affiliated} users running on foreground.
+     *
+     * @return list of {@link #isAffiliatedUser() affiliated} users running on foreground.
+     *
+     * @throws SecurityException if the calling application is not a device owner
+     */
+    @NonNull
+    public List<UserHandle> listForegroundAffiliatedUsers() {
+        if (mService == null) return Collections.emptyList();
+
+        try {
+            return mService.listForegroundAffiliatedUsers();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 }

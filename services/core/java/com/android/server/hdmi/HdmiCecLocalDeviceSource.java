@@ -139,8 +139,12 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void toggleAndFollowTvPower() {
         assertRunOnServiceThread();
-        // Wake up Android framework to take over CEC control from the microprocessor.
-        mService.wakeUp();
+        if (mService.getPowerManager().isInteractive()) {
+            mService.pauseActiveMediaSessions();
+        } else {
+            // Wake up Android framework to take over CEC control from the microprocessor.
+            mService.wakeUp();
+        }
         mService.queryDisplayStatus(new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int status) {

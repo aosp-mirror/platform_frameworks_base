@@ -24,6 +24,8 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -34,6 +36,7 @@ import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.sysprop.HdmiProperties;
@@ -1550,6 +1553,31 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(userControlReleased);
         assertThat(mStandby).isFalse();
     }
+
+    @Test
+    public void toggleAndFollowTvPower_isInteractive() throws RemoteException {
+        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
+        mActiveMediaSessionsPaused = false;
+        mWokenUp = false;
+
+        mHdmiControlService.toggleAndFollowTvPower();
+
+        assertThat(mActiveMediaSessionsPaused).isTrue();
+        assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void toggleAndFollowTvPower_isNotInteractive() throws RemoteException {
+        when(mIPowerManagerMock.isInteractive()).thenReturn(false);
+        mActiveMediaSessionsPaused = false;
+        mWokenUp = false;
+
+        mHdmiControlService.toggleAndFollowTvPower();
+
+        assertThat(mActiveMediaSessionsPaused).isFalse();
+        assertThat(mWokenUp).isTrue();
+    }
+
 
     @Test
     public void shouldHandleTvPowerKey_CecDisabled() {

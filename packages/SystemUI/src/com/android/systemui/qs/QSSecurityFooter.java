@@ -170,7 +170,8 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         // Update visibility of footer
         mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile
                 || vpnName != null || vpnNameWorkProfile != null
-                || isProfileOwnerOfOrganizationOwnedDevice || isParentalControlsEnabled;
+                || isProfileOwnerOfOrganizationOwnedDevice || isParentalControlsEnabled
+                || (hasWorkProfile && isNetworkLoggingEnabled);
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
@@ -275,10 +276,28 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                     vpnName);
         }
         if (isProfileOwnerOfOrganizationOwnedDevice) {
+            if (isNetworkLoggingEnabled) {
+                if (organizationName == null) {
+                    return mContext.getString(
+                            R.string.quick_settings_disclosure_management_monitoring);
+                }
+                return mContext.getString(
+                        R.string.quick_settings_disclosure_named_management_monitoring,
+                        organizationName);
+            }
             if (workProfileOrganizationName == null) {
                 return mContext.getString(R.string.quick_settings_disclosure_management);
             }
             return mContext.getString(R.string.quick_settings_disclosure_named_management,
+                    workProfileOrganizationName);
+        }
+        if (hasWorkProfile && isNetworkLoggingEnabled) {
+            if (workProfileOrganizationName == null) {
+                return mContext.getString(
+                        R.string.quick_settings_disclosure_managed_profile_monitoring);
+            }
+            return mContext.getString(
+                    R.string.quick_settings_disclosure_named_managed_profile_monitoring,
                     workProfileOrganizationName);
         }
         return null;
@@ -367,7 +386,8 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
 
         // network logging section
-        CharSequence networkLoggingMessage = getNetworkLoggingMessage(isNetworkLoggingEnabled);
+        CharSequence networkLoggingMessage = getNetworkLoggingMessage(isDeviceManaged,
+                isNetworkLoggingEnabled);
         if (networkLoggingMessage == null) {
             dialogView.findViewById(R.id.network_logging_disclosures).setVisibility(View.GONE);
         } else {
@@ -492,9 +512,15 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         return mContext.getString(R.string.monitoring_description_ca_certificate);
     }
 
-    protected CharSequence getNetworkLoggingMessage(boolean isNetworkLoggingEnabled) {
+    protected CharSequence getNetworkLoggingMessage(boolean isDeviceManaged,
+            boolean isNetworkLoggingEnabled) {
         if (!isNetworkLoggingEnabled) return null;
-        return mContext.getString(R.string.monitoring_description_management_network_logging);
+        if (isDeviceManaged) {
+            return mContext.getString(R.string.monitoring_description_management_network_logging);
+        } else {
+            return mContext.getString(
+                    R.string.monitoring_description_managed_profile_network_logging);
+        }
     }
 
     protected CharSequence getVpnMessage(boolean isDeviceManaged, boolean hasWorkProfile,

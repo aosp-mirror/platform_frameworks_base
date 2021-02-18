@@ -1204,15 +1204,25 @@ public final class RemoteConnection {
      * the results of a contacts lookup for the remote party.
      * @param isBlocked Whether call filtering indicates that the call should be blocked
      * @param isInContacts Whether the remote party is in the user's contacts
+     * @param callScreeningResponse The response that was returned from the
+     *                              {@link CallScreeningService} that handled this call. If no
+     *                              response was received from a call screening service,
+     *                              this will be {@code null}.
+     * @param isResponseFromSystemDialer Whether {@code callScreeningResponse} was sent from the
+     *                                  system dialer. If {@code callScreeningResponse} is
+     *                                  {@code null}, this will be {@code false}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_CONTACTS)
-    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts) {
+    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts,
+            @Nullable CallScreeningService.CallResponse callScreeningResponse,
+            boolean isResponseFromSystemDialer) {
         Log.startSession("RC.oCFC", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.onCallFilteringCompleted(mConnectionId, isBlocked, isInContacts,
+                        callScreeningResponse.toParcelable(), isResponseFromSystemDialer,
                         null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {

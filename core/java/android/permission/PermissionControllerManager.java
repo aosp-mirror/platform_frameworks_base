@@ -16,13 +16,9 @@
 
 package android.permission;
 
-import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
-import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
-import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 
 import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
-import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkFlagsArgument;
@@ -39,7 +35,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
-import android.app.admin.DevicePolicyManager.PermissionGrantState;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -70,6 +65,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -323,11 +319,11 @@ public final class PermissionControllerManager {
 
     /**
      * Set the runtime permission state from a device admin.
+     * This variant takes into account whether the admin may or may not grant sensors-related
+     * permissions.
      *
      * @param callerPackageName The package name of the admin requesting the change
-     * @param packageName Package the permission belongs to
-     * @param permission Permission to change
-     * @param grantState State to set the permission into
+     * @param params Information about the permission being granted.
      * @param executor Executor to run the {@code callback} on
      * @param callback The callback
      *
@@ -338,30 +334,27 @@ public final class PermissionControllerManager {
             Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY},
             conditional = true)
     public void setRuntimePermissionGrantStateByDeviceAdmin(@NonNull String callerPackageName,
-            @NonNull String packageName, @NonNull String permission,
-            @PermissionGrantState int grantState, @NonNull @CallbackExecutor Executor executor,
+            @NonNull AdminPermissionControlParams params,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         checkStringNotEmpty(callerPackageName);
-        checkStringNotEmpty(packageName);
-        checkStringNotEmpty(permission);
-        checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
-                || grantState == PERMISSION_GRANT_STATE_DENIED
-                || grantState == PERMISSION_GRANT_STATE_DEFAULT);
-        checkNotNull(executor);
-        checkNotNull(callback);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        Objects.requireNonNull(params, "Admin control params must not be null.");
 
         mRemoteService.postAsync(service -> {
             AndroidFuture<Boolean> setRuntimePermissionGrantStateResult = new AndroidFuture<>();
-            service.setRuntimePermissionGrantStateByDeviceAdmin(
-                    callerPackageName, packageName, permission, grantState,
+            service.setRuntimePermissionGrantStateByDeviceAdminFromParams(
+                    callerPackageName, params,
                     setRuntimePermissionGrantStateResult);
             return setRuntimePermissionGrantStateResult;
         }).whenCompleteAsync((setRuntimePermissionGrantStateResult, err) -> {
             final long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
-                    Log.e(TAG, "Error setting permissions state for device admin " + packageName,
-                            err);
+                    Log.e(TAG,
+                            "Error setting permissions state for device admin "
+                                    + callerPackageName, err);
                     callback.accept(false);
                 } else {
                     callback.accept(Boolean.TRUE.equals(setRuntimePermissionGrantStateResult));

@@ -38,6 +38,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -2491,6 +2492,82 @@ public final class MediaDrm implements AutoCloseable {
         @Override
         @NonNull public String getPlaybackId() {
             return mPlaybackId;
+        }
+    }
+
+    /**
+     * Returns recent {@link LogMessage LogMessages} associated with this {@link MediaDrm}
+     * instance.
+     */
+    @NonNull
+    public native List<LogMessage> getLogMessages();
+
+    /**
+     * A {@link LogMessage} records an event in the {@link MediaDrm} framework
+     * or vendor plugin.
+     */
+    public static class LogMessage {
+
+        /**
+         * Timing of the recorded event measured in milliseconds since the Epoch,
+         * 1970-01-01 00:00:00 +0000 (UTC).
+         */
+        public final long timestampMillis;
+
+        /**
+         * Priority of the recorded event.
+         * <p>
+         * Possible priority constants are defined in {@link Log}, e.g.:
+         * <ul>
+         *     <li>{@link Log#ASSERT}</li>
+         *     <li>{@link Log#ERROR}</li>
+         *     <li>{@link Log#WARN}</li>
+         *     <li>{@link Log#INFO}</li>
+         *     <li>{@link Log#DEBUG}</li>
+         *     <li>{@link Log#VERBOSE}</li>
+         * </ul>
+         */
+        @Log.Level
+        public final int priority;
+
+        /**
+         * Description of the recorded event.
+         */
+        @NonNull
+        public final String message;
+
+        private LogMessage(long timestampMillis, int priority, String message) {
+            this.timestampMillis = timestampMillis;
+            if (priority < Log.VERBOSE || priority > Log.ASSERT) {
+                throw new IllegalArgumentException("invalid log priority " + priority);
+            }
+            this.priority = priority;
+            this.message = message;
+        }
+
+        private char logPriorityChar() {
+            switch (priority) {
+                case Log.VERBOSE:
+                    return 'V';
+                case Log.DEBUG:
+                    return 'D';
+                case Log.INFO:
+                    return 'I';
+                case Log.WARN:
+                    return 'W';
+                case Log.ERROR:
+                    return 'E';
+                case Log.ASSERT:
+                    return 'F';
+                default:
+            }
+            return 'U';
+        }
+
+        @Override
+        public String toString() {
+            return String.format("LogMessage{%s %c %s}",
+                    Instant.ofEpochMilli(timestampMillis), logPriorityChar(), message);
         }
     }
 }

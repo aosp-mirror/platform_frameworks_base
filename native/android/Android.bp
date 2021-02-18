@@ -88,7 +88,7 @@ cc_library_shared {
         "libarect",
     ],
 
-    header_libs: [ "libhwui_internal_headers",],
+    header_libs: [ "libhwui_internal_headers", "libandroid_headers_private"],
 
     whole_static_libs: ["libnativewindow"],
 

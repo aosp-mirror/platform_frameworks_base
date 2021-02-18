@@ -601,6 +601,22 @@ public final class DataManagerTest {
     }
 
     @Test
+    public void testIsConversation() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        assertThat(mDataManager.isConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isFalse();
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_PINNED);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        assertThat(mDataManager.isConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isTrue();
+        assertThat(mDataManager.isConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID + "1")).isFalse();
+    }
+
+    @Test
     public void testNotificationChannelCreated() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
         mDataManager.onUserUnlocked(USER_ID_SECONDARY);

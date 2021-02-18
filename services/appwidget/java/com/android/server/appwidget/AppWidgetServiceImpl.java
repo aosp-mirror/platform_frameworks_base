@@ -2624,12 +2624,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.minWidth = value != null ? value.data : 0;
             value = sa.peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight);
             info.minHeight = value != null ? value.data : 0;
+
             value = sa.peekValue(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_minResizeWidth);
             info.minResizeWidth = value != null ? value.data : info.minWidth;
             value = sa.peekValue(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_minResizeHeight);
             info.minResizeHeight = value != null ? value.data : info.minHeight;
+
+            value = sa.peekValue(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_maxResizeWidth);
+            info.maxResizeWidth = value != null ? value.data : 0;
+            value = sa.peekValue(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_maxResizeHeight);
+            info.maxResizeHeight = value != null ? value.data : 0;
+
+            info.targetCellWidth = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_targetCellWidth, 0);
+            info.targetCellHeight = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_targetCellHeight, 0);
+
             info.updatePeriodMillis = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
             info.initialLayout = sa.getResourceId(

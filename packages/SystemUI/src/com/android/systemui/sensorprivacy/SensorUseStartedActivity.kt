@@ -28,6 +28,7 @@ import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
 import android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_CAMERA
 import android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE
 import android.os.Bundle
+import android.os.Handler
 import android.text.Html
 import android.util.Log
 import com.android.internal.app.AlertActivity
@@ -43,10 +44,13 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
 
     companion object {
         private val LOG_TAG = SensorUseStartedActivity::class.java.simpleName
+
+        private const val SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS = 2000L
     }
 
     private var sensor = -1
     private lateinit var sensorUsePackageName: String
+    private var unsuppressImmediately = false
 
     private lateinit var sensorPrivacyManager: SensorPrivacyManager
     private lateinit var appOpsManager: AppOpsManager
@@ -118,6 +122,7 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
         super.onStart()
 
         sensorPrivacyManager.suppressIndividualSensorPrivacyReminders(sensorUsePackageName, true)
+        unsuppressImmediately = false
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
@@ -131,15 +136,15 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
                         }
 
                         override fun onDismissSucceeded() {
-                            sensorPrivacyManager
-                                    .setIndividualSensorPrivacyForProfileGroup(sensor, false)
-                            setResult(RESULT_OK)
+                            disableSensorPrivacy()
                         }
                     })
                 } else {
-                    sensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(sensor, false)
-                    setResult(RESULT_OK)
+                    disableSensorPrivacy()
                 }
+            }
+            BUTTON_NEGATIVE -> {
+                unsuppressImmediately = false
             }
         }
 
@@ -149,10 +154,24 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
     override fun onStop() {
         super.onDestroy()
 
-        sensorPrivacyManager.suppressIndividualSensorPrivacyReminders(sensorUsePackageName, false)
+        if (unsuppressImmediately) {
+            sensorPrivacyManager
+                    .suppressIndividualSensorPrivacyReminders(sensorUsePackageName, false)
+        } else {
+            Handler(mainLooper).postDelayed({
+                sensorPrivacyManager
+                        .suppressIndividualSensorPrivacyReminders(sensorUsePackageName, false)
+            }, SUPPRESS_REMINDERS_REMOVAL_DELAY_MILLIS)
+        }
     }
 
     override fun onBackPressed() {
         // do not allow backing out
+    }
+
+    private fun disableSensorPrivacy() {
+        sensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(sensor, false)
+        unsuppressImmediately = true
+        setResult(RESULT_OK)
     }
 }

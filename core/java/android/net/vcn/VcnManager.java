@@ -23,6 +23,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
+import android.os.Binder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -39,12 +40,12 @@ import java.util.concurrent.Executor;
 /**
  * VcnManager publishes APIs for applications to configure and manage Virtual Carrier Networks.
  *
- * <p>A VCN creates a virtualization layer to allow MVNOs to aggregate heterogeneous physical
+ * <p>A VCN creates a virtualization layer to allow carriers to aggregate heterogeneous physical
  * networks, unifying them as a single carrier network. This enables infrastructure flexibility on
- * the part of MVNOs without impacting user connectivity, abstracting the physical network
+ * the part of carriers without impacting user connectivity, abstracting the physical network
  * technologies as an implementation detail of their public network.
  *
- * <p>Each VCN virtualizes an Carrier's network by building tunnels to a carrier's core network over
+ * <p>Each VCN virtualizes a carrier's network by building tunnels to a carrier's core network over
  * carrier-managed physical links and supports a IP mobility layer to ensure seamless transitions
  * between the underlying networks. Each VCN is configured based on a Subscription Group (see {@link
  * android.telephony.SubscriptionManager}) and aggregates all networks that are brought up based on
@@ -62,8 +63,6 @@ import java.util.concurrent.Executor;
  * tasks. In Safe Mode, the system will allow underlying cellular networks to be used as default.
  * Additionally, during Safe Mode, the VCN will continue to retry the connections, and will
  * automatically exit Safe Mode if all active tunnels connect successfully.
- *
- * @hide
  */
 @SystemService(Context.VCN_MANAGEMENT_SERVICE)
 public class VcnManager {
@@ -101,7 +100,6 @@ public class VcnManager {
         return Collections.unmodifiableMap(REGISTERED_POLICY_LISTENERS);
     }
 
-    // TODO: Make setVcnConfig(), clearVcnConfig() Public API
     /**
      * Sets the VCN configuration for a given subscription group.
      *
@@ -113,11 +111,10 @@ public class VcnManager {
      *
      * @param subscriptionGroup the subscription group that the configuration should be applied to
      * @param config the configuration parameters for the VCN
-     * @throws SecurityException if the caller does not have carrier privileges, or is not running
-     *     as the primary user
-     * @throws IOException if the configuration failed to be persisted. A caller encountering this
-     *     exception should attempt to retry (possibly after a delay).
-     * @hide
+     * @throws SecurityException if the caller does not have carrier privileges for the provided
+     *     subscriptionGroup, or is not running as the primary user
+     * @throws IOException if the configuration failed to be saved and persisted to disk. This may
+     *     occur due to temporary disk errors, or more permanent conditions such as a full disk.
      */
     @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
     public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config)
@@ -134,7 +131,6 @@ public class VcnManager {
         }
     }
 
-    // TODO: Make setVcnConfig(), clearVcnConfig() Public API
     /**
      * Clears the VCN configuration for a given subscription group.
      *
@@ -145,9 +141,8 @@ public class VcnManager {
      * @param subscriptionGroup the subscription group that the configuration should be applied to
      * @throws SecurityException if the caller does not have carrier privileges, or is not running
      *     as the primary user
-     * @throws IOException if the configuration failed to be cleared. A caller encountering this
-     *     exception should attempt to retry (possibly after a delay).
-     * @hide
+     * @throws IOException if the configuration failed to be cleared from disk. This may occur due
+     *     to temporary disk errors, or more permanent conditions such as a full disk.
      */
     @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
     public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) throws IOException {
@@ -267,6 +262,100 @@ public class VcnManager {
         }
     }
 
+    // TODO: make VcnStatusCallback @SystemApi
+    /**
+     * VcnStatusCallback is the interface for Carrier apps to receive updates for their VCNs.
+     *
+     * <p>VcnStatusCallbacks may be registered before {@link VcnConfig}s are provided for a
+     * subscription group.
+     *
+     * @hide
+     */
+    public abstract static class VcnStatusCallback {
+        private VcnStatusCallbackBinder mCbBinder;
+
+        /**
+         * Invoked when the VCN for this Callback's subscription group enters safe mode.
+         *
+         * <p>A VCN will be put into safe mode if any of the gateway connections were unable to
+         * establish a connection within a system-determined timeout (while underlying networks were
+         * available).
+         *
+         * <p>A VCN-configuring app may opt to exit safe mode by (re)setting the VCN configuration
+         * via {@link #setVcnConfig(ParcelUuid, VcnConfig)}.
+         */
+        public abstract void onEnteredSafeMode();
+    }
+
+    /**
+     * Registers the given callback to receive status updates for the specified subscription.
+     *
+     * <p>Callbacks can be registered for a subscription before {@link VcnConfig}s are set for it.
+     *
+     * <p>A {@link VcnStatusCallback} may only be registered for one subscription at a time. {@link
+     * VcnStatusCallback}s may be reused once unregistered.
+     *
+     * <p>A {@link VcnStatusCallback} will only be invoked if the registering package has carrier
+     * privileges for the specified subscription at the time of invocation.
+     *
+     * @param subscriptionGroup The subscription group to match for callbacks
+     * @param executor The {@link Executor} to be used for invoking callbacks
+     * @param callback The VcnStatusCallback to be registered
+     * @throws IllegalStateException if callback is currently registered with VcnManager
+     * @hide
+     */
+    public void registerVcnStatusCallback(
+            @NonNull ParcelUuid subscriptionGroup,
+            @NonNull Executor executor,
+            @NonNull VcnStatusCallback callback) {
+        requireNonNull(subscriptionGroup, "subscriptionGroup must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        synchronized (callback) {
+            if (callback.mCbBinder != null) {
+                throw new IllegalStateException("callback is already registered with VcnManager");
+            }
+            callback.mCbBinder = new VcnStatusCallbackBinder(executor, callback);
+
+            try {
+                mService.registerVcnStatusCallback(
+                        subscriptionGroup, callback.mCbBinder, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                callback.mCbBinder = null;
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregisters the given callback.
+     *
+     * <p>Once unregistered, the callback will stop receiving status updates for the subscription it
+     * was registered with.
+     *
+     * @param callback The callback to be unregistered
+     * @hide
+     */
+    public void unregisterVcnStatusCallback(@NonNull VcnStatusCallback callback) {
+        requireNonNull(callback, "callback must not be null");
+
+        synchronized (callback) {
+            if (callback.mCbBinder == null) {
+                // no Binder attached to this callback, so it's not currently registered
+                return;
+            }
+
+            try {
+                mService.unregisterVcnStatusCallback(callback.mCbBinder);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } finally {
+                callback.mCbBinder = null;
+            }
+        }
+    }
+
     /**
      * Binder wrapper for added VcnUnderlyingNetworkPolicyListeners to receive signals from System
      * Server.
@@ -286,7 +375,30 @@ public class VcnManager {
 
         @Override
         public void onPolicyChanged() {
-            mExecutor.execute(() -> mListener.onPolicyChanged());
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> mListener.onPolicyChanged()));
+        }
+    }
+
+    /**
+     * Binder wrapper for VcnStatusCallbacks to receive signals from VcnManagementService.
+     *
+     * @hide
+     */
+    private class VcnStatusCallbackBinder extends IVcnStatusCallback.Stub {
+        @NonNull private final Executor mExecutor;
+        @NonNull private final VcnStatusCallback mCallback;
+
+        private VcnStatusCallbackBinder(
+                @NonNull Executor executor, @NonNull VcnStatusCallback callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onEnteredSafeMode() {
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> mCallback.onEnteredSafeMode()));
         }
     }
 }

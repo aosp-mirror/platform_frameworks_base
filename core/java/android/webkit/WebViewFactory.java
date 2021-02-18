@@ -31,6 +31,7 @@ import android.content.pm.Signature;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
@@ -261,7 +262,7 @@ public final class WebViewFactory {
             // us honest and minimize usage of WebView internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
 
-            sTimestamps[WEBVIEW_LOAD_START] = System.currentTimeMillis();
+            sTimestamps[WEBVIEW_LOAD_START] = SystemClock.elapsedRealtime();
             final int uid = android.os.Process.myUid();
             if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID
                     || uid == android.os.Process.PHONE_UID || uid == android.os.Process.NFC_UID
@@ -401,7 +402,7 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
                     "initialApplication.createApplicationContext");
-            sTimestamps[CREATE_CONTEXT_START] = System.currentTimeMillis();
+            sTimestamps[CREATE_CONTEXT_START] = SystemClock.elapsedRealtime();
             try {
                 // Construct an app context to load the Java code into the current app.
                 Context webViewContext = initialApplication.createApplicationContext(
@@ -410,7 +411,7 @@ public final class WebViewFactory {
                 sPackageInfo = newPackageInfo;
                 return webViewContext;
             } finally {
-                sTimestamps[CREATE_CONTEXT_END] = System.currentTimeMillis();
+                sTimestamps[CREATE_CONTEXT_END] = SystemClock.elapsedRealtime();
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
         } catch (RemoteException | PackageManager.NameNotFoundException e) {
@@ -436,26 +437,26 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
-                sTimestamps[ADD_ASSETS_START] = System.currentTimeMillis();
+                sTimestamps[ADD_ASSETS_START] = SystemClock.elapsedRealtime();
                 for (String newAssetPath : webViewContext.getApplicationInfo().getAllApkPaths()) {
                     initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
                 }
                 sTimestamps[ADD_ASSETS_END] = sTimestamps[GET_CLASS_LOADER_START] =
-                        System.currentTimeMillis();
+                        SystemClock.elapsedRealtime();
                 ClassLoader clazzLoader = webViewContext.getClassLoader();
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
                 sTimestamps[GET_CLASS_LOADER_END] = sTimestamps[NATIVE_LOAD_START] =
-                        System.currentTimeMillis();
+                        SystemClock.elapsedRealtime();
                 WebViewLibraryLoader.loadNativeLibrary(clazzLoader,
                         getWebViewLibrary(sPackageInfo.applicationInfo));
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
                 sTimestamps[NATIVE_LOAD_END] = sTimestamps[PROVIDER_CLASS_FOR_NAME_START] =
-                        System.currentTimeMillis();
+                        SystemClock.elapsedRealtime();
                 try {
                     return getWebViewProviderClass(clazzLoader);
                 } finally {
-                    sTimestamps[PROVIDER_CLASS_FOR_NAME_END] = System.currentTimeMillis();
+                    sTimestamps[PROVIDER_CLASS_FOR_NAME_END] = SystemClock.elapsedRealtime();
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 }
             } catch (ClassNotFoundException e) {

@@ -17,14 +17,16 @@ package com.android.keyguard;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.view.ContextThemeWrapper;
 import android.view.ViewGroup;
 
 import androidx.annotation.StyleRes;
 
-import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
@@ -34,13 +36,18 @@ import com.android.systemui.R;
 class NumPadAnimator {
     private ValueAnimator mAnimator;
     private GradientDrawable mBackground;
+    private RippleDrawable mRipple;
+    private GradientDrawable mRippleMask;
     private int mMargin;
     private int mNormalColor;
     private int mHighlightColor;
     private int mStyle;
 
-    NumPadAnimator(Context context, final GradientDrawable background, @StyleRes int style) {
-        mBackground = (GradientDrawable) background.mutate();
+    NumPadAnimator(Context context, LayerDrawable drawable, @StyleRes int style) {
+        LayerDrawable ld = (LayerDrawable) drawable.mutate();
+        mBackground = (GradientDrawable) ld.findDrawableByLayerId(R.id.background);
+        mRipple = (RippleDrawable) ld.findDrawableByLayerId(R.id.ripple);
+        mRippleMask = (GradientDrawable) mRipple.findDrawableByLayerId(android.R.id.mask);
         mStyle = style;
 
         reloadColors(context);
@@ -49,13 +56,14 @@ class NumPadAnimator {
 
         // Actual values will be updated later, usually during an onLayout() call
         mAnimator = ValueAnimator.ofFloat(0f);
-        mAnimator.setDuration(250);
-        mAnimator.setInterpolator(Interpolators.LINEAR);
+        mAnimator.setDuration(100);
+        mAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+        mAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mAnimator.setRepeatCount(1);
         mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator anim) {
                     mBackground.setCornerRadius((float) anim.getAnimatedValue());
-                    mBackground.setColor(ColorUtils.blendARGB(mHighlightColor, mNormalColor,
-                            anim.getAnimatedFraction()));
+                    mRippleMask.setCornerRadius((float) anim.getAnimatedValue());
                 }
         });
 
@@ -66,9 +74,9 @@ class NumPadAnimator {
     }
 
     void onLayout(int height) {
-        float startRadius = height / 10f;
-        float endRadius = height / 2f;
-        mBackground.setCornerRadius(endRadius);
+        float startRadius = height / 2f;
+        float endRadius = height / 4f;
+        mBackground.setCornerRadius(startRadius);
         mAnimator.setFloatValues(startRadius, endRadius);
     }
 
@@ -91,6 +99,7 @@ class NumPadAnimator {
         a.recycle();
 
         mBackground.setColor(mNormalColor);
+        mRipple.setColor(ColorStateList.valueOf(mHighlightColor));
     }
 }
 

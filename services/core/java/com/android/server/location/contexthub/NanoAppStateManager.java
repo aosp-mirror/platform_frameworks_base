@@ -17,7 +17,7 @@
 package com.android.server.location.contexthub;
 
 import android.annotation.Nullable;
-import android.hardware.contexthub.V1_0.HubAppInfo;
+import android.hardware.contexthub.V1_2.HubAppInfo;
 import android.hardware.location.NanoAppInstanceInfo;
 import android.util.Log;
 
@@ -154,8 +154,8 @@ import java.util.function.Consumer;
     synchronized void updateCache(int contextHubId, List<HubAppInfo> nanoAppInfoList) {
         HashSet<Long> nanoAppIdSet = new HashSet<>();
         for (HubAppInfo appInfo : nanoAppInfoList) {
-            handleQueryAppEntry(contextHubId, appInfo.appId, appInfo.version);
-            nanoAppIdSet.add(appInfo.appId);
+            handleQueryAppEntry(contextHubId, appInfo.info_1_0.appId, appInfo.info_1_0.version);
+            nanoAppIdSet.add(appInfo.info_1_0.appId);
         }
 
         Iterator<NanoAppInstanceInfo> iterator = mNanoAppHash.values().iterator();

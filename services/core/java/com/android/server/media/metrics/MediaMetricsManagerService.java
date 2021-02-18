@@ -83,7 +83,14 @@ public final class MediaMetricsManagerService extends SystemService {
         @Override
         public void reportPlaybackStateEvent(
                 String sessionId, PlaybackStateEvent event, int userId) {
-            // TODO: log it to statsd
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(322)
+                    .writeString(sessionId)
+                    .writeInt(event.getState())
+                    .writeLong(event.getTimeSinceCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
         }
 
         @Override
@@ -103,7 +110,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     .writeString(event.getExceptionStack())
                     .writeInt(event.getErrorCode())
                     .writeInt(event.getSubErrorCode())
-                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .writeLong(event.getTimeSinceCreatedMillis())
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);
@@ -114,8 +121,8 @@ public final class MediaMetricsManagerService extends SystemService {
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(321)
                     .writeString(sessionId)
-                    .writeInt(event.getType())
-                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .writeInt(event.getNetworkType())
+                    .writeLong(event.getTimeSinceCreatedMillis())
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);
@@ -125,7 +132,7 @@ public final class MediaMetricsManagerService extends SystemService {
         public void reportTrackChangeEvent(
                 String sessionId, TrackChangeEvent event, int userId) {
             StatsEvent statsEvent = StatsEvent.newBuilder()
-                    .setAtomId(321)
+                    .setAtomId(324)
                     .writeString(sessionId)
                     .writeInt(event.getTrackState())
                     .writeInt(event.getTrackChangeReason())
@@ -133,7 +140,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     .writeString(event.getSampleMimeType())
                     .writeString(event.getCodecName())
                     .writeInt(event.getBitrate())
-                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .writeLong(event.getTimeSinceCreatedMillis())
                     .writeInt(event.getTrackType())
                     .writeString(event.getLanguage())
                     .writeString(event.getLanguageRegion())

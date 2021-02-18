@@ -80,6 +80,48 @@ public final class NotificationChannel implements Parcelable {
     public static final String PLACEHOLDER_CONVERSATION_ID = ":placeholder_id";
 
     /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing sound, like a tone picker
+     * ({@link #setSound(Uri, AudioAttributes)}).
+     */
+    public static final String EDIT_SOUND = "sound";
+    /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing vibration ({@link #enableVibration(boolean)},
+     * {@link #setVibrationPattern(long[])}).
+     */
+    public static final String EDIT_VIBRATION = "vibration";
+    /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing importance ({@link #setImportance(int)}) and/or conversation
+     * priority.
+     */
+    public static final String EDIT_IMPORTANCE = "importance";
+    /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing behavior on devices that are locked or have a turned off
+     * display ({@link #setLockscreenVisibility(int)}, {@link #enableLights(boolean)},
+     * {@link #setLightColor(int)}).
+     */
+    public static final String EDIT_LOCKED_DEVICE = "locked";
+    /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing do not disturb bypass {(@link #setBypassDnd(boolean)}) .
+     */
+    public static final String EDIT_ZEN = "dnd";
+    /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing conversation settings (demoting or restoring a channel to
+     * be a Conversation, changing bubble behavior, or setting the priority of a conversation).
+     */
+    public static final String EDIT_CONVERSATION = "convo";
+    /**
+     * Extra value for {@link Settings#EXTRA_CHANNEL_FILTER_LIST}. Include to show fields
+     * that have to do with editing launcher behavior (showing badges)}.
+     */
+    public static final String EDIT_LAUNCHER = "launcher";
+
+    /**
      * The maximum length for text fields in a NotificationChannel. Fields will be truncated at this
      * limit.
      */

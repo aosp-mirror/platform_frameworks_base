@@ -838,7 +838,8 @@ package android.graphics.fonts {
   public class FontManager {
     method @Nullable public android.text.FontConfig getFontConfig();
     method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFamily(@NonNull android.graphics.fonts.FontFamilyUpdateRequest, @IntRange(from=0) int);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.os.ParcelFileDescriptor, @NonNull byte[], @IntRange(from=0) int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.graphics.fonts.FontFileUpdateRequest, @IntRange(from=0) int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.os.ParcelFileDescriptor, @NonNull byte[], @IntRange(from=0) int);
     field public static final int RESULT_ERROR_DOWNGRADING = -5; // 0xfffffffb
     field public static final int RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE = -1; // 0xffffffff
     field public static final int RESULT_ERROR_FAILED_UPDATE_CONFIG = -6; // 0xfffffffa
@@ -1231,11 +1232,6 @@ package android.media {
     method public void forceResourceLost();
   }
 
-  public final class MediaCodec implements android.media.metrics.PlaybackComponent {
-    method public String getPlaybackId();
-    method public void setPlaybackId(@NonNull String);
-  }
-
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
@@ -1306,15 +1302,6 @@ package android.media.audiopolicy {
 
   public static class AudioPolicy.Builder {
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setIsTestFocusPolicy(boolean);
-  }
-
-}
-
-package android.media.metrics {
-
-  public interface PlaybackComponent {
-    method @NonNull public String getPlaybackId();
-    method public void setPlaybackId(@NonNull String);
   }
 
 }
@@ -2569,6 +2556,7 @@ package android.view.inputmethod {
 
   public final class InputMethodManager {
     method public int getDisplayId();
+    method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method public boolean isInputMethodPickerShown();
   }
 

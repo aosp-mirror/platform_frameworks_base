@@ -68,7 +68,7 @@ public class SystemScreenInteractiveHelper extends ScreenInteractiveHelper {
         mReady = true;
     }
 
-    private void onScreenInteractiveChanged(boolean interactive) {
+    void onScreenInteractiveChanged(boolean interactive) {
         if (interactive == mIsInteractive) {
             return;
         }

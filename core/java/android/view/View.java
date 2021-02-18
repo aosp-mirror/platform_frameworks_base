@@ -24032,6 +24032,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getBackgroundTintMode()
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setBackgroundTintBlendMode(@Nullable BlendMode blendMode) {
         if (mBackgroundTint == null) {
             mBackgroundTint = new TintInfo();
@@ -24294,6 +24295,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getForegroundTintMode()
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setForegroundTintBlendMode(@Nullable BlendMode blendMode) {
         if (mForegroundInfo == null) {
             mForegroundInfo = new ForegroundInfo();

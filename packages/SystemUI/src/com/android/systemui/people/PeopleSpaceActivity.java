@@ -19,6 +19,8 @@ package com.android.systemui.people;
 import static android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID;
 import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
+import static com.android.systemui.people.PeopleSpaceUtils.getUserHandle;
+
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
@@ -39,6 +41,7 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -49,6 +52,7 @@ import javax.inject.Inject;
 public class PeopleSpaceActivity extends Activity {
 
     private static final String TAG = "PeopleSpaceActivity";
+    private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
     private ViewGroup mPeopleSpaceLayout;
     private IPeopleManager mPeopleManager;
@@ -134,9 +138,11 @@ public class PeopleSpaceActivity extends Activity {
     /** Stores the user selected configuration for {@code mAppWidgetId}. */
     private void storeWidgetConfiguration(PeopleSpaceTile tile) {
         if (PeopleSpaceUtils.DEBUG) {
-            Log.d(TAG, "Put " + tile.getUserName() + "'s shortcut ID: "
-                    + tile.getId() + " for widget ID: "
-                    + mAppWidgetId);
+            if (DEBUG) {
+                Log.d(TAG, "Put " + tile.getUserName() + "'s shortcut ID: "
+                        + tile.getId() + " for widget ID: "
+                        + mAppWidgetId);
+            }
         }
 
         PeopleSpaceUtils.setStorageForTile(mContext, tile, mAppWidgetId);
@@ -144,12 +150,22 @@ public class PeopleSpaceActivity extends Activity {
         // TODO: Populate new widget with existing conversation notification, if there is any.
         PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds, mAppWidgetManager,
                 mPeopleManager);
+        if (mLauncherApps != null) {
+            try {
+                if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + tile.getId());
+                mLauncherApps.cacheShortcuts(tile.getPackageName(),
+                        Collections.singletonList(tile.getId()),
+                        getUserHandle(tile), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
+            } catch (Exception e) {
+                Log.w(TAG, "Exception caching shortcut:" + e);
+            }
+        }
         finishActivity();
     }
 
     /** Finish activity with a successful widget configuration result. */
     private void finishActivity() {
-        if (PeopleSpaceUtils.DEBUG) Log.d(TAG, "Widget added!");
+        if (DEBUG) Log.d(TAG, "Widget added!");
         mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
         setActivityResult(RESULT_OK);
         finish();
