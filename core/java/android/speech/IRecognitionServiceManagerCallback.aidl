@@ -25,5 +25,5 @@ import android.speech.IRecognitionService;
  */
 oneway interface IRecognitionServiceManagerCallback {
     void onSuccess(in IRecognitionService service);
-    void onError();
+    void onError(int errorCode);
 }
