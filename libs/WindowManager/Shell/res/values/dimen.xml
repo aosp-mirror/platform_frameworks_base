@@ -21,13 +21,19 @@
     <dimen name="floating_dismiss_gradient_height">250dp</dimen>
 
     <!-- The padding around a PiP actions. -->
-    <dimen name="pip_action_padding">12dp</dimen>
+    <dimen name="pip_action_padding">16dp</dimen>
 
     <!-- The height of the PiP actions container in which the actions are vertically centered. -->
     <dimen name="pip_action_size">48dp</dimen>
 
-    <!-- The width and height of the PiP expand action. -->
+    <!-- The width and height of the PiP action asset drawn within the container. -->
+    <dimen name="pip_action_inner_size">20dp</dimen>
+
+    <!-- The width and height of the PiP expand action container. -->
     <dimen name="pip_expand_action_size">60dp</dimen>
+
+    <!-- The width and height of the PiP expand action asset drawn within the container. -->
+    <dimen name="pip_expand_action_inner_size">28dp</dimen>
 
     <!-- The padding between actions in the PiP in landscape  Note that the PiP does not reflect
          the configuration of the device, so we can't use -land resources. -->
