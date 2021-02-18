@@ -357,11 +357,12 @@ cc_defaults {
         "libharfbuzz_ng",
         "liblog",
         "libminikin",
-        "libnativehelper",
         "libz",
         "libziparchive",
         "libjpeg",
     ],
+
+    static_libs: ["libnativehelper_lazy"],
 
     target: {
         android: {
@@ -444,6 +445,7 @@ cc_defaults {
         "renderthread/TimeLord.cpp",
         "hwui/AnimatedImageDrawable.cpp",
         "hwui/Bitmap.cpp",
+        "hwui/BlurDrawLooper.cpp",
         "hwui/Canvas.cpp",
         "hwui/ImageDecoder.cpp",
         "hwui/MinikinSkia.cpp",
@@ -480,6 +482,8 @@ cc_defaults {
 
     target: {
         android: {
+            header_libs: ["libandroid_headers_private" ],
+
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
                 "pipeline/skia/ATraceMemoryDump.cpp",
@@ -567,6 +571,7 @@ cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
     test_suites: ["device-tests"],
+    header_libs: ["libandroid_headers_private"],
     target: {
         android: {
             shared_libs: [
@@ -604,7 +609,6 @@ cc_test {
     shared_libs: [
         "libmemunreachable",
     ],
-
     srcs: [
         "tests/unit/main.cpp",
         "tests/unit/ABitmapTests.cpp",

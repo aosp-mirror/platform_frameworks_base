@@ -17,6 +17,7 @@
 package android.media.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -27,10 +28,8 @@ import java.util.Objects;
 
 /**
  * Playback state event.
- * @hide
  */
-public final class PlaybackStateEvent implements Parcelable {
-    // TODO: more states
+public final class PlaybackStateEvent extends Event implements Parcelable {
     /** Playback has not started (initial state) */
     public static final int STATE_NOT_STARTED = 0;
     /** Playback is buffering in the background for initial playback start */
@@ -41,23 +40,57 @@ public final class PlaybackStateEvent implements Parcelable {
     public static final int STATE_PLAYING = 3;
     /** Playback is paused but ready to play */
     public static final int STATE_PAUSED = 4;
+    /** Playback is handling a seek. */
+    public static final int STATE_SEEKING = 5;
+    /** Playback is buffering to resume active playback. */
+    public static final int STATE_BUFFERING = 6;
+    /** Playback is buffering while paused. */
+    public static final int STATE_PAUSED_BUFFERING = 7;
+    /** Playback is suppressed (e.g. due to audio focus loss). */
+    public static final int STATE_SUPPRESSED = 9;
+    /**
+     * Playback is suppressed (e.g. due to audio focus loss) while buffering to resume a playback.
+     */
+    public static final int STATE_SUPPRESSED_BUFFERING = 10;
+    /** Playback has reached the end of the media. */
+    public static final int STATE_ENDED = 11;
+    /** Playback is stopped and can be restarted. */
+    public static final int STATE_STOPPED = 12;
+    /** Playback is stopped due a fatal error and can be retried. */
+    public static final int STATE_FAILED = 13;
+    /** Playback is interrupted by an ad. */
+    public static final int STATE_INTERRUPTED_BY_AD = 14;
+    /** Playback is abandoned before reaching the end of the media. */
+    public static final int STATE_ABANDONED = 15;
 
-    private int mState;
-    private long mTimeSincePlaybackCreatedMillis;
+    private final int mState;
+    private final long mTimeSinceCreatedMillis;
 
     // These track ExoPlayer states. See the ExoPlayer documentation for the state transitions.
+    /** @hide */
     @IntDef(prefix = "STATE_", value = {
         STATE_NOT_STARTED,
         STATE_JOINING_BACKGROUND,
         STATE_JOINING_FOREGROUND,
         STATE_PLAYING,
-        STATE_PAUSED
+        STATE_PAUSED,
+        STATE_SEEKING,
+        STATE_BUFFERING,
+        STATE_PAUSED_BUFFERING,
+        STATE_SUPPRESSED,
+        STATE_SUPPRESSED_BUFFERING,
+        STATE_ENDED,
+        STATE_STOPPED,
+        STATE_FAILED,
+        STATE_INTERRUPTED_BY_AD,
+        STATE_ABANDONED,
     })
     @Retention(java.lang.annotation.RetentionPolicy.SOURCE)
     public @interface State {}
 
     /**
      * Converts playback state to string.
+     * @hide
      */
     public static String stateToString(@State int value) {
         switch (value) {
@@ -71,6 +104,26 @@ public final class PlaybackStateEvent implements Parcelable {
                 return "STATE_PLAYING";
             case STATE_PAUSED:
                 return "STATE_PAUSED";
+            case STATE_SEEKING:
+                return "STATE_SEEKING";
+            case STATE_BUFFERING:
+                return "STATE_BUFFERING";
+            case STATE_PAUSED_BUFFERING:
+                return "STATE_PAUSED_BUFFERING";
+            case STATE_SUPPRESSED:
+                return "STATE_SUPPRESSED";
+            case STATE_SUPPRESSED_BUFFERING:
+                return "STATE_SUPPRESSED_BUFFERING";
+            case STATE_ENDED:
+                return "STATE_ENDED";
+            case STATE_STOPPED:
+                return "STATE_STOPPED";
+            case STATE_FAILED:
+                return "STATE_FAILED";
+            case STATE_INTERRUPTED_BY_AD:
+                return "STATE_INTERRUPTED_BY_AD";
+            case STATE_ABANDONED:
+                return "STATE_ABANDONED";
             default:
                 return Integer.toHexString(value);
         }
@@ -83,14 +136,13 @@ public final class PlaybackStateEvent implements Parcelable {
      */
     public PlaybackStateEvent(
             int state,
-            long timeSincePlaybackCreatedMillis) {
+            long timeSinceCreatedMillis) {
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
         this.mState = state;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
     }
 
     /**
      * Gets playback state.
-     * @return
      */
     public int getState() {
         return mState;
@@ -98,9 +150,12 @@ public final class PlaybackStateEvent implements Parcelable {
 
     /**
      * Gets time since the corresponding playback is created in millisecond.
+     * @return the timestamp since the playback is created, or -1 if unknown.
      */
-    public long getTimeSincePlaybackCreatedMillis() {
-        return mTimeSincePlaybackCreatedMillis;
+    @Override
+    @IntRange(from = -1)
+    public long getTimeSinceCreatedMillis() {
+        return mTimeSinceCreatedMillis;
     }
 
     @Override
@@ -109,18 +164,18 @@ public final class PlaybackStateEvent implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         PlaybackStateEvent that = (PlaybackStateEvent) o;
         return mState == that.mState
-                && mTimeSincePlaybackCreatedMillis == that.mTimeSincePlaybackCreatedMillis;
+                && mTimeSinceCreatedMillis == that.mTimeSinceCreatedMillis;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mState, mTimeSincePlaybackCreatedMillis);
+        return Objects.hash(mState, mTimeSinceCreatedMillis);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mState);
-        dest.writeLong(mTimeSincePlaybackCreatedMillis);
+        dest.writeLong(mTimeSinceCreatedMillis);
     }
 
     @Override
@@ -131,10 +186,10 @@ public final class PlaybackStateEvent implements Parcelable {
     /** @hide */
     /* package-private */ PlaybackStateEvent(@NonNull Parcel in) {
         int state = in.readInt();
-        long timeSincePlaybackCreatedMillis = in.readLong();
+        long timeSinceCreatedMillis = in.readLong();
 
         this.mState = state;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
     }
 
     public static final @NonNull Parcelable.Creator<PlaybackStateEvent> CREATOR =
@@ -150,4 +205,43 @@ public final class PlaybackStateEvent implements Parcelable {
         }
     };
 
+    /**
+     * A builder for {@link PlaybackStateEvent}
+     */
+    public static final class Builder {
+        private int mState = STATE_NOT_STARTED;
+        private long mTimeSinceCreatedMillis = -1;
+
+        /**
+         * Creates a new Builder.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Sets playback state.
+         */
+        public @NonNull Builder setState(@State int value) {
+            mState = value;
+            return this;
+        }
+
+        /**
+         * Sets timestamp since the creation in milliseconds.
+         * @param value the timestamp since the creation in milliseconds.
+         *              -1 indicates the value is unknown.
+         */
+        public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
+            mTimeSinceCreatedMillis = value;
+            return this;
+        }
+
+        /** Builds the instance. */
+        public @NonNull PlaybackStateEvent build() {
+            PlaybackStateEvent o = new PlaybackStateEvent(
+                    mState,
+                    mTimeSinceCreatedMillis);
+            return o;
+        }
+    }
 }

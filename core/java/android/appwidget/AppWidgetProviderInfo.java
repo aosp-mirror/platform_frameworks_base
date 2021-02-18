@@ -179,6 +179,44 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int minResizeHeight;
 
     /**
+     * Maximum width (in dp) which the widget can be resized to. This field has no effect if it is
+     * smaller than minWidth or if horizontal resizing isn't enabled (see {@link #resizeMode}).
+     *
+     * <p>This field corresponds to the <code>android:maxResizeWidth</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int maxResizeWidth;
+
+    /**
+     * Maximum height (in dp) which the widget can be resized to. This field has no effect if it is
+     * smaller than minHeight or if vertical resizing isn't enabled (see {@link #resizeMode}).
+     *
+     * <p>This field corresponds to the <code>android:maxResizeHeight</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int maxResizeHeight;
+
+    /**
+     * The default width of a widget when added to a host, in units of launcher grid cells.
+     *
+     * <p>This field corresponds to the <code>android:targetCellWidth</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int targetCellWidth;
+
+    /**
+     * The default height of a widget when added to a host, in units of launcher grid cells.
+     *
+     * <p>This field corresponds to the <code>android:targetCellHeight</code> attribute in the
+     * AppWidget meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    public int targetCellHeight;
+
+    /**
      * How often, in milliseconds, that this AppWidget wants to be updated.
      * The AppWidget manager may place a limit on how often a AppWidget is updated.
      *
@@ -330,6 +368,10 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.minHeight = in.readInt();
         this.minResizeWidth = in.readInt();
         this.minResizeHeight = in.readInt();
+        this.maxResizeWidth = in.readInt();
+        this.maxResizeHeight = in.readInt();
+        this.targetCellWidth = in.readInt();
+        this.targetCellHeight = in.readInt();
         this.updatePeriodMillis = in.readInt();
         this.initialLayout = in.readInt();
         this.initialKeyguardLayout = in.readInt();
@@ -440,6 +482,10 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.minHeight);
         out.writeInt(this.minResizeWidth);
         out.writeInt(this.minResizeHeight);
+        out.writeInt(this.maxResizeWidth);
+        out.writeInt(this.maxResizeHeight);
+        out.writeInt(this.targetCellWidth);
+        out.writeInt(this.targetCellHeight);
         out.writeInt(this.updatePeriodMillis);
         out.writeInt(this.initialLayout);
         out.writeInt(this.initialKeyguardLayout);
@@ -463,8 +509,12 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.provider = this.provider == null ? null : this.provider.clone();
         that.minWidth = this.minWidth;
         that.minHeight = this.minHeight;
-        that.minResizeWidth = this.minResizeHeight;
+        that.minResizeWidth = this.minResizeWidth;
         that.minResizeHeight = this.minResizeHeight;
+        that.maxResizeWidth = this.maxResizeWidth;
+        that.maxResizeHeight = this.maxResizeHeight;
+        that.targetCellWidth = this.targetCellWidth;
+        that.targetCellHeight = this.targetCellHeight;
         that.updatePeriodMillis = this.updatePeriodMillis;
         that.initialLayout = this.initialLayout;
         that.initialKeyguardLayout = this.initialKeyguardLayout;
@@ -512,6 +562,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         minHeight = TypedValue.complexToDimensionPixelSize(minHeight, displayMetrics);
         minResizeWidth = TypedValue.complexToDimensionPixelSize(minResizeWidth, displayMetrics);
         minResizeHeight = TypedValue.complexToDimensionPixelSize(minResizeHeight, displayMetrics);
+        maxResizeWidth = TypedValue.complexToDimensionPixelSize(maxResizeWidth, displayMetrics);
+        maxResizeHeight = TypedValue.complexToDimensionPixelSize(maxResizeHeight, displayMetrics);
     }
 
     /**

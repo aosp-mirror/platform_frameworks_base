@@ -14,183 +14,144 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
     <RelativeLayout
         android:background="@drawable/people_space_tile_view_card"
+        android:id="@+id/people_tile"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="start">
-            <TextView
-                android:id="@+id/punctuation1"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:maxLines="1"
-                android:alpha="0.2"
-                android:rotation="350" />
-            <TextView
-                android:id="@+id/punctuation2"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
-                android:maxLines="1"
-                android:alpha="0.2"
-                android:rotation="5" />
-            <TextView
-                android:id="@+id/punctuation3"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginStart="25dp"
-                android:maxLines="1"
-                android:alpha="0.2"
-                android:rotation="355"/>
-            <TextView
-                android:id="@+id/punctuation4"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-5dp"
-                android:layout_marginStart="25dp"
-                android:maxLines="1"
-                android:alpha="0.2"
-                android:rotation="10" />
-            <TextView
-                android:id="@+id/punctuation5"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginStart="25dp"
-                android:maxLines="1"
-                android:alpha="0.2"
-                android:rotation="15" />
-            <TextView
-                android:id="@+id/punctuation6"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-5dp"
-                android:layout_marginStart="25dp"
-                android:maxLines="1"
-                android:alpha="0.2"
-                android:rotation="345" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/item"
-            android:orientation="vertical"
-            android:paddingTop="6dp"
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:gravity="start"
+            android:id="@+id/column_one"
+            android:paddingVertical="8dp"
+            android:paddingStart="8dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent">
             <LinearLayout
                 android:orientation="horizontal"
-                android:paddingHorizontal="12dp"
-                android:paddingBottom="4dp"
-                android:gravity="top"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/person_icon"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp" />
-
-                <LinearLayout
-                    android:background="@drawable/people_space_rounded_border"
-                    android:layout_marginStart="-5dp"
-                    android:layout_marginTop="18dp"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp">
-
-                    <ImageView
-                        android:id="@+id/package_icon"
-                        android:layout_width="6dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginStart="1dp"
-                        android:layout_marginBottom="1dp"
-                        android:layout_marginTop="1dp"
-                        android:layout_height="6dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:paddingStart="6dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:id="@+id/name"
-                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="14sp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/time"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                        android:textSize="10sp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
-                </LinearLayout>
-            </LinearLayout>
-            <LinearLayout
                 android:id="@+id/content_background"
                 android:background="@drawable/people_space_content_background"
-                android:layout_gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <TextView
-                    android:id="@+id/content"
-                    android:paddingVertical="3dp"
-                    android:paddingHorizontal="12dp"
-                    android:gravity="center"
-                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:textSize="16sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:maxLines="2"
-                    android:ellipsize="end" />
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="60dp"
+                android:layout_height="60dp">
                 <ImageView
                     android:id="@+id/image"
+                    android:gravity="center"
+                    android:background="@drawable/people_space_content_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
                     android:scaleType="centerCrop"/>
+                <ImageView
+                    android:id="@+id/status_defined_icon"
+                    android:gravity="start|top"
+                    android:layout_marginStart="-52dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"/>
             </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/avatar_and_app_icon"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:paddingStart="4dp"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:id="@+id/person_icon_with_story"
+                    android:background="@drawable/people_space_new_story_outline"
+                    android:gravity="center_horizontal"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp">
+                    <ImageView
+                        android:id="@+id/person_icon_inside_ring"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"/>
+                </LinearLayout>
+                <ImageView
+                    android:id="@+id/person_icon_only"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"/>
+                <ImageView
+                    android:id="@id/package_icon"
+                    android:layout_marginStart="-16dp"
+                    android:layout_marginTop="18dp"
+                    android:paddingBottom="10dp"
+                    android:paddingEnd="8dp"
+                    android:layout_width="28dp"
+                    android:layout_height="32dp"/>
+            </LinearLayout>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:paddingTop="10dp"
+            android:paddingBottom="4dp"
+            android:paddingHorizontal="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/column_one"
+            android:gravity="top|end"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/status"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="12sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/person_label"
+            android:paddingBottom="10dp"
+            android:paddingEnd="8dp"
+            android:gravity="start|bottom"
+            android:layout_toEndOf="@id/column_one"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/content_layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/time"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="12sp"
+                android:paddingVertical="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:visibility="gone"
+                android:ellipsize="end"/>
+            <ImageView
+                android:id="@+id/availability"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:paddingVertical="2dp"
+                android:background="@drawable/circle_green_10dp"/>
+            <TextView
+                android:id="@+id/name"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

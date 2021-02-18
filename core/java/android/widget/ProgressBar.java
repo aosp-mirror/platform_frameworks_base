@@ -823,6 +823,7 @@ public class ProgressBar extends View {
      * @see #setIndeterminateTintList(ColorStateList)
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setIndeterminateTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
@@ -1132,6 +1133,7 @@ public class ProgressBar extends View {
      * @see #getProgressTintMode()
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setProgressTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
@@ -1248,6 +1250,7 @@ public class ProgressBar extends View {
      * @see #setProgressBackgroundTintList(ColorStateList)
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setProgressBackgroundTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
@@ -1360,6 +1363,7 @@ public class ProgressBar extends View {
      * @see #setSecondaryProgressTintList(ColorStateList)
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setSecondaryProgressTintBlendMode(@Nullable BlendMode blendMode) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();

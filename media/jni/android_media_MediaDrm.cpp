@@ -37,6 +37,7 @@
 #include <mediadrm/DrmUtils.h>
 #include <mediadrm/IDrmMetricsConsumer.h>
 #include <mediadrm/IDrm.h>
+#include <utils/Vector.h>
 
 using ::android::os::PersistableBundle;
 namespace drm = ::android::hardware::drm;
@@ -187,6 +188,11 @@ struct KeyStatusFields {
     jclass classId;
 };
 
+struct LogMessageFields {
+    jmethodID init;
+    jclass classId;
+};
+
 struct fields_t {
     jfieldID context;
     jmethodID post_event;
@@ -208,6 +214,7 @@ struct fields_t {
     jmethodID createFromParcelId;
     jclass parcelCreatorClassId;
     KeyStatusFields keyStatus;
+    LogMessageFields logMessage;
 };
 
 static fields_t gFields;
@@ -224,6 +231,19 @@ jbyteArray hidlVectorToJByteArray(const hardware::hidl_vec<uint8_t> &vector) {
     return result;
 }
 
+jobject hidlLogMessagesToJavaList(JNIEnv *env, const Vector<drm::V1_4::LogMessage> &logs) {
+    jclass clazz = gFields.arraylistClassId;
+    jobject arrayList = env->NewObject(clazz, gFields.arraylist.init);
+    clazz = gFields.logMessage.classId;
+    for (auto log: logs) {
+        jobject jLog = env->NewObject(clazz, gFields.logMessage.init,
+                static_cast<jlong>(log.timeMs),
+                static_cast<jint>(log.priority),
+                env->NewStringUTF(log.message.c_str()));
+        env->CallBooleanMethod(arrayList, gFields.arraylist.add, jLog);
+    }
+    return arrayList;
+}
 }  // namespace anonymous
 
 // ----------------------------------------------------------------------------
@@ -907,6 +927,10 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyStatus");
     gFields.keyStatus.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
     GET_METHOD_ID(gFields.keyStatus.init, clazz, "<init>", "([BI)V");
+
+    FIND_CLASS(clazz, "android/media/MediaDrm$LogMessage");
+    gFields.logMessage.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
+    GET_METHOD_ID(gFields.logMessage.init, clazz, "<init>", "(JILjava/lang/String;)V");
 }
 
 static void android_media_MediaDrm_native_setup(
@@ -1996,6 +2020,22 @@ static void android_media_MediaDrm_setPlaybackId(
     throwExceptionAsNecessary(env, err, "Failed to set playbackId");
 }
 
+static jobject android_media_MediaDrm_getLogMessages(
+        JNIEnv *env, jobject thiz) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+    if (!CheckDrm(env, drm)) {
+        return NULL;
+    }
+
+    Vector<drm::V1_4::LogMessage> logs;
+    status_t err = drm->getLogMessages(logs);
+    ALOGI("drm->getLogMessages %zu logs", logs.size());
+    if (throwExceptionAsNecessary(env, err, "Failed to get log messages")) {
+        return NULL;
+    }
+    return hidlLogMessagesToJavaList(env, logs);
+}
+
 static const JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaDrm_native_release },
 
@@ -2123,6 +2163,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "setPlaybackId", "([BLjava/lang/String;)V",
       (void *)android_media_MediaDrm_setPlaybackId },
+
+    { "getLogMessages", "()Ljava/util/List;",
+      (void *)android_media_MediaDrm_getLogMessages },
 };
 
 int register_android_media_Drm(JNIEnv *env) {

@@ -5855,12 +5855,8 @@ class Task extends WindowContainer<WindowContainer> {
             mTaskSupervisor.acquireLaunchWakelock();
         }
 
-        if (didAutoPip) {
-            // Already entered PIP mode, no need to keep pausing.
-            return true;
-        }
-
-        if (mPausingActivity != null) {
+        // If already entered PIP mode, no need to keep pausing.
+        if (mPausingActivity != null && !didAutoPip) {
             // Have the window manager pause its key dispatching until the new
             // activity has started.  If we're pausing the activity just because
             // the screen is being turned off and the UI is sleeping, don't interrupt
@@ -5883,9 +5879,9 @@ class Task extends WindowContainer<WindowContainer> {
             }
 
         } else {
-            // This activity failed to schedule the
-            // pause, so just treat it as being paused now.
-            ProtoLog.v(WM_DEBUG_STATES, "Activity not running, resuming next.");
+            // This activity either failed to schedule the pause or it entered PIP mode,
+            // so just treat it as being paused now.
+            ProtoLog.v(WM_DEBUG_STATES, "Activity not running or entered PiP, resuming next.");
             if (resuming == null) {
                 mRootWindowContainer.resumeFocusedTasksTopActivities();
             }

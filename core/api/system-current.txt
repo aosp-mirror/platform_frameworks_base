@@ -14,6 +14,7 @@ package android {
     field public static final String ACCESS_MTP = "android.permission.ACCESS_MTP";
     field public static final String ACCESS_NETWORK_CONDITIONS = "android.permission.ACCESS_NETWORK_CONDITIONS";
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
+    field public static final String ACCESS_RCS_USER_CAPABILITY_EXCHANGE = "android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE";
     field public static final String ACCESS_SHARED_LIBRARIES = "android.permission.ACCESS_SHARED_LIBRARIES";
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
@@ -198,6 +199,7 @@ package android {
     field public static final String READ_NETWORK_DEVICE_CONFIG = "android.permission.READ_NETWORK_DEVICE_CONFIG";
     field public static final String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
+    field public static final String READ_PEOPLE_DATA = "android.permission.READ_PEOPLE_DATA";
     field public static final String READ_PRINT_SERVICES = "android.permission.READ_PRINT_SERVICES";
     field public static final String READ_PRINT_SERVICE_RECOMMENDATIONS = "android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
@@ -272,6 +274,7 @@ package android {
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
+    field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
     field public static final String WIFI_ACCESS_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS";
@@ -344,6 +347,7 @@ package android {
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
+    field public static final int config_systemContacts = 17039403; // 0x104002b
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemShell = 17039402; // 0x104002a
   }
@@ -1277,6 +1281,14 @@ package android.app.job {
 
 }
 
+package android.app.people {
+
+  public final class PeopleManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PEOPLE_DATA) public boolean isConversation(@NonNull String, @NonNull String);
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictionContext implements android.os.Parcelable {
@@ -2125,6 +2137,7 @@ package android.content {
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
+    field public static final String REBOOT_READINESS_SERVICE = "reboot_readiness";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String SEARCH_UI_SERVICE = "search_ui";
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
@@ -8950,6 +8963,16 @@ package android.os.storage {
 
 package android.permission {
 
+  public final class AdminPermissionControlParams implements android.os.Parcelable {
+    method public boolean canAdminGrantSensorsPermissions();
+    method public int describeContents();
+    method public int getGrantState();
+    method @NonNull public String getGranteePackageName();
+    method @NonNull public String getPermission();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.permission.AdminPermissionControlParams> CREATOR;
+  }
+
   public final class PermissionControllerManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
@@ -8981,7 +9004,8 @@ package android.permission {
     method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
-    method @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @Deprecated @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @BinderThread public void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull android.permission.AdminPermissionControlParams, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public void onUpdateUserSensitivePermissionFlags(int, @NonNull java.util.concurrent.Executor, @NonNull Runnable);
     method @BinderThread public void onUpdateUserSensitivePermissionFlags(int, @NonNull Runnable);
@@ -9453,22 +9477,8 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean);
   }
 
-  public final class SimPhonebookContract {
-    method @NonNull public static String getEfUriPath(int);
-    field public static final String SUBSCRIPTION_ID_PATH_SEGMENT = "subid";
-  }
-
-  public static final class SimPhonebookContract.ElementaryFiles {
-    field public static final String EF_ADN_PATH_SEGMENT = "adn";
-    field public static final String EF_FDN_PATH_SEGMENT = "fdn";
-    field public static final String EF_SDN_PATH_SEGMENT = "sdn";
-    field public static final String ELEMENTARY_FILES_PATH_SEGMENT = "elementary_files";
-  }
-
   public static final class SimPhonebookContract.SimRecords {
-    field public static final String EXTRA_NAME_VALIDATION_RESULT = "android.provider.extra.NAME_VALIDATION_RESULT";
     field public static final String QUERY_ARG_PIN2 = "android:query-arg-pin2";
-    field public static final String VALIDATE_NAME_PATH_SEGMENT = "validate_name";
   }
 
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
@@ -10762,7 +10772,7 @@ package android.telecom {
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
-    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, boolean);
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
@@ -10939,7 +10949,7 @@ package android.telecom {
   }
 
   public final class RemoteConnection {
-    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, boolean);
     method @Deprecated public void setAudioState(android.telecom.AudioState);
   }
 
@@ -14219,10 +14229,10 @@ package android.uwb {
   }
 
   public final class RangingSession implements java.lang.AutoCloseable {
-    method public void close();
-    method public void reconfigure(@NonNull android.os.PersistableBundle);
-    method public void start(@NonNull android.os.PersistableBundle);
-    method public void stop();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void close();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void reconfigure(@NonNull android.os.PersistableBundle);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void start(@NonNull android.os.PersistableBundle);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void stop();
   }
 
   public static interface RangingSession.Callback {
@@ -14258,18 +14268,18 @@ package android.uwb {
   }
 
   public final class UwbManager {
-    method public long elapsedRealtimeResolutionNanos();
-    method public int getAngleOfArrivalSupport();
-    method public int getMaxRemoteDevicesPerInitiatorSession();
-    method public int getMaxRemoteDevicesPerResponderSession();
-    method public int getMaxSimultaneousSessions();
-    method @NonNull public android.os.PersistableBundle getSpecificationInfo();
-    method @NonNull public java.util.List<java.lang.Integer> getSupportedChannelNumbers();
-    method @NonNull public java.util.Set<java.lang.Integer> getSupportedPreambleCodeIndices();
-    method public boolean isRangingSupported();
-    method @NonNull public AutoCloseable openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
-    method public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
-    method public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public long elapsedRealtimeResolutionNanos();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getAngleOfArrivalSupport();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerInitiatorSession();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerResponderSession();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxSimultaneousSessions();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public android.os.PersistableBundle getSpecificationInfo();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.List<java.lang.Integer> getSupportedChannelNumbers();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.Set<java.lang.Integer> getSupportedPreambleCodeIndices();
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public boolean isRangingSupported();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public AutoCloseable openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
+    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
     field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D = 2; // 0x2
     field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL = 3; // 0x3
     field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL = 4; // 0x4

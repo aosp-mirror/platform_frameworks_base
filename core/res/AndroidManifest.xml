@@ -1313,11 +1313,13 @@
         android:protectionLevel="dangerous|instant" />
 
     <!-- ====================================================================== -->
-    <!-- Permissions for accessing the UCE Service                              -->
+    <!-- Permissions for accessing the vendor UCE Service                              -->
     <!-- ====================================================================== -->
 
     <!-- @hide Allows an application to Access UCE-Presence.
          <p>Protection level: signature|privileged
+         @deprecated Framework should no longer use this permission to access the vendor UCE service
+         using AIDL, it is instead implemented by RcsCapabilityExchangeImplBase
     -->
     <permission android:name="android.permission.ACCESS_UCE_PRESENCE_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
@@ -1325,6 +1327,8 @@
 
     <!-- @hide Allows an application to Access UCE-OPTIONS.
          <p>Protection level: signature|privileged
+         @deprecated Framework should no longer use this permission to access the vendor UCE service
+         using AIDL, it is instead implemented by RcsCapabilityExchangeImplBase
     -->
     <permission android:name="android.permission.ACCESS_UCE_OPTIONS_SERVICE"
         android:permissionGroup="android.permission-group.PHONE"
@@ -1402,6 +1406,15 @@
         android:label="@string/permgrouplab_sensors"
         android:description="@string/permgroupdesc_sensors"
         android:priority="800" />
+
+    <!-- Allows an app to access sensor data with a sampling rate greater than 200 Hz.
+        <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"
+                android:permissionGroup="android.permission-group.SENSORS"
+                android:label="@string/permlab_highSamplingRateSensors"
+                android:description="@string/permdesc_highSamplingRateSensors"
+                android:protectionLevel="normal" />
 
     <!-- Allows an application to access data from sensors that the user uses to
          measure what is happening inside their body, such as heart rate.
@@ -2002,6 +2015,12 @@
     <permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows access to ultra wideband device.
+     <p>Not for use by third-party applications.
+     @hide -->
+    <permission android:name="android.permission.UWB_PRIVILEGED"
+                android:protectionLevel="signature|privileged" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
@@ -2452,6 +2471,15 @@
     -->
     <permission android:name="android.permission.BIND_GBA_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- Required for an Application to access APIs related to RCS User Capability Exchange.
+         <p> This permission is only granted to system applications fulfilling the SMS, Dialer, and
+         Contacts app roles.
+         <p>Protection level: internal|role
+         @SystemApi
+         @hide -->
+    <permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"
+        android:protectionLevel="internal|role" />
 
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
@@ -5491,6 +5519,12 @@
     <!-- @hide Allows an application to get a People Tile preview for a given shortcut. -->
     <permission android:name="android.permission.GET_PEOPLE_TILE_PREVIEW"
         android:protectionLevel="signature|recents" />
+
+    <!-- @hide @SystemApi Allows an application to retrieve whether shortcut is backed by a
+         Conversation.
+         TODO(b/180412052): STOPSHIP: Define a role so it can be granted to Shell and AiAi. -->
+    <permission android:name="android.permission.READ_PEOPLE_DATA"
+                android:protectionLevel="signature|appPredictor|recents"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

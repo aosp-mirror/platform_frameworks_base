@@ -127,7 +127,7 @@ java_library_static {
         "android.hardware.health-V2.0-java",
         "android.hardware.health-V2.1-java",
         "android.hardware.light-V1-java",
-        "android.hardware.tv.cec-V1.0-java",
+        "android.hardware.tv.cec-V1.1-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1-java",
         "android.hardware.biometrics.face-V1.0-java",
