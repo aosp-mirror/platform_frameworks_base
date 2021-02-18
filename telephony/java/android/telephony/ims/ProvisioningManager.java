@@ -866,6 +866,19 @@ public class ProvisioningManager {
     public static final int KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID = 67;
 
     /**
+     * An integer key representing the voice over IMS opt-in provisioning status for the
+     * associated subscription. Determines whether the user can see for voice services over
+     * IMS.
+     * <p>
+     * Use {@link #PROVISIONING_VALUE_ENABLED} to enable VoIMS provisioning and
+     * {@link #PROVISIONING_VALUE_DISABLED} to disable VoIMS  provisioning.
+     * @see #setProvisioningIntValue(int, int)
+     * @see #getProvisioningIntValue(int)
+     * @hide
+     */
+    public static final int KEY_VOIMS_OPT_IN_STATUS = 68;
+
+    /**
      * Callback for IMS provisioning changes.
      */
     public static class Callback {

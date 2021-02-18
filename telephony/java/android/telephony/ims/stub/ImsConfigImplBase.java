@@ -258,6 +258,16 @@ public class ImsConfigImplBase {
         public void setRcsClientConfiguration(RcsClientConfiguration rcc) throws RemoteException {
             getImsConfigImpl().setRcsClientConfiguration(rcc);
         }
+
+        @Override
+        public void notifyIntImsConfigChanged(int item, int value) throws RemoteException {
+            notifyImsConfigChanged(item, value);
+        }
+
+        @Override
+        public void notifyStringImsConfigChanged(int item, String value) throws RemoteException {
+            notifyImsConfigChanged(item, value);
+        }
     }
 
     /**
