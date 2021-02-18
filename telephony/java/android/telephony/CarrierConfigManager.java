@@ -4749,7 +4749,7 @@ public class CarrierConfigManager {
     public static final String KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL =
             "network_temp_not_metered_supported_bool";
 
-    /*
+    /**
      * Boolean indicating whether the SIM PIN can be stored and verified
      * seamlessly after an unattended reboot.
      *
