@@ -3067,7 +3067,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.println(job.toShortStringExceptUniqueId());
 
                     pw.increaseIndent();
-                    job.dump(pw, "", true, nowElapsed);
+                    job.dump(pw, true, nowElapsed);
 
                     pw.print("Restricted due to:");
                     final boolean isRestricted = checkIfRestricted(job) != null;
@@ -3179,7 +3179,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 pw.println(job.toShortString());
 
                 pw.increaseIndent();
-                job.dump(pw, "", false, nowElapsed);
+                job.dump(pw, false, nowElapsed);
                 int priority = evaluateJobPriorityLocked(job);
                 pw.print("Evaluated priority: ");
                 pw.println(JobInfo.getPriorityString(priority));
@@ -3213,7 +3213,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.increaseIndent();
 
                     pw.increaseIndent();
-                    job.dump(pw, "", false, nowElapsed);
+                    job.dump(pw, false, nowElapsed);
                     pw.decreaseIndent();
 
                     pw.print("Evaluated priority: ");
