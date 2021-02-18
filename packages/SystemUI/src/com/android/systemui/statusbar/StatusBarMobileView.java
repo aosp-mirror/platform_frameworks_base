@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.FeatureFlagUtils;
@@ -238,11 +237,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
     @Override
     public void setStaticDrawableColor(int color) {
         ColorStateList list = ColorStateList.valueOf(color);
-        float intensity = color == Color.WHITE ? 0 : 1;
-        // We want the ability to change the theme from the one set by SignalDrawable in certain
-        // surfaces. In this way, we can pass a theme to the view.
-        mMobileDrawable.setTintList(
-                ColorStateList.valueOf(mDualToneHandler.getSingleColor(intensity)));
+        mMobileDrawable.setTintList(list);
         mIn.setImageTintList(list);
         mOut.setImageTintList(list);
         mMobileType.setImageTintList(list);

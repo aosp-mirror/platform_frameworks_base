@@ -90,6 +90,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private OngoingPrivacyChip mPrivacyChip;
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
+    private TintedIconManager mTintedIconManager;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -144,6 +145,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     }
 
     void onAttach(TintedIconManager iconManager) {
+        mTintedIconManager = iconManager;
         int fillColor = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.textColorPrimary);
 
@@ -268,6 +270,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
                     android.R.attr.textColorSecondary);
             mTextColorPrimary = textColor;
             mClockView.setTextColor(textColor);
+            if (mTintedIconManager != null) {
+                mTintedIconManager.setTint(textColor);
+            }
             mBatteryRemainingIcon.updateColors(mTextColorPrimary, textColorSecondary,
                     mTextColorPrimary);
         }
