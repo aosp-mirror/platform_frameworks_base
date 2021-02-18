@@ -420,19 +420,11 @@ public final class VcnGatewayConnectionConfig {
          *
          * @param ctrlPlaneConfig the control plane configuration
          * @see VcnControlPlaneConfig
-         * @hide
          */
         public Builder(@NonNull VcnControlPlaneConfig ctrlPlaneConfig) {
             Objects.requireNonNull(ctrlPlaneConfig, "ctrlPlaneConfig was null");
 
             mCtrlPlaneConfig = ctrlPlaneConfig;
-        }
-
-        /** Construct a Builder object. */
-        // TODO: Remove this constructor when #Builder(ctrlPlaneConfig) is exposed as public API.
-        // This constructor is created to avoid changing API shape in this CL
-        public Builder() {
-            mCtrlPlaneConfig = null;
         }
 
         /**
