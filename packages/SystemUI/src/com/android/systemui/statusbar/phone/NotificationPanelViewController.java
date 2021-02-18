@@ -281,18 +281,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public void onKeyguardVisibilityChanged(boolean showing) {
-                    if (mDisabledUdfpsController == null
-                            && mAuthController.getUdfpsRegion() != null
-                            && mAuthController.isUdfpsEnrolled(
-                                   KeyguardUpdateMonitor.getCurrentUser())) {
-                        mLayoutInflater.inflate(R.layout.disabled_udfps_view, mView);
-                        mDisabledUdfpsController = new DisabledUdfpsController(
-                                mView.findViewById(R.id.disabled_udfps_view),
-                                mStatusBarStateController,
-                                mUpdateMonitor,
-                                mAuthController,
-                                mStatusBarKeyguardViewManager);
-                        mDisabledUdfpsController.init();
+                    if (showing) {
+                        updateDisabledUdfpsController();
                     }
                 }
     };
@@ -3582,6 +3572,25 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    private void updateDisabledUdfpsController() {
+        final boolean udfpsEnrolled = mAuthController.getUdfpsRegion() != null
+                && mAuthController.isUdfpsEnrolled(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (mDisabledUdfpsController == null && udfpsEnrolled) {
+            mLayoutInflater.inflate(R.layout.disabled_udfps_view, mView);
+            mDisabledUdfpsController = new DisabledUdfpsController(
+                    mView.findViewById(R.id.disabled_udfps_view),
+                    mStatusBarStateController,
+                    mUpdateMonitor,
+                    mAuthController,
+                    mStatusBarKeyguardViewManager);
+            mDisabledUdfpsController.init();
+        } else if (mDisabledUdfpsController != null && !udfpsEnrolled) {
+            mDisabledUdfpsController.destroy();
+            mDisabledUdfpsController = null;
+        }
+    }
+
     private class OnHeightChangedListener implements ExpandableView.OnHeightChangedListener {
         @Override
         public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
@@ -3997,6 +4006,7 @@ public class NotificationPanelViewController extends PanelViewController {
             FragmentHostManager.get(mView).addTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.addCallback(mStatusBarStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
+            updateDisabledUdfpsController();
             mUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
             // Theme might have changed between inflating this view and attaching it to the
             // window, so
