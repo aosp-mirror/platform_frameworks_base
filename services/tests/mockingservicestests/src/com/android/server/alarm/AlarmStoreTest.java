@@ -69,12 +69,12 @@ public class AlarmStoreTest {
                 mock(PendingIntent.class));
         return new Alarm(ELAPSED_REALTIME_WAKEUP, whenElapsed, whenElapsed, 0, 0,
                 mock(PendingIntent.class), null, null, null, 0, info, TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE);
+                TEST_CALLING_PACKAGE, null);
     }
 
     private static Alarm createAlarm(int type, long whenElapsed, long windowLength, int flags) {
         return new Alarm(type, whenElapsed, whenElapsed, windowLength, 0, mock(PendingIntent.class),
-                null, null, null, flags, null, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+                null, null, null, flags, null, TEST_CALLING_UID, TEST_CALLING_PACKAGE, null);
     }
 
     private void addAlarmsToStore(Alarm... alarms) {
