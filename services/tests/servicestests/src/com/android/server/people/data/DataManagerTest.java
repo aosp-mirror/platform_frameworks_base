@@ -79,6 +79,7 @@ import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.test.TestLooper;
 import android.provider.ContactsContract;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -91,7 +92,10 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
+import com.android.server.people.PeopleService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+
+import com.google.common.collect.Iterables;
 
 import org.junit.After;
 import org.junit.Before;
@@ -123,6 +127,7 @@ public final class DataManagerTest {
     private static final String TEST_PKG_NAME = "pkg";
     private static final String TEST_CLASS_NAME = "class";
     private static final String TEST_SHORTCUT_ID = "sc";
+    private static final String TEST_SHORTCUT_ID_2 = "sc2";
     private static final int TEST_PKG_UID = 35;
     private static final String CONTACT_URI = "content://com.android.contacts/contacts/lookup/123";
     private static final String PHONE_NUMBER = "+1234567890";
@@ -157,6 +162,7 @@ public final class DataManagerTest {
     private ShortcutChangeCallback mShortcutChangeCallback;
     private ShortcutInfo mShortcutInfo;
     private TestInjector mInjector;
+    private TestLooper mLooper;
 
     @Before
     public void setUp() throws PackageManager.NameNotFoundException {
@@ -237,7 +243,8 @@ public final class DataManagerTest {
         mCancellationSignal = new CancellationSignal();
 
         mInjector = new TestInjector();
-        mDataManager = new DataManager(mContext, mInjector);
+        mLooper = new TestLooper();
+        mDataManager = new DataManager(mContext, mInjector, mLooper.getLooper());
         mDataManager.initialize();
 
         when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
@@ -512,6 +519,84 @@ public final class DataManagerTest {
                 mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
 
         assertTrue(mDataManager.getRecentConversations(USER_ID_PRIMARY).isEmpty());
+    }
+
+    @Test
+    public void testAddConversationsListener() throws Exception {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        ConversationChannel conversationChannel = mDataManager.getConversation(TEST_PKG_NAME,
+                USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID);
+
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
+
+        List<ConversationChannel> changedConversations = Arrays.asList(conversationChannel);
+        verify(listener, times(0)).onConversationsUpdate(eq(changedConversations));
+        mDataManager.notifyConversationsListeners(changedConversations);
+        mLooper.dispatchAll();
+
+        verify(listener, times(1)).onConversationsUpdate(eq(changedConversations));
+    }
+
+    @Test
+    public void testAddConversationListenersNotifiesMultipleConversations() throws Exception {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        ConversationChannel conversationChannel = mDataManager.getConversation(TEST_PKG_NAME,
+                USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID);
+        ShortcutInfo shortcut2 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID_2,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut2);
+        ConversationChannel conversationChannel2 = mDataManager.getConversation(TEST_PKG_NAME,
+                USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID_2);
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
+
+        List<ConversationChannel> changedConversations = Arrays.asList(conversationChannel,
+                conversationChannel2);
+        verify(listener, times(0)).onConversationsUpdate(eq(changedConversations));
+        mDataManager.notifyConversationsListeners(changedConversations);
+        mLooper.dispatchAll();
+
+        verify(listener, times(1)).onConversationsUpdate(eq(changedConversations));
+        ArgumentCaptor<List<ConversationChannel>> capturedConversation = ArgumentCaptor.forClass(
+                List.class);
+        verify(listener, times(1)).onConversationsUpdate(capturedConversation.capture());
+        assertThat(capturedConversation.getValue()).containsExactly(conversationChannel,
+                conversationChannel2);
+    }
+
+    @Test
+    public void testAddOrUpdateStatusNotifiesConversationsListeners() throws Exception {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        PeopleService.ConversationsListener listener = mock(
+                PeopleService.ConversationsListener.class);
+        mDataManager.addConversationsListener(listener);
+
+        ConversationStatus status = new ConversationStatus.Builder("cs1", ACTIVITY_GAME).build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, status);
+        mLooper.dispatchAll();
+
+        ArgumentCaptor<List<ConversationChannel>> capturedConversation = ArgumentCaptor.forClass(
+                List.class);
+        verify(listener, times(1)).onConversationsUpdate(capturedConversation.capture());
+        ConversationChannel result = Iterables.getOnlyElement(capturedConversation.getValue());
+        assertThat(result.getStatuses()).containsExactly(status);
+        assertEquals(result.getShortcutInfo().getId(), TEST_SHORTCUT_ID);
     }
 
     @Test
@@ -975,7 +1060,7 @@ public final class DataManagerTest {
         mDataManager.reportShareTargetEvent(appTargetEvent, intentFilter);
         byte[] payload = mDataManager.getBackupPayload(USER_ID_PRIMARY);
 
-        DataManager dataManager = new DataManager(mContext, mInjector);
+        DataManager dataManager = new DataManager(mContext, mInjector, mLooper.getLooper());
         dataManager.onUserUnlocked(USER_ID_PRIMARY);
         dataManager.restore(USER_ID_PRIMARY, payload);
         ConversationInfo conversationInfo = dataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
