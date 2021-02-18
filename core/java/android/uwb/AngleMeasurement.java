@@ -38,9 +38,30 @@ public final class AngleMeasurement implements Parcelable {
     private final double mErrorRadians;
     private final double mConfidenceLevel;
 
-    private AngleMeasurement(double radians, double errorRadians, double confidenceLevel) {
+    /**
+     * Constructs a new {@link AngleMeasurement} object
+     *
+     * @param radians the angle in radians
+     * @param errorRadians the error of the angle measurement in radians
+     * @param confidenceLevel confidence level of the angle measurement
+     *
+     * @throws IllegalArgumentException if the radians, errorRadians, or confidenceLevel is out of
+     *                                  allowed range
+     */
+    public AngleMeasurement(double radians, double errorRadians, double confidenceLevel) {
+        if (radians < -Math.PI || radians > Math.PI) {
+            throw new IllegalArgumentException("Invalid radians: " + radians);
+        }
         mRadians = radians;
+
+        if (errorRadians < 0.0 || errorRadians > Math.PI) {
+            throw new IllegalArgumentException("Invalid error radians: " + errorRadians);
+        }
         mErrorRadians = errorRadians;
+
+        if (confidenceLevel < 0.0 || confidenceLevel > 1.0) {
+            throw new IllegalArgumentException("Invalid confidence level: " + confidenceLevel);
+        }
         mConfidenceLevel = confidenceLevel;
     }
 
@@ -122,11 +143,7 @@ public final class AngleMeasurement implements Parcelable {
             new Creator<AngleMeasurement>() {
                 @Override
                 public AngleMeasurement createFromParcel(Parcel in) {
-                    Builder builder = new Builder();
-                    builder.setRadians(in.readDouble());
-                    builder.setErrorRadians(in.readDouble());
-                    builder.setConfidenceLevel(in.readDouble());
-                    return builder.build();
+                    return new AngleMeasurement(in.readDouble(), in.readDouble(), in.readDouble());
                 }
 
                 @Override
@@ -134,82 +151,4 @@ public final class AngleMeasurement implements Parcelable {
                     return new AngleMeasurement[size];
                 }
     };
-
-    /**
-     * Builder class for {@link AngleMeasurement}.
-     */
-    public static final class Builder {
-        private double mRadians = Double.NaN;
-        private double mErrorRadians = Double.NaN;
-        private double mConfidenceLevel = Double.NaN;
-
-        /**
-         * Set the angle in radians
-         *
-         * @param radians angle in radians
-         * @throws IllegalArgumentException if angle exceeds allowed limits of [-Math.PI, +Math.PI]
-         */
-        @NonNull
-        public Builder setRadians(double radians) {
-            if (radians < -Math.PI || radians > Math.PI) {
-                throw new IllegalArgumentException("Invalid radians: " + radians);
-            }
-            mRadians = radians;
-            return this;
-        }
-
-        /**
-         * Set the angle error in radians
-         *
-         * @param errorRadians error of the angle in radians
-         * @throws IllegalArgumentException if the error exceeds the allowed limits of [0, +Math.PI]
-         */
-        @NonNull
-        public Builder setErrorRadians(double errorRadians) {
-            if (errorRadians < 0.0 || errorRadians > Math.PI) {
-                throw new IllegalArgumentException(
-                        "Invalid error radians: " + errorRadians);
-            }
-            mErrorRadians = errorRadians;
-            return this;
-        }
-
-        /**
-         * Set the angle confidence level
-         *
-         * @param confidenceLevel level of confidence of the angle measurement
-         * @throws IllegalArgumentException if the error exceeds the allowed limits of [0.0, 1.0]
-         */
-        @NonNull
-        public Builder setConfidenceLevel(double confidenceLevel) {
-            if (confidenceLevel < 0.0 || confidenceLevel > 1.0) {
-                throw new IllegalArgumentException(
-                        "Invalid confidence level: " + confidenceLevel);
-            }
-            mConfidenceLevel = confidenceLevel;
-            return this;
-        }
-
-        /**
-         * Build the {@link AngleMeasurement} object
-         *
-         * @throws IllegalStateException if angle, error, or confidence values are missing
-         */
-        @NonNull
-        public AngleMeasurement build() {
-            if (Double.isNaN(mRadians)) {
-                throw new IllegalStateException("Angle is not set");
-            }
-
-            if (Double.isNaN(mErrorRadians)) {
-                throw new IllegalStateException("Angle error is not set");
-            }
-
-            if (Double.isNaN(mConfidenceLevel)) {
-                throw new IllegalStateException("Angle confidence level is not set");
-            }
-
-            return new AngleMeasurement(mRadians, mErrorRadians, mConfidenceLevel);
-        }
-    }
 }
