@@ -254,6 +254,7 @@ public class Task {
     public Task(Task other) {
         this(other.key, other.colorPrimary, other.colorBackground, other.isDockable,
                 other.isLocked, other.taskDescription, other.topActivity);
+        lastSnapshotData.set(other.lastSnapshotData);
     }
 
     /**
@@ -279,6 +280,25 @@ public class Task {
         return topActivity != null
                 ? topActivity
                 : key.baseIntent.getComponent();
+    }
+
+    public void setLastSnapshotData(ActivityManager.RecentTaskInfo rawTask) {
+        lastSnapshotData.set(rawTask.lastSnapshotData);
+    }
+
+    /**
+     * Returns the visible width to height ratio. Returns 0f if snapshot data is not available.
+     */
+    public float getVisibleThumbnailRatio() {
+        if (lastSnapshotData.taskSize == null || lastSnapshotData.contentInsets == null) {
+            return 0f;
+        }
+
+        float availableWidth = lastSnapshotData.taskSize.x - (lastSnapshotData.contentInsets.left
+                + lastSnapshotData.contentInsets.right);
+        float availableHeight = lastSnapshotData.taskSize.y - (lastSnapshotData.contentInsets.top
+                + lastSnapshotData.contentInsets.bottom);
+        return availableWidth / availableHeight;
     }
 
     @Override
