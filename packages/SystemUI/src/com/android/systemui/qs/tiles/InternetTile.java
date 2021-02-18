@@ -248,15 +248,13 @@ public class InternetTile extends QSTileImpl<SignalState> {
                         + "isTransient = " + isTransient + ","
                         + "statusLabel = " + statusLabel);
             }
-            // When airplane mode is enabled, we need to refresh the Internet Tile even if the WiFi
-            // is not the default network.
+            mWifiInfo.mEnabled = enabled;
             if (qsIcon == null) {
                 return;
             }
             mWifiInfo.mConnected = qsIcon.visible;
             mWifiInfo.mWifiSignalIconId = qsIcon.icon;
             mWifiInfo.mWifiSignalContentDescription = qsIcon.contentDescription;
-            mWifiInfo.mEnabled = enabled;
             mWifiInfo.mSsid = description;
             mWifiInfo.mActivityIn = activityIn;
             mWifiInfo.mActivityOut = activityOut;
@@ -465,14 +463,13 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
         minimalContentDescription.append(
             mContext.getString(R.string.quick_settings_internet_label)).append(",");
-        if (state.value) {
-            if (wifiConnected) {
-                minimalStateDescription.append(cb.mWifiSignalContentDescription);
-                minimalContentDescription.append(removeDoubleQuotes(cb.mSsid));
-            } else if (!TextUtils.isEmpty(state.secondaryLabel)) {
-                minimalContentDescription.append(",").append(state.secondaryLabel);
-            }
+        if (state.value && wifiConnected) {
+            minimalStateDescription.append(cb.mWifiSignalContentDescription);
+            minimalContentDescription.append(removeDoubleQuotes(cb.mSsid));
+        } else if (!TextUtils.isEmpty(state.secondaryLabel)) {
+            minimalContentDescription.append(",").append(state.secondaryLabel);
         }
+
         state.stateDescription = minimalStateDescription.toString();
         state.contentDescription = minimalContentDescription.toString();
         state.dualLabelContentDescription = r.getString(
