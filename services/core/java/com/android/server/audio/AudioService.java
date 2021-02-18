@@ -724,7 +724,7 @@ public class AudioService extends IAudioService.Stub
     // caches the value returned by AudioSystem.isMicrophoneMuted()
     private boolean mMicMuteFromSystemCached;
 
-    private boolean mFastScrollSoundEffectsEnabled;
+    private boolean mNavigationRepeatSoundEffectsEnabled;
     private boolean mHomeSoundEffectEnabled;
 
     @GuardedBy("mSettingsLock")
@@ -2323,15 +2323,15 @@ public class AudioService extends IAudioService.Stub
                 VOL_ADJUST_NORMAL);
     }
 
-    public void setFastScrollSoundEffectsEnabled(boolean enabled) {
-        mFastScrollSoundEffectsEnabled = enabled;
+    public void setNavigationRepeatSoundEffectsEnabled(boolean enabled) {
+        mNavigationRepeatSoundEffectsEnabled = enabled;
     }
 
     /**
      * @return true if the fast scroll sound effects are enabled
      */
-    public boolean areFastScrollSoundEffectsEnabled() {
-        return mFastScrollSoundEffectsEnabled;
+    public boolean areNavigationRepeatSoundEffectsEnabled() {
+        return mNavigationRepeatSoundEffectsEnabled;
     }
 
     public void setHomeSoundEffectEnabled(boolean enabled) {
