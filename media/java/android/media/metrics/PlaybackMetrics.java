@@ -17,6 +17,7 @@
 package android.media.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -33,35 +34,57 @@ import java.util.Objects;
 
 /**
  * This class is used to store playback data.
- * @hide
  */
 public final class PlaybackMetrics implements Parcelable {
-    // TODO(b/177209128): JavaDoc for the constants.
+    /** Unknown stream source. */
     public static final int STREAM_SOURCE_UNKNOWN = 0;
+    /** Stream from network. */
     public static final int STREAM_SOURCE_NETWORK = 1;
+    /** Stream from device. */
     public static final int STREAM_SOURCE_DEVICE = 2;
+    /** Stream from more than one sources. */
     public static final int STREAM_SOURCE_MIXED = 3;
 
+    /** Unknown stream type. */
     public static final int STREAM_TYPE_UNKNOWN = 0;
+    /** Other stream type. */
     public static final int STREAM_TYPE_OTHER = 1;
+    /** Progressive stream type. */
     public static final int STREAM_TYPE_PROGRESSIVE = 2;
+    /** DASH (Dynamic Adaptive Streaming over HTTP) stream type. */
     public static final int STREAM_TYPE_DASH = 3;
+    /** HLS (HTTP Live Streaming) stream type. */
     public static final int STREAM_TYPE_HLS = 4;
+    /** SS (HTTP Smooth Streaming) stream type. */
     public static final int STREAM_TYPE_SS = 5;
 
+    /** VOD (Video on Demand) playback type. */
     public static final int PLAYBACK_TYPE_VOD = 0;
+    /** Live playback type. */
     public static final int PLAYBACK_TYPE_LIVE = 1;
+    /** Other playback type. */
     public static final int PLAYBACK_TYPE_OTHER = 2;
 
+    /** DRM is not used. */
     public static final int DRM_TYPE_NONE = 0;
+    /** Other DRM type. */
     public static final int DRM_TYPE_OTHER = 1;
+    /** Play ready DRM type. */
     public static final int DRM_TYPE_PLAY_READY = 2;
+    /** Widevine L1 DRM type. */
     public static final int DRM_TYPE_WIDEVINE_L1 = 3;
+    /** Widevine L3 DRM type. */
     public static final int DRM_TYPE_WIDEVINE_L3 = 4;
-    // TODO: add DRM_TYPE_CLEARKEY
+    /** Widevine L3 fallback DRM type. */
+    public static final int DRM_TYPE_WV_L3_FALLBACK = 5;
+    /** Clear key DRM type. */
+    public static final int DRM_TYPE_CLEARKEY = 6;
 
+    /** Main contents. */
     public static final int CONTENT_TYPE_MAIN = 0;
+    /** Advertisement contents. */
     public static final int CONTENT_TYPE_AD = 1;
+    /** Other contents. */
     public static final int CONTENT_TYPE_OTHER = 2;
 
 
@@ -102,7 +125,9 @@ public final class PlaybackMetrics implements Parcelable {
         DRM_TYPE_OTHER,
         DRM_TYPE_PLAY_READY,
         DRM_TYPE_WIDEVINE_L1,
-        DRM_TYPE_WIDEVINE_L3
+        DRM_TYPE_WIDEVINE_L3,
+        DRM_TYPE_WV_L3_FALLBACK,
+        DRM_TYPE_CLEARKEY
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DrmType {}
@@ -173,6 +198,11 @@ public final class PlaybackMetrics implements Parcelable {
         this.mNetworkTransferDurationMillis = networkTransferDurationMillis;
     }
 
+    /**
+     * Gets the media duration in milliseconds.
+     * @return the media duration in milliseconds, or -1 if unknown.
+     */
+    @IntRange(from = -1)
     public long getMediaDurationMillis() {
         return mMediaDurationMillis;
     }
@@ -241,28 +271,36 @@ public final class PlaybackMetrics implements Parcelable {
 
     /**
      * Gets video frames played.
+     * @return the video frames played, or -1 if unknown.
      */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getVideoFramesPlayed() {
         return mVideoFramesPlayed;
     }
 
     /**
      * Gets video frames dropped.
+     * @return the video frames dropped, or -1 if unknown.
      */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getVideoFramesDropped() {
         return mVideoFramesDropped;
     }
 
     /**
      * Gets audio underrun count.
+     * @return the audio underrun count, or -1 if unknown.
      */
+    @IntRange(from = -1, to = Integer.MAX_VALUE)
     public int getAudioUnderrunCount() {
         return mAudioUnderrunCount;
     }
 
     /**
      * Gets number of network bytes read.
+     * @return the number of network bytes read, or -1 if unknown.
      */
+    @IntRange(from = -1)
     public long getNetworkBytesRead() {
         return mNetworkBytesRead;
     }
@@ -270,6 +308,7 @@ public final class PlaybackMetrics implements Parcelable {
     /**
      * Gets number of local bytes read.
      */
+    @IntRange(from = -1)
     public long getLocalBytesRead() {
         return mLocalBytesRead;
     }
@@ -277,6 +316,7 @@ public final class PlaybackMetrics implements Parcelable {
     /**
      * Gets network transfer duration in milliseconds.
      */
+    @IntRange(from = -1)
     public long getNetworkTransferDurationMillis() {
         return mNetworkTransferDurationMillis;
     }
@@ -415,34 +455,33 @@ public final class PlaybackMetrics implements Parcelable {
      */
     public static final class Builder {
 
-        private long mMediaDurationMillis;
-        private int mStreamSource;
-        private int mStreamType;
-        private int mPlaybackType;
-        private int mDrmType;
-        private int mContentType;
+        private long mMediaDurationMillis = -1;
+        private int mStreamSource = STREAM_SOURCE_UNKNOWN;
+        private int mStreamType = STREAM_TYPE_UNKNOWN;
+        private int mPlaybackType = PLAYBACK_TYPE_OTHER;
+        private int mDrmType = DRM_TYPE_NONE;
+        private int mContentType = CONTENT_TYPE_OTHER;
         private @Nullable String mPlayerName;
         private @Nullable String mPlayerVersion;
         private @NonNull List<Long> mExperimentIds = new ArrayList<>();
-        private int mVideoFramesPlayed;
-        private int mVideoFramesDropped;
-        private int mAudioUnderrunCount;
-        private long mNetworkBytesRead;
-        private long mLocalBytesRead;
-        private long mNetworkTransferDurationMillis;
+        private int mVideoFramesPlayed = -1;
+        private int mVideoFramesDropped = -1;
+        private int mAudioUnderrunCount = -1;
+        private long mNetworkBytesRead = -1;
+        private long mLocalBytesRead = -1;
+        private long mNetworkTransferDurationMillis = -1;
 
         /**
          * Creates a new Builder.
-         *
-         * @hide
          */
         public Builder() {
         }
 
         /**
          * Sets the media duration in milliseconds.
+         * @param value the media duration in milliseconds. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setMediaDurationMillis(long value) {
+        public @NonNull Builder setMediaDurationMillis(@IntRange(from = -1) long value) {
             mMediaDurationMillis = value;
             return this;
         }
@@ -474,7 +513,7 @@ public final class PlaybackMetrics implements Parcelable {
         /**
          * Sets the DRM type.
          */
-        public @NonNull Builder setDrmType(@StreamType int value) {
+        public @NonNull Builder setDrmType(@DrmType int value) {
             mDrmType = value;
             return this;
         }
@@ -513,48 +552,58 @@ public final class PlaybackMetrics implements Parcelable {
 
         /**
          * Sets the video frames played.
+         * @param value the video frames played. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setVideoFramesPlayed(int value) {
+        public @NonNull Builder setVideoFramesPlayed(
+                @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             mVideoFramesPlayed = value;
             return this;
         }
 
         /**
          * Sets the video frames dropped.
+         * @param value the video frames dropped. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setVideoFramesDropped(int value) {
+        public @NonNull Builder setVideoFramesDropped(
+                @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             mVideoFramesDropped = value;
             return this;
         }
 
         /**
          * Sets the audio underrun count.
+         * @param value the audio underrun count. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setAudioUnderrunCount(int value) {
+        public @NonNull Builder setAudioUnderrunCount(
+                @IntRange(from = -1, to = Integer.MAX_VALUE) int value) {
             mAudioUnderrunCount = value;
             return this;
         }
 
         /**
          * Sets the number of network bytes read.
+         * @param value the number of network bytes read. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setNetworkBytesRead(long value) {
+        public @NonNull Builder setNetworkBytesRead(@IntRange(from = -1) long value) {
             mNetworkBytesRead = value;
             return this;
         }
 
         /**
          * Sets the number of local bytes read.
+         * @param value the number of local bytes read. -1 indicates the value is unknown.
          */
-        public @NonNull Builder setLocalBytesRead(long value) {
+        public @NonNull Builder setLocalBytesRead(@IntRange(from = -1) long value) {
             mLocalBytesRead = value;
             return this;
         }
 
         /**
          * Sets the network transfer duration in milliseconds.
+         * @param value the network transfer duration in milliseconds.
+         *              -1 indicates the value is unknown.
          */
-        public @NonNull Builder setNetworkTransferDurationMillis(long value) {
+        public @NonNull Builder setNetworkTransferDurationMillis(@IntRange(from = -1) long value) {
             mNetworkTransferDurationMillis = value;
             return this;
         }

@@ -247,6 +247,10 @@
     <string name="screenshot_dismiss_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
     <string name="screenshot_preview_description">Screenshot preview</string>
+    <!-- Content description for the top boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
+    <string name="screenshot_top_boundary">Top boundary</string>
+    <!-- Content description for the bottom boundary of the screenshot being cropped [CHAR LIMIT=NONE] -->
+    <string name="screenshot_bottom_boundary">Bottom boundary</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
@@ -1340,6 +1344,9 @@
 
     <!-- Monitoring dialog: Description of Network Logging. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_management_network_logging">Your admin has turned on network logging, which monitors traffic on your device.</string>
+
+    <!-- Monitoring dialog: Description of Network Logging in the work profile. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_managed_profile_network_logging">Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile.</string>
 
     <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_named_vpn">You\'re connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>, which can monitor your network activity, including emails, apps, and websites.</string>
@@ -2810,8 +2817,26 @@
     <string name="less_than_timestamp" translatable="false">Less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
     <!-- Timestamp for notification when over a certain time window [CHAR LIMIT=120] -->
     <string name="over_timestamp" translatable="false">Over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
-    <!-- Status text for a birthday today [CHAR LIMIT=120] -->
-    <string name="birthday_status" translatable="false">Today is their birthday!</string>
+    <!-- Status text for a birthday today [CHAR LIMIT=30] -->
+    <string name="birthday_status" translatable="false">Birthday</string>
+    <!-- Status text for an upcoming birthday [CHAR LIMIT=30] -->
+    <string name="upcoming_birthday_status" translatable="false">Birthday soon</string>
+    <!-- Status text for an anniversary [CHAR LIMIT=30] -->
+    <string name="anniversary_status" translatable="false">Anniversary</string>
+    <!-- Status text for sharing location [CHAR LIMIT=30] -->
+    <string name="location_status" translatable="false">Sharing location</string>
+    <!-- Status text for a new story posted [CHAR LIMIT=30] -->
+    <string name="new_story_status" translatable="false">New story</string>
+    <!-- Status text for watching a video [CHAR LIMIT=30] -->
+    <string name="video_status" translatable="false">Watching</string>
+    <!-- Status text for listening to audio [CHAR LIMIT=30] -->
+    <string name="audio_status" translatable="false">Listening</string>
+    <!-- Status text for playing a game [CHAR LIMIT=30] -->
+    <string name="game_status" translatable="false">Playing</string>
+    <!-- Empty user name before user has selected a friend [CHAR LIMIT=30] -->
+    <string name="empty_user_name" translatable="false">Your friend</string>
+    <!-- Empty status shown before user has selected a friend [CHAR LIMIT=30] -->
+    <string name="empty_status" translatable="false">Their status</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->

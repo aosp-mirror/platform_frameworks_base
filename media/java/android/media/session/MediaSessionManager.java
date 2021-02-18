@@ -1127,9 +1127,10 @@ public final class MediaSessionManager {
          * toast showing the volume should be shown.
          *
          * @param sessionToken the remote media session token
-         * @param flags extra information about how to handle the volume change
+         * @param flags flags containing extra action or information regarding the volume change
          */
-        void onVolumeChanged(@NonNull MediaSession.Token sessionToken, int flags);
+        void onVolumeChanged(@NonNull MediaSession.Token sessionToken,
+                @AudioManager.Flags int flags);
 
         /**
          * Called when the default remote session is changed where the default remote session

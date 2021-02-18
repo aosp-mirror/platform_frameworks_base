@@ -208,29 +208,21 @@ protected:
      */
     PaintCoW&& filterPaint(PaintCoW&& paint) const;
 
+    // proc(const SkPaint& modifiedPaint)
     template <typename Proc> void apply_looper(const Paint* paint, Proc proc) {
         SkPaint skp;
-        SkDrawLooper* looper = nullptr;
+        BlurDrawLooper* looper = nullptr;
         if (paint) {
             skp = *filterPaint(paint);
             looper = paint->getLooper();
         }
         if (looper) {
-            SkSTArenaAlloc<256> alloc;
-            SkDrawLooper::Context* ctx = looper->makeContext(&alloc);
-            if (ctx) {
-                SkDrawLooper::Context::Info info;
-                for (;;) {
-                    SkPaint p = skp;
-                    if (!ctx->next(&info, &p)) {
-                        break;
-                    }
-                    mCanvas->save();
-                    mCanvas->translate(info.fTranslate.fX, info.fTranslate.fY);
-                    proc(p);
-                    mCanvas->restore();
-                }
-            }
+            looper->apply(skp, [&](SkPoint offset, const SkPaint& modifiedPaint) {
+                mCanvas->save();
+                mCanvas->translate(offset.fX, offset.fY);
+                proc(modifiedPaint);
+                mCanvas->restore();
+            });
         } else {
             proc(skp);
         }

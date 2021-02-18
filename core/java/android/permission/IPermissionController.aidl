@@ -20,6 +20,7 @@ import android.os.RemoteCallback;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
+import android.permission.AdminPermissionControlParams;
 import com.android.internal.infra.AndroidFuture;
 
 /**
@@ -39,8 +40,8 @@ oneway interface IPermissionController {
     void countPermissionApps(in List<String> permissionNames, int flags,
             in AndroidFuture callback);
     void getPermissionUsages(boolean countSystem, long numMillis, in AndroidFuture callback);
-    void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName, String packageName,
-                String permission, int grantState, in AndroidFuture callback);
+    void setRuntimePermissionGrantStateByDeviceAdminFromParams(String callerPackageName,
+            in AdminPermissionControlParams params, in AndroidFuture callback);
     void grantOrUpgradeDefaultRuntimePermissions(in AndroidFuture callback);
     void notifyOneTimePermissionSessionTimeout(String packageName);
     void updateUserSensitiveForApp(int uid, in AndroidFuture callback);

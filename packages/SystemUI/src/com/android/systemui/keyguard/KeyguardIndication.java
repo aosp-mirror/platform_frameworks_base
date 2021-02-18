@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.View;
 
 /**
@@ -29,7 +30,7 @@ import android.view.View;
  * See {@link com.android.systemui.statusbar.phone.KeyguardBottomAreaView}.
  */
 public class KeyguardIndication {
-    @NonNull
+    @Nullable
     private final CharSequence mMessage;
     @NonNull
     private final ColorStateList mTextColor;
@@ -56,7 +57,7 @@ public class KeyguardIndication {
     /**
      * Message to display
      */
-    public @NonNull CharSequence getMessage() {
+    public @Nullable CharSequence getMessage() {
         return mMessage;
     }
 
@@ -88,6 +89,17 @@ public class KeyguardIndication {
         return mBackground;
     }
 
+    @Override
+    public String toString() {
+        String str = "KeyguardIndication{";
+        if (!TextUtils.isEmpty(mMessage)) str += "mMessage=" + mMessage;
+        if (mIcon != null) str += " mIcon=" + mIcon;
+        if (mOnClickListener != null) str += " mOnClickListener=" + mOnClickListener;
+        if (mBackground != null) str += " mBackground=" + mBackground;
+        str += "}";
+        return str;
+    }
+
     /**
      * KeyguardIndication Builder
      */
@@ -101,7 +113,7 @@ public class KeyguardIndication {
         public Builder() { }
 
         /**
-         * Required field. Message to display.
+         * Message to display. Indication requires a non-null message or icon.
          */
         public Builder setMessage(@NonNull CharSequence message) {
             this.mMessage = message;
@@ -117,9 +129,9 @@ public class KeyguardIndication {
         }
 
         /**
-         * Optional. Icon to show next to the text. Icon location changes based on language
-         * display direction. For LTR, icon shows to the left of the message. For RTL, icon shows
-         * to the right of the message.
+         * Icon to show next to the text. Indication requires a non-null icon or message.
+         * Icon location changes based on language display direction. For LTR, icon shows to the
+         * left of the message. For RTL, icon shows to the right of the message.
          */
         public Builder setIcon(Drawable icon) {
             this.mIcon = icon;
@@ -146,8 +158,13 @@ public class KeyguardIndication {
          * Build the KeyguardIndication.
          */
         public KeyguardIndication build() {
-            if (mMessage == null) throw new IllegalStateException("message must be set");
-            if (mTextColor == null) throw new IllegalStateException("text color must be set");
+            if (TextUtils.isEmpty(mMessage) && mIcon == null) {
+                throw new IllegalStateException("message or icon must be set");
+            }
+            if (mTextColor == null) {
+                throw new IllegalStateException("text color must be set");
+            }
+
             return new KeyguardIndication(
                     mMessage, mTextColor, mIcon, mOnClickListener, mBackground);
         }

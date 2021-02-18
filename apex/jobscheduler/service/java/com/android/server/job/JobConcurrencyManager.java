@@ -741,17 +741,26 @@ class JobConcurrencyManager {
 
         pw.increaseIndent();
         try {
-            pw.print("Configuration:");
+            pw.println("Configuration:");
             pw.increaseIndent();
             pw.print(KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, mScreenOffAdjustmentDelayMs).println();
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.normal.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.moderate.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.low.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.critical.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.normal.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.moderate.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.low.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.critical.dump(pw);
+            pw.println();
             pw.decreaseIndent();
 
             pw.print("Screen state: current ");
@@ -770,18 +779,17 @@ class JobConcurrencyManager {
 
             pw.println();
 
-            pw.println("Current max jobs:");
-            pw.println("  ");
+            pw.print("Current work counts: ");
             pw.println(mWorkCountTracker);
 
             pw.println();
 
             pw.print("mLastMemoryTrimLevel: ");
-            pw.print(mLastMemoryTrimLevel);
+            pw.println(mLastMemoryTrimLevel);
             pw.println();
 
             pw.print("User Grace Period: ");
-            pw.print(mGracePeriodObserver.mGracePeriodExpiration);
+            pw.println(mGracePeriodObserver.mGracePeriodExpiration);
             pw.println();
 
             mStatLogger.dump(pw);

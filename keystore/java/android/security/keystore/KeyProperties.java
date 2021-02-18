@@ -70,6 +70,7 @@ public abstract class KeyProperties {
             PURPOSE_VERIFY,
             PURPOSE_WRAP_KEY,
             PURPOSE_AGREE_KEY,
+            PURPOSE_ATTEST_KEY,
     })
     public @interface PurposeEnum {}
 
@@ -113,6 +114,13 @@ public abstract class KeyProperties {
     public static final int PURPOSE_AGREE_KEY = 1 << 6;
 
     /**
+     * Purpose of key: Signing attestaions. This purpose is incompatible with all others, meaning
+     * that when generating a key with PURPOSE_ATTEST_KEY, no other purposes may be specified. In
+     * addition, PURPOSE_ATTEST_KEY may not be specified for imported keys.
+     */
+    public static final int PURPOSE_ATTEST_KEY = 1 << 7;
+
+    /**
      * @hide
      */
     public static abstract class Purpose {
@@ -132,6 +140,8 @@ public abstract class KeyProperties {
                     return KeymasterDefs.KM_PURPOSE_WRAP;
                 case PURPOSE_AGREE_KEY:
                     return KeymasterDefs.KM_PURPOSE_AGREE_KEY;
+                case PURPOSE_ATTEST_KEY:
+                    return KeymasterDefs.KM_PURPOSE_ATTEST_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
@@ -151,6 +161,8 @@ public abstract class KeyProperties {
                     return PURPOSE_WRAP_KEY;
                 case KeymasterDefs.KM_PURPOSE_AGREE_KEY:
                     return PURPOSE_AGREE_KEY;
+                case KeymasterDefs.KM_PURPOSE_ATTEST_KEY:
+                    return PURPOSE_ATTEST_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }

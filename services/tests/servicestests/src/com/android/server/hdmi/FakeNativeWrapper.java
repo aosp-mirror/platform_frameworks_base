@@ -15,12 +15,9 @@
  */
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
-import android.hardware.tv.cec.V1_0.CecMessage;
-import android.hardware.tv.cec.V1_0.HotplugEvent;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiCecController.NativeWrapper;
@@ -99,7 +96,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetVersion() {
-        return 0;
+        return HdmiControlManager.HDMI_CEC_VERSION_2_0;
     }
 
     @Override
@@ -139,20 +136,15 @@ final class FakeNativeWrapper implements NativeWrapper {
         if (mCallback == null) {
             return;
         }
-        CecMessage message = new CecMessage();
-        message.initiator = hdmiCecMessage.getSource();
-        message.destination = hdmiCecMessage.getDestination();
-        ArrayList<Byte> body = new ArrayList<>();
-        body.add((byte) hdmiCecMessage.getOpcode());
+        int source = hdmiCecMessage.getSource();
+        int destination = hdmiCecMessage.getDestination();
+        byte[] body = new byte[hdmiCecMessage.getParams().length + 1];
+        int i = 0;
+        body[i++] = (byte) hdmiCecMessage.getOpcode();
         for (byte param : hdmiCecMessage.getParams()) {
-            body.add(param);
+            body[i++] = param;
         }
-        message.body = body;
-        try {
-            mCallback.onCecMessage(message);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error sending CEC message", e);
-        }
+        mCallback.onCecMessage(source, destination, body);
     }
 
     public void onHotplugEvent(int port, boolean connected) {
@@ -160,15 +152,7 @@ final class FakeNativeWrapper implements NativeWrapper {
             return;
         }
 
-        HotplugEvent hotplugEvent = new HotplugEvent();
-        hotplugEvent.portId = port;
-        hotplugEvent.connected = connected;
-
-        try {
-            mCallback.onHotplugEvent(hotplugEvent);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error sending hotplug event", e);
-        }
+        mCallback.onHotplugEvent(port, connected);
     }
 
     public List<HdmiCecMessage> getResultMessages() {

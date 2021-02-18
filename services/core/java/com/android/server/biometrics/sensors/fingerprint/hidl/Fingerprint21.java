@@ -463,10 +463,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
                 final int targetUserId = user.id;
                 if (!mAuthenticatorIds.containsKey(targetUserId)) {
-                    scheduleUpdateActiveUserWithoutHandler(targetUserId);
+                    scheduleUpdateActiveUserWithoutHandler(targetUserId, true /* force */);
                 }
             }
         });
+    }
+
+    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
+        scheduleUpdateActiveUserWithoutHandler(targetUserId, false /* force */);
     }
 
     /**
@@ -475,14 +479,17 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
      * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
      * this operation on the same lambda/runnable as those operations so that the ordering is
      * correct.
+     *
+     * @param targetUserId Switch to this user, and update their authenticatorId
+     * @param force Always retrieve the authenticatorId, even if we are already the targetUserId
      */
-    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
+    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId, boolean force) {
         final boolean hasEnrolled =
                 !getEnrolledFingerprints(mSensorProperties.sensorId, targetUserId).isEmpty();
         final FingerprintUpdateActiveUserClient client =
                 new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
                         mContext.getOpPackageName(), mSensorProperties.sensorId, mCurrentUserId,
-                        hasEnrolled, mAuthenticatorIds);
+                        hasEnrolled, mAuthenticatorIds, force);
         mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
@@ -563,7 +570,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                         boolean success) {
                     if (success) {
                         // Update authenticatorIds
-                        scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId());
+                        scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId(),
+                                true /* force */);
                     }
                 }
             });

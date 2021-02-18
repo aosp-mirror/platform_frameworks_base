@@ -244,7 +244,11 @@ final class OverlayManagerServiceImpl {
     @NonNull
     Set<PackageAndUser> onPackageAdded(@NonNull final String pkgName,
             final int userId) throws OperationFailedException {
-        return reconcileSettingsForPackage(pkgName, userId, 0 /* flags */);
+        final Set<PackageAndUser> updatedTargets = new ArraySet<>();
+        // Always update the overlays of newly added packages.
+        updatedTargets.add(new PackageAndUser(pkgName, userId));
+        updatedTargets.addAll(reconcileSettingsForPackage(pkgName, userId, 0 /* flags */));
+        return updatedTargets;
     }
 
     @NonNull
@@ -282,7 +286,7 @@ final class OverlayManagerServiceImpl {
     private Set<PackageAndUser> removeOverlaysForUser(
             @NonNull final Predicate<OverlayInfo> condition, final int userId) {
         final List<OverlayInfo> overlays = mSettings.removeIf(
-                io -> userId == io.userId && condition.test(io) );
+                io -> userId == io.userId && condition.test(io));
         Set<PackageAndUser> targets = Collections.emptySet();
         for (int i = 0, n = overlays.size(); i < n; i++) {
             final OverlayInfo info = overlays.get(i);

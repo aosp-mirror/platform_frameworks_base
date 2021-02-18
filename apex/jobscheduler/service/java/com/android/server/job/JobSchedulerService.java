@@ -3040,7 +3040,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
 
             for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
-                pw.print("    ");
                 mJobRestrictions.get(i).dumpConstants(pw);
                 pw.println();
             }
@@ -3066,7 +3065,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
 
                     job.dump(pw, "    ", true, nowElapsed);
-
 
                     pw.print("    Restricted due to:");
                     final boolean isRestricted = checkIfRestricted(job) != null;
@@ -3161,39 +3159,28 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             pw.println();
             pw.println("Active jobs:");
+            pw.increaseIndent();
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
-                pw.print("  Slot #"); pw.print(i); pw.print(": ");
-                final JobStatus job = jsc.getRunningJobLocked();
-                if (job == null) {
-                    if (jsc.mStoppedReason != null) {
-                        pw.print("inactive since ");
-                        TimeUtils.formatDuration(jsc.mStoppedTime, nowElapsed, pw);
-                        pw.print(", stopped because: ");
-                        pw.println(jsc.mStoppedReason);
-                    } else {
-                        pw.println("inactive");
-                    }
-                    continue;
-                } else {
-                    pw.println(job.toShortString());
-                    pw.print("    Running for: ");
-                    TimeUtils.formatDuration(nowElapsed - jsc.getExecutionStartTimeElapsed(), pw);
-                    pw.print(", timeout at: ");
-                    TimeUtils.formatDuration(jsc.getTimeoutElapsed() - nowElapsed, pw);
-                    pw.println();
-                    job.dump(pw, "    ", false, nowElapsed);
-                    int priority = evaluateJobPriorityLocked(job);
-                    pw.print("    Evaluated priority: ");
-                    pw.println(JobInfo.getPriorityString(priority));
+                pw.print("Slot #"); pw.print(i); pw.print(": ");
+                jsc.dumpLocked(pw, nowElapsed);
 
-                    pw.print("    Active at ");
+                final JobStatus job = jsc.getRunningJobLocked();
+                if (job != null) {
+                    pw.increaseIndent();
+                    job.dump(pw, "  ", false, nowElapsed);
+                    pw.print("Evaluated priority: ");
+                    pw.println(JobInfo.getPriorityString(job.lastEvaluatedPriority));
+
+                    pw.print("Active at ");
                     TimeUtils.formatDuration(job.madeActive - nowUptime, pw);
                     pw.print(", pending for ");
                     TimeUtils.formatDuration(job.madeActive - job.madePending, pw);
                     pw.println();
+                    pw.decreaseIndent();
                 }
             }
+            pw.decreaseIndent();
             if (filterUid == -1) {
                 pw.println();
                 pw.print("mReadyToRock="); pw.println(mReadyToRock);

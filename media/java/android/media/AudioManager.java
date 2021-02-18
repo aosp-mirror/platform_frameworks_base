@@ -567,6 +567,25 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int FLAG_FROM_KEY = 1 << 12;
 
+    /** @hide */
+    @IntDef(flag = false, prefix = "FLAG", value = {
+            FLAG_SHOW_UI,
+            FLAG_ALLOW_RINGER_MODES,
+            FLAG_PLAY_SOUND,
+            FLAG_REMOVE_SOUND_AND_VIBRATE,
+            FLAG_VIBRATE,
+            FLAG_FIXED_VOLUME,
+            FLAG_BLUETOOTH_ABS_VOLUME,
+            FLAG_SHOW_SILENT_HINT,
+            FLAG_HDMI_SYSTEM_AUDIO_VOLUME,
+            FLAG_ACTIVE_MEDIA_ONLY,
+            FLAG_SHOW_UI_WARNINGS,
+            FLAG_SHOW_VIBRATE_HINT,
+            FLAG_FROM_KEY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
     // The iterator of TreeMap#entrySet() returns the entries in ascending key order.
     private static final TreeMap<Integer, String> FLAG_NAMES = new TreeMap<>();
 

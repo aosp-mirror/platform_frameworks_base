@@ -300,3 +300,13 @@ LIBANDROID {
   local:
     *;
 };
+
+LIBANDROID_PLATFORM {
+  global:
+    extern "C++" {
+        ASurfaceControl_registerSurfaceStatsListener*;
+        ASurfaceControl_unregisterSurfaceStatsListener*;
+        ASurfaceControlStats_getAcquireTime*;
+        ASurfaceControlStats_getFrameNumber*;
+    };
+} LIBANDROID;

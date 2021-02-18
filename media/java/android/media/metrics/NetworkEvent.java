@@ -17,6 +17,7 @@
 package android.media.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -27,22 +28,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Playback network event.
- * @hide
+ * Media network event.
  */
-public final class NetworkEvent implements Parcelable {
+public final class NetworkEvent extends Event implements Parcelable {
+    /** Network type is not specified. Default type. */
     public static final int NETWORK_TYPE_NONE = 0;
+    /** Other network type */
     public static final int NETWORK_TYPE_OTHER = 1;
+    /** Wi-Fi network */
     public static final int NETWORK_TYPE_WIFI = 2;
+    /** Ethernet network */
     public static final int NETWORK_TYPE_ETHERNET = 3;
+    /** 2G network */
     public static final int NETWORK_TYPE_2G = 4;
+    /** 3G network */
     public static final int NETWORK_TYPE_3G = 5;
+    /** 4G network */
     public static final int NETWORK_TYPE_4G = 6;
+    /** 5G NSA network */
     public static final int NETWORK_TYPE_5G_NSA = 7;
+    /** 5G SA network */
     public static final int NETWORK_TYPE_5G_SA = 8;
 
-    private final int mType;
-    private final long mTimeSincePlaybackCreatedMillis;
+    private final int mNetworkType;
+    private final long mTimeSinceCreatedMillis;
 
     /** @hide */
     @IntDef(prefix = "NETWORK_TYPE_", value = {
@@ -61,6 +70,7 @@ public final class NetworkEvent implements Parcelable {
 
     /**
      * Network type to string.
+     * @hide
      */
     public static String networkTypeToString(@NetworkType int value) {
         switch (value) {
@@ -92,25 +102,34 @@ public final class NetworkEvent implements Parcelable {
      *
      * @hide
      */
-    public NetworkEvent(@NetworkType int type, long timeSincePlaybackCreatedMillis) {
-        this.mType = type;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+    public NetworkEvent(@NetworkType int type, long timeSinceCreatedMillis) {
+        this.mNetworkType = type;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
     }
 
+    /**
+     * Gets network type.
+     */
     @NetworkType
-    public int getType() {
-        return mType;
+    public int getNetworkType() {
+        return mNetworkType;
     }
 
-    public long getTimeSincePlaybackCreatedMillis() {
-        return mTimeSincePlaybackCreatedMillis;
+    /**
+     * Gets timestamp since the creation in milliseconds.
+     * @return the timestamp since the creation in milliseconds, or -1 if unknown.
+     */
+    @Override
+    @IntRange(from = -1)
+    public long getTimeSinceCreatedMillis() {
+        return mTimeSinceCreatedMillis;
     }
 
     @Override
     public String toString() {
         return "NetworkEvent { "
-                + "type = " + mType + ", "
-                + "timeSincePlaybackCreatedMillis = " + mTimeSincePlaybackCreatedMillis
+                + "networkType = " + mNetworkType + ", "
+                + "timeSinceCreatedMillis = " + mTimeSinceCreatedMillis
                 + " }";
     }
 
@@ -119,19 +138,19 @@ public final class NetworkEvent implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NetworkEvent that = (NetworkEvent) o;
-        return mType == that.mType
-                && mTimeSincePlaybackCreatedMillis == that.mTimeSincePlaybackCreatedMillis;
+        return mNetworkType == that.mNetworkType
+                && mTimeSinceCreatedMillis == that.mTimeSinceCreatedMillis;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mTimeSincePlaybackCreatedMillis);
+        return Objects.hash(mNetworkType, mTimeSinceCreatedMillis);
     }
 
     @Override
     public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
-        dest.writeInt(mType);
-        dest.writeLong(mTimeSincePlaybackCreatedMillis);
+        dest.writeInt(mNetworkType);
+        dest.writeLong(mTimeSinceCreatedMillis);
     }
 
     @Override
@@ -142,12 +161,15 @@ public final class NetworkEvent implements Parcelable {
     /** @hide */
     /* package-private */ NetworkEvent(@NonNull android.os.Parcel in) {
         int type = in.readInt();
-        long timeSincePlaybackCreatedMillis = in.readLong();
+        long timeSinceCreatedMillis = in.readLong();
 
-        this.mType = type;
-        this.mTimeSincePlaybackCreatedMillis = timeSincePlaybackCreatedMillis;
+        this.mNetworkType = type;
+        this.mTimeSinceCreatedMillis = timeSinceCreatedMillis;
     }
 
+    /**
+     * Used to read a NetworkEvent from a Parcel.
+     */
     public static final @NonNull Parcelable.Creator<NetworkEvent> CREATOR =
             new Parcelable.Creator<NetworkEvent>() {
         @Override
@@ -165,13 +187,11 @@ public final class NetworkEvent implements Parcelable {
      * A builder for {@link NetworkEvent}
      */
     public static final class Builder {
-        private int mType;
-        private long mTimeSincePlaybackCreatedMillis;
+        private int mNetworkType = NETWORK_TYPE_NONE;
+        private long mTimeSinceCreatedMillis = -1;
 
         /**
          * Creates a new Builder.
-         *
-         * @hide
          */
         public Builder() {
         }
@@ -179,24 +199,24 @@ public final class NetworkEvent implements Parcelable {
         /**
          * Sets network type.
          */
-        public @NonNull Builder setType(@NetworkType int value) {
-            mType = value;
+        public @NonNull Builder setNetworkType(@NetworkType int value) {
+            mNetworkType = value;
             return this;
         }
 
         /**
          * Sets timestamp since the creation in milliseconds.
+         * @param value the timestamp since the creation in milliseconds.
+         *              -1 indicates the value is unknown.
          */
-        public @NonNull Builder setTimeSincePlaybackCreatedMillis(long value) {
-            mTimeSincePlaybackCreatedMillis = value;
+        public @NonNull Builder setTimeSinceCreatedMillis(@IntRange(from = -1) long value) {
+            mTimeSinceCreatedMillis = value;
             return this;
         }
 
         /** Builds the instance. */
         public @NonNull NetworkEvent build() {
-            NetworkEvent o = new NetworkEvent(
-                    mType,
-                    mTimeSincePlaybackCreatedMillis);
+            NetworkEvent o = new NetworkEvent(mNetworkType, mTimeSinceCreatedMillis);
             return o;
         }
     }

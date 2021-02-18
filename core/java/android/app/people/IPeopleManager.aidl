@@ -49,6 +49,9 @@ interface IPeopleManager {
     /** Removes all the recent conversations and uncaches their cached shortcuts. */
     void removeAllRecentConversations();
 
+    /** Returns whether the shortcutId is backed by a Conversation in People Service. */
+    boolean isConversation(in String packageName, int userId, in String shortcutId);
+
     /**
      * Returns the last interaction with the specified conversation. If the
      * conversation can't be found or no interactions have been recorded, returns 0L.

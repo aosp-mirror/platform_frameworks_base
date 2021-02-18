@@ -17,11 +17,11 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H_
 #define ANDROID_GRAPHICS_PAINT_H_
 
+#include "BlurDrawLooper.h"
 #include "Typeface.h"
 
 #include <cutils/compiler.h>
 
-#include <SkDrawLooper.h>
 #include <SkFont.h>
 #include <SkPaint.h>
 #include <string>
@@ -59,8 +59,8 @@ public:
     SkFont& getSkFont() { return mFont; }
     const SkFont& getSkFont() const { return mFont; }
 
-    SkDrawLooper* getLooper() const { return mLooper.get(); }
-    void setLooper(sk_sp<SkDrawLooper> looper) { mLooper = std::move(looper); }
+    BlurDrawLooper* getLooper() const { return mLooper.get(); }
+    void setLooper(sk_sp<BlurDrawLooper> looper) { mLooper = std::move(looper); }
 
     // These shadow the methods on SkPaint, but we need to so we can keep related
     // attributes in-sync.
@@ -155,7 +155,7 @@ public:
 
 private:
     SkFont mFont;
-    sk_sp<SkDrawLooper> mLooper;
+    sk_sp<BlurDrawLooper> mLooper;
 
     float mLetterSpacing = 0;
     float mWordSpacing = 0;

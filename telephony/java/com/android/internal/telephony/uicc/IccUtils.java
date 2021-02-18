@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony.uicc;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -28,6 +29,7 @@ import com.android.internal.telephony.GsmAlphabet;
 import com.android.telephony.Rlog;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -253,8 +255,43 @@ public class IccUtils {
         }
 
         if ((b & 0x0f) <= 0x09) {
-            ret +=  (b & 0xf);
+            ret += (b & 0xf);
         }
+
+        return ret;
+    }
+
+    /**
+     * Encodes a string to be formatted like the EF[ADN] alpha identifier.
+     *
+     * <p>See javadoc for {@link #adnStringFieldToString(byte[], int, int)} for more details on
+     * the relevant specs.
+     *
+     * <p>This will attempt to encode using the GSM 7-bit alphabet but will fallback to UCS-2 if
+     * there are characters that are not supported by it.
+     *
+     * @return the encoded string including the prefix byte necessary to identify the encoding.
+     * @see #adnStringFieldToString(byte[], int, int)
+     */
+    @NonNull
+    public static byte[] stringToAdnStringField(@NonNull String alphaTag) {
+        int septets = GsmAlphabet.countGsmSeptetsUsingTables(alphaTag, false, 0, 0);
+        if (septets != -1) {
+            byte[] ret = new byte[septets];
+            GsmAlphabet.stringToGsm8BitUnpackedField(alphaTag, ret, 0, ret.length);
+            return ret;
+        }
+
+        // Strictly speaking UCS-2 disallows surrogate characters but it's much more complicated to
+        // validate that the string contains only valid UCS-2 characters. Since the read path
+        // in most modern software will decode "UCS-2" by treating it as UTF-16 this should be fine
+        // (e.g. the adnStringFieldToString has done this for a long time on Android). Also there's
+        // already a precedent in SMS applications to ignore the UCS-2/UTF-16 distinction.
+        byte[] alphaTagBytes = alphaTag.getBytes(StandardCharsets.UTF_16BE);
+        byte[] ret = new byte[alphaTagBytes.length + 1];
+        // 0x80 tags the remaining bytes as UCS-2
+        ret[0] = (byte) 0x80;
+        System.arraycopy(alphaTagBytes, 0, ret, 1, alphaTagBytes.length);
 
         return ret;
     }
@@ -309,7 +346,7 @@ public class IccUtils {
                     ret = new String(data, offset + 1, ucslen * 2, "utf-16be");
                 } catch (UnsupportedEncodingException ex) {
                     Rlog.e(LOG_TAG, "implausible UnsupportedEncodingException",
-                          ex);
+                            ex);
                 }
 
                 if (ret != null) {
@@ -342,7 +379,7 @@ public class IccUtils {
                 len = length - 4;
 
             base = (char) (((data[offset + 2] & 0xFF) << 8) |
-                            (data[offset + 3] & 0xFF));
+                    (data[offset + 3] & 0xFF));
             offset += 4;
             isucs2 = true;
         }
@@ -366,7 +403,7 @@ public class IccUtils {
                     count++;
 
                 ret.append(GsmAlphabet.gsm8BitUnpackedToString(data,
-                           offset, count));
+                        offset, count));
 
                 offset += count;
                 len -= count;

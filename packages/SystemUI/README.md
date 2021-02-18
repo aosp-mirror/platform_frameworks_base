@@ -144,6 +144,10 @@ Biometric UI.
 
 Delegates SysUI events to WM Shell controllers.
 
+### [com.android.systemui.people.widget.PeopleSpaceWidgetEnabler](/packages/SystemUI/src/com/android/systemui/people/widget/PeopleSpaceWidgetEnabler.java)
+
+Enables People Space widgets.
+
 ---
 
  * [Plugins](/packages/SystemUI/docs/plugins.md)
