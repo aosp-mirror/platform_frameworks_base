@@ -672,7 +672,22 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     /**
      * @return whether {@param win} can be hidden by Keyguard
      */
-    public boolean canBeHiddenByKeyguardLw(WindowState win);
+    default boolean canBeHiddenByKeyguardLw(WindowState win) {
+        // Keyguard visibility of window from activities are determined over activity visibility.
+        if (win.getAppToken() != null) {
+            return false;
+        }
+        switch (win.getAttrs().type) {
+            case TYPE_NOTIFICATION_SHADE:
+            case TYPE_STATUS_BAR:
+            case TYPE_NAVIGATION_BAR:
+            case TYPE_WALLPAPER:
+                return false;
+            default:
+                // Hide only windows below the keyguard host window.
+                return getWindowLayerLw(win) < getWindowLayerFromTypeLw(TYPE_NOTIFICATION_SHADE);
+        }
+    }
 
     /**
      * Called when the system would like to show a UI to indicate that an
