@@ -313,7 +313,7 @@ public final class JobPackageTracker {
         }
 
         void dump(PrintWriter pw, String header, String prefix, long now, long nowElapsed,
-                int filterUid) {
+                int filterAppId) {
             final long period = getTotalTime(now);
             pw.print(prefix); pw.print(header); pw.print(" at ");
             pw.print(DateFormat.format("yyyy-MM-dd-HH-mm-ss", mStartClockTime).toString());
@@ -325,7 +325,7 @@ public final class JobPackageTracker {
             final int NE = mEntries.size();
             for (int i = 0; i < NE; i++) {
                 int uid = mEntries.keyAt(i);
-                if (filterUid != -1 && filterUid != UserHandle.getAppId(uid)) {
+                if (filterAppId != -1 && filterAppId != UserHandle.getAppId(uid)) {
                     continue;
                 }
                 ArrayMap<String, PackageEntry> uidMap = mEntries.valueAt(i);
@@ -520,7 +520,7 @@ public final class JobPackageTracker {
         return time / (float)period;
     }
 
-    public void dump(PrintWriter pw, String prefix, int filterUid) {
+    public void dump(PrintWriter pw, String prefix, int filterAppId) {
         final long now = sUptimeMillisClock.millis();
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final DataSet total;
@@ -533,11 +533,11 @@ public final class JobPackageTracker {
         mCurDataSet.addTo(total, now);
         for (int i = 1; i < mLastDataSets.length; i++) {
             if (mLastDataSets[i] != null) {
-                mLastDataSets[i].dump(pw, "Historical stats", prefix, now, nowElapsed, filterUid);
+                mLastDataSets[i].dump(pw, "Historical stats", prefix, now, nowElapsed, filterAppId);
                 pw.println();
             }
         }
-        total.dump(pw, "Current stats", prefix, now, nowElapsed, filterUid);
+        total.dump(pw, "Current stats", prefix, now, nowElapsed, filterAppId);
     }
 
     public void dump(ProtoOutputStream proto, long fieldId, int filterUid) {
@@ -566,7 +566,7 @@ public final class JobPackageTracker {
         proto.end(token);
     }
 
-    public boolean dumpHistory(PrintWriter pw, String prefix, int filterUid) {
+    public boolean dumpHistory(PrintWriter pw, String prefix, int filterAppId) {
         final int size = mEventIndices.size();
         if (size <= 0) {
             return false;
@@ -576,7 +576,7 @@ public final class JobPackageTracker {
         for (int i=0; i<size; i++) {
             final int index = mEventIndices.indexOf(i);
             final int uid = mEventUids[index];
-            if (filterUid != -1 && filterUid != UserHandle.getAppId(uid)) {
+            if (filterAppId != -1 && filterAppId != UserHandle.getAppId(uid)) {
                 continue;
             }
             final int cmd = mEventCmds[index] & EVENT_CMD_MASK;

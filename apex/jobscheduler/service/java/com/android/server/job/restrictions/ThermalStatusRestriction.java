@@ -64,7 +64,7 @@ public class ThermalStatusRestriction extends JobRestriction {
     @Override
     public void dumpConstants(IndentingPrintWriter pw) {
         pw.print("In thermal throttling?: ");
-        pw.print(mIsThermalRestricted);
+        pw.println(mIsThermalRestricted);
     }
 
     @Override
