@@ -14,14 +14,36 @@
 // limitations under the License.
 //
 
-// TODO: use a java_library in the bootclasspath instead
 filegroup {
-    name: "framework-connectivity-sources",
+    name: "framework-connectivity-internal-sources",
     srcs: [
         "src/**/*.java",
         "src/**/*.aidl",
     ],
     path: "src",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+filegroup {
+    name: "framework-connectivity-aidl-export-sources",
+    srcs: [
+        "aidl-export/**/*.aidl",
+    ],
+    path: "aidl-export",
+    visibility: [
+        "//visibility:private",
+    ],
+}
+
+// TODO: use a java_library in the bootclasspath instead
+filegroup {
+    name: "framework-connectivity-sources",
+    srcs: [
+        ":framework-connectivity-internal-sources",
+        ":framework-connectivity-aidl-export-sources",
+    ],
     visibility: [
         "//frameworks/base",
         "//packages/modules/Connectivity:__subpackages__",
