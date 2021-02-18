@@ -4461,6 +4461,10 @@ public class TelephonyManager {
      * This functionality is only available to the app filling the {@link RoleManager#ROLE_DIALER}
      * role on the device.
      *
+     * This functionality is only available when
+     * {@link CarrierConfigManager#KEY_SUPPORTS_CALL_COMPOSER_BOOL} is set to {@code true} in the
+     * bundle returned from {@link #getCarrierConfig()}.
+     *
      * @param pictureToUpload An {@link InputStream} that supplies the bytes representing the
      *                        picture to upload. The client bears responsibility for closing this
      *                        stream after {@code callback} is called with success or failure.
@@ -4469,7 +4473,9 @@ public class TelephonyManager {
      *                        of {@link #getMaximumCallComposerPictureSize()}, the upload will be
      *                        aborted and the callback will be called with an exception containing
      *                        {@link CallComposerException#ERROR_FILE_TOO_LARGE}.
-     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg)
+     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg). The list
+     *                    of acceptable content types can be found at 3GPP TS 26.141 sections
+     *                    4.2 and 4.3.
      * @param executor The {@link Executor} on which the {@code pictureToUpload} stream will be
      *                 read, as well as on which the callback will be called.
      * @param callback A callback called when the upload operation terminates, either in success
