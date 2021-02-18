@@ -958,7 +958,11 @@ public class RecoverySystem {
             Intent intent = new Intent(ACTION_EUICC_FACTORY_RESET);
             intent.setPackage(packageName);
             PendingIntent callbackIntent = PendingIntent.getBroadcastAsUser(
-                    context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT, UserHandle.SYSTEM);
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                    UserHandle.SYSTEM);
             IntentFilter filterConsent = new IntentFilter();
             filterConsent.addAction(ACTION_EUICC_FACTORY_RESET);
             HandlerThread euiccHandlerThread = new HandlerThread("euiccWipeFinishReceiverThread");
@@ -1052,7 +1056,11 @@ public class RecoverySystem {
         Intent intent = new Intent(ACTION_EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS);
         intent.setPackage(PACKAGE_NAME_EUICC_DATA_MANAGEMENT_CALLBACK);
         PendingIntent callbackIntent = PendingIntent.getBroadcastAsUser(
-                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT, UserHandle.SYSTEM);
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                UserHandle.SYSTEM);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS);
         HandlerThread euiccHandlerThread =
