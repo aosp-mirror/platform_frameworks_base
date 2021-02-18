@@ -325,6 +325,8 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private boolean isInsane(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
+        // Use the maximum possible time since it gives us an upper bound, even though the job
+        // could end up stopping earlier.
         final long maxJobExecutionTimeMs = mService.getMaxJobExecutionTimeMs(jobStatus);
 
         final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();

@@ -63,7 +63,6 @@ import android.util.DataUnit;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
-import com.android.server.job.JobServiceContext;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
 import org.junit.Before;
@@ -144,8 +143,7 @@ public class ConnectivityControllerTest {
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 
         final ConnectivityController controller = new ConnectivityController(mService);
-        when(mService.getMaxJobExecutionTimeMs(any()))
-                .thenReturn(JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS);
+        when(mService.getMaxJobExecutionTimeMs(any())).thenReturn(10 * 60_000L);
 
         // Slow network is too slow
         assertFalse(controller.isSatisfied(createJobStatus(job), net,
