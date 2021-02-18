@@ -1710,8 +1710,6 @@ public class VcnGatewayConnection extends StateMachine {
             }
         }
 
-        // TODO: Make a VcnNetworkSpecifier, and match all underlying subscription IDs.
-
         return builder.build();
     }
 
