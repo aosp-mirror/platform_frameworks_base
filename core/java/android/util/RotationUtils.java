@@ -24,6 +24,7 @@ import static android.view.Surface.ROTATION_90;
 import android.annotation.Dimension;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.view.Surface.Rotation;
 
 /**
@@ -70,6 +71,60 @@ public class RotationUtils {
                 throw new IllegalArgumentException("unknown rotation: " + rotation);
         }
         return rotated;
+    }
+
+    /**
+     * Rotates bounds as if parentBounds and bounds are a group. The group is rotated from
+     * oldRotation to newRotation. This assumes that parentBounds is at 0,0 and remains at 0,0 after
+     * rotation. The bounds will be at the same physical position in parentBounds.
+     *
+     * Only 'inOutBounds' is mutated.
+     */
+    public static void rotateBounds(Rect inOutBounds, Rect parentBounds, @Rotation int oldRotation,
+            @Rotation int newRotation) {
+        rotateBounds(inOutBounds, parentBounds, deltaRotation(oldRotation, newRotation));
+    }
+
+    /**
+     * Rotates bounds as if parentBounds and bounds are a group. The group is rotated by `delta`
+     * 90-degree counter-clockwise increments. This assumes that parentBounds is at 0,0 and
+     * remains at 0,0 after rotation. The bounds will be at the same physical position in
+     * parentBounds.
+     *
+     * Only 'inOutBounds' is mutated.
+     */
+    public static void rotateBounds(Rect inOutBounds, Rect parentBounds, @Rotation int rotation) {
+        final int origLeft = inOutBounds.left;
+        final int origTop = inOutBounds.top;
+        switch (rotation) {
+            case ROTATION_0:
+                return;
+            case ROTATION_90:
+                inOutBounds.left = inOutBounds.top;
+                inOutBounds.top = parentBounds.right - inOutBounds.right;
+                inOutBounds.right = inOutBounds.bottom;
+                inOutBounds.bottom = parentBounds.right - origLeft;
+                return;
+            case ROTATION_180:
+                inOutBounds.left = parentBounds.right - inOutBounds.right;
+                inOutBounds.right = parentBounds.right - origLeft;
+                inOutBounds.top = parentBounds.bottom - inOutBounds.bottom;
+                inOutBounds.bottom = parentBounds.bottom - origTop;
+                return;
+            case ROTATION_270:
+                inOutBounds.left = parentBounds.bottom - inOutBounds.bottom;
+                inOutBounds.bottom = inOutBounds.right;
+                inOutBounds.right = parentBounds.bottom - inOutBounds.top;
+                inOutBounds.top = origLeft;
+        }
+    }
+
+    /** @return the rotation needed to rotate from oldRotation to newRotation. */
+    @Rotation
+    public static int deltaRotation(int oldRotation, int newRotation) {
+        int delta = newRotation - oldRotation;
+        if (delta < 0) delta += 4;
+        return delta;
     }
 
     /**

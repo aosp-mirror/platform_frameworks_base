@@ -2361,9 +2361,7 @@ class Task extends WindowContainer<WindowContainer> {
             final int newRotation = getWindowConfiguration().getRotation();
             final boolean rotationChanged = prevRotation != newRotation;
             if (rotationChanged) {
-                mDisplayContent.rotateBounds(
-                        newParentConfig.windowConfiguration.getBounds(), prevRotation, newRotation,
-                        newBounds);
+                mDisplayContent.rotateBounds(prevRotation, newRotation, newBounds);
                 setBounds(newBounds);
             }
         }
