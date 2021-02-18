@@ -47,7 +47,6 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
@@ -83,7 +82,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @SmallTest
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class DisplayModeDirectorTest {
     // The tolerance within which we consider something approximately equals.
