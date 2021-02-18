@@ -5301,7 +5301,8 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void onWindowFocusChanged(boolean hasFocus) {
         updateShadowsRadius(hasFocus, getSyncTransaction());
-        dispatchTaskInfoChangedIfNeeded(false /* force */);
+        // TODO(b/180525887): Un-comment once there is resolution on the bug.
+        // dispatchTaskInfoChangedIfNeeded(false /* force */);
     }
 
     void onPictureInPictureParamsChanged() {
