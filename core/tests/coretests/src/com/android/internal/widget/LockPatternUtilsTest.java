@@ -18,13 +18,10 @@ package com.android.internal.widget;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.testng.Assert.assertThrows;
 
-import android.content.Context;
 import android.os.UserHandle;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -33,9 +30,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LockPatternUtilsTest {
-
-    private static final int INVALID_USER_ID = -1;
-    private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
 
     @Test
     public void testUserFrp_isNotRegularUser() throws Exception {
@@ -48,11 +42,5 @@ public class LockPatternUtilsTest {
         assertNotEquals(UserHandle.USER_ALL, LockPatternUtils.USER_FRP);
         assertNotEquals(UserHandle.USER_CURRENT, LockPatternUtils.USER_FRP);
         assertNotEquals(UserHandle.USER_CURRENT_OR_SELF, LockPatternUtils.USER_FRP);
-    }
-
-    @Test
-    public void getCredentialTypeForUser_invalidUserId_throwsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new LockPatternUtils(mContext).getCredentialTypeForUser(INVALID_USER_ID));
     }
 }
