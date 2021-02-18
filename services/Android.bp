@@ -6,7 +6,7 @@ filegroup {
 }
 
 filegroup {
-    name: "services-all-sources",
+    name: "services-non-updatable-sources",
     srcs: [
         ":services.core-sources",
         ":services.core-sources-am-wm",
@@ -37,7 +37,15 @@ filegroup {
         ":services.usb-sources",
         ":services.voiceinteraction-sources",
         ":services.wifi-sources",
-        ":service-media-s-sources", // TODO (b/177640454)
+    ],
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "services-all-sources",
+    srcs: [
+        ":services-non-updatable-sources",
+        ":service-media-s-sources",
         ":service-permission-sources",
         ":service-statsd-sources",
     ],
@@ -123,9 +131,8 @@ filegroup {
 // API stub
 // =============================================================
 
-droidstubs {
-    name: "services-stubs.sources",
-    srcs: [":services-all-sources"],
+stubs_defaults {
+    name: "services-stubs-default",
     installable: false,
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
@@ -135,7 +142,13 @@ droidstubs {
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
     visibility: ["//visibility:private"],
-    filter_packages: ["com.android."],
+    filter_packages: ["com.android."]
+}
+
+droidstubs {
+    name: "services-stubs.sources",
+    srcs: [":services-all-sources"],
+    defaults: ["services-stubs-default"],
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -180,4 +193,35 @@ java_library {
     dist: {
         dir: "apistubs/android/system-server",
     },
+}
+
+droidstubs {
+    name: "services-non-updatable-stubs.sources",
+    srcs: [":services-non-updatable-sources"],
+    defaults: ["services-stubs-default"],
+    check_api: {
+        current: {
+            api_file: "api/non-updatable-current.txt",
+            removed_api_file: "api/non-updatable-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android-non-updatable.api.system-server.latest",
+            baseline_file: "api/non-updatable-lint-baseline.txt",
+        },
+    },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt"
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ]
 }
