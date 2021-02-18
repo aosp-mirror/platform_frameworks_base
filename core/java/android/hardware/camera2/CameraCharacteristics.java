@@ -2908,6 +2908,29 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
 
     /**
+     * <p>Default YUV/PRIVATE size to use for requesting secure image buffers.</p>
+     * <p>This entry lists the default size supported in the secure camera mode. This entry is
+     * optional on devices support the SECURE_IMAGE_DATA capability. This entry will be null
+     * if the camera device does not list SECURE_IMAGE_DATA capability.</p>
+     * <p>When the key is present, only a PRIVATE/YUV output of the specified size is guaranteed
+     * to be supported by the camera HAL in the secure camera mode. Any other format or
+     * resolutions might not be supported. Use
+     * {@link CameraDevice#isSessionConfigurationSupported }
+     * API to query if a secure session configuration is supported if the device supports this
+     * API.</p>
+     * <p>If this key returns null on a device with SECURE_IMAGE_DATA capability, the application
+     * can assume all output sizes listed in the
+     * {@link android.hardware.camera2.params.StreamConfigurationMap }
+     * are supported.</p>
+     * <p><b>Units</b>: Pixels</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE =
+            new Key<android.util.Size>("android.scaler.defaultSecureImageSize", android.util.Size.class);
+
+    /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
      * distortion correction has been applied.</p>
      * <p>This is the rectangle representing the size of the active region of the sensor (i.e.
