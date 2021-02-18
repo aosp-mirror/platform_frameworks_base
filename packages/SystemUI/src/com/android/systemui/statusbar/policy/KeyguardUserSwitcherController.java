@@ -19,9 +19,13 @@ package com.android.systemui.statusbar.policy;
 import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
 import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.UserHandle;
@@ -50,7 +54,6 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.ViewController;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -73,9 +76,10 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     private final KeyguardUserAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private WeakReference<KeyguardUserSwitcherListener> mKeyguardUserSwitcherCallback;
     protected final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
+    private ObjectAnimator mBgAnimator;
+    private final KeyguardUserSwitcherScrim mBackground;
 
     // Child views of KeyguardUserSwitcherView
     private KeyguardUserSwitcherListView mListView;
@@ -171,6 +175,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 mUserSwitcherController, this);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters);
+        mBackground = new KeyguardUserSwitcherScrim(context);
     }
 
     @Override
@@ -204,6 +209,9 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mScreenLifecycle.addObserver(mScreenObserver);
+        mView.addOnLayoutChangeListener(mBackground);
+        mView.setBackground(mBackground);
+        mBackground.setAlpha(0);
     }
 
     @Override
@@ -217,6 +225,9 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mScreenLifecycle.removeObserver(mScreenObserver);
+        mView.removeOnLayoutChangeListener(mBackground);
+        mView.setBackground(null);
+        mBackground.setAlpha(0);
     }
 
     /**
@@ -338,6 +349,13 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 animate);
         PropertyAnimator.setProperty(mListView, AnimatableProperty.TRANSLATION_X, -Math.abs(x),
                 ANIMATION_PROPERTIES, animate);
+
+        Rect r = new Rect();
+        mListView.getDrawingRect(r);
+        mView.offsetDescendantRectToMyCoords(mListView, r);
+        mBackground.setGradientCenter(
+                (int) (mListView.getTranslationX() + r.left + r.width() / 2),
+                (int) (mListView.getTranslationY() + r.top + r.height() / 2));
     }
 
     /**
@@ -372,49 +390,52 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     /**
-     * Remove the callback if it exists.
-     */
-    public void removeCallback() {
-        if (DEBUG) Log.d(TAG, "removeCallback");
-        mKeyguardUserSwitcherCallback = null;
-    }
-
-    /**
-     * Register to receive notifications about keyguard user switcher state
-     * (see {@link KeyguardUserSwitcherListener}.
-     *
-     * Only one callback can be used at a time.
-     *
-     * @param callback The callback to register
-     */
-    public void setCallback(KeyguardUserSwitcherListener callback) {
-        if (DEBUG) Log.d(TAG, "setCallback");
-        mKeyguardUserSwitcherCallback = new WeakReference<>(callback);
-    }
-
-    /**
-     * If user switcher state changes, notifies all {@link KeyguardUserSwitcherListener}.
-     * Switcher state is updatd before animations finish.
+     * NOTE: switcher state is updated before animations finish.
      *
      * @param animate true to animate transition. The user switcher state (i.e.
      *                {@link #isUserSwitcherOpen()}) is updated before animation is finished.
      */
     private void setUserSwitcherOpened(boolean open, boolean animate) {
-        boolean wasOpen = mUserSwitcherOpen;
         if (DEBUG) {
-            Log.d(TAG, String.format("setUserSwitcherOpened: %b -> %b (animate=%b)", wasOpen,
-                    open, animate));
+            Log.d(TAG,
+                    String.format("setUserSwitcherOpened: %b -> %b (animate=%b)",
+                            mUserSwitcherOpen, open, animate));
         }
         mUserSwitcherOpen = open;
-        if (mUserSwitcherOpen != wasOpen) {
-            notifyUserSwitcherStateChanged();
-        }
         updateVisibilities(animate);
     }
 
     private void updateVisibilities(boolean animate) {
         if (DEBUG) Log.d(TAG, String.format("updateVisibilities: animate=%b", animate));
         mEndGuestButton.animate().cancel();
+        if (mBgAnimator != null) {
+            mBgAnimator.cancel();
+        }
+
+        if (mUserSwitcherOpen) {
+            mBgAnimator = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
+            mBgAnimator.setDuration(400);
+            mBgAnimator.setInterpolator(Interpolators.ALPHA_IN);
+            mBgAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mBgAnimator = null;
+                }
+            });
+            mBgAnimator.start();
+        } else {
+            mBgAnimator = ObjectAnimator.ofInt(mBackground, "alpha", 255, 0);
+            mBgAnimator.setDuration(400);
+            mBgAnimator.setInterpolator(Interpolators.ALPHA_OUT);
+            mBgAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mBgAnimator = null;
+                }
+            });
+            mBgAnimator.start();
+        }
+
         if (mUserSwitcherOpen && mCurrentUserIsGuest) {
             // Show the "End guest session" button
             mEndGuestButton.setVisibility(View.VISIBLE);
@@ -457,34 +478,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
 
     private boolean isUserSwitcherOpen() {
         return mUserSwitcherOpen;
-    }
-
-    private void notifyUserSwitcherStateChanged() {
-        if (DEBUG) {
-            Log.d(TAG, String.format("notifyUserSwitcherStateChanged: mUserSwitcherOpen=%b",
-                    mUserSwitcherOpen));
-        }
-        if (mKeyguardUserSwitcherCallback != null) {
-            KeyguardUserSwitcherListener cb = mKeyguardUserSwitcherCallback.get();
-            if (cb != null) {
-                cb.onKeyguardUserSwitcherChanged(mUserSwitcherOpen);
-            }
-        }
-    }
-
-    /**
-     * Callback for keyguard user switcher state information
-     */
-    public interface KeyguardUserSwitcherListener {
-
-        /**
-         * Called when the keyguard enters or leaves user switcher mode. This will be called
-         * before the animations are finished.
-         *
-         * @param open if true, keyguard is showing the user switcher or transitioning from/to user
-         *             switcher mode.
-         */
-        void onKeyguardUserSwitcherChanged(boolean open);
     }
 
     static class KeyguardUserAdapter extends
