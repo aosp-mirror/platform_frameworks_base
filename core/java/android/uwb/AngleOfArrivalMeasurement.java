@@ -116,9 +116,8 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
             new Creator<AngleOfArrivalMeasurement>() {
                 @Override
                 public AngleOfArrivalMeasurement createFromParcel(Parcel in) {
-                    Builder builder = new Builder();
-
-                    builder.setAzimuth(in.readParcelable(AngleMeasurement.class.getClassLoader()));
+                    Builder builder =
+                            new Builder(in.readParcelable(AngleMeasurement.class.getClassLoader()));
 
                     builder.setAltitude(in.readParcelable(AngleMeasurement.class.getClassLoader()));
 
@@ -135,18 +134,16 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
      * Builder class for {@link AngleOfArrivalMeasurement}.
      */
     public static final class Builder {
-        private AngleMeasurement mAzimuthAngleMeasurement = null;
+        private final AngleMeasurement mAzimuthAngleMeasurement;
         private AngleMeasurement mAltitudeAngleMeasurement = null;
 
         /**
-         * Set the azimuth angle
+         * Constructs an {@link AngleOfArrivalMeasurement} object
          *
-         * @param azimuthAngle azimuth angle
+         * @param azimuthAngle the azimuth angle of the measurement
          */
-        @NonNull
-        public Builder setAzimuth(@NonNull AngleMeasurement azimuthAngle) {
+        public Builder(@NonNull AngleMeasurement azimuthAngle) {
             mAzimuthAngleMeasurement = azimuthAngle;
-            return this;
         }
 
         /**
@@ -162,15 +159,9 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
 
         /**
          * Build the {@link AngleOfArrivalMeasurement} object
-         *
-         * @throws IllegalStateException if the required azimuth angle is not provided
          */
         @NonNull
         public AngleOfArrivalMeasurement build() {
-            if (mAzimuthAngleMeasurement == null) {
-                throw new IllegalStateException("Azimuth angle measurement is not set");
-            }
-
             return new AngleOfArrivalMeasurement(mAzimuthAngleMeasurement,
                     mAltitudeAngleMeasurement);
         }
