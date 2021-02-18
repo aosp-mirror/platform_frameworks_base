@@ -19,6 +19,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -33,7 +34,7 @@ import java.util.List;
 interface IFingerprintService {
 
     // Creates a test session with the specified sensorId
-    ITestSession createTestSession(int sensorId, String opPackageName);
+    ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
 
     // Requests a proto dump of the specified sensor
     byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
@@ -86,6 +87,9 @@ interface IFingerprintService {
     // Any errors resulting from this call will be returned to the listener
     void remove(IBinder token, int fingerId, int userId, IFingerprintServiceReceiver receiver,
             String opPackageName);
+
+    // Removes all face enrollments for the specified userId.
+    void removeAll(IBinder token, int userId, IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Rename the fingerprint specified by fingerId and userId to the given name
     void rename(int fingerId, int userId, String name);
