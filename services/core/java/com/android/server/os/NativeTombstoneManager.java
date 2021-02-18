@@ -22,11 +22,16 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import android.annotation.AppIdInt;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoInputStream;
@@ -75,6 +80,9 @@ public final class NativeTombstoneManager {
     }
 
     void onSystemReady() {
+        registerForUserRemoval();
+        registerForPackageRemoval();
+
         // Scan existing tombstones.
         mHandler.post(() -> {
             final File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
@@ -145,6 +153,67 @@ public final class NativeTombstoneManager {
         }
     }
 
+    private void purge(Optional<Integer> userId, Optional<Integer> appId) {
+        mHandler.post(() -> {
+            synchronized (mLock) {
+                for (int i = mTombstones.size() - 1; i >= 0; --i) {
+                    TombstoneFile tombstone = mTombstones.valueAt(i);
+                    if (tombstone.matches(userId, appId)) {
+                        tombstone.purge();
+                        mTombstones.removeAt(i);
+                    }
+                }
+            }
+        });
+    }
+
+    private void purgePackage(int uid, boolean allUsers) {
+        final int appId = UserHandle.getAppId(uid);
+        Optional<Integer> userId;
+        if (allUsers) {
+            userId = Optional.empty();
+        } else {
+            userId = Optional.of(UserHandle.getUserId(uid));
+        }
+        purge(userId, Optional.of(appId));
+    }
+
+    private void purgeUser(int uid) {
+        purge(Optional.of(uid), Optional.empty());
+    }
+
+    private void registerForPackageRemoval() {
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int uid = intent.getIntExtra(Intent.EXTRA_UID, UserHandle.USER_NULL);
+                if (uid == UserHandle.USER_NULL) return;
+
+                final boolean allUsers = intent.getBooleanExtra(
+                        Intent.EXTRA_REMOVED_FOR_ALL_USERS, false);
+
+                purgePackage(uid, allUsers);
+            }
+        }, filter, null, mHandler);
+    }
+
+    private void registerForUserRemoval() {
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (userId < 1) return;
+
+                purgeUser(userId);
+            }
+        }, filter, null, mHandler);
+    }
+
     static class TombstoneFile {
         final ParcelFileDescriptor mPfd;
 
@@ -177,6 +246,25 @@ public final class NativeTombstoneManager {
 
         public void dispose() {
             IoUtils.closeQuietly(mPfd);
+        }
+
+        public void purge() {
+            if (!mPurged) {
+                // There's no way to atomically unlink a specific file for which we have an fd from
+                // a path, which means that we can't safely delete a tombstone without coordination
+                // with tombstoned (which has a risk of deadlock if for example, system_server hangs
+                // with a flock). Do the next best thing, and just truncate the file.
+                //
+                // We don't have to worry about inflicting a SIGBUS on a process that has the
+                // tombstone mmaped, because we only clear if the package has been removed, which
+                // means no one with access to the tombstone should be left.
+                try {
+                    Os.ftruncate(mPfd.getFileDescriptor(), 0);
+                } catch (ErrnoException ex) {
+                    Slog.e(TAG, "Failed to truncate tombstone", ex);
+                }
+                mPurged = true;
+            }
         }
 
         static Optional<TombstoneFile> parse(ParcelFileDescriptor pfd) {
