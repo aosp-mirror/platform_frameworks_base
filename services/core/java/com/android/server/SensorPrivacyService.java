@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.MANAGE_SENSOR_PRIVACY;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -199,7 +200,8 @@ public final class SensorPrivacyService extends SystemService {
                                     Intent.EXTRA_USER)).getIdentifier(),
                             intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
                 }
-            }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY));
+            }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY),
+                    MANAGE_SENSOR_PRIVACY, null);
         }
 
         @Override
@@ -461,12 +463,12 @@ public final class SensorPrivacyService extends SystemService {
          */
         private void enforceSensorPrivacyPermission() {
             if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_SENSOR_PRIVACY) == PERMISSION_GRANTED) {
+                    MANAGE_SENSOR_PRIVACY) == PERMISSION_GRANTED) {
                 return;
             }
             throw new SecurityException(
                     "Changing sensor privacy requires the following permission: "
-                            + android.Manifest.permission.MANAGE_SENSOR_PRIVACY);
+                            + MANAGE_SENSOR_PRIVACY);
         }
 
         /**
