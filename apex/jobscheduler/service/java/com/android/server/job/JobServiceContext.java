@@ -17,9 +17,9 @@
 package com.android.server.job;
 
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
-import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
@@ -76,14 +76,6 @@ public final class JobServiceContext implements ServiceConnection {
     private static final boolean DEBUG_STANDBY = JobSchedulerService.DEBUG_STANDBY;
 
     private static final String TAG = "JobServiceContext";
-    /** Amount of time a job is allowed to execute for before being considered timed-out. */
-    public static final long DEFAULT_EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
-    /**
-     * Amount of time a RESTRICTED expedited job is allowed to execute for before being considered
-     * timed-out.
-     */
-    public static final long DEFAULT_RESTRICTED_EXPEDITED_JOB_EXECUTING_TIMESLICE_MILLIS =
-            DEFAULT_EXECUTING_TIMESLICE_MILLIS / 2;
     /** Amount of time the JobScheduler waits for the initial service launch+bind. */
     private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
@@ -110,6 +102,7 @@ public final class JobServiceContext implements ServiceConnection {
     /** Make callbacks to {@link JobSchedulerService} to inform on job completion status. */
     private final JobCompletedListener mCompletedListener;
     private final JobConcurrencyManager mJobConcurrencyManager;
+    private final JobSchedulerService mService;
     /** Used for service binding, etc. */
     private final Context mContext;
     private final Object mLock;
@@ -149,6 +142,13 @@ public final class JobServiceContext implements ServiceConnection {
     private long mExecutionStartTimeElapsed;
     /** Track when job will timeout. */
     private long mTimeoutElapsed;
+    /**
+     * The minimum amount of time the context will allow the job to run before checking whether to
+     * stop it or not.
+     */
+    private long mMinExecutionGuaranteeMillis;
+    /** The absolute maximum amount of time the job can run */
+    private long mMaxExecutionTimeMillis;
 
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
@@ -190,6 +190,7 @@ public final class JobServiceContext implements ServiceConnection {
             IBatteryStats batteryStats, JobPackageTracker tracker, Looper looper) {
         mContext = service.getContext();
         mLock = service.getLock();
+        mService = service;
         mBatteryStats = batteryStats;
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
@@ -239,6 +240,9 @@ public final class JobServiceContext implements ServiceConnection {
                     isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
                     triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
+            mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
+            mMaxExecutionTimeMillis =
+                    Math.max(mService.getMaxJobExecutionTimeMs(job), mMinExecutionGuaranteeMillis);
 
             final long whenDeferred = job.getWhenStandbyDeferred();
             if (whenDeferred > 0) {
@@ -352,8 +356,8 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    void preemptExecutingJobLocked() {
-        doCancelLocked(JobParameters.REASON_PREEMPT, "cancelled due to preemption");
+    void preemptExecutingJobLocked(@NonNull String reason) {
+        doCancelLocked(JobParameters.REASON_PREEMPT, reason);
     }
 
     int getPreferredUid() {
@@ -370,6 +374,11 @@ public final class JobServiceContext implements ServiceConnection {
 
     long getTimeoutElapsed() {
         return mTimeoutElapsed;
+    }
+
+    boolean isWithinExecutionGuaranteeTime() {
+        return mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis
+                < sElapsedRealtimeClock.millis();
     }
 
     @GuardedBy("mLock")
@@ -607,7 +616,7 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    void doCancelLocked(int arg1, String debugReason) {
+    private void doCancelLocked(int stopReasonCode, String debugReason) {
         if (mVerb == VERB_FINISHED) {
             if (DEBUG) {
                 Slog.d(TAG,
@@ -615,8 +624,8 @@ public final class JobServiceContext implements ServiceConnection {
             }
             return;
         }
-        mParams.setStopReason(arg1, debugReason);
-        if (arg1 == JobParameters.REASON_PREEMPT) {
+        mParams.setStopReason(stopReasonCode, debugReason);
+        if (stopReasonCode == JobParameters.REASON_PREEMPT) {
             mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
                     NO_PREFERRED_UID;
         }
@@ -767,11 +776,30 @@ public final class JobServiceContext implements ServiceConnection {
                 closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
                 break;
             case VERB_EXECUTING:
-                // Not an error - client ran out of time.
-                Slog.i(TAG, "Client timed out while executing (no jobFinished received), " +
-                        "sending onStop: " + getRunningJobNameLocked());
-                mParams.setStopReason(JobParameters.REASON_TIMEOUT, "client timed out");
-                sendStopMessageLocked("timeout while executing");
+                final long latestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                if (nowElapsed >= latestStopTimeElapsed) {
+                    // Not an error - client ran out of time.
+                    Slog.i(TAG, "Client timed out while executing (no jobFinished received)."
+                            + " Sending onStop: " + getRunningJobNameLocked());
+                    mParams.setStopReason(JobParameters.REASON_TIMEOUT, "client timed out");
+                    sendStopMessageLocked("timeout while executing");
+                } else {
+                    // We've given the app the minimum execution time. See if we should stop it or
+                    // let it continue running
+                    final String reason = mJobConcurrencyManager.shouldStopRunningJobLocked(this);
+                    if (reason != null) {
+                        Slog.i(TAG, "Stopping client after min execution time: "
+                                + getRunningJobNameLocked() + " because " + reason);
+                        mParams.setStopReason(JobParameters.REASON_TIMEOUT, reason);
+                        sendStopMessageLocked(reason);
+                    } else {
+                        Slog.i(TAG, "Letting " + getRunningJobNameLocked()
+                                + " continue to run past min execution time");
+                        scheduleOpTimeOutLocked();
+                    }
+                }
                 break;
             default:
                 Slog.e(TAG, "Handling timeout for an invalid job state: "
@@ -878,10 +906,16 @@ public final class JobServiceContext implements ServiceConnection {
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:
-                timeoutMillis = mRunningJob.shouldTreatAsExpeditedJob()
-                        && mRunningJob.getStandbyBucket() == RESTRICTED_INDEX
-                        ? DEFAULT_RESTRICTED_EXPEDITED_JOB_EXECUTING_TIMESLICE_MILLIS
-                        : DEFAULT_EXECUTING_TIMESLICE_MILLIS;
+                final long earliestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
+                final long latestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                if (nowElapsed < earliestStopTimeElapsed) {
+                    timeoutMillis = earliestStopTimeElapsed - nowElapsed;
+                } else {
+                    timeoutMillis = latestStopTimeElapsed - nowElapsed;
+                }
                 break;
 
             case VERB_BINDING:
@@ -925,6 +959,13 @@ public final class JobServiceContext implements ServiceConnection {
             pw.print(", timeout at: ");
             TimeUtils.formatDuration(mTimeoutElapsed - nowElapsed, pw);
             pw.println();
+            pw.print("Remaining execution limits: [");
+            TimeUtils.formatDuration(
+                    (mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis) - nowElapsed, pw);
+            pw.print(", ");
+            TimeUtils.formatDuration(
+                    (mExecutionStartTimeElapsed + mMaxExecutionTimeMillis) - nowElapsed, pw);
+            pw.println("]");
             pw.decreaseIndent();
         }
     }
