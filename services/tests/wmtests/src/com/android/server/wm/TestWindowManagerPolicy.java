@@ -91,11 +91,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         return attrs.type == TYPE_NOTIFICATION_SHADE;
     }
 
-    @Override
-    public boolean canBeHiddenByKeyguardLw(WindowState win) {
-        return false;
-    }
-
     /**
      * Sets a runnable to run when adding a splash screen which gets executed after the window has
      * been added but before returning the surface.
