@@ -214,6 +214,7 @@ import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_SO
 import static com.android.server.wm.WindowManagerService.MIN_TASK_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
+import static com.android.server.wm.WindowManagerService.letterboxBackgroundTypeToString;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
@@ -1080,6 +1081,46 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
         }
+
+        dumpLetterboxInfo(pw, prefix);
+    }
+
+    private void dumpLetterboxInfo(PrintWriter pw, String prefix) {
+        final WindowState mainWin = findMainWindow();
+        if (mainWin == null) {
+            return;
+        }
+
+        boolean isLetterboxed = isLetterboxed(mainWin);
+        pw.println(prefix + "isLetterboxed=" + isLetterboxed);
+        if (!isLetterboxed) {
+            return;
+        }
+
+        pw.println(prefix + "  letterboxReason=" + getLetterboxReasonString(mainWin));
+        pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
+                getLetterboxBackgroundColor().toArgb()));
+        pw.println(prefix + "  letterboxBackgroundType="
+                + letterboxBackgroundTypeToString(mWmService.getLetterboxBackgroundType()));
+        pw.println(prefix + "  letterboxAspectRatio="
+                + computeAspectRatio(getBounds()));
+    }
+
+    /**
+     * Returns a string representing the reason for letterboxing. This method assumes the activity
+     * is letterboxed.
+     */
+    private String getLetterboxReasonString(WindowState mainWin) {
+        if (inSizeCompatMode()) {
+            return "SIZE_COMPAT_MODE";
+        }
+        if (isLetterboxedForFixedOrientationAndAspectRatio()) {
+            return "FIXED_ORIENTATION";
+        }
+        if (mainWin.isLetterboxedForDisplayCutout()) {
+            return "DISPLAY_CUTOUT";
+        }
+        return "UNKNOWN_REASON";
     }
 
     void setAppTimeTracker(AppTimeTracker att) {
@@ -7390,8 +7431,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final int containingAppWidth = containingAppBounds.width();
         final int containingAppHeight = containingAppBounds.height();
-        final float containingRatio = Math.max(containingAppWidth, containingAppHeight)
-                / (float) Math.min(containingAppWidth, containingAppHeight);
+        final float containingRatio = computeAspectRatio(containingAppBounds);
 
         int activityWidth = containingAppWidth;
         int activityHeight = containingAppHeight;
@@ -7452,6 +7492,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         outBounds.set(containingBounds.left, containingBounds.top,
                 activityWidth + containingAppBounds.left,
                 activityHeight + containingAppBounds.top);
+    }
+
+    /**
+     * Returns the aspect ratio of the given {@code rect}.
+     */
+    private static float computeAspectRatio(Rect rect) {
+        final int width = rect.width();
+        final int height = rect.height();
+        if (width == 0 || height == 0) {
+            return 0;
+        }
+        return Math.max(width, height) / (float) Math.min(width, height);
     }
 
     /**

@@ -3971,6 +3971,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     ? backgroundType : LETTERBOX_BACKGROUND_SOLID_COLOR;
     }
 
+    /** Returns a string representing the given {@link LetterboxBackgroundType}. */
+    static String letterboxBackgroundTypeToString(
+            @LetterboxBackgroundType int backgroundType) {
+        switch (backgroundType) {
+            case LETTERBOX_BACKGROUND_SOLID_COLOR:
+                return "LETTERBOX_BACKGROUND_SOLID_COLOR";
+            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
+                return "LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND";
+            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
+                return "LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING";
+            default:
+                return "unknown=" + backgroundType;
+        }
+    }
+
     @Override
     public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
         if (!checkCallingPermission(
