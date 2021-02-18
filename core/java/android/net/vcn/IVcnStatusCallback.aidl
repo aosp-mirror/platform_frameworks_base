@@ -19,4 +19,9 @@ package android.net.vcn;
 /** @hide */
 interface IVcnStatusCallback {
     void onEnteredSafeMode();
+    void onGatewayConnectionError(
+            in int[] gatewayNetworkCapabilities,
+            int errorCode,
+            in String exceptionClass,
+            in String exceptionMessage);
 }
