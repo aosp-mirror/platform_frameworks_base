@@ -17,6 +17,7 @@
 package com.android.systemui.theme;
 
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_NEUTRAL_PALETTE;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
 import static com.android.systemui.theme.ThemeOverlayController.USE_LOCK_SCREEN_WALLPAPER;
 
@@ -146,6 +147,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         // Assert that we received the colors that we were expecting
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
+                .isEqualTo(new OverlayIdentifier("ffff0000"));
+        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_NEUTRAL_PALETTE))
                 .isEqualTo(new OverlayIdentifier("ffff0000"));
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_ACCENT_COLOR))
                 .isEqualTo(new OverlayIdentifier("ff0000ff"));
