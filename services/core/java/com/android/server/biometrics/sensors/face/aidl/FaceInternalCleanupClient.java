@@ -61,7 +61,7 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, ISession> {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         return new FaceRemovalClient(context, lazyDaemon, token,
-                null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
-                sensorId, authenticatorIds);
+                null /* ClientMonitorCallbackConverter */, new int[] {biometricId}, userId, owner,
+                utils, sensorId, authenticatorIds);
     }
 }
