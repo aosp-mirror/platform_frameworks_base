@@ -4005,8 +4005,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         deferWindowLayout();
         try {
             if (values != null) {
-                changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId,
-                        deferResume);
+                changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId);
             }
 
             if (!deferResume) {
@@ -4025,7 +4024,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Update default (global) configuration and notify listeners about changes. */
     int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
-            boolean persistent, int userId, boolean deferResume) {
+            boolean persistent, int userId) {
 
         final DisplayContent defaultDisplay =
                 mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);
@@ -4037,7 +4036,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // setting WindowManagerService.mWaitingForConfig to true, it is important that we call
             // performDisplayOverrideConfigUpdate in order to send the new display configuration
             // (even if there are no actual changes) to unfreeze the window.
-            defaultDisplay.performDisplayOverrideConfigUpdate(values, deferResume);
+            defaultDisplay.performDisplayOverrideConfigUpdate(values);
             return 0;
         }
 
@@ -4085,9 +4084,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         mTempConfig.seq = increaseConfigurationSeqLocked();
 
-        // Update stored global config and notify everyone about the change.
-        mRootWindowContainer.onConfigurationChanged(mTempConfig);
-
         Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
         mUsageStatsInternal.reportConfigurationChange(mTempConfig, mAmInternal.getCurrentUserId());
@@ -4106,13 +4102,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // resources have that config before following boot code is executed.
         mSystemThread.applyConfigurationToResources(mTempConfig);
 
-        // We need another copy of global config because we're scheduling some calls instead of
-        // running them in place. We need to be sure that object we send will be handled unchanged.
-        final Configuration configCopy = new Configuration(mTempConfig);
         if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
             final Message msg = PooledLambda.obtainMessage(
                     ActivityTaskManagerService::sendPutConfigurationForUserMsg,
-                    this, userId, configCopy);
+                    this, userId, new Configuration(mTempConfig));
             mH.sendMessage(msg);
         }
 
@@ -4121,8 +4114,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final int pid = pidMap.keyAt(i);
             final WindowProcessController app = pidMap.get(pid);
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Update process config of %s to new "
-                    + "config %s", app.mName, configCopy);
-            app.onConfigurationChanged(configCopy);
+                    + "config %s", app.mName, mTempConfig);
+            app.onConfigurationChanged(mTempConfig);
         }
 
         final Message msg = PooledLambda.obtainMessage(
@@ -4130,10 +4123,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAmInternal, changes, initLocale);
         mH.sendMessage(msg);
 
-        // Override configuration of the default display duplicates global config, so we need to
-        // update it also. This will also notify WindowManager about changes.
-        defaultDisplay.performDisplayOverrideConfigUpdate(mRootWindowContainer.getConfiguration(),
-                deferResume);
+        // Update stored global config and notify everyone about the change.
+        mRootWindowContainer.onConfigurationChanged(mTempConfig);
 
         return changes;
     }
