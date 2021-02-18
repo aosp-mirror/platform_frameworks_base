@@ -884,7 +884,7 @@ package android.app.admin {
   public class DevicePolicyManager {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public boolean getBluetoothContactSharingDisabled(@NonNull android.os.UserHandle);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getDeviceOwner();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, "android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"}) public android.content.ComponentName getDeviceOwnerComponentOnAnyUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getDeviceOwnerNameOnAnyUser();
     method @Nullable public CharSequence getDeviceOwnerOrganizationName();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getDeviceOwnerUser();
