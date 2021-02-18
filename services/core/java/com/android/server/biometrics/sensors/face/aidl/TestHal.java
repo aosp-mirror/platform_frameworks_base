@@ -22,6 +22,7 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.ISessionCallback;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.biometrics.face.SessionState;
 import android.hardware.common.NativeHandle;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
@@ -131,6 +132,15 @@ public class TestHal extends IFace.Stub {
                 Slog.w(TAG, "resetLockout, cookie: " + cookie);
                 cb.onLockoutCleared();
             }
+
+            @Override
+            public void close(int cookie) throws RemoteException {
+                cb.onStateChanged(cookie, SessionState.CLOSED);
+            }
         };
+    }
+
+    @Override
+    public void reset() {
     }
 }
