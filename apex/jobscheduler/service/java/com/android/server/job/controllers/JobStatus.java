@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -1644,14 +1645,18 @@ public final class JobStatus {
         }
     }
 
-    private void dumpJobWorkItem(PrintWriter pw, String prefix, JobWorkItem work, int index) {
-        pw.print(prefix); pw.print("  #"); pw.print(index); pw.print(": #");
+    private void dumpJobWorkItem(IndentingPrintWriter pw, JobWorkItem work, int index) {
+        pw.increaseIndent();
+        pw.print("#"); pw.print(index); pw.print(": #");
         pw.print(work.getWorkId()); pw.print(" "); pw.print(work.getDeliveryCount());
         pw.print("x "); pw.println(work.getIntent());
         if (work.getGrants() != null) {
-            pw.print(prefix); pw.println("  URI grants:");
-            ((GrantedUriPermissions)work.getGrants()).dump(pw, prefix + "    ");
+            pw.println("URI grants:");
+            pw.increaseIndent();
+            ((GrantedUriPermissions) work.getGrants()).dump(pw);
+            pw.decreaseIndent();
         }
+        pw.decreaseIndent();
     }
 
     private void dumpJobWorkItem(ProtoOutputStream proto, long fieldId, JobWorkItem work) {
@@ -1695,36 +1700,38 @@ public final class JobStatus {
     }
 
     // Dumpsys infrastructure
-    public void dump(PrintWriter pw, String prefix, boolean full, long elapsedRealtimeMillis) {
-        pw.print(prefix); UserHandle.formatUid(pw, callingUid);
+    public void dump(IndentingPrintWriter pw,  boolean full, long elapsedRealtimeMillis) {
+        UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);
-        pw.print(prefix);
+
         pw.print("Source: uid="); UserHandle.formatUid(pw, getSourceUid());
         pw.print(" user="); pw.print(getSourceUserId());
         pw.print(" pkg="); pw.println(getSourcePackageName());
         if (full) {
-            pw.print(prefix); pw.println("JobInfo:");
-            pw.print(prefix); pw.print("  Service: ");
+            pw.println("JobInfo:");
+            pw.increaseIndent();
+
+            pw.print("Service: ");
             pw.println(job.getService().flattenToShortString());
             if (job.isPeriodic()) {
-                pw.print(prefix); pw.print("  PERIODIC: interval=");
+                pw.print("PERIODIC: interval=");
                 TimeUtils.formatDuration(job.getIntervalMillis(), pw);
                 pw.print(" flex="); TimeUtils.formatDuration(job.getFlexMillis(), pw);
                 pw.println();
             }
             if (job.isPersisted()) {
-                pw.print(prefix); pw.println("  PERSISTED");
+                pw.println("PERSISTED");
             }
             if (job.getPriority() != 0) {
-                pw.print(prefix); pw.print("  Priority: ");
+                pw.print("Priority: ");
                 pw.println(JobInfo.getPriorityString(job.getPriority()));
             }
             if (job.getFlags() != 0) {
-                pw.print(prefix); pw.print("  Flags: ");
+                pw.print("Flags: ");
                 pw.println(Integer.toHexString(job.getFlags()));
             }
             if (getInternalFlags() != 0) {
-                pw.print(prefix); pw.print("  Internal flags: ");
+                pw.print("Internal flags: ");
                 pw.print(Integer.toHexString(getInternalFlags()));
 
                 if ((getInternalFlags()&INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0) {
@@ -1732,106 +1739,109 @@ public final class JobStatus {
                 }
                 pw.println();
             }
-            pw.print(prefix); pw.print("  Requires: charging=");
+            pw.print("Requires: charging=");
             pw.print(job.isRequireCharging()); pw.print(" batteryNotLow=");
             pw.print(job.isRequireBatteryNotLow()); pw.print(" deviceIdle=");
             pw.println(job.isRequireDeviceIdle());
             if (job.getTriggerContentUris() != null) {
-                pw.print(prefix); pw.println("  Trigger content URIs:");
+                pw.println("Trigger content URIs:");
+                pw.increaseIndent();
                 for (int i = 0; i < job.getTriggerContentUris().length; i++) {
                     JobInfo.TriggerContentUri trig = job.getTriggerContentUris()[i];
-                    pw.print(prefix); pw.print("    ");
                     pw.print(Integer.toHexString(trig.getFlags()));
                     pw.print(' '); pw.println(trig.getUri());
                 }
+                pw.decreaseIndent();
                 if (job.getTriggerContentUpdateDelay() >= 0) {
-                    pw.print(prefix); pw.print("  Trigger update delay: ");
+                    pw.print("Trigger update delay: ");
                     TimeUtils.formatDuration(job.getTriggerContentUpdateDelay(), pw);
                     pw.println();
                 }
                 if (job.getTriggerContentMaxDelay() >= 0) {
-                    pw.print(prefix); pw.print("  Trigger max delay: ");
+                    pw.print("Trigger max delay: ");
                     TimeUtils.formatDuration(job.getTriggerContentMaxDelay(), pw);
                     pw.println();
                 }
             }
             if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
-                pw.print(prefix); pw.print("  Extras: ");
+                pw.print("Extras: ");
                 pw.println(job.getExtras().toShortString());
             }
             if (job.getTransientExtras() != null && !job.getTransientExtras().isDefinitelyEmpty()) {
-                pw.print(prefix); pw.print("  Transient extras: ");
+                pw.print("Transient extras: ");
                 pw.println(job.getTransientExtras().toShortString());
             }
             if (job.getClipData() != null) {
-                pw.print(prefix); pw.print("  Clip data: ");
+                pw.print("Clip data: ");
                 StringBuilder b = new StringBuilder(128);
                 b.append(job.getClipData());
                 pw.println(b);
             }
             if (uriPerms != null) {
-                pw.print(prefix); pw.println("  Granted URI permissions:");
-                uriPerms.dump(pw, prefix + "  ");
+                pw.println("Granted URI permissions:");
+                uriPerms.dump(pw);
             }
             if (job.getRequiredNetwork() != null) {
-                pw.print(prefix); pw.print("  Network type: ");
+                pw.print("Network type: ");
                 pw.println(job.getRequiredNetwork());
             }
             if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                pw.print(prefix); pw.print("  Network download bytes: ");
+                pw.print("Network download bytes: ");
                 pw.println(mTotalNetworkDownloadBytes);
             }
             if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                pw.print(prefix); pw.print("  Network upload bytes: ");
+                pw.print("Network upload bytes: ");
                 pw.println(mTotalNetworkUploadBytes);
             }
             if (job.getMinLatencyMillis() != 0) {
-                pw.print(prefix); pw.print("  Minimum latency: ");
+                pw.print("Minimum latency: ");
                 TimeUtils.formatDuration(job.getMinLatencyMillis(), pw);
                 pw.println();
             }
             if (job.getMaxExecutionDelayMillis() != 0) {
-                pw.print(prefix); pw.print("  Max execution delay: ");
+                pw.print("Max execution delay: ");
                 TimeUtils.formatDuration(job.getMaxExecutionDelayMillis(), pw);
                 pw.println();
             }
-            pw.print(prefix); pw.print("  Backoff: policy="); pw.print(job.getBackoffPolicy());
+            pw.print("Backoff: policy="); pw.print(job.getBackoffPolicy());
             pw.print(" initial="); TimeUtils.formatDuration(job.getInitialBackoffMillis(), pw);
             pw.println();
             if (job.hasEarlyConstraint()) {
-                pw.print(prefix); pw.println("  Has early constraint");
+                pw.println("Has early constraint");
             }
             if (job.hasLateConstraint()) {
-                pw.print(prefix); pw.println("  Has late constraint");
+                pw.println("Has late constraint");
             }
+
+            pw.decreaseIndent();
         }
-        pw.print(prefix); pw.print("Required constraints:");
+
+        pw.print("Required constraints:");
         dumpConstraints(pw, requiredConstraints);
         pw.println();
-        pw.print(prefix);
         pw.print("Dynamic constraints:");
         dumpConstraints(pw, mDynamicConstraints);
         pw.println();
         if (full) {
-            pw.print(prefix); pw.print("Satisfied constraints:");
+            pw.print("Satisfied constraints:");
             dumpConstraints(pw, satisfiedConstraints);
             pw.println();
-            pw.print(prefix); pw.print("Unsatisfied constraints:");
+            pw.print("Unsatisfied constraints:");
             dumpConstraints(pw,
                     ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA) & ~satisfiedConstraints));
             pw.println();
             if (dozeWhitelisted) {
-                pw.print(prefix); pw.println("Doze whitelisted: true");
+                pw.println("Doze whitelisted: true");
             }
             if (uidActive) {
-                pw.print(prefix); pw.println("Uid: active");
+                pw.println("Uid: active");
             }
             if (job.isExemptedFromAppStandby()) {
-                pw.print(prefix); pw.println("Is exempted from app standby");
+                pw.println("Is exempted from app standby");
             }
         }
         if (trackingControllers != 0) {
-            pw.print(prefix); pw.print("Tracking:");
+            pw.print("Tracking:");
             if ((trackingControllers&TRACKING_BATTERY) != 0) pw.print(" BATTERY");
             if ((trackingControllers&TRACKING_CONNECTIVITY) != 0) pw.print(" CONNECTIVITY");
             if ((trackingControllers&TRACKING_CONTENT) != 0) pw.print(" CONTENT");
@@ -1842,76 +1852,78 @@ public final class JobStatus {
             pw.println();
         }
 
-        pw.print(prefix); pw.println("Implicit constraints:");
-        pw.print(prefix); pw.print("  readyNotDozing: ");
+        pw.println("Implicit constraints:");
+        pw.increaseIndent();
+        pw.print("readyNotDozing: ");
         pw.println(mReadyNotDozing);
-        pw.print(prefix); pw.print("  readyNotRestrictedInBg: ");
+        pw.print("readyNotRestrictedInBg: ");
         pw.println(mReadyNotRestrictedInBg);
         if (!job.isPeriodic() && hasDeadlineConstraint()) {
-            pw.print(prefix); pw.print("  readyDeadlineSatisfied: ");
+            pw.print("readyDeadlineSatisfied: ");
             pw.println(mReadyDeadlineSatisfied);
         }
         if (mDynamicConstraints != 0) {
-            pw.print(prefix);
-            pw.print("  readyDynamicSatisfied: ");
+            pw.print("readyDynamicSatisfied: ");
             pw.println(mReadyDynamicSatisfied);
         }
-        pw.print(prefix);
-        pw.print("  readyComponentEnabled: ");
+        pw.print("readyComponentEnabled: ");
         pw.println(serviceInfo != null);
         if ((getFlags() & JobInfo.FLAG_EXPEDITED) != 0) {
-            pw.print(prefix);
-            pw.print("  mReadyWithinExpeditedQuota: ");
+            pw.print("readyWithinExpeditedQuota: ");
             pw.println(mReadyWithinExpeditedQuota);
         }
+        pw.decreaseIndent();
 
         if (changedAuthorities != null) {
-            pw.print(prefix); pw.println("Changed authorities:");
+            pw.println("Changed authorities:");
+            pw.increaseIndent();
             for (int i=0; i<changedAuthorities.size(); i++) {
-                pw.print(prefix); pw.print("  "); pw.println(changedAuthorities.valueAt(i));
+                pw.println(changedAuthorities.valueAt(i));
             }
+            pw.decreaseIndent();
         }
         if (changedUris != null) {
-            pw.print(prefix);
             pw.println("Changed URIs:");
+            pw.increaseIndent();
             for (int i = 0; i < changedUris.size(); i++) {
-                pw.print(prefix);
-                pw.print("  ");
                 pw.println(changedUris.valueAt(i));
             }
+            pw.decreaseIndent();
         }
         if (network != null) {
-            pw.print(prefix); pw.print("Network: "); pw.println(network);
+            pw.print("Network: "); pw.println(network);
         }
         if (pendingWork != null && pendingWork.size() > 0) {
-            pw.print(prefix); pw.println("Pending work:");
+            pw.println("Pending work:");
             for (int i = 0; i < pendingWork.size(); i++) {
-                dumpJobWorkItem(pw, prefix, pendingWork.get(i), i);
+                dumpJobWorkItem(pw, pendingWork.get(i), i);
             }
         }
         if (executingWork != null && executingWork.size() > 0) {
-            pw.print(prefix); pw.println("Executing work:");
+            pw.println("Executing work:");
             for (int i = 0; i < executingWork.size(); i++) {
-                dumpJobWorkItem(pw, prefix, executingWork.get(i), i);
+                dumpJobWorkItem(pw, executingWork.get(i), i);
             }
         }
-        pw.print(prefix); pw.print("Standby bucket: ");
+        pw.print("Standby bucket: ");
         pw.println(getBucketName());
+        pw.increaseIndent();
         if (whenStandbyDeferred != 0) {
-            pw.print(prefix); pw.print("  Deferred since: ");
+            pw.print("Deferred since: ");
             TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);
             pw.println();
         }
         if (mFirstForceBatchedTimeElapsed != 0) {
-            pw.print(prefix);
-            pw.print("  Time since first force batch attempt: ");
+            pw.print("Time since first force batch attempt: ");
             TimeUtils.formatDuration(mFirstForceBatchedTimeElapsed, elapsedRealtimeMillis, pw);
             pw.println();
         }
-        pw.print(prefix); pw.print("Enqueue time: ");
+        pw.decreaseIndent();
+
+        pw.print("Enqueue time: ");
         TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
         pw.println();
-        pw.print(prefix); pw.print("Run time: earliest=");
+        pw.print("Run time: earliest=");
         formatRunTime(pw, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, elapsedRealtimeMillis);
         pw.print(", latest=");
         formatRunTime(pw, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, elapsedRealtimeMillis);
@@ -1920,14 +1932,14 @@ public final class JobStatus {
                 NO_LATEST_RUNTIME, elapsedRealtimeMillis);
         pw.println();
         if (numFailures != 0) {
-            pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);
+            pw.print("Num failures: "); pw.println(numFailures);
         }
         if (mLastSuccessfulRunTime != 0) {
-            pw.print(prefix); pw.print("Last successful run: ");
+            pw.print("Last successful run: ");
             pw.println(formatTime(mLastSuccessfulRunTime));
         }
         if (mLastFailedRunTime != 0) {
-            pw.print(prefix); pw.print("Last failed run: ");
+            pw.print("Last failed run: ");
             pw.println(formatTime(mLastFailedRunTime));
         }
     }
