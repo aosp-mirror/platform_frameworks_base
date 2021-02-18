@@ -59,6 +59,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 25;
     private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 26;
     private static final int NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG = 27;
+    private static final int NOTIFY_LOCK_TASK_MODE_CHANGED_MSG = 28;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -177,6 +178,10 @@ class TaskChangeNotificationController {
         l.onTaskMovedToBack((RunningTaskInfo) m.obj);
     };
 
+    private final TaskStackConsumer mNotifyLockTaskModeChanged = (l, m) -> {
+        l.onLockTaskModeChanged(m.arg1);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -267,6 +272,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskMovedToBack, msg);
+                    break;
+                case NOTIFY_LOCK_TASK_MODE_CHANGED_MSG:
+                    forAllRemoteListeners(mNotifyLockTaskModeChanged, msg);
                     break;
             }
             if (msg.obj instanceof SomeArgs) {
@@ -548,6 +556,13 @@ class TaskChangeNotificationController {
     void notifyTaskMovedToBack(TaskInfo ti) {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG, ti);
         forAllLocalListeners(mNotifyTaskMovedToBack, msg);
+        msg.sendToTarget();
+    }
+
+    void notifyLockTaskModeChanged(int lockTaskModeState) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_LOCK_TASK_MODE_CHANGED_MSG,
+                lockTaskModeState, 0 /* unused */);
+        forAllLocalListeners(mNotifyLockTaskModeChanged, msg);
         msg.sendToTarget();
     }
 }
