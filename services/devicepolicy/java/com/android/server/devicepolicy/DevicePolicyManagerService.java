@@ -10095,7 +10095,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = user.id;
 
-        // TODO(b/177547285): add CTS test
         if (mInjector.userManagerIsHeadlessSystemUserMode()) {
             ComponentName admin = mOwners.getDeviceOwnerComponent();
             Slog.i(LOG_TAG, "Automatically setting profile owner (" + admin + ") on new user "
@@ -12914,8 +12913,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mOwners.hasProfileOwner(deviceOwnerUserId)) {
             return CODE_USER_HAS_PROFILE_OWNER;
         }
+
+        boolean isHeadlessSystemUserMode = mInjector.userManagerIsHeadlessSystemUserMode();
         // System user is always running in headless system user mode.
-        if (!mInjector.userManagerIsHeadlessSystemUserMode()
+        if (!isHeadlessSystemUserMode
                 && !mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
             return CODE_USER_NOT_RUNNING;
         }
@@ -12923,7 +12924,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return CODE_HAS_PAIRED;
         }
 
-        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+        if (isHeadlessSystemUserMode) {
             if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
                 Slog.e(LOG_TAG, "In headless system user mode, "
                         + "device owner can only be set on headless system user.");
@@ -12935,9 +12936,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
             if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 // In non-headless system user mode, DO can be setup only if
-                // there's no non-system user
-                if (!mInjector.userManagerIsHeadlessSystemUserMode()
-                        && mUserManager.getUserCount() > 1) {
+                // there's no non-system user.
+                // In headless system user mode, DO can be setup only if there are
+                // two users: the headless system user and the foreground user.
+                // If there could be multiple foreground users, this constraint should be modified.
+
+                int maxNumberOfExistingUsers = isHeadlessSystemUserMode ? 2 : 1;
+                if (mUserManager.getUserCount() > maxNumberOfExistingUsers) {
                     return CODE_NONSYSTEM_USER_EXISTS;
                 }
 
