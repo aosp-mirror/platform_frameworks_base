@@ -74,7 +74,14 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
     }
 
     void setAnimation(@Nullable UdfpsAnimation animation) {
+        if (mUdfpsAnimation != null) {
+            mUdfpsAnimation.setAnimationView(null);
+        }
+
         mUdfpsAnimation = animation;
+        if (mUdfpsAnimation != null) {
+            mUdfpsAnimation.setAnimationView(this);
+        }
     }
 
     void onSensorRectUpdated(@NonNull RectF sensorRect) {
