@@ -3021,14 +3021,14 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     void dumpInternal(final IndentingPrintWriter pw, int filterUid) {
-        final int filterUidFinal = UserHandle.getAppId(filterUid);
+        final int filterAppId = UserHandle.getAppId(filterUid);
         final long now = sSystemClock.millis();
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long nowUptime = sUptimeMillisClock.millis();
 
         final Predicate<JobStatus> predicate = (js) -> {
-            return filterUidFinal == -1 || UserHandle.getAppId(js.getUid()) == filterUidFinal
-                    || UserHandle.getAppId(js.getSourceUid()) == filterUidFinal;
+            return filterAppId == -1 || UserHandle.getAppId(js.getUid()) == filterAppId
+                    || UserHandle.getAppId(js.getSourceUid()) == filterAppId;
         };
         synchronized (mLock) {
             mConstants.dump(pw);
@@ -3041,7 +3041,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                 mJobRestrictions.get(i).dumpConstants(pw);
-                pw.println();
             }
             pw.println();
 
@@ -3052,21 +3051,25 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print("Registered ");
             pw.print(mJobs.size());
             pw.println(" jobs:");
+            pw.increaseIndent();
+            boolean jobPrinted = false;
             if (mJobs.size() > 0) {
                 final List<JobStatus> jobs = mJobs.mJobSet.getAllJobs();
                 sortJobs(jobs);
                 for (JobStatus job : jobs) {
-                    pw.print("  JOB #"); job.printUniqueId(pw); pw.print(": ");
-                    pw.println(job.toShortStringExceptUniqueId());
-
                     // Skip printing details if the caller requested a filter
                     if (!predicate.test(job)) {
                         continue;
                     }
+                    jobPrinted = true;
 
-                    job.dump(pw, "    ", true, nowElapsed);
+                    pw.print("JOB #"); job.printUniqueId(pw); pw.print(": ");
+                    pw.println(job.toShortStringExceptUniqueId());
 
-                    pw.print("    Restricted due to:");
+                    pw.increaseIndent();
+                    job.dump(pw, "", true, nowElapsed);
+
+                    pw.print("Restricted due to:");
                     final boolean isRestricted = checkIfRestricted(job) != null;
                     if (isRestricted) {
                         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
@@ -3081,7 +3084,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     pw.println(".");
 
-                    pw.print("    Ready: ");
+                    pw.print("Ready: ");
                     pw.print(isReadyToBeExecutedLocked(job));
                     pw.print(" (job=");
                     pw.print(job.isReady());
@@ -3098,10 +3101,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" comp=");
                     pw.print(isComponentUsable(job));
                     pw.println(")");
+
+                    pw.decreaseIndent();
                 }
-            } else {
-                pw.println("  None.");
             }
+            if (!jobPrinted) {
+                pw.println("None.");
+            }
+            pw.decreaseIndent();
+
             for (int i=0; i<mControllers.size(); i++) {
                 pw.println();
                 pw.println(mControllers.get(i).getClass().getSimpleName() + ":");
@@ -3109,66 +3117,105 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mControllers.get(i).dumpControllerStateLocked(pw, predicate);
                 pw.decreaseIndent();
             }
-            pw.println();
-            pw.println("Uid priority overrides:");
+
+            boolean overridePrinted = false;
             for (int i=0; i< mUidPriorityOverride.size(); i++) {
                 int uid = mUidPriorityOverride.keyAt(i);
-                if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
-                    pw.print("  "); pw.print(UserHandle.formatUid(uid));
+                if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
+                    if (!overridePrinted) {
+                        overridePrinted = true;
+                        pw.println();
+                        pw.println("Uid priority overrides:");
+                        pw.increaseIndent();
+                    }
+                    pw.print(UserHandle.formatUid(uid));
                     pw.print(": "); pw.println(mUidPriorityOverride.valueAt(i));
                 }
             }
-            if (mBackingUpUids.size() > 0) {
-                pw.println();
-                pw.println("Backing up uids:");
-                boolean first = true;
-                for (int i = 0; i < mBackingUpUids.size(); i++) {
-                    int uid = mBackingUpUids.keyAt(i);
-                    if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
-                        if (first) {
-                            pw.print("  ");
-                            first = false;
-                        } else {
-                            pw.print(", ");
-                        }
-                        pw.print(UserHandle.formatUid(uid));
+            if (overridePrinted) {
+                pw.decreaseIndent();
+            }
+
+            boolean backingPrinted = false;
+            for (int i = 0; i < mBackingUpUids.size(); i++) {
+                int uid = mBackingUpUids.keyAt(i);
+                if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
+                    if (!backingPrinted) {
+                        pw.println();
+                        pw.println("Backing up uids:");
+                        pw.increaseIndent();
+                        backingPrinted = true;
+                    } else {
+                        pw.print(", ");
                     }
+                    pw.print(UserHandle.formatUid(uid));
                 }
+            }
+            if (backingPrinted) {
+                pw.decreaseIndent();
                 pw.println();
             }
+
             pw.println();
-            mJobPackageTracker.dump(pw, "", filterUidFinal);
+            mJobPackageTracker.dump(pw, "", filterAppId);
             pw.println();
-            if (mJobPackageTracker.dumpHistory(pw, "", filterUidFinal)) {
+            if (mJobPackageTracker.dumpHistory(pw, "", filterAppId)) {
                 pw.println();
             }
+
+            boolean pendingPrinted = false;
             pw.println("Pending queue:");
+            pw.increaseIndent();
             for (int i=0; i<mPendingJobs.size(); i++) {
                 JobStatus job = mPendingJobs.get(i);
-                pw.print("  Pending #"); pw.print(i); pw.print(": ");
+                if (!predicate.test(job)) {
+                    continue;
+                }
+                if (!pendingPrinted) {
+                    pendingPrinted = true;
+                }
+
+                pw.print("Pending #"); pw.print(i); pw.print(": ");
                 pw.println(job.toShortString());
-                job.dump(pw, "    ", false, nowElapsed);
+
+                pw.increaseIndent();
+                job.dump(pw, "", false, nowElapsed);
                 int priority = evaluateJobPriorityLocked(job);
-                pw.print("    Evaluated priority: ");
+                pw.print("Evaluated priority: ");
                 pw.println(JobInfo.getPriorityString(priority));
 
-                pw.print("    Tag: "); pw.println(job.getTag());
-                pw.print("    Enq: ");
+                pw.print("Tag: "); pw.println(job.getTag());
+                pw.print("Enq: ");
                 TimeUtils.formatDuration(job.madePending - nowUptime, pw);
+                pw.decreaseIndent();
                 pw.println();
             }
+            if (!pendingPrinted) {
+                pw.println("None");
+            }
+            pw.decreaseIndent();
+
             pw.println();
             pw.println("Active jobs:");
             pw.increaseIndent();
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
+                final JobStatus job = jsc.getRunningJobLocked();
+
+                if (job != null && !predicate.test(job)) {
+                    continue;
+                }
+
                 pw.print("Slot #"); pw.print(i); pw.print(": ");
                 jsc.dumpLocked(pw, nowElapsed);
 
-                final JobStatus job = jsc.getRunningJobLocked();
                 if (job != null) {
                     pw.increaseIndent();
-                    job.dump(pw, "  ", false, nowElapsed);
+
+                    pw.increaseIndent();
+                    job.dump(pw, "", false, nowElapsed);
+                    pw.decreaseIndent();
+
                     pw.print("Evaluated priority: ");
                     pw.println(JobInfo.getPriorityString(job.lastEvaluatedPriority));
 
@@ -3176,8 +3223,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     TimeUtils.formatDuration(job.madeActive - nowUptime, pw);
                     pw.print(", pending for ");
                     TimeUtils.formatDuration(job.madeActive - job.madePending, pw);
-                    pw.println();
                     pw.decreaseIndent();
+                    pw.println();
                 }
             }
             pw.decreaseIndent();
@@ -3199,13 +3246,13 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void dumpInternalProto(final FileDescriptor fd, int filterUid) {
         ProtoOutputStream proto = new ProtoOutputStream(fd);
-        final int filterUidFinal = UserHandle.getAppId(filterUid);
+        final int filterAppId = UserHandle.getAppId(filterUid);
         final long now = sSystemClock.millis();
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long nowUptime = sUptimeMillisClock.millis();
         final Predicate<JobStatus> predicate = (js) -> {
-            return filterUidFinal == -1 || UserHandle.getAppId(js.getUid()) == filterUidFinal
-                    || UserHandle.getAppId(js.getSourceUid()) == filterUidFinal;
+            return filterAppId == -1 || UserHandle.getAppId(js.getUid()) == filterAppId
+                    || UserHandle.getAppId(js.getSourceUid()) == filterAppId;
         };
 
         synchronized (mLock) {
@@ -3278,7 +3325,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             for (int i=0; i< mUidPriorityOverride.size(); i++) {
                 int uid = mUidPriorityOverride.keyAt(i);
-                if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
+                if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
                     long pToken = proto.start(JobSchedulerServiceDumpProto.PRIORITY_OVERRIDES);
                     proto.write(JobSchedulerServiceDumpProto.PriorityOverride.UID, uid);
                     proto.write(JobSchedulerServiceDumpProto.PriorityOverride.OVERRIDE_VALUE,
@@ -3288,15 +3335,15 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             for (int i = 0; i < mBackingUpUids.size(); i++) {
                 int uid = mBackingUpUids.keyAt(i);
-                if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
+                if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
                     proto.write(JobSchedulerServiceDumpProto.BACKING_UP_UIDS, uid);
                 }
             }
 
             mJobPackageTracker.dump(proto, JobSchedulerServiceDumpProto.PACKAGE_TRACKER,
-                    filterUidFinal);
+                    filterAppId);
             mJobPackageTracker.dumpHistory(proto, JobSchedulerServiceDumpProto.HISTORY,
-                    filterUidFinal);
+                    filterAppId);
 
             for (JobStatus job : mPendingJobs) {
                 final long pjToken = proto.start(JobSchedulerServiceDumpProto.PENDING_JOBS);
