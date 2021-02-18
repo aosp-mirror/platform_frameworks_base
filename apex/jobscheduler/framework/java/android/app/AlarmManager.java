@@ -16,11 +16,14 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -182,6 +185,25 @@ public class AlarmManager {
      */
     @UnsupportedAppUsage
     public static final int FLAG_IDLE_UNTIL = 1<<4;
+
+    /**
+     * Flag for alarms: Used to provide backwards compatibility for apps with targetSdkVersion less
+     * than {@link Build.VERSION_CODES#S}
+     * @hide
+     */
+    public static final int FLAG_ALLOW_WHILE_IDLE_COMPAT = 1 << 5;
+
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#S} or above, APIs
+     * {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)} and
+     * {@link #setAlarmClock(AlarmClockInfo, PendingIntent)} will require holding a new
+     * permission {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled // TODO (b/171306433): Enable starting S.
+    public static final long REQUIRE_EXACT_ALARM_PERMISSION = 171306433L;
 
     @UnsupportedAppUsage
     private final IAlarmManager mService;
@@ -588,6 +610,11 @@ public class AlarmManager {
      * This method is like {@link #setExact(int, long, PendingIntent)}, but implies
      * {@link #RTC_WAKEUP}.
      *
+     * <p>
+     * Starting from API {@link Build.VERSION_CODES#S}, using this method requires the
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM} permission. Alarms scheduled via this API
+     * will be allowed to start a foreground service even if the app is in the background.
+     *
      * @param info
      * @param operation Action to perform when the alarm goes off;
      *        typically comes from {@link PendingIntent#getBroadcast
@@ -603,6 +630,7 @@ public class AlarmManager {
      * @see android.content.Context#registerReceiver
      * @see android.content.Intent#filterEquals
      */
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
         setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation,
                 null, null, null, null, info);
@@ -876,6 +904,12 @@ public class AlarmManager {
      * device is idle it may take even more liberties with scheduling in order to optimize
      * for battery life.</p>
      *
+     * <p>
+     * Starting from API {@link Build.VERSION_CODES#S}, using this method requires the
+     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM} permission, unless the app is exempt from
+     * battery restrictions. Alarms scheduled via this API will be allowed to start a foreground
+     * service even if the app is in the background.
+     *
      * @param type type of alarm.
      * @param triggerAtMillis time in milliseconds that the alarm should go
      *        off, using the appropriate clock (depending on the alarm type).
@@ -895,6 +929,7 @@ public class AlarmManager {
      * @see #RTC
      * @see #RTC_WAKEUP
      */
+    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExactAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
             PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
@@ -1014,6 +1049,18 @@ public class AlarmManager {
             return mService.getNextWakeFromIdleTime();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called to check if the caller has permission to use alarms set via {@link }
+     * @return
+     */
+    public boolean canScheduleExactAlarms() {
+        try {
+            return mService.canScheduleExactAlarms();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 

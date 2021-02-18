@@ -26,6 +26,7 @@ import static com.android.server.alarm.AlarmManagerService.clampPositive;
 import android.app.AlarmManager;
 import android.app.IAlarmListener;
 import android.app.PendingIntent;
+import android.os.Bundle;
 import android.os.WorkSource;
 import android.util.IndentingPrintWriter;
 import android.util.TimeUtils;
@@ -92,10 +93,12 @@ class Alarm {
     private long mWhenElapsed;
     private long mMaxWhenElapsed;
     public AlarmManagerService.PriorityClass priorityClass;
+    /** Broadcast options to use when delivering this alarm */
+    public Bundle mIdleOptions;
 
     Alarm(int type, long when, long requestedWhenElapsed, long windowLength, long interval,
             PendingIntent op, IAlarmListener rec, String listenerTag, WorkSource ws, int flags,
-            AlarmManager.AlarmClockInfo info, int uid, String pkgName) {
+            AlarmManager.AlarmClockInfo info, int uid, String pkgName, Bundle idleOptions) {
         this.type = type;
         origWhen = when;
         wakeup = type == AlarmManager.ELAPSED_REALTIME_WAKEUP
@@ -115,6 +118,7 @@ class Alarm {
         alarmClock = info;
         this.uid = uid;
         packageName = pkgName;
+        mIdleOptions = idleOptions;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
     }
@@ -302,6 +306,10 @@ class Alarm {
         if (listener != null) {
             ipw.print("listener=");
             ipw.println(listener.asBinder());
+        }
+        if (mIdleOptions != null) {
+            ipw.print("idle-options=");
+            ipw.println(mIdleOptions.toString());
         }
     }
 
