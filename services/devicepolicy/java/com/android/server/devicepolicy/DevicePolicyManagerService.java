@@ -16755,7 +16755,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
-            return admin != null && admin.mUsbDataSignalingEnabled;
+            return admin == null || admin.mUsbDataSignalingEnabled;
         }
     }
 
