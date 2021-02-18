@@ -100,4 +100,10 @@ public abstract class TaskStackChangeListener {
 
     /** @see ITaskStackListener#onActivityRotation(int)*/
     public void onActivityRotation(int displayId) { }
+
+    /**
+     * Called when the lock task mode changes. See ActivityManager#LOCK_TASK_MODE_* and
+     * LockTaskController.
+     */
+    public void onLockTaskModeChanged(int mode) { }
 }
