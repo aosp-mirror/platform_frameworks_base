@@ -44,18 +44,15 @@ public class KeyguardSecurityViewFlipperController
     private final List<KeyguardInputViewController<KeyguardInputView>> mChildren =
             new ArrayList<>();
     private final LayoutInflater mLayoutInflater;
-    private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
     private final Factory mKeyguardSecurityViewControllerFactory;
 
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
             LayoutInflater layoutInflater,
-            KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory,
-            EmergencyButtonController.Factory emergencyButtonControllerFactory) {
+            KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory) {
         super(view);
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
         mLayoutInflater = layoutInflater;
-        mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
     }
 
     @Override
@@ -114,8 +111,7 @@ public class KeyguardSecurityViewFlipperController
 
         if (childController == null) {
             childController = new NullKeyguardInputViewController(
-                    securityMode, keyguardSecurityCallback,
-                    mEmergencyButtonControllerFactory.create(null));
+                    securityMode, keyguardSecurityCallback);
         }
 
         return childController;
@@ -144,9 +140,8 @@ public class KeyguardSecurityViewFlipperController
     private static class NullKeyguardInputViewController
             extends KeyguardInputViewController<KeyguardInputView> {
         protected NullKeyguardInputViewController(SecurityMode securityMode,
-                KeyguardSecurityCallback keyguardSecurityCallback,
-                EmergencyButtonController emergencyButtonController) {
-            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController);
+                KeyguardSecurityCallback keyguardSecurityCallback) {
+            super(null, securityMode, keyguardSecurityCallback);
         }
 
         @Override
