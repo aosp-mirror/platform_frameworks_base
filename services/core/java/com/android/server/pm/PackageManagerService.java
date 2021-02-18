@@ -12135,10 +12135,10 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void notifyDexLoad(String loadingPackageName, Map<String, String> classLoaderContextMap,
             String loaderIsa) {
-        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName)
-                && Binder.getCallingUid() != Process.SYSTEM_UID) {
+        int callingUid = Binder.getCallingUid();
+        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName) && callingUid != Process.SYSTEM_UID) {
             Slog.w(TAG, "Non System Server process reporting dex loads as system server. uid="
-                    + Binder.getCallingUid());
+                    + callingUid);
             // Do not record dex loads from processes pretending to be system server.
             // Only the system server should be assigned the package "android", so reject calls
             // that don't satisfy the constraint.
@@ -12149,6 +12149,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // in order to verify the expectations.
             return;
         }
+
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -12156,7 +12157,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 + loadingPackageName + ", user=" + userId);
             return;
         }
-        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId);
+        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
+                Process.isIsolated(callingUid));
     }
 
     @Override
