@@ -59,10 +59,6 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardInputViewController.Factory mKeyguardSecurityViewControllerFactory;
     @Mock
-    private EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
-    @Mock
-    private EmergencyButtonController mEmergencyButtonController;
-    @Mock
     private KeyguardInputViewController mKeyguardInputViewController;
     @Mock
     private KeyguardInputView mInputView;
@@ -80,12 +76,9 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
                 any(KeyguardSecurityCallback.class)))
                 .thenReturn(mKeyguardInputViewController);
         when(mView.getWindowInsetsController()).thenReturn(mWindowInsetsController);
-        when(mEmergencyButtonControllerFactory.create(any(EmergencyButton.class)))
-                .thenReturn(mEmergencyButtonController);
 
         mKeyguardSecurityViewFlipperController = new KeyguardSecurityViewFlipperController(mView,
-                mLayoutInflater, mKeyguardSecurityViewControllerFactory,
-                mEmergencyButtonControllerFactory);
+                mLayoutInflater, mKeyguardSecurityViewControllerFactory);
     }
 
     @Test
