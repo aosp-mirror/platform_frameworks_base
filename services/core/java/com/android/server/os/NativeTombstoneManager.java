@@ -114,8 +114,9 @@ public final class NativeTombstoneManager {
 
         if (filename.endsWith(".pb")) {
             handleProtoTombstone(path);
+            BootReceiver.addTombstoneToDropBox(mContext, path, true);
         } else {
-            BootReceiver.addTombstoneToDropBox(mContext, path);
+            BootReceiver.addTombstoneToDropBox(mContext, path, false);
         }
     }
 
