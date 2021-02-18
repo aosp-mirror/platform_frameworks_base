@@ -29,19 +29,9 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
     private final int mUid;
     @Nullable
     private final String mPackageWithHighestDrain;
-    private boolean mSystemComponent;
 
     public int getUid() {
         return mUid;
-    }
-
-    /**
-     * Returns true if this battery consumer is considered to be a part of the operating
-     * system itself. For example, the UidBatteryConsumer with the UID {@link Process#BLUETOOTH_UID}
-     * is a system component.
-     */
-    public boolean isSystemComponent() {
-        return mSystemComponent;
     }
 
     @Nullable
@@ -52,7 +42,6 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
     private UidBatteryConsumer(@NonNull Builder builder) {
         super(builder.mPowerComponentsBuilder.build());
         mUid = builder.mUid;
-        mSystemComponent = builder.mSystemComponent;
         mPackageWithHighestDrain = builder.mPackageWithHighestDrain;
     }
 
@@ -95,7 +84,6 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         private final BatteryStats.Uid mBatteryStatsUid;
         private final int mUid;
         private String mPackageWithHighestDrain;
-        private boolean mSystemComponent;
         private boolean mExcludeFromBatteryUsageStats;
 
         public Builder(int customPowerComponentCount, int customTimeComponentCount,
