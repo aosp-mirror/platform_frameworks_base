@@ -17,10 +17,17 @@
 package com.android.server.alarm;
 
 import static android.app.AlarmManager.ELAPSED_REALTIME;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_COMPAT;
+import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
+import static android.app.AlarmManager.FLAG_STANDALONE;
+import static android.app.AlarmManager.FLAG_WAKE_FROM_IDLE;
+import static android.app.AlarmManager.RTC_WAKEUP;
 
 import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.NUM_POLICIES;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
+import static com.android.server.alarm.AlarmManagerService.isExemptFromAppStandby;
 import static com.android.server.alarm.Constants.TEST_CALLING_PACKAGE;
 import static com.android.server.alarm.Constants.TEST_CALLING_UID;
 
@@ -28,7 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.platform.test.annotations.Presubmit;
 
@@ -43,15 +52,29 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 public class AlarmTest {
 
-    private Alarm createDefaultAlarm(long requestedElapsed, long windowLength) {
+    private Alarm createDefaultAlarm(long requestedElapsed, long windowLength, int flags) {
         return new Alarm(ELAPSED_REALTIME, 0, requestedElapsed, windowLength, 0,
-                mock(PendingIntent.class), null, null, null, 0, null, TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE);
+                createAlarmSender(), null, null, null, flags, null, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE, null);
+    }
+
+    private Alarm createAlarmClock(long requestedRtc) {
+        final AlarmManager.AlarmClockInfo info = mock(AlarmManager.AlarmClockInfo.class);
+        return new Alarm(RTC_WAKEUP, requestedRtc, requestedRtc, 0, 0, createAlarmSender(),
+                null, null, null, FLAG_WAKE_FROM_IDLE | FLAG_STANDALONE, info, TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE, null);
+    }
+
+    private PendingIntent createAlarmSender() {
+        final PendingIntent alarmPi = mock(PendingIntent.class);
+        when(alarmPi.getCreatorPackage()).thenReturn(TEST_CALLING_PACKAGE);
+        when(alarmPi.getCreatorUid()).thenReturn(TEST_CALLING_UID);
+        return alarmPi;
     }
 
     @Test
     public void initSetsOnlyRequesterPolicy() {
-        final Alarm a = createDefaultAlarm(4567, 2);
+        final Alarm a = createDefaultAlarm(4567, 2, 0);
 
         for (int i = 0; i < NUM_POLICIES; i++) {
             if (i == REQUESTER_POLICY_INDEX) {
@@ -86,7 +109,7 @@ public class AlarmTest {
 
     @Test
     public void whenElapsed() {
-        final Alarm a = createDefaultAlarm(0, 0);
+        final Alarm a = createDefaultAlarm(0, 0, 0);
 
         final long[][] uniqueData = generatePolicyTestMatrix(NUM_POLICIES);
         for (int i = 0; i < NUM_POLICIES; i++) {
@@ -104,7 +127,7 @@ public class AlarmTest {
 
     @Test
     public void maxWhenElapsed() {
-        final Alarm a = createDefaultAlarm(10, 12);
+        final Alarm a = createDefaultAlarm(10, 12, 0);
         assertEquals(22, a.getMaxWhenElapsed());
 
         a.setPolicyElapsed(REQUESTER_POLICY_INDEX, 15);
@@ -128,7 +151,7 @@ public class AlarmTest {
 
     @Test
     public void setPolicyElapsedExact() {
-        final Alarm exactAlarm = createDefaultAlarm(10, 0);
+        final Alarm exactAlarm = createDefaultAlarm(10, 0, 0);
 
         assertTrue(exactAlarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, 4));
         assertTrue(exactAlarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 10));
@@ -143,7 +166,7 @@ public class AlarmTest {
 
     @Test
     public void setPolicyElapsedInexact() {
-        final Alarm inexactAlarm = createDefaultAlarm(10, 5);
+        final Alarm inexactAlarm = createDefaultAlarm(10, 5, 0);
 
         assertTrue(inexactAlarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, 4));
         assertTrue(inexactAlarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 10));
@@ -153,5 +176,21 @@ public class AlarmTest {
         assertTrue(inexactAlarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, 10));
 
         assertFalse(inexactAlarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, 8));
+    }
+
+    @Test
+    public void isExemptFromStandby() {
+        final long anything = 35412;    // Arbitrary number, doesn't matter for this test.
+
+        assertFalse("Basic alarm exempt", isExemptFromAppStandby(
+                createDefaultAlarm(anything, anything, 0)));
+        assertFalse("FLAG_ALLOW_WHILE_IDLE_COMPAT exempt", isExemptFromAppStandby(
+                createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE_COMPAT)));
+
+        assertTrue("ALLOW_WHILE_IDLE not exempt", isExemptFromAppStandby(
+                createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE)));
+        assertTrue("ALLOW_WHILE_IDLE_UNRESTRICTED not exempt", isExemptFromAppStandby(
+                createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED)));
+        assertTrue("Alarm clock not exempt", isExemptFromAppStandby(createAlarmClock(anything)));
     }
 }

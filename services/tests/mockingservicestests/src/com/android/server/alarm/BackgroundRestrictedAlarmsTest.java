@@ -45,7 +45,7 @@ public class BackgroundRestrictedAlarmsTest {
         }
         uidAlarms.add(new Alarm(
                 removeIt ? RTC : RTC_WAKEUP,
-                0, 0, 0, 0, null, null, null, null, 0, null, uid, name));
+                0, 0, 0, 0, null, null, null, null, 0, null, uid, name, null));
         return all;
     }
 
