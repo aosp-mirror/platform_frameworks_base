@@ -14,6 +14,15 @@
 
 // This is a cc_test just because it supports test_suites. This should be converted to something
 // like cc_binary_test_helper once supported, thus auto_gen_config:false below.
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_test {
     // Depending on how the test runs, the executable may be uploaded to different location.
     // Before the bug in the file pusher is fixed, workaround by making the name unique.
