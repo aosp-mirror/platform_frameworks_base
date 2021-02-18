@@ -16,6 +16,8 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.annotation.UserIdInt;
 import android.app.job.JobInfo;
 import android.database.ContentObserver;
@@ -74,6 +76,7 @@ public final class ContentObserverController extends StateController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasContentTriggerConstraint()) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
             if (taskStatus.contentObserverJobInstance == null) {
                 taskStatus.contentObserverJobInstance = new JobInstance(taskStatus);
             }
@@ -110,7 +113,7 @@ public final class ContentObserverController extends StateController {
             }
             taskStatus.changedAuthorities = null;
             taskStatus.changedUris = null;
-            taskStatus.setContentTriggerConstraintSatisfied(havePendingUris);
+            taskStatus.setContentTriggerConstraintSatisfied(nowElapsed, havePendingUris);
         }
         if (lastJob != null && lastJob.contentObserverJobInstance != null) {
             // And now we can detach the instance state from the last job.
@@ -295,7 +298,8 @@ public final class ContentObserverController extends StateController {
             boolean reportChange = false;
             synchronized (mLock) {
                 if (mTriggerPending) {
-                    if (mJobStatus.setContentTriggerConstraintSatisfied(true)) {
+                    final long nowElapsed = sElapsedRealtimeClock.millis();
+                    if (mJobStatus.setContentTriggerConstraintSatisfied(nowElapsed, true)) {
                         reportChange = true;
                     }
                     unscheduleLocked();
