@@ -39,4 +39,5 @@ apex {
     key: "com.android.overlaytest.overlay.key",
     apps: ["OverlayRemountedTest_Overlay"],
     installable: false,
+    updatable: false,
 }
