@@ -21,9 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.icu.text.NumberFormat;
-import android.util.MathUtils;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -92,11 +90,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     protected void onViewDetached() {
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
-    }
-
-    float getClockTextTopPadding() {
-        Paint.FontMetrics fm = mView.getPaint().getFontMetrics();
-        return MathUtils.abs(fm.ascent - fm.top);
     }
 
     /**
