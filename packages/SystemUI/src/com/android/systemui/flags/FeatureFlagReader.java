@@ -16,23 +16,17 @@
 
 package com.android.systemui.flags;
 
-import android.annotation.NonNull;
 import android.content.res.Resources;
-import android.provider.DeviceConfig;
 import android.util.SparseArray;
 
 import androidx.annotation.BoolRes;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
-import com.android.systemui.assist.DeviceConfigHelper;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.wrapper.BuildInfo;
-
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 /**
@@ -60,23 +54,19 @@ import javax.inject.Inject;
 @SysUISingleton
 public class FeatureFlagReader {
     private final Resources mResources;
-    private final DeviceConfigHelper mDeviceConfig;
     private final boolean mAreFlagsOverrideable;
-
+    private final SystemPropertiesHelper mSystemPropertiesHelper;
     private final SparseArray<CachedFlag> mCachedFlags = new SparseArray<>();
 
     @Inject
     public FeatureFlagReader(
             @Main Resources resources,
             BuildInfo build,
-            DeviceConfigHelper deviceConfig,
-            @Background Executor executor) {
+            SystemPropertiesHelper systemPropertiesHelper) {
         mResources = resources;
-        mDeviceConfig = deviceConfig;
+        mSystemPropertiesHelper = systemPropertiesHelper;
         mAreFlagsOverrideable =
                 build.isDebuggable() && mResources.getBoolean(R.bool.are_flags_overrideable);
-
-        mDeviceConfig.addOnPropertiesChangedListener(executor, this::onPropertiesChanged);
     }
 
     /**
@@ -93,7 +83,7 @@ public class FeatureFlagReader {
                 String name = resourceIdToFlagName(resId);
                 boolean value = mResources.getBoolean(resId);
                 if (mAreFlagsOverrideable) {
-                    value = mDeviceConfig.getBoolean(flagNameToStorageKey(name), value);
+                    value = mSystemPropertiesHelper.getBoolean(flagNameToStorageKey(name), value);
                 }
 
                 cachedFlag = new CachedFlag(name, value);
@@ -101,27 +91,6 @@ public class FeatureFlagReader {
             }
 
             return cachedFlag.value;
-        }
-    }
-
-    private void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
-        synchronized (mCachedFlags) {
-            for (String key : properties.getKeyset()) {
-                String flagName = storageKeyToFlagName(key);
-                if (flagName != null) {
-                    clearCachedFlag(flagName);
-                }
-            }
-        }
-    }
-
-    private void clearCachedFlag(String flagName) {
-        for (int i = 0; i < mCachedFlags.size(); i++) {
-            CachedFlag flag = mCachedFlags.valueAt(i);
-            if (flag.name.equals(flagName)) {
-                mCachedFlags.removeAt(i);
-                break;
-            }
         }
     }
 
@@ -160,6 +129,6 @@ public class FeatureFlagReader {
         }
     }
 
-    private static final String STORAGE_KEY_PREFIX = "flag_";
+    private static final String STORAGE_KEY_PREFIX = "persist.systemui.flag_";
     private static final String RESNAME_PREFIX = "flag_";
 }
