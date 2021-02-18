@@ -28,7 +28,9 @@ import android.content.om.IOverlayManager;
 import android.os.Handler;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
+import android.util.ArrayMap;
 import android.view.Display;
+import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
@@ -74,6 +76,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     ShellExecutor mMockShellMainExecutor;
     @Mock
+    SurfaceControl mMockLeash;
+    @Mock
     Handler mMockShellMainHandler;
 
     @Before
@@ -81,6 +85,12 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
         mTimeoutHandler = Mockito.spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
+
+        when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+        when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
+        when(mMockBackgroundOrganizer.getBackgroundSurface()).thenReturn(mMockLeash);
+
         OneHandedController oneHandedController = new OneHandedController(
                 mContext,
                 mMockDisplayController,
@@ -96,9 +106,6 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockShellMainExecutor,
                 mMockShellMainHandler);
         mOneHandedController = Mockito.spy(oneHandedController);
-
-        when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
-        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
     }
 
     @Test
@@ -113,12 +120,22 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testRegisterOrganizer() {
-        verify(mMockDisplayAreaOrganizer, atLeastOnce()).registerOrganizer(anyInt());
+    public void testEnabledNoRegisterAndUnregisterInSameCall() {
+        mOneHandedController.setOneHandedEnabled(true);
+
+        verify(mMockDisplayAreaOrganizer).registerOrganizer(anyInt());
+    }
+
+    @Test
+    public void testDisabledNoRegisterAndUnregisterInSameCall() {
+        mOneHandedController.setOneHandedEnabled(false);
+
+        verify(mMockDisplayAreaOrganizer, never()).registerOrganizer(anyInt());
     }
 
     @Test
     public void testStartOneHanded() {
+        mOneHandedController.setOneHandedEnabled(true);
         mOneHandedController.startOneHanded();
 
         verify(mMockDisplayAreaOrganizer).scheduleOffset(anyInt(), anyInt());
@@ -127,6 +144,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Test
     public void testStopOneHanded() {
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+        mOneHandedController.setOneHandedEnabled(true);
         mOneHandedController.stopOneHanded();
 
         verify(mMockDisplayAreaOrganizer, never()).scheduleOffset(anyInt(), anyInt());
@@ -168,7 +186,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         final boolean enabled = true;
         mOneHandedController.setSwipeToNotificationEnabled(enabled);
 
-        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
+        verify(mMockGestureHandler, atLeastOnce()).onOneHandedEnabled(enabled);
     }
 
     @Ignore("b/167943723, refactor it and fix it")

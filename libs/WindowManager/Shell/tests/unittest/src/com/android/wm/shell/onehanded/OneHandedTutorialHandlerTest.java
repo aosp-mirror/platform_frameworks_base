@@ -17,10 +17,12 @@
 package com.android.wm.shell.onehanded;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.om.IOverlayManager;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
 
@@ -68,6 +70,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
         mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
                 mMockShellMainExecutor);
+
+        when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         mOneHandedController = new OneHandedController(
                 getContext(),
                 mMockDisplayController,

@@ -67,8 +67,6 @@ public abstract class OneHandedTestCase {
         sOrigSwipeToNotification = OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                 getContext().getContentResolver());
         Settings.Secure.putInt(getContext().getContentResolver(),
-                Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
-        Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
         Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.TAPS_APP_TO_EXIT, 1);

@@ -132,7 +132,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
         mDisplayAreaOrganizer.onDisplayAreaVanished(mDisplayAreaInfo);
 
-        assertThat(mDisplayAreaOrganizer.mDisplayAreaTokenMap).isEmpty();
+        assertThat(mDisplayAreaOrganizer.getDisplayAreaTokenMap()).isEmpty();
     }
 
     @Test

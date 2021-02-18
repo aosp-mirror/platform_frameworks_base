@@ -432,17 +432,26 @@ public class OneHandedController {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
             stopOneHanded();
         }
-        // TODO Be aware to unregisterOrganizer() after animation finished
-        mDisplayAreaOrganizer.unregisterOrganizer();
-        mBackgroundPanelOrganizer.unregisterOrganizer();
-        if (mIsOneHandedEnabled) {
+
+        mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
+        mGestureHandler.onOneHandedEnabled(mIsOneHandedEnabled || mIsSwipeToNotificationEnabled);
+
+        if (!mIsOneHandedEnabled) {
+            mDisplayAreaOrganizer.unregisterOrganizer();
+            mBackgroundPanelOrganizer.unregisterOrganizer();
+            // Do NOT register + unRegister DA in the same call
+            return;
+        }
+
+        if (mDisplayAreaOrganizer.getDisplayAreaTokenMap().isEmpty()) {
             mDisplayAreaOrganizer.registerOrganizer(
                     OneHandedDisplayAreaOrganizer.FEATURE_ONE_HANDED);
+        }
+
+        if (mBackgroundPanelOrganizer.getBackgroundSurface() == null) {
             mBackgroundPanelOrganizer.registerOrganizer(
                     OneHandedBackgroundPanelOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL);
         }
-        mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
-        mGestureHandler.onOneHandedEnabled(mIsOneHandedEnabled || mIsSwipeToNotificationEnabled);
     }
 
     private void setupGesturalOverlay() {
