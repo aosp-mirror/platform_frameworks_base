@@ -332,12 +332,13 @@ public class AppWidgetProviderInfo implements Parcelable {
 
     /**
      * Resource id for the description of the AppWidget.
+     *
      * <p>This field corresponds to the <code>android:description</code> attribute in the AppWidget
      * meta-data file.
      */
     @SuppressLint("MutableBareField")
     @IdRes
-    public int descriptionResource;
+    public int descriptionRes;
 
     /**
      * Flags indicating various features supported by the widget. These are hints to the widget
@@ -385,7 +386,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.widgetCategory = in.readInt();
         this.providerInfo = in.readTypedObject(ActivityInfo.CREATOR);
         this.widgetFeatures = in.readInt();
-        this.descriptionResource = in.readInt();
+        this.descriptionRes = in.readInt();
     }
 
     /**
@@ -442,14 +443,22 @@ public class AppWidgetProviderInfo implements Parcelable {
         return loadDrawable(context, density, previewImage, false);
     }
 
-    /** Loads localized description for the app widget. */
+    /**
+     * Loads localized description for the app widget.
+     *
+     * <p>Description is intended to be displayed in the UI of the widget picker.
+     *
+     * @param context Context for accessing resources.
+     *
+     * @return CharSequence for app widget description for the current locale.
+     */
     @Nullable
-    public final String loadDescription(@NonNull Context context) {
-        if (ResourceId.isValid(descriptionResource)) {
+    public final CharSequence loadDescription(@NonNull Context context) {
+        if (ResourceId.isValid(descriptionRes)) {
             return context.getPackageManager()
                     .getText(
                             providerInfo.packageName,
-                            descriptionResource,
+                            descriptionRes,
                             providerInfo.applicationInfo)
                     .toString()
                     .trim();
@@ -499,7 +508,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.widgetCategory);
         out.writeTypedObject(this.providerInfo, flags);
         out.writeInt(this.widgetFeatures);
-        out.writeInt(this.descriptionResource);
+        out.writeInt(this.descriptionRes);
     }
 
     @Override
@@ -528,7 +537,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.widgetCategory = this.widgetCategory;
         that.providerInfo = this.providerInfo;
         that.widgetFeatures = this.widgetFeatures;
-        that.descriptionResource = this.descriptionResource;
+        that.descriptionRes = this.descriptionRes;
         return that;
     }
 
