@@ -49,7 +49,6 @@ cc_library_static {
         "com_android_server_net_NetworkStatsService.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_powerstats_PowerStatsService.cpp",
-        "com_android_server_security_VerityUtils.cpp",
         "com_android_server_SerialService.cpp",
         "com_android_server_soundtrigger_middleware_AudioSessionProviderImpl.cpp",
         "com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker.cpp",
