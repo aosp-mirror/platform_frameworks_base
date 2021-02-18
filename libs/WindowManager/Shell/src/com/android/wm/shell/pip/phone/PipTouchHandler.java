@@ -19,7 +19,9 @@ package com.android.wm.shell.pip.phone;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASHING;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASH_MINIMUM_VELOCITY_THRESHOLD;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
@@ -810,7 +812,6 @@ public class PipTouchHandler {
             }
 
             if (touchState.startedDragging()) {
-                mPipBoundsState.setStashed(STASH_TYPE_NONE);
                 mSavedSnapFraction = -1f;
                 mPipDismissTargetHandler.showDismissTargetMaybe();
             }
@@ -863,10 +864,10 @@ public class PipTouchHandler {
 
                 // Reset the touch state on up before the fling settles
                 mTouchState.reset();
-                if (mEnableStash && !mPipBoundsState.isStashed()
-                        && shouldStash(vel, getPossiblyMotionBounds())) {
-                    mMotionHelper.stashToEdge(vel.x, this::stashEndAction /* endAction */);
+                if (mEnableStash && shouldStash(vel, getPossiblyMotionBounds())) {
+                    mMotionHelper.stashToEdge(vel.x, vel.y, this::stashEndAction /* endAction */);
                 } else {
+                    mPipBoundsState.setStashed(STASH_TYPE_NONE);
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
                 }
@@ -920,6 +921,11 @@ public class PipTouchHandler {
                     && mPipExclusionBoundsChangeListener.get() != null) {
                 mPipExclusionBoundsChangeListener.get().accept(mPipBoundsState.getBounds());
             }
+            if (mPipBoundsState.getBounds().left < 0) {
+                mPipBoundsState.setStashed(STASH_TYPE_LEFT);
+            } else {
+                mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
+            }
         }
 
         private void flingEndAction() {
@@ -937,12 +943,12 @@ public class PipTouchHandler {
 
         private boolean shouldStash(PointF vel, Rect motionBounds) {
             // If user flings the PIP window above the minimum velocity, stash PIP.
-            // Only allow stashing to the edge if the user starts dragging the PIP from the
-            // opposite edge.
+            // Only allow stashing to the edge if PIP wasn't previously stashed on the opposite
+            // edge.
             final boolean stashFromFlingToEdge = ((vel.x < -mStashVelocityThreshold
-                    && mDownSavedFraction > 1f && mDownSavedFraction < 2f)
+                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT)
                     || (vel.x > mStashVelocityThreshold
-                    && mDownSavedFraction > 3f && mDownSavedFraction < 4f));
+                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT));
 
             // If User releases the PIP window while it's out of the display bounds, put
             // PIP into stashed mode.

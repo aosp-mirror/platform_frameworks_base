@@ -390,7 +390,6 @@ public class BiometricManager {
      * in Keystore land as SIDs, and are used during key generation.
      * @hide
      */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public long[] getAuthenticatorIds() {
         if (mService != null) {
             try {

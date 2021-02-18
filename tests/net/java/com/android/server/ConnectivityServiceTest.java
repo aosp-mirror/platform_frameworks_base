@@ -66,6 +66,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_SUPL;
@@ -169,6 +171,7 @@ import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkStatsService;
+import android.net.IOnSetOemNetworkPreferenceListener;
 import android.net.IQosCallback;
 import android.net.InetAddresses;
 import android.net.InterfaceConfigurationParcel;
@@ -192,6 +195,7 @@ import android.net.NetworkStack;
 import android.net.NetworkStackClient;
 import android.net.NetworkState;
 import android.net.NetworkTestResultParcelable;
+import android.net.OemNetworkPreferences;
 import android.net.ProxyInfo;
 import android.net.QosCallbackException;
 import android.net.QosFilter;
@@ -300,6 +304,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -359,6 +364,7 @@ public class ConnectivityServiceTest {
     private static final String WIFI_WOL_IFNAME = "test_wlan_wol";
     private static final String VPN_IFNAME = "tun10042";
     private static final String TEST_PACKAGE_NAME = "com.android.test.package";
+    private static final int TEST_PACKAGE_UID = 123;
     private static final String ALWAYS_ON_PACKAGE = "com.android.test.alwaysonvpn";
 
     private static final String INTERFACE_NAME = "interface";
@@ -418,6 +424,7 @@ public class ConnectivityServiceTest {
     @Mock EthernetManager mEthernetManager;
     @Mock NetworkPolicyManager mNetworkPolicyManager;
     @Mock KeyStore mKeyStore;
+    @Mock IOnSetOemNetworkPreferenceListener mOnSetOemNetworkPreferenceListener;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -9421,5 +9428,265 @@ public class ConnectivityServiceTest {
             }
         }
         fail("TOO_MANY_REQUESTS never thrown");
+    }
+
+    private void mockGetApplicationInfo(@NonNull final String packageName, @NonNull final int uid)
+            throws PackageManager.NameNotFoundException {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = uid;
+        when(mPackageManager.getApplicationInfo(eq(packageName), anyInt()))
+                .thenReturn(applicationInfo);
+    }
+
+    private void mockHasSystemFeature(@NonNull final String featureName,
+            @NonNull final boolean hasFeature) {
+        when(mPackageManager.hasSystemFeature(eq(featureName)))
+                .thenReturn(hasFeature);
+    }
+
+    private UidRange getNriFirstUidRange(
+            @NonNull final ConnectivityService.NetworkRequestInfo nri) {
+        return nri.mRequests.get(0).networkCapabilities.getUids().iterator().next();
+    }
+
+    private OemNetworkPreferences createDefaultOemNetworkPreferences(
+            @OemNetworkPreferences.OemNetworkPreference final int preference)
+            throws PackageManager.NameNotFoundException {
+        // Arrange PackageManager mocks
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
+
+        // Build OemNetworkPreferences object
+        return new OemNetworkPreferences.Builder()
+                .addNetworkPreference(TEST_PACKAGE_NAME, preference)
+                .build();
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryPreferenceUninitializedThrowsError()
+            throws PackageManager.NameNotFoundException {
+        @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_UNINITIALIZED;
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        assertThrows(IllegalArgumentException.class,
+                () -> mService.new OemNetworkRequestFactory()
+                        .createNrisFromOemNetworkPreferences(
+                                createDefaultOemNetworkPreferences(prefToTest)));
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryPreferenceOemPaid()
+            throws PackageManager.NameNotFoundException {
+        // Expectations
+        final int expectedNumOfNris = 1;
+        final int expectedNumOfRequests = 3;
+
+        @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
+                mService.new OemNetworkRequestFactory()
+                        .createNrisFromOemNetworkPreferences(
+                                createDefaultOemNetworkPreferences(prefToTest));
+
+        final List<NetworkRequest> mRequests = nris.iterator().next().mRequests;
+        assertEquals(expectedNumOfNris, nris.size());
+        assertEquals(expectedNumOfRequests, mRequests.size());
+        assertTrue(mRequests.get(0).isListen());
+        assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_VALIDATED));
+        assertTrue(mRequests.get(1).isRequest());
+        assertTrue(mRequests.get(1).hasCapability(NET_CAPABILITY_OEM_PAID));
+        assertTrue(mRequests.get(2).isRequest());
+        assertTrue(mService.getDefaultRequest().networkCapabilities.equalsNetCapabilities(
+                mRequests.get(2).networkCapabilities));
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryPreferenceOemPaidNoFallback()
+            throws PackageManager.NameNotFoundException {
+        // Expectations
+        final int expectedNumOfNris = 1;
+        final int expectedNumOfRequests = 2;
+
+        @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
+                mService.new OemNetworkRequestFactory()
+                        .createNrisFromOemNetworkPreferences(
+                                createDefaultOemNetworkPreferences(prefToTest));
+
+        final List<NetworkRequest> mRequests = nris.iterator().next().mRequests;
+        assertEquals(expectedNumOfNris, nris.size());
+        assertEquals(expectedNumOfRequests, mRequests.size());
+        assertTrue(mRequests.get(0).isListen());
+        assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_VALIDATED));
+        assertTrue(mRequests.get(1).isRequest());
+        assertTrue(mRequests.get(1).hasCapability(NET_CAPABILITY_OEM_PAID));
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryPreferenceOemPaidOnly()
+            throws PackageManager.NameNotFoundException {
+        // Expectations
+        final int expectedNumOfNris = 1;
+        final int expectedNumOfRequests = 1;
+
+        @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
+                mService.new OemNetworkRequestFactory()
+                        .createNrisFromOemNetworkPreferences(
+                                createDefaultOemNetworkPreferences(prefToTest));
+
+        final List<NetworkRequest> mRequests = nris.iterator().next().mRequests;
+        assertEquals(expectedNumOfNris, nris.size());
+        assertEquals(expectedNumOfRequests, mRequests.size());
+        assertTrue(mRequests.get(0).isRequest());
+        assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_OEM_PAID));
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryPreferenceOemPrivateOnly()
+            throws PackageManager.NameNotFoundException {
+        // Expectations
+        final int expectedNumOfNris = 1;
+        final int expectedNumOfRequests = 1;
+
+        @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
+                mService.new OemNetworkRequestFactory()
+                        .createNrisFromOemNetworkPreferences(
+                                createDefaultOemNetworkPreferences(prefToTest));
+
+        final List<NetworkRequest> mRequests = nris.iterator().next().mRequests;
+        assertEquals(expectedNumOfNris, nris.size());
+        assertEquals(expectedNumOfRequests, mRequests.size());
+        assertTrue(mRequests.get(0).isRequest());
+        assertTrue(mRequests.get(0).hasCapability(NET_CAPABILITY_OEM_PRIVATE));
+        assertFalse(mRequests.get(0).hasCapability(NET_CAPABILITY_OEM_PAID));
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryCreatesCorrectNumOfNris()
+            throws PackageManager.NameNotFoundException {
+        // Expectations
+        final int expectedNumOfNris = 2;
+
+        // Arrange PackageManager mocks
+        final String testPackageName2 = "com.google.apps.dialer";
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
+        mockGetApplicationInfo(testPackageName2, TEST_PACKAGE_UID);
+
+        // Build OemNetworkPreferences object
+        final int testOemPref = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final int testOemPref2 = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+        final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
+                .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
+                .addNetworkPreference(testPackageName2, testOemPref2)
+                .build();
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
+                mService.new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(pref);
+
+        assertNotNull(nris);
+        assertEquals(expectedNumOfNris, nris.size());
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryCorrectlySetsUids()
+            throws PackageManager.NameNotFoundException {
+        // Arrange PackageManager mocks
+        final String testPackageName2 = "com.google.apps.dialer";
+        final int testPackageNameUid2 = 456;
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
+        mockGetApplicationInfo(testPackageName2, testPackageNameUid2);
+
+        // Build OemNetworkPreferences object
+        final int testOemPref = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final int testOemPref2 = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+        final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
+                .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
+                .addNetworkPreference(testPackageName2, testOemPref2)
+                .build();
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final List<ConnectivityService.NetworkRequestInfo> nris =
+                new ArrayList<>(
+                        mService.new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(
+                                pref));
+
+        // Sort by uid to access nris by index
+        nris.sort(Comparator.comparingInt(nri -> getNriFirstUidRange(nri).start));
+        assertEquals(TEST_PACKAGE_UID, getNriFirstUidRange(nris.get(0)).start);
+        assertEquals(TEST_PACKAGE_UID, getNriFirstUidRange(nris.get(0)).stop);
+        assertEquals(testPackageNameUid2, getNriFirstUidRange(nris.get(1)).start);
+        assertEquals(testPackageNameUid2, getNriFirstUidRange(nris.get(1)).stop);
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryAddsPackagesToCorrectPreference()
+            throws PackageManager.NameNotFoundException {
+        // Expectations
+        final int expectedNumOfNris = 1;
+        final int expectedNumOfAppUids = 2;
+
+        // Arrange PackageManager mocks
+        final String testPackageName2 = "com.google.apps.dialer";
+        final int testPackageNameUid2 = 456;
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
+        mockGetApplicationInfo(testPackageName2, testPackageNameUid2);
+
+        // Build OemNetworkPreferences object
+        final int testOemPref = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
+                .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
+                .addNetworkPreference(testPackageName2, testOemPref)
+                .build();
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
+                mService.new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(pref);
+
+        assertEquals(expectedNumOfNris, nris.size());
+        assertEquals(expectedNumOfAppUids,
+                nris.iterator().next().mRequests.get(0).networkCapabilities.getUids().size());
+    }
+
+    @Test
+    public void testSetOemNetworkPreferenceNullListenerAndPrefParamThrowsNpe() {
+        mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, true);
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+
+        // Act on ConnectivityService.setOemNetworkPreference()
+        assertThrows(NullPointerException.class,
+                () -> mService.setOemNetworkPreference(
+                        null,
+                        null));
+    }
+
+    @Test
+    public void testSetOemNetworkPreferenceFailsForNonAutomotive()
+            throws PackageManager.NameNotFoundException, RemoteException {
+        mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, false);
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+
+        // Act on ConnectivityService.setOemNetworkPreference()
+        assertThrows(UnsupportedOperationException.class,
+                () -> mService.setOemNetworkPreference(
+                        createDefaultOemNetworkPreferences(networkPref),
+                        mOnSetOemNetworkPreferenceListener));
     }
 }

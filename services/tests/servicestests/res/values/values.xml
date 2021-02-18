@@ -36,4 +36,12 @@
     <string name="module_2_name" translatable="false">module_2_name</string>
 
     <string name="widget_description">widget description string</string>
+    <dimen name="widget_min_width">80dp</dimen>
+    <dimen name="widget_min_height">40dp</dimen>
+    <dimen name="widget_min_resize_width">40dp</dimen>
+    <dimen name="widget_min_resize_height">20dp</dimen>
+    <dimen name="widget_max_resize_width">160dp</dimen>
+    <dimen name="widget_max_resize_height">80dp</dimen>
+    <integer name="widget_target_cell_width">2</integer>
+    <integer name="widget_target_cell_height">1</integer>
 </resources>

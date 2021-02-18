@@ -21,9 +21,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Binder;
 import android.os.PowerManager;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
+
+import java.util.Objects;
 
 /**
  * Provides accessors and listeners for device stationary state.
@@ -31,40 +35,66 @@ import com.android.server.FgThread;
 public class SystemDeviceIdleHelper extends DeviceIdleHelper {
 
     private final Context mContext;
-    private final PowerManager mPowerManager;
 
+    private PowerManager mPowerManager;
+
+    private boolean mSystemReady;
+    private boolean mRegistrationRequired;
     private @Nullable BroadcastReceiver mReceiver;
 
     public SystemDeviceIdleHelper(Context context) {
         mContext = context;
-        mPowerManager = context.getSystemService(PowerManager.class);
+    }
+
+    public synchronized void onSystemReady() {
+        mSystemReady = true;
+        mPowerManager = Objects.requireNonNull(mContext.getSystemService(PowerManager.class));
+        onRegistrationStateChanged();
     }
 
     @Override
-    protected void registerInternal() {
-        if (mReceiver == null) {
-            mReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    notifyDeviceIdleChanged();
-                }
-            };
+    protected synchronized void registerInternal() {
+        mRegistrationRequired = true;
+        onRegistrationStateChanged();
+    }
 
-            mContext.registerReceiver(mReceiver,
-                    new IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED), null,
-                    FgThread.getHandler());
+    @Override
+    protected synchronized void unregisterInternal() {
+        mRegistrationRequired = false;
+        onRegistrationStateChanged();
+    }
+
+    private void onRegistrationStateChanged() {
+        if (!mSystemReady) {
+            return;
         }
-    }
 
-    @Override
-    protected void unregisterInternal() {
-        if (mReceiver != null) {
-            mContext.unregisterReceiver(mReceiver);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (mRegistrationRequired && mReceiver == null) {
+                BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        notifyDeviceIdleChanged();
+                    }
+                };
+                mContext.registerReceiver(receiver,
+                        new IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED), null,
+                        FgThread.getHandler());
+                mReceiver = receiver;
+            } else if (!mRegistrationRequired && mReceiver != null) {
+                BroadcastReceiver receiver = mReceiver;
+                mReceiver = null;
+                mContext.unregisterReceiver(receiver);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
     public boolean isDeviceIdle() {
+        Preconditions.checkState(mPowerManager != null);
         return mPowerManager.isDeviceIdleMode();
     }
 }

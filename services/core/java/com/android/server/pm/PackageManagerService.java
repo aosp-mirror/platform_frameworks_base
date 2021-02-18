@@ -25925,6 +25925,17 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public boolean isPackageDebuggable(String packageName) throws RemoteException {
+            int callingUser = UserHandle.getCallingUserId();
+            ApplicationInfo appInfo = getApplicationInfo(packageName, 0, callingUser);
+            if (appInfo != null) {
+                return (0 != (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE));
+            }
+
+            throw new RemoteException("Couldn't get debug flag for package " + packageName);
+        }
+
+        @Override
         public boolean[] isAudioPlaybackCaptureAllowed(String[] packageNames)
                 throws RemoteException {
             int callingUser = UserHandle.getUserId(Binder.getCallingUid());

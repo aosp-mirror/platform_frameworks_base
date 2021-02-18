@@ -208,7 +208,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
                 mLockScreenMode);
         updateIndication(false /* animate */);
         updateDisclosure();
-        updateOwnerInfo();
         if (mBroadcastReceiver == null) {
             // Update the disclosure proactively to avoid IPC on the critical path.
             mBroadcastReceiver = new BroadcastReceiver() {
@@ -261,18 +260,21 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
     }
 
     /**
-     * Doesn't include owner information or disclosure which get triggered separately.
+     * Doesn't include disclosure which gets triggered separately.
      */
     private void updateIndications(boolean animate, int userId) {
+        updateOwnerInfo();
         updateBattery(animate);
         updateUserLocked(userId);
         updateTransient();
         updateTrust(userId, getTrustGrantedIndication(), getTrustManagedIndication());
         updateAlignment();
+        updateLogoutView();
         updateResting();
     }
 
     private void updateDisclosure() {
+        // avoid calling this method since it has an IPC
         if (whitelistIpcs(this::isOrganizationOwnedDevice)) {
             final CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
             final CharSequence disclosure =  organizationName != null
@@ -291,7 +293,34 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         }
 
         if (isKeyguardLayoutEnabled()) {
-            updateIndication(false); // resting indication may need to update
+            updateResting();
+        }
+    }
+
+    private void updateOwnerInfo() {
+        if (!isKeyguardLayoutEnabled()) {
+            mRotateTextViewController.hideIndication(INDICATION_TYPE_OWNER_INFO);
+            return;
+        }
+        String info = mLockPatternUtils.getDeviceOwnerInfo();
+        if (info == null) {
+            // Use the current user owner information if enabled.
+            final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled(
+                    KeyguardUpdateMonitor.getCurrentUser());
+            if (ownerInfoEnabled) {
+                info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
+            }
+        }
+        if (info != null) {
+            mRotateTextViewController.updateIndication(
+                    INDICATION_TYPE_OWNER_INFO,
+                    new KeyguardIndication.Builder()
+                            .setMessage(info)
+                            .setTextColor(mInitialTextColorState)
+                            .build(),
+                    false);
+        } else {
+            mRotateTextViewController.hideIndication(INDICATION_TYPE_OWNER_INFO);
         }
     }
 
@@ -400,56 +429,34 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
 
     private void updateLogoutView() {
         if (!isKeyguardLayoutEnabled()) {
+            mRotateTextViewController.hideIndication(INDICATION_TYPE_LOGOUT);
             return;
         }
         final boolean shouldShowLogout = mKeyguardUpdateMonitor.isLogoutEnabled()
                 && KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM;
-        String logoutString = shouldShowLogout ? mContext.getResources().getString(
-                    com.android.internal.R.string.global_action_logout) : null;
-        mRotateTextViewController.updateIndication(
-                INDICATION_TYPE_LOGOUT,
-                new KeyguardIndication.Builder()
-                        .setMessage(logoutString)
-                        .setTextColor(mInitialTextColorState)
-                        .setBackground(mContext.getDrawable(
-                                com.android.systemui.R.drawable.logout_button_background))
-                        .setClickListener((view) -> {
-                            int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
-                            try {
-                                mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
-                                mIActivityManager.stopUser(currentUserId, true /* force */, null);
-                            } catch (RemoteException re) {
-                                Log.e(TAG, "Failed to logout user", re);
-                            }
-                        })
-                .build(),
-                false);
-        updateIndication(false); // resting indication may need to update
-    }
-
-    private void updateOwnerInfo() {
-        if (!isKeyguardLayoutEnabled()) {
-            return;
-        }
-        String info = mLockPatternUtils.getDeviceOwnerInfo();
-        if (info == null) {
-            // Use the current user owner information if enabled.
-            final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled(
-                    KeyguardUpdateMonitor.getCurrentUser());
-            if (ownerInfoEnabled) {
-                info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
-            }
-        }
-        if (info != null) {
+        if (shouldShowLogout) {
             mRotateTextViewController.updateIndication(
-                    INDICATION_TYPE_OWNER_INFO,
+                    INDICATION_TYPE_LOGOUT,
                     new KeyguardIndication.Builder()
-                            .setMessage(info)
+                            .setMessage(mContext.getResources().getString(
+                                    com.android.internal.R.string.global_action_logout))
                             .setTextColor(mInitialTextColorState)
+                            .setBackground(mContext.getDrawable(
+                                    com.android.systemui.R.drawable.logout_button_background))
+                            .setClickListener((view) -> {
+                                int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
+                                try {
+                                    mIActivityManager.switchUser(UserHandle.USER_SYSTEM);
+                                    mIActivityManager.stopUser(currentUserId, true /* force */,
+                                            null);
+                                } catch (RemoteException re) {
+                                    Log.e(TAG, "Failed to logout user", re);
+                                }
+                            })
                             .build(),
                     false);
         } else {
-            updateIndication(false); // resting indication may need to update
+            mRotateTextViewController.hideIndication(INDICATION_TYPE_LOGOUT);
         }
     }
 
@@ -1042,7 +1049,6 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         @Override
         public void onUserSwitchComplete(int userId) {
             if (mVisible) {
-                updateOwnerInfo();
                 updateIndication(false);
             }
         }
@@ -1057,7 +1063,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         @Override
         public void onLogoutEnabledChanged() {
             if (mVisible) {
-                updateLogoutView();
+                updateIndication(false);
             }
         }
 

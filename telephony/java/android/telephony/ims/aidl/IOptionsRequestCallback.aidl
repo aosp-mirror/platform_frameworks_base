@@ -27,8 +27,9 @@ oneway interface IOptionsRequestCallback {
      * Respond to a remote capability request from the contact specified with the capabilities
      * of this device.
      * @param ownCapabilities The capabilities of this device.
+     * @param isBlocked True if the user has blocked the number sending this request.
      */
-    void respondToCapabilityRequest(in RcsContactUceCapability ownCapabilities);
+    void respondToCapabilityRequest(in RcsContactUceCapability ownCapabilities, boolean isBlocked);
 
     /**
      * Respond to a remote capability request from the contact specified with the

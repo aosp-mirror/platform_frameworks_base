@@ -695,6 +695,7 @@ public class ImageView extends View {
      * @see #getImageTintMode()
      * @see Drawable#setTintBlendMode(BlendMode)
      */
+    @RemotableViewMethod
     public void setImageTintBlendMode(@Nullable BlendMode blendMode) {
         mDrawableBlendMode = blendMode;
         mHasDrawableBlendMode = true;

@@ -1948,6 +1948,8 @@
     <string name="config_systemAutomotiveCluster" translatable="false"></string>
     <!-- The name of the package that will hold the system shell role. -->
     <string name="config_systemShell" translatable="false">com.android.shell</string>
+    <!-- The name of the package that will hold the system contacts role. -->
+    <string name="config_systemContacts" translatable="false">com.android.contacts</string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false"></string>
@@ -2509,10 +2511,9 @@
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
 
     <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
-         Default is carrier_config, but it should be set to modem if the modem is returning
-         predictive (instead of instantaneous) bandwidth estimate.
-         Values are carrier_config and modem. -->
-    <string name="config_bandwidthEstimateSource">carrier_config</string>
+         Default is bandwidth_estimator.
+         Values are bandwidth_estimator, carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.

@@ -1,0 +1,13 @@
+filegroup {
+    name: "services.texttospeech-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library_static {
+    name: "services.texttospeech",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.texttospeech-sources"],
+    libs: ["services.core"],
+}

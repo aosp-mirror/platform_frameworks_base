@@ -154,6 +154,24 @@ public final class FrameMetrics {
      */
     public static final int VSYNC_TIMESTAMP = 11;
 
+    /**
+     * Metric identifier for GPU duration.
+     * <p>
+     * Represents the total time in nanoseconds this frame took to complete on the GPU.
+     * </p>
+     **/
+    public static final int GPU_DURATION = 12;
+
+    /**
+     * Metric identifier for the total duration that was available to the app to produce a frame.
+     * <p>
+     * Represents the total time in nanoseconds the system allocated for the app to produce its
+     * frame. If FrameMetrics.TOTAL_DURATION < FrameMetrics.DEADLINE, the app hit its intended
+     * deadline and there was no jank visible to the user.
+     * </p>
+     **/
+    public static final int DEADLINE = 13;
+
     private static final int FRAME_INFO_FLAG_FIRST_DRAW = 1 << 0;
 
     /**
@@ -175,6 +193,8 @@ public final class FrameMetrics {
             FIRST_DRAW_FRAME,
             INTENDED_VSYNC_TIMESTAMP,
             VSYNC_TIMESTAMP,
+            GPU_DURATION,
+            DEADLINE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Metric {}
@@ -205,6 +225,8 @@ public final class FrameMetrics {
             Index.ISSUE_DRAW_COMMANDS_START,
             Index.SWAP_BUFFERS,
             Index.FRAME_COMPLETED,
+            Index.GPU_COMPLETED,
+            Index.SWAP_BUFFERS_COMPLETED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Index {
@@ -224,8 +246,10 @@ public final class FrameMetrics {
         int ISSUE_DRAW_COMMANDS_START = 13;
         int SWAP_BUFFERS = 14;
         int FRAME_COMPLETED = 15;
+        int GPU_COMPLETED = 18;
+        int SWAP_BUFFERS_COMPLETED = 19;
 
-        int FRAME_STATS_COUNT = 19; // must always be last and in sync with
+        int FRAME_STATS_COUNT = 20; // must always be last and in sync with
                                     // FrameInfoIndex::NumIndexes in libs/hwui/FrameInfo.h
     }
 
@@ -251,9 +275,19 @@ public final class FrameMetrics {
         // COMMAND_ISSUE
         Index.ISSUE_DRAW_COMMANDS_START, Index.SWAP_BUFFERS,
         // SWAP_BUFFERS
-        Index.SWAP_BUFFERS, Index.FRAME_COMPLETED,
+        Index.SWAP_BUFFERS, Index.SWAP_BUFFERS_COMPLETED,
         // TOTAL_DURATION
         Index.INTENDED_VSYNC, Index.FRAME_COMPLETED,
+        // RESERVED for FIRST_DRAW_FRAME
+        0, 0,
+        // RESERVED forINTENDED_VSYNC_TIMESTAMP
+        0, 0,
+        // RESERVED VSYNC_TIMESTAMP
+        0, 0,
+        // GPU_DURATION
+        Index.SWAP_BUFFERS, Index.GPU_COMPLETED,
+        // DEADLINE
+        Index.INTENDED_VSYNC, Index.FRAME_DEADLINE,
     };
 
     /**
@@ -294,7 +328,7 @@ public final class FrameMetrics {
      * @return the value of the metric or -1 if it is not available.
      */
     public long getMetric(@Metric int id) {
-        if (id < UNKNOWN_DELAY_DURATION || id > VSYNC_TIMESTAMP) {
+        if (id < UNKNOWN_DELAY_DURATION || id > DEADLINE) {
             return -1;
         }
 

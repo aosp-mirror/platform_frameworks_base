@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
-import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
@@ -37,6 +36,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -71,7 +71,7 @@ import java.util.function.Consumer;
     /*
      * The proxy to talk to the Context Hub.
      */
-    private final IContexthub mContextHubProxy;
+    private final IContextHubWrapper mContextHubProxy;
 
     /*
      * A mapping of host endpoint IDs to the ContextHubClientBroker object of registered clients.
@@ -137,8 +137,7 @@ import java.util.function.Consumer;
         }
     }
 
-    /* package */ ContextHubClientManager(
-            Context context, IContexthub contextHubProxy) {
+    /* package */ ContextHubClientManager(Context context, IContextHubWrapper contextHubProxy) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
     }
@@ -148,19 +147,23 @@ import java.util.function.Consumer;
      *
      * @param contextHubInfo the object describing the hub this client is attached to
      * @param clientCallback the callback interface of the client to register
+     * @param attributionTag an optional attribution tag within the given package
      *
      * @return the client interface
      *
      * @throws IllegalStateException if max number of clients have already registered
      */
     /* package */ IContextHubClient registerClient(
-            ContextHubInfo contextHubInfo, IContextHubClientCallback clientCallback) {
+            ContextHubInfo contextHubInfo, IContextHubClientCallback clientCallback,
+            String attributionTag, ContextHubTransactionManager transactionManager,
+            String packageName) {
         ContextHubClientBroker broker;
         synchronized (this) {
             short hostEndPointId = getHostEndPointId();
             broker = new ContextHubClientBroker(
                     mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
-                    hostEndPointId, clientCallback);
+                    hostEndPointId, clientCallback, attributionTag, transactionManager,
+                    packageName);
             mHostEndPointIdToClientMap.put(hostEndPointId, broker);
             mRegistrationRecordDeque.add(
                     new RegistrationRecord(broker.toString(), ACTION_REGISTERED));
@@ -185,13 +188,15 @@ import java.util.function.Consumer;
      * @param pendingIntent  the callback interface of the client to register
      * @param contextHubInfo the object describing the hub this client is attached to
      * @param nanoAppId      the ID of the nanoapp to receive Intent events for
+     * @param attributionTag an optional attribution tag within the given package
      *
      * @return the client interface
      *
      * @throws IllegalStateException    if there were too many registered clients at the service
      */
     /* package */ IContextHubClient registerClient(
-            ContextHubInfo contextHubInfo, PendingIntent pendingIntent, long nanoAppId) {
+            ContextHubInfo contextHubInfo, PendingIntent pendingIntent, long nanoAppId,
+            String attributionTag, ContextHubTransactionManager transactionManager) {
         ContextHubClientBroker broker;
         String registerString = "Regenerated";
         synchronized (this) {
@@ -201,11 +206,16 @@ import java.util.function.Consumer;
                 short hostEndPointId = getHostEndPointId();
                 broker = new ContextHubClientBroker(
                         mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
-                        hostEndPointId, pendingIntent, nanoAppId);
+                        hostEndPointId, pendingIntent, nanoAppId, attributionTag,
+                        transactionManager);
                 mHostEndPointIdToClientMap.put(hostEndPointId, broker);
                 registerString = "Registered";
                 mRegistrationRecordDeque.add(
                         new RegistrationRecord(broker.toString(), ACTION_REGISTERED));
+            } else {
+                // Update the attribution tag to the latest value provided by the client app in
+                // case the app was updated and decided to change its tag.
+                broker.setAttributionTag(attributionTag);
             }
         }
 
@@ -217,9 +227,14 @@ import java.util.function.Consumer;
      * Handles a message sent from a nanoapp.
      *
      * @param contextHubId the ID of the hub where the nanoapp sent the message from
-     * @param message      the message send by a nanoapp
+     * @param message the message send by a nanoapp
+     * @param nanoappPermissions the set of permissions the nanoapp holds
+     * @param messagePermissions the set of permissions that should be used for attributing
+     * permissions when this message is consumed by a client
      */
-    /* package */ void onMessageFromNanoApp(int contextHubId, ContextHubMsg message) {
+    /* package */ void onMessageFromNanoApp(
+            int contextHubId, ContextHubMsg message, List<String> nanoappPermissions,
+            List<String> messagePermissions) {
         NanoAppMessage clientMessage = ContextHubServiceUtil.createNanoAppMessage(message);
 
         if (DEBUG_LOG_ENABLED) {
@@ -227,11 +242,19 @@ import java.util.function.Consumer;
         }
 
         if (clientMessage.isBroadcastMessage()) {
-            broadcastMessage(contextHubId, clientMessage);
+            // Broadcast messages shouldn't be sent with any permissions tagged per CHRE API
+            // requirements.
+            if (!messagePermissions.isEmpty()) {
+                Log.wtf(TAG, "Received broadcast message with permissions from " + message.appName);
+            }
+
+            broadcastMessage(
+                    contextHubId, clientMessage, nanoappPermissions, messagePermissions);
         } else {
             ContextHubClientBroker proxy = mHostEndPointIdToClientMap.get(message.hostEndPoint);
             if (proxy != null) {
-                proxy.sendMessageToClient(clientMessage);
+                proxy.sendMessageToClient(
+                        clientMessage, nanoappPermissions, messagePermissions);
             } else {
                 Log.e(TAG, "Cannot send message to unregistered client (host endpoint ID = "
                         + message.hostEndPoint + ")");
@@ -296,6 +319,21 @@ import java.util.function.Consumer;
     }
 
     /**
+     * Runs a command for each client that is attached to a hub with the given ID.
+     *
+     * @param contextHubId the ID of the hub
+     * @param callback     the command to invoke for the client
+     */
+    /* package */ void forEachClientOfHub(
+            int contextHubId, Consumer<ContextHubClientBroker> callback) {
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            if (broker.getAttachedContextHubId() == contextHubId) {
+                callback.accept(broker);
+            }
+        }
+    }
+
+    /**
      * Returns an available host endpoint ID.
      *
      * @returns an available host endpoint ID
@@ -326,22 +364,12 @@ import java.util.function.Consumer;
      * @param contextHubId the ID of the hub where the nanoapp sent the message from
      * @param message      the message send by a nanoapp
      */
-    private void broadcastMessage(int contextHubId, NanoAppMessage message) {
-        forEachClientOfHub(contextHubId, client -> client.sendMessageToClient(message));
-    }
-
-    /**
-     * Runs a command for each client that is attached to a hub with the given ID.
-     *
-     * @param contextHubId the ID of the hub
-     * @param callback     the command to invoke for the client
-     */
-    private void forEachClientOfHub(int contextHubId, Consumer<ContextHubClientBroker> callback) {
-        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            if (broker.getAttachedContextHubId() == contextHubId) {
-                callback.accept(broker);
-            }
-        }
+    private void broadcastMessage(
+            int contextHubId, NanoAppMessage message, List<String> nanoappPermissions,
+            List<String> messagePermissions) {
+        forEachClientOfHub(contextHubId,
+                client -> client.sendMessageToClient(
+                        message, nanoappPermissions, messagePermissions));
     }
 
     /**

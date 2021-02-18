@@ -61,7 +61,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Object mLock = new Object();
     private final Handler mHandler;
     @GuardedBy("mLock")
-    private final ArrayMap<Integer, Settings> mSettings = new ArrayMap<>();
+    private final ArrayMap<Integer, GameManagerSettings> mSettings = new ArrayMap<>();
 
     public GameManagerService(Context context) {
         this(context, createServiceThread().getLooper());
@@ -99,7 +99,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     synchronized (mLock) {
                         removeMessages(WRITE_SETTINGS, msg.obj);
                         if (mSettings.containsKey(userId)) {
-                            Settings userSettings = mSettings.get(userId);
+                            GameManagerSettings userSettings = mSettings.get(userId);
                             userSettings.writePersistentDataLocked();
                         }
                     }
@@ -123,7 +123,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         removeMessages(WRITE_SETTINGS, msg.obj);
                         removeMessages(REMOVE_SETTINGS, msg.obj);
                         if (mSettings.containsKey(userId)) {
-                            final Settings userSettings = mSettings.get(userId);
+                            final GameManagerSettings userSettings = mSettings.get(userId);
                             mSettings.remove(userId);
                             userSettings.writePersistentDataLocked();
                         }
@@ -190,7 +190,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             if (!mSettings.containsKey(userId)) {
                 return GameManager.GAME_MODE_UNSUPPORTED;
             }
-            Settings userSettings = mSettings.get(userId);
+            GameManagerSettings userSettings = mSettings.get(userId);
             return userSettings.getGameModeLocked(packageName);
         }
     }
@@ -211,7 +211,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             if (!mSettings.containsKey(userId)) {
                 return;
             }
-            Settings userSettings = mSettings.get(userId);
+            GameManagerSettings userSettings = mSettings.get(userId);
             userSettings.setGameModeLocked(packageName, gameMode);
             final Message msg = mHandler.obtainMessage(WRITE_SETTINGS);
             msg.obj = userId;
@@ -235,7 +235,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return;
             }
 
-            Settings userSettings = new Settings(Environment.getDataSystemDeDirectory(userId));
+            GameManagerSettings userSettings =
+                    new GameManagerSettings(Environment.getDataSystemDeDirectory(userId));
             mSettings.put(userId, userSettings);
             userSettings.readPersistentDataLocked();
         }

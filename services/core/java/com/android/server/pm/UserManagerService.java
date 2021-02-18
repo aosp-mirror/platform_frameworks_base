@@ -1522,6 +1522,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isUserForeground() {
+        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
+        int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+        // TODO(b/179163496): should return true for profile users of the current user as well
+        return currentUser == callingUserId;
+    }
+
+    @Override
     public String getUserName() {
         if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
             throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "

@@ -64,6 +64,22 @@ genrule {
 }
 
 genrule {
+    name: "frameworks-base-api-current-compat",
+    srcs: [
+        ":android.api.public.latest",
+        ":android-incompatibilities.api.public.latest",
+        ":frameworks-base-api-current.txt",
+    ],
+    out: ["stdout.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 " +
+        "--check-compatibility:api:released $(location :android.api.public.latest) " +
+        "--baseline:compatibility:released $(location :android-incompatibilities.api.public.latest) " +
+        "$(location :frameworks-base-api-current.txt) " +
+        "> $(genDir)/stdout.txt",
+}
+
+genrule {
     name: "frameworks-base-api-current.srcjar",
     srcs: [
         ":android.net.ipsec.ike{.public.stubs.source}",
@@ -162,6 +178,24 @@ genrule {
 }
 
 genrule {
+    name: "frameworks-base-api-system-current-compat",
+    srcs: [
+        ":android.api.system.latest",
+        ":android-incompatibilities.api.system.latest",
+        ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-system-current.txt",
+    ],
+    out: ["stdout.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 " +
+        "--check-compatibility:api:released $(location :android.api.system.latest) " +
+        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
+        "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
+        "$(location :frameworks-base-api-system-current.txt) " +
+        "> $(genDir)/stdout.txt",
+}
+
+genrule {
     name: "frameworks-base-api-system-removed.txt",
     srcs: [
         ":android.net.ipsec.ike{.system.removed-api.txt}",
@@ -228,6 +262,27 @@ genrule {
             dest: "android.txt",
         },
     ],
+}
+
+genrule {
+    name: "frameworks-base-api-module-lib-current-compat",
+    srcs: [
+        ":android.api.module-lib.latest",
+        ":android-incompatibilities.api.module-lib.latest",
+        ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-module-lib-current.txt",
+    ],
+    out: ["stdout.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 " +
+        "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
+        // Note: having "public" be the base of module-lib is not perfect -- it should
+        // ideally be a merged public+system), but this will  help when migrating from
+        // MODULE_LIBS -> public.
+        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
+        "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
+        "$(location :frameworks-base-api-module-lib-current.txt) " +
+        "> $(genDir)/stdout.txt",
 }
 
 genrule {

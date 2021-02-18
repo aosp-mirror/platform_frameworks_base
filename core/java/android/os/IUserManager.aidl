@@ -113,6 +113,7 @@ interface IUserManager {
     boolean hasBadge(int userId);
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
+    boolean isUserForeground();
     boolean isUserNameSet(int userId);
     boolean hasRestrictedProfiles();
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userId, in IntentSender target, int flags);
