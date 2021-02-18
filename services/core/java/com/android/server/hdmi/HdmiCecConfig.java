@@ -39,6 +39,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.hdmi.cec.config.CecSettings;
 import com.android.server.hdmi.cec.config.Setting;
 import com.android.server.hdmi.cec.config.Value;
@@ -55,7 +56,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -99,7 +102,7 @@ public class HdmiCecConfig {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final ArrayMap<Setting, Set<SettingChangeListener>>
+    private final ArrayMap<Setting, ArrayMap<SettingChangeListener, Executor>>
             mSettingChangeListeners = new ArrayMap<>();
 
     private SettingsObserver mSettingsObserver;
@@ -430,12 +433,20 @@ public class HdmiCecConfig {
 
     private void notifySettingChanged(@NonNull Setting setting) {
         synchronized (mLock) {
-            Set<SettingChangeListener> listeners = mSettingChangeListeners.get(setting);
+            ArrayMap<SettingChangeListener, Executor> listeners =
+                    mSettingChangeListeners.get(setting);
             if (listeners == null) {
                 return;  // No listeners registered, do nothing.
             }
-            for (SettingChangeListener listener: listeners) {
-                listener.onChange(setting.getName());
+            for (Entry<SettingChangeListener, Executor> entry: listeners.entrySet()) {
+                SettingChangeListener listener = entry.getKey();
+                Executor executor = entry.getValue();
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onChange(setting.getName());
+                    }
+                });
             }
         }
     }
@@ -471,10 +482,19 @@ public class HdmiCecConfig {
     }
 
     /**
-     * Register change listener for a given setting name.
+     * Register change listener for a given setting name using DirectExecutor.
      */
     public void registerChangeListener(@NonNull @CecSettingName String name,
                                        SettingChangeListener listener) {
+        registerChangeListener(name, listener, ConcurrentUtils.DIRECT_EXECUTOR);
+    }
+
+    /**
+     * Register change listener for a given setting name and executor.
+     */
+    public void registerChangeListener(@NonNull @CecSettingName String name,
+                                       SettingChangeListener listener,
+                                       Executor executor) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -486,9 +506,9 @@ public class HdmiCecConfig {
         }
         synchronized (mLock) {
             if (!mSettingChangeListeners.containsKey(setting)) {
-                mSettingChangeListeners.put(setting, new HashSet<>());
+                mSettingChangeListeners.put(setting, new ArrayMap<>());
             }
-            mSettingChangeListeners.get(setting).add(listener);
+            mSettingChangeListeners.get(setting).put(listener, executor);
         }
     }
 
@@ -503,7 +523,8 @@ public class HdmiCecConfig {
         }
         synchronized (mLock) {
             if (mSettingChangeListeners.containsKey(setting)) {
-                Set<SettingChangeListener> listeners = mSettingChangeListeners.get(setting);
+                ArrayMap<SettingChangeListener, Executor> listeners =
+                        mSettingChangeListeners.get(setting);
                 listeners.remove(listener);
                 if (listeners.isEmpty()) {
                     mSettingChangeListeners.remove(setting);
