@@ -54,6 +54,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -73,7 +74,7 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class CarrierTextManagerTest extends SysuiTestCase {
+public class CarrierTextControllerTest extends SysuiTestCase {
 
     private static final CharSequence SEPARATOR = " \u2014 ";
     private static final CharSequence INVALID_CARD_TEXT = "Invalid card";
@@ -94,9 +95,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     @Mock
     private WifiManager mWifiManager;
     @Mock
-    private WakefulnessLifecycle mWakefulnessLifecycle;
-    @Mock
-    private CarrierTextManager.CarrierTextCallback mCarrierTextCallback;
+    private CarrierTextController.CarrierTextCallback mCarrierTextCallback;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
@@ -105,14 +104,13 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     private TelephonyManager mTelephonyManager;
     @Mock
     private SubscriptionManager mSubscriptionManager;
-    private CarrierTextManager.CarrierTextCallbackInfo mCarrierTextCallbackInfo;
+    private CarrierTextController.CarrierTextCallbackInfo mCarrierTextCallbackInfo;
 
-    private CarrierTextManager mCarrierTextManager;
+    private CarrierTextController mCarrierTextController;
     private TestableLooper mTestableLooper;
-    private Handler mMainHandler;
 
     private Void checkMainThread(InvocationOnMock inv) {
-        Looper mainLooper = mMainHandler.getLooper();
+        Looper mainLooper = Dependency.get(Dependency.MAIN_HANDLER).getLooper();
         if (!mainLooper.isCurrentThread()) {
             fail("This call should be done from the main thread");
         }
@@ -124,33 +122,35 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
 
-        mMainHandler = new Handler(mTestableLooper.getLooper());
+        mContext.addMockSystemService(WifiManager.class, mWifiManager);
+        mContext.addMockSystemService(ConnectivityManager.class, mConnectivityManager);
         when(mConnectivityManager.isNetworkSupported(anyInt())).thenReturn(true);
+        mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
+        mContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
         mContext.getOrCreateTestableResources().addOverride(
                 R.string.keyguard_sim_error_message_short, INVALID_CARD_TEXT);
         mContext.getOrCreateTestableResources().addOverride(
                 R.string.airplane_mode, AIRPLANE_MODE_TEXT);
+        mDependency.injectMockDependency(WakefulnessLifecycle.class);
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                new Handler(mTestableLooper.getLooper()));
+        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
+        mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
 
         doAnswer(this::checkMainThread).when(mKeyguardUpdateMonitor)
                 .registerCallback(any(KeyguardUpdateMonitorCallback.class));
         doAnswer(this::checkMainThread).when(mKeyguardUpdateMonitor)
                 .removeCallback(any(KeyguardUpdateMonitorCallback.class));
 
-        mCarrierTextCallbackInfo = new CarrierTextManager.CarrierTextCallbackInfo("",
+        mCarrierTextCallbackInfo = new CarrierTextController.CarrierTextCallbackInfo("",
                 new CharSequence[]{}, false, new int[]{});
         when(mTelephonyManager.getSupportedModemCount()).thenReturn(3);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(3);
 
-        mCarrierTextManager = new CarrierTextManager.Builder(
-                mContext, mContext.getResources(), mWifiManager, mConnectivityManager,
-                mTelephonyManager, mWakefulnessLifecycle, new Handler(mTestableLooper.getLooper()),
-                mMainHandler, mKeyguardUpdateMonitor)
-                .setShowAirplaneMode(true)
-                .setShowMissingSim(true)
-                .build();
+        mCarrierTextController = new CarrierTextController(mContext, SEPARATOR, true, true);
         // This should not start listening on any of the real dependencies but will test that
         // callbacks in mKeyguardUpdateMonitor are done in the mTestableLooper thread
-        mCarrierTextManager.setListening(mCarrierTextCallback);
+        mCarrierTextController.setListening(mCarrierTextCallback);
         mTestableLooper.processAllMessages();
     }
 
@@ -165,8 +165,8 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         TestableLooper testableLooper = new TestableLooper(thread.getLooper());
         Handler h = new Handler(testableLooper.getLooper());
         h.post(() -> {
-            mCarrierTextManager.setListening(null);
-            mCarrierTextManager.setListening(mCarrierTextCallback);
+            mCarrierTextController.setListening(null);
+            mCarrierTextController.setListening(mCarrierTextCallback);
         });
         testableLooper.processAllMessages();
         mTestableLooper.processAllMessages();
@@ -183,11 +183,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(0)).thenReturn(TelephonyManager.SIM_STATE_READY);
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
@@ -205,12 +205,12 @@ public class CarrierTextManagerTest extends SysuiTestCase {
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR);
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        mCarrierTextManager.mCallback.onSimStateChanged(3, 1,
+        mCarrierTextController.mCallback.onSimStateChanged(3, 1,
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR);
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
@@ -223,7 +223,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         reset(mCarrierTextCallback);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(1);
         // Update carrier text. It should ignore error state of subId 3 in inactive slotId.
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
         assertEquals("TEST_CARRIER", captor.getValue().carrierText);
@@ -237,9 +237,9 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR);
         // This should not produce an out of bounds error, even though there are no subscriptions
-        mCarrierTextManager.mCallback.onSimStateChanged(0, -3,
+        mCarrierTextController.mCallback.onSimStateChanged(0, -3,
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR);
-        mCarrierTextManager.mCallback.onSimStateChanged(0, 3, TelephonyManager.SIM_STATE_READY);
+        mCarrierTextController.mCallback.onSimStateChanged(0, 3, TelephonyManager.SIM_STATE_READY);
         verify(mCarrierTextCallback, never()).updateCarrierInfo(any());
     }
 
@@ -257,23 +257,23 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR);
         // This should not produce an out of bounds error, even though there are no subscriptions
-        mCarrierTextManager.mCallback.onSimStateChanged(0, 1,
+        mCarrierTextController.mCallback.onSimStateChanged(0, 1,
                 TelephonyManager.SIM_STATE_CARD_IO_ERROR);
 
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(
-                any(CarrierTextManager.CarrierTextCallbackInfo.class));
+                any(CarrierTextController.CarrierTextCallbackInfo.class));
     }
 
     @Test
     public void testCallback() {
         reset(mCarrierTextCallback);
-        mCarrierTextManager.postToCallback(mCarrierTextCallbackInfo);
+        mCarrierTextController.postToCallback(mCarrierTextCallbackInfo);
         mTestableLooper.processAllMessages();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
         assertEquals(mCarrierTextCallbackInfo, captor.getValue());
     }
@@ -282,8 +282,8 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     public void testNullingCallback() {
         reset(mCarrierTextCallback);
 
-        mCarrierTextManager.postToCallback(mCarrierTextCallbackInfo);
-        mCarrierTextManager.setListening(null);
+        mCarrierTextController.postToCallback(mCarrierTextCallbackInfo);
+        mCarrierTextController.setListening(null);
 
         // This shouldn't produce NPE
         mTestableLooper.processAllMessages();
@@ -301,15 +301,15 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
-        CarrierTextManager.CarrierTextCallbackInfo info = captor.getValue();
+        CarrierTextController.CarrierTextCallbackInfo info = captor.getValue();
         assertEquals(1, info.listOfCarriers.length);
         assertEquals(TEST_CARRIER, info.listOfCarriers[0]);
         assertEquals(1, info.subscriptionIds.length);
@@ -326,15 +326,15 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
-        CarrierTextManager.CarrierTextCallbackInfo info = captor.getValue();
+        CarrierTextController.CarrierTextCallbackInfo info = captor.getValue();
         assertEquals(1, info.listOfCarriers.length);
         assertTrue(info.listOfCarriers[0].toString().contains(TEST_CARRIER));
         assertEquals(1, info.subscriptionIds.length);
@@ -346,16 +346,16 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         List<SubscriptionInfo> list = new ArrayList<>();
         list.add(TEST_SUBSCRIPTION_NULL);
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
-                TelephonyManager.SIM_STATE_READY);
+            TelephonyManager.SIM_STATE_READY);
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(anyBoolean())).thenReturn(list);
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
@@ -380,11 +380,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(ss.getDataRegistrationState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         mKeyguardUpdateMonitor.mServiceStates.put(TEST_SUBSCRIPTION_NULL.getSubscriptionId(), ss);
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
@@ -407,15 +407,15 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(anyBoolean())).thenReturn(
                 new ArrayList<>());
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
-        CarrierTextManager.CarrierTextCallbackInfo info = captor.getValue();
+        CarrierTextController.CarrierTextCallbackInfo info = captor.getValue();
         assertEquals(0, info.listOfCarriers.length);
         assertEquals(0, info.subscriptionIds.length);
 
@@ -428,16 +428,16 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         list.add(TEST_SUBSCRIPTION);
         list.add(TEST_SUBSCRIPTION);
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
-                TelephonyManager.SIM_STATE_READY);
+            TelephonyManager.SIM_STATE_READY);
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(anyBoolean())).thenReturn(list);
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
@@ -458,11 +458,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
@@ -483,11 +483,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
@@ -509,11 +509,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(anyBoolean())).thenReturn(list);
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        ArgumentCaptor<CarrierTextManager.CarrierTextCallbackInfo> captor =
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
-                        CarrierTextManager.CarrierTextCallbackInfo.class);
+                        CarrierTextController.CarrierTextCallbackInfo.class);
 
-        mCarrierTextManager.updateCarrierText();
+        mCarrierTextController.updateCarrierText();
         mTestableLooper.processAllMessages();
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
 
