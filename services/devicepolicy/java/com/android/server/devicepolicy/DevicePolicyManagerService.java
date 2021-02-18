@@ -1138,6 +1138,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isSafeOperation(@OperationSafetyReason int reason) {
+        if (VERBOSE_LOG) {
+            Slog.v(LOG_TAG, "checking isSafeOperation("
+                    + DevicePolicyManager.operationSafetyReasonToString(reason)
+                    + ") using mSafetyChecker " + mSafetyChecker);
+        }
         return mSafetyChecker == null ? true : mSafetyChecker.isSafeOperation(reason);
     }
 
@@ -9172,8 +9177,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pw.printf("mIsWatch=%b\n", mIsWatch);
         pw.printf("mIsAutomotive=%b\n", mIsAutomotive);
         pw.printf("mHasTelephonyFeature=%b\n", mHasTelephonyFeature);
-        String safetyChecker = mSafetyChecker == null ? "N/A" : mSafetyChecker.getClass().getName();
-        pw.printf("mSafetyChecker=%b\n", safetyChecker);
+        pw.printf("mSafetyChecker=%s\n", mSafetyChecker);
         pw.decreaseIndent();
     }
 
