@@ -5121,7 +5121,6 @@ public final class PowerManagerService extends SystemService
 
         @Override // Binder call
         public int getPowerSaveModeTrigger() {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER, null);
             final long ident = Binder.clearCallingIdentity();
             try {
                 return Settings.Global.getInt(mContext.getContentResolver(),
