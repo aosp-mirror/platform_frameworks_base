@@ -188,6 +188,7 @@ public final class KeymasterDefs {
     public static final int KM_PURPOSE_VERIFY = KeyPurpose.VERIFY;
     public static final int KM_PURPOSE_WRAP = KeyPurpose.WRAP_KEY;
     public static final int KM_PURPOSE_AGREE_KEY = KeyPurpose.AGREE_KEY;
+    public static final int KM_PURPOSE_ATTEST_KEY = KeyPurpose.ATTEST_KEY;
 
     // Key formats.
     public static final int KM_KEY_FORMAT_X509 = KeyFormat.X509;

@@ -29,7 +29,6 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 import android.util.Slog;
-import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
@@ -161,11 +160,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        if (MULTIUSER_DEBUG) {
-            mNotificationPanelDebugText = mNotificationPanel.getHeaderDebugInfo();
-            mNotificationPanelDebugText.setVisibility(View.VISIBLE);
-        }
 
         IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
                 Context.VR_SERVICE));
@@ -332,7 +326,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         // Begin old BaseStatusBar.userSwitched
         mHeadsUpManager.setUser(newUserId);
         // End old BaseStatusBar.userSwitched
-        if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
+        if (MULTIUSER_DEBUG) mNotificationPanel.setHeaderDebugInfo("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
         if (mReinflateNotificationsOnUserSwitched) {
             updateNotificationsOnDensityOrFontScaleChanged();

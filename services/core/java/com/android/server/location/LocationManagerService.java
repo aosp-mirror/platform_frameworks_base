@@ -1424,6 +1424,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             mAppForegroundHelper.onSystemReady();
             mLocationPowerSaveModeHelper.onSystemReady();
             mScreenInteractiveHelper.onSystemReady();
+            mDeviceStationaryHelper.onSystemReady();
+            mDeviceIdleHelper.onSystemReady();
 
             if (mEmergencyCallHelper != null) {
                 mEmergencyCallHelper.onSystemReady();

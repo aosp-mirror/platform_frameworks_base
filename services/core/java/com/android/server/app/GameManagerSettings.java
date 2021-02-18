@@ -41,7 +41,7 @@ import java.util.Map;
  * Persists all GameService related settings.
  * @hide
  */
-public class Settings {
+public class GameManagerSettings {
 
     // The XML file follows the below format:
     // <?xml>
@@ -63,7 +63,7 @@ public class Settings {
     // PackageName -> GameMode
     private final ArrayMap<String, Integer> mGameModes = new ArrayMap<>();
 
-    Settings(File dataDir) {
+    GameManagerSettings(File dataDir) {
         mSystemDir = new File(dataDir, "system");
         mSystemDir.mkdirs();
         FileUtils.setPermissions(mSystemDir.toString(),
@@ -144,6 +144,7 @@ public class Settings {
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
+                // Do nothing
             }
             if (type != XmlPullParser.START_TAG) {
                 Slog.wtf(GameManagerService.TAG,

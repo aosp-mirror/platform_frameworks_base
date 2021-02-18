@@ -245,19 +245,19 @@
     <color name="system_main_0">#ffffff</color>
     <!-- Shade of the main system color at 95% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_50">#f0f0f0</color>
+    <color name="system_main_50">#f2f2f2</color>
     <!-- Shade of the main system color at 90% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_100">#e2e2e2</color>
+    <color name="system_main_100">#e3e3e3</color>
     <!-- Shade of the main system color at 80% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_200">#c6c6c6</color>
+    <color name="system_main_200">#c7c7c7</color>
     <!-- Shade of the main system color at 70% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_main_300">#ababab</color>
     <!-- Shade of the main system color at 60% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_400">#909090</color>
+    <color name="system_main_400">#8f8f8f</color>
     <!-- Shade of the main system color at 50% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_main_500">#757575</color>
@@ -266,13 +266,13 @@
     <color name="system_main_600">#5e5e5e</color>
     <!-- Shade of the main system color at 30% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_700">#464646</color>
+    <color name="system_main_700">#474747</color>
     <!-- Shade of the main system color at 20% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_main_800">#303030</color>
     <!-- Shade of the main system color at 10% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_900">#1b1b1b</color>
+    <color name="system_main_900">#1f1f1f</color>
     <!-- Darkest shade of the main color used by the system. Black.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_main_1000">#000000</color>

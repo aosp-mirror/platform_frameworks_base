@@ -47,6 +47,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BlendMode;
 import android.graphics.Outline;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -1054,6 +1055,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return ColorStateList.class;
             case BaseReflectionAction.ICON:
                 return Icon.class;
+            case BaseReflectionAction.BLEND_MODE:
+                return BlendMode.class;
             default:
                 return null;
         }
@@ -1400,6 +1403,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int INTENT = 14;
         static final int COLOR_STATE_LIST = 15;
         static final int ICON = 16;
+        static final int BLEND_MODE = 17;
 
         @UnsupportedAppUsage
         String methodName;
@@ -1589,6 +1593,10 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case ICON:
                     this.value = in.readTypedObject(Icon.CREATOR);
+                    break;
+                case BLEND_MODE:
+                    this.value = BlendMode.fromValue(in.readInt());
+                    break;
                 default:
                     break;
             }
@@ -1631,6 +1639,9 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case BUNDLE:
                     out.writeBundle((Bundle) this.value);
+                    break;
+                case BLEND_MODE:
+                    out.writeInt(BlendMode.toValue((BlendMode) this.value));
                     break;
                 case URI:
                 case BITMAP:
@@ -4129,6 +4140,18 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setBitmap(@IdRes int viewId, String methodName, Bitmap value) {
         addAction(new BitmapReflectionAction(viewId, methodName, value));
+    }
+
+    /**
+     * Call a method taking one BlendMode on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The value to pass to the method.
+     */
+    public void setBlendMode(@IdRes int viewId, @NonNull String methodName,
+            @Nullable BlendMode value) {
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.BLEND_MODE, value));
     }
 
     /**

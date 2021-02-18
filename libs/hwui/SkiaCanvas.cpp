@@ -463,9 +463,7 @@ void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint,
 }
 
 void SkiaCanvas::drawPoint(float x, float y, const Paint& paint) {
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawPoint(x, y, p);
-    });
+    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawPoint(x, y, p); });
 }
 
 void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint) {
@@ -493,9 +491,7 @@ void SkiaCanvas::drawRect(float left, float top, float right, float bottom, cons
 
 void SkiaCanvas::drawRegion(const SkRegion& region, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawRegion(region, p);
-    });
+    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawRegion(region, p); });
 }
 
 void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
@@ -509,24 +505,18 @@ void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom,
 
 void SkiaCanvas::drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
                                 const Paint& paint) {
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawDRRect(outer, inner, p);
-    });
+    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawDRRect(outer, inner, p); });
 }
 
 void SkiaCanvas::drawCircle(float x, float y, float radius, const Paint& paint) {
     if (CC_UNLIKELY(radius <= 0 || paint.nothingToDraw())) return;
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawCircle(x, y, radius, p);
-    });
+    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawCircle(x, y, radius, p); });
 }
 
 void SkiaCanvas::drawOval(float left, float top, float right, float bottom, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawOval(oval, p);
-    });
+    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawOval(oval, p); });
 }
 
 void SkiaCanvas::drawArc(float left, float top, float right, float bottom, float startAngle,
@@ -547,9 +537,7 @@ void SkiaCanvas::drawPath(const SkPath& path, const Paint& paint) {
     if (CC_UNLIKELY(path.isEmpty() && (!path.isInverseFillType()))) {
         return;
     }
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawPath(path, p);
-    });
+    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawPath(path, p); });
 }
 
 void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, const Paint& paint) {

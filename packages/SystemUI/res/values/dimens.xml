@@ -1348,8 +1348,8 @@
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
 
-    <dimen name="people_space_widget_radius">24dp</dimen>
-    <dimen name="people_space_widget_round_radius">100dp</dimen>
+    <dimen name="people_space_widget_radius">28dp</dimen>
+    <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
 
     <dimen name="rounded_slider_height">48dp</dimen>

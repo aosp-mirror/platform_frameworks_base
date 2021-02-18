@@ -26,7 +26,8 @@ import android.os.RemoteException;
  */
 @SystemService(Context.MEDIA_METRICS_SERVICE)
 public class MediaMetricsManager {
-    // TODO: unhide APIs.
+    public static final long INVALID_TIMESTAMP = -1;
+
     private static final String TAG = "MediaMetricsManager";
 
     private IMediaMetricsManager mService;

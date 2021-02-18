@@ -79,7 +79,9 @@ static const int64_t EXEMPT_FRAMES_FLAGS = FrameInfoFlags::SurfaceCanvas;
 // and filter it out of the frame profile data
 static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 
-JankTracker::JankTracker(ProfileDataContainer* globalData) {
+JankTracker::JankTracker(ProfileDataContainer* globalData)
+        : mData(globalData->getDataMutex())
+        , mDataMutex(globalData->getDataMutex()) {
     mGlobalData = globalData;
     nsecs_t frameIntervalNanos = DeviceInfo::getVsyncPeriod();
     nsecs_t sfOffset = DeviceInfo::getCompositorOffset();
@@ -107,6 +109,8 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
 }
 
 void JankTracker::finishFrame(const FrameInfo& frame) {
+    std::lock_guard lock(mDataMutex);
+
     // Fast-path for jank-free frames
     int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
     if (mDequeueTimeForgiveness && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
@@ -125,7 +129,11 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
         }
     }
 
-    LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64, totalDuration);
+    LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64 " start=%" PRIi64
+                        " gpuComplete=%" PRIi64, totalDuration,
+                        frame[FrameInfoIndex::IntendedVsync],
+                        frame[FrameInfoIndex::GpuCompleted]);
+
     mData->reportFrame(totalDuration);
     (*mGlobalData)->reportFrame(totalDuration);
 
@@ -188,6 +196,7 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
 
 void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
                            const ProfileData* data) {
+
     if (description) {
         switch (description->type) {
             case JankTrackerType::Generic:
@@ -227,6 +236,7 @@ void JankTracker::dumpFrames(int fd) {
 }
 
 void JankTracker::reset() {
+    std::lock_guard lock(mDataMutex);
     mFrames.clear();
     mData->reset();
     (*mGlobalData)->reset();
@@ -235,6 +245,7 @@ void JankTracker::reset() {
 }
 
 void JankTracker::finishGpuDraw(const FrameInfo& frame) {
+    std::lock_guard lock(mDataMutex);
     int64_t totalGPUDrawTime = frame.gpuDrawTime();
     if (totalGPUDrawTime >= 0) {
         mData->reportGPUFrame(totalGPUDrawTime);

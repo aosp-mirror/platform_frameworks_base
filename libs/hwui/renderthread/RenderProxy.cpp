@@ -215,6 +215,7 @@ void RenderProxy::notifyFramePending() {
 
 void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
     mRenderThread.queue().runSync([&]() {
+        std::lock_guard lock(mRenderThread.getJankDataMutex());
         mContext->profiler().dumpData(fd);
         if (dumpFlags & DumpFlags::FrameStats) {
             mContext->dumpFrames(fd);
@@ -234,6 +235,7 @@ void RenderProxy::resetProfileInfo() {
 
 uint32_t RenderProxy::frameTimePercentile(int percentile) {
     return mRenderThread.queue().runSync([&]() -> auto {
+        std::lock_guard lock(mRenderThread.globalProfileData().getDataMutex());
         return mRenderThread.globalProfileData()->findPercentile(percentile);
     });
 }

@@ -1341,7 +1341,9 @@ public final class OverlayManagerService extends SystemService {
         }
 
         public void forgetAllPackageInfos(final int userId) {
-            for (int i = 0, n = mCache.size(); i < n; i++) {
+            // Iterate in reverse order since removing the package in all users will remove the
+            // package from the cache.
+            for (int i = mCache.size() - 1; i >= 0; i--) {
                 removePackageUser(mCache.valueAt(i), userId);
             }
         }

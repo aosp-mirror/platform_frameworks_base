@@ -16,6 +16,7 @@
 
 package com.android.server.powerstats;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -34,6 +35,9 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
+import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerUtils;
+import com.android.server.powerstats.ProtoStreamUtils.PowerEntityUtils;
 import com.android.server.powerstats.nano.PowerEntityProto;
 import com.android.server.powerstats.nano.PowerStatsServiceMeterProto;
 import com.android.server.powerstats.nano.PowerStatsServiceModelProto;
@@ -52,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -63,15 +68,18 @@ import java.util.Random;
 public class PowerStatsServiceTest {
     private static final String TAG = PowerStatsServiceTest.class.getSimpleName();
     private static final String DATA_STORAGE_SUBDIR = "powerstatstest";
-    private static final String METER_FILENAME = "metertest";
-    private static final String MODEL_FILENAME = "modeltest";
-    private static final String RESIDENCY_FILENAME = "residencytest";
+    private static final String METER_FILENAME = "log.powerstats.metertest.0";
+    private static final String MODEL_FILENAME = "log.powerstats.modeltest.0";
+    private static final String RESIDENCY_FILENAME = "log.powerstats.residencytest.0";
     private static final String PROTO_OUTPUT_FILENAME = "powerstats.proto";
     private static final String CHANNEL_NAME = "channelname";
     private static final String CHANNEL_SUBSYSTEM = "channelsubsystem";
     private static final String POWER_ENTITY_NAME = "powerentityinfo";
     private static final String STATE_NAME = "stateinfo";
     private static final String ENERGY_CONSUMER_NAME = "energyconsumer";
+    private static final String METER_CACHE_FILENAME = "meterCacheTest";
+    private static final String MODEL_CACHE_FILENAME = "modelCacheTest";
+    private static final String RESIDENCY_CACHE_FILENAME = "residencyCacheTest";
     private static final int ENERGY_METER_COUNT = 8;
     private static final int ENERGY_CONSUMER_COUNT = 2;
     private static final int ENERGY_CONSUMER_ATTRIBUTION_COUNT = 5;
@@ -90,12 +98,12 @@ public class PowerStatsServiceTest {
         private TestPowerStatsHALWrapper mTestPowerStatsHALWrapper = new TestPowerStatsHALWrapper();
         @Override
         File createDataStoragePath() {
-            mDataStorageDir = null;
-
-            try {
-                mDataStorageDir = Files.createTempDirectory(DATA_STORAGE_SUBDIR).toFile();
-            } catch (IOException e) {
-                fail("Could not create temp directory.");
+            if (mDataStorageDir == null) {
+                try {
+                    mDataStorageDir = Files.createTempDirectory(DATA_STORAGE_SUBDIR).toFile();
+                } catch (IOException e) {
+                    fail("Could not create temp directory.");
+                }
             }
 
             return mDataStorageDir;
@@ -117,16 +125,36 @@ public class PowerStatsServiceTest {
         }
 
         @Override
+        String createMeterCacheFilename() {
+            return METER_CACHE_FILENAME;
+        }
+
+        @Override
+        String createModelCacheFilename() {
+            return MODEL_CACHE_FILENAME;
+        }
+
+        @Override
+        String createResidencyCacheFilename() {
+            return RESIDENCY_CACHE_FILENAME;
+        }
+
+        @Override
         IPowerStatsHALWrapper getPowerStatsHALWrapperImpl() {
             return mTestPowerStatsHALWrapper;
         }
 
         @Override
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String meterFilename, String modelFilename, String residencyFilename,
+                String meterFilename, String meterCacheFilename,
+                String modelFilename, String modelCacheFilename,
+                String residencyFilename, String residencyCacheFilename,
                 IPowerStatsHALWrapper powerStatsHALWrapper) {
-            mPowerStatsLogger = new PowerStatsLogger(context, dataStoragePath, meterFilename,
-                modelFilename, residencyFilename, powerStatsHALWrapper);
+            mPowerStatsLogger = new PowerStatsLogger(context, dataStoragePath,
+                meterFilename, meterCacheFilename,
+                modelFilename, modelCacheFilename,
+                residencyFilename, residencyCacheFilename,
+                powerStatsHALWrapper);
             return mPowerStatsLogger;
         }
 
@@ -664,5 +692,316 @@ public class PowerStatsServiceTest {
         // No stateResidencyResults should be written to the incident report since the
         // input buffer had only length and no data.
         assertTrue(pssProto.stateResidencyResult.length == 0);
+    }
+
+    @Test
+    public void testDataStorageDeletedMeterMismatch() throws IOException {
+        // Create the directory where cached data will be stored.
+        mInjector.createDataStoragePath();
+
+        // In order to create cached data that will match the current data read by the
+        // PowerStatsService we need to write valid data from the TestPowerStatsHALWrapper that is
+        // returned from the Injector.
+        IPowerStatsHALWrapper powerStatsHALWrapper = mInjector.getPowerStatsHALWrapperImpl();
+
+        // Generate random array of bytes to emulate cached meter data.  Store to file.
+        Random rd = new Random();
+        byte[] bytes = new byte[100];
+        rd.nextBytes(bytes);
+        File onDeviceStorageFile = new File(mDataStorageDir, mInjector.createMeterCacheFilename());
+        FileOutputStream onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create cached energy consumer data and write to file.
+        EnergyConsumer[] energyConsumers = powerStatsHALWrapper.getEnergyConsumerInfo();
+        bytes = EnergyConsumerUtils.getProtoBytes(energyConsumers);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createModelCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create cached power entity info data and write to file.
+        PowerEntity[] powerEntityInfo = powerStatsHALWrapper.getPowerEntityInfo();
+        bytes = PowerEntityUtils.getProtoBytes(powerEntityInfo);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createResidencyCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create log files.
+        File meterFile = new File(mDataStorageDir, mInjector.createMeterFilename());
+        File modelFile = new File(mDataStorageDir, mInjector.createModelFilename());
+        File residencyFile = new File(mDataStorageDir, mInjector.createResidencyFilename());
+        meterFile.createNewFile();
+        modelFile.createNewFile();
+        residencyFile.createNewFile();
+
+        // Verify log files exist.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // Boot device after creating old cached data.
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Since cached meter data is just random bytes it won't match the data read from the HAL.
+        // This mismatch of cached and current HAL data should force a delete.
+        assertTrue(mService.getDeleteMeterDataOnBoot());
+        assertFalse(mService.getDeleteModelDataOnBoot());
+        assertFalse(mService.getDeleteResidencyDataOnBoot());
+
+        // Verify log files were deleted.
+        assertFalse(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // Verify cached meter data was updated to new HAL output.
+        Channel[] channels = powerStatsHALWrapper.getEnergyMeterInfo();
+        byte[] bytesExpected = ChannelUtils.getProtoBytes(channels);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createMeterCacheFilename());
+        byte[] bytesActual = new byte[(int) onDeviceStorageFile.length()];
+        FileInputStream onDeviceStorageFis = new FileInputStream(onDeviceStorageFile);
+        onDeviceStorageFis.read(bytesActual);
+        assertTrue(Arrays.equals(bytesExpected, bytesActual));
+    }
+
+    @Test
+    public void testDataStorageDeletedModelMismatch() throws IOException {
+        // Create the directory where cached data will be stored.
+        mInjector.createDataStoragePath();
+
+        // In order to create cached data that will match the current data read by the
+        // PowerStatsService we need to write valid data from the TestPowerStatsHALWrapper that is
+        // returned from the Injector.
+        IPowerStatsHALWrapper powerStatsHALWrapper = mInjector.getPowerStatsHALWrapperImpl();
+
+        // Create cached channel data and write to file.
+        Channel[] channels = powerStatsHALWrapper.getEnergyMeterInfo();
+        byte[] bytes = ChannelUtils.getProtoBytes(channels);
+        File onDeviceStorageFile = new File(mDataStorageDir, mInjector.createMeterCacheFilename());
+        FileOutputStream onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Generate random array of bytes to emulate cached energy consumer data.  Store to file.
+        Random rd = new Random();
+        bytes = new byte[100];
+        rd.nextBytes(bytes);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createModelCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create cached power entity info data and write to file.
+        PowerEntity[] powerEntityInfo = powerStatsHALWrapper.getPowerEntityInfo();
+        bytes = PowerEntityUtils.getProtoBytes(powerEntityInfo);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createResidencyCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create log files.
+        File meterFile = new File(mDataStorageDir, mInjector.createMeterFilename());
+        File modelFile = new File(mDataStorageDir, mInjector.createModelFilename());
+        File residencyFile = new File(mDataStorageDir, mInjector.createResidencyFilename());
+        meterFile.createNewFile();
+        modelFile.createNewFile();
+        residencyFile.createNewFile();
+
+        // Verify log files exist.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // Boot device after creating old cached data.
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Since cached energy consumer data is just random bytes it won't match the data read from
+        // the HAL.  This mismatch of cached and current HAL data should force a delete.
+        assertFalse(mService.getDeleteMeterDataOnBoot());
+        assertTrue(mService.getDeleteModelDataOnBoot());
+        assertFalse(mService.getDeleteResidencyDataOnBoot());
+
+        // Verify log files were deleted.
+        assertTrue(meterFile.exists());
+        assertFalse(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // Verify cached energy consumer data was updated to new HAL output.
+        EnergyConsumer[] energyConsumers = powerStatsHALWrapper.getEnergyConsumerInfo();
+        byte[] bytesExpected = EnergyConsumerUtils.getProtoBytes(energyConsumers);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createModelCacheFilename());
+        byte[] bytesActual = new byte[(int) onDeviceStorageFile.length()];
+        FileInputStream onDeviceStorageFis = new FileInputStream(onDeviceStorageFile);
+        onDeviceStorageFis.read(bytesActual);
+        assertTrue(Arrays.equals(bytesExpected, bytesActual));
+    }
+
+    @Test
+    public void testDataStorageDeletedResidencyMismatch() throws IOException {
+        // Create the directory where cached data will be stored.
+        mInjector.createDataStoragePath();
+
+        // In order to create cached data that will match the current data read by the
+        // PowerStatsService we need to write valid data from the TestPowerStatsHALWrapper that is
+        // returned from the Injector.
+        IPowerStatsHALWrapper powerStatsHALWrapper = mInjector.getPowerStatsHALWrapperImpl();
+
+        // Create cached channel data and write to file.
+        Channel[] channels = powerStatsHALWrapper.getEnergyMeterInfo();
+        byte[] bytes = ChannelUtils.getProtoBytes(channels);
+        File onDeviceStorageFile = new File(mDataStorageDir, mInjector.createMeterCacheFilename());
+        FileOutputStream onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create cached energy consumer data and write to file.
+        EnergyConsumer[] energyConsumers = powerStatsHALWrapper.getEnergyConsumerInfo();
+        bytes = EnergyConsumerUtils.getProtoBytes(energyConsumers);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createModelCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Generate random array of bytes to emulate cached power entity info data.  Store to file.
+        Random rd = new Random();
+        bytes = new byte[100];
+        rd.nextBytes(bytes);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createResidencyCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create log files.
+        File meterFile = new File(mDataStorageDir, mInjector.createMeterFilename());
+        File modelFile = new File(mDataStorageDir, mInjector.createModelFilename());
+        File residencyFile = new File(mDataStorageDir, mInjector.createResidencyFilename());
+        meterFile.createNewFile();
+        modelFile.createNewFile();
+        residencyFile.createNewFile();
+
+        // Verify log files exist.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // Boot device after creating old cached data.
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Since cached power entity info data is just random bytes it won't match the data read
+        // from the HAL.  This mismatch of cached and current HAL data should force a delete.
+        assertFalse(mService.getDeleteMeterDataOnBoot());
+        assertFalse(mService.getDeleteModelDataOnBoot());
+        assertTrue(mService.getDeleteResidencyDataOnBoot());
+
+        // Verify log files were deleted.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertFalse(residencyFile.exists());
+
+        // Verify cached power entity data was updated to new HAL output.
+        PowerEntity[] powerEntityInfo = powerStatsHALWrapper.getPowerEntityInfo();
+        byte[] bytesExpected = PowerEntityUtils.getProtoBytes(powerEntityInfo);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createResidencyCacheFilename());
+        byte[] bytesActual = new byte[(int) onDeviceStorageFile.length()];
+        FileInputStream onDeviceStorageFis = new FileInputStream(onDeviceStorageFile);
+        onDeviceStorageFis.read(bytesActual);
+        assertTrue(Arrays.equals(bytesExpected, bytesActual));
+    }
+
+    @Test
+    public void testDataStorageNotDeletedNoCachedData() throws IOException {
+        // Create the directory where log files will be stored.
+        mInjector.createDataStoragePath();
+
+        // Create log files.
+        File meterFile = new File(mDataStorageDir, mInjector.createMeterFilename());
+        File modelFile = new File(mDataStorageDir, mInjector.createModelFilename());
+        File residencyFile = new File(mDataStorageDir, mInjector.createResidencyFilename());
+        meterFile.createNewFile();
+        modelFile.createNewFile();
+        residencyFile.createNewFile();
+
+        // Verify log files exist.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // This test mimics the device's first boot where there is no cached data.
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // Since there is no cached data on the first boot any log files that happen to exist
+        // should be deleted.
+        assertTrue(mService.getDeleteMeterDataOnBoot());
+        assertTrue(mService.getDeleteModelDataOnBoot());
+        assertTrue(mService.getDeleteResidencyDataOnBoot());
+
+        // Verify log files were deleted.
+        assertFalse(meterFile.exists());
+        assertFalse(modelFile.exists());
+        assertFalse(residencyFile.exists());
+    }
+
+    @Test
+    public void testDataStorageNotDeletedAllDataMatches() throws IOException {
+        // Create the directory where cached data will be stored.
+        mInjector.createDataStoragePath();
+
+        // In order to create cached data that will match the current data read by the
+        // PowerStatsService we need to write valid data from the TestPowerStatsHALWrapper that is
+        // returned from the Injector.
+        IPowerStatsHALWrapper powerStatsHALWrapper = mInjector.getPowerStatsHALWrapperImpl();
+
+        // Create cached channel data and write to file.
+        Channel[] channels = powerStatsHALWrapper.getEnergyMeterInfo();
+        byte[] bytes = ChannelUtils.getProtoBytes(channels);
+        File onDeviceStorageFile = new File(mDataStorageDir, mInjector.createMeterCacheFilename());
+        FileOutputStream onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create cached energy consumer data and write to file.
+        EnergyConsumer[] energyConsumers = powerStatsHALWrapper.getEnergyConsumerInfo();
+        bytes = EnergyConsumerUtils.getProtoBytes(energyConsumers);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createModelCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create cached power entity info data and write to file.
+        PowerEntity[] powerEntityInfo = powerStatsHALWrapper.getPowerEntityInfo();
+        bytes = PowerEntityUtils.getProtoBytes(powerEntityInfo);
+        onDeviceStorageFile = new File(mDataStorageDir, mInjector.createResidencyCacheFilename());
+        onDeviceStorageFos = new FileOutputStream(onDeviceStorageFile);
+        onDeviceStorageFos.write(bytes);
+        onDeviceStorageFos.close();
+
+        // Create log files.
+        File meterFile = new File(mDataStorageDir, mInjector.createMeterFilename());
+        File modelFile = new File(mDataStorageDir, mInjector.createModelFilename());
+        File residencyFile = new File(mDataStorageDir, mInjector.createResidencyFilename());
+        meterFile.createNewFile();
+        modelFile.createNewFile();
+        residencyFile.createNewFile();
+
+        // Verify log files exist.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
+
+        // Boot device after creating old cached data.
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        // All cached data created above should match current data read in PowerStatsService so we
+        // expect the data not to be deleted.
+        assertFalse(mService.getDeleteMeterDataOnBoot());
+        assertFalse(mService.getDeleteModelDataOnBoot());
+        assertFalse(mService.getDeleteResidencyDataOnBoot());
+
+        // Verify log files were not deleted.
+        assertTrue(meterFile.exists());
+        assertTrue(modelFile.exists());
+        assertTrue(residencyFile.exists());
     }
 }

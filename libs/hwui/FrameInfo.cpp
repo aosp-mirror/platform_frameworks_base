@@ -42,7 +42,7 @@ const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> Fram
         "GpuCompleted",
 };
 
-static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 19,
+static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 20,
               "Must update value in FrameMetrics.java#FRAME_STATS_COUNT (and here)");
 
 void FrameInfo::importUiThreadInfo(int64_t* info) {

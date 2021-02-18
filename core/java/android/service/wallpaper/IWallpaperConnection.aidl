@@ -16,7 +16,6 @@
 
 package android.service.wallpaper;
 
-import android.graphics.RectF;
 import android.os.ParcelFileDescriptor;
 import android.service.wallpaper.IWallpaperEngine;
 import android.app.WallpaperColors;
@@ -29,5 +28,4 @@ interface IWallpaperConnection {
     void engineShown(IWallpaperEngine engine);
     ParcelFileDescriptor setWallpaper(String name);
     void onWallpaperColorsChanged(in WallpaperColors colors, int displayId);
-    void onLocalWallpaperColorsChanged(in RectF area, in WallpaperColors colors, int displayId);
 }

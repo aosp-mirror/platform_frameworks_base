@@ -443,9 +443,18 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
     @Test
     public void testGetNetworkLoggingMessage() {
-        assertEquals(null, mFooter.getNetworkLoggingMessage(false));
+        // Test network logging message on a device with a device owner.
+        // Network traffic may be monitored on the device.
+        assertEquals(null, mFooter.getNetworkLoggingMessage(true, false));
         assertEquals(mContext.getString(R.string.monitoring_description_management_network_logging),
-                     mFooter.getNetworkLoggingMessage(true));
+                mFooter.getNetworkLoggingMessage(true, true));
+
+        // Test network logging message on a device with a managed profile owner
+        // Network traffic may be monitored on the work profile.
+        assertEquals(null, mFooter.getNetworkLoggingMessage(false, false));
+        assertEquals(
+                mContext.getString(R.string.monitoring_description_managed_profile_network_logging),
+                mFooter.getNetworkLoggingMessage(false, true));
     }
 
     @Test

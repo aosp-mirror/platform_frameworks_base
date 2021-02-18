@@ -23,8 +23,8 @@ import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
-import android.hardware.contexthub.V1_0.HubAppInfo;
 import android.hardware.contexthub.V1_0.Result;
+import android.hardware.contexthub.V1_2.HubAppInfo;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
@@ -161,7 +161,8 @@ import java.util.Set;
         ArrayList<NanoAppState> nanoAppStateList = new ArrayList<>();
         for (HubAppInfo appInfo : nanoAppInfoList) {
             nanoAppStateList.add(
-                    new NanoAppState(appInfo.appId, appInfo.version, appInfo.enabled));
+                    new NanoAppState(appInfo.info_1_0.appId, appInfo.info_1_0.version,
+                                     appInfo.info_1_0.enabled, appInfo.permissions));
         }
 
         return nanoAppStateList;
@@ -254,5 +255,27 @@ import java.util.Set;
             default: /* fall through */
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
         }
+    }
+
+    /**
+     * Converts old list of HubAppInfo received from the HAL to V1.2 HubAppInfo objects.
+     *
+     * @param oldInfoList list of V1.0 HubAppInfo objects
+     * @return list of V1.2 HubAppInfo objects
+     */
+    /* package */
+    static ArrayList<HubAppInfo> toHubAppInfo_1_2(
+            ArrayList<android.hardware.contexthub.V1_0.HubAppInfo> oldInfoList) {
+        ArrayList newAppInfo = new ArrayList<HubAppInfo>();
+        for (android.hardware.contexthub.V1_0.HubAppInfo oldInfo : oldInfoList) {
+            HubAppInfo newInfo = new HubAppInfo();
+            newInfo.info_1_0.appId = oldInfo.appId;
+            newInfo.info_1_0.version = oldInfo.version;
+            newInfo.info_1_0.memUsage = oldInfo.memUsage;
+            newInfo.info_1_0.enabled = oldInfo.enabled;
+            newInfo.permissions = new ArrayList<String>();
+            newAppInfo.add(newInfo);
+        }
+        return newAppInfo;
     }
 }

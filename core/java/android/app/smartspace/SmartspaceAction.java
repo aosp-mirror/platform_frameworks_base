@@ -89,7 +89,7 @@ public final class SmartspaceAction implements Parcelable {
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
         mIntent = in.readTypedObject(Intent.CREATOR);
         mUserHandle = in.readTypedObject(UserHandle.CREATOR);
-        mExtras = in.readTypedObject(Bundle.CREATOR);
+        mExtras = in.readBundle();
     }
 
     private SmartspaceAction(

@@ -79,7 +79,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mConnectingState, mGatewayConnection.getCurrentState());
-        verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+        verifySafeModeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
     }
 
     @Test
@@ -100,6 +100,6 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
 
         assertNull(mGatewayConnection.getCurrentState());
         verify(mIpSecSvc).deleteTunnelInterface(eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), any());
-        verifySafemodeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
+        verifySafeModeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
     }
 }
