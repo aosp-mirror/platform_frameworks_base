@@ -421,6 +421,9 @@ public final class AppHibernationService extends SystemService {
 
     private void onPackageAdded(@NonNull String packageName, int userId) {
         synchronized (mLock) {
+            if (!mUserStates.contains(userId)) {
+                return;
+            }
             UserLevelState userState = new UserLevelState();
             userState.packageName = packageName;
             mUserStates.get(userId).put(packageName, userState);
@@ -434,6 +437,9 @@ public final class AppHibernationService extends SystemService {
 
     private void onPackageRemoved(@NonNull String packageName, int userId) {
         synchronized (mLock) {
+            if (!mUserStates.contains(userId)) {
+                return;
+            }
             mUserStates.get(userId).remove(packageName);
         }
     }
