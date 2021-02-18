@@ -14,39 +14,34 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.apppairs
+package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.os.Bundle
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 
-abstract class RotateTwoLaunchedAppsTransition(
+abstract class LegacySplitScreenRotateTransition(
     testSpec: FlickerTestParameter
-) : AppPairsTransition(testSpec) {
-    override val nonResizeableApp: SplitScreenHelper?
-        get() = null
-
+) : LegacySplitScreenTransition(testSpec) {
     override val transition: FlickerBuilder.(Bundle) -> Unit
         get() = {
             setup {
-                test {
+                eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    this.setRotation(Surface.ROTATION_0)
-                    primaryApp.launchViaIntent()
-                    secondaryApp.launchViaIntent()
-                    updateTasksId()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
+                    secondaryApp.launchViaIntent(wmHelper)
+                    splitScreenApp.launchViaIntent(wmHelper)
                 }
             }
             teardown {
                 eachRun {
-                    executeShellCommand(composePairsCommand(
-                        primaryTaskId, secondaryTaskId, pair = false))
-                    primaryApp.exit(wmHelper)
+                    splitScreenApp.exit(wmHelper)
                     secondaryApp.exit(wmHelper)
+                    this.setRotation(Surface.ROTATION_0)
                 }
             }
         }
