@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.metrics.PlaybackComponent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.IHwBinder;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -73,8 +75,10 @@ import java.util.stream.Collectors;
  * <p>This class requires the {@link android.Manifest.permission#INTERNET} permission
  * when used with network-based content.
  */
-final public class MediaExtractor {
+public final class MediaExtractor implements PlaybackComponent {
+
     public MediaExtractor() {
+        mPlaybackId = "";
         native_setup();
     }
 
@@ -767,6 +771,18 @@ final public class MediaExtractor {
      */
     public native boolean hasCacheReachedEndOfStream();
 
+    @Override
+    public void setPlaybackId(@NonNull String playbackId) {
+        mPlaybackId = Objects.requireNonNull(playbackId);
+        native_setPlaybackId(playbackId);
+    }
+
+    @NonNull
+    @Override
+    public String getPlaybackId() {
+        return mPlaybackId;
+    }
+
     /**
      *  Return Metrics data about the current media container.
      *
@@ -784,6 +800,7 @@ final public class MediaExtractor {
         return bundle;
     }
 
+    private native void native_setPlaybackId(String playbackId);
     private native PersistableBundle native_getMetrics();
 
     private static native final void native_init();
@@ -796,6 +813,7 @@ final public class MediaExtractor {
     }
 
     private MediaCas mMediaCas;
+    private String mPlaybackId;
 
     private long mNativeContext;
 

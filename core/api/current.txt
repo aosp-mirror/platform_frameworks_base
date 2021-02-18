@@ -21856,7 +21856,7 @@ package android.media {
     ctor public MediaDrmResetException(String);
   }
 
-  public final class MediaExtractor {
+  public final class MediaExtractor implements android.media.metrics.PlaybackComponent {
     ctor public MediaExtractor();
     method public boolean advance();
     method protected void finalize();
@@ -21865,6 +21865,7 @@ package android.media {
     method public android.media.MediaExtractor.CasInfo getCasInfo(int);
     method public android.media.DrmInitData getDrmInitData();
     method public android.os.PersistableBundle getMetrics();
+    method @NonNull public String getPlaybackId();
     method @Nullable public java.util.Map<java.util.UUID,byte[]> getPsshInfo();
     method public boolean getSampleCryptoInfo(@NonNull android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
@@ -21886,6 +21887,7 @@ package android.media {
     method public void setDataSource(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     method public void setDataSource(@NonNull java.io.FileDescriptor, long, long) throws java.io.IOException;
     method public void setMediaCas(@NonNull android.media.MediaCas);
+    method public void setPlaybackId(@NonNull String);
     method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_PARTIAL_FRAME = 4; // 0x4
