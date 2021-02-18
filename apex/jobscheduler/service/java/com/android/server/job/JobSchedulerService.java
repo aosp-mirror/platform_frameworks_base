@@ -3157,9 +3157,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             pw.println();
-            mJobPackageTracker.dump(pw, "", filterAppId);
+            mJobPackageTracker.dump(pw, filterAppId);
             pw.println();
-            if (mJobPackageTracker.dumpHistory(pw, "", filterAppId)) {
+            if (mJobPackageTracker.dumpHistory(pw, filterAppId)) {
                 pw.println();
             }
 
