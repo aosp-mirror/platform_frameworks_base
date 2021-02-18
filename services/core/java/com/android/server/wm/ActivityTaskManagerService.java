@@ -863,7 +863,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(mGlobalLock, mTaskSupervisor, mH);
-        mLockTaskController = new LockTaskController(mContext, mTaskSupervisor, mH);
+        mLockTaskController = new LockTaskController(mContext, mTaskSupervisor, mH,
+                mTaskChangeNotificationController);
         mActivityStartController = new ActivityStartController(this);
         setRecentTasks(new RecentTasks(this, mTaskSupervisor));
         mVrController = new VrController(mGlobalLock);
