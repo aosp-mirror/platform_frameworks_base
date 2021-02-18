@@ -141,6 +141,7 @@ public class LockTaskController {
     private final IBinder mToken = new LockTaskToken();
     private final ActivityTaskSupervisor mSupervisor;
     private final Context mContext;
+    private final TaskChangeNotificationController mTaskChangeNotificationController;
 
     // The following system services cannot be final, because they do not exist when this class
     // is instantiated during device boot
@@ -204,10 +205,11 @@ public class LockTaskController {
     private int mPendingDisableFromDismiss = UserHandle.USER_NULL;
 
     LockTaskController(Context context, ActivityTaskSupervisor supervisor,
-            Handler handler) {
+            Handler handler, TaskChangeNotificationController taskChangeNotificationController) {
         mContext = context;
         mSupervisor = supervisor;
         mHandler = handler;
+        mTaskChangeNotificationController = taskChangeNotificationController;
     }
 
     /**
@@ -532,6 +534,7 @@ public class LockTaskController {
         // thread, which makes it guarded by ATMS#mGlobalLock as ATMS#getLockTaskModeState.
         final int oldLockTaskModeState = mLockTaskModeState;
         mLockTaskModeState = LOCK_TASK_MODE_NONE;
+        mTaskChangeNotificationController.notifyLockTaskModeChanged(mLockTaskModeState);
         // When lock task ends, we enable the status bars.
         try {
             setStatusBarState(mLockTaskModeState, userId);
@@ -661,6 +664,7 @@ public class LockTaskController {
             }
             mWindowManager.onLockTaskStateChanged(lockTaskModeState);
             mLockTaskModeState = lockTaskModeState;
+            mTaskChangeNotificationController.notifyLockTaskModeChanged(mLockTaskModeState);
             setStatusBarState(lockTaskModeState, userId);
             setKeyguardState(lockTaskModeState, userId);
             if (getDevicePolicyManager() != null) {

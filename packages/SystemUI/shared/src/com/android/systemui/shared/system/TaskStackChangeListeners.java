@@ -93,6 +93,7 @@ public class TaskStackChangeListeners {
         private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 20;
         private static final int ON_TASK_DESCRIPTION_CHANGED = 21;
         private static final int ON_ACTIVITY_ROTATION = 22;
+        private static final int ON_LOCK_TASK_MODE_CHANGED = 23;
 
         /**
          * List of {@link TaskStackChangeListener} registered from {@link #addListener}.
@@ -273,6 +274,11 @@ public class TaskStackChangeListeners {
         }
 
         @Override
+        public void onLockTaskModeChanged(int mode) {
+            mHandler.obtainMessage(ON_LOCK_TASK_MODE_CHANGED, mode, 0 /* unused */).sendToTarget();
+        }
+
+        @Override
         public boolean handleMessage(Message msg) {
             synchronized (mTaskStackListeners) {
                 switch (msg.what) {
@@ -418,6 +424,12 @@ public class TaskStackChangeListeners {
                     case ON_ACTIVITY_ROTATION: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onActivityRotation(msg.arg1);
+                        }
+                        break;
+                    }
+                    case ON_LOCK_TASK_MODE_CHANGED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onLockTaskModeChanged(msg.arg1);
                         }
                         break;
                     }
