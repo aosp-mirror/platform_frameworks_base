@@ -20,6 +20,9 @@ import static android.net.IpSecManager.DIRECTION_IN;
 import static android.net.IpSecManager.DIRECTION_OUT;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
+import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
+import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
 import static com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
@@ -39,6 +42,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
+import android.net.ipsec.ike.exceptions.IkeException;
+import android.net.ipsec.ike.exceptions.IkeInternalException;
+import android.net.ipsec.ike.exceptions.TemporaryFailureException;
+import android.net.vcn.VcnManager.VcnErrorCode;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -48,6 +56,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 
 /** Tests for VcnGatewayConnection.ConnectedState */
@@ -208,6 +218,25 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         // Since network never validated, verify mSafeModeTimeoutAlarm not canceled
         verifyNoMoreInteractions(mSafeModeTimeoutAlarm);
+
+        // The child session was closed without exception, so verify that the GatewayStatusCallback
+        // was not notified
+        verifyNoMoreInteractions(mGatewayStatusCallback);
+    }
+
+    @Test
+    public void testChildSessionClosedExceptionallyNotifiesGatewayStatusCallback()
+            throws Exception {
+        final IkeInternalException exception = new IkeInternalException(mock(IOException.class));
+        getChildSessionCallback().onClosedExceptionally(exception);
+        mTestLooper.dispatchAll();
+
+        verify(mGatewayStatusCallback)
+                .onGatewayConnectionError(
+                        eq(mConfig.getRequiredUnderlyingCapabilities()),
+                        eq(VCN_ERROR_CODE_INTERNAL_ERROR),
+                        any(),
+                        any());
     }
 
     @Test
@@ -223,5 +252,42 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         // Since network never validated, verify mSafeModeTimeoutAlarm not canceled
         verifyNoMoreInteractions(mSafeModeTimeoutAlarm);
+
+        // IkeSession closed with no error, so verify that the GatewayStatusCallback was not
+        // notified
+        verifyNoMoreInteractions(mGatewayStatusCallback);
+    }
+
+    private void verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
+            IkeException cause, @VcnErrorCode int expectedErrorType) {
+        getIkeSessionCallback().onClosedExceptionally(cause);
+        mTestLooper.dispatchAll();
+
+        verify(mIkeSession).close();
+
+        verify(mGatewayStatusCallback)
+                .onGatewayConnectionError(
+                        eq(mConfig.getRequiredUnderlyingCapabilities()),
+                        eq(expectedErrorType),
+                        any(),
+                        any());
+    }
+
+    @Test
+    public void testIkeSessionClosedExceptionallyAuthenticationFailure() throws Exception {
+        verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
+                new AuthenticationFailedException("vcn test"), VCN_ERROR_CODE_CONFIG_ERROR);
+    }
+
+    @Test
+    public void testIkeSessionClosedExceptionallyDnsFailure() throws Exception {
+        verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
+                new IkeInternalException(new UnknownHostException()), VCN_ERROR_CODE_NETWORK_ERROR);
+    }
+
+    @Test
+    public void testIkeSessionClosedExceptionallyInternalFailure() throws Exception {
+        verifyIkeSessionClosedExceptionalltyNotifiesStatusCallback(
+                new TemporaryFailureException("vcn test"), VCN_ERROR_CODE_INTERNAL_ERROR);
     }
 }
