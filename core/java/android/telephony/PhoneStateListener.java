@@ -1840,13 +1840,15 @@ public class PhoneStateListener {
          *
          * @param allowedNetworkTypesList Map associating all allowed network type reasons
          * ({@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER},
-         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER}, and
-         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER}) with reason's allowed
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER},
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER}, and
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}) with reason's allowed
          * network type values.
          * For example:
          * map{{TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER, long type value},
          *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER, long type value},
-         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER, long type value}}
+         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER, long type value},
+         *     {TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G, long type value}}
          */
         @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
         void onAllowedNetworkTypesChanged(

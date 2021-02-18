@@ -5286,7 +5286,8 @@ public final class Telephony {
          * which network types are allowed for
          * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER},
          * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_POWER},
-         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER}.
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_CARRIER},
+         * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}.
          * <P>Type: TEXT </P>
          *
          * @hide
