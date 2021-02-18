@@ -2898,9 +2898,6 @@ public class Editor {
         } finally {
             mTextView.endBatchEdit();
             mUndoInputFilter.freezeLastEdit();
-            if (permissions != null) {
-                permissions.release();
-            }
         }
     }
 
