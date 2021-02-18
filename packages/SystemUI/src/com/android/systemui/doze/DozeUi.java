@@ -23,6 +23,7 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.format.Formatter;
 import android.util.Log;
 
@@ -32,6 +33,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -43,7 +45,7 @@ import javax.inject.Inject;
  * The policy controlling doze.
  */
 @DozeScope
-public class DozeUi implements DozeMachine.Part {
+public class DozeUi implements DozeMachine.Part, TunerService.Tunable {
 
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
     private final Context mContext;
@@ -73,7 +75,7 @@ public class DozeUi implements DozeMachine.Part {
     public DozeUi(Context context, AlarmManager alarmManager,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DozeLog dozeLog) {
+            DozeLog dozeLog, TunerService tunerService) {
         mContext = context;
         mWakeLock = wakeLock;
         mHost = host;
@@ -83,6 +85,8 @@ public class DozeUi implements DozeMachine.Part {
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mDozeLog = dozeLog;
+
+        tunerService.addTunable(this, Settings.Secure.DOZE_ALWAYS_ON);
     }
 
     @Override
@@ -237,5 +241,12 @@ public class DozeUi implements DozeMachine.Part {
     @VisibleForTesting
     KeyguardUpdateMonitorCallback getKeyguardCallback() {
         return mKeyguardVisibilityCallback;
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {
+            updateAnimateScreenOff();
+        }
     }
 }
