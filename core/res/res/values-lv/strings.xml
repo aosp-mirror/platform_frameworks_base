@@ -688,6 +688,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ļauj lietotnei lasīt un rakstīt režīma “Netraucēt” konfigurāciju."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Datu skatīšana par izmantojamajām atļaujām"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ļauj atļaujas īpašniekam sākt lietotnes atļauju izmantošanu. Parastām lietotnēm tas nekad nav nepieciešams."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
