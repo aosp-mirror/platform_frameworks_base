@@ -20,7 +20,6 @@ import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
-import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
 
@@ -33,7 +32,7 @@ import android.hardware.biometrics.SensorPropertiesInternal;
  */
 interface IAuthService {
     // Creates a test session with the specified sensorId
-    ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
+    ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Retrieve static sensor properties for all biometric sensors
     List<SensorPropertiesInternal> getSensorProperties(String opPackageName);
