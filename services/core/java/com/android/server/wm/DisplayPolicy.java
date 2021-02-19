@@ -2686,8 +2686,9 @@ public class DisplayPolicy {
         boolean newImmersiveMode = isImmersiveMode(win);
         if (oldImmersiveMode != newImmersiveMode) {
             mLastImmersiveMode = newImmersiveMode;
-            final String pkg = win.getOwningPackage();
-            mImmersiveModeConfirmation.immersiveModeChangedLw(pkg, newImmersiveMode,
+            // The immersive confirmation window should be attached to the immersive window root.
+            final int rootDisplayAreaId = win.getRootDisplayArea().mFeatureId;
+            mImmersiveModeConfirmation.immersiveModeChangedLw(rootDisplayAreaId, newImmersiveMode,
                     mService.mPolicy.isUserSetupComplete(),
                     isNavBarEmpty(disableFlags));
         }
