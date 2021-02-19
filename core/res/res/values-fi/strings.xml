@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"aloita katseluoikeuksien käyttö"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Antaa luvanhaltijan käynnistää sovelluksen käyttöoikeuksien käytön. Ei tavallisten sovelluksien käyttöön."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Asentaa salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Tarkkailla näytön avaamisyrityksiä"</string>

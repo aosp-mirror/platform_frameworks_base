@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kiểm soát độ dài và ký tự được phép trong mật khẩu khóa màn hình và mã PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Giám sát những lần thử mở khóa màn hình"</string>

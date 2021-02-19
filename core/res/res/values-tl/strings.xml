@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Pinapahintulutan ang app na mag-sample ng data ng sensor sa rate na higit sa 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>

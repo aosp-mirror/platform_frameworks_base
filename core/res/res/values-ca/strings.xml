@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permet que l\'aplicació llegeixi la configuració No molestis i hi escrigui."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"comença a utilitzar el permís de visualització"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permet que un propietari comenci a utilitzar el permís amb una aplicació. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar els intents de desbloqueig de la pantalla"</string>

@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"መተግበሪያው የአትረብሽ ውቅረትን እንዲያነብብ እና እንዲጸፍ ይፈቅዳል።"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"የእይታ ፈቃድ መጠቀምን መጀመር"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ያዢው ለአንድ መተግበሪያ የፈቃድ አጠቃቀሙን እንዲያስጀምር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"የማሳያ-ክፈት ሙከራዎችን ክትትል ያድርጉባቸው"</string>

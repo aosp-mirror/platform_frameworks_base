@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"高サンプリング レートでセンサーデータにアクセスする"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz を超えるレートでセンサーデータをサンプリングすることをアプリに許可します"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>

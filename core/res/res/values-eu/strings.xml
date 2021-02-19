@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ez molestatzeko moduaren konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"hasi ikusteko baimena erabiltzen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ezarri pasahitzen arauak"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolatu pantaila blokeoaren pasahitzen eta PINen luzera eta onartutako karaktereak."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>

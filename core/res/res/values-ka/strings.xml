@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"საშუალებას აძლევს აპს, წაიკითხოს და დაწეროს კონფიგურაცია „არ შემაწუხოთ“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ნახვის ნებართვის გამოყენების დაწყება"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ნებართვის გამოყენება. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"სენსორის მონაცემებზე წვდომა სემპლინგის მაღალი სიხშირით"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"საშუალებას აძლევს აპს, მიიღოს სენსორის მონაცემების ნიმუშები 200 ჰც-ზე მეტი სიხშირით"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>

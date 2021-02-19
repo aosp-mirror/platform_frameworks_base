@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"அனுமதி உபயோகத்தை அணுகுதல்"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ஆப்ஸிற்கான அனுமதி உபயோகத்தை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையைத் திறப்பதற்கான முயற்சிகளைக் கண்காணி"</string>

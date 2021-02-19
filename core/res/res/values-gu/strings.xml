@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>

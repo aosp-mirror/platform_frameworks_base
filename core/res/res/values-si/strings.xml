@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>

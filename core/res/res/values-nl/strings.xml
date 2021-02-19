@@ -685,6 +685,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -1858,7 +1862,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraken"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Slapen"</string>
-    <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dempt sommige geluiden"</string>
+    <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> zet sommige geluiden uit"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Er is een intern probleem met je apparaat. Neem contact op met de fabrikant voor meer informatie."</string>
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD-verzoek gewijzigd in normaal gesprek"</string>
@@ -1932,7 +1936,7 @@
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo starten…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Apparaat resetten…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>
-    <string name="conference_call" msgid="5731633152336490471">"Conferencecall"</string>
+    <string name="conference_call" msgid="5731633152336490471">"Telefonische vergadering"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Knopinfo"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Games"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Muziek en audio"</string>
@@ -2008,7 +2012,7 @@
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weergeven"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bewerken"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Trillen bij gesprekken en meldingen"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Gesprekken en meldingen zijn gedempt"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Telefoon- en meldingsgeluid wordt uitgezet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systeemwijzigingen"</string>
     <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Niet storen"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nieuw: \'Niet storen\' verbergt meldingen"</string>

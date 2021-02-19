@@ -688,6 +688,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Omogućava aplikaciji da čita i upisuje konfiguraciju načina rada Ne ometaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pokrenuti korištenje odobrenja za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Dozvoljava vlasniku da pokrene korištenje odobrenja za aplikaciju. Ne bi trebalo biti potrebno za obične aplikacije."</string>
+    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
+    <skip />
+    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavljanje pravila za lozinke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN-ovima."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Prati pokušaje otključavanja ekrana"</string>
