@@ -33,7 +33,6 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -50,8 +49,12 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
+import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerWhitelistManager.REASON_UNKNOWN;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.NETWORK_STACK_UID;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.PHONE_UID;
@@ -101,7 +104,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
@@ -251,6 +254,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -623,7 +627,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private volatile String mDeviceOwnerName;
 
-    private volatile int mDeviceOwnerUid = Process.INVALID_UID;
+    private volatile int mDeviceOwnerUid = INVALID_UID;
 
     /**
      * Map userId to its companion app uids.
@@ -1149,13 +1153,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     DeviceIdleInternal mLocalDeviceIdleController;
 
     /**
-     * Power-save whitelisted app-ids (not including except-idle-whitelisted ones).
+     * Power-save allowlisted app-ids (not including except-idle-allowlisted ones).
      */
     @CompositeRWLock({"this", "mProcLock"})
     int[] mDeviceIdleAllowlist = new int[0];
 
     /**
-     * Power-save whitelisted app-ids (including except-idle-whitelisted ones).
+     * Power-save allowlisted app-ids (including except-idle-allowlisted ones).
      */
     @CompositeRWLock({"this", "mProcLock"})
     int[] mDeviceIdleExceptIdleAllowlist = new int[0];
@@ -1171,20 +1175,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long duration;
         final String tag;
         final int type;
+        final @ReasonCode int reasonCode;
 
-        PendingTempAllowlist(int targetUid, long duration, String tag, int type) {
+        PendingTempAllowlist(int targetUid, long duration, @ReasonCode int reasonCode, String tag,
+                int type) {
             this.targetUid = targetUid;
             this.duration = duration;
             this.tag = tag;
             this.type = type;
+            this.reasonCode = reasonCode;
         }
 
         void dumpDebug(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
-            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TARGET_UID, targetUid);
-            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.DURATION_MS, duration);
+            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TARGET_UID,
+                    targetUid);
+            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.DURATION_MS,
+                    duration);
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TAG, tag);
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TYPE, type);
+            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.REASON_CODE,
+                    reasonCode);
             proto.end(token);
         }
     }
@@ -1198,6 +1209,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @CompositeRWLock({"this", "mProcLock"})
     final FgsStartTempAllowList mFgsStartTempAllowList = new FgsStartTempAllowList();
 
+    static final FgsStartTempAllowList.TempFgsAllowListEntry FAKE_TEMP_ALLOWLIST_ENTRY = new
+            FgsStartTempAllowList.TempFgsAllowListEntry(Long.MAX_VALUE, Long.MAX_VALUE,
+            REASON_SYSTEM_ALLOW_LISTED, "", INVALID_UID);
     /**
      * Information about and control over application operations
      */
@@ -4817,12 +4831,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int sendIntentSender(IIntentSender target, IBinder whitelistToken, int code,
+    public int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
             Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         if (target instanceof PendingIntentRecord) {
             return ((PendingIntentRecord)target).sendWithResult(code, intent, resolvedType,
-                    whitelistToken, finishedReceiver, requiredPermission, options);
+                    allowlistToken, finishedReceiver, requiredPermission, options);
         } else {
             if (intent == null) {
                 // Weird case: someone has given us their own custom IIntentSender, and now
@@ -4834,7 +4848,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent = new Intent(Intent.ACTION_MAIN);
             }
             try {
-                target.send(code, intent, resolvedType, whitelistToken, null,
+                target.send(code, intent, resolvedType, allowlistToken, null,
                         requiredPermission, options);
             } catch (RemoteException e) {
             }
@@ -5449,7 +5463,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         switch (appop) {
             case AppOpsManager.MODE_ALLOWED:
-                // If force-background-check is enabled, restrict all apps that aren't whitelisted.
+                // If force-background-check is enabled, restrict all apps that aren't allowlisted.
                 if (mForceBackgroundCheck &&
                         !UserHandle.isCore(uid) &&
                         !isOnDeviceIdleAllowlistLOSP(uid, /*allowExceptIdleToo=*/ true)) {
@@ -5485,7 +5499,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (uidOnBackgroundAllowlistLOSP(uid)) {
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
-                        + " on background whitelist; not restricted in background");
+                        + " on background allowlist; not restricted in background");
             }
             return ActivityManager.APP_START_MODE_NORMAL;
         }
@@ -5494,7 +5508,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (isOnDeviceIdleAllowlistLOSP(uid, /*allowExceptIdleToo=*/ false)) {
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
-                        + " on idle whitelist; not restricted in background");
+                        + " on idle allowlist; not restricted in background");
             }
             return ActivityManager.APP_START_MODE_NORMAL;
         }
@@ -5582,10 +5596,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || mPendingTempAllowlist.indexOfKey(uid) >= 0;
     }
 
+    /**
+     * Is the uid allowlisted to start FGS?
+     * @param uid
+     * @return a TempAllowListEntry if the uid is allowed.
+     *         null if the uid is not allowed.
+     */
+    @Nullable
     @GuardedBy(anyOf = {"this", "mProcLock"})
-    boolean isAllowlistedForFgsStartLOSP(int uid) {
-        return Arrays.binarySearch(mDeviceIdleExceptIdleAllowlist, UserHandle.getAppId(uid)) >= 0
-                || mFgsStartTempAllowList.isAllowed(uid);
+    FgsStartTempAllowList.TempFgsAllowListEntry isAllowlistedForFgsStartLOSP(int uid) {
+        if (Arrays.binarySearch(mDeviceIdleExceptIdleAllowlist, UserHandle.getAppId(uid)) >= 0) {
+            return FAKE_TEMP_ALLOWLIST_ENTRY;
+        }
+        return mFgsStartTempAllowList.getAllowedDurationAndReason(uid);
     }
 
     /**
@@ -6057,13 +6080,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void backgroundWhitelistUid(final int uid) {
+    public void backgroundAllowlistUid(final int uid) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the OS may call backgroundWhitelistUid()");
+            throw new SecurityException("Only the OS may call backgroundAllowlistUid()");
         }
 
         if (DEBUG_BACKGROUND_CHECK) {
-            Slog.i(TAG, "Adding uid " + uid + " to bg uid whitelist");
+            Slog.i(TAG, "Adding uid " + uid + " to bg uid allowlist");
         }
         synchronized (this) {
             synchronized (mProcLock) {
@@ -8282,7 +8305,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!TextUtils.isEmpty(packageName)) {
             final int uid = enforceDumpPermissionForPackage(packageName, userId, callingUid,
                       "getHistoricalProcessExitReasons");
-            if (uid != Process.INVALID_UID) {
+            if (uid != INVALID_UID) {
                 mProcessList.mAppExitInfoTracker.getExitInfo(
                         packageName, uid, pid, maxNum, results);
                 tombstoneService.collectTombstones(results, uid, pid, maxNum);
@@ -8316,7 +8339,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     int enforceDumpPermissionForPackage(String packageName, int userId, int callingUid,
             String function) {
         final long identity = Binder.clearCallingIdentity();
-        int uid = Process.INVALID_UID;
+        int uid = INVALID_UID;
         try {
             uid = mPackageManagerInt.getPackageUid(packageName,
                     MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
@@ -9208,6 +9231,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println(ptw.tag);
                     pw.print(" ");
                     pw.print(ptw.type);
+                    pw.print(" ");
+                    pw.print(ptw.reasonCode);
                 }
             }
         }
@@ -12556,7 +12581,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         BroadcastOptions brOptions = null;
         if (bOptions != null) {
             brOptions = new BroadcastOptions(bOptions);
-            if (brOptions.getTemporaryAppWhitelistDuration() > 0) {
+            if (brOptions.getTemporaryAppAllowlistDuration() > 0) {
                 // See if the caller is allowed to do this.  Note we are checking against
                 // the actual real caller (not whoever provided the operation as say a
                 // PendingIntent), because that who is actually supplied the arguments.
@@ -14455,8 +14480,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void tempAllowlistForPendingIntentLocked(int callerPid, int callerUid, int targetUid,
-            long duration, int type, String tag) {
-        if (DEBUG_WHITELISTS) {
+            long duration, int type, @ReasonCode int reasonCode, String reason) {
+        if (DEBUG_ALLOWLISTS) {
             Slog.d(TAG, "tempAllowlistForPendingIntentLocked(" + callerPid + ", " + callerUid + ", "
                     + targetUid + ", " + duration + ", " + type + ")");
         }
@@ -14475,7 +14500,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         != PackageManager.PERMISSION_GRANTED
                         && checkPermission(START_FOREGROUND_SERVICES_FROM_BACKGROUND, callerPid,
                         callerUid) != PackageManager.PERMISSION_GRANTED) {
-                    if (DEBUG_WHITELISTS) {
+                    if (DEBUG_ALLOWLISTS) {
                         Slog.d(TAG, "tempAllowlistForPendingIntentLocked() for target " + targetUid
                                 + ": pid " + callerPid + " is not allowed");
                     }
@@ -14484,22 +14509,23 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        tempAllowlistUidLocked(targetUid, duration, tag, type);
+        tempAllowlistUidLocked(targetUid, duration, reasonCode, reason, type, callerUid);
     }
 
     /**
      * Allowlists {@code targetUid} to temporarily bypass Power Save mode.
      */
     @GuardedBy("this")
-    void tempAllowlistUidLocked(int targetUid, long duration, String tag, int type) {
+    void tempAllowlistUidLocked(int targetUid, long duration, @ReasonCode int reasonCode,
+            String reason, int type, int callingUid) {
         synchronized (mProcLock) {
             mPendingTempAllowlist.put(targetUid,
-                    new PendingTempAllowlist(targetUid, duration, tag, type));
+                    new PendingTempAllowlist(targetUid, duration, reasonCode, reason, type));
             setUidTempAllowlistStateLSP(targetUid, true);
             mUiHandler.obtainMessage(PUSH_TEMP_ALLOWLIST_UI_MSG).sendToTarget();
 
-            if (type == TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
-                mFgsStartTempAllowList.add(targetUid, duration);
+            if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                mFgsStartTempAllowList.add(targetUid, duration, reasonCode, reason, callingUid);
             }
         }
     }
@@ -14525,7 +14551,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = 0; i < N; i++) {
                 PendingTempAllowlist ptw = list[i];
                 mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                        ptw.duration, ptw.type, true, ptw.tag);
+                        ptw.duration, ptw.type, true, ptw.reasonCode, ptw.tag);
             }
         }
 
@@ -15113,10 +15139,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
+        public void setPendingIntentAllowlistDuration(IIntentSender target, IBinder allowlistToken,
+                long duration, int type, @ReasonCode int reasonCode, @Nullable String reason) {
+            mPendingIntentController.setPendingIntentAllowlistDuration(target, allowlistToken,
+                    duration, type, reasonCode, reason);
+        }
+
+        @Override
+        public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder allowlistToken,
                 long duration, int type) {
-            mPendingIntentController.setPendingIntentWhitelistDuration(target, whitelistToken,
-                    duration, type);
+            mPendingIntentController.setPendingIntentAllowlistDuration(target, allowlistToken,
+                    duration, type, REASON_UNKNOWN, "");
         }
 
         @Override
@@ -15126,32 +15159,32 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setPendingIntentAllowBgActivityStarts(IIntentSender target,
-                IBinder whitelistToken, int flags) {
+                IBinder allowlistToken, int flags) {
             if (!(target instanceof PendingIntentRecord)) {
                 Slog.w(TAG, "setPendingIntentAllowBgActivityStarts():"
                         + " not a PendingIntentRecord: " + target);
                 return;
             }
             synchronized (ActivityManagerService.this) {
-                ((PendingIntentRecord) target).setAllowBgActivityStarts(whitelistToken, flags);
+                ((PendingIntentRecord) target).setAllowBgActivityStarts(allowlistToken, flags);
             }
         }
 
         @Override
         public void clearPendingIntentAllowBgActivityStarts(IIntentSender target,
-                IBinder whitelistToken) {
+                IBinder allowlistToken) {
             if (!(target instanceof PendingIntentRecord)) {
                 Slog.w(TAG, "clearPendingIntentAllowBgActivityStarts():"
                         + " not a PendingIntentRecord: " + target);
                 return;
             }
             synchronized (ActivityManagerService.this) {
-                ((PendingIntentRecord) target).clearAllowBgActivityStarts(whitelistToken);
+                ((PendingIntentRecord) target).clearAllowBgActivityStarts(allowlistToken);
             }
         }
 
         @Override
-        public void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids) {
+        public void setDeviceIdleAllowlist(int[] allAppids, int[] exceptIdleAppids) {
             synchronized (ActivityManagerService.this) {
                 synchronized (mProcLock) {
                     mDeviceIdleAllowlist = allAppids;
@@ -15161,17 +15194,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void updateDeviceIdleTempWhitelist(int[] appids, int changingUid, boolean adding,
-                long durationMs, @TempAllowListType int type) {
+        public void updateDeviceIdleTempAllowlist(int[] appids, int changingUid, boolean adding,
+                long durationMs, @TempAllowListType int type, @ReasonCode int reasonCode,
+                @Nullable String reason, int callingUid) {
             synchronized (ActivityManagerService.this) {
                 synchronized (mProcLock) {
                     mDeviceIdleTempAllowlist = appids;
                     if (adding) {
-                        if (type == TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
-                            mFgsStartTempAllowList.add(changingUid, durationMs);
+                        if (type == TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                            mFgsStartTempAllowList.add(changingUid, durationMs, reasonCode, reason,
+                                    callingUid);
                         }
+                        setAppIdTempAllowlistStateLSP(changingUid, adding);
                     }
-                    setAppIdTempAllowlistStateLSP(changingUid, adding);
                 }
             }
         }
@@ -15532,11 +15567,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-                long duration, int type, String tag) {
+        public void tempAllowlistForPendingIntent(int callerPid, int callerUid, int targetUid,
+                long duration, int type, @ReasonCode int reasonCode, String reason) {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.tempAllowlistForPendingIntentLocked(
-                        callerPid, callerUid, targetUid, duration, type, tag);
+                        callerPid, callerUid, targetUid, duration, type, reasonCode, reason);
             }
         }
 

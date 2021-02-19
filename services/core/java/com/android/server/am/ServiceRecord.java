@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static android.os.PowerWhitelistManager.REASON_DENIED;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -36,6 +37,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerWhitelistManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -101,7 +103,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
     ServiceState tracker; // tracking service execution, may be null
     ServiceState restartTracker; // tracking service restart
-    boolean whitelistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
+    boolean allowlistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
     boolean delayed;        // are we waiting to start this service in the background?
     boolean fgRequired;     // is the service required to go foreground after starting?
     boolean fgWaiting;      // is a timeout for going foreground already scheduled?
@@ -156,11 +158,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
+    // the most recent uid that start/bind this service.
+    int mRecentCallingUid;
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
-    @ActiveServices.FgsFeatureRetCode int mAllowStartForeground;
+    @PowerWhitelistManager.ReasonCode int mAllowStartForeground = REASON_DENIED;
     String mInfoAllowStartForeground;
+    FgsStartTempAllowList.TempFgsAllowListEntry mInfoTempFgsAllowListReason;
     boolean mLoggedInfoAllowStartForeground;
 
     String stringName;      // caching of toString
@@ -309,7 +314,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (isolatedProc != null) {
             isolatedProc.dumpDebug(proto, ServiceRecordProto.ISOLATED_PROC);
         }
-        proto.write(ServiceRecordProto.WHITELIST_MANAGER, whitelistManager);
+        proto.write(ServiceRecordProto.WHITELIST_MANAGER, allowlistManager);
         proto.write(ServiceRecordProto.DELAYED, delayed);
         if (isForeground || foregroundId != 0) {
             long fgToken = proto.start(ServiceRecordProto.FOREGROUND);
@@ -410,8 +415,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (isolatedProc != null) {
             pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
         }
-        if (whitelistManager) {
-            pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
+        if (allowlistManager) {
+            pw.print(prefix); pw.print("allowlistManager="); pw.println(allowlistManager);
         }
         if (mIsAllowedBgActivityStartsByBinding) {
             pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByBinding=");
@@ -429,6 +434,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 pw.println(mAllowWhileInUsePermissionInFgs);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
+        pw.print(prefix); pw.print("recentCallingUid=");
+        pw.println(mRecentCallingUid);
         pw.print(prefix); pw.print("allowStartForeground=");
         pw.println(mAllowStartForeground);
         pw.print(prefix); pw.print("infoAllowStartForeground=");
@@ -894,13 +901,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         return false;
     }
 
-    public void updateWhitelistManager() {
-        whitelistManager = false;
+    public void updateAllowlistManager() {
+        allowlistManager = false;
         for (int conni=connections.size()-1; conni>=0; conni--) {
             ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
             for (int i=0; i<cr.size(); i++) {
                 if ((cr.get(i).flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
-                    whitelistManager = true;
+                    allowlistManager = true;
                     return;
                 }
             }
