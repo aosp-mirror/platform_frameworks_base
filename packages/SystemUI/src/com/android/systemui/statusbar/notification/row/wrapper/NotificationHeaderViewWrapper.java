@@ -67,8 +67,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private ImageView mWorkProfileImage;
     private View mAudiblyAlertedIcon;
     private View mFeedbackIcon;
-    private View mLeftIcon;
-    private View mRightIcon;
 
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
@@ -113,8 +111,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mAltExpandTarget = mView.findViewById(com.android.internal.R.id.alternate_expand_target);
         mIconContainer = mView.findViewById(com.android.internal.R.id.conversation_icon_container);
-        mLeftIcon = mView.findViewById(com.android.internal.R.id.left_icon);
-        mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
         mNotificationTopLine = mView.findViewById(com.android.internal.R.id.notification_top_line);
@@ -160,12 +156,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         updateCropToPaddingForImageViews();
         Notification notification = row.getEntry().getSbn().getNotification();
         mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
-        if (mLeftIcon != null) {
-            mLeftIcon.setClipToOutline(true);
-        }
-        if (mRightIcon != null) {
-            mRightIcon.setClipToOutline(true);
-        }
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
