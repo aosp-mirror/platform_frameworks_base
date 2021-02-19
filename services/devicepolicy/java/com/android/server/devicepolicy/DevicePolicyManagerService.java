@@ -197,6 +197,7 @@ import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
@@ -2243,6 +2244,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         ConnectivityManager getConnectivityManager() {
             return mContext.getSystemService(ConnectivityManager.class);
+        }
+
+        VpnManager getVpnManager() {
+            return mContext.getSystemService(VpnManager.class);
         }
 
         LocationManager getLocationManager() {
@@ -7090,7 +7095,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
             // If some package is uninstalled after the check above, it will be ignored by CM.
-            if (!mInjector.getConnectivityManager().setAlwaysOnVpnPackageForUser(
+            if (!mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(
                     userId, vpnPackage, lockdown, lockdownAllowlist)) {
                 throw new UnsupportedOperationException();
             }
@@ -7121,7 +7126,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().getAlwaysOnVpnPackageForUser(userId));
+                () -> mInjector.getVpnManager().getAlwaysOnVpnPackageForUser(userId));
     }
 
     @Override
@@ -7139,7 +7144,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().isVpnLockdownEnabled(userId));
+                () -> mInjector.getVpnManager().isVpnLockdownEnabled(userId));
     }
 
     @Override
@@ -7158,7 +7163,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getConnectivityManager().getVpnLockdownAllowlist(userId));
+                () -> mInjector.getVpnManager().getVpnLockdownAllowlist(userId));
     }
 
     private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc) {
