@@ -17,14 +17,15 @@
 #include "SkiaVulkanPipeline.h"
 
 #include "DeferredLayerUpdater.h"
+#include "LightingInfo.h"
 #include "Readback.h"
 #include "ShaderCache.h"
-#include "LightingInfo.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
+#include "utils/TraceUtils.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -73,8 +74,6 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
                 mVkSurface->getCurrentPreTransform());
-    ShaderCache::get().onVkFrameFlushed(mRenderThread.getGrContext());
-    layerUpdateQueue->clear();
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
@@ -82,8 +81,13 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         SkCanvas* profileCanvas = backBuffer->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas);
         profiler->draw(profileRenderer);
-        profileCanvas->flush();
     }
+
+    {
+        ATRACE_NAME("flush commands");
+        mVkManager.finishFrame(backBuffer.get());
+    }
+    layerUpdateQueue->clear();
 
     // Log memory statistics
     if (CC_UNLIKELY(Properties::debugLevel != kDebugDisabled)) {
