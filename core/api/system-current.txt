@@ -1491,11 +1491,18 @@ package android.bluetooth {
     field public static final int ACCESS_REJECTED = 2; // 0x2
     field public static final int ACCESS_UNKNOWN = 0; // 0x0
     field public static final String ACTION_SILENCE_MODE_CHANGED = "android.bluetooth.device.action.SILENCE_MODE_CHANGED";
+    field public static final String DEVICE_TYPE_DEFAULT = "Default";
+    field public static final String DEVICE_TYPE_UNTETHERED_HEADSET = "Untethered Headset";
+    field public static final String DEVICE_TYPE_WATCH = "Watch";
     field public static final int METADATA_COMPANION_APP = 4; // 0x4
+    field public static final int METADATA_DEVICE_TYPE = 17; // 0x11
     field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
     field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
     field public static final int METADATA_IS_UNTETHERED_HEADSET = 6; // 0x6
+    field public static final int METADATA_MAIN_BATTERY = 18; // 0x12
+    field public static final int METADATA_MAIN_CHARGING = 19; // 0x13
     field public static final int METADATA_MAIN_ICON = 5; // 0x5
+    field public static final int METADATA_MAIN_LOW_BATTERY_THRESHOLD = 20; // 0x14
     field public static final int METADATA_MANUFACTURER_NAME = 0; // 0x0
     field public static final int METADATA_MAX_LENGTH = 2048; // 0x800
     field public static final int METADATA_MODEL_NAME = 1; // 0x1
@@ -1503,12 +1510,15 @@ package android.bluetooth {
     field public static final int METADATA_UNTETHERED_CASE_BATTERY = 12; // 0xc
     field public static final int METADATA_UNTETHERED_CASE_CHARGING = 15; // 0xf
     field public static final int METADATA_UNTETHERED_CASE_ICON = 9; // 0x9
+    field public static final int METADATA_UNTETHERED_CASE_LOW_BATTERY_THRESHOLD = 23; // 0x17
     field public static final int METADATA_UNTETHERED_LEFT_BATTERY = 10; // 0xa
     field public static final int METADATA_UNTETHERED_LEFT_CHARGING = 13; // 0xd
     field public static final int METADATA_UNTETHERED_LEFT_ICON = 7; // 0x7
+    field public static final int METADATA_UNTETHERED_LEFT_LOW_BATTERY_THRESHOLD = 21; // 0x15
     field public static final int METADATA_UNTETHERED_RIGHT_BATTERY = 11; // 0xb
     field public static final int METADATA_UNTETHERED_RIGHT_CHARGING = 14; // 0xe
     field public static final int METADATA_UNTETHERED_RIGHT_ICON = 8; // 0x8
+    field public static final int METADATA_UNTETHERED_RIGHT_LOW_BATTERY_THRESHOLD = 22; // 0x16
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
