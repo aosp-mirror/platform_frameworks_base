@@ -42,6 +42,7 @@ import android.system.StructStat;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoParseException;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.BootReceiver;
@@ -434,7 +435,7 @@ public final class NativeTombstoneManager {
                             break;
                     }
                 }
-            } catch (IOException ex) {
+            } catch (IOException | ProtoParseException ex) {
                 Slog.e(TAG, "Failed to parse tombstone", ex);
                 return Optional.empty();
             }
