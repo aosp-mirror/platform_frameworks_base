@@ -149,6 +149,7 @@ import java.util.function.Predicate;
  */
 public class AccessibilityManagerService extends IAccessibilityManager.Stub
         implements AbstractAccessibilityServiceConnection.SystemSupport,
+        AccessibilityTrace,
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
         AccessibilitySecurityPolicy.AccessibilityUserManager,
@@ -243,6 +244,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     final SparseArray<AccessibilityUserState> mUserStates = new SparseArray<>();
 
     private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
+    private final WindowManagerInternal.AccessibilityControllerInternal mA11yController;
 
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -288,6 +290,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
+        mA11yController = mWindowManagerService.getAccessibilityController();
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = packageManager;
@@ -308,6 +311,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
+        mA11yController = mWindowManagerService.getAccessibilityController();
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
@@ -328,16 +332,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public int getCurrentUserIdLocked() {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getCurrentUserIdLocked");
+        }
         return mCurrentUserId;
     }
 
     @Override
     public boolean isAccessibilityButtonShown() {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".isAccessibilityButtonShown");
+        }
         return mIsAccessibilityButtonShown;
     }
 
     @Override
     public void onServiceInfoChangedLocked(AccessibilityUserState userState) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".onServiceInfoChangedLocked", "userState=" + userState);
+        }
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
     }
 
@@ -395,6 +408,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         PackageMonitor monitor = new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
+                if (isA11yTracingEnabled()) {
+                    logTrace(LOG_TAG + ".PM.onSomePackagesChanged");
+                }
+
                 synchronized (mLock) {
                     // Only the profile parent can install accessibility services.
                     // Therefore we ignore packages from linked profiles.
@@ -419,6 +436,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // mBindingServices in binderDied() during updating. Remove services from  this
                 // package from mBindingServices, and then update the user state to re-bind new
                 // versions of them.
+                if (isA11yTracingEnabled()) {
+                    logTrace(LOG_TAG + ".PM.onPackageUpdateFinished",
+                            "packageName=" + packageName + ";uid=" + uid);
+                }
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
                     if (userId != mCurrentUserId) {
@@ -448,6 +469,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             @Override
             public void onPackageRemoved(String packageName, int uid) {
+                if (isA11yTracingEnabled()) {
+                    logTrace(LOG_TAG + ".PM.onPackageRemoved",
+                            "packageName=" + packageName + ";uid=" + uid);
+                }
+
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
                     // Only the profile parent can install accessibility services.
@@ -487,6 +513,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages,
                     int uid, boolean doit) {
+                if (isA11yTracingEnabled()) {
+                    logTrace(LOG_TAG + ".PM.onHandleForceStop", "intent=" + intent + ";packages="
+                            + packages + ";uid=" + uid + ";doit=" + doit);
+                }
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
                     // Only the profile parent can install accessibility services.
@@ -533,6 +563,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (isA11yTracingEnabled()) {
+                    logTrace(LOG_TAG + ".BR.onReceive", "context=" + context + ";intent=" + intent);
+                }
+
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                     switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
@@ -616,6 +650,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public long addClient(IAccessibilityManagerClient callback, int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".addClient", "callback=" + callback + ";userId=" + userId);
+        }
+
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -654,6 +692,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void sendAccessibilityEvent(AccessibilityEvent event, int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".sendAccessibilityEvent", "event=" + event + ";userId=" + userId);
+        }
         boolean dispatchEvent = false;
 
         synchronized (mLock) {
@@ -746,6 +787,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void registerSystemAction(RemoteAction action, int actionId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".registerSystemAction", "action=" + action + ";actionId="
+                    + actionId);
+        }
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         getSystemActionPerformer().registerSystemAction(actionId, action);
     }
@@ -757,6 +802,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void unregisterSystemAction(int actionId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".unregisterSystemAction", "actionId=" + actionId);
+        }
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         getSystemActionPerformer().unregisterSystemAction(actionId);
     }
@@ -771,6 +819,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getInstalledAccessibilityServiceList", "userId=" + userId);
+        }
+
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -784,6 +836,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType,
             int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getEnabledAccessibilityServiceList",
+                    "feedbackType=" + feedbackType + ";userId=" + userId);
+        }
+
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -812,6 +869,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void interrupt(int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".interrupt", "userId=" + userId);
+        }
+
         List<IAccessibilityServiceClient> interfacesToInterrupt;
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
@@ -838,6 +899,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         for (int i = 0, count = interfacesToInterrupt.size(); i < count; i++) {
             try {
+                if (isA11yTracingEnabled()) {
+                    logTrace(LOG_TAG + ".IAccessibilityServiceClient.onInterrupt");
+                }
                 interfacesToInterrupt.get(i).onInterrupt();
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error sending interrupt request to "
@@ -850,18 +914,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             IAccessibilityInteractionConnection connection, String packageName,
             int userId) throws RemoteException {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".addAccessibilityInteractionConnection",
+                    "windowToken=" + windowToken + "leashToken=" + leashToken + ";connection="
+                            + connection + "; packageName=" + packageName + ";userId=" + userId);
+        }
+
         return mA11yWindowManager.addAccessibilityInteractionConnection(
                 windowToken, leashToken, connection, packageName, userId);
     }
 
     @Override
     public void removeAccessibilityInteractionConnection(IWindow window) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".removeAccessibilityInteractionConnection", "window=" + window);
+        }
         mA11yWindowManager.removeAccessibilityInteractionConnection(window);
     }
 
     @Override
     public void setPictureInPictureActionReplacingConnection(
             IAccessibilityInteractionConnection connection) throws RemoteException {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".setPictureInPictureActionReplacingConnection",
+                    "connection=" + connection);
+        }
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.MODIFY_ACCESSIBILITY_DATA,
                 SET_PIP_ACTION_REPLACEMENT);
         mA11yWindowManager.setPictureInPictureActionReplacingConnection(connection);
@@ -872,13 +949,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             IAccessibilityServiceClient serviceClient,
             AccessibilityServiceInfo accessibilityServiceInfo,
             int flags) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".registerUiTestAutomationService", "owner=" + owner
+                    + ";serviceClient=" + serviceClient + ";accessibilityServiceInfo="
+                    + accessibilityServiceInfo + ";flags=" + flags);
+        }
+
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
 
         synchronized (mLock) {
             mUiAutomationManager.registerUiTestAutomationServiceLocked(owner, serviceClient,
                     mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler,
-                    mSecurityPolicy, this, mWindowManagerService, getSystemActionPerformer(),
+                    mSecurityPolicy, this, this, mWindowManagerService, getSystemActionPerformer(),
                     mA11yWindowManager, flags);
             onUserStateChangedLocked(getCurrentUserStateLocked());
         }
@@ -886,6 +969,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".unregisterUiTestAutomationService",
+                    "serviceClient=" + serviceClient);
+        }
         synchronized (mLock) {
             mUiAutomationManager.unregisterUiTestAutomationServiceLocked(serviceClient);
         }
@@ -894,6 +981,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public void temporaryEnableAccessibilityStateUntilKeyguardRemoved(
             ComponentName service, boolean touchExplorationEnabled) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".temporaryEnableAccessibilityStateUntilKeyguardRemoved",
+                    "service=" + service + ";touchExplorationEnabled=" + touchExplorationEnabled);
+        }
+
         mSecurityPolicy.enforceCallingPermission(
                 Manifest.permission.TEMPORARY_ENABLE_ACCESSIBILITY,
                 TEMPORARY_ENABLE_ACCESSIBILITY_UNTIL_KEYGUARD_REMOVED);
@@ -922,6 +1014,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public IBinder getWindowToken(int windowId, int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getWindowToken", "windowId=" + windowId + ";userId=" + userId);
+        }
+
         mSecurityPolicy.enforceCallingPermission(
                 Manifest.permission.RETRIEVE_WINDOW_TOKEN,
                 GET_WINDOW_TOKEN);
@@ -961,6 +1057,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void notifyAccessibilityButtonClicked(int displayId, String targetName) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".notifyAccessibilityButtonClicked",
+                    "displayId=" + displayId + ";targetName=" + targetName);
+        }
+
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
@@ -986,6 +1087,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".notifyAccessibilityButtonVisibilityChanged", "shown=" + shown);
+        }
+
         mSecurityPolicy.enforceCallingOrSelfPermission(
                 android.Manifest.permission.STATUS_BAR_SERVICE);
         synchronized (mLock) {
@@ -1014,6 +1119,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void onSystemActionsChanged() {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".onSystemActionsChanged");
+        }
+
         synchronized (mLock) {
             AccessibilityUserState state = getCurrentUserStateLocked();
             notifySystemActionsChangedLocked(state);
@@ -1076,6 +1185,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public @Nullable MotionEventInjector getMotionEventInjectorForDisplayLocked(int displayId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getMotionEventInjectorForDisplayLocked", "displayId=" + displayId);
+        }
+
         final long endMillis = SystemClock.uptimeMillis() + WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS;
         MotionEventInjector motionEventInjector = null;
         while ((mMotionEventInjectors == null) && (SystemClock.uptimeMillis() < endMillis)) {
@@ -1642,6 +1755,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public void persistComponentNamesToSettingLocked(String settingName,
             Set<ComponentName> componentNames, int userId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".persistComponentNamesToSettingLocked", "settingName=" + settingName
+                    + ";componentNames=" + componentNames + ";userId=" + userId);
+        }
+
         persistColonDelimitedSetToSettingLocked(settingName, userId, componentNames,
                 componentName -> componentName.flattenToShortString());
     }
@@ -1726,7 +1844,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (service == null) {
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
-                            this, mWindowManagerService, getSystemActionPerformer(),
+                            this, this, mWindowManagerService, getSystemActionPerformer(),
                             mA11yWindowManager, mActivityTaskManagerService);
                 } else if (userState.mBoundServices.contains(service)) {
                     continue;
@@ -2603,6 +2721,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @GuardedBy("mLock")
     @Override
     public MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getCompatibleMagnificationSpecLocked", "windowId=" + windowId);
+        }
+
         IBinder windowToken = mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(
                 mCurrentUserId, windowId);
         if (windowToken != null) {
@@ -2614,6 +2736,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public KeyEventDispatcher getKeyEventDispatcher() {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getKeyEventDispatcher");
+        }
+
         if (mKeyEventDispatcher == null) {
             mKeyEventDispatcher = new KeyEventDispatcher(
                     mMainHandler, MainHandler.MSG_SEND_KEY_EVENT_TO_INPUT_FILTER, mLock,
@@ -2626,6 +2752,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public PendingIntent getPendingIntentActivity(Context context, int requestCode, Intent intent,
             int flags) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getPendingIntentActivity", "context=" + context + ";requestCode="
+                    + requestCode + ";intent=" + intent + ";flags=" + flags);
+        }
+
+
         return PendingIntent.getActivity(context, requestCode, intent, flags);
     }
 
@@ -2640,6 +2772,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void performAccessibilityShortcut(String targetName) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".performAccessibilityShortcut", "targetName=" + targetName);
+        }
+
         if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
                 && (mContext.checkCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
                 != PackageManager.PERMISSION_GRANTED)) {
@@ -2824,6 +2960,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public List<String> getAccessibilityShortcutTargets(@ShortcutType int shortcutType) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getAccessibilityShortcutTargets", "shortcutType=" + shortcutType);
+        }
+
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException(
@@ -2893,6 +3033,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void sendAccessibilityEventForCurrentUserLocked(AccessibilityEvent event) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".sendAccessibilityEventForCurrentUserLocked", "event=" + event);
+        }
+
         sendAccessibilityEventLocked(event, mCurrentUserId);
     }
 
@@ -2914,6 +3058,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public boolean sendFingerprintGesture(int gestureKeyCode) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".sendFingerprintGesture", "gestureKeyCode=" + gestureKeyCode);
+        }
+
         synchronized(mLock) {
             if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
                 throw new SecurityException("Only SYSTEM can call sendFingerprintGesture");
@@ -2935,6 +3083,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public int getAccessibilityWindowId(@Nullable IBinder windowToken) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getAccessibilityWindowId", "windowToken=" + windowToken);
+        }
+
         synchronized (mLock) {
             if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
                 throw new SecurityException("Only SYSTEM can call getAccessibilityWindowId");
@@ -2952,6 +3104,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public long getRecommendedTimeoutMillis() {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getRecommendedTimeoutMillis");
+        }
+
         synchronized(mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
             return getRecommendedTimeoutMillisLocked(userState);
@@ -2966,6 +3122,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public void setWindowMagnificationConnection(
             IWindowMagnificationConnection connection) throws RemoteException {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".setWindowMagnificationConnection", "connection=" + connection);
+        }
+
         mSecurityPolicy.enforceCallingOrSelfPermission(
                 android.Manifest.permission.STATUS_BAR_SERVICE);
 
@@ -2996,6 +3156,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".associateEmbeddedHierarchy",
+                    "host=" + host + ";embedded=" + embedded);
+        }
+
         synchronized (mLock) {
             mA11yWindowManager.associateEmbeddedHierarchyLocked(host, embedded);
         }
@@ -3003,6 +3168,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void disassociateEmbeddedHierarchy(@NonNull IBinder token) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".disassociateEmbeddedHierarchy", "token=" + token);
+        }
+
         synchronized (mLock) {
             mA11yWindowManager.disassociateEmbeddedHierarchyLocked(token);
         }
@@ -3080,6 +3249,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public FullScreenMagnificationController getFullScreenMagnificationController() {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".getFullScreenMagnificationController");
+        }
         synchronized (mLock) {
             return mMagnificationController.getFullScreenMagnificationController();
         }
@@ -3087,6 +3259,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void onClientChangeLocked(boolean serviceInfoChanged) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".onClientChangeLocked", "serviceInfoChanged=" + serviceInfoChanged);
+        }
+
         AccessibilityUserState userState = getUserStateLocked(mCurrentUserId);
         onUserStateChangedLocked(userState);
         if (serviceInfoChanged) {
@@ -3122,8 +3298,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityServiceConnection service = new AccessibilityServiceConnection(
                     userState, mContext,
                     COMPONENT_NAME, info, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
-                    AccessibilityManagerService.this, mWindowManagerService,
-                    getSystemActionPerformer(), mA11yWindowManager, mActivityTaskManagerService) {
+                    AccessibilityManagerService.this, AccessibilityManagerService.this,
+                    mWindowManagerService, getSystemActionPerformer(), mA11yWindowManager,
+                    mActivityTaskManagerService) {
                 @Override
                 public boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
                     return true;
@@ -3610,6 +3787,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void setGestureDetectionPassthroughRegion(int displayId, Region region) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".setGestureDetectionPassthroughRegion",
+                    "displayId=" + displayId + ";region=" + region);
+        }
+
         mMainHandler.sendMessage(
                 obtainMessage(
                         AccessibilityManagerService::setGestureDetectionPassthroughRegionInternal,
@@ -3620,6 +3802,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
+        if (isA11yTracingEnabled()) {
+            logTrace(LOG_TAG + ".setTouchExplorationPassthroughRegion",
+                    "displayId=" + displayId + ";region=" + region);
+        }
+
         mMainHandler.sendMessage(
                 obtainMessage(
                         AccessibilityManagerService::setTouchExplorationPassthroughRegionInternal,
@@ -3656,5 +3843,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }));
         });
 
+    }
+
+    @Override
+    public boolean isA11yTracingEnabled() {
+        return mA11yController.isAccessibilityTracingEnabled();
+    }
+
+    @Override
+    public void logTrace(String where) {
+        logTrace(where, "");
+    }
+
+    @Override
+    public void logTrace(String where, String callingParams) {
+        mA11yController.logTrace(where, callingParams, "".getBytes(),
+                Binder.getCallingUid(), Thread.currentThread().getStackTrace());
     }
 }

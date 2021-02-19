@@ -66,7 +66,7 @@ public abstract class WindowManagerInternal {
         /**
          * Is trace enabled or not.
          */
-        boolean isEnabled();
+        boolean isAccessibilityTracingEnabled();
 
         /**
          * Add an accessibility trace entry.
