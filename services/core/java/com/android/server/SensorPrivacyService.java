@@ -19,9 +19,10 @@ package com.android.server;
 import static android.Manifest.permission.MANAGE_SENSOR_PRIVACY;
 import static android.app.ActivityManager.RunningServiceInfo;
 import static android.app.ActivityManager.RunningTaskInfo;
-import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
@@ -136,9 +137,13 @@ public final class SensorPrivacyService extends SystemService {
     private final UserManagerInternal mUserManagerInternal;
     private final ActivityManager mActivityManager;
     private final ActivityTaskManager mActivityTaskManager;
+    private final AppOpsManager mAppOpsManager;
+
+    private final IBinder mAppOpsRestrictionToken = new Binder();
 
     public SensorPrivacyService(Context context) {
         super(context);
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mUserManagerInternal = getLocalService(UserManagerInternal.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl(context);
         mActivityManager = context.getSystemService(ActivityManager.class);
@@ -185,10 +190,20 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
 
+            for (int i = 0; i < mIndividualEnabled.size(); i++) {
+                int userId = mIndividualEnabled.keyAt(i);
+                SparseBooleanArray userIndividualEnabled =
+                        mIndividualEnabled.get(i);
+                for (int j = 0; j < userIndividualEnabled.size(); j++) {
+                    int sensor = userIndividualEnabled.keyAt(i);
+                    boolean enabled = userIndividualEnabled.valueAt(j);
+                    setUserRestriction(userId, sensor, enabled);
+                }
+            }
+
             int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_CAMERA};
-            AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
-            appOpsManager.startWatchingNoted(micAndCameraOps, this);
-            appOpsManager.startWatchingStarted(micAndCameraOps, this);
+            mAppOpsManager.startWatchingNoted(micAndCameraOps, this);
+            mAppOpsManager.startWatchingStarted(micAndCameraOps, this);
 
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
@@ -212,7 +227,7 @@ public final class SensorPrivacyService extends SystemService {
         public void onOpNoted(int code, int uid, String packageName,
                 String attributionTag, @AppOpsManager.OpFlags int flags,
                 @AppOpsManager.Mode int result) {
-            if (result != MODE_ALLOWED || (flags & AppOpsManager.OP_FLAGS_ALL_TRUSTED) == 0) {
+            if (result != MODE_IGNORED || (flags & AppOpsManager.OP_FLAGS_ALL_TRUSTED) == 0) {
                 return;
             }
 
@@ -1110,6 +1125,9 @@ public final class SensorPrivacyService extends SystemService {
         public void handleSensorPrivacyChanged(int userId, int sensor, boolean enabled) {
             SparseArray<RemoteCallbackList<ISensorPrivacyListener>> listenersForUser =
                     mIndividualSensorListeners.get(userId);
+
+            setUserRestriction(userId, sensor, enabled);
+
             if (listenersForUser == null) {
                 return;
             }
@@ -1134,6 +1152,18 @@ public final class SensorPrivacyService extends SystemService {
             sendMessage(PooledLambda.obtainMessage(
                     SensorPrivacyServiceImpl::removeSuppressPackageReminderToken,
                     mSensorPrivacyServiceImpl, key, token));
+        }
+    }
+
+    private void setUserRestriction(int userId, int sensor, boolean enabled) {
+        if (sensor == CAMERA) {
+            mAppOpsManager.setUserRestrictionForUser(OP_CAMERA, enabled,
+                    mAppOpsRestrictionToken, new String[]{}, userId);
+        } else if (sensor == MICROPHONE) {
+            mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO, enabled,
+                    mAppOpsRestrictionToken, new String[]{}, userId);
+            mAppOpsManager.setUserRestrictionForUser(OP_RECORD_AUDIO_HOTWORD, enabled,
+                    mAppOpsRestrictionToken, new String[]{}, userId);
         }
     }
 
