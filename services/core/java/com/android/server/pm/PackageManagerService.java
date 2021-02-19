@@ -1755,6 +1755,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean filterAppAccess(String packageName, int callingUid, int userId) {
             return mPmInternal.filterAppAccess(packageName, callingUid, userId);
         }
+
+        @Override
+        public int[] getAllUserIds() {
+            return mUserManager.getUserIds();
+        }
     }
 
     /**
