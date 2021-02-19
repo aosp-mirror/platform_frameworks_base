@@ -176,6 +176,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
+import android.view.contentcapture.IContentCaptureManager;
+import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.translation.TranslationSpec;
 import android.webkit.WebView;
 import android.window.SplashScreen;
@@ -511,6 +513,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     private final Object mCoreSettingsLock = new Object();
 
     boolean mHasImeComponent = false;
+
+    private IContentCaptureOptionsCallback.Stub mContentCaptureOptionsCallback = null;
 
     /** Activity client record, used for bookkeeping for the real {@link Activity} instance. */
     public static final class ActivityClientRecord {
@@ -1934,6 +1938,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int PURGE_RESOURCES = 161;
         public static final int ATTACH_STARTUP_AGENTS = 162;
         public static final int UPDATE_UI_TRANSLATION_STATE = 163;
+        public static final int SET_CONTENT_CAPTURE_OPTIONS_CALLBACK = 164;
 
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
@@ -1983,6 +1988,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case PURGE_RESOURCES: return "PURGE_RESOURCES";
                     case ATTACH_STARTUP_AGENTS: return "ATTACH_STARTUP_AGENTS";
                     case UPDATE_UI_TRANSLATION_STATE: return "UPDATE_UI_TRANSLATION_STATE";
+                    case SET_CONTENT_CAPTURE_OPTIONS_CALLBACK:
+                        return "SET_CONTENT_CAPTURE_OPTIONS_CALLBACK";
                     case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
@@ -2174,6 +2181,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                     updateUiTranslationState((IBinder) args.arg1, (int) args.arg2,
                             (TranslationSpec) args.arg3, (TranslationSpec) args.arg4,
                             (List<AutofillId>) args.arg5);
+                    break;
+                case SET_CONTENT_CAPTURE_OPTIONS_CALLBACK:
+                    handleSetContentCaptureOptionsCallback((String) msg.obj);
                     break;
                 case INSTRUMENT_WITHOUT_RESTART:
                     handleInstrumentWithoutRestart((AppBindData) msg.obj);
@@ -6788,6 +6798,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             // Propagate Content Capture options
             app.setContentCaptureOptions(data.contentCaptureOptions);
+            sendMessage(H.SET_CONTENT_CAPTURE_OPTIONS_CALLBACK, data.appInfo.packageName);
 
             mInitialApplication = app;
 
@@ -6846,6 +6857,36 @@ public final class ActivityThread extends ClientTransactionHandler {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    private void handleSetContentCaptureOptionsCallback(String packageName) {
+        if (mContentCaptureOptionsCallback != null) {
+            return;
+        }
+
+        IBinder b = ServiceManager.getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
+        if (b == null) {
+            return;
+        }
+
+        IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(b);
+        mContentCaptureOptionsCallback = new IContentCaptureOptionsCallback.Stub() {
+            @Override
+            public void setContentCaptureOptions(ContentCaptureOptions options)
+                    throws RemoteException {
+                if (mInitialApplication != null) {
+                    mInitialApplication.setContentCaptureOptions(options);
+                }
+            }
+        };
+        try {
+            service.registerContentCaptureOptionsCallback(packageName,
+                    mContentCaptureOptionsCallback);
+        } catch (RemoteException e)  {
+            Slog.w(TAG, "registerContentCaptureOptionsCallback() failed: "
+                    + packageName, e);
+            mContentCaptureOptionsCallback = null;
         }
     }
 

@@ -595,8 +595,14 @@ final class ContentCapturePerUserService
                         ? "null_activities" : activities.size() + " activities") + ")"
                         + " for user " + mUserId);
             }
+
+            ArraySet<String> oldList =
+                    mMaster.mGlobalContentCaptureOptions.getWhitelistedPackages(mUserId);
+
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
             writeSetWhitelistEvent(getServiceComponentName(), packages, activities);
+
+            updateContentCaptureOptions(oldList);
 
             // Must disable session that are not the allowlist anymore...
             final int numSessions = mSessions.size();
@@ -668,6 +674,24 @@ final class ContentCapturePerUserService
                 ContentCaptureOptions options, int flushReason) {
             ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(), app,
                     flushMetrics, options, flushReason);
+        }
+
+        /** Updates {@link ContentCaptureOptions} for all newly added packages on allowlist. */
+        private void updateContentCaptureOptions(@Nullable ArraySet<String> oldList) {
+            ArraySet<String> adding = mMaster.mGlobalContentCaptureOptions
+                    .getWhitelistedPackages(mUserId);
+
+            if (oldList != null && adding != null) {
+                adding.removeAll(oldList);
+            }
+
+            int N = adding != null ? adding.size() : 0;
+            for (int i = 0; i < N; i++) {
+                String packageName = adding.valueAt(i);
+                ContentCaptureOptions options = mMaster.mGlobalContentCaptureOptions
+                        .getOptions(mUserId, packageName);
+                mMaster.updateOptions(packageName, options);
+            }
         }
     }
 }

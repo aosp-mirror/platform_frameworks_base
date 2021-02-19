@@ -69,6 +69,7 @@ import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.IDataShareReadAdapter;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Pair;
@@ -81,6 +82,7 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IContentCaptureManager;
+import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.contentcapture.IDataShareWriteAdapter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -133,6 +135,9 @@ public final class ContentCaptureManagerService extends
             CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_WRITE_FINISHED;
 
     private final LocalService mLocalService = new LocalService();
+
+    private final ContentCaptureManagerServiceStub mContentCaptureManagerServiceStub =
+            new ContentCaptureManagerServiceStub();
 
     @Nullable
     final LocalLog mRequestsHistory;
@@ -224,8 +229,7 @@ public final class ContentCaptureManagerService extends
 
     @Override // from SystemService
     public void onStart() {
-        publishBinderService(CONTENT_CAPTURE_MANAGER_SERVICE,
-                new ContentCaptureManagerServiceStub());
+        publishBinderService(CONTENT_CAPTURE_MANAGER_SERVICE, mContentCaptureManagerServiceStub);
         publishLocalService(ContentCaptureManagerInternal.class, mLocalService);
     }
 
@@ -492,6 +496,19 @@ public final class ContentCaptureManagerService extends
         }
     }
 
+    void updateOptions(String packageName, ContentCaptureOptions options) {
+        ArraySet<CallbackRecord> records;
+        synchronized (mLock) {
+            records = mContentCaptureManagerServiceStub.mCallbacks.get(packageName);
+            if (records != null) {
+                int N = records.size();
+                for (int i = 0; i < N; i++) {
+                    records.valueAt(i).setContentCaptureOptions(options);
+                }
+            }
+        }
+    }
+
     private ActivityManagerInternal getAmInternal() {
         synchronized (mLock) {
             if (mAm == null) {
@@ -599,6 +616,8 @@ public final class ContentCaptureManagerService extends
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
+        @GuardedBy("mLock")
+        private final ArrayMap<String, ArraySet<CallbackRecord>> mCallbacks = new ArrayMap<>();
 
         @Override
         public void startSession(@NonNull IBinder activityToken,
@@ -751,6 +770,46 @@ public final class ContentCaptureManagerService extends
             } catch (RemoteException e) {
                 Slog.w(TAG, "Unable to send getServiceComponentName(): " + e);
             }
+        }
+
+        @Override
+        public void registerContentCaptureOptionsCallback(@NonNull String packageName,
+                IContentCaptureOptionsCallback callback) {
+            assertCalledByPackageOwner(packageName);
+
+            CallbackRecord record = new CallbackRecord(callback, packageName);
+            record.registerObserver();
+
+            synchronized (mLock) {
+                ArraySet<CallbackRecord> records = mCallbacks.get(packageName);
+                if (records == null) {
+                    records = new ArraySet<>();
+                }
+                records.add(record);
+                mCallbacks.put(packageName, records);
+            }
+
+            // Set options here in case it was updated before this was registered.
+            final int userId = UserHandle.getCallingUserId();
+            final ContentCaptureOptions options = mGlobalContentCaptureOptions.getOptions(userId,
+                    packageName);
+            if (options != null) {
+                record.setContentCaptureOptions(options);
+            }
+        }
+
+        private void unregisterContentCaptureOptionsCallback(CallbackRecord record) {
+            synchronized (mLock) {
+                ArraySet<CallbackRecord> records = mCallbacks.get(record.mPackageName);
+                if (records != null) {
+                    records.remove(record);
+                }
+
+                if (records == null || records.isEmpty()) {
+                    mCallbacks.remove(record.mPackageName);
+                }
+            }
+            record.unregisterObserver();
         }
 
         @Override
@@ -1215,6 +1274,41 @@ public final class ContentCaptureManagerService extends
             String serviceName = mParentService.mServiceNameResolver.getServiceName(userId);
             ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName,
                     mDataShareRequest.getPackageName());
+        }
+    }
+
+    private final class CallbackRecord implements IBinder.DeathRecipient {
+        private final String mPackageName;
+        private final IContentCaptureOptionsCallback mCallback;
+
+        private CallbackRecord(IContentCaptureOptionsCallback callback, String packageName) {
+            mCallback = callback;
+            mPackageName = packageName;
+        }
+
+        private void setContentCaptureOptions(ContentCaptureOptions options) {
+            try {
+                mCallback.setContentCaptureOptions(options);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to send setContentCaptureOptions(): " + e);
+            }
+        }
+
+        private void registerObserver() {
+            try {
+                mCallback.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to register callback cleanup " + e);
+            }
+        }
+
+        private void unregisterObserver() {
+            mCallback.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            mContentCaptureManagerServiceStub.unregisterContentCaptureOptionsCallback(this);
         }
     }
 }
