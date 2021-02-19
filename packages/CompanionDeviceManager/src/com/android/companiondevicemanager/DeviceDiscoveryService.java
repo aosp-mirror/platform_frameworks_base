@@ -309,7 +309,7 @@ public class DeviceDiscoveryService extends Service {
     }
 
     private void onDeviceLost(@Nullable DeviceFilterPair device) {
-        if (DEBUG) Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
+        Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
         Handler.getMain().sendMessage(obtainMessage(
                 DeviceDiscoveryService::onDeviceLostMainThread, this, device));
     }

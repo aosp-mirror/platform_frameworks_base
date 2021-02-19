@@ -552,6 +552,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // mTouchHandler would rely on the bounds populated from mPipTaskOrganizer
         mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation, fromImeAdjustment,
                 fromShelfAdjustment, wct);
+        mPipTaskOrganizer.finishResizeForMenu(outBounds);
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mPipBoundsState.getNormalBounds(),
                 outBounds, fromImeAdjustment, fromShelfAdjustment, rotation);
     }

@@ -30,6 +30,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -158,7 +159,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
         public void onUserSwitching(int newUserId) {
-            scheduleInternalCleanup(newUserId);
+            scheduleInternalCleanup(newUserId, null /* callback */);
         }
     };
 
@@ -437,7 +438,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         Slog.d(TAG, "Fingerprint HAL ready, HAL ID: " + halId);
         if (halId != 0) {
             scheduleLoadAuthenticatorIds();
-            scheduleInternalCleanup(ActivityManager.getCurrentUser());
+            scheduleInternalCleanup(ActivityManager.getCurrentUser(), null /* callback */);
         } else {
             Slog.e(TAG, "Unable to set callback");
             mDaemon = null;
@@ -463,10 +464,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
                 final int targetUserId = user.id;
                 if (!mAuthenticatorIds.containsKey(targetUserId)) {
-                    scheduleUpdateActiveUserWithoutHandler(targetUserId);
+                    scheduleUpdateActiveUserWithoutHandler(targetUserId, true /* force */);
                 }
             }
         });
+    }
+
+    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
+        scheduleUpdateActiveUserWithoutHandler(targetUserId, false /* force */);
     }
 
     /**
@@ -475,14 +480,17 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
      * invocation prior to authenticate/enroll/etc. Thus, internally we usually want to schedule
      * this operation on the same lambda/runnable as those operations so that the ordering is
      * correct.
+     *
+     * @param targetUserId Switch to this user, and update their authenticatorId
+     * @param force Always retrieve the authenticatorId, even if we are already the targetUserId
      */
-    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId) {
+    private void scheduleUpdateActiveUserWithoutHandler(int targetUserId, boolean force) {
         final boolean hasEnrolled =
                 !getEnrolledFingerprints(mSensorProperties.sensorId, targetUserId).isEmpty();
         final FingerprintUpdateActiveUserClient client =
                 new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
                         mContext.getOpPackageName(), mSensorProperties.sensorId, mCurrentUserId,
-                        hasEnrolled, mAuthenticatorIds);
+                        hasEnrolled, mAuthenticatorIds, force);
         mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
@@ -563,7 +571,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                         boolean success) {
                     if (success) {
                         // Update authenticatorIds
-                        scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId());
+                        scheduleUpdateActiveUserWithoutHandler(clientMonitor.getTargetUserId(),
+                                true /* force */);
                     }
                 }
             });
@@ -636,7 +645,25 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         });
     }
 
-    private void scheduleInternalCleanup(int userId) {
+    @Override
+    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token,
+            @NonNull IFingerprintServiceReceiver receiver, int userId,
+            @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            // For IBiometricsFingerprint@2.1, remove(0) means remove all enrollments
+            final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver),
+                    0 /* fingerprintId */, userId, opPackageName,
+                    FingerprintUtils.getLegacyInstance(mSensorId),
+                    mSensorProperties.sensorId, mAuthenticatorIds);
+            mScheduler.scheduleClientMonitor(client);
+        });
+    }
+
+    private void scheduleInternalCleanup(int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -646,13 +673,14 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mContext, mLazyDaemon, userId, mContext.getOpPackageName(),
                     mSensorProperties.sensorId, enrolledList,
                     FingerprintUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
-            mScheduler.scheduleClientMonitor(client);
+            mScheduler.scheduleClientMonitor(client, callback);
         });
     }
 
     @Override
-    public void scheduleInternalCleanup(int sensorId, int userId) {
-        scheduleInternalCleanup(userId);
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
+        scheduleInternalCleanup(userId, callback);
     }
 
     @Override
@@ -832,8 +860,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @NonNull
     @Override
-    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, this,
+    public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName) {
+        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, callback, this,
                 mHalResultController);
     }
 }

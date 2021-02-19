@@ -47,7 +47,8 @@ public class PowerStatsDataStorage {
     private static final long DELETE_AGE_MILLIS = 48 * MILLISECONDS_PER_HOUR;
 
     private final ReentrantLock mLock = new ReentrantLock();
-    private File mDataStorageDir;
+    private final File mDataStorageDir;
+    private final String mDataStorageFilename;
     private final FileRotator mFileRotator;
 
     private static class DataElement {
@@ -168,6 +169,7 @@ public class PowerStatsDataStorage {
     public PowerStatsDataStorage(Context context, File dataStoragePath,
             String dataStorageFilename) {
         mDataStorageDir = dataStoragePath;
+        mDataStorageFilename = dataStorageFilename;
 
         if (!mDataStorageDir.exists() && !mDataStorageDir.mkdirs()) {
             Slog.wtf(TAG, "mDataStorageDir does not exist: " + mDataStorageDir.getPath());
@@ -177,33 +179,35 @@ public class PowerStatsDataStorage {
             // filename, so any files that don't match the current version number can be deleted.
             File[] files = mDataStorageDir.listFiles();
             for (int i = 0; i < files.length; i++) {
-                // Meter and model files are stored in the same directory.
+                // Meter, model, and residency files are stored in the same directory.
                 //
                 // The format of filenames on disk is:
                 //    log.powerstats.meter.version.timestamp
                 //    log.powerstats.model.version.timestamp
+                //    log.powerstats.residency.version.timestamp
                 //
                 // The format of dataStorageFilenames is:
                 //    log.powerstats.meter.version
                 //    log.powerstats.model.version
+                //    log.powerstats.residency.version
                 //
-                // A PowerStatsDataStorage object is created for meter and model data.  Strip off
-                // the version and check that the current file we're checking starts with the stem
-                // (log.powerstats.meter or log.powerstats.model). If the stem matches and the
-                // version number is different, delete the old file.
-                int versionDot = dataStorageFilename.lastIndexOf('.');
-                String beforeVersionDot = dataStorageFilename.substring(0, versionDot);
+                // A PowerStatsDataStorage object is created for meter, model, and residency data.
+                // Strip off the version and check that the current file we're checking starts with
+                // the stem (log.powerstats.meter, log.powerstats.model, log.powerstats.residency).
+                // If the stem matches and the version number is different, delete the old file.
+                int versionDot = mDataStorageFilename.lastIndexOf('.');
+                String beforeVersionDot = mDataStorageFilename.substring(0, versionDot);
                 // Check that the stems match.
                 if (files[i].getName().startsWith(beforeVersionDot)) {
                     // Check that the version number matches.  If not, delete the old file.
-                    if (!files[i].getName().startsWith(dataStorageFilename)) {
+                    if (!files[i].getName().startsWith(mDataStorageFilename)) {
                         files[i].delete();
                     }
                 }
             }
 
             mFileRotator = new FileRotator(mDataStorageDir,
-                                           dataStorageFilename,
+                                           mDataStorageFilename,
                                            ROTATE_AGE_MILLIS,
                                            DELETE_AGE_MILLIS);
         }
@@ -241,5 +245,20 @@ public class PowerStatsDataStorage {
      */
     public void read(DataElementReadCallback callback) throws IOException {
         mFileRotator.readMatching(new DataReader(callback), Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    /**
+     * Deletes all stored log data.
+     */
+    public void deleteLogs() {
+        File[] files = mDataStorageDir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            int versionDot = mDataStorageFilename.lastIndexOf('.');
+            String beforeVersionDot = mDataStorageFilename.substring(0, versionDot);
+            // Check that the stems before the version match.
+            if (files[i].getName().startsWith(beforeVersionDot)) {
+                files[i].delete();
+            }
+        }
     }
 }

@@ -168,8 +168,10 @@ public final class Trace {
     }
 
     /**
-     * Set whether application tracing is allowed for this process.  This is intended to be set
-     * once at application start-up time based on whether the application is debuggable.
+     * From Android S, this is no-op.
+     *
+     * Before, set whether application tracing is allowed for this process.  This is intended to be
+     * set once at application start-up time based on whether the application is debuggable.
      *
      * @hide
      */

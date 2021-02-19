@@ -40,6 +40,8 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.ui.ControlsDialog
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
@@ -53,8 +55,9 @@ class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
     private val listingController: ControlsListingController,
-    broadcastDispatcher: BroadcastDispatcher,
-    private val globalActionsComponent: GlobalActionsComponent
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val globalActionsComponent: GlobalActionsComponent,
+    private val uiController: ControlsUiController
 ) : LifecycleActivity() {
 
     companion object {
@@ -89,6 +92,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var comparator: Comparator<StructureContainer>
     private var cancelLoadRunnable: Runnable? = null
     private var isPagerLoaded = false
+    private var backToGlobalActions = true
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -114,7 +118,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
     override fun onBackPressed() {
         if (!fromProviderSelector) {
-            globalActionsComponent.handleShowGlobalActionsMenu()
+            openControlsOrigin()
         }
         animateExitAndFinish()
     }
@@ -128,6 +132,11 @@ class ControlsFavoritingActivity @Inject constructor(
         structureExtra = intent.getCharSequenceExtra(EXTRA_STRUCTURE)
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
         fromProviderSelector = intent.getBooleanExtra(EXTRA_FROM_PROVIDER_SELECTOR, false)
+
+        backToGlobalActions = intent.getBooleanExtra(
+            ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
+            true
+        )
 
         bindViews()
     }
@@ -330,8 +339,16 @@ class ControlsFavoritingActivity @Inject constructor(
                     )
                 }
                 animateExitAndFinish()
-                globalActionsComponent.handleShowGlobalActionsMenu()
+                openControlsOrigin()
             }
+        }
+    }
+
+    private fun openControlsOrigin() {
+        if (backToGlobalActions) {
+            globalActionsComponent.handleShowGlobalActionsMenu()
+        } else {
+            ControlsDialog(applicationContext, broadcastDispatcher).show(uiController)
         }
     }
 

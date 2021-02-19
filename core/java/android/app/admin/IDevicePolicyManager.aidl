@@ -510,4 +510,6 @@ interface IDevicePolicyManager {
     boolean isUsbDataSignalingEnabled(String callerPackage);
     boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
+
+    List<UserHandle> listForegroundAffiliatedUsers();
 }

@@ -19,7 +19,6 @@ package com.android.systemui.keyguard;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.text.TextUtils;
 import android.view.View;
 
 import androidx.annotation.IntDef;
@@ -105,9 +104,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public void updateIndication(@IndicationType int type, KeyguardIndication newIndication,
             boolean showImmediately) {
         final boolean hasPreviousIndication = mIndicationMessages.get(type) != null;
-        final boolean hasNewIndication = newIndication != null
-                && (!TextUtils.isEmpty(newIndication.getMessage())
-                    || newIndication.getIcon() != null);
+        final boolean hasNewIndication = newIndication != null;
         if (!hasNewIndication) {
             mIndicationMessages.remove(type);
             mIndicationQueue.removeIf(x -> x == type);
@@ -289,8 +286,7 @@ public class KeyguardIndicationRotateTextViewController extends
         if (hasIndications()) {
             pw.println("    All messages:");
             for (int type : mIndicationMessages.keySet()) {
-                pw.println("        type=" + type
-                        + " message=" + mIndicationMessages.get(type).getMessage());
+                pw.println("        type=" + type + " " + mIndicationMessages.get(type));
             }
         }
     }

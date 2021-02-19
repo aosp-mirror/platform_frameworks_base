@@ -2525,7 +2525,9 @@ public final class TvInputManager {
         /**
          * Pauses TV program recording in the current recording session.
          *
-         * @param params A set of extra parameters which might be handled with this event.
+         * @param params Domain-specific data for this request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
          *        {@link TvRecordingClient#pauseRecording(Bundle)}.
          */
         void pauseRecording(@NonNull Bundle params) {
@@ -2543,7 +2545,9 @@ public final class TvInputManager {
         /**
          * Resumes TV program recording in the current recording session.
          *
-         * @param params A set of extra parameters which might be handled with this event.
+         * @param params Domain-specific data for this request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
          *        {@link TvRecordingClient#resumeRecording(Bundle)}.
          */
         void resumeRecording(@NonNull Bundle params) {

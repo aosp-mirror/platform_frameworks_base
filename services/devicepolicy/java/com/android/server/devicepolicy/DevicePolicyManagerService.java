@@ -534,8 +534,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Strings logged with {@link
-     * com.android.internal.logging.nano.MetricsProto.MetricsEvent#PROVISIONING_ENTRY_POINT_ADB}
-     * and {@link DevicePolicyEnums#PROVISIONING_ENTRY_POINT_ADB}.
+     * com.android.internal.logging.nano.MetricsProto.MetricsEvent#PROVISIONING_ENTRY_POINT_ADB},
+     * {@link DevicePolicyEnums#PROVISIONING_ENTRY_POINT_ADB},
+     * {@link DevicePolicyEnums#SET_NETWORK_LOGGING_ENABLED} and
+     * {@link DevicePolicyEnums#RETRIEVE_NETWORK_LOGS}.
      */
     private static final String LOG_TAG_PROFILE_OWNER = "profile-owner";
     private static final String LOG_TAG_DEVICE_OWNER = "device-owner";
@@ -6451,7 +6453,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void forceWipeUser(int userId, String wipeReasonForUser, boolean wipeSilently) {
         boolean success = false;
         try {
-            if (getCurrentForegroundUser() == userId) {
+            if (getCurrentForegroundUserId() == userId) {
                 mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM);
             }
 
@@ -7919,7 +7921,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
 
             if (mInjector.userManagerIsHeadlessSystemUserMode()) {
-                int currentForegroundUser = getCurrentForegroundUser();
+                int currentForegroundUser = getCurrentForegroundUserId();
                 Slog.i(LOG_TAG, "setDeviceOwner(): setting " + admin
                         + " as profile owner on user " + currentForegroundUser);
                 // Sets profile owner on current foreground user since
@@ -9053,13 +9055,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return UserHandle.isSameApp(caller.getUid(), Process.SHELL_UID);
     }
 
-    private @UserIdInt int getCurrentForegroundUser() {
+    private @UserIdInt int getCurrentForegroundUserId() {
         try {
             return mInjector.getIActivityManager().getCurrentUser().id;
         } catch (RemoteException e) {
             Slog.wtf(LOG_TAG, "cannot get current user");
         }
         return UserHandle.USER_NULL;
+    }
+
+    @Override
+    public List<UserHandle> listForegroundAffiliatedUsers() {
+        checkIsDeviceOwner(getCallerIdentity());
+
+        int userId = mInjector.binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId());
+
+        boolean isAffiliated;
+        synchronized (getLockObject()) {
+            isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
+        }
+
+        if (!isAffiliated) return Collections.emptyList();
+
+        List<UserHandle> users = new ArrayList<>(1);
+        users.add(UserHandle.of(userId));
+
+        return users;
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -10074,7 +10095,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userId = user.id;
 
-        // TODO(b/177547285): add CTS test
         if (mInjector.userManagerIsHeadlessSystemUserMode()) {
             ComponentName admin = mOwners.getDeviceOwnerComponent();
             Slog.i(LOG_TAG, "Automatically setting profile owner (" + admin + ") on new user "
@@ -12893,8 +12913,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mOwners.hasProfileOwner(deviceOwnerUserId)) {
             return CODE_USER_HAS_PROFILE_OWNER;
         }
+
+        boolean isHeadlessSystemUserMode = mInjector.userManagerIsHeadlessSystemUserMode();
         // System user is always running in headless system user mode.
-        if (!mInjector.userManagerIsHeadlessSystemUserMode()
+        if (!isHeadlessSystemUserMode
                 && !mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
             return CODE_USER_NOT_RUNNING;
         }
@@ -12902,7 +12924,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return CODE_HAS_PAIRED;
         }
 
-        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+        if (isHeadlessSystemUserMode) {
             if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
                 Slog.e(LOG_TAG, "In headless system user mode, "
                         + "device owner can only be set on headless system user.");
@@ -12914,13 +12936,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
             if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 // In non-headless system user mode, DO can be setup only if
-                // there's no non-system user
-                if (!mInjector.userManagerIsHeadlessSystemUserMode()
-                        && mUserManager.getUserCount() > 1) {
+                // there's no non-system user.
+                // In headless system user mode, DO can be setup only if there are
+                // two users: the headless system user and the foreground user.
+                // If there could be multiple foreground users, this constraint should be modified.
+
+                int maxNumberOfExistingUsers = isHeadlessSystemUserMode ? 2 : 1;
+                if (mUserManager.getUserCount() > maxNumberOfExistingUsers) {
                     return CODE_NONSYSTEM_USER_EXISTS;
                 }
 
-                int currentForegroundUser = getCurrentForegroundUser();
+                int currentForegroundUser = getCurrentForegroundUserId();
                 if (callingUserId != currentForegroundUser
                         && mInjector.userManagerIsHeadlessSystemUserMode()
                         && currentForegroundUser == UserHandle.USER_SYSTEM) {
@@ -13014,6 +13040,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(ident);
         }
         return CODE_OK;
+    }
+
+    private void checkIsDeviceOwner(CallerIdentity caller) {
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller), caller.getUid()
+                + " is not device owner");
     }
 
     private ComponentName getOwnerComponent(String packageName, int userId) {
@@ -14212,9 +14243,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        final boolean isManagedProfileOwner = isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId());
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                && (isDeviceOwner(caller)
-                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
+                && (isDeviceOwner(caller) || isManagedProfileOwner))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
 
         synchronized (getLockObject()) {
@@ -14236,6 +14268,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .setAdmin(caller.getPackageName())
                     .setBoolean(/* isDelegate */ admin == null)
                     .setInt(enabled ? 1 : 0)
+                    .setStrings(isManagedProfileOwner
+                            ? LOG_TAG_PROFILE_OWNER : LOG_TAG_DEVICE_OWNER)
                     .write();
         }
     }
@@ -14392,9 +14426,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        final boolean isManagedProfileOwner = isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId());
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                &&  (isDeviceOwner(caller)
-                || (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))))
+                &&  (isDeviceOwner(caller) || isManagedProfileOwner))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
         if (mOwners.hasDeviceOwner()) {
             checkAllUsersAreAffiliatedWithDevice();
@@ -14408,6 +14443,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .createEvent(DevicePolicyEnums.RETRIEVE_NETWORK_LOGS)
                     .setAdmin(caller.getPackageName())
                     .setBoolean(/* isDelegate */ admin == null)
+                    .setStrings(isManagedProfileOwner
+                            ? LOG_TAG_PROFILE_OWNER : LOG_TAG_DEVICE_OWNER)
                     .write();
 
             final long currentTime = System.currentTimeMillis();
@@ -15506,7 +15543,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean isLockTaskFeatureEnabled(int lockTaskFeature) throws RemoteException {
         //TODO(b/175285301): Explicitly get the user's identity to check.
         int lockTaskFeatures =
-                getUserData(getCurrentForegroundUser()).mLockTaskFeatures;
+                getUserData(getCurrentForegroundUserId()).mLockTaskFeatures;
         return (lockTaskFeatures & lockTaskFeature) == lockTaskFeature;
     }
 
@@ -16755,13 +16792,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
-            return admin == null || admin.mUsbDataSignalingEnabled;
+            return admin != null && admin.mUsbDataSignalingEnabled;
         }
     }
 
     @Override
     public boolean canUsbDataSignalingBeDisabled() {
         return mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3);
+                mInjector.getUsbManager() != null
+                        && mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3
+        );
     }
 }

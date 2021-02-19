@@ -22,6 +22,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
+import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
+import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
 
 import static com.android.server.VcnManagementService.VDBG;
 
@@ -52,7 +55,9 @@ import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
 import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.exceptions.AuthenticationFailedException;
 import android.net.ipsec.ike.exceptions.IkeException;
+import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnTransportInfo;
@@ -418,13 +423,13 @@ public class VcnGatewayConnection extends StateMachine {
     private static final int EVENT_SUBSCRIPTIONS_CHANGED = 9;
 
     /**
-     * Sent when this VcnGatewayConnection has entered Safemode.
+     * Sent when this VcnGatewayConnection has entered safe mode.
      *
-     * <p>A VcnGatewayConnection enters Safemode when it takes over {@link
+     * <p>A VcnGatewayConnection enters safe mode when it takes over {@link
      * #SAFEMODE_TIMEOUT_SECONDS} to enter {@link ConnectedState}.
      *
      * <p>When a VcnGatewayConnection enters safe mode, it will fire {@link
-     * VcnGatewayStatusCallback#onEnteredSafemode()} to notify its Vcn. The Vcn will then shut down
+     * VcnGatewayStatusCallback#onEnteredSafeMode()} to notify its Vcn. The Vcn will then shut down
      * its VcnGatewayConnectin(s).
      *
      * <p>Relevant in DisconnectingState, ConnectingState, ConnectedState (if the Vcn Network is not
@@ -432,7 +437,7 @@ public class VcnGatewayConnection extends StateMachine {
      *
      * @param arg1 The "all" token; this signal is always honored.
      */
-    private static final int EVENT_SAFEMODE_TIMEOUT_EXCEEDED = 10;
+    private static final int EVENT_SAFE_MODE_TIMEOUT_EXCEEDED = 10;
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
@@ -551,7 +556,7 @@ public class VcnGatewayConnection extends StateMachine {
     @Nullable private WakeupMessage mTeardownTimeoutAlarm;
     @Nullable private WakeupMessage mDisconnectRequestAlarm;
     @Nullable private WakeupMessage mRetryTimeoutAlarm;
-    @Nullable private WakeupMessage mSafemodeTimeoutAlarm;
+    @Nullable private WakeupMessage mSafeModeTimeoutAlarm;
 
     public VcnGatewayConnection(
             @NonNull VcnContext vcnContext,
@@ -638,7 +643,7 @@ public class VcnGatewayConnection extends StateMachine {
         cancelTeardownTimeoutAlarm();
         cancelDisconnectRequestAlarm();
         cancelRetryTimeoutAlarm();
-        cancelSafemodeAlarm();
+        cancelSafeModeAlarm();
 
         mUnderlyingNetworkTracker.teardown();
     }
@@ -928,38 +933,91 @@ public class VcnGatewayConnection extends StateMachine {
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void setSafemodeAlarm() {
+    void setSafeModeAlarm() {
         // Only schedule a NEW alarm if none is already set.
-        if (mSafemodeTimeoutAlarm != null) {
+        if (mSafeModeTimeoutAlarm != null) {
             return;
         }
 
-        final Message delayedMessage = obtainMessage(EVENT_SAFEMODE_TIMEOUT_EXCEEDED, TOKEN_ALL);
-        mSafemodeTimeoutAlarm =
+        final Message delayedMessage = obtainMessage(EVENT_SAFE_MODE_TIMEOUT_EXCEEDED, TOKEN_ALL);
+        mSafeModeTimeoutAlarm =
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
                         TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
     }
 
-    private void cancelSafemodeAlarm() {
-        if (mSafemodeTimeoutAlarm != null) {
-            mSafemodeTimeoutAlarm.cancel();
-            mSafemodeTimeoutAlarm = null;
+    private void cancelSafeModeAlarm() {
+        if (mSafeModeTimeoutAlarm != null) {
+            mSafeModeTimeoutAlarm.cancel();
+            mSafeModeTimeoutAlarm = null;
         }
 
-        removeEqualMessages(EVENT_SAFEMODE_TIMEOUT_EXCEEDED);
+        removeEqualMessages(EVENT_SAFE_MODE_TIMEOUT_EXCEEDED);
     }
 
-    private void sessionLost(int token, @Nullable Exception exception) {
+    private void sessionLostWithoutCallback(int token, @Nullable Exception exception) {
         sendMessageAndAcquireWakeLock(
                 EVENT_SESSION_LOST, token, new EventSessionLostInfo(exception));
     }
 
+    private void sessionLost(int token, @Nullable Exception exception) {
+        // Only notify mGatewayStatusCallback if the session was lost with an error. All
+        // authentication and DNS failures are sent through
+        // IkeSessionCallback.onClosedExceptionally(), which calls sessionClosed()
+        if (exception != null) {
+            mGatewayStatusCallback.onGatewayConnectionError(
+                    mConnectionConfig.getRequiredUnderlyingCapabilities(),
+                    VCN_ERROR_CODE_INTERNAL_ERROR,
+                    "java.lang.RuntimeException",
+                    "Received "
+                            + exception.getClass().getSimpleName()
+                            + " with message: "
+                            + exception.getMessage());
+        }
+
+        sessionLostWithoutCallback(token, exception);
+    }
+
+    private void notifyStatusCallbackForSessionClosed(@NonNull Exception exception) {
+        final int errorCode;
+        final String exceptionClass;
+        final String exceptionMessage;
+
+        if (exception instanceof AuthenticationFailedException) {
+            errorCode = VCN_ERROR_CODE_CONFIG_ERROR;
+            exceptionClass = exception.getClass().getName();
+            exceptionMessage = exception.getMessage();
+        } else if (exception instanceof IkeInternalException
+                && exception.getCause() instanceof IOException) {
+            errorCode = VCN_ERROR_CODE_NETWORK_ERROR;
+            exceptionClass = "java.io.IOException";
+            exceptionMessage = exception.getCause().getMessage();
+        } else {
+            errorCode = VCN_ERROR_CODE_INTERNAL_ERROR;
+            exceptionClass = "java.lang.RuntimeException";
+            exceptionMessage =
+                    "Received "
+                            + exception.getClass().getSimpleName()
+                            + " with message: "
+                            + exception.getMessage();
+        }
+
+        mGatewayStatusCallback.onGatewayConnectionError(
+                mConnectionConfig.getRequiredUnderlyingCapabilities(),
+                errorCode,
+                exceptionClass,
+                exceptionMessage);
+    }
+
     private void sessionClosed(int token, @Nullable Exception exception) {
+        if (exception != null) {
+            notifyStatusCallbackForSessionClosed(exception);
+        }
+
         // SESSION_LOST MUST be sent before SESSION_CLOSED to ensure that the SM moves to the
         // Disconnecting state.
-        sessionLost(token, exception);
+        sessionLostWithoutCallback(token, exception);
         sendMessageAndAcquireWakeLock(EVENT_SESSION_CLOSED, token);
     }
 
@@ -1084,6 +1142,8 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         protected void handleDisconnectRequested(String msg) {
+            // TODO(b/180526152): notify VcnStatusCallback for Network loss
+
             Slog.v(TAG, "Tearing down. Cause: " + msg);
             mIsRunning = false;
 
@@ -1125,7 +1185,7 @@ public class VcnGatewayConnection extends StateMachine {
                 Slog.wtf(TAG, "Active IKE Session or NetworkAgent in DisconnectedState");
             }
 
-            cancelSafemodeAlarm();
+            cancelSafeModeAlarm();
         }
 
         @Override
@@ -1153,7 +1213,7 @@ public class VcnGatewayConnection extends StateMachine {
         @Override
         protected void exitState() {
             // Safe to blindly set up, as it is cancelled and cleared on entering this state
-            setSafemodeAlarm();
+            setSafeModeAlarm();
         }
     }
 
@@ -1228,6 +1288,8 @@ public class VcnGatewayConnection extends StateMachine {
 
                     String reason = ((EventDisconnectRequestedInfo) msg.obj).reason;
                     if (reason.equals(DISCONNECT_REASON_UNDERLYING_NETWORK_LOST)) {
+                        // TODO(b/180526152): notify VcnStatusCallback for Network loss
+
                         // Will trigger EVENT_SESSION_CLOSED immediately.
                         mIkeSession.kill();
                         break;
@@ -1245,9 +1307,9 @@ public class VcnGatewayConnection extends StateMachine {
                         transitionTo(mDisconnectedState);
                     }
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1331,9 +1393,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1399,7 +1461,7 @@ public class VcnGatewayConnection extends StateMachine {
 
             // Validated connection, clear failed attempt counter
             mFailedAttempts = 0;
-            cancelSafemodeAlarm();
+            cancelSafeModeAlarm();
         }
 
         protected void applyTransform(
@@ -1517,9 +1579,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1573,9 +1635,8 @@ public class VcnGatewayConnection extends StateMachine {
 
         @Override
         protected void exitState() {
-            // Attempt to set the safe mode alarm - this requires the Vcn Network being validated
-            // while in ConnectedState (which cancels the previous alarm)
-            setSafemodeAlarm();
+            // Will only set a new alarm if no safe mode alarm is currently scheduled.
+            setSafeModeAlarm();
         }
     }
 
@@ -1623,9 +1684,9 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_DISCONNECT_REQUESTED:
                     handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
                     break;
-                case EVENT_SAFEMODE_TIMEOUT_EXCEEDED:
-                    mGatewayStatusCallback.onEnteredSafemode();
-                    mSafemodeTimeoutAlarm = null;
+                case EVENT_SAFE_MODE_TIMEOUT_EXCEEDED:
+                    mGatewayStatusCallback.onEnteredSafeMode();
+                    mSafeModeTimeoutAlarm = null;
                     break;
                 default:
                     logUnhandledMessage(msg);
@@ -1709,8 +1770,6 @@ public class VcnGatewayConnection extends StateMachine {
                                 + " non-null underlying network");
             }
         }
-
-        // TODO: Make a VcnNetworkSpecifier, and match all underlying subscription IDs.
 
         return builder.build();
     }

@@ -110,7 +110,7 @@ public class VcnGatewayConnectionTestBase {
     @NonNull protected final WakeupMessage mTeardownTimeoutAlarm;
     @NonNull protected final WakeupMessage mDisconnectRequestAlarm;
     @NonNull protected final WakeupMessage mRetryTimeoutAlarm;
-    @NonNull protected final WakeupMessage mSafemodeTimeoutAlarm;
+    @NonNull protected final WakeupMessage mSafeModeTimeoutAlarm;
 
     @NonNull protected final IpSecService mIpSecSvc;
     @NonNull protected final ConnectivityManager mConnMgr;
@@ -131,7 +131,7 @@ public class VcnGatewayConnectionTestBase {
         mTeardownTimeoutAlarm = mock(WakeupMessage.class);
         mDisconnectRequestAlarm = mock(WakeupMessage.class);
         mRetryTimeoutAlarm = mock(WakeupMessage.class);
-        mSafemodeTimeoutAlarm = mock(WakeupMessage.class);
+        mSafeModeTimeoutAlarm = mock(WakeupMessage.class);
 
         mIpSecSvc = mock(IpSecService.class);
         setupIpSecManager(mContext, mIpSecSvc);
@@ -154,7 +154,7 @@ public class VcnGatewayConnectionTestBase {
         setUpWakeupMessage(mTeardownTimeoutAlarm, VcnGatewayConnection.TEARDOWN_TIMEOUT_ALARM);
         setUpWakeupMessage(mDisconnectRequestAlarm, VcnGatewayConnection.DISCONNECT_REQUEST_ALARM);
         setUpWakeupMessage(mRetryTimeoutAlarm, VcnGatewayConnection.RETRY_TIMEOUT_ALARM);
-        setUpWakeupMessage(mSafemodeTimeoutAlarm, VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM);
+        setUpWakeupMessage(mSafeModeTimeoutAlarm, VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM);
 
         doReturn(ELAPSED_REAL_TIME).when(mDeps).getElapsedRealTime();
     }
@@ -259,23 +259,23 @@ public class VcnGatewayConnectionTestBase {
                 expectCanceled);
     }
 
-    protected Runnable verifySafemodeTimeoutAlarmAndGetCallback(boolean expectCanceled) {
+    protected Runnable verifySafeModeTimeoutAlarmAndGetCallback(boolean expectCanceled) {
         return verifyWakeupMessageSetUpAndGetCallback(
                 VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM,
-                mSafemodeTimeoutAlarm,
+                mSafeModeTimeoutAlarm,
                 TimeUnit.SECONDS.toMillis(VcnGatewayConnection.SAFEMODE_TIMEOUT_SECONDS),
                 expectCanceled);
     }
 
-    protected void verifySafemodeTimeoutNotifiesCallback(@NonNull State expectedState) {
-        // Safemode timer starts when VcnGatewayConnection exits DisconnectedState (the initial
+    protected void verifySafeModeTimeoutNotifiesCallback(@NonNull State expectedState) {
+        // SafeMode timer starts when VcnGatewayConnection exits DisconnectedState (the initial
         // state)
         final Runnable delayedEvent =
-                verifySafemodeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
+                verifySafeModeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
         delayedEvent.run();
         mTestLooper.dispatchAll();
 
-        verify(mGatewayStatusCallback).onEnteredSafemode();
+        verify(mGatewayStatusCallback).onEnteredSafeMode();
         assertEquals(expectedState, mGatewayConnection.getCurrentState());
     }
 }

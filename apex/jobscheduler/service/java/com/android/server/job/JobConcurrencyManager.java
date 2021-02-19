@@ -20,6 +20,7 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.UserSwitchObserver;
@@ -80,6 +81,8 @@ class JobConcurrencyManager {
     static final int WORK_TYPE_BGUSER = 1 << 3;
     @VisibleForTesting
     static final int NUM_WORK_TYPES = 4;
+    private static final int ALL_WORK_TYPES =
+            WORK_TYPE_TOP | WORK_TYPE_EJ | WORK_TYPE_BG | WORK_TYPE_BGUSER;
 
     @IntDef(prefix = {"WORK_TYPE_"}, flag = true, value = {
             WORK_TYPE_NONE,
@@ -90,6 +93,23 @@ class JobConcurrencyManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WorkType {
+    }
+
+    private static String workTypeToString(@WorkType int workType) {
+        switch (workType) {
+            case WORK_TYPE_NONE:
+                return "NONE";
+            case WORK_TYPE_TOP:
+                return "TOP";
+            case WORK_TYPE_EJ:
+                return "EJ";
+            case WORK_TYPE_BG:
+                return "BG";
+            case WORK_TYPE_BGUSER:
+                return "BGUSER";
+            default:
+                return "WORK(" + workType + ")";
+        }
     }
 
     private final Object mLock;
@@ -182,9 +202,15 @@ class JobConcurrencyManager {
 
     int[] mRecycledWorkTypeForContext = new int[MAX_JOB_CONTEXTS_COUNT];
 
+    String[] mRecycledPreemptReasonForContext = new String[MAX_JOB_CONTEXTS_COUNT];
+
+    String[] mRecycledShouldStopJobReason = new String[MAX_JOB_CONTEXTS_COUNT];
+
     private final ArraySet<JobStatus> mRunningJobs = new ArraySet<>();
 
     private final WorkCountTracker mWorkCountTracker = new WorkCountTracker();
+
+    private WorkTypeConfig mWorkTypeConfig = CONFIG_LIMITS_SCREEN_OFF.normal;
 
     /** Wait for this long after screen off before adjusting the job concurrency. */
     private long mScreenOffAdjustmentDelayMs = DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS;
@@ -353,23 +379,22 @@ class JobConcurrencyManager {
         final WorkConfigLimitsPerMemoryTrimLevel workConfigs = mEffectiveInteractiveState
                 ? CONFIG_LIMITS_SCREEN_ON : CONFIG_LIMITS_SCREEN_OFF;
 
-        WorkTypeConfig workTypeConfig;
         switch (mLastMemoryTrimLevel) {
             case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                workTypeConfig = workConfigs.moderate;
+                mWorkTypeConfig = workConfigs.moderate;
                 break;
             case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                workTypeConfig = workConfigs.low;
+                mWorkTypeConfig = workConfigs.low;
                 break;
             case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                workTypeConfig = workConfigs.critical;
+                mWorkTypeConfig = workConfigs.critical;
                 break;
             default:
-                workTypeConfig = workConfigs.normal;
+                mWorkTypeConfig = workConfigs.normal;
                 break;
         }
 
-        mWorkCountTracker.setConfig(workTypeConfig);
+        mWorkCountTracker.setConfig(mWorkTypeConfig);
     }
 
     /**
@@ -401,13 +426,20 @@ class JobConcurrencyManager {
         boolean[] slotChanged = mRecycledSlotChanged;
         int[] preferredUidForContext = mRecycledPreferredUidForContext;
         int[] workTypeForContext = mRecycledWorkTypeForContext;
+        String[] preemptReasonForContext = mRecycledPreemptReasonForContext;
+        String[] shouldStopJobReason = mRecycledShouldStopJobReason;
 
         updateCounterConfigLocked();
         // Reset everything since we'll re-evaluate the current state.
         mWorkCountTracker.resetCounts();
 
+        // Update the priorities of jobs that aren't running, and also count the pending work types.
+        // Do this before the following loop to hopefully reduce the cost of
+        // shouldStopRunningJobLocked().
+        updateNonRunningPriorities(pendingJobs, true);
+
         for (int i = 0; i < MAX_JOB_CONTEXTS_COUNT; i++) {
-            final JobServiceContext js = mService.mActiveServices.get(i);
+            final JobServiceContext js = activeServices.get(i);
             final JobStatus status = js.getRunningJobLocked();
 
             if ((contextIdToJobMap[i] = status) != null) {
@@ -417,13 +449,12 @@ class JobConcurrencyManager {
 
             slotChanged[i] = false;
             preferredUidForContext[i] = js.getPreferredUid();
+            preemptReasonForContext[i] = null;
+            shouldStopJobReason[i] = shouldStopRunningJobLocked(js);
         }
         if (DEBUG) {
             Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs initial"));
         }
-
-        // Next, update the job priorities, and also count the pending FG / BG jobs.
-        updateNonRunningPriorities(pendingJobs, true);
 
         mWorkCountTracker.onCountDone();
 
@@ -434,8 +465,6 @@ class JobConcurrencyManager {
                 continue;
             }
 
-            // TODO(171305774): make sure HPJs aren't pre-empted and add dedicated contexts for them
-
             // Find an available slot for nextPending. The context should be available OR
             // it should have lowest priority among all running jobs
             // (sharing the same Uid as nextPending)
@@ -444,6 +473,9 @@ class JobConcurrencyManager {
             int allWorkTypes = getJobWorkTypes(nextPending);
             int workType = mWorkCountTracker.canJobStart(allWorkTypes);
             boolean startingJob = false;
+            String preemptReason = null;
+            // TODO(141645789): rewrite this to look at empty contexts first so we don't
+            // unnecessarily preempt
             for (int j = 0; j < MAX_JOB_CONTEXTS_COUNT; j++) {
                 JobStatus job = contextIdToJobMap[j];
                 int preferredUid = preferredUidForContext[j];
@@ -464,6 +496,15 @@ class JobConcurrencyManager {
                     continue;
                 }
                 if (job.getUid() != nextPending.getUid()) {
+                    // Maybe stop the job if it has had its day in the sun.
+                    final String reason = shouldStopJobReason[j];
+                    if (reason != null && mWorkCountTracker.canJobStart(allWorkTypes,
+                            activeServices.get(j).getRunningJobWorkType()) != WORK_TYPE_NONE) {
+                        // Right now, the way the code is set up, we don't need to explicitly
+                        // assign the new job to this context since we'll reassign when the
+                        // preempted job finally stops.
+                        preemptReason = reason;
+                    }
                     continue;
                 }
 
@@ -477,6 +518,7 @@ class JobConcurrencyManager {
                     // the lowest-priority running job
                     minPriorityForPreemption = jobPriority;
                     selectedContextId = j;
+                    preemptReason = "higher priority job found";
                     // In this case, we're just going to preempt a low priority job, we're not
                     // actually starting a job, so don't set startingJob.
                 }
@@ -484,6 +526,7 @@ class JobConcurrencyManager {
             if (selectedContextId != -1) {
                 contextIdToJobMap[selectedContextId] = nextPending;
                 slotChanged[selectedContextId] = true;
+                preemptReasonForContext[selectedContextId] = preemptReason;
             }
             if (startingJob) {
                 // Increase the counters when we're going to start a job.
@@ -509,7 +552,7 @@ class JobConcurrencyManager {
                                 + activeServices.get(i).getRunningJobLocked());
                     }
                     // preferredUid will be set to uid of currently running job.
-                    activeServices.get(i).preemptExecutingJobLocked();
+                    activeServices.get(i).preemptExecutingJobLocked(preemptReasonForContext[i]);
                     preservePreferredUid = true;
                 } else {
                     final JobStatus pendingJob = contextIdToJobMap[i];
@@ -692,6 +735,91 @@ class JobConcurrencyManager {
         noteConcurrency();
     }
 
+    /**
+     * Returns {@code null} if the job can continue running and a non-null String if the job should
+     * be stopped. The non-null String details the reason for stopping the job. A job will generally
+     * be stopped if there similar job types waiting to be run and stopping this job would allow
+     * another job to run, or if system state suggests the job should stop.
+     */
+    @Nullable
+    String shouldStopRunningJobLocked(@NonNull JobServiceContext context) {
+        final JobStatus js = context.getRunningJobLocked();
+        if (js == null) {
+            // This can happen when we try to assign newly found pending jobs to contexts.
+            return null;
+        }
+
+        if (context.isWithinExecutionGuaranteeTime()) {
+            return null;
+        }
+
+        // Update config in case memory usage has changed significantly.
+        updateCounterConfigLocked();
+
+        @WorkType final int workType = context.getRunningJobWorkType();
+
+        // We're over the minimum guaranteed runtime. Stop the job if we're over config limits or
+        // there are pending jobs that could replace this one.
+        if (mRunningJobs.size() > mWorkTypeConfig.getMaxTotal()
+                || mWorkCountTracker.isOverTypeLimit(workType)) {
+            return "too many jobs running";
+        }
+
+        final List<JobStatus> pendingJobs = mService.mPendingJobs;
+        final int numPending = pendingJobs.size();
+        if (numPending == 0) {
+            // All quiet. We can let this job run to completion.
+            return null;
+        }
+
+        // Only expedited jobs can replace expedited jobs.
+        if (js.shouldTreatAsExpeditedJob()) {
+            // Keep fg/bg user distinction.
+            if (workType == WORK_TYPE_BGUSER) {
+                // For now, let any bg user job replace a bg user expedited job.
+                // TODO: limit to ej once we have dedicated bg user ej slots.
+                if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_BGUSER) > 0) {
+                    return "blocking " + workTypeToString(workType) + " queue";
+                }
+            } else {
+                if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0) {
+                    return "blocking " + workTypeToString(workType) + " queue";
+                }
+            }
+
+            if (mPowerManager.isPowerSaveMode()) {
+                return "battery saver";
+            }
+            if (mPowerManager.isDeviceIdleMode()) {
+                return "deep doze";
+            }
+        }
+
+        // Easy check. If there are pending jobs of the same work type, then we know that
+        // something will replace this.
+        if (mWorkCountTracker.getPendingJobCount(workType) > 0) {
+            return "blocking " + workTypeToString(workType) + " queue";
+        }
+
+        // Harder check. We need to see if a different work type can replace this job.
+        int remainingWorkTypes = ALL_WORK_TYPES;
+        for (int i = 0; i < numPending; ++i) {
+            final JobStatus pending = pendingJobs.get(i);
+            final int workTypes = getJobWorkTypes(pending);
+            if ((workTypes & remainingWorkTypes) > 0
+                    && mWorkCountTracker.canJobStart(workTypes, workType) != WORK_TYPE_NONE) {
+                return "blocking other pending jobs";
+            }
+
+            remainingWorkTypes = remainingWorkTypes & ~workTypes;
+            if (remainingWorkTypes == 0) {
+                break;
+            }
+        }
+
+        return null;
+    }
+
     @GuardedBy("mLock")
     private String printPendingQueueLocked() {
         StringBuilder s = new StringBuilder("Pending queue: ");
@@ -741,17 +869,26 @@ class JobConcurrencyManager {
 
         pw.increaseIndent();
         try {
-            pw.print("Configuration:");
+            pw.println("Configuration:");
             pw.increaseIndent();
             pw.print(KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, mScreenOffAdjustmentDelayMs).println();
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.normal.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.moderate.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.low.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_ON.critical.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.normal.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.moderate.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.low.dump(pw);
+            pw.println();
             CONFIG_LIMITS_SCREEN_OFF.critical.dump(pw);
+            pw.println();
             pw.decreaseIndent();
 
             pw.print("Screen state: current ");
@@ -770,18 +907,17 @@ class JobConcurrencyManager {
 
             pw.println();
 
-            pw.println("Current max jobs:");
-            pw.println("  ");
+            pw.print("Current work counts: ");
             pw.println(mWorkCountTracker);
 
             pw.println();
 
             pw.print("mLastMemoryTrimLevel: ");
-            pw.print(mLastMemoryTrimLevel);
+            pw.println(mLastMemoryTrimLevel);
             pw.println();
 
             pw.print("User Grace Period: ");
-            pw.print(mGracePeriodObserver.mGracePeriodExpiration);
+            pw.println(mGracePeriodObserver.mGracePeriodExpiration);
             pw.println();
 
             mStatLogger.dump(pw);
@@ -1354,8 +1490,38 @@ class JobConcurrencyManager {
             return WORK_TYPE_NONE;
         }
 
+        int canJobStart(int workTypes, @WorkType int replacingWorkType) {
+            final boolean changedNums;
+            int oldNumRunning = mNumRunningJobs.get(replacingWorkType);
+            if (replacingWorkType != WORK_TYPE_NONE && oldNumRunning > 0) {
+                mNumRunningJobs.put(replacingWorkType, oldNumRunning - 1);
+                // Lazy implementation to avoid lots of processing. Best way would be to go
+                // through the whole process of adjusting reservations, but the processing cost
+                // is likely not worth it.
+                mNumUnspecializedRemaining++;
+                changedNums = true;
+            } else {
+                changedNums = false;
+            }
+
+            final int ret = canJobStart(workTypes);
+            if (changedNums) {
+                mNumRunningJobs.put(replacingWorkType, oldNumRunning);
+                mNumUnspecializedRemaining--;
+            }
+            return ret;
+        }
+
+        int getPendingJobCount(@WorkType final int workType) {
+            return mNumPendingJobs.get(workType, 0);
+        }
+
         int getRunningJobCount(@WorkType final int workType) {
             return mNumRunningJobs.get(workType, 0);
+        }
+
+        boolean isOverTypeLimit(@WorkType final int workType) {
+            return getRunningJobCount(workType) > mConfigAbsoluteMaxSlots.get(workType);
         }
 
         public String toString() {

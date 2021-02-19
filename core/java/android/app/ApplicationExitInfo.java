@@ -428,6 +428,13 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     private IAppTraceRetriever mAppTraceRetriever;
 
+    /**
+     * ParcelFileDescriptor pointing to a native tombstone.
+     *
+     * @see #getTraceInputStream
+     */
+    private IParcelFileDescriptorRetriever mNativeTombstoneRetriever;
+
     /** @hide */
     @IntDef(prefix = { "REASON_" }, value = {
         REASON_UNKNOWN,
@@ -603,22 +610,38 @@ public final class ApplicationExitInfo implements Parcelable {
      * prior to the death of the process; typically it'll be available when
      * the reason is {@link #REASON_ANR}, though if the process gets an ANR
      * but recovers, and dies for another reason later, this trace will be included
-     * in the record of {@link ApplicationExitInfo} still.
+     * in the record of {@link ApplicationExitInfo} still. Beginning with API 31,
+     * tombstone traces will be returned for
+     * {@link #REASON_CRASH_NATIVE}, with an InputStream containing a protobuf with
+     * <a href="https://android.googlesource.com/platform/system/core/+/refs/heads/master/debuggerd/proto/tombstone.proto">this schema</a>.
+     * Note thatbecause these traces are kept in a separate global circular buffer, crashes may be
+     * overwritten by newer crashes (including from other applications), so this may still return
+     * null.
      *
      * @return The input stream to the traces that was taken by the system
      *         prior to the death of the process.
      */
     public @Nullable InputStream getTraceInputStream() throws IOException {
-        if (mAppTraceRetriever == null) {
+        if (mAppTraceRetriever == null && mNativeTombstoneRetriever == null) {
             return null;
         }
+
         try {
-            final ParcelFileDescriptor fd = mAppTraceRetriever.getTraceFileDescriptor(
-                    mPackageName, mPackageUid, mPid);
-            if (fd == null) {
-                return null;
+            if (mNativeTombstoneRetriever != null) {
+                final ParcelFileDescriptor pfd = mNativeTombstoneRetriever.getPfd();
+                if (pfd == null) {
+                    return null;
+                }
+
+                return new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+            } else {
+                final ParcelFileDescriptor fd = mAppTraceRetriever.getTraceFileDescriptor(
+                        mPackageName, mPackageUid, mPid);
+                if (fd == null) {
+                    return null;
+                }
+                return new GZIPInputStream(new ParcelFileDescriptor.AutoCloseInputStream(fd));
             }
-            return new GZIPInputStream(new ParcelFileDescriptor.AutoCloseInputStream(fd));
         } catch (RemoteException e) {
             return null;
         }
@@ -849,6 +872,15 @@ public final class ApplicationExitInfo implements Parcelable {
         mAppTraceRetriever = retriever;
     }
 
+    /**
+     * @see mNativeTombstoneRetriever
+     *
+     * @hide
+     */
+    public void setNativeTombstoneRetriever(final IParcelFileDescriptorRetriever retriever) {
+        mNativeTombstoneRetriever = retriever;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -875,6 +907,12 @@ public final class ApplicationExitInfo implements Parcelable {
         if (mAppTraceRetriever != null) {
             dest.writeInt(1);
             dest.writeStrongBinder(mAppTraceRetriever.asBinder());
+        } else {
+            dest.writeInt(0);
+        }
+        if (mNativeTombstoneRetriever != null) {
+            dest.writeInt(1);
+            dest.writeStrongBinder(mNativeTombstoneRetriever.asBinder());
         } else {
             dest.writeInt(0);
         }
@@ -906,6 +944,7 @@ public final class ApplicationExitInfo implements Parcelable {
         mState = other.mState;
         mTraceFile = other.mTraceFile;
         mAppTraceRetriever = other.mAppTraceRetriever;
+        mNativeTombstoneRetriever = other.mNativeTombstoneRetriever;
     }
 
     private ApplicationExitInfo(@NonNull Parcel in) {
@@ -927,6 +966,10 @@ public final class ApplicationExitInfo implements Parcelable {
         mState = in.createByteArray();
         if (in.readInt() == 1) {
             mAppTraceRetriever = IAppTraceRetriever.Stub.asInterface(in.readStrongBinder());
+        }
+        if (in.readInt() == 1) {
+            mNativeTombstoneRetriever = IParcelFileDescriptorRetriever.Stub.asInterface(
+                    in.readStrongBinder());
         }
     }
 
@@ -986,6 +1029,7 @@ public final class ApplicationExitInfo implements Parcelable {
         sb.append(" state=").append(ArrayUtils.isEmpty(mState)
                 ? "empty" : Integer.toString(mState.length) + " bytes");
         sb.append(" trace=").append(mTraceFile);
+
         return sb.toString();
     }
 

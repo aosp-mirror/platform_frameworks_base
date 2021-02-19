@@ -4601,8 +4601,9 @@ public class CarrierConfigManager {
             "mmi_two_digit_number_pattern_string_array";
 
     /**
-     * Holds the list of carrier certificate hashes.
-     * Note that each carrier has its own certificates.
+     * Holds the list of carrier certificate hashes, followed by optional package names.
+     * Format: "sha1/256" or "sha1/256:package1,package2,package3..."
+     * Note that each carrier has its own hashes.
      */
     public static final String KEY_CARRIER_CERTIFICATE_STRING_ARRAY =
             "carrier_certificate_string_array";
@@ -4762,6 +4763,14 @@ public class CarrierConfigManager {
      */
     public static final String KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL =
             "store_sim_pin_for_unattended_reboot_bool";
+
+     /**
+     * Determine whether "Enable 2G" toggle can be shown.
+     *
+     * Used to trade privacy/security against potentially reduced carrier coverage for some
+     * carriers.
+     */
+    public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -5320,6 +5329,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
+        sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
     }
 
     /**

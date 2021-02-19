@@ -41,7 +41,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.security.FileIntegrityService;
 import com.android.server.security.VerityUtils;
 
 import java.io.File;
@@ -226,7 +225,7 @@ public final class FontManagerService extends IFontManager.Stub {
     @Nullable
     private static UpdatableFontDir createUpdatableFontDir() {
         // If apk verity is supported, fs-verity should be available.
-        if (!FileIntegrityService.isApkVeritySupported()) return null;
+        if (!VerityUtils.isFsVeritySupported()) return null;
         return new UpdatableFontDir(new File(FONT_FILES_DIR),
                 Arrays.asList(new File(SystemFonts.SYSTEM_FONT_DIR),
                         new File(SystemFonts.OEM_FONT_DIR)),

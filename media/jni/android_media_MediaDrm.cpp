@@ -2056,7 +2056,7 @@ static const JNINativeMethod gMethods[] = {
     { "closeSessionNative", "([B)V",
       (void *)android_media_MediaDrm_closeSession },
 
-    { "getKeyRequest", "([B[BLjava/lang/String;ILjava/util/HashMap;)"
+    { "getKeyRequestNative", "([B[BLjava/lang/String;ILjava/util/HashMap;)"
       "Landroid/media/MediaDrm$KeyRequest;",
       (void *)android_media_MediaDrm_getKeyRequest },
 

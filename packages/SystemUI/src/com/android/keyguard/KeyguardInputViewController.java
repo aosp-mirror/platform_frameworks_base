@@ -42,7 +42,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     private final SecurityMode mSecurityMode;
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
     private final EmergencyButton mEmergencyButton;
-    private final EmergencyButtonController mEmergencyButtonController;
     private boolean mPaused;
 
 
@@ -70,18 +69,11 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     };
 
     protected KeyguardInputViewController(T view, SecurityMode securityMode,
-            KeyguardSecurityCallback keyguardSecurityCallback,
-            EmergencyButtonController emergencyButtonController) {
+            KeyguardSecurityCallback keyguardSecurityCallback) {
         super(view);
         mSecurityMode = securityMode;
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mEmergencyButton = view == null ? null : view.findViewById(R.id.emergency_call_button);
-        mEmergencyButtonController = emergencyButtonController;
-    }
-
-    @Override
-    protected void onInit() {
-        mEmergencyButtonController.init();
     }
 
     @Override
@@ -163,9 +155,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final InputMethodManager mInputMethodManager;
         private final DelayableExecutor mMainExecutor;
         private final Resources mResources;
-        private final LiftToActivateListener mLiftToActivateListener;
-        private final TelephonyManager mTelephonyManager;
-        private final EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
+        private LiftToActivateListener mLiftToActivateListener;
+        private TelephonyManager mTelephonyManager;
         private final FalsingCollector mFalsingCollector;
         private final boolean mIsNewLayoutEnabled;
 
@@ -177,7 +168,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 InputMethodManager inputMethodManager, @Main DelayableExecutor mainExecutor,
                 @Main Resources resources, LiftToActivateListener liftToActivateListener,
                 TelephonyManager telephonyManager,
-                EmergencyButtonController.Factory emergencyButtonControllerFactory,
                 FalsingCollector falsingCollector,
                 FeatureFlags featureFlags) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -189,7 +179,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mResources = resources;
             mLiftToActivateListener = liftToActivateListener;
             mTelephonyManager = telephonyManager;
-            mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
             mFalsingCollector = falsingCollector;
             mIsNewLayoutEnabled = featureFlags.isKeyguardLayoutEnabled();
         }
@@ -197,40 +186,31 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         /** Create a new {@link KeyguardInputViewController}. */
         public KeyguardInputViewController create(KeyguardInputView keyguardInputView,
                 SecurityMode securityMode, KeyguardSecurityCallback keyguardSecurityCallback) {
-            EmergencyButtonController emergencyButtonController =
-                    mEmergencyButtonControllerFactory.create(
-                            keyguardInputView.findViewById(R.id.emergency_call_button));
-
             if (keyguardInputView instanceof KeyguardPatternView) {
                 return new KeyguardPatternViewController((KeyguardPatternView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
-                        keyguardSecurityCallback, mLatencyTracker,
-                        emergencyButtonController,
-                        mMessageAreaControllerFactory);
+                        keyguardSecurityCallback, mLatencyTracker, mMessageAreaControllerFactory);
             } else if (keyguardInputView instanceof KeyguardPasswordView) {
                 return new KeyguardPasswordViewController((KeyguardPasswordView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mInputMethodManager, emergencyButtonController, mMainExecutor, mResources);
+                        mInputMethodManager, mMainExecutor, mResources);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
-                        mIsNewLayoutEnabled);
+                        mLiftToActivateListener, mFalsingCollector, mIsNewLayoutEnabled);
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager,
-                        emergencyButtonController,
                         mFalsingCollector, mIsNewLayoutEnabled);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager,
-                        emergencyButtonController,
                         mFalsingCollector, mIsNewLayoutEnabled);
             }
 

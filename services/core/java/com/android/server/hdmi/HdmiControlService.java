@@ -774,8 +774,14 @@ public class HdmiControlService extends SystemService {
 
     private void initializeCec(int initiatedBy) {
         mAddressAllocated = false;
-        mCecVersion = getHdmiCecConfig().getIntValue(
+        int settingsCecVersion = getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION);
+        int supportedCecVersion = mCecController.getVersion();
+
+        // Limit the used CEC version to the highest supported version by HAL and selected
+        // version in settings (but at least v1.4b).
+        mCecVersion = Math.max(HdmiControlManager.HDMI_CEC_VERSION_1_4_B,
+                Math.min(settingsCecVersion, supportedCecVersion));
 
         mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, true);
         mCecController.setLanguage(mMenuLanguage);
@@ -2184,6 +2190,7 @@ public class HdmiControlService extends SystemService {
 
             pw.println("mProhibitMode: " + mProhibitMode);
             pw.println("mPowerStatus: " + mPowerStatusController.getPowerStatus());
+            pw.println("mCecVersion: " + mCecVersion);
 
             // System settings
             pw.println("System_settings:");

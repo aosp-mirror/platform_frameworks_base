@@ -26,6 +26,7 @@ import android.hardware.power.stats.StateResidencyResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -41,14 +42,17 @@ import com.android.server.powerstats.ProtoStreamUtils.StateResidencyResultUtils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
- * PowerStatsLogger is responsible for logging model and meter energy data to on-device storage.
- * Messages are sent to its message handler to request that energy data be logged, at which time it
- * queries the PowerStats HAL and logs the data to on-device storage.  The on-device storage is
- * dumped to file by calling writeModelDataToFile, writeMeterDataToFile, or writeResidencyDataToFile
- * with a file descriptor that points to the output file.
+ * PowerStatsLogger is responsible for logging model, meter, and residency data to on-device
+ * storage.  Messages are sent to its message handler to request that energy data be logged, at
+ * which time it queries the PowerStats HAL and logs the data to on-device storage.  The on-device
+ * storage is dumped to file by calling writeModelDataToFile, writeMeterDataToFile, or
+ * writeResidencyDataToFile with a file descriptor that points to the output file.
  */
 public final class PowerStatsLogger extends Handler {
     private static final String TAG = PowerStatsLogger.class.getSimpleName();
@@ -61,6 +65,10 @@ public final class PowerStatsLogger extends Handler {
     private final PowerStatsDataStorage mPowerStatsModelStorage;
     private final PowerStatsDataStorage mPowerStatsResidencyStorage;
     private final IPowerStatsHALWrapper mPowerStatsHALWrapper;
+    private File mDataStoragePath;
+    private boolean mDeleteMeterDataOnBoot;
+    private boolean mDeleteModelDataOnBoot;
+    private boolean mDeleteResidencyDataOnBoot;
 
     @Override
     public void handleMessage(Message msg) {
@@ -230,16 +238,99 @@ public final class PowerStatsLogger extends Handler {
         pos.flush();
     }
 
-    public PowerStatsLogger(Context context, File dataStoragePath, String meterFilename,
-            String modelFilename, String residencyFilename,
+    private boolean dataChanged(String cachedFilename, byte[] dataCurrent) {
+        boolean dataChanged = false;
+
+        if (mDataStoragePath.exists() || mDataStoragePath.mkdirs()) {
+            final File cachedFile = new File(mDataStoragePath, cachedFilename);
+
+            if (cachedFile.exists()) {
+                // Get the byte array for the cached data.
+                final byte[] dataCached = new byte[(int) cachedFile.length()];
+
+                // Get the cached data from file.
+                try {
+                    final FileInputStream fis = new FileInputStream(cachedFile.getPath());
+                    fis.read(dataCached);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to read cached data from file");
+                }
+
+                // If the cached and current data are different, delete the data store.
+                dataChanged = !Arrays.equals(dataCached, dataCurrent);
+            } else {
+                // Either the cached file was somehow deleted, or this is the first
+                // boot of the device and we're creating the file for the first time.
+                // In either case, delete the log files.
+                dataChanged = true;
+            }
+        }
+
+        return dataChanged;
+    }
+
+    private void updateCacheFile(String cacheFilename, byte[] data) {
+        try {
+            final AtomicFile atomicCachedFile =
+                    new AtomicFile(new File(mDataStoragePath, cacheFilename));
+            final FileOutputStream fos = atomicCachedFile.startWrite();
+            fos.write(data);
+            atomicCachedFile.finishWrite(fos);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write current data to cached file");
+        }
+    }
+
+    public boolean getDeleteMeterDataOnBoot() {
+        return mDeleteMeterDataOnBoot;
+    }
+
+    public boolean getDeleteModelDataOnBoot() {
+        return mDeleteModelDataOnBoot;
+    }
+
+    public boolean getDeleteResidencyDataOnBoot() {
+        return mDeleteResidencyDataOnBoot;
+    }
+
+    public PowerStatsLogger(Context context, File dataStoragePath,
+            String meterFilename, String meterCacheFilename,
+            String modelFilename, String modelCacheFilename,
+            String residencyFilename, String residencyCacheFilename,
             IPowerStatsHALWrapper powerStatsHALWrapper) {
         super(Looper.getMainLooper());
         mPowerStatsHALWrapper = powerStatsHALWrapper;
-        mPowerStatsMeterStorage = new PowerStatsDataStorage(context, dataStoragePath,
+        mDataStoragePath = dataStoragePath;
+
+        mPowerStatsMeterStorage = new PowerStatsDataStorage(context, mDataStoragePath,
             meterFilename);
-        mPowerStatsModelStorage = new PowerStatsDataStorage(context, dataStoragePath,
+        mPowerStatsModelStorage = new PowerStatsDataStorage(context, mDataStoragePath,
             modelFilename);
-        mPowerStatsResidencyStorage = new PowerStatsDataStorage(context, dataStoragePath,
+        mPowerStatsResidencyStorage = new PowerStatsDataStorage(context, mDataStoragePath,
             residencyFilename);
+
+        final Channel[] channels = mPowerStatsHALWrapper.getEnergyMeterInfo();
+        final byte[] channelBytes = ChannelUtils.getProtoBytes(channels);
+        mDeleteMeterDataOnBoot = dataChanged(meterCacheFilename, channelBytes);
+        if (mDeleteMeterDataOnBoot) {
+            mPowerStatsMeterStorage.deleteLogs();
+            updateCacheFile(meterCacheFilename, channelBytes);
+        }
+
+        final EnergyConsumer[] energyConsumers = mPowerStatsHALWrapper.getEnergyConsumerInfo();
+        final byte[] energyConsumerBytes = EnergyConsumerUtils.getProtoBytes(energyConsumers);
+        mDeleteModelDataOnBoot = dataChanged(modelCacheFilename, energyConsumerBytes);
+        if (mDeleteModelDataOnBoot) {
+            mPowerStatsModelStorage.deleteLogs();
+            updateCacheFile(modelCacheFilename, energyConsumerBytes);
+        }
+
+        final PowerEntity[] powerEntities = mPowerStatsHALWrapper.getPowerEntityInfo();
+        final byte[] powerEntityBytes = PowerEntityUtils.getProtoBytes(powerEntities);
+        mDeleteResidencyDataOnBoot = dataChanged(residencyCacheFilename, powerEntityBytes);
+        if (mDeleteResidencyDataOnBoot) {
+            mPowerStatsResidencyStorage.deleteLogs();
+            updateCacheFile(residencyCacheFilename, powerEntityBytes);
+        }
     }
 }
