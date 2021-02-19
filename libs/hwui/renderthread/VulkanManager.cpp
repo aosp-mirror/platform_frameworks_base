@@ -31,6 +31,7 @@
 
 #include "Properties.h"
 #include "RenderThread.h"
+#include "pipeline/skia/ShaderCache.h"
 #include "renderstate/RenderState.h"
 #include "utils/TraceUtils.h"
 
@@ -476,17 +477,10 @@ static void destroy_semaphore(void* context) {
     }
 }
 
-void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect) {
-    if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
-        ATRACE_NAME("Finishing GPU work");
-        mDeviceWaitIdle(mDevice);
-    }
-
-    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
-    if (!bufferInfo) {
-        // If VulkanSurface::dequeueNativeBuffer failed earlier, then swapBuffers is a no-op.
-        return;
-    }
+void VulkanManager::finishFrame(SkSurface* surface) {
+    ATRACE_NAME("Vulkan finish frame");
+    ALOGE_IF(mSwapSemaphore != VK_NULL_HANDLE || mDestroySemaphoreContext != nullptr,
+             "finishFrame already has an outstanding semaphore");
 
     VkExportSemaphoreCreateInfo exportInfo;
     exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
@@ -499,32 +493,52 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
     semaphoreInfo.flags = 0;
     VkSemaphore semaphore;
     VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
-    ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to create semaphore");
+    ALOGE_IF(VK_SUCCESS != err, "VulkanManager::makeSwapSemaphore(): Failed to create semaphore");
 
     GrBackendSemaphore backendSemaphore;
     backendSemaphore.initVulkan(semaphore);
 
-    int fenceFd = -1;
-    DestroySemaphoreInfo* destroyInfo =
-            new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
     GrFlushInfo flushInfo;
-    flushInfo.fNumSemaphores = 1;
-    flushInfo.fSignalSemaphores = &backendSemaphore;
-    flushInfo.fFinishedProc = destroy_semaphore;
-    flushInfo.fFinishedContext = destroyInfo;
-    GrSemaphoresSubmitted submitted = bufferInfo->skSurface->flush(
-            SkSurface::BackendSurfaceAccess::kPresent, flushInfo);
-    GrDirectContext* context = GrAsDirectContext(bufferInfo->skSurface->recordingContext());
+    if (err == VK_SUCCESS) {
+        mDestroySemaphoreContext = new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
+        flushInfo.fNumSemaphores = 1;
+        flushInfo.fSignalSemaphores = &backendSemaphore;
+        flushInfo.fFinishedProc = destroy_semaphore;
+        flushInfo.fFinishedContext = mDestroySemaphoreContext;
+    } else {
+        semaphore = VK_NULL_HANDLE;
+    }
+    GrSemaphoresSubmitted submitted =
+            surface->flush(SkSurface::BackendSurfaceAccess::kPresent, flushInfo);
+    GrDirectContext* context = GrAsDirectContext(surface->recordingContext());
     ALOGE_IF(!context, "Surface is not backed by gpu");
     context->submit();
-    if (submitted == GrSemaphoresSubmitted::kYes) {
+    if (semaphore != VK_NULL_HANDLE) {
+        if (submitted == GrSemaphoresSubmitted::kYes) {
+            mSwapSemaphore = semaphore;
+        } else {
+            destroy_semaphore(mDestroySemaphoreContext);
+            mDestroySemaphoreContext = nullptr;
+        }
+    }
+    skiapipeline::ShaderCache::get().onVkFrameFlushed(context);
+}
+
+void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect) {
+    if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
+        ATRACE_NAME("Finishing GPU work");
+        mDeviceWaitIdle(mDevice);
+    }
+
+    int fenceFd = -1;
+    if (mSwapSemaphore != VK_NULL_HANDLE) {
         VkSemaphoreGetFdInfoKHR getFdInfo;
         getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
         getFdInfo.pNext = nullptr;
-        getFdInfo.semaphore = semaphore;
+        getFdInfo.semaphore = mSwapSemaphore;
         getFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
 
-        err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
+        VkResult err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
         ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
     } else {
         ALOGE("VulkanManager::swapBuffers(): Semaphore submission failed");
@@ -532,9 +546,11 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         std::lock_guard<std::mutex> lock(mGraphicsQueueMutex);
         mQueueWaitIdle(mGraphicsQueue);
     }
-    destroy_semaphore(destroyInfo);
+    destroy_semaphore(mDestroySemaphoreContext);
 
     surface->presentCurrentBuffer(dirtyRect, fenceFd);
+    mSwapSemaphore = VK_NULL_HANDLE;
+    mDestroySemaphoreContext = nullptr;
 }
 
 void VulkanManager::destroySurface(VulkanSurface* surface) {
