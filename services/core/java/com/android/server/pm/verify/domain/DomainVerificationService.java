@@ -1210,7 +1210,8 @@ public class DomainVerificationService extends SystemService
 
         // Filter to highest, non-zero packages
         ArraySet<String> approvedPackages = new ArraySet<>();
-        for (int index = 0; index < infosSize; index++) {
+        int approvalsSize = packageApprovals.size();
+        for (int index = 0; index < approvalsSize; index++) {
             if (packageApprovals.valueAt(index) == highestApproval) {
                 approvedPackages.add(packageApprovals.keyAt(index));
             }

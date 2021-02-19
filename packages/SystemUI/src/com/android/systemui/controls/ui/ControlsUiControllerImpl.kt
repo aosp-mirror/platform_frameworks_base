@@ -266,6 +266,10 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun startActivity(context: Context, intent: Intent) {
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+        intent.putExtra(
+            ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
+            controlActionCoordinator.startedFromGlobalActions
+        )
         onDismiss.run()
 
         activityStarter.dismissKeyguardThenExecute({

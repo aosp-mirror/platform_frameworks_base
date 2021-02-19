@@ -3993,6 +3993,30 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testGetSetNetworkSlicing() throws Exception {
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setNetworkSlicingEnabled(false));
+
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.isNetworkSlicingEnabled());
+
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.isNetworkSlicingEnabledForUser(UserHandle.of(CALLER_USER_HANDLE)));
+
+        mContext.callerPermissions.add(permission.READ_NETWORK_DEVICE_CONFIG);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+        try {
+            dpm.isNetworkSlicingEnabledForUser(UserHandle.of(CALLER_USER_HANDLE));
+        } catch (SecurityException se) {
+            fail("Threw SecurityException with right permission");
+        }
+
+        setupProfileOwner();
+        dpm.setNetworkSlicingEnabled(false);
+        assertThat(dpm.isNetworkSlicingEnabled()).isFalse();
+    }
+
+    @Test
     public void testSetSystemSettingFailWithNonWhitelistedSettings() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();

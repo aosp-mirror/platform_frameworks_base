@@ -34,6 +34,7 @@ import android.widget.TextView;
 import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 import java.io.FileDescriptor;
@@ -55,6 +56,7 @@ public class KeyguardStatusView extends GridLayout {
     private final IActivityManager mIActivityManager;
 
     private TextView mLogoutView;
+    private boolean mCanShowLogout = true; // by default, try to show the logout button here
     private KeyguardClockSwitch mClockView;
     private TextView mOwnerInfo;
     private boolean mCanShowOwnerInfo = true; // by default, try to show the owner information here
@@ -128,6 +130,11 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    void setCanShowLogout(boolean canShowLogout) {
+        mCanShowLogout = canShowLogout;
+        updateLogoutView();
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -152,7 +159,10 @@ public class KeyguardStatusView extends GridLayout {
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
         onSliceContentChanged();
 
+        boolean shouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
+        setEnableMarquee(shouldMarquee);
         updateOwnerInfo();
+        updateLogoutView();
         updateDark();
     }
 
@@ -199,11 +209,11 @@ public class KeyguardStatusView extends GridLayout {
         return mOwnerInfo.getVisibility() == VISIBLE ? mOwnerInfo.getHeight() : 0;
     }
 
-    void updateLogoutView(boolean shouldShowLogout) {
+    void updateLogoutView() {
         if (mLogoutView == null) {
             return;
         }
-        mLogoutView.setVisibility(shouldShowLogout ? VISIBLE : GONE);
+        mLogoutView.setVisibility(mCanShowLogout && shouldShowLogout() ? VISIBLE : GONE);
         // Logout button will stay in language of user 0 if we don't set that manually.
         mLogoutView.setText(mContext.getResources().getString(
                 com.android.internal.R.string.global_action_logout));
@@ -301,6 +311,11 @@ public class KeyguardStatusView extends GridLayout {
         } else if (mNotificationIcons != null){
             mNotificationIcons.setScrollY(0);
         }
+    }
+
+    private boolean shouldShowLogout() {
+        return Dependency.get(KeyguardUpdateMonitor.class).isLogoutEnabled()
+                && KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM;
     }
 
     private void onLogoutClicked(View view) {

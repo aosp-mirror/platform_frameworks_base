@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -41,9 +42,6 @@ import java.util.Map;
  * @hide
  */
 public class OverlayActorEnforcer {
-
-    // By default, the reason is not logged to prevent leaks of why it failed
-    private static final boolean DEBUG_REASON = false;
 
     private final PackageManagerHelper mPackageManager;
 
@@ -85,17 +83,18 @@ public class OverlayActorEnforcer {
 
     void enforceActor(@NonNull OverlayInfo overlayInfo, @NonNull String methodName,
             int callingUid, int userId) throws SecurityException {
-        ActorState actorState = isAllowedActor(methodName, overlayInfo, callingUid, userId);
+        final ActorState actorState = isAllowedActor(methodName, overlayInfo, callingUid, userId);
         if (actorState == ActorState.ALLOWED) {
             return;
         }
 
-        String targetOverlayableName = overlayInfo.targetOverlayableName;
-        throw new SecurityException("UID" + callingUid + " is not allowed to call "
-                + methodName + " for "
+        final String targetOverlayableName = overlayInfo.targetOverlayableName;
+        final String errorMessage = "UID" + callingUid + " is not allowed to call " + methodName
+                + " for "
                 + (TextUtils.isEmpty(targetOverlayableName) ? "" : (targetOverlayableName + " in "))
-                + overlayInfo.targetPackageName + (DEBUG_REASON ? (" because " + actorState) : "")
-        );
+                + overlayInfo.targetPackageName + " for user " + userId;
+        Slog.w(OverlayManagerService.TAG, errorMessage + " because " + actorState);
+        throw new SecurityException(errorMessage);
     }
 
     /**

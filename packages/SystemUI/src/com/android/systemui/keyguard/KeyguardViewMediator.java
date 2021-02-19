@@ -2395,6 +2395,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             return;
         }
         mDozing = dozing;
+        if (!dozing) {
+            mAnimatingScreenOff = false;
+        }
         setShowingLocked(mShowing);
     }
 
@@ -2404,7 +2407,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         // is 1f), then show the activity lock screen.
         if (mAnimatingScreenOff && mDozing && linear == 1f) {
             mAnimatingScreenOff = false;
-            setShowingLocked(mShowing);
+            setShowingLocked(mShowing, true);
         }
     }
 

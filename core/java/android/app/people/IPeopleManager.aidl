@@ -18,6 +18,7 @@ package android.app.people;
 
 import android.app.people.ConversationStatus;
 import android.app.people.ConversationChannel;
+import android.app.people.IConversationListener;
 import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.IBinder;
@@ -62,4 +63,6 @@ interface IPeopleManager {
     void clearStatus(in String packageName, int userId, in String conversationId, in String statusId);
     void clearStatuses(in String packageName, int userId, in String conversationId);
     ParceledListSlice getStatuses(in String packageName, int userId, in String conversationId);
+    void registerConversationListener(in String packageName, int userId, in String shortcutId, in IConversationListener callback);
+    void unregisterConversationListener(in IConversationListener callback);
 }

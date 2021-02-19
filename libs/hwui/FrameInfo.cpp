@@ -40,6 +40,7 @@ const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> Fram
         "DequeueBufferDuration",
         "QueueBufferDuration",
         "GpuCompleted",
+        "SwapBuffersCompleted"
 };
 
 static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 20,

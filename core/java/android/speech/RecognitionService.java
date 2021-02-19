@@ -105,17 +105,6 @@ public abstract class RecognitionService extends Service {
             int callingUid) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
-            try {
-                listener.asBinder().linkToDeath(new IBinder.DeathRecipient() {
-                    @Override
-                    public void binderDied() {
-                        mHandler.sendMessage(mHandler.obtainMessage(MSG_CANCEL, listener));
-                    }
-                }, 0);
-            } catch (RemoteException re) {
-                Log.e(TAG, "dead listener on startListening");
-                return;
-            }
             mCurrentCallback = new Callback(listener, callingUid);
             RecognitionService.this.onStartListening(intent, mCurrentCallback);
         } else {
@@ -352,7 +341,6 @@ public abstract class RecognitionService extends Service {
          * Return the Linux uid assigned to the process that sent you the current transaction that
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */
-        // TODO(b/176578753): need to make sure this is fixed when proxied through system.
         public int getCallingUid() {
             return mCallingUid;
         }
@@ -368,7 +356,7 @@ public abstract class RecognitionService extends Service {
 
         @Override
         public void startListening(Intent recognizerIntent, IRecognitionListener listener,
-                String packageName, String featureId) {
+                String packageName, String featureId, int callingUid) {
             Preconditions.checkNotNull(packageName);
 
             if (DBG) Log.d(TAG, "startListening called by:" + listener.asBinder());
@@ -377,7 +365,7 @@ public abstract class RecognitionService extends Service {
                     packageName, featureId)) {
                 service.mHandler.sendMessage(Message.obtain(service.mHandler,
                         MSG_START_LISTENING, service.new StartListeningArgs(
-                                recognizerIntent, listener, Binder.getCallingUid())));
+                                recognizerIntent, listener, callingUid)));
             }
         }
 
@@ -397,7 +385,7 @@ public abstract class RecognitionService extends Service {
 
         @Override
         public void cancel(IRecognitionListener listener, String packageName,
-                String featureId) {
+                String featureId, boolean isShutdown) {
             Preconditions.checkNotNull(packageName);
 
             if (DBG) Log.d(TAG, "cancel called by:" + listener.asBinder());

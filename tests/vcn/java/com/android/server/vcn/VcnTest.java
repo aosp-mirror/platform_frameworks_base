@@ -34,7 +34,7 @@ import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
 
-import com.android.server.VcnManagementService.VcnSafeModeCallback;
+import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.VcnNetworkProvider.NetworkRequestListener;
@@ -56,7 +56,7 @@ public class VcnTest {
     private VcnContext mVcnContext;
     private TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     private VcnNetworkProvider mVcnNetworkProvider;
-    private VcnSafeModeCallback mVcnSafeModeCallback;
+    private VcnCallback mVcnCallback;
     private Vcn.Dependencies mDeps;
 
     private ArgumentCaptor<VcnGatewayStatusCallback> mGatewayStatusCallbackCaptor;
@@ -72,7 +72,7 @@ public class VcnTest {
         mVcnContext = mock(VcnContext.class);
         mSubscriptionSnapshot = mock(TelephonySubscriptionSnapshot.class);
         mVcnNetworkProvider = mock(VcnNetworkProvider.class);
-        mVcnSafeModeCallback = mock(VcnSafeModeCallback.class);
+        mVcnCallback = mock(VcnCallback.class);
         mDeps = mock(Vcn.Dependencies.class);
 
         mTestLooper = new TestLooper();
@@ -104,7 +104,7 @@ public class VcnTest {
                         TEST_SUB_GROUP,
                         mConfig,
                         mSubscriptionSnapshot,
-                        mVcnSafeModeCallback,
+                        mVcnCallback,
                         mDeps);
     }
 
@@ -179,6 +179,6 @@ public class VcnTest {
             verify(gatewayConnection).teardownAsynchronously();
         }
         verify(mVcnNetworkProvider).unregisterListener(requestListener);
-        verify(mVcnSafeModeCallback).onEnteredSafeMode();
+        verify(mVcnCallback).onEnteredSafeMode();
     }
 }

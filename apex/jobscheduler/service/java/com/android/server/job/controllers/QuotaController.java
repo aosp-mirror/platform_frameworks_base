@@ -72,7 +72,6 @@ import com.android.server.LocalServices;
 import com.android.server.PowerAllowlistInternal;
 import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateControllerProto;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
@@ -770,18 +769,38 @@ public final class QuotaController extends StateController {
 
     /** Returns the maximum amount of time this job could run for. */
     public long getMaxJobExecutionTimeMsLocked(@NonNull final JobStatus jobStatus) {
-        // If quota is currently "free", then the job can run for the full amount of time.
-        if (mChargeTracker.isCharging()
-                || isTopStartedJobLocked(jobStatus)
-                || isUidInForeground(jobStatus.getSourceUid())) {
-            return JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS;
+        // Need to look at current proc state as well in the case where the job hasn't started yet.
+        final boolean isTop = mActivityManagerInternal
+                .getUidProcessState(jobStatus.getSourceUid()) <= ActivityManager.PROCESS_STATE_TOP;
+
+        if (!jobStatus.shouldTreatAsExpeditedJob()) {
+            // If quota is currently "free", then the job can run for the full amount of time.
+            if (mChargeTracker.isCharging()
+                    || isTop
+                    || isTopStartedJobLocked(jobStatus)
+                    || isUidInForeground(jobStatus.getSourceUid())) {
+                return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
+            }
+            return getTimeUntilQuotaConsumedLocked(
+                    jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
         }
-        if (jobStatus.shouldTreatAsExpeditedJob()) {
-            return jobStatus.getStandbyBucket() == RESTRICTED_INDEX
-                    ? JobServiceContext.DEFAULT_RESTRICTED_EXPEDITED_JOB_EXECUTING_TIMESLICE_MILLIS
-                    : JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS;
+
+        // Expedited job.
+        if (mChargeTracker.isCharging()) {
+            return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
         }
-        return getRemainingExecutionTimeLocked(jobStatus);
+        if (isTop || isTopStartedJobLocked(jobStatus)) {
+            return Math.max(mEJLimitsMs[ACTIVE_INDEX] / 2,
+                    getTimeUntilEJQuotaConsumedLocked(
+                            jobStatus.getSourceUserId(), jobStatus.getSourcePackageName()));
+        }
+        if (isUidInForeground(jobStatus.getSourceUid())) {
+            return Math.max(mEJLimitsMs[WORKING_INDEX] / 2,
+                    getTimeUntilEJQuotaConsumedLocked(
+                            jobStatus.getSourceUserId(), jobStatus.getSourcePackageName()));
+        }
+        return getTimeUntilEJQuotaConsumedLocked(
+                jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
     }
 
     /** @return true if the job is within expedited job quota. */
@@ -3577,8 +3596,8 @@ public final class QuotaController extends StateController {
                 mEJLimitsMs[RARE_INDEX] = newRareLimitMs;
                 mShouldReevaluateConstraints = true;
             }
-            // The limit must be in the range [0 minutes, rare limit].
-            long newRestrictedLimitMs = Math.max(0,
+            // The limit must be in the range [5 minutes, rare limit].
+            long newRestrictedLimitMs = Math.max(5 * MINUTE_IN_MILLIS,
                     Math.min(newRareLimitMs, EJ_LIMIT_RESTRICTED_MS));
             if (mEJLimitsMs[RESTRICTED_INDEX] != newRestrictedLimitMs) {
                 mEJLimitsMs[RESTRICTED_INDEX] = newRestrictedLimitMs;

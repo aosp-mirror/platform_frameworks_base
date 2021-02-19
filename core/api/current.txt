@@ -145,6 +145,7 @@ package android {
     field public static final String REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE = "android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE";
     field public static final String REQUEST_PASSWORD_COMPLEXITY = "android.permission.REQUEST_PASSWORD_COMPLEXITY";
     field @Deprecated public static final String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
+    field public static final String SCHEDULE_EXACT_ALARM = "android.permission.SCHEDULE_EXACT_ALARM";
     field public static final String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final String SEND_SMS = "android.permission.SEND_SMS";
     field public static final String SET_ALARM = "com.android.alarm.permission.SET_ALARM";
@@ -1713,30 +1714,42 @@ package android {
     field @Deprecated public static final int secondary_text_dark_nodisable = 17170438; // 0x1060006
     field @Deprecated public static final int secondary_text_light = 17170439; // 0x1060007
     field @Deprecated public static final int secondary_text_light_nodisable = 17170440; // 0x1060008
-    field public static final int system_accent_0 = 17170473; // 0x1060029
-    field public static final int system_accent_100 = 17170475; // 0x106002b
-    field public static final int system_accent_1000 = 17170484; // 0x1060034
-    field public static final int system_accent_200 = 17170476; // 0x106002c
-    field public static final int system_accent_300 = 17170477; // 0x106002d
-    field public static final int system_accent_400 = 17170478; // 0x106002e
-    field public static final int system_accent_50 = 17170474; // 0x106002a
-    field public static final int system_accent_500 = 17170479; // 0x106002f
-    field public static final int system_accent_600 = 17170480; // 0x1060030
-    field public static final int system_accent_700 = 17170481; // 0x1060031
-    field public static final int system_accent_800 = 17170482; // 0x1060032
-    field public static final int system_accent_900 = 17170483; // 0x1060033
-    field public static final int system_main_0 = 17170461; // 0x106001d
-    field public static final int system_main_100 = 17170463; // 0x106001f
-    field public static final int system_main_1000 = 17170472; // 0x1060028
-    field public static final int system_main_200 = 17170464; // 0x1060020
-    field public static final int system_main_300 = 17170465; // 0x1060021
-    field public static final int system_main_400 = 17170466; // 0x1060022
-    field public static final int system_main_50 = 17170462; // 0x106001e
-    field public static final int system_main_500 = 17170467; // 0x1060023
-    field public static final int system_main_600 = 17170468; // 0x1060024
-    field public static final int system_main_700 = 17170469; // 0x1060025
-    field public static final int system_main_800 = 17170470; // 0x1060026
-    field public static final int system_main_900 = 17170471; // 0x1060027
+    field public static final int system_neutral_0 = 17170485; // 0x1060035
+    field public static final int system_neutral_100 = 17170487; // 0x1060037
+    field public static final int system_neutral_1000 = 17170496; // 0x1060040
+    field public static final int system_neutral_200 = 17170488; // 0x1060038
+    field public static final int system_neutral_300 = 17170489; // 0x1060039
+    field public static final int system_neutral_400 = 17170490; // 0x106003a
+    field public static final int system_neutral_50 = 17170486; // 0x1060036
+    field public static final int system_neutral_500 = 17170491; // 0x106003b
+    field public static final int system_neutral_600 = 17170492; // 0x106003c
+    field public static final int system_neutral_700 = 17170493; // 0x106003d
+    field public static final int system_neutral_800 = 17170494; // 0x106003e
+    field public static final int system_neutral_900 = 17170495; // 0x106003f
+    field public static final int system_primary_0 = 17170461; // 0x106001d
+    field public static final int system_primary_100 = 17170463; // 0x106001f
+    field public static final int system_primary_1000 = 17170472; // 0x1060028
+    field public static final int system_primary_200 = 17170464; // 0x1060020
+    field public static final int system_primary_300 = 17170465; // 0x1060021
+    field public static final int system_primary_400 = 17170466; // 0x1060022
+    field public static final int system_primary_50 = 17170462; // 0x106001e
+    field public static final int system_primary_500 = 17170467; // 0x1060023
+    field public static final int system_primary_600 = 17170468; // 0x1060024
+    field public static final int system_primary_700 = 17170469; // 0x1060025
+    field public static final int system_primary_800 = 17170470; // 0x1060026
+    field public static final int system_primary_900 = 17170471; // 0x1060027
+    field public static final int system_secondary_0 = 17170473; // 0x1060029
+    field public static final int system_secondary_100 = 17170475; // 0x106002b
+    field public static final int system_secondary_1000 = 17170484; // 0x1060034
+    field public static final int system_secondary_200 = 17170476; // 0x106002c
+    field public static final int system_secondary_300 = 17170477; // 0x106002d
+    field public static final int system_secondary_400 = 17170478; // 0x106002e
+    field public static final int system_secondary_50 = 17170474; // 0x106002a
+    field public static final int system_secondary_500 = 17170479; // 0x106002f
+    field public static final int system_secondary_600 = 17170480; // 0x1060030
+    field public static final int system_secondary_700 = 17170481; // 0x1060031
+    field public static final int system_secondary_800 = 17170482; // 0x1060032
+    field public static final int system_secondary_900 = 17170483; // 0x1060033
     field public static final int tab_indicator_text = 17170441; // 0x1060009
     field @Deprecated public static final int tertiary_text_dark = 17170448; // 0x1060010
     field @Deprecated public static final int tertiary_text_light = 17170449; // 0x1060011
@@ -4316,16 +4329,17 @@ package android.app {
   }
 
   public class AlarmManager {
+    method public boolean canScheduleExactAlarms();
     method public void cancel(android.app.PendingIntent);
     method public void cancel(android.app.AlarmManager.OnAlarmListener);
     method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
     method public void set(int, long, android.app.PendingIntent);
     method public void set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
     method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
     method public void setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.SET_TIME) public void setTime(long);
@@ -7092,6 +7106,7 @@ package android.app.admin {
     method public boolean isManagedProfile(@NonNull android.content.ComponentName);
     method public boolean isMasterVolumeMuted(@NonNull android.content.ComponentName);
     method public boolean isNetworkLoggingEnabled(@Nullable android.content.ComponentName);
+    method public boolean isNetworkSlicingEnabled();
     method public boolean isOrganizationOwnedDeviceWithManagedProfile();
     method public boolean isOverrideApnEnabled(@NonNull android.content.ComponentName);
     method public boolean isPackageSuspended(@NonNull android.content.ComponentName, String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -7164,6 +7179,7 @@ package android.app.admin {
     method public void setMaximumTimeToLock(@NonNull android.content.ComponentName, long);
     method @NonNull public java.util.List<java.lang.String> setMeteredDataDisabledPackages(@NonNull android.content.ComponentName, @NonNull java.util.List<java.lang.String>);
     method public void setNetworkLoggingEnabled(@Nullable android.content.ComponentName, boolean);
+    method public void setNetworkSlicingEnabled(boolean);
     method @Deprecated public void setOrganizationColor(@NonNull android.content.ComponentName, int);
     method public void setOrganizationId(@NonNull String);
     method public void setOrganizationName(@NonNull android.content.ComponentName, @Nullable CharSequence);
@@ -17693,6 +17709,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
@@ -39009,7 +39026,9 @@ package android.speech {
     field public static final int ERROR_NO_MATCH = 7; // 0x7
     field public static final int ERROR_RECOGNIZER_BUSY = 8; // 0x8
     field public static final int ERROR_SERVER = 4; // 0x4
+    field public static final int ERROR_SERVER_DISCONNECTED = 11; // 0xb
     field public static final int ERROR_SPEECH_TIMEOUT = 6; // 0x6
+    field public static final int ERROR_TOO_MANY_REQUESTS = 10; // 0xa
     field public static final String RESULTS_RECOGNITION = "results_recognition";
   }
 
@@ -40575,6 +40594,7 @@ package android.telephony {
     field public static final String KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY = "gsm_roaming_networks_string_array";
     field public static final String KEY_HAS_IN_CALL_NOISE_SUPPRESSION_BOOL = "has_in_call_noise_suppression_bool";
     field public static final String KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL = "hide_carrier_network_settings_bool";
+    field public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
     field public static final String KEY_HIDE_ENHANCED_4G_LTE_BOOL = "hide_enhanced_4g_lte_bool";
     field public static final String KEY_HIDE_IMS_APN_BOOL = "hide_ims_apn_bool";
     field public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL = "hide_lte_plus_data_icon_bool";

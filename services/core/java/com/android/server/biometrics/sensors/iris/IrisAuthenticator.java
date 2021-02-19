@@ -21,6 +21,7 @@ import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.iris.IIrisService;
 import android.os.IBinder;
@@ -39,7 +40,8 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public ITestSession createTestSession(@NonNull String opPackageName) throws RemoteException {
+    public ITestSession createTestSession(@NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName) throws RemoteException {
         return null;
     }
 

@@ -50,8 +50,6 @@ import com.android.server.LocalServices;
 
 import libcore.util.EmptyArray;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -149,7 +147,6 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
      * Maps an {@link EnergyConsumerType} to it's corresponding {@link EnergyConsumer#id}s,
      * unless it is of {@link EnergyConsumer#type}=={@link EnergyConsumerType#OTHER}
      */
-    // TODO(b/180029015): Hook this up (it isn't used yet)
     @GuardedBy("mWorkerLock")
     private @Nullable SparseArray<int[]> mEnergyConsumerTypeToIdMap = null;
 
@@ -209,11 +206,22 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                         = populateEnergyConsumerSubsystemMapsLocked();
                 if (idToConsumer != null) {
                     mMeasuredEnergySnapshot = new MeasuredEnergySnapshot(idToConsumer);
-                    final EnergyConsumerResult[] initialEcrs = getEnergyConsumptionData();
-                    // According to spec, initialEcrs will include 0s for consumers that haven't
-                    // used any energy yet, as long as they are supported; however, attributed uid
-                    // energies will be absent if their energy is 0.
-                    mMeasuredEnergySnapshot.updateAndGetDelta(initialEcrs);
+                    try {
+                        final EnergyConsumerResult[] initialEcrs = getEnergyConsumptionData().get(
+                                EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+                        // According to spec, initialEcrs will include 0s for consumers that haven't
+                        // used any energy yet, as long as they are supported; however,
+                        // attributed uid energies will be absent if their energy is 0.
+                        mMeasuredEnergySnapshot.updateAndGetDelta(initialEcrs);
+                    } catch (TimeoutException | InterruptedException e) {
+                        Slog.w(TAG, "timeout or interrupt reading initial getEnergyConsumedAsync: "
+                                + e);
+                        // Continue running, later attempts to query may be successful.
+                    } catch (ExecutionException e) {
+                        Slog.wtf(TAG, "exception reading initial getEnergyConsumedAsync: "
+                                + e.getCause());
+                        // Continue running, later attempts to query may be successful.
+                    }
                     numCustomBuckets = mMeasuredEnergySnapshot.getNumOtherOrdinals();
                     supportedStdBuckets = getSupportedEnergyBuckets(idToConsumer);
                 }
@@ -498,6 +506,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         CompletableFuture<ModemActivityInfo> modemFuture = CompletableFuture.completedFuture(null);
         boolean railUpdated = false;
 
+        CompletableFuture<EnergyConsumerResult[]> futureECRs = getMeasuredEnergyLocked(updateFlags);
+
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
             // Only fetch WiFi power data if it is supported.
@@ -574,9 +584,23 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             Slog.w(TAG, "exception reading modem stats: " + e.getCause());
         }
 
-        final MeasuredEnergySnapshot.MeasuredEnergyDeltaData measuredEnergyDeltas =
-                mMeasuredEnergySnapshot == null ? null :
-                mMeasuredEnergySnapshot.updateAndGetDelta(getMeasuredEnergyLocked(updateFlags));
+        final MeasuredEnergySnapshot.MeasuredEnergyDeltaData measuredEnergyDeltas;
+        if (mMeasuredEnergySnapshot == null || futureECRs == null) {
+            measuredEnergyDeltas = null;
+        } else {
+            EnergyConsumerResult[] ecrs;
+            try {
+                ecrs = futureECRs.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException | InterruptedException e) {
+                // TODO (b/180519623): Invalidate the MeasuredEnergy derived data until next reset.
+                Slog.w(TAG, "timeout or interrupt reading getEnergyConsumedAsync: " + e);
+                ecrs = null;
+            } catch (ExecutionException e) {
+                Slog.wtf(TAG, "exception reading getEnergyConsumedAsync: " + e.getCause());
+                ecrs = null;
+            }
+            measuredEnergyDeltas = mMeasuredEnergySnapshot.updateAndGetDelta(ecrs);
+        }
 
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
@@ -786,22 +810,29 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         return buckets;
     }
 
-    /** Get {@link EnergyConsumerResult}s with the latest energy usage since boot. */
+    /** Get all {@link EnergyConsumerResult}s with the latest energy usage since boot. */
     @GuardedBy("mWorkerLock")
-    private @Nullable EnergyConsumerResult[] getEnergyConsumptionData() {
-        try {
-            return mPowerStatsInternal.getEnergyConsumedAsync(new int[0])
-                    .get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            Slog.e(TAG, "Failed to getEnergyConsumedAsync", e);
-            return null;
-        }
+    @Nullable
+    private CompletableFuture<EnergyConsumerResult[]> getEnergyConsumptionData() {
+        return getEnergyConsumptionData(new int[0]);
+    }
+
+    /**
+     * Get {@link EnergyConsumerResult}s of the specified {@link EnergyConsumer} ids with the latest
+     * energy usage since boot.
+     */
+    @GuardedBy("mWorkerLock")
+    @Nullable
+    private CompletableFuture<EnergyConsumerResult[]> getEnergyConsumptionData(int[] consumerIds) {
+        return mPowerStatsInternal.getEnergyConsumedAsync(consumerIds);
     }
 
     /** Fetch EnergyConsumerResult[] for supported subsystems based on the given updateFlags. */
+    @VisibleForTesting
     @GuardedBy("mWorkerLock")
-    private @Nullable EnergyConsumerResult[] getMeasuredEnergyLocked(@ExternalUpdateFlag int flags)
-    {
+    @Nullable
+    public CompletableFuture<EnergyConsumerResult[]> getMeasuredEnergyLocked(
+            @ExternalUpdateFlag int flags) {
         if (mMeasuredEnergySnapshot == null || mPowerStatsInternal == null) return null;
 
         if (flags == UPDATE_ALL) {
@@ -809,24 +840,27 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             return getEnergyConsumptionData();
         }
 
-        final List<Integer> energyConsumerIds = new ArrayList<>();
+        final IntArray energyConsumerIds = new IntArray();
+        if ((flags & UPDATE_CPU) != 0) {
+            addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.CPU_CLUSTER);
+        }
         if ((flags & UPDATE_DISPLAY) != 0) {
             addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.DISPLAY);
         }
         // TODO: Wifi, Bluetooth, etc., go here
 
-        if (energyConsumerIds.isEmpty()) {
+        if (energyConsumerIds.size() == 0) {
             return null;
         }
-        // TODO(b/180029015): Query specific subsystems from HAL based on energyConsumerIds.toArray
-        return getEnergyConsumptionData();
+        return getEnergyConsumptionData(energyConsumerIds.toArray());
     }
 
     @GuardedBy("mWorkerLock")
     private void addEnergyConsumerIdLocked(
-            List<Integer> energyConsumerIds, @EnergyConsumerType int type) {
-        final int consumerId = 0; // TODO(b/180029015): Use mEnergyConsumerTypeToIdMap to get this
-        energyConsumerIds.add(consumerId);
+            IntArray energyConsumerIds, @EnergyConsumerType int type) {
+        final int[] consumerIds = mEnergyConsumerTypeToIdMap.get(type);
+        if (consumerIds == null) return;
+        energyConsumerIds.addAll(consumerIds);
     }
 
     /** Populates the cached type->ids map, and returns the (inverse) id->EnergyConsumer map. */
@@ -840,12 +874,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             return null;
         }
 
-        // TODO(b/180029015): Initialize typeToIds
-        // Maps type -> {ids} (1:n map, since multiple ids might have the same type)
-        // final SparseArray<SparseIntArray> typeToIds = new SparseArray<>();
-
         // Maps id -> EnergyConsumer (1:1 map)
         final SparseArray<EnergyConsumer> idToConsumer = new SparseArray<>(energyConsumers.length);
+        // Maps type -> {ids} (1:n map, since multiple ids might have the same type)
+        final SparseArray<IntArray> tempTypeToId = new SparseArray<>();
 
         // Add all expected EnergyConsumers to the maps
         for (final EnergyConsumer consumer : energyConsumers) {
@@ -862,9 +894,23 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 }
             }
             idToConsumer.put(consumer.id, consumer);
-            // TODO(b/180029015): Also populate typeToIds map
+
+            IntArray ids = tempTypeToId.get(consumer.type);
+            if (ids == null) {
+                ids = new IntArray();
+                tempTypeToId.put(consumer.type, ids);
+            }
+            ids.add(consumer.id);
         }
-        // TODO(b/180029015): Store typeToIds in mEnergyConsumerTypeToIdMap.
+
+        mEnergyConsumerTypeToIdMap = new SparseArray<>(tempTypeToId.size());
+        // Populate mEnergyConsumerTypeToIdMap with EnergyConsumer type to ids mappings
+        final int size = tempTypeToId.size();
+        for (int i = 0; i < size; i++) {
+            final int consumerType = tempTypeToId.keyAt(i);
+            final int[] consumerIds = tempTypeToId.valueAt(i).toArray();
+            mEnergyConsumerTypeToIdMap.put(consumerType, consumerIds);
+        }
         return idToConsumer;
     }
 }
