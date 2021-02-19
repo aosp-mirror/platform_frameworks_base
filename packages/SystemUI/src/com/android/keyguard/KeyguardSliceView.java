@@ -49,8 +49,10 @@ import androidx.slice.widget.SliceContent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import java.io.FileDescriptor;
@@ -315,22 +317,6 @@ public class KeyguardSliceView extends LinearLayout {
                 R.dimen.widget_label_font_size);
         mRowWithHeaderTextSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.header_row_font_size);
-
-        for (int i = 0; i < mRow.getChildCount(); i++) {
-            View child = mRow.getChildAt(i);
-            if (child instanceof KeyguardSliceTextView) {
-                ((KeyguardSliceTextView) child).onDensityOrFontScaleChanged();
-            }
-        }
-    }
-
-    void onOverlayChanged() {
-        for (int i = 0; i < mRow.getChildCount(); i++) {
-            View child = mRow.getChildAt(i);
-            if (child instanceof KeyguardSliceTextView) {
-                ((KeyguardSliceTextView) child).onOverlayChanged();
-            }
-        }
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -493,7 +479,8 @@ public class KeyguardSliceView extends LinearLayout {
      * Representation of an item that appears under the clock on main keyguard message.
      */
     @VisibleForTesting
-    static class KeyguardSliceTextView extends TextView {
+    static class KeyguardSliceTextView extends TextView implements
+            ConfigurationController.ConfigurationListener {
         private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
         @StyleRes
@@ -505,10 +492,24 @@ public class KeyguardSliceView extends LinearLayout {
             setEllipsize(TruncateAt.END);
         }
 
+        @Override
+        protected void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            Dependency.get(ConfigurationController.class).addCallback(this);
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            Dependency.get(ConfigurationController.class).removeCallback(this);
+        }
+
+        @Override
         public void onDensityOrFontScaleChanged() {
             updatePadding();
         }
 
+        @Override
         public void onOverlayChanged() {
             setTextAppearance(sStyleId);
         }

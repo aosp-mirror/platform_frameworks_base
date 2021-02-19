@@ -12706,12 +12706,12 @@ public class BatteryStatsImpl extends BatteryStats {
         // When the battery is not on, we don't attribute the cpu times to any timers but we still
         // need to take the snapshots.
         if (!onBattery) {
-            mCpuUidUserSysTimeReader.readDelta(null);
-            mCpuUidFreqTimeReader.readDelta(null);
+            mCpuUidUserSysTimeReader.readDelta(false, null);
+            mCpuUidFreqTimeReader.readDelta(false, null);
             mNumAllUidCpuTimeReads += 2;
             if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-                mCpuUidActiveTimeReader.readDelta(null);
-                mCpuUidClusterTimeReader.readDelta(null);
+                mCpuUidActiveTimeReader.readDelta(false, null);
+                mCpuUidClusterTimeReader.readDelta(false, null);
                 mNumAllUidCpuTimeReads += 2;
             }
             for (int cluster = mKernelCpuSpeedReaders.length - 1; cluster >= 0; --cluster) {
@@ -12897,7 +12897,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
 
-        mCpuUidUserSysTimeReader.readDelta((uid, timesUs) -> {
+        mCpuUidUserSysTimeReader.readDelta(false, (uid, timesUs) -> {
             long userTimeUs = timesUs[0], systemTimeUs = timesUs[1];
 
             uid = mapUid(uid);
@@ -13011,7 +13011,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
         final List<Integer> uidsToRemove = new ArrayList<>();
-        mCpuUidFreqTimeReader.readDelta((uid, cpuFreqTimeMs) -> {
+        mCpuUidFreqTimeReader.readDelta(false, (uid, cpuFreqTimeMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 uidsToRemove.add(uid);
@@ -13129,7 +13129,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
         final List<Integer> uidsToRemove = new ArrayList<>();
-        mCpuUidActiveTimeReader.readDelta((uid, cpuActiveTimesMs) -> {
+        mCpuUidActiveTimeReader.readDelta(false, (uid, cpuActiveTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 uidsToRemove.add(uid);
@@ -13163,7 +13163,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long startTimeMs = mClocks.uptimeMillis();
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
         final List<Integer> uidsToRemove = new ArrayList<>();
-        mCpuUidClusterTimeReader.readDelta((uid, cpuClusterTimesMs) -> {
+        mCpuUidClusterTimeReader.readDelta(false, (uid, cpuClusterTimesMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
                 uidsToRemove.add(uid);

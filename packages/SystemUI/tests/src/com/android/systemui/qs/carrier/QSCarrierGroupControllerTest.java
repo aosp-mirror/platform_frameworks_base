@@ -33,7 +33,7 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.CarrierTextManager;
+import com.android.keyguard.CarrierTextController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -54,7 +54,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
 
     private QSCarrierGroupController mQSCarrierGroupController;
     private NetworkController.SignalCallback mSignalCallback;
-    private CarrierTextManager.CarrierTextCallback mCallback;
+    private CarrierTextController.CarrierTextCallback mCallback;
     @Mock
     private QSCarrierGroup mQSCarrierGroup;
     @Mock
@@ -62,9 +62,9 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
     @Mock
     private NetworkController mNetworkController;
     @Mock
-    private CarrierTextManager.Builder mCarrierTextControllerBuilder;
+    private CarrierTextController.Builder mCarrierTextControllerBuilder;
     @Mock
-    private CarrierTextManager mCarrierTextManager;
+    private CarrierTextController mCarrierTextController;
     private TestableLooper mTestableLooper;
 
     @Before
@@ -83,11 +83,11 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 .thenReturn(mCarrierTextControllerBuilder);
         when(mCarrierTextControllerBuilder.setShowMissingSim(anyBoolean()))
                 .thenReturn(mCarrierTextControllerBuilder);
-        when(mCarrierTextControllerBuilder.build()).thenReturn(mCarrierTextManager);
+        when(mCarrierTextControllerBuilder.build()).thenReturn(mCarrierTextController);
 
         doAnswer(invocation -> mCallback = invocation.getArgument(0))
-                .when(mCarrierTextManager)
-                .setListening(any(CarrierTextManager.CarrierTextCallback.class));
+                .when(mCarrierTextController)
+                .setListening(any(CarrierTextController.CarrierTextCallback.class));
 
         when(mQSCarrierGroup.getNoSimTextView()).thenReturn(new TextView(mContext));
         when(mQSCarrierGroup.getCarrier1View()).thenReturn(mock(QSCarrier.class));
@@ -113,8 +113,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 (Answer<Integer>) invocationOnMock -> invocationOnMock.getArgument(0));
 
         // listOfCarriers length 1, subscriptionIds length 1, anySims false
-        CarrierTextManager.CarrierTextCallbackInfo
-                c1 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c1 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
                 false,
@@ -122,8 +122,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(c1);
 
         // listOfCarriers length 1, subscriptionIds length 1, anySims true
-        CarrierTextManager.CarrierTextCallbackInfo
-                c2 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c2 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
                 true,
@@ -131,8 +131,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(c2);
 
         // listOfCarriers length 2, subscriptionIds length 2, anySims false
-        CarrierTextManager.CarrierTextCallbackInfo
-                c3 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c3 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{"", ""},
                 false,
@@ -140,8 +140,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(c3);
 
         // listOfCarriers length 2, subscriptionIds length 2, anySims true
-        CarrierTextManager.CarrierTextCallbackInfo
-                c4 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c4 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{"", ""},
                 true,
@@ -159,8 +159,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 (Answer<Integer>) invocationOnMock -> invocationOnMock.getArgument(0));
 
         // listOfCarriers length 2, subscriptionIds length 1, anySims false
-        CarrierTextManager.CarrierTextCallbackInfo
-                c1 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c1 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{"", ""},
                 false,
@@ -168,8 +168,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(c1);
 
         // listOfCarriers length 2, subscriptionIds length 1, anySims true
-        CarrierTextManager.CarrierTextCallbackInfo
-                c2 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c2 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{"", ""},
                 true,
@@ -177,8 +177,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(c2);
 
         // listOfCarriers length 1, subscriptionIds length 2, anySims false
-        CarrierTextManager.CarrierTextCallbackInfo
-                c3 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c3 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
                 false,
@@ -186,8 +186,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(c3);
 
         // listOfCarriers length 1, subscriptionIds length 2, anySims true
-        CarrierTextManager.CarrierTextCallbackInfo
-                c4 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c4 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
                 true,
@@ -203,8 +203,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         when(spiedCarrierGroupController.getSlotIndex(anyInt())).thenReturn(
                 SubscriptionManager.INVALID_SIM_SLOT_INDEX);
 
-        CarrierTextManager.CarrierTextCallbackInfo
-                c4 = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                c4 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{"", ""},
                 true,
@@ -223,8 +223,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
 
     @Test
     public void testNoEmptyVisibleView_airplaneMode() {
-        CarrierTextManager.CarrierTextCallbackInfo
-                info = new CarrierTextManager.CarrierTextCallbackInfo(
+        CarrierTextController.CarrierTextCallbackInfo
+                info = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
                 true,

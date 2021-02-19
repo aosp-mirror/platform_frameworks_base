@@ -36,6 +36,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -45,15 +46,12 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
     private static boolean DEBUG = KeyguardConstants.DEBUG;
 
     private MediaRouter mMediaRouter = null;
     private final DisplayManager mDisplayService;
-    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final Context mContext;
 
@@ -87,11 +85,9 @@ public class KeyguardDisplayManager {
 
     @Inject
     public KeyguardDisplayManager(Context context,
-            Lazy<NavigationBarController> navigationBarControllerLazy,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             @UiBackground Executor uiBgExecutor) {
         mContext = context;
-        mNavigationBarControllerLazy = navigationBarControllerLazy;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         uiBgExecutor.execute(() -> mMediaRouter = mContext.getSystemService(MediaRouter.class));
         mDisplayService = mContext.getSystemService(DisplayManager.class);
@@ -244,7 +240,7 @@ public class KeyguardDisplayManager {
         // Leave this task to {@link StatusBarKeyguardViewManager}
         if (displayId == DEFAULT_DISPLAY) return;
 
-        NavigationBarView navBarView = mNavigationBarControllerLazy.get()
+        NavigationBarView navBarView = Dependency.get(NavigationBarController.class)
                 .getNavigationBarView(displayId);
         // We may not have nav bar on a display.
         if (navBarView == null) return;

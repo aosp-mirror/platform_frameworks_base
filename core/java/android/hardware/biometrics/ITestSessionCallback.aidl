@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.hardware.biometrics;
 
-package com.android.keyguard.dagger;
-
-import com.android.keyguard.CarrierText;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
-
-import dagger.Module;
-import dagger.Provides;
-
-/** Dagger module for {@link KeyguardStatusBarViewComponent}. */
-@Module
-public abstract class KeyguardStatusBarViewModule {
-    @Provides
-    @KeyguardStatusBarViewScope
-    static CarrierText getCarrierText(KeyguardStatusBarView view) {
-        return view.findViewById(R.id.keyguard_carrier_text);
-    }
+/**
+ * ITestSession callback for FingerprintManager and BiometricManager.
+ * @hide
+ */
+interface ITestSessionCallback {
+    void onCleanupStarted(int userId);
+    void onCleanupFinished(int userId);
 }

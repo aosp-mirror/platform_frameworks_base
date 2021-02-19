@@ -209,4 +209,10 @@ oneway interface ITaskStackListener {
      * @param taskInfo info about the task which moved
      */
     void onTaskMovedToBack(in ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
+     * Called when the lock task mode changes. See ActivityManager#LOCK_TASK_MODE_* and
+     * LockTaskController.
+     */
+    void onLockTaskModeChanged(int mode);
 }

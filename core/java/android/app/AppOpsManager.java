@@ -795,7 +795,8 @@ public class AppOpsManager {
     // when adding one of these:
     //  - increment _NUM_OP
     //  - define an OPSTR_* constant (marked as @SystemApi)
-    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpToPerms, sOpDefault
+    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode, sOpDisableReset,
+    //      sOpRestrictions, sOpAllowSystemRestrictionBypass
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -1174,13 +1175,19 @@ public class AppOpsManager {
      *
      * @hide
      */
-    // TODO: Add as AppProtoEnums
-    public static final int OP_RECORD_AUDIO_OUTPUT = 106;
+    public static final int OP_RECORD_AUDIO_OUTPUT = AppProtoEnums.APP_OP_RECORD_AUDIO_OUTPUT;
+
+    /**
+     * App can schedule exact alarm to perform timing based background work
+     *
+     * @hide
+     */
+    public static final int OP_SCHEDULE_EXACT_ALARM = AppProtoEnums.APP_OP_SCHEDULE_EXACT_ALARM;
 
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 107;
+    public static final int _NUM_OP = 108;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1553,6 +1560,13 @@ public class AppOpsManager {
      */
     public static final String OPSTR_RECORD_AUDIO_OUTPUT = "android:record_audio_output";
 
+    /**
+     * App can schedule exact alarm to perform timing based background work.
+     *
+     * @hide
+     */
+    public static final String OPSTR_SCHEDULE_EXACT_ALARM = "android:schedule_exact_alarm";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1633,6 +1647,7 @@ public class AppOpsManager {
             OP_LOADER_USAGE_STATS,
             OP_MANAGE_ONGOING_CALLS,
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
+            OP_SCHEDULE_EXACT_ALARM,
     };
 
     /**
@@ -1751,6 +1766,7 @@ public class AppOpsManager {
             OP_MANAGE_CREDENTIALS,              // MANAGE_CREDENTIALS
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             OP_RECORD_AUDIO_OUTPUT,             // RECORD_AUDIO_OUTPUT
+            OP_SCHEDULE_EXACT_ALARM,            // SCHEDULE_EXACT_ALARM
     };
 
     /**
@@ -1864,6 +1880,7 @@ public class AppOpsManager {
             OPSTR_MANAGE_CREDENTIALS,
             OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OPSTR_RECORD_AUDIO_OUTPUT,
+            OPSTR_SCHEDULE_EXACT_ALARM,
     };
 
     /**
@@ -1978,6 +1995,7 @@ public class AppOpsManager {
             "MANAGE_CREDENTIALS",
             "USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER",
             "RECORD_AUDIO_OUTPUT",
+            "SCHEDULE_EXACT_ALARM",
     };
 
     /**
@@ -2093,6 +2111,7 @@ public class AppOpsManager {
             null, // no permission for OP_MANAGE_CREDENTIALS
             Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             null, // no permission for OP_RECORD_AUDIO_OUTPUT
+            Manifest.permission.SCHEDULE_EXACT_ALARM,
     };
 
     /**
@@ -2208,6 +2227,7 @@ public class AppOpsManager {
             null, // MANAGE_CREDENTIALS
             null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             null, // RECORD_AUDIO_OUTPUT
+            null, // SCHEDULE_EXACT_ALARM
     };
 
     /**
@@ -2322,6 +2342,7 @@ public class AppOpsManager {
             null, // MANAGE_CREDENTIALS
             null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             null, // RECORD_AUDIO_OUTPUT
+            null, // SCHEDULE_EXACT_ALARM
     };
 
     /**
@@ -2435,6 +2456,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // MANAGE_CREDENTIALS
             AppOpsManager.MODE_DEFAULT, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO_OUTPUT
+            AppOpsManager.MODE_DEFAULT, // SCHEDULE_EXACT_ALARM
     };
 
     /**
@@ -2552,6 +2574,7 @@ public class AppOpsManager {
             false, // MANAGE_CREDENTIALS
             true, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             false, // RECORD_AUDIO_OUTPUT
+            false, // SCHEDULE_EXACT_ALARM
     };
 
     /**

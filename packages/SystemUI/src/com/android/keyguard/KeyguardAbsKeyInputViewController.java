@@ -31,7 +31,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
-import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
+import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
@@ -41,7 +41,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
-    private final EmergencyButtonController mEmergencyButtonController;
     private CountDownTimer mCountdownTimer;
     protected KeyguardMessageAreaController mMessageAreaController;
     private boolean mDismissing;
@@ -71,12 +70,11 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            LatencyTracker latencyTracker, EmergencyButtonController emergencyButtonController) {
-        super(view, securityMode, keyguardSecurityCallback, emergencyButtonController);
+            LatencyTracker latencyTracker) {
+        super(view, securityMode, keyguardSecurityCallback);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
-        mEmergencyButtonController = emergencyButtonController;
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = messageAreaControllerFactory.create(kma);
     }
@@ -85,7 +83,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     @Override
     public void onInit() {
-        super.onInit();
         mMessageAreaController.init();
     }
 
@@ -94,7 +91,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         super.onViewAttached();
         mView.setKeyDownListener(mKeyDownListener);
         mView.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
-        mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
+        EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
+        if (button != null) {
+            button.setCallback(mEmergencyButtonCallback);
+        }
     }
 
     @Override
