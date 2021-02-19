@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -228,14 +229,14 @@ public final class UwbManager {
      * @param callbacks {@link RangingSession.Callback} to associate with the
      *                  {@link RangingSession} that is being opened.
      *
-     * @return an {@link AutoCloseable} that is able to be used to close or cancel the opening of a
+     * @return an {@link CancellationSignal} that is able to be used to cancel the opening of a
      *         {@link RangingSession} that has been requested through {@link #openRangingSession}
      *         but has not yet been made available by
      *         {@link RangingSession.Callback#onOpened(RangingSession)}.
      */
     @NonNull
     @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
+    public CancellationSignal openRangingSession(@NonNull PersistableBundle parameters,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
         return mRangingManager.openSession(parameters, executor, callbacks);
