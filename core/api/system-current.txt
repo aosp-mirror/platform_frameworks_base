@@ -9587,10 +9587,28 @@ package android.service.dataloader {
 
 package android.service.displayhash {
 
+  public final class DisplayHashParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.util.Size getBufferSize();
+    method public boolean isBufferScaleWithFiltering();
+    method public boolean isGrayscaleBuffer();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.displayhash.DisplayHashParams> CREATOR;
+  }
+
+  public static final class DisplayHashParams.Builder {
+    ctor public DisplayHashParams.Builder();
+    method @NonNull public android.service.displayhash.DisplayHashParams build();
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferScaleWithFiltering(boolean);
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setBufferSize(int, int);
+    method @NonNull public android.service.displayhash.DisplayHashParams.Builder setGrayscaleBuffer(boolean);
+  }
+
   public abstract class DisplayHasherService extends android.app.Service {
     ctor public DisplayHasherService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public abstract void onGenerateDisplayHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String, @NonNull android.view.displayhash.DisplayHashResultCallback);
+    method @NonNull public abstract java.util.Map<java.lang.String,android.service.displayhash.DisplayHashParams> onGetDisplayHashAlgorithms();
     method @Nullable public abstract android.view.displayhash.VerifiedDisplayHash onVerifyDisplayHash(@NonNull byte[], @NonNull android.view.displayhash.DisplayHash);
     field public static final String SERVICE_INTERFACE = "android.service.displayhash.DisplayHasherService";
   }
