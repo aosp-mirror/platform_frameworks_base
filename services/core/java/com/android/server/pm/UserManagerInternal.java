@@ -63,8 +63,13 @@ public abstract class UserManagerInternal {
      */
     public interface UserLifecycleListener {
 
-        /** Called when a new user is created. */
-        default void onUserCreated(UserInfo user) {}
+        /**
+         * Called when a new user is created.
+         *
+         * @param user new user.
+         * @param token token passed to the method that created the user.
+         */
+        default void onUserCreated(UserInfo user, @Nullable Object token) {}
 
         /** Called when an existing user is removed. */
         default void onUserRemoved(UserInfo user) {}
@@ -179,10 +184,12 @@ public abstract class UserManagerInternal {
      * {@link UserManager#DISALLOW_ADD_USER} and {@link UserManager#DISALLOW_ADD_MANAGED_PROFILE}
      *
      * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
-     * createAndManageUser is called by the device owner.
+     * createAndManageUser is called by the device owner; it uses {@code token} to block until
+     * the user is created (as it will be passed back to it through
+     * {@link UserLifecycleListener#onUserCreated(UserInfo, Object)});
      */
     public abstract UserInfo createUserEvenWhenDisallowed(String name, String userType,
-            int flags, String[] disallowedPackages)
+            int flags, String[] disallowedPackages, @Nullable Object token)
             throws UserManager.CheckedUserOperationException;
 
     /**
