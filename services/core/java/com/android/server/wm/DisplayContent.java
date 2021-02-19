@@ -150,7 +150,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
@@ -3639,8 +3638,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private boolean isImeControlledByApp() {
-        return mImeInputTarget != null && !WindowConfiguration.isSplitScreenWindowingMode(
-                        mImeInputTarget.getWindowingMode());
+        return mImeInputTarget != null && !mImeInputTarget.inMultiWindowMode();
     }
 
     boolean isImeAttachedToApp() {

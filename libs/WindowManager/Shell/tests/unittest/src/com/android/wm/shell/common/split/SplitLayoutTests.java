@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,7 @@ import org.mockito.MockitoAnnotations;
 public class SplitLayoutTests extends ShellTestCase {
     @Mock SplitLayout.LayoutChangeListener mLayoutChangeListener;
     @Mock SurfaceControl mRootLeash;
+    @Mock DisplayImeController mDisplayImeController;
     private SplitLayout mSplitLayout;
 
     @Before
@@ -59,7 +61,8 @@ public class SplitLayoutTests extends ShellTestCase {
                 mContext,
                 getConfiguration(false),
                 mLayoutChangeListener,
-                b -> b.setParent(mRootLeash));
+                b -> b.setParent(mRootLeash),
+                mDisplayImeController);
     }
 
     @Test
