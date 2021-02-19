@@ -133,10 +133,11 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected Callback mCallback;
     protected final ArrayList<NotificationLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
 
-    private final RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
+    private final RemoteViews.InteractionHandler
+            mInteractionHandler = new RemoteViews.InteractionHandler() {
 
         @Override
-        public boolean onClickHandler(
+        public boolean onInteraction(
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
             mStatusBarLazy.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
                     "NOTIFICATION_CLICK");
@@ -164,11 +165,11 @@ public class NotificationRemoteInputManager implements Dumpable {
             Notification.Action action = getActionFromView(view, entry, pendingIntent);
             return mCallback.handleRemoteViewClick(view, pendingIntent,
                     action == null ? false : action.isAuthenticationRequired(), () -> {
-                Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
-                options.second.setLaunchWindowingMode(
-                        WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
-                mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
-                return RemoteViews.startPendingIntent(view, pendingIntent, options);
+                    Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
+                    options.second.setLaunchWindowingMode(
+                            WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
+                    mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
+                    return RemoteViews.startPendingIntent(view, pendingIntent, options);
             });
         }
 
@@ -690,8 +691,8 @@ public class NotificationRemoteInputManager implements Dumpable {
      *
      * @return on-click handler
      */
-    public RemoteViews.OnClickHandler getRemoteViewsOnClickHandler() {
-        return mOnClickHandler;
+    public RemoteViews.InteractionHandler getRemoteViewsOnClickHandler() {
+        return mInteractionHandler;
     }
 
     @VisibleForTesting

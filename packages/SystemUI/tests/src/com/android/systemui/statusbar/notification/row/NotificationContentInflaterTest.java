@@ -386,7 +386,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
 
         @Override
         public CancellationSignal applyAsync(Context context, ViewGroup parent, Executor executor,
-                OnViewAppliedListener listener, OnClickHandler handler) {
+                OnViewAppliedListener listener, InteractionHandler handler) {
             mHandler.post(() -> listener.onError(new RuntimeException("Failed to inflate async")));
             return new CancellationSignal();
         }

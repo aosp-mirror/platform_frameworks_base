@@ -317,7 +317,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             NotifRemoteViewCache remoteViewCache,
             NotificationEntry entry,
             ExpandableNotificationRow row,
-            RemoteViews.OnClickHandler remoteViewClickHandler,
+            RemoteViews.InteractionHandler remoteViewClickHandler,
             @Nullable InflationCallback callback) {
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
@@ -442,7 +442,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             final NotificationEntry entry,
             final ExpandableNotificationRow row,
             boolean isNewView,
-            RemoteViews.OnClickHandler remoteViewClickHandler,
+            RemoteViews.InteractionHandler remoteViewClickHandler,
             @Nullable final InflationCallback callback,
             NotificationContentView parentLayout,
             View existingView,
@@ -705,7 +705,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final Executor mBgExecutor;
         private ExpandableNotificationRow mRow;
         private Exception mError;
-        private RemoteViews.OnClickHandler mRemoteViewClickHandler;
+        private RemoteViews.InteractionHandler mRemoteViewClickHandler;
         private CancellationSignal mCancellationSignal;
         private final ConversationNotificationProcessor mConversationProcessor;
         private final boolean mIsMediaInQS;
@@ -723,7 +723,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 boolean usesIncreasedHeight,
                 boolean usesIncreasedHeadsUpHeight,
                 InflationCallback callback,
-                RemoteViews.OnClickHandler remoteViewClickHandler,
+                RemoteViews.InteractionHandler remoteViewClickHandler,
                 boolean isMediaFlagEnabled,
                 SmartRepliesAndActionsInflater smartRepliesInflater) {
             mEntry = entry;
