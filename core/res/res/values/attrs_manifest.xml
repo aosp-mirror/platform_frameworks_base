@@ -285,9 +285,6 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system default text classifier -->
         <flag name="textClassifier" value="0x10000" />
-        <!-- Additional flag from base permission type: this permission will be granted to the
-             wellbeing app, as defined by the OEM. -->
-        <flag name="wellbeing" value="0x20000" />
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the document manager -->
         <flag name="documenter" value="0x40000" />

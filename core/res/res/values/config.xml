@@ -1966,6 +1966,8 @@
     <string name="config_systemSpeechRecognizer" translatable="false"></string>
     <!-- The name of the package that will hold the system Wi-Fi coex manager role. -->
     <string name="config_systemWifiCoexManager" translateable="false"></string>
+    <!-- The name of the package that will hold the wellbeing role. -->
+    <string name="config_systemWellbeing" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false"></string>

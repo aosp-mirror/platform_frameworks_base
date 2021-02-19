@@ -3170,6 +3170,8 @@
     <public name="config_systemSpeechRecognizer" />
     <!-- @hide @SystemApi -->
     <public name="config_systemWifiCoexManager" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemWellbeing" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

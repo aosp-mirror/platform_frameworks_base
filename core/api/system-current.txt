@@ -358,6 +358,7 @@ package android {
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
+    field public static final int config_systemWellbeing = 17039408; // 0x1040030
     field public static final int config_systemWifiCoexManager = 17039407; // 0x104002f
   }
 
@@ -2689,7 +2690,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_ROLE = 67108864; // 0x4000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
-    field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
+    field @Deprecated public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
     field @Nullable public final String backgroundPermission;
     field @StringRes public int requestRes;
   }

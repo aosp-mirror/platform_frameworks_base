@@ -351,6 +351,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -1385,7 +1386,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public @Nullable String systemTextClassifierPackage;
         public @Nullable String overlayConfigSignaturePackage;
         public ViewCompiler viewCompiler;
-        public @Nullable String wellbeingPackage;
         public @Nullable String retailDemoPackage;
         public @Nullable String recentsPackage;
         public ComponentName resolveComponentName;
@@ -1676,7 +1676,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mDefaultTextClassifierPackage;
     final @Nullable String mSystemTextClassifierPackageName;
-    final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
@@ -6216,7 +6215,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mStorageManagerPackage = testParams.storageManagerPackage;
         mDefaultTextClassifierPackage = testParams.defaultTextClassifierPackage;
         mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
-        mWellbeingPackage = testParams.wellbeingPackage;
         mRetailDemoPackage = testParams.retailDemoPackage;
         mRecentsPackage = testParams.recentsPackage;
         mDocumenterPackage = testParams.documenterPackage;
@@ -6817,7 +6815,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mDefaultTextClassifierPackage = getDefaultTextClassifierPackageName();
             mSystemTextClassifierPackageName = getSystemTextClassifierPackageName();
-            mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
@@ -22840,7 +22837,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getWellbeingPackageName() {
-        return ensureSystemPackageName(mContext.getString(R.string.config_defaultWellbeingPackage));
+        return CollectionUtils.firstOrNull(
+                mContext.getSystemService(RoleManager.class).getRoleHolders(
+                        RoleManager.ROLE_SYSTEM_WELLBEING));
     }
 
     @Override
@@ -26358,8 +26357,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
                     return filterOnlySystemPackages(mRequiredPermissionControllerPackage);
-                case PackageManagerInternal.PACKAGE_WELLBEING:
-                    return filterOnlySystemPackages(mWellbeingPackage);
                 case PackageManagerInternal.PACKAGE_DOCUMENTER:
                     return filterOnlySystemPackages(mDocumenterPackage);
                 case PackageManagerInternal.PACKAGE_CONFIGURATOR:
