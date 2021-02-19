@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ম্যানেজ করুন"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল বাতিল করা হয়েছে।"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন ও \'ফুল-স্ক্রিন\' মোড ব্যবহার করুন।"</string>
+    <string name="got_it" msgid="4428750913636945527">"বুঝেছি"</string>
 </resources>

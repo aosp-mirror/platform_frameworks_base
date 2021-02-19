@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"泡泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已關閉泡泡。"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"輕觸即可重新啟動這個應用程式並進入全螢幕模式。"</string>
+    <string name="got_it" msgid="4428750913636945527">"我知道了"</string>
 </resources>
