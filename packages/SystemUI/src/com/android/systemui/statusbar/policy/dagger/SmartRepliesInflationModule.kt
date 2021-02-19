@@ -17,10 +17,10 @@ package com.android.systemui.statusbar.policy.dagger
 
 import com.android.systemui.statusbar.policy.SmartActionInflater
 import com.android.systemui.statusbar.policy.SmartActionInflaterImpl
-import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflater
-import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflaterImpl
 import com.android.systemui.statusbar.policy.SmartReplyInflater
 import com.android.systemui.statusbar.policy.SmartReplyInflaterImpl
+import com.android.systemui.statusbar.policy.SmartReplyStateInflater
+import com.android.systemui.statusbar.policy.SmartReplyStateInflaterImpl
 import dagger.Binds
 import dagger.Module
 
@@ -29,6 +29,6 @@ interface SmartRepliesInflationModule {
     @Binds fun bindSmartActionsInflater(impl: SmartActionInflaterImpl): SmartActionInflater
     @Binds fun bindSmartReplyInflater(impl: SmartReplyInflaterImpl): SmartReplyInflater
     @Binds fun bindsInflatedSmartRepliesProvider(
-        impl: SmartRepliesAndActionsInflaterImpl
-    ): SmartRepliesAndActionsInflater
+        impl: SmartReplyStateInflaterImpl
+    ): SmartReplyStateInflater
 }

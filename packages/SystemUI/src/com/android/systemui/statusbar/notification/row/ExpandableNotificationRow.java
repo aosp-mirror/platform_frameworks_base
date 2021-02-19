@@ -104,7 +104,7 @@ import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.FileDescriptor;
@@ -3196,8 +3196,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * Returns the Smart Suggestions backing the smart suggestion buttons in the notification.
      */
-    public SmartRepliesAndActions getExistingSmartRepliesAndActions() {
-        return mPrivateLayout.getCurrentSmartRepliesAndActions();
+    public InflatedSmartReplyState getExistingSmartReplyState() {
+        return mPrivateLayout.getCurrentSmartReplyState();
     }
 
     @VisibleForTesting

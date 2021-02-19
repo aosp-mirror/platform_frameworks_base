@@ -58,16 +58,18 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.RemoteInputView;
-import com.android.systemui.statusbar.policy.SmartRepliesAndActionsInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
+import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
@@ -106,9 +108,9 @@ public class NotificationContentView extends FrameLayout {
     private SmartReplyView mExpandedSmartReplyView;
     private SmartReplyView mHeadsUpSmartReplyView;
     private SmartReplyController mSmartReplyController;
-    private InflatedSmartReplies mExpandedInflatedSmartReplies;
-    private InflatedSmartReplies mHeadsUpInflatedSmartReplies;
-    private SmartRepliesAndActions mCurrentSmartRepliesAndActions;
+    private InflatedSmartReplyViewHolder mExpandedInflatedSmartReplies;
+    private InflatedSmartReplyViewHolder mHeadsUpInflatedSmartReplies;
+    private InflatedSmartReplyState mCurrentSmartReplyState;
 
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
@@ -1189,29 +1191,19 @@ public class NotificationContentView extends FrameLayout {
 
         applyRemoteInput(entry, hasFreeformRemoteInput(entry));
 
-        if (mExpandedInflatedSmartReplies == null && mHeadsUpInflatedSmartReplies == null) {
+        if (mCurrentSmartReplyState == null) {
             if (DEBUG) {
-                Log.d(TAG, "Both expanded, and heads-up InflatedSmartReplies are null, "
-                        + "don't add smart replies.");
+                Log.d(TAG, "InflatedSmartReplies are null, don't add smart replies.");
             }
             return;
         }
-        // The inflated smart-reply objects for the expanded view and the heads-up view both contain
-        // the same SmartRepliesAndActions to avoid discrepancies between the two views. We here
-        // reuse that object for our local SmartRepliesAndActions to avoid discrepancies between
-        // this class and the InflatedSmartReplies classes.
-        mCurrentSmartRepliesAndActions = mExpandedInflatedSmartReplies != null
-                ? mExpandedInflatedSmartReplies.getSmartRepliesAndActions()
-                : mHeadsUpInflatedSmartReplies.getSmartRepliesAndActions();
         if (DEBUG) {
             Log.d(TAG, String.format("Adding suggestions for %s, %d actions, and %d replies.",
                     entry.getSbn().getKey(),
-                    mCurrentSmartRepliesAndActions.smartActions == null ? 0 :
-                            mCurrentSmartRepliesAndActions.smartActions.actions.size(),
-                    mCurrentSmartRepliesAndActions.smartReplies == null ? 0 :
-                            mCurrentSmartRepliesAndActions.smartReplies.choices.size()));
+                    mCurrentSmartReplyState.getSmartActionsList().size(),
+                    mCurrentSmartReplyState.getSmartRepliesList().size()));
         }
-        applySmartReplyView(mCurrentSmartRepliesAndActions, entry);
+        applySmartReplyView(mCurrentSmartReplyState, entry);
     }
 
     private void applyRemoteInput(NotificationEntry entry, boolean hasFreeformRemoteInput) {
@@ -1415,41 +1407,74 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private void applySmartReplyView(
-            SmartRepliesAndActions smartRepliesAndActions,
+            InflatedSmartReplyState state,
             NotificationEntry entry) {
+        if (mContractedChild != null) {
+            applyExternalSmartReplyState(mContractedChild, state);
+        }
         if (mExpandedChild != null) {
-            mExpandedSmartReplyView = applySmartReplyView(mExpandedChild, smartRepliesAndActions,
+            applyExternalSmartReplyState(mExpandedChild, state);
+            mExpandedSmartReplyView = applySmartReplyView(mExpandedChild, state,
                     entry, mExpandedInflatedSmartReplies);
             if (mExpandedSmartReplyView != null) {
-                if (smartRepliesAndActions.smartReplies != null
-                        || smartRepliesAndActions.smartActions != null) {
-                    int numSmartReplies = smartRepliesAndActions.smartReplies == null
-                            ? 0 : smartRepliesAndActions.smartReplies.choices.size();
-                    int numSmartActions = smartRepliesAndActions.smartActions == null
-                            ? 0 : smartRepliesAndActions.smartActions.actions.size();
-                    boolean fromAssistant = smartRepliesAndActions.smartReplies == null
-                            ? smartRepliesAndActions.smartActions.fromAssistant
-                            : smartRepliesAndActions.smartReplies.fromAssistant;
-                    boolean editBeforeSending = smartRepliesAndActions.smartReplies != null
+                SmartReplyView.SmartReplies smartReplies = state.getSmartReplies();
+                SmartReplyView.SmartActions smartActions = state.getSmartActions();
+                if (smartReplies != null || smartActions != null) {
+                    int numSmartReplies = smartReplies == null ? 0 : smartReplies.choices.size();
+                    int numSmartActions = smartActions == null ? 0 : smartActions.actions.size();
+                    boolean fromAssistant = smartReplies == null
+                            ? smartActions.fromAssistant
+                            : smartReplies.fromAssistant;
+                    boolean editBeforeSending = smartReplies != null
                             && mSmartReplyConstants.getEffectiveEditChoicesBeforeSending(
-                                    smartRepliesAndActions.smartReplies.remoteInput
-                                            .getEditChoicesBeforeSending());
+                                    smartReplies.remoteInput.getEditChoicesBeforeSending());
 
                     mSmartReplyController.smartSuggestionsAdded(entry, numSmartReplies,
                             numSmartActions, fromAssistant, editBeforeSending);
                 }
             }
         }
-        if (mHeadsUpChild != null && mSmartReplyConstants.getShowInHeadsUp()) {
-            mHeadsUpSmartReplyView = applySmartReplyView(mHeadsUpChild, smartRepliesAndActions,
-                    entry, mHeadsUpInflatedSmartReplies);
+        if (mHeadsUpChild != null) {
+            applyExternalSmartReplyState(mHeadsUpChild, state);
+            if (mSmartReplyConstants.getShowInHeadsUp()) {
+                mHeadsUpSmartReplyView = applySmartReplyView(mHeadsUpChild, state,
+                        entry, mHeadsUpInflatedSmartReplies);
+            }
+        }
+    }
+
+    private void applyExternalSmartReplyState(View view, InflatedSmartReplyState state) {
+        boolean hasPhishingAlert = state != null && state.getHasPhishingAction();
+        View phishingAlertIcon = view.findViewById(com.android.internal.R.id.phishing_alert);
+        if (phishingAlertIcon != null) {
+            if (DEBUG) {
+                Log.d(TAG, "Setting 'phishing_alert' view visible=" + hasPhishingAlert + ".");
+            }
+            phishingAlertIcon.setVisibility(hasPhishingAlert ? View.VISIBLE : View.GONE);
+        }
+        List<Integer> suppressedActionIndices = state != null
+                ? state.getSuppressedActionIndices()
+                : Collections.emptyList();
+        ViewGroup actionsList = view.findViewById(com.android.internal.R.id.actions);
+        if (actionsList != null) {
+            if (DEBUG && !suppressedActionIndices.isEmpty()) {
+                Log.d(TAG, "Suppressing actions with indices: " + suppressedActionIndices);
+            }
+            for (int i = 0; i < actionsList.getChildCount(); i++) {
+                View actionBtn = actionsList.getChildAt(i);
+                Object actionIndex =
+                        actionBtn.getTag(com.android.internal.R.id.notification_action_index_tag);
+                boolean suppressAction = actionIndex instanceof Integer
+                        && suppressedActionIndices.contains(actionIndex);
+                actionBtn.setVisibility(suppressAction ? View.GONE : View.VISIBLE);
+            }
         }
     }
 
     @Nullable
     private SmartReplyView applySmartReplyView(View view,
-            SmartRepliesAndActions smartRepliesAndActions,
-            NotificationEntry entry, InflatedSmartReplies inflatedSmartReplyView) {
+            InflatedSmartReplyState smartReplyState,
+            NotificationEntry entry, InflatedSmartReplyViewHolder inflatedSmartReplyViewHolder) {
         View smartReplyContainerCandidate = view.findViewById(
                 com.android.internal.R.id.smart_reply_container);
         if (!(smartReplyContainerCandidate instanceof LinearLayout)) {
@@ -1457,8 +1482,7 @@ public class NotificationContentView extends FrameLayout {
         }
 
         LinearLayout smartReplyContainer = (LinearLayout) smartReplyContainerCandidate;
-        if (!SmartRepliesAndActionsInflaterKt
-                .shouldShowSmartReplyView(entry, smartRepliesAndActions)) {
+        if (!SmartReplyStateInflaterKt.shouldShowSmartReplyView(entry, smartReplyState)) {
             smartReplyContainer.setVisibility(View.GONE);
             return null;
         }
@@ -1471,15 +1495,15 @@ public class NotificationContentView extends FrameLayout {
             smartReplyContainer.removeAllViews();
         }
         if (smartReplyContainer.getChildCount() == 0
-                && inflatedSmartReplyView != null
-                && inflatedSmartReplyView.getSmartReplyView() != null) {
-            smartReplyView = inflatedSmartReplyView.getSmartReplyView();
+                && inflatedSmartReplyViewHolder != null
+                && inflatedSmartReplyViewHolder.getSmartReplyView() != null) {
+            smartReplyView = inflatedSmartReplyViewHolder.getSmartReplyView();
             smartReplyContainer.addView(smartReplyView);
         }
         if (smartReplyView != null) {
             smartReplyView.resetSmartSuggestions(smartReplyContainer);
             smartReplyView.addPreInflatedButtons(
-                    inflatedSmartReplyView.getSmartSuggestionButtons());
+                    inflatedSmartReplyViewHolder.getSmartSuggestionButtons());
             // Ensure the colors of the smart suggestion buttons are up-to-date.
             smartReplyView.setBackgroundTintColor(entry.getRow().getCurrentBackgroundTint());
             smartReplyContainer.setVisibility(View.VISIBLE);
@@ -1495,7 +1519,7 @@ public class NotificationContentView extends FrameLayout {
      * {@link SmartReplyView} related to the expanded notification state is cleared.
      */
     public void setExpandedInflatedSmartReplies(
-            @Nullable InflatedSmartReplies inflatedSmartReplies) {
+            @Nullable InflatedSmartReplyViewHolder inflatedSmartReplies) {
         mExpandedInflatedSmartReplies = inflatedSmartReplies;
         if (inflatedSmartReplies == null) {
             mExpandedSmartReplyView = null;
@@ -1510,7 +1534,7 @@ public class NotificationContentView extends FrameLayout {
      * {@link SmartReplyView} related to the heads-up notification state is cleared.
      */
     public void setHeadsUpInflatedSmartReplies(
-            @Nullable InflatedSmartReplies inflatedSmartReplies) {
+            @Nullable InflatedSmartReplyViewHolder inflatedSmartReplies) {
         mHeadsUpInflatedSmartReplies = inflatedSmartReplies;
         if (inflatedSmartReplies == null) {
             mHeadsUpSmartReplyView = null;
@@ -1518,10 +1542,21 @@ public class NotificationContentView extends FrameLayout {
     }
 
     /**
+     * Set pre-inflated replies and actions for the notification.
+     * This can be relevant to any state of the notification, even contracted, because smart actions
+     * may cause a phishing alert to be made visible.
+     * @param smartReplyState the pre-inflated list of replies and actions
+     */
+    public void setInflatedSmartReplyState(
+            @NonNull InflatedSmartReplyState smartReplyState) {
+        mCurrentSmartReplyState = smartReplyState;
+    }
+
+    /**
      * Returns the smart replies and actions currently shown in the notification.
      */
-    @Nullable public SmartRepliesAndActions getCurrentSmartRepliesAndActions() {
-        return mCurrentSmartRepliesAndActions;
+    @Nullable public InflatedSmartReplyState getCurrentSmartReplyState() {
+        return mCurrentSmartReplyState;
     }
 
     public void closeRemoteInput() {

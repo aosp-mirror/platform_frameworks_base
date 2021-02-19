@@ -123,6 +123,18 @@
         />
 
     <ImageView
+        android:id="@+id/phishing_alert"
+        android:layout_width="@dimen/notification_phishing_alert_size"
+        android:layout_height="@dimen/notification_phishing_alert_size"
+        android:layout_marginStart="4dp"
+        android:baseline="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_dialog_alert_material"
+        android:visibility="gone"
+        android:contentDescription="@string/notification_phishing_alert_content_description"
+        />
+
+    <ImageView
         android:id="@+id/profile_badge"
         android:layout_width="@dimen/notification_badge_size"
         android:layout_height="@dimen/notification_badge_size"
