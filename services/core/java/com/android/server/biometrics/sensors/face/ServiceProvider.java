@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -28,6 +29,7 @@ import android.os.IBinder;
 import android.os.NativeHandle;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -123,7 +125,8 @@ public interface ServiceProvider {
 
     void startPreparedClient(int sensorId, int cookie);
 
-    void scheduleInternalCleanup(int sensorId, int userId);
+    void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable BaseClientMonitor.Callback callback);
 
     void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
             boolean clearSchedulerBuffer);
@@ -133,7 +136,8 @@ public interface ServiceProvider {
     void dumpInternal(int sensorId, @NonNull PrintWriter pw);
 
     @NonNull
-    ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
+    ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName);
 
     void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args);
 }

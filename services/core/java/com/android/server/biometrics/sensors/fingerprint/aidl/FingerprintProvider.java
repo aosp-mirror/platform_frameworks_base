@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
@@ -185,7 +186,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         for (int i = 0; i < mSensors.size(); i++) {
             final int sensorId = mSensors.keyAt(i);
             scheduleLoadAuthenticatorIds(sensorId);
-            scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser());
+            scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser(),
+                    null /* callback */);
         }
 
         return mDaemon;
@@ -539,7 +541,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void scheduleInternalCleanup(int sensorId, int userId) {
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
         mHandler.post(() -> {
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
@@ -559,7 +562,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                                 mContext.getOpPackageName(), sensorId, enrolledList,
                                 FingerprintUtils.getInstance(sensorId),
                                 mSensors.get(sensorId).getAuthenticatorIds());
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client, callback);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling internal cleanup", e);
             }
@@ -704,8 +707,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @NonNull
     @Override
-    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        return mSensors.get(sensorId).createTestSession();
+    public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName) {
+        return mSensors.get(sensorId).createTestSession(callback);
     }
 
     @Override
