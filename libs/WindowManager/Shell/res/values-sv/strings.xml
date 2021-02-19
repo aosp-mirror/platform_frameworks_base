@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubbla"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Hantera"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubblan ignorerades."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Tryck för att starta om appen i helskärmsläge."</string>
+    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>
