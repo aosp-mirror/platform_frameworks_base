@@ -93,6 +93,10 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रीनशॉटवर स्क्रोल करा"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट डिसमिस करा"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉटचे पूर्वावलोकन"</string>
+    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
@@ -410,6 +414,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सूर्योदयापर्यंत"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> वाजता सुरू होते"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> पर्यंत"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"ब्राइटनेस कमी करा"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC अक्षम केले आहे"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC सक्षम केले आहे"</string>
@@ -463,9 +468,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफाईल दर्शवा"</string>
     <string name="user_add_user" msgid="4336657383006913022">"वापरकर्ता जोडा"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नवीन वापरकर्ता"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"अतिथी सत्र संपायचे का?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"अतिथी सत्र संपवा"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथी काढायचे?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"सत्र संपवा"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"काढा"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथी, तुमचे पुन्‍हा स्‍वागत आहे!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तुम्ही तुमचे सत्र सुरू ठेवू इच्छिता?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"येथून सुरू करा"</string>
@@ -540,6 +546,8 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपल्या प्रशासकाने नेटवर्क लॉगिंग सुरू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
+    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
+    <skip />
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"तुम्‍ही <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"तुम्‍ही <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"तुमचे कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
@@ -733,7 +741,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"सिस्टमद्वारे या सूचनेला आपोआप &lt;b&gt;सायलंट म्हणून डीमोट केले&lt;/b&gt; गेले."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"तुमच्या रंगछटेमध्ये या सूचनेला आपोआप &lt;b&gt;थोडी जास्त&lt;/b&gt; म्हणून रँक केले गेले."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"तुमच्या रंगछटेमध्ये या सूचनेला आपोआप &lt;b&gt;थोडी कमी&lt;/b&gt; म्हणून रँक केले गेले."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"हे बरोबर होते का?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"डेव्हलपरला तुमचा फीडबॅक कळवा. हे बरोबर होते का?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"तुमच्‍या फीडबॅकबद्दल धन्यवाद!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ओके"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे खुली आहेत"</string>
@@ -880,6 +888,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> यावर हलवा"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> स्थानावर जोडा"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"स्थान <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"टाइल जोडली"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"टाइल काढून टाकली"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"द्रुत सेटिंग्ज संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"सेटिंग्ज उघडा."</string>
@@ -967,23 +977,17 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ॲप्लिकेशन्स तुमचे <xliff:g id="TYPES_LIST">%s</xliff:g> वापरत आहे."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" आणि "</string>
-    <!-- no translation found for ongoing_privacy_dialog_using_op (4125175620929701569) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_recent_op (4255923947334262404) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_enterprise (4082735415905550729) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_phonecall (3526223335298089311) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_attribution_text (9186683306719924646) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> हे <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> वापरत आहे"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ने अलीकडे <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> वापरले आहे"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(एंटरप्राइझ)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"फोन कॉल"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> द्वारे)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"कॅमेरा"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"स्थान"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"मायक्रोफोन"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेन्सर बंद आहेत"</string>
     <string name="device_services" msgid="1549944177856658705">"डिव्हाइस सेवा"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक नाही"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"हे अ‍ॅप रीस्टार्ट करण्यासाठी आणि फुल स्क्रीन करण्यासाठी टॅप करा."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"हलवा"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेव्हिगेशन अपडेट केले. बदल करण्यासाठी, सेटिंग्जवर जा."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेव्हिगेशन अपडेट करण्यासाठी सेटिंग्जवर जा"</string>

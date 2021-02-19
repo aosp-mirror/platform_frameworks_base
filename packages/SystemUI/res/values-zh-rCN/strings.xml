@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"滚动抓取长截图"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"关闭屏幕截图"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"屏幕截图预览"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"顶部边界"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"底部边界"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
@@ -410,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"在日出时关闭"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"在<xliff:g id="TIME">%s</xliff:g> 开启"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"调低亮度"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 已启用"</string>
@@ -463,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"显示个人资料"</string>
     <string name="user_add_user" msgid="4336657383006913022">"添加用户"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新用户"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"要结束访客会话吗？"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"结束访客会话"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"要移除访客吗？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"结束会话"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"移除"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"访客，欢迎回来！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"要继续您的会话吗？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>
@@ -540,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"您所在的单位已为您的工作资料安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"此设备上已安装证书授权中心。您的安全网络流量可能会受到监控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"您的管理员已开启网络日志功能（该功能会监控您设备上的流量）。"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"您的管理员已开启网络日志功能，该功能会监控您的工作资料的流量，而不会监控个人资料的流量。"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"您已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"您已连接到“<xliff:g id="VPN_APP_0">%1$s</xliff:g>”和“<xliff:g id="VPN_APP_1">%2$s</xliff:g>”（这两个应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"您的工作资料已连接到“<xliff:g id="VPN_APP">%1$s</xliff:g>”（该应用能够监控您的网络活动，其中包括收发电子邮件、使用应用和浏览网站）。"</string>
@@ -733,7 +738,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"系统已自动将此通知的重要性&lt;b&gt;降低为“静音”&lt;/b&gt;。"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"系统已自动&lt;b&gt;调高&lt;/b&gt;此通知在通知栏中的顺序。"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"系统已自动&lt;b&gt;调低&lt;/b&gt;此通知在通知栏中的顺序。"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"是否正确？"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"向开发者提供反馈。此信息是否正确？"</string>
     <string name="feedback_response" msgid="4671729244976641339">"感谢您提供反馈！"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"确定"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g>的通知控件已打开"</string>
@@ -880,6 +885,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移至 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"添加到位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加卡片"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除卡片"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"快捷设置编辑器。"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"打开设置。"</string>
@@ -970,7 +977,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>正在使用<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>最近曾使用<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"（企业版）"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"电话"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"电话"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"（通过<xliff:g id="ATTRIBUTION">%s</xliff:g>）"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"相机"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"位置信息"</string>
@@ -978,7 +985,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"已关闭传感器"</string>
     <string name="device_services" msgid="1549944177856658705">"设备服务"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"无标题"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"点按即可重启此应用并进入全屏模式。"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"移动"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>
