@@ -20,6 +20,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.content.pm.ParceledListSlice;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.NotificationStats;
 import android.service.notification.IStatusBarNotificationHolder;
@@ -58,4 +59,5 @@ oneway interface INotificationListener
     void onActionClicked(String key, in Notification.Action action, int source);
     void onNotificationClicked(String key);
     void onAllowedAdjustmentsChanged();
+    void onNotificationFeedbackReceived(String key, in NotificationRankingUpdate update, in Bundle feedback);
 }

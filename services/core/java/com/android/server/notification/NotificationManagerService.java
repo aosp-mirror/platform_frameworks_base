@@ -172,7 +172,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -215,7 +214,6 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
-import android.service.notification.ConditionProviderService;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
@@ -383,7 +381,8 @@ public class NotificationManagerService extends SystemService {
             Adjustment.KEY_TEXT_REPLIES,
             Adjustment.KEY_NOT_CONVERSATION,
             Adjustment.KEY_IMPORTANCE,
-            Adjustment.KEY_RANKING_SCORE};
+            Adjustment.KEY_RANKING_SCORE
+    };
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
@@ -431,8 +430,6 @@ public class NotificationManagerService extends SystemService {
     private static final int REQUEST_CODE_TIMEOUT = 1;
     private static final String SCHEME_TIMEOUT = "timeout";
     private static final String EXTRA_KEY = "key";
-
-    private static final String FEEDBACK_KEY = "feedback_key";
 
     private static final int NOTIFICATION_INSTANCE_ID_MAX = (1 << 13);
 
@@ -1020,30 +1017,26 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
                 final long now = System.currentTimeMillis();
-                //TODO(b/154257994): remove this when feedback apis are in place
-                boolean isFeedback = action.getExtras().containsKey(FEEDBACK_KEY);
-                if (!isFeedback) {
-                    MetricsLogger.action(r.getLogMaker(now)
-                            .setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION)
-                            .setType(MetricsEvent.TYPE_ACTION)
-                            .setSubtype(actionIndex)
-                            .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
-                            .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
-                            .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
-                                    action.isContextual() ? 1 : 0)
-                            .addTaggedData(
-                                    MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                                    generatedByAssistant ? 1 : 0)
-                            .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
-                                    nv.location.toMetricsEventEnum()));
-                    mNotificationRecordLogger.log(
-                            NotificationRecordLogger.NotificationEvent.fromAction(actionIndex,
-                                    generatedByAssistant, action.isContextual()), r);
-                    EventLogTags.writeNotificationActionClicked(key, actionIndex,
-                            r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
-                            nv.rank, nv.count);
-                    nv.recycle();
-                }
+                MetricsLogger.action(r.getLogMaker(now)
+                        .setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(actionIndex)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
+                                action.isContextual() ? 1 : 0)
+                        .addTaggedData(
+                                MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                                generatedByAssistant ? 1 : 0)
+                        .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
+                                nv.location.toMetricsEventEnum()));
+                mNotificationRecordLogger.log(
+                        NotificationRecordLogger.NotificationEvent.fromAction(actionIndex,
+                                generatedByAssistant, action.isContextual()), r);
+                EventLogTags.writeNotificationActionClicked(key, actionIndex,
+                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
+                        nv.rank, nv.count);
+                nv.recycle();
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantActionClicked(r, action, generatedByAssistant);
             }
@@ -1386,6 +1379,20 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onNotificationFeedbackReceived(String key, Bundle feedback) {
+            exitIdle();
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r == null) {
+                    if (DBG) Slog.w(TAG, "No notification with key: " + key);
+                    return;
+                }
+                mAssistants.notifyAssistantFeedbackReceived(r, feedback);
+            }
+        }
+
     };
 
     @VisibleForTesting
@@ -9503,6 +9510,26 @@ public class NotificationManagerService extends SystemService {
                             Slog.e(TAG, "unable to notify assistant (clicked): " + assistant, ex);
                         }
                     });
+        }
+
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantFeedbackReceived(final NotificationRecord r, Bundle feedback) {
+            final StatusBarNotification sbn = r.getSbn();
+
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                boolean sbnVisible = isVisibleToListener(
+                        sbn, r.getNotificationType(), info)
+                        && info.isSameUser(r.getUserId());
+                if (sbnVisible) {
+                    final INotificationListener assistant = (INotificationListener) info.service;
+                    try {
+                        final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
+                        assistant.onNotificationFeedbackReceived(sbn.getKey(), update, feedback);
+                    } catch (RemoteException ex) {
+                        Slog.e(TAG, "unable to notify assistant (feedback): " + assistant, ex);
+                    }
+                }
+            }
         }
 
         /**
