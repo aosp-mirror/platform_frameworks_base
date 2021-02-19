@@ -237,8 +237,7 @@ public class BiometricManager {
     public BiometricTestSession createTestSession(int sensorId) {
         try {
             return new BiometricTestSession(mContext, sensorId,
-                    (context, sensorId1, callback) -> mService
-                            .createTestSession(sensorId1, callback, context.getOpPackageName()));
+                    mService.createTestSession(sensorId, mContext.getOpPackageName()));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
