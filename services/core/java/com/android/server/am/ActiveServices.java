@@ -1949,20 +1949,30 @@ public final class ActiveServices {
                     && isLegacyApp;
         }
         if (!showNow) {
-            // is the notification such that it should show right away?
-            showNow = r.foregroundNoti.shouldShowForegroundImmediately();
-            // or is this an type of FGS that always shows immediately?
-            if (!showNow) {
-                switch (r.foregroundServiceType) {
-                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
-                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL:
-                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE:
-                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
-                        if (DEBUG_FOREGROUND_SERVICE) {
-                            Slog.d(TAG_SERVICE, "FGS " + r
-                                    + " type gets immediate display");
-                        }
-                        showNow = true;
+            // has the app forced deferral?
+            if (!r.foregroundNoti.isForegroundDisplayForceDeferred()) {
+                // is the notification such that it should show right away?
+                showNow = r.foregroundNoti.shouldShowForegroundImmediately();
+                if (DEBUG_FOREGROUND_SERVICE && showNow) {
+                    Slog.d(TAG_SERVICE, "FGS " + r
+                            + " notification policy says show immediately");
+                }
+                // or is this an type of FGS that always shows immediately?
+                if (!showNow) {
+                    switch (r.foregroundServiceType) {
+                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
+                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL:
+                        case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
+                            if (DEBUG_FOREGROUND_SERVICE) {
+                                Slog.d(TAG_SERVICE, "FGS " + r
+                                        + " type gets immediate display");
+                            }
+                            showNow = true;
+                    }
+                }
+            } else {
+                if (DEBUG_FOREGROUND_SERVICE) {
+                    Slog.d(TAG_SERVICE, "FGS " + r + " notification is app deferred");
                 }
             }
         }

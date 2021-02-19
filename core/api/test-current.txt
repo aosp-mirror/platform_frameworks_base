@@ -270,6 +270,10 @@ package android.app {
     method public abstract void onHomeVisibilityChanged(boolean);
   }
 
+  public class Notification implements android.os.Parcelable {
+    method public boolean shouldShowForegroundImmediately();
+  }
+
   public final class NotificationChannel implements android.os.Parcelable {
     method public int getOriginalImportance();
     method public boolean isBlockable();

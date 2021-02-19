@@ -38,6 +38,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -129,6 +130,52 @@ import java.util.function.Consumer;
 public class Notification implements Parcelable
 {
     private static final String TAG = "Notification";
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            FOREGROUND_SERVICE_DEFAULT,
+            FOREGROUND_SERVICE_IMMEDIATE,
+            FOREGROUND_SERVICE_DEFERRED
+    })
+    public @interface ServiceNotificationPolicy {};
+
+    /**
+     * If the Notification associated with starting a foreground service has been
+     * built using setForegroundServiceBehavior() with this behavior, display of
+     * the notification will usually be suppressed for a short time to avoid visual
+     * disturbances to the user.
+     * @see Notification.Builder#setForegroundServiceBehavior(int)
+     * @see #FOREGROUND_SERVICE_IMMEDIATE
+     * @see #FOREGROUND_SERVICE_DEFERRED
+     */
+    public static final @ServiceNotificationPolicy int FOREGROUND_SERVICE_DEFAULT = 0;
+
+    /**
+     * If the Notification associated with starting a foreground service has been
+     * built using setForegroundServiceBehavior() with this behavior, display of
+     * the notification will be immediate even if the default behavior would be
+     * to defer visibility for a short time.
+     * @see Notification.Builder#setForegroundServiceBehavior(int)
+     * @see #FOREGROUND_SERVICE_DEFAULT
+     * @see #FOREGROUND_SERVICE_DEFERRED
+     */
+    public static final @ServiceNotificationPolicy int FOREGROUND_SERVICE_IMMEDIATE = 1;
+
+    /**
+     * If the Notification associated with starting a foreground service has been
+     * built using setForegroundServiceBehavior() with this behavior, display of
+     * the notification will usually be suppressed for a short time to avoid visual
+     * disturbances to the user.
+     * @see Notification.Builder#setForegroundServiceBehavior(int)
+     * @see #FOREGROUND_SERVICE_DEFAULT
+     * @see #FOREGROUND_SERVICE_IMMEDIATE
+     */
+    public static final @ServiceNotificationPolicy int FOREGROUND_SERVICE_DEFERRED = 2;
+
+    private int mFgsDeferBehavior;
 
     /**
      * An activity that provides a user interface for adjusting notification preferences for its
@@ -645,11 +692,6 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_BUBBLE = 0x00001000;
 
-    /**
-     * @hide
-     */
-    public static final int FLAG_IMMEDIATE_FGS_DISPLAY = 0x00002000;
-
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -659,8 +701,7 @@ public class Notification implements Parcelable
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {FLAG_SHOW_LIGHTS, FLAG_ONGOING_EVENT,
             FLAG_INSISTENT, FLAG_ONLY_ALERT_ONCE,
             FLAG_AUTO_CANCEL, FLAG_NO_CLEAR, FLAG_FOREGROUND_SERVICE, FLAG_HIGH_PRIORITY,
-            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE,
-            FLAG_IMMEDIATE_FGS_DISPLAY})
+            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFlags{};
 
@@ -2550,6 +2591,8 @@ public class Notification implements Parcelable
         }
 
         mAllowSystemGeneratedContextualActions = parcel.readBoolean();
+
+        mFgsDeferBehavior = parcel.readInt();
     }
 
     @Override
@@ -2665,6 +2708,7 @@ public class Notification implements Parcelable
         that.mBadgeIcon = this.mBadgeIcon;
         that.mSettingsText = this.mSettingsText;
         that.mGroupAlertBehavior = this.mGroupAlertBehavior;
+        that.mFgsDeferBehavior = this.mFgsDeferBehavior;
         that.mBubbleMetadata = this.mBubbleMetadata;
         that.mAllowSystemGeneratedContextualActions = this.mAllowSystemGeneratedContextualActions;
 
@@ -3063,6 +3107,8 @@ public class Notification implements Parcelable
         }
 
         parcel.writeBoolean(mAllowSystemGeneratedContextualActions);
+
+        parcel.writeInt(mFgsDeferBehavior);
 
         // mUsesStandardHeader is not written because it should be recomputed in listeners
     }
@@ -4532,10 +4578,40 @@ public class Notification implements Parcelable
          * foreground service is shown as soon as the service's {@code startForeground()}
          * method is called, even if the system's UI policy might otherwise defer
          * its visibility to a later time.
+         * @deprecated Use setForegroundServiceBehavior(int) instead
          */
+        @Deprecated
         @NonNull
         public Builder setShowForegroundImmediately(boolean showImmediately) {
-            setFlag(FLAG_IMMEDIATE_FGS_DISPLAY, showImmediately);
+            setForegroundServiceBehavior(showImmediately
+                    ? FOREGROUND_SERVICE_IMMEDIATE
+                    : FOREGROUND_SERVICE_DEFAULT);
+            return this;
+        }
+
+        /**
+         * Specify a desired visibility policy for a Notification associated with a
+         * foreground service.  By default, the system can choose to defer
+         * visibility of the notification for a short time after the service is
+         * started.  Pass
+         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE BEHAVIOR_IMMEDIATE_DISPLAY}
+         * to this method in order to guarantee that visibility is never deferred.  Pass
+         * {@link Notification#FOREGROUND_SERVICE_DEFERRED BEHAVIOR_DEFERRED_DISPLAY}
+         * to request that visibility is deferred whenever possible.
+         *
+         * <p class="note">Note that deferred visibility is not guaranteed.  There
+         * may be some circumstances under which the system will show the foreground
+         * service's associated Notification immediately even when the app has used
+         * this method to explicitly request deferred display.</p>
+         * @param behavior One of
+         * {@link Notification#FOREGROUND_SERVICE_DEFAULT BEHAVIOR_DEFAULT},
+         * {@link Notification#FOREGROUND_SERVICE_IMMEDIATE BEHAVIOR_IMMEDIATE_DISPLAY},
+         * or {@link Notification#FOREGROUND_SERVICE_DEFERRED BEHAVIOR_DEFERRED_DISPLAY}
+         * @return
+         */
+        @NonNull
+        public Builder setForegroundServiceBehavior(int behavior) {
+            mN.mFgsDeferBehavior = behavior;
             return this;
         }
 
@@ -6717,28 +6793,57 @@ public class Notification implements Parcelable
      * immediately when tied to a foreground service, even if the system might generally
      * avoid showing the notifications for short-lived foreground service lifetimes.
      *
-     * Immediate visibility of the Notification is recommended when:
+     * Immediate visibility of the Notification is indicated when:
      * <ul>
      *     <li>The app specifically indicated it with
-     *         {@link Notification.Builder#setShowForegroundImmediately(boolean)
-     *         setShowForegroundImmediately(true)}</li>
+     *         {@link Notification.Builder#setForegroundServiceBehavior(int)
+     *         setForegroundServiceBehavior(BEHAVIOR_IMMEDIATE_DISPLAY)}</li>
      *     <li>It is a media notification or has an associated media session</li>
      *     <li>It is a call or navigation notification</li>
      *     <li>It provides additional action affordances</li>
      * </ul>
-     * @return whether this notification should always be displayed immediately when
+     *
+     * If the app has specified
+     * {@code NotificationBuilder.setForegroundServiceBehavior(BEHAVIOR_DEFERRED_DISPLAY)}
+     * then this method will return {@code false} and notification visibility will be
+     * deferred following the service's transition to the foreground state even in the
+     * circumstances described above.
+     *
+     * @return whether this notification should be displayed immediately when
      * its associated service transitions to the foreground state
      * @hide
      */
+    @TestApi
     public boolean shouldShowForegroundImmediately() {
-        if ((flags & Notification.FLAG_IMMEDIATE_FGS_DISPLAY) != 0
-                || isMediaNotification() || hasMediaSession()
-                || CATEGORY_CALL.equals(category)
-                || CATEGORY_NAVIGATION.equals(category)
-                || (actions != null && actions.length > 0)) {
+        // Has the app demanded immediate display?
+        if (mFgsDeferBehavior == FOREGROUND_SERVICE_IMMEDIATE) {
             return true;
         }
+
+        // Has the app demanded deferred display?
+        if (mFgsDeferBehavior == FOREGROUND_SERVICE_DEFERRED) {
+            return false;
+        }
+
+        // We show these sorts of notifications immediately in the absence of
+        // any explicit app declaration
+        if (isMediaNotification() || hasMediaSession()
+                    || CATEGORY_CALL.equals(category)
+                    || CATEGORY_NAVIGATION.equals(category)
+                    || (actions != null && actions.length > 0)) {
+            return true;
+        }
+
+        // No extenuating circumstances: defer visibility
         return false;
+    }
+
+    /**
+     * Has forced deferral for FGS purposes been specified?
+     * @hide
+     */
+    public boolean isForegroundDisplayForceDeferred() {
+        return FOREGROUND_SERVICE_DEFERRED == mFgsDeferBehavior;
     }
 
     /**
