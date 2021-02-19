@@ -49,10 +49,8 @@ import androidx.slice.widget.SliceContent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import java.io.FileDescriptor;
@@ -299,8 +297,23 @@ public class KeyguardSliceView extends LinearLayout {
     void onDensityOrFontScaleChanged() {
         mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.widget_icon_size);
         mIconSizeWithHeader = (int) mContext.getResources().getDimension(R.dimen.header_icon_size);
+
+        for (int i = 0; i < mRow.getChildCount(); i++) {
+            View child = mRow.getChildAt(i);
+            if (child instanceof KeyguardSliceTextView) {
+                ((KeyguardSliceTextView) child).onDensityOrFontScaleChanged();
+            }
+        }
     }
 
+    void onOverlayChanged() {
+        for (int i = 0; i < mRow.getChildCount(); i++) {
+            View child = mRow.getChildAt(i);
+            if (child instanceof KeyguardSliceTextView) {
+                ((KeyguardSliceTextView) child).onOverlayChanged();
+            }
+        }
+    }
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardSliceView:");
         pw.println("  mTitle: " + (mTitle == null ? "null" : mTitle.getVisibility() == VISIBLE));
@@ -466,8 +479,7 @@ public class KeyguardSliceView extends LinearLayout {
      * Representation of an item that appears under the clock on main keyguard message.
      */
     @VisibleForTesting
-    static class KeyguardSliceTextView extends TextView implements
-            ConfigurationController.ConfigurationListener {
+    static class KeyguardSliceTextView extends TextView {
         private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
         @StyleRes
@@ -479,24 +491,10 @@ public class KeyguardSliceView extends LinearLayout {
             setEllipsize(TruncateAt.END);
         }
 
-        @Override
-        protected void onAttachedToWindow() {
-            super.onAttachedToWindow();
-            Dependency.get(ConfigurationController.class).addCallback(this);
-        }
-
-        @Override
-        protected void onDetachedFromWindow() {
-            super.onDetachedFromWindow();
-            Dependency.get(ConfigurationController.class).removeCallback(this);
-        }
-
-        @Override
         public void onDensityOrFontScaleChanged() {
             updatePadding();
         }
 
-        @Override
         public void onOverlayChanged() {
             setTextAppearance(sStyleId);
         }
