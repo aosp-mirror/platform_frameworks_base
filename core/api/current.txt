@@ -21118,15 +21118,15 @@ package android.media {
   public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
     ctor public MediaCodec.CryptoException(int, @Nullable String);
     method public int getErrorCode();
-    field public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
-    field public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
-    field public static final int ERROR_INSUFFICIENT_SECURITY = 7; // 0x7
-    field public static final int ERROR_KEY_EXPIRED = 2; // 0x2
-    field public static final int ERROR_LOST_STATE = 9; // 0x9
-    field public static final int ERROR_NO_KEY = 1; // 0x1
-    field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
-    field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
-    field public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
+    field @Deprecated public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
+    field @Deprecated public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
+    field @Deprecated public static final int ERROR_INSUFFICIENT_SECURITY = 7; // 0x7
+    field @Deprecated public static final int ERROR_KEY_EXPIRED = 2; // 0x2
+    field @Deprecated public static final int ERROR_LOST_STATE = 9; // 0x9
+    field @Deprecated public static final int ERROR_NO_KEY = 1; // 0x1
+    field @Deprecated public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
+    field @Deprecated public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
+    field @Deprecated public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
   }
 
   public static final class MediaCodec.CryptoInfo {
@@ -21745,6 +21745,42 @@ package android.media {
     method public boolean verify(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
   }
 
+  public static final class MediaDrm.ErrorCodes {
+    field public static final int ERROR_CERTIFICATE_MALFORMED = 10; // 0xa
+    field public static final int ERROR_CERTIFICATE_MISSING = 11; // 0xb
+    field public static final int ERROR_CRYPTO_LIBRARY = 12; // 0xc
+    field public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
+    field public static final int ERROR_GENERIC_OEM = 13; // 0xd
+    field public static final int ERROR_GENERIC_PLUGIN = 14; // 0xe
+    field public static final int ERROR_INIT_DATA = 15; // 0xf
+    field public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
+    field public static final int ERROR_INSUFFICIENT_SECURITY = 7; // 0x7
+    field public static final int ERROR_KEY_EXPIRED = 2; // 0x2
+    field public static final int ERROR_KEY_NOT_LOADED = 16; // 0x10
+    field public static final int ERROR_LICENSE_PARSE = 17; // 0x11
+    field public static final int ERROR_LICENSE_POLICY = 18; // 0x12
+    field public static final int ERROR_LICENSE_RELEASE = 19; // 0x13
+    field public static final int ERROR_LICENSE_REQUEST_REJECTED = 20; // 0x14
+    field public static final int ERROR_LICENSE_RESTORE = 21; // 0x15
+    field public static final int ERROR_LICENSE_STATE = 22; // 0x16
+    field public static final int ERROR_LOST_STATE = 9; // 0x9
+    field public static final int ERROR_MEDIA_FRAMEWORK = 23; // 0x17
+    field public static final int ERROR_NO_KEY = 1; // 0x1
+    field public static final int ERROR_PROVISIONING_CERTIFICATE = 24; // 0x18
+    field public static final int ERROR_PROVISIONING_CONFIG = 25; // 0x19
+    field public static final int ERROR_PROVISIONING_PARSE = 26; // 0x1a
+    field public static final int ERROR_PROVISIONING_RETRY = 27; // 0x1b
+    field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
+    field public static final int ERROR_RESOURCE_CONTENTION = 28; // 0x1c
+    field public static final int ERROR_SECURE_STOP_RELEASE = 29; // 0x1d
+    field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
+    field public static final int ERROR_STORAGE_READ = 30; // 0x1e
+    field public static final int ERROR_STORAGE_WRITE = 31; // 0x1f
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+    field public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
+    field public static final int ERROR_ZERO_SUBSAMPLES = 32; // 0x20
+  }
+
   @Deprecated @IntDef({android.media.MediaDrm.HDCP_LEVEL_UNKNOWN, android.media.MediaDrm.HDCP_NONE, android.media.MediaDrm.HDCP_V1, android.media.MediaDrm.HDCP_V2, android.media.MediaDrm.HDCP_V2_1, android.media.MediaDrm.HDCP_V2_2, android.media.MediaDrm.HDCP_V2_3, android.media.MediaDrm.HDCP_NO_DIGITAL_OUTPUT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.HdcpLevel {
   }
 
@@ -21778,6 +21814,8 @@ package android.media {
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
     method @NonNull public String getDiagnosticInfo();
+    method public int getErrorCode();
+    method public boolean isTransient();
   }
 
   public static final class MediaDrm.MetricsConstants {
@@ -21844,9 +21882,10 @@ package android.media {
 
   public static final class MediaDrm.SessionException extends java.lang.RuntimeException {
     ctor public MediaDrm.SessionException(int, @Nullable String);
-    method public int getErrorCode();
-    field public static final int ERROR_RESOURCE_CONTENTION = 1; // 0x1
-    field public static final int ERROR_UNKNOWN = 0; // 0x0
+    method @Deprecated public int getErrorCode();
+    method public boolean isTransient();
+    field @Deprecated public static final int ERROR_RESOURCE_CONTENTION = 1; // 0x1
+    field @Deprecated public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
   public class MediaDrmException extends java.lang.Exception {
