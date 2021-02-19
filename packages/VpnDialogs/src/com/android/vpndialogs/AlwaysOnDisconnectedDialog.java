@@ -23,7 +23,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.VpnManager;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -42,7 +42,7 @@ public class AlwaysOnDisconnectedDialog extends AlertActivity
 
     private static final String TAG = "VpnDisconnected";
 
-    private VpnManager mService;
+    private ConnectivityManager mService;
     private int mUserId;
     private String mVpnPackage;
 
@@ -51,8 +51,8 @@ public class AlwaysOnDisconnectedDialog extends AlertActivity
         super.onCreate(savedInstanceState);
 
         mUserId = UserHandle.myUserId();
-        final VpnManager vm = getSystemService(VpnManager.class);
-        mVpnPackage = vm.getAlwaysOnVpnPackageForUser(mUserId);
+        final ConnectivityManager cm = getSystemService(ConnectivityManager.class);
+        mVpnPackage = cm.getAlwaysOnVpnPackageForUser(mUserId);
         if (mVpnPackage == null) {
             finish();
             return;
