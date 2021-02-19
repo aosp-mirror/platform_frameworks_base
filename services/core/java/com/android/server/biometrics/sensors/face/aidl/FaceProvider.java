@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
-import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
@@ -178,8 +177,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         for (int i = 0; i < mSensors.size(); i++) {
             final int sensorId = mSensors.keyAt(i);
             scheduleLoadAuthenticatorIds(sensorId);
-            scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser(),
-                    null /* callback */);
+            scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser());
         }
 
         return mDaemon;
@@ -564,8 +562,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+    public void scheduleInternalCleanup(int sensorId, int userId) {
         mHandler.post(() -> {
             final IFace daemon = getHalInstance();
             if (daemon == null) {
@@ -586,7 +583,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                                 FaceUtils.getInstance(sensorId),
                                 mSensors.get(sensorId).getAuthenticatorIds());
 
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client, callback);
+                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling internal cleanup", e);
             }
@@ -649,9 +646,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @NonNull
     @Override
-    public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull String opPackageName) {
-        return mSensors.get(sensorId).createTestSession(callback);
+    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        return mSensors.get(sensorId).createTestSession();
     }
 
     @Override
