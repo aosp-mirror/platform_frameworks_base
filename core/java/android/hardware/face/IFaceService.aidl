@@ -19,7 +19,6 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
-import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -33,7 +32,7 @@ import android.view.Surface;
 interface IFaceService {
 
     // Creates a test session with the specified sensorId
-    ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
+    ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Requests a proto dump of the specified sensor
     byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
