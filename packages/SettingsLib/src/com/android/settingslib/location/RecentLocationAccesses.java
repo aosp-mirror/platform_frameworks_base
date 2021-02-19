@@ -163,8 +163,12 @@ public class RecentLocationAccesses {
         long locationAccessFinishTime = 0L;
         // Earliest time for a location access to end and still be shown in list.
         long recentLocationCutoffTime = now - RECENT_TIME_INTERVAL_MILLIS;
+        // Compute the most recent access time from all op entries.
         for (AppOpsManager.OpEntry entry : entries) {
-            locationAccessFinishTime = entry.getLastAccessTime(TRUSTED_STATE_FLAGS);
+            long lastAccessTime = entry.getLastAccessTime(TRUSTED_STATE_FLAGS);
+            if (lastAccessTime > locationAccessFinishTime) {
+                locationAccessFinishTime = lastAccessTime;
+            }
         }
         // Bail out if the entry is out of date.
         if (locationAccessFinishTime < recentLocationCutoffTime) {

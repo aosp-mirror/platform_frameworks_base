@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.keyguard.dagger;
+package android.app;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
+import android.os.ParcelFileDescriptor;
 
 /**
- * Scope annotation for singleton items within the StatusBarComponent.
+ * An interface used to lazily provide a ParcelFileDescriptor to apps.
+ *
+ * @hide
  */
-@Documented
-@Retention(RUNTIME)
-@Scope
-public @interface KeyguardStatusBarViewScope {}
+interface IParcelFileDescriptorRetriever {
+    /**
+     * Retrieve the ParcelFileDescriptor.
+     */
+    ParcelFileDescriptor getPfd();
+}

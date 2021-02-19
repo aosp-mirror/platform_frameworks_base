@@ -4461,6 +4461,10 @@ public class TelephonyManager {
      * This functionality is only available to the app filling the {@link RoleManager#ROLE_DIALER}
      * role on the device.
      *
+     * This functionality is only available when
+     * {@link CarrierConfigManager#KEY_SUPPORTS_CALL_COMPOSER_BOOL} is set to {@code true} in the
+     * bundle returned from {@link #getCarrierConfig()}.
+     *
      * @param pictureToUpload An {@link InputStream} that supplies the bytes representing the
      *                        picture to upload. The client bears responsibility for closing this
      *                        stream after {@code callback} is called with success or failure.
@@ -4469,7 +4473,9 @@ public class TelephonyManager {
      *                        of {@link #getMaximumCallComposerPictureSize()}, the upload will be
      *                        aborted and the callback will be called with an exception containing
      *                        {@link CallComposerException#ERROR_FILE_TOO_LARGE}.
-     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg)
+     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg). The list
+     *                    of acceptable content types can be found at 3GPP TS 26.141 sections
+     *                    4.2 and 4.3.
      * @param executor The {@link Executor} on which the {@code pictureToUpload} stream will be
      *                 read, as well as on which the callback will be called.
      * @param callback A callback called when the upload operation terminates, either in success
@@ -8591,7 +8597,8 @@ public class TelephonyManager {
     @IntDef({
             ALLOWED_NETWORK_TYPES_REASON_USER,
             ALLOWED_NETWORK_TYPES_REASON_POWER,
-            ALLOWED_NETWORK_TYPES_REASON_CARRIER
+            ALLOWED_NETWORK_TYPES_REASON_CARRIER,
+            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -8628,6 +8635,14 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2;
 
     /**
+     * To indicate allowed network type change is requested by the user via the 2G toggle.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
      * Set the allowed network types of the device and
      * provide the reason triggering the allowed network change.
      * This can be called for following reasons
@@ -8636,6 +8651,8 @@ public class TelephonyManager {
      * <li>Allowed network types control by power manager
      * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
+     * <li>Allowed network types control by the user-controlled "Allow 2G" toggle
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
@@ -8719,6 +8736,7 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
         }
         return false;

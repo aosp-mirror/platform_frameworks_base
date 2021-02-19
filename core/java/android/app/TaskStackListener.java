@@ -193,4 +193,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
     public void onTaskMovedToBack(RunningTaskInfo taskInfo) {
     }
+
+    @Override
+    public void onLockTaskModeChanged(int mode) {
+    }
 }

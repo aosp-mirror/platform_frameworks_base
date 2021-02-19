@@ -48,6 +48,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -75,14 +76,17 @@ import com.android.internal.telephony.SmsApplication;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.notification.ShortcutHelper;
+import com.android.server.people.PeopleService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -118,6 +122,11 @@ public class DataManager {
     private final SparseArray<ScheduledFuture<?>> mUsageStatsQueryFutures = new SparseArray<>();
     private final SparseArray<NotificationListener> mNotificationListeners = new SparseArray<>();
     private final SparseArray<PackageMonitor> mPackageMonitors = new SparseArray<>();
+    @GuardedBy("mLock")
+    private final List<PeopleService.ConversationsListener> mConversationsListeners =
+            new ArrayList<>(1);
+    private final Handler mHandler;
+
     private ContentObserver mCallLogContentObserver;
     private ContentObserver mMmsSmsContentObserver;
 
@@ -128,14 +137,14 @@ public class DataManager {
     private ConversationStatusExpirationBroadcastReceiver mStatusExpReceiver;
 
     public DataManager(Context context) {
-        this(context, new Injector());
+        this(context, new Injector(), BackgroundThread.get().getLooper());
     }
 
-    @VisibleForTesting
-    DataManager(Context context, Injector injector) {
+    DataManager(Context context, Injector injector, Looper looper) {
         mContext = context;
         mInjector = injector;
         mScheduledExecutor = mInjector.createScheduledExecutor();
+        mHandler = new Handler(looper);
     }
 
     /** Initialization. Called when the system services are up running. */
@@ -234,20 +243,19 @@ public class DataManager {
             PackageData packageData = userData.getPackageData(packageName);
             // App may have been uninstalled.
             if (packageData != null) {
-                return getConversationChannel(packageData, shortcutId);
+                ConversationInfo conversationInfo = packageData.getConversationInfo(shortcutId);
+                return getConversationChannel(packageName, userId, shortcutId, conversationInfo);
             }
         }
         return null;
     }
 
     @Nullable
-    private ConversationChannel getConversationChannel(PackageData packageData, String shortcutId) {
-        ConversationInfo conversationInfo = packageData.getConversationInfo(shortcutId);
+    private ConversationChannel getConversationChannel(String packageName, int userId,
+            String shortcutId, ConversationInfo conversationInfo) {
         if (conversationInfo == null) {
             return null;
         }
-        int userId = packageData.getUserId();
-        String packageName = packageData.getPackageName();
         ShortcutInfo shortcutInfo = getShortcut(packageName, userId, shortcutId);
         if (shortcutInfo == null) {
             return null;
@@ -278,7 +286,8 @@ public class DataManager {
                     return;
                 }
                 String shortcutId = conversationInfo.getShortcutId();
-                ConversationChannel channel = getConversationChannel(packageData, shortcutId);
+                ConversationChannel channel = getConversationChannel(packageData.getPackageName(),
+                        packageData.getUserId(), shortcutId, conversationInfo);
                 if (channel == null || channel.getParentNotificationChannel() == null) {
                     return;
                 }
@@ -384,7 +393,11 @@ public class DataManager {
         ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
         ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
         builder.addOrUpdateStatus(status);
-        cs.addOrUpdate(builder.build());
+        ConversationInfo modifiedConv = builder.build();
+        cs.addOrUpdate(modifiedConv);
+        ConversationChannel conversation = getConversationChannel(packageName, userId,
+                conversationId, modifiedConv);
+        notifyConversationsListeners(Arrays.asList(conversation));
 
         if (status.getEndTimeMillis() >= 0) {
             mStatusExpReceiver.scheduleExpiration(
@@ -1233,6 +1246,32 @@ public class DataManager {
                 packageData.getConversationStore().addOrUpdate(updated);
             }
         }
+    }
+
+    /** Adds {@code listener} to be notified on conversation changes. */
+    public void addConversationsListener(
+            @NonNull PeopleService.ConversationsListener listener) {
+        synchronized (mConversationsListeners) {
+            mConversationsListeners.add(Objects.requireNonNull(listener));
+        }
+    }
+
+    // TODO(b/178792356): Trigger ConversationsListener on all-related data changes.
+    @VisibleForTesting
+    void notifyConversationsListeners(
+            @Nullable final List<ConversationChannel> changedConversations) {
+        mHandler.post(() -> {
+            try {
+                final List<PeopleService.ConversationsListener> copy;
+                synchronized (mLock) {
+                    copy = new ArrayList<>(mConversationsListeners);
+                }
+                for (PeopleService.ConversationsListener listener : copy) {
+                    listener.onConversationsUpdate(changedConversations);
+                }
+            } catch (Exception e) {
+            }
+        });
     }
 
     /** A {@link BroadcastReceiver} that receives the intents for a specified user. */

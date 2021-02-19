@@ -89,7 +89,7 @@ public class WindowPerfRunPreconditionBase extends RunListener {
                         navOverlay = WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
                         break;
                 }
-                executeShellCommand("cmd overlay enable-exclusive " + navOverlay);
+                executeShellCommand("cmd overlay enable-exclusive --category " + navOverlay);
             });
 
     /** It only executes once before all tests. */

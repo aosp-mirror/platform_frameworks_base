@@ -264,6 +264,20 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onStateChanged(newState: Int) {
+        if (dozeParameters.shouldControlUnlockedScreenOff()) {
+            if (animatingScreenOff &&
+                    state == StatusBarState.KEYGUARD &&
+                    newState == StatusBarState.SHADE) {
+                // If we're animating the screen off and going from KEYGUARD back to SHADE, the
+                // animation was cancelled and we are unlocking. Override the doze amount to 0f (not
+                // dozing) so that the notifications are no longer hidden.
+                setDozeAmount(0f, 0f)
+            }
+
+            animatingScreenOff =
+                    state == StatusBarState.SHADE && newState == StatusBarState.KEYGUARD
+        }
+
         overrideDozeAmountIfBypass()
         if (bypassController.bypassEnabled &&
                 newState == StatusBarState.KEYGUARD && state == StatusBarState.SHADE_LOCKED &&
@@ -271,13 +285,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // We're leaving shade locked. Let's animate the notifications away
             setNotificationsVisible(visible = true, increaseSpeed = false, animate = false)
             setNotificationsVisible(visible = false, increaseSpeed = false, animate = true)
-        }
-
-        // If we want to control the screen off animation, check whether we are going from SHADE to
-        // KEYGUARD.
-        if (dozeParameters.shouldControlUnlockedScreenOff()) {
-            animatingScreenOff =
-                state == StatusBarState.SHADE && newState == StatusBarState.KEYGUARD
         }
 
         this.state = newState
@@ -386,8 +393,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
     override fun onDozingChanged(isDozing: Boolean) {
         if (isDozing) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
-        } else {
-            animatingScreenOff = false
         }
     }
 

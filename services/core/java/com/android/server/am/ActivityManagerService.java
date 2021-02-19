@@ -130,6 +130,7 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_LASTANR_TRAC
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_RECENTS_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_TOP_RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
 
@@ -353,6 +354,7 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.graphics.fonts.FontManagerInternal;
 import com.android.server.job.JobSchedulerInternal;
+import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Installer;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
@@ -8273,6 +8275,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController.handleIncomingUser(callingPid, callingUid, userId, true, ALLOW_NON_FULL,
                 "getHistoricalProcessExitReasons", null);
 
+        NativeTombstoneManager tombstoneService = LocalServices.getService(
+                NativeTombstoneManager.class);
+
         final ArrayList<ApplicationExitInfo> results = new ArrayList<ApplicationExitInfo>();
         if (!TextUtils.isEmpty(packageName)) {
             final int uid = enforceDumpPermissionForPackage(packageName, userId, callingUid,
@@ -8280,11 +8285,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uid != Process.INVALID_UID) {
                 mProcessList.mAppExitInfoTracker.getExitInfo(
                         packageName, uid, pid, maxNum, results);
+                tombstoneService.collectTombstones(results, uid, pid, maxNum);
             }
         } else {
             // If no package name is given, use the caller's uid as the filter uid.
             mProcessList.mAppExitInfoTracker.getExitInfo(
                     packageName, callingUid, pid, maxNum, results);
+            tombstoneService.collectTombstones(results, callingUid, pid, maxNum);
         }
 
         return new ParceledListSlice<ApplicationExitInfo>(results);
@@ -8668,7 +8675,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (DUMP_ACTIVITIES_CMD.equals(cmd) || DUMP_ACTIVITIES_SHORT_CMD.equals(cmd)
                     || DUMP_LASTANR_CMD.equals(cmd) || DUMP_LASTANR_TRACES_CMD.equals(cmd)
                     || DUMP_STARTER_CMD.equals(cmd) || DUMP_CONTAINERS_CMD.equals(cmd)
-                    || DUMP_RECENTS_CMD.equals(cmd) || DUMP_RECENTS_SHORT_CMD.equals(cmd)) {
+                    || DUMP_RECENTS_CMD.equals(cmd) || DUMP_RECENTS_SHORT_CMD.equals(cmd)
+                    || DUMP_TOP_RESUMED_ACTIVITY.equals(cmd)) {
                 mAtmInternal.dump(
                         cmd, fd, pw, args, opti, true /* dumpAll */, dumpClient, dumpPackage);
             } else if ("binder-proxies".equals(cmd)) {

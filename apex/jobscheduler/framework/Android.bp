@@ -22,6 +22,7 @@ java_library {
         ],
     },
     libs: [
+        "app-compat-annotations",
         "framework-minus-apex",
         "unsupportedappusage",
     ],

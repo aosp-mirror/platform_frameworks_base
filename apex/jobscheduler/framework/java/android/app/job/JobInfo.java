@@ -59,6 +59,12 @@ import java.util.Objects;
  * constraint on the JobInfo object that you are creating. Otherwise, the builder would throw an
  * exception when building. From Android version {@link Build.VERSION_CODES#Q} and onwards, it is
  * valid to schedule jobs with no constraints.
+ * <p> In Android version {@link Build.VERSION_CODES#LOLLIPOP}, jobs had a maximum execution time
+ * of one minute. Starting with Android version {@link Build.VERSION_CODES#M} and ending with
+ * Android version {@link Build.VERSION_CODES#R}, jobs had a maximum execution time of 10 minutes.
+ * Starting from Android version {@link Build.VERSION_CODES#S}, jobs will still be stopped after
+ * 10 minutes if the system is busy or needs the resources, but if not, jobs may continue running
+ * longer than 10 minutes.
  */
 public class JobInfo implements Parcelable {
     private static String TAG = "JobInfo";
@@ -1461,11 +1467,13 @@ public class JobInfo implements Parcelable {
          * possible with stronger guarantees than regular jobs. These "expedited" jobs will:
          * <ol>
          *     <li>Run as soon as possible</li>
-         *     <li>Be exempted from Doze and battery saver restrictions</li>
+         *     <li>Be less restricted during Doze and battery saver</li>
          *     <li>Have network access</li>
-         *     <li>Less likely to be killed than regular jobs</li>
+         *     <li>Be less likely to be killed than regular jobs</li>
+         *     <li>Be subject to background location throttling</li>
          * </ol>
          *
+         * <p>
          * Since these jobs have stronger guarantees than regular jobs, they will be subject to
          * stricter quotas. As long as an app has available expedited quota, jobs scheduled with
          * this set to true will run with these guarantees. If an app has run out of available
@@ -1475,9 +1483,18 @@ public class JobInfo implements Parcelable {
          * will immediately return {@link JobScheduler#RESULT_FAILURE} if the app does not have
          * available quota (and the job will not be successfully scheduled).
          *
+         * <p>
          * Expedited jobs may only set network, storage-not-low, and persistence constraints.
          * No other constraints are allowed.
          *
+         * <p>
+         * Assuming all constraints remain satisfied (including ideal system load conditions),
+         * expedited jobs are guaranteed to have a minimum allowed runtime of 1 minute. If your
+         * app has remaining expedited job quota, then the expedited job <i>may</i> potentially run
+         * longer until remaining quota is used up. Just like with regular jobs, quota is not
+         * consumed while the app is on top and visible to the user.
+         *
+         * <p>
          * Note: Even though expedited jobs are meant to run as soon as possible, they may be
          * deferred if the system is under heavy load or requested constraints are not satisfied.
          *

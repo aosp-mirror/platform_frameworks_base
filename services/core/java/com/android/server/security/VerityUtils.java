@@ -17,7 +17,9 @@
 package com.android.server.security;
 
 import android.annotation.NonNull;
+import android.os.Build;
 import android.os.SharedMemory;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -56,6 +58,11 @@ abstract public class VerityUtils {
     private static final int HASH_SIZE_BYTES = 32;
 
     private static final boolean DEBUG = false;
+
+    public static boolean isFsVeritySupported() {
+        return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
+                || SystemProperties.getInt("ro.apk_verity.mode", 0) == 2;
+    }
 
     /** Returns true if the given file looks like containing an fs-verity signature. */
     public static boolean isFsveritySignatureFile(File file) {

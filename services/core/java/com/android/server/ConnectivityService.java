@@ -3721,7 +3721,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Looking up the app passed param request in mRequests isn't possible since it may return
         // null for a request managed by a per-app default. Therefore use getNriForAppRequest() to
         // do the lookup since that will also find per-app default managed requests.
-        final NetworkRequestInfo nri = getNriForAppRequest(request);
+        // Additionally, this lookup needs to be relatively fast (hence the lookup optimization)
+        // to avoid potential race conditions when validating a package->uid mapping when sending
+        // the callback on the very low-chance that an application shuts down prior to the callback
+        // being sent.
+        final NetworkRequestInfo nri = mNetworkRequests.get(request) != null
+                ? mNetworkRequests.get(request) : getNriForAppRequest(request);
 
         if (nri != null) {
             if (Process.SYSTEM_UID != callingUid && Process.NETWORK_STACK_UID != callingUid

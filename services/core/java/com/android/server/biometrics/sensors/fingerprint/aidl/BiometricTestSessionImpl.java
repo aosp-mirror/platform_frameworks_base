@@ -21,14 +21,17 @@ import static android.Manifest.permission.TEST_BIOMETRIC;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.HashSet;
@@ -46,6 +49,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
 
     @NonNull private final Context mContext;
     private final int mSensorId;
+    @NonNull private final ITestSessionCallback mCallback;
     @NonNull private final FingerprintProvider mProvider;
     @NonNull private final Sensor mSensor;
     @NonNull private final Set<Integer> mEnrollmentIds;
@@ -110,9 +114,11 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     };
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
-            @NonNull FingerprintProvider provider, @NonNull Sensor sensor) {
+            @NonNull ITestSessionCallback callback, @NonNull FingerprintProvider provider,
+            @NonNull Sensor sensor) {
         mContext = context;
         mSensorId = sensorId;
+        mCallback = callback;
         mProvider = provider;
         mSensor = sensor;
         mEnrollmentIds = new HashSet<>();
@@ -192,6 +198,25 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void cleanupInternalState(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mProvider.scheduleInternalCleanup(mSensorId, userId);
+        mProvider.scheduleInternalCleanup(mSensorId, userId, new BaseClientMonitor.Callback() {
+            @Override
+            public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
+                try {
+                    mCallback.onCleanupStarted(clientMonitor.getTargetUserId());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
+            }
+
+            @Override
+            public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
+                    boolean success) {
+                try {
+                    mCallback.onCleanupFinished(clientMonitor.getTargetUserId());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception", e);
+                }
+            }
+        });
     }
 }

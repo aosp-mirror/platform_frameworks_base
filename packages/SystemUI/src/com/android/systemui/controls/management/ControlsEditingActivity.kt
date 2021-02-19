@@ -32,6 +32,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.ui.ControlsDialog
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
@@ -42,9 +44,10 @@ import javax.inject.Inject
  */
 class ControlsEditingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
-    broadcastDispatcher: BroadcastDispatcher,
+    private val broadcastDispatcher: BroadcastDispatcher,
     private val globalActionsComponent: GlobalActionsComponent,
-    private val customIconCache: CustomIconCache
+    private val customIconCache: CustomIconCache,
+    private val uiController: ControlsUiController
 ) : LifecycleActivity() {
 
     companion object {
@@ -59,6 +62,7 @@ class ControlsEditingActivity @Inject constructor(
     private lateinit var model: FavoritesModel
     private lateinit var subtitle: TextView
     private lateinit var saveButton: View
+    private var backToGlobalActions = true
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -82,6 +86,11 @@ class ControlsEditingActivity @Inject constructor(
             structure = it
         } ?: run(this::finish)
 
+        backToGlobalActions = intent.getBooleanExtra(
+            ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
+            true
+        )
+
         bindViews()
 
         bindButtons()
@@ -100,7 +109,11 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     override fun onBackPressed() {
-        globalActionsComponent.handleShowGlobalActionsMenu()
+        if (backToGlobalActions) {
+            globalActionsComponent.handleShowGlobalActionsMenu()
+        } else {
+            ControlsDialog(applicationContext, broadcastDispatcher).show(uiController)
+        }
         animateExitAndFinish()
     }
 

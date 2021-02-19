@@ -551,7 +551,7 @@ public class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
         @Override
         public boolean isReturnTransitionAllowed() {
-            return !mActivity.isTopOfTask();
+            return true;
         }
 
         @Override

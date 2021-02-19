@@ -257,6 +257,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         new PackageMonitor() {
             @Override
             public void onPackageRemoved(String packageName, int uid) {
+                Slog.d(LOG_TAG, "onPackageRemoved(packageName = " + packageName
+                        + ", uid = " + uid + ")");
                 int userId = getChangingUserId();
                 updateAssociations(
                         as -> CollectionUtils.filter(as,
@@ -268,6 +270,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             @Override
             public void onPackageModified(String packageName) {
+                Slog.d(LOG_TAG, "onPackageModified(packageName = " + packageName + ")");
                 int userId = getChangingUserId();
                 forEach(getAllAssociations(userId, packageName), association -> {
                     updateSpecialAccessPermissionForAssociatedPackage(association);
@@ -304,7 +307,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         mBleStateBroadcastReceiver, mBleStateBroadcastReceiver.mIntentFilter);
                 initBleScanning();
             } else {
-                Log.w(LOG_TAG, "No BluetoothAdapter available");
+                Slog.w(LOG_TAG, "No BluetoothAdapter available");
             }
         }
     }
@@ -324,6 +327,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void maybeGrantAutoRevokeExemptions() {
+        Slog.d(LOG_TAG, "maybeGrantAutoRevokeExemptions()");
         PackageManager pm = getContext().getPackageManager();
         for (int userId : LocalServices.getService(UserManagerInternal.class).getUserIds()) {
             SharedPreferences pref = getContext().getSharedPreferences(
@@ -343,7 +347,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         int uid = pm.getPackageUidAsUser(a.getPackageName(), userId);
                         exemptFromAutoRevoke(a.getPackageName(), uid);
                     } catch (PackageManager.NameNotFoundException e) {
-                        Log.w(LOG_TAG, "Unknown companion package: " + a.getPackageName(), e);
+                        Slog.w(LOG_TAG, "Unknown companion package: " + a.getPackageName(), e);
                     }
                 }
             } finally {
@@ -354,10 +358,13 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     @Override
     public void binderDied() {
+        Slog.w(LOG_TAG, "binderDied()");
         mMainHandler.post(this::cleanup);
     }
 
     private void cleanup() {
+        Slog.d(LOG_TAG, "cleanup(); discovery = "
+                + mOngoingDeviceDiscovery + ", request = " + mRequest);
         synchronized (mLock) {
             AndroidFuture<Association> ongoingDeviceDiscovery = mOngoingDeviceDiscovery;
             if (ongoingDeviceDiscovery != null && !ongoingDeviceDiscovery.isDone()) {
@@ -400,10 +407,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 AssociationRequest request,
                 IFindDeviceCallback callback,
                 String callingPackage) throws RemoteException {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
-                        + ", callingPackage = " + callingPackage + ")");
-            }
+            Slog.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
+                    + ", callingPackage = " + callingPackage + ")");
             checkNotNull(request, "Request cannot be null");
             checkNotNull(callback, "Callback cannot be null");
             checkCallerIsSystemOr(callingPackage);
@@ -423,9 +428,13 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                                     request.getDeviceProfile());
 
             mOngoingDeviceDiscovery = fetchProfileDescription.thenComposeAsync(description -> {
+                Slog.d(LOG_TAG, "fetchProfileDescription done: " + description);
+
                 request.setDeviceProfilePrivilegesDescription(description);
 
                 return mServiceConnectors.forUser(userId).postAsync(service -> {
+                    Slog.d(LOG_TAG, "Connected to CDM service; starting discovery for " + request);
+
                     AndroidFuture<Association> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
@@ -438,7 +447,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     if (err == null) {
                         addAssociation(association);
                     } else {
-                        Log.e(LOG_TAG, "Failed to discover device(s)", err);
+                        Slog.e(LOG_TAG, "Failed to discover device(s)", err);
                         callback.onFailure("No devices found: " + err.getMessage());
                     }
                     cleanup();
@@ -452,6 +461,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public void stopScan(AssociationRequest request,
                 IFindDeviceCallback callback,
                 String callingPackage) {
+            Slog.d(LOG_TAG, "stopScan(request = " + request + ")");
             if (Objects.equals(request, mRequest)
                     && Objects.equals(callback, mFindDeviceCallback)
                     && Objects.equals(callingPackage, mCallingPackage)) {
@@ -712,7 +722,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     getAllAssociations(association.getUserId()),
                     a -> !a.equals(association) && deviceProfile.equals(a.getDeviceProfile()));
             if (otherAssociationWithDeviceProfile != null) {
-                Log.i(LOG_TAG, "Not revoking " + deviceProfile
+                Slog.i(LOG_TAG, "Not revoking " + deviceProfile
                         + " for " + association
                         + " - profile still present in " + otherAssociationWithDeviceProfile);
             } else {
@@ -726,7 +736,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                             getContext().getMainExecutor(),
                             success -> {
                                 if (!success) {
-                                    Log.e(LOG_TAG, "Failed to revoke device profile role "
+                                    Slog.e(LOG_TAG, "Failed to revoke device profile role "
                                             + association.getDeviceProfile()
                                             + " to " + association.getPackageName()
                                             + " for user " + association.getUserId());
@@ -794,7 +804,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     packageName,
                     AppOpsManager.MODE_IGNORED);
         } catch (RemoteException e) {
-            Log.w(LOG_TAG,
+            Slog.w(LOG_TAG,
                     "Error while granting auto revoke exemption for " + packageName, e);
         }
     }
@@ -819,9 +829,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void recordAssociation(Association association) {
-        if (DEBUG) {
-            Log.i(LOG_TAG, "recordAssociation(" + association + ")");
-        }
+        Slog.i(LOG_TAG, "recordAssociation(" + association + ")");
         updateAssociations(associations -> CollectionUtils.add(associations, association));
     }
 
@@ -835,9 +843,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             final Set<Association> old = getAllAssociations(userId);
             Set<Association> associations = new ArraySet<>(old);
             associations = update.apply(associations);
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "Updating associations: " + old + "  -->  " + associations);
-            }
+            Slog.i(LOG_TAG, "Updating associations: " + old + "  -->  " + associations);
             mCachedAssociations.put(userId, Collections.unmodifiableSet(associations));
             BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                     CompanionDeviceManagerService::persistAssociations,
@@ -866,9 +872,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void persistAssociations(Set<Association> associations, int userId) {
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "Writing associations to disk: " + associations);
-        }
+        Slog.i(LOG_TAG, "Writing associations to disk: " + associations);
         final AtomicFile file = getStorageFileForUser(userId);
         synchronized (file) {
             file.write(out -> {
@@ -919,9 +923,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             if (mCachedAssociations.get(userId) == null) {
                 mCachedAssociations.put(userId, Collections.unmodifiableSet(
                         emptyIfNull(readAllAssociations(userId))));
-                if (DEBUG) {
-                    Slog.i(LOG_TAG, "Read associations from disk: " + mCachedAssociations);
-                }
+                Slog.i(LOG_TAG, "Read associations from disk: " + mCachedAssociations);
             }
             return mCachedAssociations.get(userId);
         }
@@ -1002,13 +1004,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void onDeviceConnected(String address) {
+        Slog.d(LOG_TAG, "onDeviceConnected(address = " + address + ")");
+
         mCurrentlyConnectedDevices.add(address);
 
         for (UserInfo user : getAllUsers()) {
             for (Association association : getAllAssociations(user.id)) {
                 if (Objects.equals(address, association.getDeviceMacAddress())) {
                     if (association.getDeviceProfile() != null) {
-                        Log.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
+                        Slog.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
                                 + " to " + association.getPackageName()
                                 + " due to device connected: " + association.getDeviceMacAddress());
                         grantDeviceProfile(association);
@@ -1021,6 +1025,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void grantDeviceProfile(Association association) {
+        Slog.i(LOG_TAG, "grantDeviceProfile(association = " + association + ")");
+
         if (association.getDeviceProfile() != null) {
             mRoleManager.addRoleHolderAsUser(
                     association.getDeviceProfile(),
@@ -1030,7 +1036,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     getContext().getMainExecutor(),
                     success -> {
                         if (!success) {
-                            Log.e(LOG_TAG, "Failed to grant device profile role "
+                            Slog.e(LOG_TAG, "Failed to grant device profile role "
                                     + association.getDeviceProfile()
                                     + " to " + association.getPackageName()
                                     + " for user " + association.getUserId());
@@ -1040,6 +1046,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void onDeviceDisconnected(String address) {
+        Slog.d(LOG_TAG, "onDeviceConnected(address = " + address + ")");
+
         mCurrentlyConnectedDevices.remove(address);
 
         onDeviceDisappeared(address);
@@ -1059,13 +1067,13 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         List<ResolveInfo> packageResolveInfos = filter(resolveInfos,
                 info -> Objects.equals(info.serviceInfo.packageName, a.getPackageName()));
         if (packageResolveInfos.size() != 1) {
-            Log.w(LOG_TAG, "Device presence listener package must have exactly one "
+            Slog.w(LOG_TAG, "Device presence listener package must have exactly one "
                     + "CompanionDeviceService, but " + a.getPackageName()
                     + " has " + packageResolveInfos.size());
             return new ServiceConnector.NoOp<>();
         }
         ComponentName componentName = packageResolveInfos.get(0).serviceInfo.getComponentName();
-        Log.i(LOG_TAG, "Initializing CompanionDeviceService binding for " + componentName);
+        Slog.i(LOG_TAG, "Initializing CompanionDeviceService binding for " + componentName);
         return new ServiceConnector.Impl<>(getContext(),
                 new Intent(CompanionDeviceService.SERVICE_INTERFACE).setComponent(componentName),
                 BIND_IMPORTANT,
@@ -1077,7 +1085,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             if (DEBUG) {
-                Log.i(LOG_TAG, "onScanResult(callbackType = "
+                Slog.i(LOG_TAG, "onScanResult(callbackType = "
                         + callbackType + ", result = " + result + ")");
             }
 
@@ -1096,9 +1104,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             if (errorCode == SCAN_FAILED_ALREADY_STARTED) {
                 // ignore - this might happen if BT tries to auto-restore scans for us in the
                 // future
-                Log.i(LOG_TAG, "Ignoring BLE scan error: SCAN_FAILED_ALREADY_STARTED");
+                Slog.i(LOG_TAG, "Ignoring BLE scan error: SCAN_FAILED_ALREADY_STARTED");
             } else {
-                Log.w(LOG_TAG, "Failed to start BLE scan: error " + errorCode);
+                Slog.w(LOG_TAG, "Failed to start BLE scan: error " + errorCode);
             }
         }
     }
@@ -1112,7 +1120,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public void onReceive(Context context, Intent intent) {
             int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, -1);
             int newState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            Log.i(LOG_TAG, "Received BT state transition broadcast: "
+            Slog.d(LOG_TAG, "Received BT state transition broadcast: "
                     + BluetoothAdapter.nameForState(previousState)
                     + " -> " + BluetoothAdapter.nameForState(newState));
 
@@ -1122,7 +1130,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 if (mBluetoothAdapter.getBluetoothLeScanner() != null) {
                     startBleScan();
                 } else {
-                    Log.wtf(LOG_TAG, "BLE on, but BluetoothLeScanner == null");
+                    Slog.wtf(LOG_TAG, "BLE on, but BluetoothLeScanner == null");
                 }
             }
         }
@@ -1136,6 +1144,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
         @Override
         public void run() {
+            Slog.i(LOG_TAG, "UnbindDeviceListenersRunnable.run(); devicesNearby = "
+                    + mDevicesLastNearby);
             int size = mDevicesLastNearby.size();
             for (int i = 0; i < size; i++) {
                 String address = mDevicesLastNearby.keyAt(i);
@@ -1162,12 +1172,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         public void schedule() {
+            Slog.d(LOG_TAG,
+                    "TriggerDeviceDisappearedRunnable.schedule(address = " + mAddress + ")");
             mMainHandler.removeCallbacks(this);
             mMainHandler.postDelayed(this, this, DEVICE_DISAPPEARED_TIMEOUT_MS);
         }
 
         @Override
         public void run() {
+            Slog.d(LOG_TAG, "TriggerDeviceDisappearedRunnable.run(address = " + mAddress + ")");
             onDeviceDisappeared(mAddress);
         }
     }
@@ -1187,6 +1200,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void onDeviceNearby(String address) {
+        Slog.i(LOG_TAG, "onDeviceNearby(address = " + address + ")");
+
         Date timestamp = new Date();
         Date oldTimestamp = mDevicesLastNearby.put(address, timestamp);
 
@@ -1203,7 +1218,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             for (Association association : getAllAssociations(address)) {
                 if (association.isNotifyOnDeviceNearby()) {
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "Device " + address
+                        Slog.i(LOG_TAG, "Device " + address
                                 + " managed by " + association.getPackageName()
                                 + " is nearby on " + timestamp);
                     }
@@ -1215,11 +1230,13 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void onDeviceDisappeared(String address) {
+        Slog.i(LOG_TAG, "onDeviceDisappeared(address = " + address + ")");
+
         boolean hasDeviceListeners = false;
         for (Association association : getAllAssociations(address)) {
             if (association.isNotifyOnDeviceNearby()) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "Device " + address
+                    Slog.i(LOG_TAG, "Device " + address
                             + " managed by " + association.getPackageName()
                             + " disappeared; last seen on " + mDevicesLastNearby.get(address));
                 }
@@ -1245,19 +1262,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void initBleScanning() {
-        Log.i(LOG_TAG, "initBleScanning()");
+        Slog.i(LOG_TAG, "initBleScanning()");
 
         boolean bluetoothReady = mBluetoothAdapter.registerServiceLifecycleCallback(
                 new BluetoothAdapter.ServiceLifecycleCallback() {
                     @Override
                     public void onBluetoothServiceUp() {
-                        Log.i(LOG_TAG, "Bluetooth stack is up");
+                        Slog.i(LOG_TAG, "Bluetooth stack is up");
                         startBleScan();
                     }
 
                     @Override
                     public void onBluetoothServiceDown() {
-                        Log.w(LOG_TAG, "Bluetooth stack is down");
+                        Slog.w(LOG_TAG, "Bluetooth stack is down");
                     }
                 });
         if (bluetoothReady) {
@@ -1266,7 +1283,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     void startBleScan() {
-        Log.i(LOG_TAG, "startBleScan()");
+        Slog.i(LOG_TAG, "startBleScan()");
 
         List<ScanFilter> filters = getBleScanFilters();
         if (filters.isEmpty()) {
@@ -1274,7 +1291,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
         BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
         if (scanner == null) {
-            Log.w(LOG_TAG, "scanner == null (likely BLE isn't ON yet)");
+            Slog.w(LOG_TAG, "scanner == null (likely BLE isn't ON yet)");
         } else {
             scanner.startScan(
                     filters,
@@ -1321,7 +1338,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         try {
             return Long.parseLong(str);
         } catch (NumberFormatException e) {
-            Log.w(LOG_TAG, "Failed to parse", e);
+            Slog.w(LOG_TAG, "Failed to parse", e);
             return def;
         }
     }
@@ -1380,7 +1397,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 }
                 return 0;
             } catch (Throwable t) {
-                Log.e(LOG_TAG, "Error running a command: $ " + cmd, t);
+                Slog.e(LOG_TAG, "Error running a command: $ " + cmd, t);
                 getErrPrintWriter().println(Log.getStackTraceString(t));
                 return 1;
             }

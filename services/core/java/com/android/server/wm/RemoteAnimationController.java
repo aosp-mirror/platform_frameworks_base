@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
@@ -126,7 +129,7 @@ class RemoteAnimationController implements DeathRecipient {
         final RemoteAnimationTarget[] wallpaperTargets = createWallpaperAnimations();
 
         // TODO(bc-unlock): Create the remote non app animation targets (if any)
-        final RemoteAnimationTarget[] nonAppTargets = new RemoteAnimationTarget[0];
+        final RemoteAnimationTarget[] nonAppTargets = createNonAppWindowAnimations(transit);
 
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
@@ -213,6 +216,17 @@ class RemoteAnimationController implements DeathRecipient {
                         mPendingWallpaperAnimations.remove(adapter);
                     }
                 }, mPendingWallpaperAnimations);
+    }
+
+    private RemoteAnimationTarget[] createNonAppWindowAnimations(
+            @WindowManager.TransitionOldType int transit) {
+        ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createNonAppWindowAnimations()");
+        return (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER)
+                ? NonAppWindowAnimationAdapter.startNonAppWindowAnimationsForKeyguardExit(mService,
+                    mRemoteAnimationAdapter.getDuration(),
+                    mRemoteAnimationAdapter.getStatusBarTransitionDelay())
+                : new RemoteAnimationTarget[0];
     }
 
     private void onAnimationFinished() {

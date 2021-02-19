@@ -49,6 +49,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -620,6 +621,45 @@ public class HdmiControlServiceTest {
 
         assertEquals(Optional.of(callerUid), uidReadingRunnable.getWorkSourceUid());
         assertEquals(runnerUid, Binder.getCallingWorkSourceUid());
+    }
+
+    @Ignore("b/180499471")
+    @Test
+    public void initCecVersion_limitToMinimumSupportedVersion() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mNativeWrapper.setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+
+        mHdmiControlService.initService();
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+    }
+
+    @Ignore("b/180499471")
+    @Test
+    public void initCecVersion_limitToAtLeast1_4() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mNativeWrapper.setCecVersion(0x0);
+
+        mHdmiControlService.initService();
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+    }
+
+    @Ignore("b/180499471")
+    @Test
+    public void initCecVersion_useHighestMatchingVersion() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mNativeWrapper.setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0);
+
+        mHdmiControlService.initService();
+        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
     }
 
     private static class VolumeControlFeatureCallback extends

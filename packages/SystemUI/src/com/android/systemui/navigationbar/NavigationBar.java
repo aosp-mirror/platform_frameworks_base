@@ -855,6 +855,14 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
+        if (mNavigationBarView == null) {
+            if (RotationContextButton.DEBUG_ROTATION) {
+                Log.v(TAG, "onRotationProposal proposedRotation=" +
+                        Surface.rotationToString(rotation) + ", mNavigationBarView is null");
+            }
+            return;
+        }
+
         final int winRotation = mNavigationBarView.getDisplay().getRotation();
         final boolean rotateSuggestionsDisabled = RotationButtonController
                 .hasDisable2RotateSuggestionFlag(mDisabledFlags2);

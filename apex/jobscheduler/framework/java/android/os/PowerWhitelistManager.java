@@ -87,7 +87,7 @@ public class PowerWhitelistManager {
      * The list of temp allowlist types.
      * @hide
      */
-    @IntDef(flag = true, prefix = { "TEMPORARY_ALLOW_TYPE_" }, value = {
+    @IntDef(flag = true, prefix = { "TEMPORARY_ALLOWLIST_TYPE_" }, value = {
             TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
             TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
     })

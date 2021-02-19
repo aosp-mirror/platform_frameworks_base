@@ -74,6 +74,7 @@ public class BootReceiver extends BroadcastReceiver {
     private static final int GMSCORE_LASTK_LOG_SIZE = 196608;
 
     private static final String TAG_TOMBSTONE = "SYSTEM_TOMBSTONE";
+    private static final String TAG_TOMBSTONE_PROTO = "SYSTEM_TOMBSTONE_PROTO";
 
     // The pre-froyo package and class of the system updater, which
     // ran in the system process.  We need to remove its packages here
@@ -251,14 +252,14 @@ public class BootReceiver extends BroadcastReceiver {
      * @param ctx Context
      * @param tombstone path to the tombstone
      */
-    public static void addTombstoneToDropBox(Context ctx, File tombstone) {
+    public static void addTombstoneToDropBox(Context ctx, File tombstone, boolean proto) {
         final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
         final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
         HashMap<String, Long> timestamps = readTimestamps();
         try {
             final String headers = getBootHeadersToLogAndUpdate();
             addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
-                    TAG_TOMBSTONE);
+                    proto ? TAG_TOMBSTONE_PROTO : TAG_TOMBSTONE);
         } catch (IOException e) {
             Slog.e(TAG, "Can't log tombstone", e);
         }
