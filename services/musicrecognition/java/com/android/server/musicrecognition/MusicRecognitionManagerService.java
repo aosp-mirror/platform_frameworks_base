@@ -45,7 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Service which allows a DSP audio event to be securely streamed to a designated {@link
+ * Service which allows audio to be securely streamed to a designated {@link
  * MusicRecognitionService}.
  */
 public class MusicRecognitionManagerService extends
