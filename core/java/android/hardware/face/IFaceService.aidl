@@ -19,7 +19,6 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
-import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -33,7 +32,7 @@ import android.view.Surface;
 interface IFaceService {
 
     // Creates a test session with the specified sensorId
-    ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
+    ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Requests a proto dump of the specified sensor
     byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
@@ -84,12 +83,9 @@ interface IFaceService {
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
 
-    // Removes the specified face enrollment for the specified userId.
+    // Any errors resulting from this call will be returned to the listener
     void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver,
             String opPackageName);
-
-    // Removes all face enrollments for the specified userId.
-    void removeAll(IBinder token, int userId, IFaceServiceReceiver receiver, String opPackageName);
 
     // Get the enrolled face for user.
     List<Face> getEnrolledFaces(int sensorId, int userId, String opPackageName);
