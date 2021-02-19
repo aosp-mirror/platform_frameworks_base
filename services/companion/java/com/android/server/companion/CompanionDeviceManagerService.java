@@ -726,7 +726,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         @Override
-        public void onDeviceDisconnected(BluetoothDevice device) {
+        public void onDeviceDisconnected(BluetoothDevice device, @DisconnectReason int reason) {
+            Slog.d(LOG_TAG, device.getAddress() + " disconnected w/ reason: (" + reason + ") "
+                    + BluetoothAdapter.BluetoothConnectionCallback.disconnectReasonText(reason));
             CompanionDeviceManagerService.this.onDeviceDisconnected(device.getAddress());
         }
     }
