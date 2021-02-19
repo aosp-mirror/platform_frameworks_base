@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles.storage
 
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
@@ -31,17 +32,18 @@ import java.io.ByteArrayOutputStream
 class BubbleXmlHelperTest : ShellTestCase() {
 
     private val bubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title"),
-            BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0)
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null, 1),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title", 2),
+            BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
+                    INVALID_TASK_ID)
     )
 
     @Test
     fun testWriteXml() {
         val expectedEntries = """
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" tid="1" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" tid="2" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" />
         """.trimIndent()
         ByteArrayOutputStream().use {
             writeXml(it, bubbles)
@@ -56,9 +58,9 @@ class BubbleXmlHelperTest : ShellTestCase() {
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <bs v="1">
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" tid="1" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" tid="2" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" tid="-1" />
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
@@ -78,5 +80,33 @@ class BubbleXmlHelperTest : ShellTestCase() {
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
         assertEquals("failed parsing bubbles from xml\n$src", emptyList<BubbleEntity>(), actual)
+    }
+
+    /**
+     * In S we changed the XML to include a taskId, version didn't increase because we can set a
+     * reasonable default for taskId (INVALID_TASK_ID) if it wasn't in the XML previously, this
+     * tests that that works.
+     */
+    @Test
+    fun testReadXMLWithoutTaskId() {
+        val expectedBubbles = listOf(
+                BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1", 120, 0, null,
+                        INVALID_TASK_ID),
+                BubbleEntity(10, "com.example.chat", "alice and bob", "k2", 0, 16537428, "title",
+                        INVALID_TASK_ID),
+                BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3", 120, 0, null,
+                        INVALID_TASK_ID)
+        )
+
+        val src = """
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<bs v="1">
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+</bs>
+        """.trimIndent()
+        val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
+        assertEquals("failed parsing bubbles from xml\n$src", expectedBubbles, actual)
     }
 }
