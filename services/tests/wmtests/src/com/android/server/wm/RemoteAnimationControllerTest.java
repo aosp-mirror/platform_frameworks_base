@@ -18,11 +18,13 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -35,7 +37,9 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
@@ -94,7 +98,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50, true /* changeNeedsSnapshot */);
         mAdapter.setCallingPidUid(123, 456);
         runWithScissors(mWm.mH, () -> mHandler = new TestHandler(null, mClock), 0);
-        mController = new RemoteAnimationController(mWm, mAdapter, mHandler);
+        mController = new RemoteAnimationController(mWm, mDisplayContent, mAdapter, mHandler);
     }
 
     private WindowState createAppOverlayWindow() {
@@ -518,6 +522,164 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         } finally {
             mDisplayContent.mOpeningApps.clear();
         }
+    }
+
+    @Test
+    public void testNonAppTarget_sendNavBar() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mActivityRecord);
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
+        mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        spyOn(policy);
+        doReturn(true).when(policy).shouldAttachNavBarToAppDuringTransition();
+
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord, new Point(50, 100), null,
+                new Rect(50, 100, 150, 150), null).mAdapter;
+        adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
+                mFinishedCallback);
+        mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> nonAppsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+        verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_TASK_OPEN),
+                appsCaptor.capture(), wallpapersCaptor.capture(), nonAppsCaptor.capture(),
+                finishedCaptor.capture());
+        boolean containNavTarget = false;
+        for (int i = 0; i < nonAppsCaptor.getValue().length; i++) {
+            if (nonAppsCaptor.getValue()[0].windowType == TYPE_NAVIGATION_BAR) {
+                containNavTarget = true;
+                break;
+            }
+        }
+        assertTrue(containNavTarget);
+    }
+
+    @Test
+    public void testNonAppTarget_notSendNavBar_notAttachToApp() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mActivityRecord);
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
+        mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        spyOn(policy);
+        doReturn(false).when(policy).shouldAttachNavBarToAppDuringTransition();
+
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord, new Point(50, 100), null,
+                new Rect(50, 100, 150, 150), null).mAdapter;
+        adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
+                mFinishedCallback);
+        mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> nonAppsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+        verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_TASK_OPEN),
+                appsCaptor.capture(), wallpapersCaptor.capture(), nonAppsCaptor.capture(),
+                finishedCaptor.capture());
+        boolean containNavTarget = false;
+        for (int i = 0; i < nonAppsCaptor.getValue().length; i++) {
+            if (nonAppsCaptor.getValue()[0].windowType == TYPE_NAVIGATION_BAR) {
+                containNavTarget = true;
+                break;
+            }
+        }
+        assertFalse(containNavTarget);
+    }
+
+    @Test
+    public void testNonAppTarget_notSendNavBar_controlledByFixedRotation() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mActivityRecord);
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
+        mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
+        final FixedRotationAnimationController mockController =
+                mock(FixedRotationAnimationController.class);
+        doReturn(mockController).when(mDisplayContent).getFixedRotationAnimationController();
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        spyOn(policy);
+        doReturn(true).when(policy).shouldAttachNavBarToAppDuringTransition();
+
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord, new Point(50, 100), null,
+                new Rect(50, 100, 150, 150), null).mAdapter;
+        adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
+                mFinishedCallback);
+        mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> nonAppsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+        verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_TASK_OPEN),
+                appsCaptor.capture(), wallpapersCaptor.capture(), nonAppsCaptor.capture(),
+                finishedCaptor.capture());
+        boolean containNavTarget = false;
+        for (int i = 0; i < nonAppsCaptor.getValue().length; i++) {
+            if (nonAppsCaptor.getValue()[0].windowType == TYPE_NAVIGATION_BAR) {
+                containNavTarget = true;
+                break;
+            }
+        }
+        assertFalse(containNavTarget);
+    }
+
+    @Test
+    public void testNonAppTarget_notSendNavBar_controlledByRecents() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mActivityRecord);
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
+        mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
+        final RecentsAnimationController mockController =
+                mock(RecentsAnimationController.class);
+        doReturn(mockController).when(mWm).getRecentsAnimationController();
+        final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
+        spyOn(policy);
+        doReturn(true).when(policy).shouldAttachNavBarToAppDuringTransition();
+
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord, new Point(50, 100), null,
+                new Rect(50, 100, 150, 150), null).mAdapter;
+        adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
+                mFinishedCallback);
+        mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<RemoteAnimationTarget[]> nonAppsCaptor =
+                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+        final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+        verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_TASK_OPEN),
+                appsCaptor.capture(), wallpapersCaptor.capture(), nonAppsCaptor.capture(),
+                finishedCaptor.capture());
+        boolean containNavTarget = false;
+        for (int i = 0; i < nonAppsCaptor.getValue().length; i++) {
+            if (nonAppsCaptor.getValue()[0].windowType == TYPE_NAVIGATION_BAR) {
+                containNavTarget = true;
+                break;
+            }
+        }
+        assertFalse(containNavTarget);
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

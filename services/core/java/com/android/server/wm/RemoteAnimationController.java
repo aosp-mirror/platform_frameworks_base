@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
@@ -60,6 +57,7 @@ class RemoteAnimationController implements DeathRecipient {
     private static final long TIMEOUT_MS = 2000;
 
     private final WindowManagerService mService;
+    private final DisplayContent mDisplayContent;
     private final RemoteAnimationAdapter mRemoteAnimationAdapter;
     private final ArrayList<RemoteAnimationRecord> mPendingAnimations = new ArrayList<>();
     private final ArrayList<WallpaperAnimationAdapter> mPendingWallpaperAnimations =
@@ -72,9 +70,10 @@ class RemoteAnimationController implements DeathRecipient {
     private boolean mCanceled;
     private boolean mLinkedToDeathOfRunner;
 
-    RemoteAnimationController(WindowManagerService service,
+    RemoteAnimationController(WindowManagerService service, DisplayContent displayContent,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
         mService = service;
+        mDisplayContent = displayContent;
         mRemoteAnimationAdapter = remoteAnimationAdapter;
         mHandler = handler;
     }
@@ -221,12 +220,11 @@ class RemoteAnimationController implements DeathRecipient {
     private RemoteAnimationTarget[] createNonAppWindowAnimations(
             @WindowManager.TransitionOldType int transit) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createNonAppWindowAnimations()");
-        return (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER)
-                ? NonAppWindowAnimationAdapter.startNonAppWindowAnimationsForKeyguardExit(mService,
+        return NonAppWindowAnimationAdapter.startNonAppWindowAnimations(mService,
+                    mDisplayContent,
+                    transit,
                     mRemoteAnimationAdapter.getDuration(),
-                    mRemoteAnimationAdapter.getStatusBarTransitionDelay())
-                : new RemoteAnimationTarget[0];
+                    mRemoteAnimationAdapter.getStatusBarTransitionDelay());
     }
 
     private void onAnimationFinished() {
