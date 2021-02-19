@@ -412,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> पर चालू हाेगी"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> तक चालू रहेगी"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"स्क्रीन की चमक कम करें"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"एनएफ़सी"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC चालू है"</string>
@@ -465,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफ़ाइल दिखाएं"</string>
     <string name="user_add_user" msgid="4336657383006913022">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नया उपयोगकर्ता"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"मेहमान के तौर पर ब्राउज़ करने का सेशन खत्म करना चाहते हैं?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"मेहमान के तौर पर ब्राउज़ करने का सेशन खत्म करें"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि को निकालें?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"सेशन खत्म करें"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"निकालें"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"अतिथि, आपका फिर से स्वागत है!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"क्‍या आप अपना सत्र जारी रखना चाहते हैं?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"फिर से शुरू करें"</string>
@@ -735,7 +737,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"सिस्टम ने अपने-आप &lt;b&gt;इस सूचना का लेवल घटाकर, इसे साइलेंट&lt;/b&gt; पर सेट किया था."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"आपकी शेड में, इस सूचना को अपने-आप &lt;b&gt;रैंकिंग में ऊपर&lt;/b&gt; किया गया था."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"आपकी शेड में, इस सूचना को अपने-आप &lt;b&gt;रैंकिंग में नीचे&lt;/b&gt; किया गया था."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"आपको यह सुविधा कैसी लगी?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"डेवलपर को अपना सुझाव/राय दें. आपको यह सुविधा कैसी लगी?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"सुझाव या शिकायत के लिए धन्यवाद!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ठीक है"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण चालू हैं"</string>
@@ -882,6 +884,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"टाइल को <xliff:g id="POSITION">%1$d</xliff:g> पोज़िशन पर ले जाएं"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"टाइल को <xliff:g id="POSITION">%1$d</xliff:g> पोज़िशन पर जोड़ें"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"टाइल की पोज़िशन <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"टाइल जोड़ी गई"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"टाइल हटाई गई"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"त्वरित सेटिंग संपादक."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"सेटिंग खोलें."</string>
@@ -955,8 +959,8 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- यह <xliff:g id="APP">%1$s</xliff:g> से सूचना पढ़ सकता है"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- यह <xliff:g id="APP">%1$s</xliff:g> में कार्रवाई कर सकता है"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> को किसी भी ऐप्लिकेशन के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"मंज़ूरी दें"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"नामंज़ूर करें"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"अनुमति दें"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"अनुमति न दें"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"बैटरी सेवर शेड्यूल करने के लिए टैप करें"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"जब बैटरी खत्म होने वाली हो तब \'बैटरी सेवर\' चालू करें"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"जी नहीं, शुक्रिया"</string>
@@ -971,16 +975,15 @@
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" और "</string>
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>, <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> का इस्तेमाल कर रहा है"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ने हाल ही में <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> का इस्तेमाल किया"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"एंटरप्राइज़ वर्शन"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Phonecall"</string>
-    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"<xliff:g id="ATTRIBUTION">%s</xliff:g> के ज़रिए"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(एंटरप्राइज़ वर्शन)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"फ़ोन कॉल"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> के ज़रिए)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"कैमरा"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"जगह"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"माइक्रोफ़ोन"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेंसर बंद हैं"</string>
     <string name="device_services" msgid="1549944177856658705">"डिवाइस सेवाएं"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन चालू करने के लिए टैप करें."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ले जाएं"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
