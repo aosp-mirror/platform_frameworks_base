@@ -1934,25 +1934,33 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPath(
-        const IncFsMount& ifs, std::string_view storagePath, bool stopOnFirstIncomplete) const {
-    ssize_t totalBlocks = 0, filledBlocks = 0;
-    const auto filePaths = mFs->listFilesRecursive(storagePath);
-    for (const auto& filePath : filePaths) {
+        const IncFsMount& ifs, std::string_view storagePath,
+        const bool stopOnFirstIncomplete) const {
+    ssize_t totalBlocks = 0, filledBlocks = 0, error = 0;
+    mFs->listFilesRecursive(storagePath, [&, this](auto filePath) {
         const auto [filledBlocksCount, totalBlocksCount] =
                 mIncFs->countFilledBlocks(ifs.control, filePath);
+        if (filledBlocksCount == -EOPNOTSUPP || filledBlocksCount == -ENOTSUP ||
+            filledBlocksCount == -ENOENT) {
+            // a kind of a file that's not really being loaded, e.g. a mapped range
+            // an older IncFS used to return ENOENT in this case, so handle it the same way
+            return true;
+        }
         if (filledBlocksCount < 0) {
             LOG(ERROR) << "getLoadingProgress failed to get filled blocks count for: " << filePath
                        << " errno: " << filledBlocksCount;
-            return {filledBlocksCount, filledBlocksCount};
+            error = filledBlocksCount;
+            return false;
         }
         totalBlocks += totalBlocksCount;
         filledBlocks += filledBlocksCount;
         if (stopOnFirstIncomplete && filledBlocks < totalBlocks) {
-            break;
+            return false;
         }
-    }
+        return true;
+    });
 
-    return {filledBlocks, totalBlocks};
+    return error ? LoadingProgress{error, error} : LoadingProgress{filledBlocks, totalBlocks};
 }
 
 bool IncrementalService::updateLoadingProgress(

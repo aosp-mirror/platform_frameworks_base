@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <android-base/function_ref.h>
 #include <android-base/unique_fd.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
 #include <android/content/pm/FileSystemControlParcel.h>
@@ -79,9 +80,9 @@ public:
     using WaitResult = incfs::WaitResult;
     using Features = incfs::Features;
 
-    using ExistingMountCallback =
-            std::function<void(std::string_view root, std::string_view backingDir,
-                               std::span<std::pair<std::string_view, std::string_view>> binds)>;
+    using ExistingMountCallback = android::base::function_ref<
+            void(std::string_view root, std::string_view backingDir,
+                 std::span<std::pair<std::string_view, std::string_view>> binds)>;
 
     virtual ~IncFsWrapper() = default;
     virtual Features features() const = 0;
@@ -152,7 +153,9 @@ public:
 class FsWrapper {
 public:
     virtual ~FsWrapper() = default;
-    virtual std::vector<std::string> listFilesRecursive(std::string_view directoryPath) const = 0;
+
+    using FileCallback = android::base::function_ref<bool(std::string_view)>;
+    virtual void listFilesRecursive(std::string_view directoryPath, FileCallback onFile) const = 0;
 };
 
 class ServiceManagerWrapper {
