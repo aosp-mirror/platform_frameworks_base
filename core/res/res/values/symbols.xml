@@ -3533,6 +3533,7 @@
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
+  <java-symbol type="string" name="config_companionProviderPackage" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultOnDeviceSpeechRecognitionService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
