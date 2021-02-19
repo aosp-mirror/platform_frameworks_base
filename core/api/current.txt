@@ -40840,7 +40840,6 @@ package android.telephony {
     field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14; // 0xe
     field public static final int INTEGRITY_ALGORITHM_NONE = 0; // 0x0
     field public static final String KEY_ADD_KE_TO_CHILD_SESSION_REKEY_BOOL = "iwlan.add_ke_to_child_session_rekey_bool";
-    field public static final String KEY_ADD_WIFI_MAC_ADDR_TO_NAI_BOOL = "iwlan.add_wifi_mac_addr_to_nai_bool";
     field public static final String KEY_CHILD_SA_REKEY_HARD_TIMER_SEC_INT = "iwlan.child_sa_rekey_hard_timer_sec_int";
     field public static final String KEY_CHILD_SA_REKEY_SOFT_TIMER_SEC_INT = "iwlan.child_sa_rekey_soft_timer_sec_int";
     field public static final String KEY_CHILD_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY = "iwlan.child_session_aes_cbc_key_size_int_array";
