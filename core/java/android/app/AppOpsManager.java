@@ -2436,9 +2436,9 @@ public class AppOpsManager {
             false, // READ_MEDIA_AUDIO
             false, // WRITE_MEDIA_AUDIO
             false, // READ_MEDIA_VIDEO
-            false, // WRITE_MEDIA_VIDEO
+            true,  // WRITE_MEDIA_VIDEO
             false, // READ_MEDIA_IMAGES
-            false, // WRITE_MEDIA_IMAGES
+            true,  // WRITE_MEDIA_IMAGES
             true,  // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
