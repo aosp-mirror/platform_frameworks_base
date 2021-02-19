@@ -48,7 +48,7 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
 
     public static final String EXTRA_TILE_ID = "extra_tile_id";
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
-    public static final String EXTRA_UID = "extra_uid";
+    public static final String EXTRA_USER_HANDLE = "extra_user_handle";
 
     public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 

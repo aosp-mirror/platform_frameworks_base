@@ -41,7 +41,8 @@ public class LaunchConversationActivity extends Activity {
         Intent intent = getIntent();
         String tileId = intent.getStringExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID);
         String packageName = intent.getStringExtra(PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME);
-        int uid = intent.getIntExtra(PeopleSpaceWidgetProvider.EXTRA_UID, 0);
+        UserHandle userHandle = intent.getParcelableExtra(
+                PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE);
 
         if (tileId != null && !tileId.isEmpty()) {
             if (DEBUG) {
@@ -52,7 +53,7 @@ public class LaunchConversationActivity extends Activity {
                 LauncherApps launcherApps =
                         getApplicationContext().getSystemService(LauncherApps.class);
                 launcherApps.startShortcut(
-                        packageName, tileId, null, null, UserHandle.getUserHandleForUid(uid));
+                        packageName, tileId, null, null, userHandle);
             } catch (Exception e) {
                 Log.e(TAG, "Exception starting shortcut:" + e);
             }

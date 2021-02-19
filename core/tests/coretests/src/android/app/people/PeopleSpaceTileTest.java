@@ -37,6 +37,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Parcel;
+import android.os.UserHandle;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -124,13 +125,13 @@ public class PeopleSpaceTileTest {
     }
 
     @Test
-    public void testUid() {
+    public void testUserHandle() {
         PeopleSpaceTile tile = new PeopleSpaceTile
                 .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
-                .setUid(42)
+                .setUserHandle(new UserHandle(0))
                 .build();
 
-        assertThat(tile.getUid()).isEqualTo(42);
+        assertThat(tile.getUserHandle()).isEqualTo(new UserHandle(0));
     }
 
     @Test
@@ -227,7 +228,7 @@ public class PeopleSpaceTileTest {
                 .setUserName("name")
                 .setUserIcon(mIcon)
                 .setContactUri(Uri.parse("contact"))
-                .setUid(42)
+                .setUserHandle(new UserHandle(1))
                 .setPackageName("package.name")
                 .setLastInteractionTimestamp(7L)
                 .setIsImportantConversation(true)
@@ -246,7 +247,7 @@ public class PeopleSpaceTileTest {
         assertThat(readTile.getUserName()).isEqualTo(tile.getUserName());
         assertThat(readTile.getUserIcon().toString()).isEqualTo(tile.getUserIcon().toString());
         assertThat(readTile.getContactUri()).isEqualTo(tile.getContactUri());
-        assertThat(readTile.getUid()).isEqualTo(tile.getUid());
+        assertThat(readTile.getUserHandle()).isEqualTo(tile.getUserHandle());
         assertThat(readTile.getPackageName()).isEqualTo(tile.getPackageName());
         assertThat(readTile.getLastInteractionTimestamp()).isEqualTo(
                 tile.getLastInteractionTimestamp());
