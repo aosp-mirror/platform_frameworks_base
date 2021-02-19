@@ -72,11 +72,11 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
         DevicePolicyManagerInternal dpmi = LocalServices
                 .getService(DevicePolicyManagerInternal.class);
 
-        Slog.i(TAG, "notifying " + reasonName + " is active");
-        dpmi.notifyUnsafeOperationStateChanged(this, reason, true);
+        Slog.i(TAG, "notifying " + reasonName + " is UNSAFE");
+        dpmi.notifyUnsafeOperationStateChanged(this, reason, /* isSafe= */ false);
 
-        Slog.i(TAG, "notifying " + reasonName + " is inactive");
-        dpmi.notifyUnsafeOperationStateChanged(this, reason, false);
+        Slog.i(TAG, "notifying " + reasonName + " is SAFE");
+        dpmi.notifyUnsafeOperationStateChanged(this, reason, /* isSafe= */ true);
 
         Slog.i(TAG, "returning " + reasonName);
 

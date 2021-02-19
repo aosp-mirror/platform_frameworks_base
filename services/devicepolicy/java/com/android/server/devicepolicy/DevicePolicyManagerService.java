@@ -12341,7 +12341,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.v(LOG_TAG, String.format("notifyUnsafeOperationStateChanged(): %s=%b",
                         DevicePolicyManager.operationSafetyReasonToString(reason), isSafe));
             }
-
             Preconditions.checkArgument(mSafetyChecker == checker,
                     "invalid checker: should be %s, was %s", mSafetyChecker, checker);
 
@@ -12349,7 +12348,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             extras.putInt(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_REASON, reason);
             extras.putBoolean(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_STATE, isSafe);
 
-            // TODO(b/178494483): add CTS test
             sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
                     extras);
             for (int profileOwnerId : mOwners.getProfileOwnerKeys()) {
