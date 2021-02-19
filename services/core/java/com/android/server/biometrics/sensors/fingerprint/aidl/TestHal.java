@@ -22,6 +22,7 @@ import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.ISessionCallback;
 import android.hardware.biometrics.fingerprint.SensorProps;
+import android.hardware.biometrics.fingerprint.SessionState;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -119,6 +120,11 @@ public class TestHal extends IFingerprint.Stub {
             }
 
             @Override
+            public void close(int cookie) throws RemoteException {
+                cb.onStateChanged(cookie, SessionState.CLOSED);
+            }
+
+            @Override
             public void onPointerDown(int pointerId, int x, int y, float minor, float major) {
                 Slog.w(TAG, "onPointerDown");
             }
@@ -134,4 +140,9 @@ public class TestHal extends IFingerprint.Stub {
             }
         };
     }
+
+    @Override
+    public void reset() {
+    }
 }
+
