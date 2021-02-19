@@ -4681,4 +4681,71 @@ public class ActivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * A subset of immutable pending intent information suitable for caching on the client side.
+     *
+     * @hide
+     */
+    public static final class PendingIntentInfo implements Parcelable {
+
+        private final String mCreatorPackage;
+        private final int mCreatorUid;
+        private final boolean mImmutable;
+        private final int mIntentSenderType;
+
+        public PendingIntentInfo(String creatorPackage, int creatorUid, boolean immutable,
+                int intentSenderType) {
+            mCreatorPackage = creatorPackage;
+            mCreatorUid = creatorUid;
+            mImmutable = immutable;
+            mIntentSenderType = intentSenderType;
+        }
+
+        public String getCreatorPackage() {
+            return mCreatorPackage;
+        }
+
+        public int getCreatorUid() {
+            return mCreatorUid;
+        }
+
+        public boolean isImmutable() {
+            return mImmutable;
+        }
+
+        public int getIntentSenderType() {
+            return mIntentSenderType;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeString(mCreatorPackage);
+            parcel.writeInt(mCreatorUid);
+            parcel.writeBoolean(mImmutable);
+            parcel.writeInt(mIntentSenderType);
+        }
+
+        public static final @NonNull Creator<PendingIntentInfo> CREATOR =
+                new Creator<PendingIntentInfo>() {
+                    @Override
+                    public PendingIntentInfo createFromParcel(Parcel in) {
+                        return new PendingIntentInfo(
+                                /* creatorPackage= */ in.readString(),
+                                /* creatorUid= */ in.readInt(),
+                                /* immutable= */ in.readBoolean(),
+                                /* intentSenderType= */ in.readInt());
+                    }
+
+                    @Override
+                    public PendingIntentInfo[] newArray(int size) {
+                        return new PendingIntentInfo[size];
+                    }
+                };
+    }
 }

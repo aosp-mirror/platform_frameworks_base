@@ -141,6 +141,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
+import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -4857,19 +4858,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public String getPackageForIntentSender(IIntentSender pendingResult) {
-        if (!(pendingResult instanceof PendingIntentRecord)) {
-            return null;
-        }
-        try {
-            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
-            return res.key.packageName;
-        } catch (ClassCastException e) {
-        }
-        return null;
-    }
-
-    @Override
     public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
         mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
     }
@@ -4881,15 +4869,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int getUidForIntentSender(IIntentSender sender) {
+    public PendingIntentInfo getInfoForIntentSender(IIntentSender sender) {
         if (sender instanceof PendingIntentRecord) {
-            try {
-                PendingIntentRecord res = (PendingIntentRecord)sender;
-                return res.uid;
-            } catch (ClassCastException e) {
-            }
+            PendingIntentRecord res = (PendingIntentRecord) sender;
+            return new PendingIntentInfo(
+                    res.key.packageName,
+                    res.uid,
+                    (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
+                    res.key.type);
+        } else {
+            throw new IllegalArgumentException();
         }
-        return -1;
     }
 
     @Override
@@ -4915,15 +4905,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean isIntentSenderImmutable(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0;
-        }
-        return false;
-    }
-
-    @Override
     public boolean isIntentSenderAnActivity(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return false;
@@ -4935,33 +4916,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return false;
         } catch (ClassCastException e) {
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isIntentSenderAForegroundService(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isIntentSenderAService(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_SERVICE;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isIntentSenderABroadcast(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_BROADCAST;
         }
         return false;
     }
