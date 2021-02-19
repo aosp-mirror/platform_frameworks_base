@@ -45,7 +45,7 @@ import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState.SuppressedActions;
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions;
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartReplies;
 
@@ -74,13 +74,12 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
     @Mock private ActivityManagerWrapper mActivityManagerWrapper;
     @Mock private PackageManagerWrapper mPackageManagerWrapper;
     @Mock private DevicePolicyManagerWrapper mDevicePolicyManagerWrapper;
-    @Mock private SmartRepliesAndActions mSmartRepliesAndActions;
     @Mock private SmartReplyInflater mSmartReplyInflater;
     @Mock private SmartActionInflater mSmartActionInflater;
 
     private Icon mActionIcon;
     private NotificationEntry mEntry;
-    private SmartRepliesAndActionsInflaterImpl mSmartRepliesInflater;
+    private SmartReplyStateInflaterImpl mSmartReplyStateInflater;
 
     @Before
     @UiThreadTest
@@ -101,7 +100,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
         when(mActivityManagerWrapper.isLockTaskKioskModeActive()).thenReturn(false);
 
-        mSmartRepliesInflater = new SmartRepliesAndActionsInflaterImpl(
+        mSmartReplyStateInflater = new SmartReplyStateInflaterImpl(
                 mSmartReplyConstants,
                 mActivityManagerWrapper,
                 mPackageManagerWrapper,
@@ -118,11 +117,13 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         setupAppGeneratedSuggestions(smartReplies, smartActions);
         when(mSmartReplyConstants.isEnabled()).thenReturn(false);
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies).isNull();
-        assertThat(repliesAndActions.smartActions).isNull();
+        assertThat(smartReplyState.getSmartReplies()).isNull();
+        assertThat(smartReplyState.getSmartActions()).isNull();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -134,11 +135,13 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
         when(mSmartReplyConstants.isEnabled()).thenReturn(false);
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies).isNull();
-        assertThat(repliesAndActions.smartActions).isNull();
+        assertThat(smartReplyState.getSmartReplies()).isNull();
+        assertThat(smartReplyState.getSmartActions()).isNull();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -146,12 +149,15 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
         setupAppGeneratedReplies(smartReplies);
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(Arrays.asList(smartReplies));
-        assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
-        assertThat(repliesAndActions.smartActions).isNull();
+        assertThat(smartReplyState.getSmartReplies().choices)
+                .containsExactlyElementsIn(smartReplies).inOrder();
+        assertThat(smartReplyState.getSmartReplies().fromAssistant).isFalse();
+        assertThat(smartReplyState.getSmartActions()).isNull();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -161,13 +167,17 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 createActions("Test Action 1", "Test Action 2");
         setupAppGeneratedSuggestions(smartReplies, smartActions);
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(Arrays.asList(smartReplies));
-        assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
-        assertThat(repliesAndActions.smartActions.actions).isEqualTo(smartActions);
-        assertThat(repliesAndActions.smartActions.fromAssistant).isFalse();
+        assertThat(smartReplyState.getSmartReplies().choices)
+                .containsExactlyElementsIn(smartReplies).inOrder();
+        assertThat(smartReplyState.getSmartReplies().fromAssistant).isFalse();
+        assertThat(smartReplyState.getSmartActions().actions)
+                .containsExactlyElementsIn(smartActions).inOrder();
+        assertThat(smartReplyState.getSmartActions().fromAssistant).isFalse();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -180,12 +190,15 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(mEntry.getSmartReplies());
-        assertThat(repliesAndActions.smartReplies.fromAssistant).isTrue();
-        assertThat(repliesAndActions.smartActions).isNull();
+        assertThat(smartReplyState.getSmartReplies().choices)
+                .containsExactlyElementsIn(mEntry.getSmartReplies()).inOrder();
+        assertThat(smartReplyState.getSmartReplies().fromAssistant).isTrue();
+        assertThat(smartReplyState.getSmartActions()).isNull();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -197,11 +210,13 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         NotificationEntryHelper.modifyRanking(mEntry)
                 .setSmartReplies(createReplies("Sys Smart Reply 1", "Sys Smart Reply 2"))
                 .build();
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies).isNull();
-        assertThat(repliesAndActions.smartActions).isNull();
+        assertThat(smartReplyState.getSmartReplies()).isNull();
+        assertThat(smartReplyState.getSmartActions()).isNull();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -214,13 +229,50 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies).isNull();
-        assertThat(repliesAndActions.smartActions.actions)
-                .isEqualTo(mEntry.getSmartActions());
-        assertThat(repliesAndActions.smartActions.fromAssistant).isTrue();
+        assertThat(smartReplyState.getSmartReplies()).isNull();
+        assertThat(smartReplyState.getSmartActions().actions)
+                .containsExactlyElementsIn(mEntry.getSmartActions()).inOrder();
+        assertThat(smartReplyState.getSmartActions().fromAssistant).isTrue();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_sysGeneratedPhishingSmartAction() {
+        // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
+        // actions.
+        setupAppGeneratedReplies(null /* smartReplies */);
+
+        mNotification.actions = new Notification.Action[]{
+                createAction("Details"),
+                createActionBuilder("Reply").addRemoteInput(
+                        new RemoteInput.Builder("key").build()).build()
+        };
+
+        modifyRanking(mEntry)
+                .setSmartActions(
+                        createAction("Sys Smart Action 1"),
+                        createActionBuilder("Sys Smart Action 2")
+                                .setContextual(true)
+                                .setSemanticAction(Notification.Action
+                                        .SEMANTIC_ACTION_CONVERSATION_IS_PHISHING)
+                                .build())
+                .build();
+
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
+
+        assertThat(smartReplyState.getSmartReplies()).isNull();
+        assertThat(smartReplyState.getSmartActions().actions)
+                .containsExactlyElementsIn(mEntry.getSmartActions()).inOrder();
+        assertThat(smartReplyState.getSmartActions().fromAssistant).isTrue();
+        assertThat(smartReplyState.getSuppressedActions()).isNotNull();
+        assertThat(smartReplyState.getSuppressedActions().getSuppressedActionIndices())
+                .containsExactly(1);
+        assertThat(smartReplyState.getHasPhishingAction()).isTrue();
     }
 
     @Test
@@ -237,14 +289,17 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices)
-                .isEqualTo(Arrays.asList(appGenSmartReplies));
-        assertThat(repliesAndActions.smartReplies.fromAssistant).isFalse();
-        assertThat(repliesAndActions.smartActions.actions).isEqualTo(appGenSmartActions);
-        assertThat(repliesAndActions.smartActions.fromAssistant).isFalse();
+        assertThat(smartReplyState.getSmartReplies().choices)
+                .containsExactlyElementsIn(Arrays.asList(appGenSmartReplies)).inOrder();
+        assertThat(smartReplyState.getSmartReplies().fromAssistant).isFalse();
+        assertThat(smartReplyState.getSmartActions().actions)
+                .containsExactlyElementsIn(appGenSmartActions).inOrder();
+        assertThat(smartReplyState.getSmartActions().fromAssistant).isFalse();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -259,11 +314,13 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartActions).isNull();
-        assertThat(repliesAndActions.smartReplies).isNull();
+        assertThat(smartReplyState.getSmartActions()).isNull();
+        assertThat(smartReplyState.getSmartReplies()).isNull();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -281,13 +338,15 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
-                mEntry.getSmartReplies());
+        assertThat(smartReplyState.getSmartReplies().choices)
+                .containsExactlyElementsIn(mEntry.getSmartReplies()).inOrder();
         // Since no apps are whitelisted no actions should be shown.
-        assertThat(repliesAndActions.smartActions.actions).isEmpty();
+        assertThat(smartReplyState.getSmartActions().actions).isEmpty();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -317,13 +376,14 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartActions(actions)
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
         // Only the action for the whitelisted package should be allowed.
-        assertThat(repliesAndActions.smartActions.actions.size()).isEqualTo(1);
-        assertThat(repliesAndActions.smartActions.actions.get(0)).isEqualTo(
-                mEntry.getSmartActions().get(0));
+        assertThat(smartReplyState.getSmartActions().actions)
+                .containsExactly(mEntry.getSmartActions().get(0));
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -340,14 +400,16 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 .setSmartActions(createActions("Sys Smart Action 1", "Sys Smart Action 2"))
                 .build();
 
-        SmartRepliesAndActions repliesAndActions =
-                mSmartRepliesInflater.chooseSmartRepliesAndActions(mEntry);
+        InflatedSmartReplyState smartReplyState =
+                mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
         // We don't restrict replies or actions in screen pinning mode.
-        assertThat(repliesAndActions.smartReplies.choices).isEqualTo(
-                mEntry.getSmartReplies());
-        assertThat(repliesAndActions.smartActions.actions).isEqualTo(
-                mEntry.getSmartActions());
+        assertThat(smartReplyState.getSmartReplies().choices)
+                .containsExactlyElementsIn(mEntry.getSmartReplies()).inOrder();
+        assertThat(smartReplyState.getSmartActions().actions)
+                .containsExactlyElementsIn(mEntry.getSmartActions()).inOrder();
+        assertThat(smartReplyState.getSuppressedActions()).isNull();
+        assertThat(smartReplyState.getHasPhishingAction()).isFalse();
     }
 
     @Test
@@ -360,17 +422,24 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         List<Notification.Action> rightActions = Arrays.asList(
                 createAction("firstAction"),
                 createAction("secondAction"));
+        List<Integer> leftSuppressed = Arrays.asList(1, 2);
+        List<Integer> rightSuppressed = Arrays.asList(1, 2);
+        boolean leftPhishing = true;
+        boolean rightPhishing = true;
 
-        SmartRepliesAndActions leftRepliesAndActions = new SmartRepliesAndActions(
+        InflatedSmartReplyState leftRepliesAndActions = new InflatedSmartReplyState(
                 new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
-                new SmartActions(leftActions, false /* fromAssistant */));
-        SmartRepliesAndActions rightRepliesAndActions = new SmartRepliesAndActions(
+                new SmartActions(leftActions, false /* fromAssistant */),
+                new SuppressedActions(leftSuppressed),
+                leftPhishing);
+        InflatedSmartReplyState rightRepliesAndActions = new InflatedSmartReplyState(
                 new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
-                new SmartActions(rightActions, false /* fromAssistant */));
+                new SmartActions(rightActions, false /* fromAssistant */),
+                new SuppressedActions(rightSuppressed),
+                rightPhishing);
 
-        assertThat(
-                SmartRepliesAndActionsInflaterKt
-                        .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
+        assertThat(SmartReplyStateInflaterKt
+                .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
                 .isTrue();
     }
 
@@ -384,16 +453,25 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         List<Notification.Action> rightActions = Arrays.asList(
                 createAction("firstAction"),
                 createAction("secondAction"));
+        List<Integer> leftSuppressed = Arrays.asList(1, 2);
+        List<Integer> rightSuppressed = Arrays.asList(1, 2);
+        boolean leftPhishing = true;
+        boolean rightPhishing = true;
 
-        SmartRepliesAndActions leftRepliesAndActions = new SmartRepliesAndActions(
+        InflatedSmartReplyState leftRepliesAndActions = new InflatedSmartReplyState(
                 new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
-                new SmartActions(leftActions, false /* fromAssistant */));
-        SmartRepliesAndActions rightRepliesAndActions = new SmartRepliesAndActions(
+                new SmartActions(leftActions, false /* fromAssistant */),
+                new SuppressedActions(leftSuppressed),
+                leftPhishing);
+        InflatedSmartReplyState rightRepliesAndActions = new InflatedSmartReplyState(
                 new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
-                new SmartActions(rightActions, false /* fromAssistant */));
+                new SmartActions(rightActions, false /* fromAssistant */),
+                new SuppressedActions(rightSuppressed),
+                rightPhishing);
 
-        assertThat(SmartRepliesAndActionsInflaterKt.areSuggestionsSimilar(
-                leftRepliesAndActions, rightRepliesAndActions)).isFalse();
+        assertThat(SmartReplyStateInflaterKt
+                .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
+                .isFalse();
     }
 
     @Test
@@ -406,16 +484,87 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         List<Notification.Action> rightActions = Arrays.asList(
                 createAction("firstAction"),
                 createAction("not secondAction"));
+        List<Integer> leftSuppressed = Arrays.asList(1, 2);
+        List<Integer> rightSuppressed = Arrays.asList(1, 2);
+        boolean leftPhishing = true;
+        boolean rightPhishing = true;
 
-        SmartRepliesAndActions leftRepliesAndActions = new SmartRepliesAndActions(
+        InflatedSmartReplyState leftRepliesAndActions = new InflatedSmartReplyState(
                 new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
-                new SmartActions(leftActions, false /* fromAssistant */));
-        SmartRepliesAndActions rightRepliesAndActions = new SmartRepliesAndActions(
+                new SmartActions(leftActions, false /* fromAssistant */),
+                new SuppressedActions(leftSuppressed),
+                leftPhishing);
+        InflatedSmartReplyState rightRepliesAndActions = new InflatedSmartReplyState(
                 new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
-                new SmartActions(rightActions, false /* fromAssistant */));
+                new SmartActions(rightActions, false /* fromAssistant */),
+                new SuppressedActions(rightSuppressed),
+                rightPhishing);
 
-        assertThat(SmartRepliesAndActionsInflaterKt.areSuggestionsSimilar(
-                leftRepliesAndActions, rightRepliesAndActions)).isFalse();
+        assertThat(SmartReplyStateInflaterKt
+                .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
+                .isFalse();
+    }
+
+    @Test
+    public void areSuggestionsSimilar_falseForDifferentSuppressedActions() {
+        List<CharSequence> leftReplies = createReplies("first reply", "second reply");
+        List<CharSequence> rightReplies = createReplies("first reply", "second reply");
+        List<Notification.Action> leftActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Notification.Action> rightActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Integer> leftSuppressed = Arrays.asList(1, 2);
+        List<Integer> rightSuppressed = Arrays.asList(1, 3);
+        boolean leftPhishing = true;
+        boolean rightPhishing = true;
+
+        InflatedSmartReplyState leftRepliesAndActions = new InflatedSmartReplyState(
+                new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
+                new SmartActions(leftActions, false /* fromAssistant */),
+                new SuppressedActions(leftSuppressed),
+                leftPhishing);
+        InflatedSmartReplyState rightRepliesAndActions = new InflatedSmartReplyState(
+                new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
+                new SmartActions(rightActions, false /* fromAssistant */),
+                new SuppressedActions(rightSuppressed),
+                rightPhishing);
+
+        assertThat(SmartReplyStateInflaterKt
+                .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
+                .isFalse();
+    }
+
+    @Test
+    public void areSuggestionsSimilar_falseForDifferentPhishing() {
+        List<CharSequence> leftReplies = createReplies("first reply", "second reply");
+        List<CharSequence> rightReplies = createReplies("first reply", "second reply");
+        List<Notification.Action> leftActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Notification.Action> rightActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Integer> leftSuppressed = Arrays.asList(1, 2);
+        List<Integer> rightSuppressed = Arrays.asList(1, 2);
+        boolean leftPhishing = true;
+        boolean rightPhishing = false;
+
+        InflatedSmartReplyState leftRepliesAndActions = new InflatedSmartReplyState(
+                new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
+                new SmartActions(leftActions, false /* fromAssistant */),
+                new SuppressedActions(leftSuppressed),
+                leftPhishing);
+        InflatedSmartReplyState rightRepliesAndActions = new InflatedSmartReplyState(
+                new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
+                new SmartActions(rightActions, false /* fromAssistant */),
+                new SuppressedActions(rightSuppressed),
+                rightPhishing);
+
+        assertThat(SmartReplyStateInflaterKt
+                .areSuggestionsSimilar(leftRepliesAndActions, rightRepliesAndActions))
+                .isFalse();
     }
 
     private void setupAppGeneratedReplies(CharSequence[] smartReplies) {
