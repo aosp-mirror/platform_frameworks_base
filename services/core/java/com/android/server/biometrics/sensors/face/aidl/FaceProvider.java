@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
-import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
@@ -178,8 +177,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         for (int i = 0; i < mSensors.size(); i++) {
             final int sensorId = mSensors.keyAt(i);
             scheduleLoadAuthenticatorIds(sensorId);
-            scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser(),
-                    null /* callback */);
+            scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser());
         }
 
         return mDaemon;
@@ -470,25 +468,6 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @Override
     public void scheduleRemove(int sensorId, @NonNull IBinder token, int faceId, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
-        scheduleRemoveSpecifiedIds(sensorId, token, new int[] {faceId}, userId, receiver,
-                opPackageName);
-    }
-
-    @Override
-    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token, int userId,
-            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
-        final List<Face> faces = FaceUtils.getInstance(sensorId)
-                .getBiometricsForUser(mContext, userId);
-        final int[] faceIds = new int[faces.size()];
-        for (int i = 0; i < faces.size(); i++) {
-            faceIds[i] = faces.get(i).getBiometricId();
-        }
-
-        scheduleRemoveSpecifiedIds(sensorId, token, faceIds, userId, receiver, opPackageName);
-    }
-
-    private void scheduleRemoveSpecifiedIds(int sensorId, @NonNull IBinder token, int[] faceIds,
-            int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             final IFace daemon = getHalInstance();
             if (daemon == null) {
@@ -506,7 +485,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
                 final FaceRemovalClient client = new FaceRemovalClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
-                        new ClientMonitorCallbackConverter(receiver), faceIds, userId,
+                        new ClientMonitorCallbackConverter(receiver), faceId, userId,
                         opPackageName, FaceUtils.getInstance(sensorId), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
 
@@ -564,8 +543,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+    public void scheduleInternalCleanup(int sensorId, int userId) {
         mHandler.post(() -> {
             final IFace daemon = getHalInstance();
             if (daemon == null) {
@@ -586,7 +564,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                                 FaceUtils.getInstance(sensorId),
                                 mSensors.get(sensorId).getAuthenticatorIds());
 
-                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client, callback);
+                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling internal cleanup", e);
             }
@@ -649,9 +627,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @NonNull
     @Override
-    public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull String opPackageName) {
-        return mSensors.get(sensorId).createTestSession(callback);
+    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        return mSensors.get(sensorId).createTestSession();
     }
 
     @Override

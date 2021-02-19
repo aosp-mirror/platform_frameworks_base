@@ -37,16 +37,18 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
 
     private static final String TAG = "Biometrics/RemovalClient";
 
+    protected final int mBiometricId;
     private final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
 
     public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils, int sensorId,
-            @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
+            int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils,
+            int sensorId, @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_REMOVE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
+        mBiometricId = biometricId;
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
     }
@@ -66,7 +68,6 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
 
     @Override
     public void onRemoved(@Nullable BiometricAuthenticator.Identifier identifier, int remaining) {
-        Slog.d(TAG, "onRemoved: " + identifier.getBiometricId() + " remaining: " + remaining);
         if (identifier != null) {
             mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
                     identifier.getBiometricId());
