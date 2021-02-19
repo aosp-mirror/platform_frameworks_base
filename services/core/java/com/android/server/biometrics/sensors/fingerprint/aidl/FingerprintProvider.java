@@ -490,27 +490,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleRemove(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
             @NonNull String opPackageName) {
-        scheduleRemoveSpecifiedIds(sensorId, token, new int[] {fingerId}, userId, receiver,
-                opPackageName);
-    }
-
-    @Override
-    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token,
-            @NonNull IFingerprintServiceReceiver receiver, int userId,
-            @NonNull String opPackageName) {
-        final List<Fingerprint> fingers = FingerprintUtils.getInstance(sensorId)
-                .getBiometricsForUser(mContext, userId);
-        final int[] fingerIds = new int[fingers.size()];
-        for (int i = 0; i < fingers.size(); i++) {
-            fingerIds[i] = fingers.get(i).getBiometricId();
-        }
-
-        scheduleRemoveSpecifiedIds(sensorId, token, fingerIds, userId, receiver, opPackageName);
-    }
-
-    private void scheduleRemoveSpecifiedIds(int sensorId, @NonNull IBinder token,
-            int[] fingerprintIds, int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName) {
         mHandler.post(() -> {
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
@@ -528,7 +507,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
                 final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
                         mSensors.get(sensorId).getLazySession(), token,
-                        new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
+                        new ClientMonitorCallbackConverter(receiver), fingerId, userId,
                         opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                         mSensors.get(sensorId).getAuthenticatorIds());
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
