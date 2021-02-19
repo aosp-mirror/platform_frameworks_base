@@ -140,7 +140,11 @@ public class InsetsSource implements Parcelable {
         if (getType() == ITYPE_CAPTION_BAR) {
             return Insets.of(0, frame.height(), 0, 0);
         }
-        if (!getIntersection(frame, relativeFrame, mTmpFrame)) {
+        // Checks for whether there is shared edge with insets for 0-width/height window.
+        final boolean hasIntersection = relativeFrame.isEmpty()
+                ? getIntersection(frame, relativeFrame, mTmpFrame)
+                : mTmpFrame.setIntersect(frame, relativeFrame);
+        if (!hasIntersection) {
             return Insets.NONE;
         }
 
