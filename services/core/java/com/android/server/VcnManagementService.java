@@ -35,6 +35,7 @@ import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
+import android.net.vcn.VcnManager;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.net.wifi.WifiInfo;
@@ -724,6 +725,26 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
     }
 
+    private boolean isCallbackPermissioned(
+            @NonNull VcnStatusCallbackInfo cbInfo, @NonNull ParcelUuid subgroup) {
+        if (!subgroup.equals(cbInfo.mSubGroup)) {
+            return false;
+        }
+
+        if (!mLastSnapshot.packageHasPermissionsForSubscriptionGroup(subgroup, cbInfo.mPkgName)) {
+            return false;
+        }
+
+        if (!mLocationPermissionChecker.checkLocationPermission(
+                cbInfo.mPkgName,
+                "VcnStatusCallback" /* featureId */,
+                cbInfo.mUid,
+                null /* message */)) {
+            return false;
+        }
+        return true;
+    }
+
     /** Registers the provided callback for receiving VCN status updates. */
     @Override
     public void registerVcnStatusCallback(
@@ -758,6 +779,27 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 }
 
                 mRegisteredStatusCallbacks.put(cbBinder, cbInfo);
+
+                // now that callback is registered, send it the VCN's current status
+                final VcnConfig vcnConfig = mConfigs.get(subGroup);
+                final Vcn vcn = mVcns.get(subGroup);
+                final int vcnStatus;
+                if (vcnConfig == null || !isCallbackPermissioned(cbInfo, subGroup)) {
+                    vcnStatus = VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED;
+                } else if (vcn == null) {
+                    vcnStatus = VcnManager.VCN_STATUS_CODE_INACTIVE;
+                } else if (vcn.isActive()) {
+                    vcnStatus = VcnManager.VCN_STATUS_CODE_ACTIVE;
+                } else {
+                    // TODO(b/181789060): create Vcn.getStatus() and Log.WTF() for unknown status
+                    vcnStatus = VcnManager.VCN_STATUS_CODE_SAFE_MODE;
+                }
+
+                try {
+                    cbInfo.mCallback.onVcnStatusChanged(vcnStatus);
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "VcnStatusCallback threw on VCN status change", e);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -806,26 +848,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             mSubGroup = Objects.requireNonNull(subGroup, "Missing subGroup");
         }
 
-        private boolean isCallbackPermissioned(@NonNull VcnStatusCallbackInfo cbInfo) {
-            if (!mSubGroup.equals(cbInfo.mSubGroup)) {
-                return false;
-            }
-
-            if (!mLastSnapshot.packageHasPermissionsForSubscriptionGroup(
-                    mSubGroup, cbInfo.mPkgName)) {
-                return false;
-            }
-
-            if (!mLocationPermissionChecker.checkLocationPermission(
-                    cbInfo.mPkgName,
-                    "VcnStatusCallback" /* featureId */,
-                    cbInfo.mUid,
-                    null /* message */)) {
-                return false;
-            }
-            return true;
-        }
-
         @Override
         public void onEnteredSafeMode() {
             synchronized (mLock) {
@@ -838,7 +860,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
                 // Notify all registered StatusCallbacks for this subGroup
                 for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
-                    if (isCallbackPermissioned(cbInfo)) {
+                    if (isCallbackPermissioned(cbInfo, mSubGroup)) {
                         Binder.withCleanCallingIdentity(
                                 () ->
                                         cbInfo.mCallback.onVcnStatusChanged(
@@ -862,7 +884,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
                 // Notify all registered StatusCallbacks for this subGroup
                 for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
-                    if (isCallbackPermissioned(cbInfo)) {
+                    if (isCallbackPermissioned(cbInfo, mSubGroup)) {
                         Binder.withCleanCallingIdentity(
                                 () ->
                                         cbInfo.mCallback.onGatewayConnectionError(
