@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सूर्योदयसम्म"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> सम्म"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"स्क्रिनको चमक घटाउनुहोस्"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC लाई असक्षम पारिएको छ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC लाई सक्षम पारिएको छ"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"प्रोफाइल देखाउनुहोस्"</string>
     <string name="user_add_user" msgid="4336657383006913022">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नयाँ प्रयोगकर्ता"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"अतिथिको सत्र अन्त्य गर्ने हो?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"अतिथिको सत्र अन्त्य गर्नुहोस्"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि हटाउने हो?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यस सत्रमा सबै एपहरू र डेटा मेटाइनेछ।"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"सत्र अन्त्य गर्नुहोस्"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"हटाउनुहोस्"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"पुनः स्वागत, अतिथि!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तपाईं आफ्नो सत्र जारी गर्न चाहनुहुन्छ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"सुरु गर्नुहोस्"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"सिस्टमले स्वतः यस सूचनालाई &lt;b&gt;कम महत्त्वपूर्ण ठानी साइलेन्ट मोडमा&lt;/b&gt; सेट गरिदियो।"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"तपाईंको सेडमा यो सूचना स्वतः &lt;b&gt;धेरै महत्त्वपूर्ण सूचनाका रूपमा&lt;/b&gt; सेट गरियो।"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"तपाईंको सेडमा यो सूचना स्वतः &lt;b&gt;कम महत्त्वपूर्ण सूचनाका रूपमा&lt;/b&gt; सेट गरियो।"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"के यो सही थियो?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"विकासकर्तालाई तपाईंको प्रतिक्रिया थाहा पाउन दिनुहोस्। यो कुरा सही थियो?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"तपाईंको प्रतिक्रियाका लागि धन्यवाद!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ठिक छ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचना सम्बन्धी नियन्त्रणहरूलाई खोलियो"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"टाइल सारेर <xliff:g id="POSITION">%1$d</xliff:g> मा लैजानुहोस्"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"टाइल यो अवस्था <xliff:g id="POSITION">%1$d</xliff:g> मा हाल्नुहोस्"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"टाइल हालियो"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"टाइल हटाइयो"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"द्रुत सेटिङ सम्पादक।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> को सूचना: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"सेटिङहरूलाई खोल्नुहोस्।"</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ले <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> प्रयोग गरिरहेको छ"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ले हालसालै <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> प्रयोग गरेको छ"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(इन्टरप्राइज)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"फोन कल"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"फोन कल"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> मार्फत)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"क्यामेरा"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"स्थान"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेन्सरहरू निष्क्रिय छन्"</string>
     <string name="device_services" msgid="1549944177856658705">"यन्त्रका सेवाहरू"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक छैन"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"यो एप पुनः सुरु गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"सार्नुहोस्"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>

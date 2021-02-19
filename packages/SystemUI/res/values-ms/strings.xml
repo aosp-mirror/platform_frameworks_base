@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Hingga matahari trbt"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Dihidupkan pada <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Hingga <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Kurangkan Kecerahan"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC dilumpuhkan"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC didayakan"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Tunjuk profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Tambah pengguna"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baharu"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Tamatkan sesi tetamu?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Tamatkan sesi tetamu"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alih keluar tetamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua apl dan data dalam sesi ini akan dipadam."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Tamatkan sesi"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alih keluar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Selamat kembali, tetamu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Adakah anda ingin meneruskan sesi anda?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Mulakan semula"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Pemberitahuan ini secara automatik &lt;b&amp;gtditurunkan taraf kepada Senyap&lt;/b&gt; oleh sistem."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Pemberitahuan ini secara automatik &lt;b&gt;dinilai lebih tinggi&lt;/b&gt; dalam rona warna anda."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Pemberitahuan ini secara automatik &lt;b&gt;dinilai lebih rendah&lt;/b&gt; dalam rona warna anda."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Adakah ini betul?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Beritahu pembangun tentang maklum balas anda. Adakah ini betul?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Terima kasih atas maklum balas anda!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Kawalan pemberitahuan untuk <xliff:g id="APP_NAME">%1$s</xliff:g> dibuka"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Alih ke <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Tambahkan pada kedudukan <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Kedudukan <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Jubin ditambah"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Jubin dialih keluar"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor tetapan pantas."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Pemberitahuan <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Buka tetapan."</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> sedang menggunakan <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> menggunakan <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> baru-baru ini"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(perusahaan)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Panggilan telefon"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Panggilan telefon"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(melalui <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokasi"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Penderia dimatikan"</string>
     <string name="device_services" msgid="1549944177856658705">"Perkhidmatan Peranti"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Tiada tajuk"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Ketik untuk memulakan semula apl ini dan menggunakan skrin penuh."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Alih"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigasi sistem dikemas kini. Untuk membuat perubahan, pergi ke Tetapan."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Pergi ke Tetapan untuk mengemas kini navigasi sistem"</string>
