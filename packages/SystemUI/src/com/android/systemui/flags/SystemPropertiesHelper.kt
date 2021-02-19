@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package android.speech.tts;
-import android.speech.tts.ITextToSpeechSession;
+package com.android.systemui.flags
+
+import android.os.SystemProperties
+import com.android.systemui.dagger.SysUISingleton
+
+import javax.inject.Inject
 
 /**
- * Callback interface for a session created by {@link ITextToSpeechManager} API.
- *
- * @hide
+ * Proxy to make {@link SystemProperties} easily testable.
  */
-oneway interface ITextToSpeechSessionCallback {
-
-    void onConnected(in ITextToSpeechSession session, in IBinder serviceBinder);
-
-    void onDisconnected();
-
-    void onError(in String errorInfo);
+@SysUISingleton
+class SystemPropertiesHelper @Inject constructor() {
+    fun getBoolean(name: String, default: Boolean): Boolean {
+        return SystemProperties.getBoolean(name, default)
+    }
 }

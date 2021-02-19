@@ -43,7 +43,7 @@ oneway interface IRecognitionService {
      * @param featureId The feature in the package
      */
     void startListening(in Intent recognizerIntent, in IRecognitionListener listener,
-            String packageName, String featureId);
+            String packageName, String featureId, int callingUid);
 
     /**
      * Stops listening for speech. Speech captured so far will be recognized as
@@ -62,6 +62,7 @@ oneway interface IRecognitionService {
      * @param listener to receive callbacks, note that this must be non-null
      * @param packageName the package name calling this API
      * @param featureId The feature in the package
+     * @param isShutdown Whether the cancellation is caused by a client calling #shutdown
      */
-    void cancel(in IRecognitionListener listener, String packageName, String featureId);
+    void cancel(in IRecognitionListener listener, String packageName, String featureId, boolean isShutdown);
 }

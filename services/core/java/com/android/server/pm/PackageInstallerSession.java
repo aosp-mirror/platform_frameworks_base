@@ -70,6 +70,7 @@ import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
+import android.content.pm.IPackageLoadingProgressCallback;
 import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
@@ -321,6 +322,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private float mProgress = 0;
     @GuardedBy("mLock")
     private float mReportedProgress = -1;
+    @GuardedBy("mLock")
+    private float mIncrementalProgress = 0;
 
     /** State of the session. */
     @GuardedBy("mLock")
@@ -3770,7 +3773,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
                         inheritedDir, params, statusListener, healthCheckParams, healthListener,
-                        addedFiles, perUidReadTimeouts);
+                        addedFiles, perUidReadTimeouts,
+                        new IPackageLoadingProgressCallback.Stub() {
+                            @Override
+                            public void onPackageLoadingProgressChanged(float progress) {
+                                synchronized (mLock) {
+                                    mIncrementalProgress = progress;
+                                }
+                            }
+                        });
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),

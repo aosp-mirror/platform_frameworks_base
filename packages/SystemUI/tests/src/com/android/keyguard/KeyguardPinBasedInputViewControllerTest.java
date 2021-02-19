@@ -67,8 +67,6 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     private LatencyTracker mLatencyTracker;
     @Mock
     private LiftToActivateListener mLiftToactivateListener;
-    @Mock
-    private EmergencyButtonController mEmergencyButtonController;
     private FalsingCollector mFalsingCollector = new FalsingCollectorFake();
     @Mock
     private View mDeleteButton;
@@ -94,7 +92,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
-                mEmergencyButtonController, mFalsingCollector) {
+                mFalsingCollector) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);

@@ -124,15 +124,15 @@ public class CpuPowerCalculator extends PowerCalculator {
         long durationMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
 
         // Constant battery drain when CPU is active
-        double powerMah = mCpuActivePowerEstimator.calculatePower(u.getCpuActiveTime());
+        double powerMah = calculateActiveCpuPowerMah(u.getCpuActiveTime());
 
         // Additional per-cluster battery drain
         long[] cpuClusterTimes = u.getCpuClusterTimes();
         if (cpuClusterTimes != null) {
             if (cpuClusterTimes.length == mNumCpuClusters) {
                 for (int cluster = 0; cluster < mNumCpuClusters; cluster++) {
-                    double power = mPerClusterPowerEstimators[cluster]
-                            .calculatePower(cpuClusterTimes[cluster]);
+                    double power = calculatePerCpuClusterPowerMah(cluster,
+                            cpuClusterTimes[cluster]);
                     powerMah += power;
                     if (DEBUG) {
                         Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster
@@ -151,8 +151,8 @@ public class CpuPowerCalculator extends PowerCalculator {
             final int speedsForCluster = mPerCpuFreqPowerEstimators[cluster].length;
             for (int speed = 0; speed < speedsForCluster; speed++) {
                 final long timeUs = u.getTimeAtCpuSpeed(cluster, speed, statsType);
-                final double power =
-                        mPerCpuFreqPowerEstimators[cluster][speed].calculatePower(timeUs / 1000);
+                final double power = calculatePerCpuFreqPowerMah(cluster, speed,
+                        timeUs / 1000);
                 if (DEBUG) {
                     Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
                             + speed + " timeUs=" + timeUs + " power="
@@ -206,5 +206,40 @@ public class CpuPowerCalculator extends PowerCalculator {
         result.durationFgMs = durationFgMs;
         result.powerMah = powerMah;
         result.packageWithHighestDrain = packageWithHighestDrain;
+    }
+
+    /**
+     * Calculates active CPU power consumption.
+     *
+     * @param durationsMs duration of CPU usage.
+     * @return a double in milliamp-hours of estimated active CPU power consumption.
+     */
+    public double calculateActiveCpuPowerMah(long durationsMs) {
+        return mCpuActivePowerEstimator.calculatePower(durationsMs);
+    }
+
+    /**
+     * Calculates CPU cluster power consumption.
+     *
+     * @param cluster CPU cluster used.
+     * @param clusterDurationMs duration of CPU cluster usage.
+     * @return a double in milliamp-hours of estimated CPU cluster power consumption.
+     */
+    public double calculatePerCpuClusterPowerMah(int cluster, long clusterDurationMs) {
+        return mPerClusterPowerEstimators[cluster].calculatePower(clusterDurationMs);
+    }
+
+    /**
+     * Calculates CPU cluster power consumption at a specific speedstep.
+     *
+     * @param cluster CPU cluster used.
+     * @param speedStep which speedstep used.
+     * @param clusterSpeedDurationsMs duration of CPU cluster usage at the specified speed step.
+     * @return a double in milliamp-hours of estimated CPU cluster-speed power consumption.
+     */
+    public double calculatePerCpuFreqPowerMah(int cluster, int speedStep,
+            long clusterSpeedDurationsMs) {
+        return mPerCpuFreqPowerEstimators[cluster][speedStep].calculatePower(
+                clusterSpeedDurationsMs);
     }
 }

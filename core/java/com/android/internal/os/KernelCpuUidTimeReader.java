@@ -91,15 +91,24 @@ public abstract class KernelCpuUidTimeReader<T> {
      * Reads the proc file, calling into the callback with a delta of time for each UID.
      *
      * @param cb The callback to invoke for each line of the proc file. If null,the data is
-     *           consumed and subsequent calls to readDelta will provide a fresh delta.
      */
     public void readDelta(@Nullable Callback<T> cb) {
+        readDelta(false, cb);
+    }
+
+    /**
+     * Reads the proc file, calling into the callback with a delta of time for each UID.
+     *
+     * @param force Ignore the throttling and force read the delta.
+     * @param cb The callback to invoke for each line of the proc file. If null,the data is
+     */
+    public void readDelta(boolean force, @Nullable Callback<T> cb) {
         if (!mThrottle) {
             readDeltaImpl(cb);
             return;
         }
         final long currTimeMs = SystemClock.elapsedRealtime();
-        if (currTimeMs < mLastReadTimeMs + mMinTimeBetweenRead) {
+        if (!force && currTimeMs < mLastReadTimeMs + mMinTimeBetweenRead) {
             if (DEBUG) {
                 Slog.d(mTag, "Throttle readDelta");
             }

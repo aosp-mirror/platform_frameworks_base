@@ -18,7 +18,6 @@ package com.android.systemui.flags;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,59 +26,44 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
-import android.provider.DeviceConfig;
 
 import androidx.annotation.BoolRes;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.assist.DeviceConfigHelper;
 import com.android.systemui.util.wrapper.BuildInfo;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
 
 @SmallTest
 public class FeatureFlagReaderTest extends SysuiTestCase {
     @Mock private Resources mResources;
     @Mock private BuildInfo mBuildInfo;
-    @Mock private DeviceConfigHelper mDeviceConfig;
-    @Mock private Executor mBackgroundExecutor;
+    @Mock private SystemPropertiesHelper mSystemPropertiesHelper;
 
     private FeatureFlagReader mReader;
-
-    @Captor private ArgumentCaptor<DeviceConfig.OnPropertiesChangedListener> mListenerCaptor;
-    private DeviceConfig.OnPropertiesChangedListener mPropChangeListener;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mDeviceConfig.getBoolean(anyString(), anyBoolean()))
+        when(mSystemPropertiesHelper.getBoolean(anyString(), anyBoolean()))
                 .thenAnswer(invocation -> invocation.getArgument(1));
 
         defineFlag(FLAG_RESID_0, false);
         defineFlag(FLAG_RESID_1, true);
 
         initialize(true, true);
-
-        verify(mDeviceConfig).addOnPropertiesChangedListener(any(), mListenerCaptor.capture());
-        mPropChangeListener = mListenerCaptor.getValue();
     }
 
     private void initialize(boolean isDebuggable, boolean isOverrideable) {
         when(mBuildInfo.isDebuggable()).thenReturn(isDebuggable);
         when(mResources.getBoolean(R.bool.are_flags_overrideable)).thenReturn(isOverrideable);
-        mReader = new FeatureFlagReader(mResources, mBuildInfo, mDeviceConfig, mBackgroundExecutor);
+        mReader = new FeatureFlagReader(mResources, mBuildInfo, mSystemPropertiesHelper);
     }
 
     @Test
@@ -136,24 +120,8 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
 
         // THEN the underlying resource and override are only queried once
         verify(mResources, times(1)).getBoolean(FLAG_RESID_0);
-        verify(mDeviceConfig, times(1)).getBoolean(fakeStorageKey(FLAG_RESID_0), false);
-    }
-
-    @Test
-    public void testCachesAreClearedAfterPropsChange() {
-        // GIVEN a flag whose value has already been queried
-        assertFalse(mReader.isEnabled(FLAG_RESID_0));
-
-        // WHEN the value of the flag changes
-        overrideFlag(FLAG_RESID_0, true);
-        Map<String, String> changedMap = new HashMap<>();
-        changedMap.put(fakeStorageKey(FLAG_RESID_0), "true");
-        DeviceConfig.Properties properties =
-                new DeviceConfig.Properties("systemui", changedMap);
-        mPropChangeListener.onPropertiesChanged(properties);
-
-        // THEN the new value is provided
-        assertTrue(mReader.isEnabled(FLAG_RESID_0));
+        verify(mSystemPropertiesHelper, times(1))
+                .getBoolean(fakeStorageKey(FLAG_RESID_0), false);
     }
 
     private void defineFlag(int resId, boolean value) {
@@ -162,12 +130,12 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
     }
 
     private void overrideFlag(int resId, boolean value) {
-        when(mDeviceConfig.getBoolean(eq(fakeStorageKey(resId)), anyBoolean()))
+        when(mSystemPropertiesHelper.getBoolean(eq(fakeStorageKey(resId)), anyBoolean()))
                 .thenReturn(value);
     }
 
     private String fakeStorageKey(@BoolRes int resId) {
-        return "flag_testname_" + resId;
+        return "persist.systemui.flag_testname_" + resId;
     }
 
     private static final int FLAG_RESID_0 = 47;

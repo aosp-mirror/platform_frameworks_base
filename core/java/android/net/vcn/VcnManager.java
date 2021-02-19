@@ -17,7 +17,9 @@ package android.net.vcn;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -32,6 +34,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -262,6 +266,42 @@ public class VcnManager {
         }
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        VCN_ERROR_CODE_INTERNAL_ERROR,
+        VCN_ERROR_CODE_CONFIG_ERROR,
+        VCN_ERROR_CODE_NETWORK_ERROR
+    })
+    public @interface VcnErrorCode {}
+
+    /**
+     * Value indicating that an internal failure occurred in this Gateway Connection.
+     *
+     * @hide
+     */
+    public static final int VCN_ERROR_CODE_INTERNAL_ERROR = 0;
+
+    /**
+     * Value indicating that an error with this Gateway Connection's configuration occurred.
+     *
+     * <p>For example, this error code will be returned after authentication failures.
+     *
+     * @hide
+     */
+    public static final int VCN_ERROR_CODE_CONFIG_ERROR = 1;
+
+    /**
+     * Value indicating that a Network error occurred with this Gateway Connection.
+     *
+     * <p>For example, this error code will be returned if an underlying {@link android.net.Network}
+     * for this Gateway Connection is lost, or if an error occurs while resolving the connection
+     * endpoint address.
+     *
+     * @hide
+     */
+    public static final int VCN_ERROR_CODE_NETWORK_ERROR = 2;
+
     // TODO: make VcnStatusCallback @SystemApi
     /**
      * VcnStatusCallback is the interface for Carrier apps to receive updates for their VCNs.
@@ -285,6 +325,24 @@ public class VcnManager {
          * via {@link #setVcnConfig(ParcelUuid, VcnConfig)}.
          */
         public abstract void onEnteredSafeMode();
+
+        /**
+         * Invoked when a VCN Gateway Connection corresponding to this callback's subscription
+         * encounters an error.
+         *
+         * @param networkCapabilities an array of underlying NetworkCapabilities for the Gateway
+         *     Connection that encountered the error for identification purposes. These will be a
+         *     sorted list with no duplicates, matching one of the {@link
+         *     VcnGatewayConnectionConfig}s set in the {@link VcnConfig} for this subscription
+         *     group.
+         * @param errorCode {@link VcnErrorCode} to indicate the error that occurred
+         * @param detail Throwable to provide additional information about the error, or {@code
+         *     null} if none
+         */
+        public abstract void onGatewayConnectionError(
+                @NonNull int[] networkCapabilities,
+                @VcnErrorCode int errorCode,
+                @Nullable Throwable detail);
     }
 
     /**
@@ -385,11 +443,12 @@ public class VcnManager {
      *
      * @hide
      */
-    private class VcnStatusCallbackBinder extends IVcnStatusCallback.Stub {
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class VcnStatusCallbackBinder extends IVcnStatusCallback.Stub {
         @NonNull private final Executor mExecutor;
         @NonNull private final VcnStatusCallback mCallback;
 
-        private VcnStatusCallbackBinder(
+        public VcnStatusCallbackBinder(
                 @NonNull Executor executor, @NonNull VcnStatusCallback callback) {
             mExecutor = executor;
             mCallback = callback;
@@ -399,6 +458,37 @@ public class VcnManager {
         public void onEnteredSafeMode() {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> mCallback.onEnteredSafeMode()));
+        }
+
+        // TODO(b/180521637): use ServiceSpecificException for safer Exception 'parceling'
+        @Override
+        public void onGatewayConnectionError(
+                @NonNull int[] networkCapabilities,
+                @VcnErrorCode int errorCode,
+                @Nullable String exceptionClass,
+                @Nullable String exceptionMessage) {
+            final Throwable cause = createThrowableByClassName(exceptionClass, exceptionMessage);
+
+            Binder.withCleanCallingIdentity(
+                    () ->
+                            mExecutor.execute(
+                                    () ->
+                                            mCallback.onGatewayConnectionError(
+                                                    networkCapabilities, errorCode, cause)));
+        }
+
+        private static Throwable createThrowableByClassName(
+                @Nullable String className, @Nullable String message) {
+            if (className == null) {
+                return null;
+            }
+
+            try {
+                Class<?> c = Class.forName(className);
+                return (Throwable) c.getConstructor(String.class).newInstance(message);
+            } catch (ReflectiveOperationException | ClassCastException e) {
+                return new RuntimeException(className + ": " + message);
+            }
         }
     }
 }

@@ -67,7 +67,7 @@ class ControlsDialog @Inject constructor(
 
         val vg = requireViewById<ViewGroup>(com.android.systemui.R.id.global_actions_controls)
         vg.alpha = 0f
-        controller.show(vg, { /* do nothing */ }, false /* startedFromGlobalActions */)
+        controller.show(vg, { dismiss() }, false /* startedFromGlobalActions */)
 
         vg.animate()
             .alpha(1f)

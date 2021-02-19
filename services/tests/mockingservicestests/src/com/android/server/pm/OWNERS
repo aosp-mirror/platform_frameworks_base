@@ -1,1 +1,3 @@
 include /services/core/java/com/android/server/pm/OWNERS
+
+per-file StagingManagerTest.java = dariofreni@google.com, ioffe@google.com, olilan@google.com

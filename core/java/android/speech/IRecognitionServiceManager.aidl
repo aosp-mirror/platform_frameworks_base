@@ -16,6 +16,8 @@
 
 package android.speech;
 
+import android.content.ComponentName;
+
 import android.speech.IRecognitionServiceManagerCallback;
 
 /**
@@ -23,6 +25,10 @@ import android.speech.IRecognitionServiceManagerCallback;
  *
  * {@hide}
  */
-interface IRecognitionServiceManager {
-    void createSession(in IRecognitionServiceManagerCallback callback);
+oneway interface IRecognitionServiceManager {
+    void createSession(
+        in ComponentName componentName,
+        in IBinder clientToken,
+        boolean onDevice,
+        in IRecognitionServiceManagerCallback callback);
 }

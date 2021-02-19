@@ -44,6 +44,7 @@ import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
@@ -570,13 +571,13 @@ public class BiometricService extends SystemService {
      */
     private final class BiometricServiceWrapper extends IBiometricService.Stub {
         @Override // Binder call
-        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName)
-                throws RemoteException {
+        public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+                @NonNull String opPackageName) throws RemoteException {
             checkInternalPermission();
 
             for (BiometricSensor sensor : mSensors) {
                 if (sensor.id == sensorId) {
-                    return sensor.impl.createTestSession(opPackageName);
+                    return sensor.impl.createTestSession(callback, opPackageName);
                 }
             }
 

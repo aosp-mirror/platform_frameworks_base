@@ -75,7 +75,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.LocationPermissionChecker;
-import com.android.server.VcnManagementService.VcnSafeModeCallback;
+import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.VcnManagementService.VcnStatusCallbackInfo;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
@@ -156,8 +156,8 @@ public class VcnManagementServiceTest {
     private final LocationPermissionChecker mLocationPermissionChecker =
             mock(LocationPermissionChecker.class);
 
-    private final ArgumentCaptor<VcnSafeModeCallback> mSafeModeCallbackCaptor =
-            ArgumentCaptor.forClass(VcnSafeModeCallback.class);
+    private final ArgumentCaptor<VcnCallback> mVcnCallbackCaptor =
+            ArgumentCaptor.forClass(VcnCallback.class);
 
     private final VcnManagementService mVcnMgmtSvc;
 
@@ -721,7 +721,7 @@ public class VcnManagementServiceTest {
         verify(mMockPolicyListener).onPolicyChanged();
     }
 
-    private void verifyVcnSafeModeCallback(
+    private void verifyVcnCallback(
             @NonNull ParcelUuid subGroup, @NonNull TelephonySubscriptionSnapshot snapshot)
             throws Exception {
         verify(mMockDeps)
@@ -730,22 +730,22 @@ public class VcnManagementServiceTest {
                         eq(subGroup),
                         eq(TEST_VCN_CONFIG),
                         eq(snapshot),
-                        mSafeModeCallbackCaptor.capture());
+                        mVcnCallbackCaptor.capture());
 
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
-        VcnSafeModeCallback safeModeCallback = mSafeModeCallbackCaptor.getValue();
-        safeModeCallback.onEnteredSafeMode();
+        VcnCallback vcnCallback = mVcnCallbackCaptor.getValue();
+        vcnCallback.onEnteredSafeMode();
 
         verify(mMockPolicyListener).onPolicyChanged();
     }
 
     @Test
-    public void testVcnSafeModeCallbackOnEnteredSafeMode() throws Exception {
+    public void testVcnCallbackOnEnteredSafeMode() throws Exception {
         TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
 
-        verifyVcnSafeModeCallback(TEST_UUID_1, snapshot);
+        verifyVcnCallback(TEST_UUID_1, snapshot);
     }
 
     private void triggerVcnStatusCallbackOnEnteredSafeMode(
@@ -771,7 +771,7 @@ public class VcnManagementServiceTest {
         // Trigger systemReady() to set up LocationPermissionChecker
         mVcnMgmtSvc.systemReady();
 
-        verifyVcnSafeModeCallback(subGroup, snapshot);
+        verifyVcnCallback(subGroup, snapshot);
     }
 
     @Test

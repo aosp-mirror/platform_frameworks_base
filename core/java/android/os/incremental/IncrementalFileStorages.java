@@ -36,6 +36,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.IDataLoaderStatusListener;
+import android.content.pm.IPackageLoadingProgressCallback;
 import android.content.pm.InstallationFileParcel;
 
 import java.io.File;
@@ -71,7 +72,8 @@ public final class IncrementalFileStorages {
             @Nullable StorageHealthCheckParams healthCheckParams,
             @Nullable IStorageHealthListener healthListener,
             @NonNull List<InstallationFileParcel> addedFiles,
-            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) throws IOException {
+            @NonNull PerUidReadTimeouts[] perUidReadTimeouts,
+            IPackageLoadingProgressCallback progressCallback) throws IOException {
         // TODO(b/136132412): validity check if session should not be incremental
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
                 Context.INCREMENTAL_SERVICE);
@@ -94,6 +96,11 @@ public final class IncrementalFileStorages {
             } else {
                 throw new IOException("Unknown file location: " + file.location);
             }
+        }
+        // Register progress loading callback after files have been added
+        if (progressCallback != null) {
+            incrementalManager.registerLoadingProgressCallback(stageDir.getAbsolutePath(),
+                    progressCallback);
         }
         result.startLoading(dataLoaderParams, statusListener, healthCheckParams, healthListener,
                 perUidReadTimeouts);
@@ -205,6 +212,7 @@ public final class IncrementalFileStorages {
 
         try {
             mDefaultStorage.unBind(mStageDir.getAbsolutePath());
+            mDefaultStorage.unregisterLoadingProgressListener();
         } catch (IOException ignored) {
         }
         mDefaultStorage = null;
