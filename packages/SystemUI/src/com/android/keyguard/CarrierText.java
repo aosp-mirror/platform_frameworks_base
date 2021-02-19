@@ -18,49 +18,20 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.telephony.TelephonyListenerManager;
 
 import java.util.Locale;
 
 public class CarrierText extends TextView {
-    private static final boolean DEBUG = KeyguardConstants.DEBUG;
-    private static final String TAG = "CarrierText";
+    private final boolean mShowMissingSim;
 
-    private static CharSequence mSeparator;
-
-    private boolean mShowMissingSim;
-
-    private boolean mShowAirplaneMode;
-    private boolean mShouldMarquee;
-
-    private CarrierTextController mCarrierTextController;
-
-    private CarrierTextController.CarrierTextCallback mCarrierTextCallback =
-            new CarrierTextController.CarrierTextCallback() {
-                @Override
-                public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
-                    setText(info.carrierText);
-                }
-
-                @Override
-                public void startedGoingToSleep() {
-                    setSelected(false);
-                }
-
-                @Override
-                public void finishedWakingUp() {
-                    setSelected(true);
-                }
-            };
+    private final boolean mShowAirplaneMode;
 
     public CarrierText(Context context) {
         this(context, null);
@@ -80,33 +51,6 @@ public class CarrierText extends TextView {
         }
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
     }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mSeparator = getResources().getString(
-                com.android.internal.R.string.kg_text_message_separator);
-        mCarrierTextController = new CarrierTextController(mContext, mSeparator, mShowAirplaneMode,
-                mShowMissingSim, mContext.getSystemService(TelephonyManager.class),
-                Dependency.get(TelephonyListenerManager.class),
-                Dependency.get(Dependency.MAIN_EXECUTOR),
-                Dependency.get(Dependency.BACKGROUND_EXECUTOR));
-        mShouldMarquee = Dependency.get(KeyguardUpdateMonitor.class).isDeviceInteractive();
-        setSelected(mShouldMarquee); // Allow marquee to work.
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mCarrierTextController.setListening(mCarrierTextCallback);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mCarrierTextController.setListening(null);
-    }
-
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
@@ -118,7 +62,15 @@ public class CarrierText extends TextView {
         }
     }
 
-    private class CarrierTextTransformationMethod extends SingleLineTransformationMethod {
+    public boolean getShowAirplaneMode() {
+        return mShowAirplaneMode;
+    }
+
+    public boolean getShowMissingSim() {
+        return mShowMissingSim;
+    }
+
+    private static class CarrierTextTransformationMethod extends SingleLineTransformationMethod {
         private final Locale mLocale;
         private final boolean mAllCaps;
 
