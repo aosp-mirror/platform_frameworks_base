@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package android.service.wallpaper;
+package android.app;
 
-import android.graphics.RectF;
-import android.os.ParcelFileDescriptor;
-import android.service.wallpaper.IWallpaperEngine;
 import android.app.WallpaperColors;
+import android.graphics.RectF;
 
 /**
  * @hide
  */
-interface IWallpaperConnection {
-    void attachEngine(IWallpaperEngine engine, int displayId);
-    void engineShown(IWallpaperEngine engine);
-    ParcelFileDescriptor setWallpaper(String name);
-    void onWallpaperColorsChanged(in WallpaperColors colors, int displayId);
-    void onLocalWallpaperColorsChanged(in RectF area, in WallpaperColors colors, int displayId);
+oneway interface ILocalWallpaperColorConsumer {
+    void onColorsChanged(in RectF area, in WallpaperColors colors);
 }
