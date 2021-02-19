@@ -18,7 +18,7 @@ package android.hardware.biometrics;
 import android.hardware.biometrics.SensorPropertiesInternal;
 
 /**
- * A test service for FingerprintManager and BiometricManager.
+ * A test service for FingerprintManager and BiometricPrompt.
  * @hide
  */
 interface ITestSession {
