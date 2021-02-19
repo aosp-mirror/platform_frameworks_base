@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Baloncuk"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Yönet"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon kapatıldı."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Bu uygulamayı yeniden başlatmak ve tam ekrana geçmek için dokunun."</string>
+    <string name="got_it" msgid="4428750913636945527">"Anladım"</string>
 </resources>
