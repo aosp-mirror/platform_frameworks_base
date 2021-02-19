@@ -739,11 +739,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             mService.remove(mToken, fp.getBiometricId(), userId, mServiceReceiver,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Slog.w(TAG, "Remote exception in remove: ", e);
-            if (callback != null) {
-                callback.onRemovalError(fp, FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                            0 /* vendorCode */));
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes all face templates for the given user.
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void removeAll(int userId, @NonNull RemovalCallback callback) {
+        if (mService != null) {
+            try {
+                mRemovalCallback = callback;
+                mService.removeAll(mToken, userId, mServiceReceiver, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }

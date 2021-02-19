@@ -386,7 +386,22 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                     opPackageName);
         }
 
-        @Override
+        @Override // Binder call
+        public void removeAll(final IBinder token, final int userId,
+                final IFaceServiceReceiver receiver, final String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for removeAll");
+                return;
+            }
+
+            provider.second.scheduleRemoveAll(provider.first, token, userId, receiver,
+                    opPackageName);
+        }
+
+        @Override // Binder call
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
                 final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);

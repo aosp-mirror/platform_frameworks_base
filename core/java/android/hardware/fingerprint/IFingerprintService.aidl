@@ -87,6 +87,9 @@ interface IFingerprintService {
     void remove(IBinder token, int fingerId, int userId, IFingerprintServiceReceiver receiver,
             String opPackageName);
 
+    // Removes all face enrollments for the specified userId.
+    void removeAll(IBinder token, int userId, IFingerprintServiceReceiver receiver, String opPackageName);
+
     // Rename the fingerprint specified by fingerId and userId to the given name
     void rename(int fingerId, int userId, String name);
 

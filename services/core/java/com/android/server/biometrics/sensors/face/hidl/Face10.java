@@ -671,6 +671,20 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         });
     }
 
+    @Override
+    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token, int userId,
+            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            // For IBiometricsFace@1.0, remove(0) means remove all enrollments
+            final FaceRemovalClient client = new FaceRemovalClient(mContext, mLazyDaemon, token,
+                    new ClientMonitorCallbackConverter(receiver), 0 /* faceId */, userId,
+                    opPackageName,
+                    FaceUtils.getLegacyInstance(mSensorId), mSensorId, mAuthenticatorIds);
+            mScheduler.scheduleClientMonitor(client);
+        });
+    }
 
     @Override
     public void scheduleResetLockout(int sensorId, int userId, @NonNull byte[] hardwareAuthToken) {

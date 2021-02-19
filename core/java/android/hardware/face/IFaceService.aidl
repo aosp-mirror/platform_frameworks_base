@@ -83,9 +83,12 @@ interface IFaceService {
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
 
-    // Any errors resulting from this call will be returned to the listener
+    // Removes the specified face enrollment for the specified userId.
     void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver,
             String opPackageName);
+
+    // Removes all face enrollments for the specified userId.
+    void removeAll(IBinder token, int userId, IFaceServiceReceiver receiver, String opPackageName);
 
     // Get the enrolled face for user.
     List<Face> getEnrolledFaces(int sensorId, int userId, String opPackageName);

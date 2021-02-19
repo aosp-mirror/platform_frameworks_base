@@ -499,7 +499,21 @@ public class FingerprintService extends SystemService implements BiometricServic
                     opPackageName);
         }
 
-        @Override
+        @Override // Binder call
+        public void removeAll(final IBinder token, final int userId,
+                final IFingerprintServiceReceiver receiver, final String opPackageName) {
+            Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
+
+            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for removeAll");
+                return;
+            }
+            provider.second.scheduleRemoveAll(provider.first, token, receiver, userId,
+                    opPackageName);
+        }
+
+        @Override // Binder call
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
                 final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
