@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Scorri screenshot"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignora screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Anteprima screenshot"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Limite superiore"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Limite inferiore"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Registrazione dello schermo"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
@@ -410,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Fino all\'alba"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Attivazione alle <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Fino alle <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Riduci la luminosità"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC attiva"</string>
@@ -463,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostra profilo"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Aggiungi utente"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nuovo utente"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Vuoi terminare la sessione Ospite?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Termina sessione Ospite"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Rimuovere l\'ospite?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tutte le app e i dati di questa sessione verranno eliminati."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Termina sessione"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Rimuovi"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bentornato, ospite."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vuoi continuare la sessione?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Ricomincia"</string>
@@ -540,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"La tua organizzazione ha installato un\'autorità di certificazione nel tuo profilo di lavoro. Il tuo traffico di rete protetto potrebbe essere monitorato o modificato."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Sul dispositivo è installata un\'autorità di certificazione. Il tuo traffico di rete protetto potrebbe essere monitorato o modificato."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'amministratore ha attivato i log di rete, che consentono di monitorare il traffico sul dispositivo."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'amministratore ha attivato i log di rete, che consentono di monitorare il traffico nel profilo di lavoro, ma non nel profilo personale."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Sei connesso a <xliff:g id="VPN_APP">%1$s</xliff:g>, che consente di monitorare le attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Sei connesso a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>, che consentono di monitorare le attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Il tuo profilo di lavoro è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi siti web, email e app."</string>
@@ -733,7 +738,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Questa notifica è stata &lt;b&gt;retrocessa automaticamente a Silenziosa&lt;/b&gt; dal sistema."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Questa notifica è stata &lt;b&gt;posizionata automaticamente più in alto&lt;/b&gt; nell\'area notifiche."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Questa notifica è stata &lt;b&gt;posizionata automaticamente più in basso&lt;/b&gt; nell\'area notifiche."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Era corretto?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Fai conoscere la tua opinione allo sviluppatore. La classificazione era corretta?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Grazie per il feedback."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Controlli di gestione delle notifiche per <xliff:g id="APP_NAME">%1$s</xliff:g> aperti"</string>
@@ -880,6 +885,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Sposta nella posizione <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Aggiungi alla posizione <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posizione <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Riquadro aggiunto"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Riquadro rimosso"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor di impostazioni rapide."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notifica di <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Apri le impostazioni."</string>
@@ -970,7 +977,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> sta usando: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ha usato di recente: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(enterprise)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Phonecall"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonata"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(tramite <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"Fotocamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"luogo"</string>
@@ -978,7 +985,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensori disattivati"</string>
     <string name="device_services" msgid="1549944177856658705">"Servizi del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Tocca per riavviare l\'app e passare a schermo intero."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Sposta"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Usa le Impostazioni per aggiornare la navigazione del sistema"</string>

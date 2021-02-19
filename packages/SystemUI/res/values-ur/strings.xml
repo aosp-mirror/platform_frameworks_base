@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"اسکرین شاٹ پر اسکرول کریں"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"اسکرین شاٹ برخاست کریں"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"اسکرین شاٹ کا پیش منظر"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"اوپر کا احاطہ"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"نیچے کا احاطہ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"سکرین ریکارڈر"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"سکرین ریکارڈنگ پروسیس ہورہی ہے"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اسکرین ریکارڈ سیشن کیلئے جاری اطلاع"</string>
@@ -410,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"طلوع آفتاب تک"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"آن ہوگی بوقت <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> تک"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"چمک کم کریں"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیر فعال ہے"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال ہے"</string>
@@ -463,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"پروفائل دکھائیں"</string>
     <string name="user_add_user" msgid="4336657383006913022">"صارف کو شامل کریں"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"نیا صارف"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"مہمان سیشن ختم کریں؟"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"مہمان سیشن ختم کریں"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"مہمان کو ہٹائیں؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"سیشن ختم کریں"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ہٹائیں"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مہمان، پھر سے خوش آمدید!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"کیا آپ اپنا سیشن جاری رکھنا چاہتے ہیں؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"دوبارہ شروع کریں"</string>
@@ -540,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"آپ کی تنظیم نے آپ کے دفتری پروفائل میں ایک سرٹیفکیٹ کی اتھارٹی کو انسٹال کیا ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ایک سرٹیفکیٹ کی اتھارٹی اس آلہ پر انسٹال ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"آپ کے منتظم نے نیٹ ورک لاگنگ کو آن کر دیا ہے، جو آپ کے آلے پر ٹریفک مانیٹر کرتی ہے۔"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"آپ کے منتظم نے نیٹ ورک لاگنگ آن کر دی ہے، جو آپ کے ذاتی پروفائل پر نہیں بلکہ دفتری پروفائل پر ٹریفک کو مانیٹر کرتی ہے۔"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"آپ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہیں جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"آپ <xliff:g id="VPN_APP_0">%1$s</xliff:g> اور <xliff:g id="VPN_APP_1">%2$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہیں۔"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"آپ کا دفتری پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
@@ -733,7 +738,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"‏اس اطلاع کو خودکار طور پر سسٹم کے ذریعے &lt;b&gt;خاموش پر درجہ بند&lt;b&gt; کیا گیا۔"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"‏اس اطلاع کو آپ کے شیڈ میں خودکار طور پر &lt;b&gt;اعلی درجہ&lt;/b&gt; دیا گیا۔"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"‏اس اطلاع کو آپ کے شیڈ میں خودکار طور پر &lt;b&gt;کم درجہ&lt;/b&gt; دیا گیا۔"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"کیا یہ درست تھا؟"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"ڈویلپر کو اپنے تاثرات فراہم کریں کیا یہ درست تھا؟"</string>
     <string name="feedback_response" msgid="4671729244976641339">"آپ کے تاثرات کا شکریہ!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ٹھیک ہے"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> کیلئے اطلاعی کنٹرولز کھلے ہیں"</string>
@@ -880,6 +885,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> میں منتقل کریں"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g> میں شامل کریں"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"پوزیشن <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ٹائل کو شامل کیا گیا"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ٹائل کو ہٹا دیا گیا"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"فوری ترتیبات کا ایڈیٹر۔"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> اطلاع: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ترتیبات کھولیں۔"</string>
@@ -970,7 +977,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> کا استعمال کر رہی ہے"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> نے حال ہی میں <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> کا استعمال کیا"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(انٹرپرائز)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"فون کال"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"فون کال"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> کے ذریعے)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"کیمرا"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"مقام"</string>
@@ -978,7 +985,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"سینسرز آف ہیں"</string>
     <string name="device_services" msgid="1549944177856658705">"آلہ کی سروس"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"کوئی عنوان نہیں ہے"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"یہ ایپ دوبارہ شروع کرنے کے لیے تھپتھپائیں اور پوری اسکرین پر جائیں۔"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"منتقل کریں"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>

@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"තිර රුව අනුචලනය කරන්න"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"තිර රුව ඉවත ලන්න"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ඉහළම මායිම"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"පහළම මායිම"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"තිර රෙකෝඩරය"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"තිර පටිගත කිරීම සකසමින්"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"තිර පටිගත කිරීමේ සැසියක් සඳහා කෙරෙන දැනුම් දීම"</string>
@@ -410,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"හිරු නගින තෙක්"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>ට ක්‍රියාත්මකයි"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> තෙක්"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"දීප්තිය අඩු කරන්න"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC අබලයි"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC සබලයි"</string>
@@ -463,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"පැතිකඩ පෙන්වන්න"</string>
     <string name="user_add_user" msgid="4336657383006913022">"පරිශීලකයෙක් එක් කරන්න"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"නව පරිශීලකයා"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"ආරාධිත සැසිය අවසන් කරන්නද?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"ආරාධිත සැසිය අවසන් කරන්න"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"අමුත්තාන් ඉවත් කරන්නද?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"මෙම සැසියේ සියළුම යෙදුම් සහ දත්ත මකාවී."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"සැසිය අවසන් කරන්න"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ඉවත් කරන්න"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"නැවත සාදරයෙන් පිළිගනිමු, අමුත්තා!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ඔබගේ සැසිය දිගටම කරගෙන යෑමට ඔබට අවශ්‍යද?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"යළි මුල සිට අරඹන්න"</string>
@@ -540,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ඔබගේ සංවිධානය ඔබගේ කාර්යාල පැතිකඩ තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"මෙම උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ඔබගේ පරිපාලක ඔබගේ උපාංගය මත තදබදය නිරීක්ෂණය කරන ජාල ලොග් කිරීම ක්‍රියාත්මක කර ඇත."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ඔබගේ පරිපාලක ඔබගේ පුද්ගලික පැතිකඩෙහි නොව කාර්යාල පැතිකඩෙහි තදබදය නිරීක්ෂණය කරන, ජාල පිරීම ක්‍රියාත්මක කර ඇත."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි <xliff:g id="VPN_APP">%1$s</xliff:g>, වෙත ඔබ සම්බන්ධ වී ඇත."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි <xliff:g id="VPN_APP_0">%1$s</xliff:g> සහ <xliff:g id="VPN_APP_1">%2$s</xliff:g> වෙත ඔබ සම්බන්ධ වී ඇත."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි <xliff:g id="VPN_APP">%1$s</xliff:g>, වෙත ඔබේ කාර්යාල පැතිකඩ සම්බන්ධ වී ඇත."</string>
@@ -733,7 +738,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"පද්ධතිය මගින් මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;නිශ්ශබ්ද වෙත පහත දමන ලදි&lt;/b&gt;."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"ඔබගේ වැස්ම තුළ මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;ඉහළට ශ්‍රේණිගත කරන ලදි&lt;/b&gt;."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"ඔබගේ වැස්ම තුළ මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;පහළට ශ්‍රේණිගත කරන ලදි&lt;/b&gt;."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"මෙය නිවැරදි වුයේද?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"ඔබගේ ප්‍රතිපෝෂණය සංවර්ධකට දන්වන්න. මෙය නිවැරදි වුයේද?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"ඔබේ ප්‍රතිපෝෂණයට ස්තූතියි!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"හරි"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා දැනුම්දීම් පාලන විවෘත කරන ලදී"</string>
@@ -880,6 +885,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> වෙත ගෙන යන්න"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ස්ථානයට එක් කරන්න"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ස්ථානය <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ටයිල් එක එක් කරන ලදි"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ටයිල් ඉවත් කරන ලදි"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ඉක්මන් සැකසුම් සංස්කාරකය."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> දැනුම්දීම: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"සැකසීම් විවෘත කරන්න."</string>
@@ -970,7 +977,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> භාවිත කරමින් ඇත"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> මෑතකදී <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> භාවිත කළේය"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(ව්‍යවසාය)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"දුරකථන ඇමතුම"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"දුරකථන ඇමතුම"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> හරහා)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"කැමරාව"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ස්ථානය"</string>
@@ -978,7 +985,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"සංවේදක ක්‍රියාවිරහිතයි"</string>
     <string name="device_services" msgid="1549944177856658705">"උපාංග සේවා"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"මාතෘකාවක් නැත"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"මෙම යෙදුම යළි ඇරඹීමට සහ පූර්ණ තිරයට යාමට තට්ටු කරන්න"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ගෙන යන්න"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"පද්ධති සංචලනය යාවත්කාලීන කළා. වෙනස්කම් සිදු කිරීමට, සැකසීම් වෙත යන්න."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"පද්ධති සංචලනය යාවත්කාලීන කිරීමට සැකසීම් වෙත යන්න"</string>

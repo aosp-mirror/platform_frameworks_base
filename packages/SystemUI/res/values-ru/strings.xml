@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Прокрутить скриншот"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Закрыть скриншот"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Предварительный просмотр скриншота"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Верхняя граница"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Нижняя граница"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запись видео с экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обработка записи с экрана…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
@@ -414,6 +416,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"До рассвета"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Включить в <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"До <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Уменьшение яркости"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"Модуль NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Модуль NFC отключен"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Модуль NFC включен"</string>
@@ -467,9 +470,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Показать профиль."</string>
     <string name="user_add_user" msgid="4336657383006913022">"Добавить пользователя"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Новый пользователь"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Завершить гостевой сеанс?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Завершить гостевой сеанс"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Удалить аккаунт гостя?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Завершить сеанс"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Удалить"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Рады видеть вас снова!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Продолжить сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Начать заново"</string>
@@ -546,6 +550,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ваша организация установила сертификат ЦС в рабочем профиле. Она может отслеживать и изменять защищенный сетевой трафик."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На устройстве установлен сертификат ЦС. Ваш защищенный сетевой трафик могут отслеживать и изменять."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик в вашем рабочем профиле (информация из личного профиля не собирается)."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Оно может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Запущены приложения \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" и \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Они могут отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"В рабочем профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\", которое может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
@@ -739,7 +744,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Уровень важности этого уведомления был автоматически &lt;/b&gt;понижен до \"Без звука\"&lt;/b&gt;."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Уровень важности этого уведомления на панели был автоматически &lt;b&gt;повышен&lt;/b&gt;."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Уровень важности этого уведомления на панели был автоматически &lt;b&gt;понижен&lt;/b&gt;."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Все верно?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Все верно? Поделитесь своим мнением с разработчиком."</string>
     <string name="feedback_response" msgid="4671729244976641339">"Спасибо!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Настройки уведомлений для приложения <xliff:g id="APP_NAME">%1$s</xliff:g> открыты"</string>
@@ -890,6 +895,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Переместить на позицию <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Добавить на позицию <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Панель добавлена"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Панель удалена"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Редактор быстрых настроек."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Уведомление <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Открыть настройки."</string>
@@ -980,7 +987,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"Приложение \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\" использует другое (<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>)."</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Приложение \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\" недавно использовало другое (<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>)."</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(корпоративная версия)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Приложение для звонков"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Телефонный звонок"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(через приложение \"<xliff:g id="ATTRIBUTION">%s</xliff:g>\")"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"местоположение"</string>
@@ -988,7 +995,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Датчики отключены"</string>
     <string name="device_services" msgid="1549944177856658705">"Сервисы устройства"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без названия"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Нажмите, чтобы перезапустить приложение и перейти в полноэкранный режим."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Перенести"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Параметры навигации в системе обновлены. Чтобы изменить их, перейдите в настройки."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Чтобы обновить параметры навигации в системе, перейдите в настройки."</string>
