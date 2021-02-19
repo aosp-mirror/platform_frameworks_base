@@ -29,6 +29,7 @@ import android.annotation.SystemApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -38,7 +39,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.ims.ImsStreamMediaProfile;
@@ -3379,6 +3382,121 @@ public abstract class Connection extends Conferenceable {
     public void handleRttUpgradeResponse(@Nullable RttTextStream rttTextStream) {}
 
     /**
+     * Information provided to a {@link Connection} upon completion of call filtering in Telecom.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class CallFilteringCompletionInfo implements Parcelable {
+        private final boolean mIsBlocked;
+        private final boolean mIsInContacts;
+        private final CallScreeningService.CallResponse mCallResponse;
+        private final ComponentName mCallScreeningComponent;
+
+        /**
+         * Constructor for {@link CallFilteringCompletionInfo}
+         *
+         * @param isBlocked Whether any part of the call filtering process indicated that this call
+         *                  should be blocked.
+         * @param isInContacts Whether the caller is in the user's contacts.
+         * @param callResponse The instance of {@link CallScreeningService.CallResponse} provided
+         *                     by the {@link CallScreeningService} that processed this call, or
+         *                     {@code null} if no call screening service ran.
+         * @param callScreeningComponent The component of the {@link CallScreeningService}
+         *                                 that processed this call, or {@link null} if no
+         *                                 call screening service ran.
+         */
+        public CallFilteringCompletionInfo(boolean isBlocked, boolean isInContacts,
+                @Nullable CallScreeningService.CallResponse callResponse,
+                @Nullable ComponentName callScreeningComponent) {
+            mIsBlocked = isBlocked;
+            mIsInContacts = isInContacts;
+            mCallResponse = callResponse;
+            mCallScreeningComponent = callScreeningComponent;
+        }
+
+        /** @hide */
+        protected CallFilteringCompletionInfo(Parcel in) {
+            mIsBlocked = in.readByte() != 0;
+            mIsInContacts = in.readByte() != 0;
+            CallScreeningService.ParcelableCallResponse response
+                    = in.readParcelable(CallScreeningService.class.getClassLoader());
+            mCallResponse = response == null ? null : response.toCallResponse();
+            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader());
+        }
+
+        @NonNull
+        public static final Creator<CallFilteringCompletionInfo> CREATOR =
+                new Creator<CallFilteringCompletionInfo>() {
+                    @Override
+                    public CallFilteringCompletionInfo createFromParcel(Parcel in) {
+                        return new CallFilteringCompletionInfo(in);
+                    }
+
+                    @Override
+                    public CallFilteringCompletionInfo[] newArray(int size) {
+                        return new CallFilteringCompletionInfo[size];
+                    }
+                };
+
+        /**
+         * @return Whether any part of the call filtering process indicated that this call should be
+         *         blocked.
+         */
+        public boolean isBlocked() {
+            return mIsBlocked;
+        }
+
+        /**
+         * @return Whether the caller is in the user's contacts.
+         */
+        public boolean isInContacts() {
+            return mIsInContacts;
+        }
+
+        /**
+         * @return The instance of {@link CallScreeningService.CallResponse} provided
+         *         by the {@link CallScreeningService} that processed this
+         *         call, or {@code null} if no call screening service ran.
+         */
+        public @Nullable CallScreeningService.CallResponse getCallResponse() {
+            return mCallResponse;
+        }
+
+        /**
+         * @return The component of the {@link CallScreeningService}
+         *         that processed this call, or {@code null} if no call screening service ran.
+         */
+        public @Nullable ComponentName getCallScreeningComponent() {
+            return mCallScreeningComponent;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "CallFilteringCompletionInfo{" +
+                    "mIsBlocked=" + mIsBlocked +
+                    ", mIsInContacts=" + mIsInContacts +
+                    ", mCallResponse=" + mCallResponse +
+                    ", mCallScreeningPackageName='" + mCallScreeningComponent + '\'' +
+                    '}';
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte((byte) (mIsBlocked ? 1 : 0));
+            dest.writeByte((byte) (mIsInContacts ? 1 : 0));
+            dest.writeParcelable(mCallResponse == null ? null : mCallResponse.toParcelable(), 0);
+            dest.writeParcelable(mCallScreeningComponent, 0);
+        }
+    }
+
+    /**
      * Indicates that call filtering in Telecom is complete
      *
      * This method is called for a connection created via
@@ -3386,24 +3504,13 @@ public abstract class Connection extends Conferenceable {
      * Telecom, including checking the blocked number db, per-contact settings, and custom call
      * filtering apps.
      *
-     * @param isBlocked {@code true} if the call was blocked, {@code false} otherwise. If this is
-     *                  {@code true}, {@link #onDisconnect()} will be called soon after
-     *                  this is called.
-     * @param isInContacts Indicates whether the caller is in the user's contacts list.
-     * @param callScreeningResponse The response that was returned from the
-     *                              {@link CallScreeningService} that handled this call. If no
-     *                              response was received from a call screening service,
-     *                              this will be {@code null}.
-     * @param isResponseFromSystemDialer Whether {@code callScreeningResponse} was sent from the
-     *                                  system dialer. If {@code callScreeningResponse} is
-     *                                  {@code null}, this will be {@code false}.
+     * @param callFilteringCompletionInfo Info provided by Telecom on the results of call filtering.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_CONTACTS)
-    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts,
-            @Nullable CallScreeningService.CallResponse callScreeningResponse,
-            boolean isResponseFromSystemDialer) { }
+    public void onCallFilteringCompleted(
+            @NonNull CallFilteringCompletionInfo callFilteringCompletionInfo) { }
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

@@ -10769,7 +10769,7 @@ package android.telecom {
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
-    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(@NonNull android.telecom.Connection.CallFilteringCompletionInfo);
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
@@ -10783,6 +10783,16 @@ package android.telecom {
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
     field public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 64; // 0x40
     field public static final int PROPERTY_REMOTELY_HOSTED = 2048; // 0x800
+  }
+
+  public static final class Connection.CallFilteringCompletionInfo implements android.os.Parcelable {
+    ctor public Connection.CallFilteringCompletionInfo(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, @Nullable android.content.ComponentName);
+    method public int describeContents();
+    method @Nullable public android.telecom.CallScreeningService.CallResponse getCallResponse();
+    method @Nullable public android.content.ComponentName getCallScreeningComponent();
+    method public boolean isBlocked();
+    method public boolean isInContacts();
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.Connection.CallFilteringCompletionInfo> CREATOR;
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
@@ -10946,7 +10956,7 @@ package android.telecom {
   }
 
   public final class RemoteConnection {
-    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(@NonNull android.telecom.Connection.CallFilteringCompletionInfo);
     method @Deprecated public void setAudioState(android.telecom.AudioState);
   }
 
