@@ -2722,6 +2722,15 @@ public interface WindowManager extends ViewManager {
         public boolean hasManualSurfaceInsets;
 
         /**
+         * Whether we should use global insets state when report insets to the window. When set to
+         * {@code true}, all the insets will be reported to the window regardless of the z-order.
+         * Otherwise, only the insets above the given window will be reported.
+         *
+         * @hide
+         */
+        public boolean receiveInsetsIgnoringZOrder;
+
+        /**
          * Whether the previous surface insets should be used vs. what is currently set. When set
          * to {@code true}, the view root will ignore surfaces insets in this object and use what
          * it currently has.
@@ -3610,15 +3619,16 @@ public interface WindowManager extends ViewManager {
             out.writeInt(preferredDisplayModeId);
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
-            out.writeInt(hasSystemUiListeners ? 1 : 0);
+            out.writeBoolean(hasSystemUiListeners);
             out.writeInt(inputFeatures);
             out.writeLong(userActivityTimeout);
             out.writeInt(surfaceInsets.left);
             out.writeInt(surfaceInsets.top);
             out.writeInt(surfaceInsets.right);
             out.writeInt(surfaceInsets.bottom);
-            out.writeInt(hasManualSurfaceInsets ? 1 : 0);
-            out.writeInt(preservePreviousSurfaceInsets ? 1 : 0);
+            out.writeBoolean(hasManualSurfaceInsets);
+            out.writeBoolean(receiveInsetsIgnoringZOrder);
+            out.writeBoolean(preservePreviousSurfaceInsets);
             out.writeLong(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
             out.writeInt(mColorMode);
@@ -3679,15 +3689,16 @@ public interface WindowManager extends ViewManager {
             preferredDisplayModeId = in.readInt();
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
-            hasSystemUiListeners = in.readInt() != 0;
+            hasSystemUiListeners = in.readBoolean();
             inputFeatures = in.readInt();
             userActivityTimeout = in.readLong();
             surfaceInsets.left = in.readInt();
             surfaceInsets.top = in.readInt();
             surfaceInsets.right = in.readInt();
             surfaceInsets.bottom = in.readInt();
-            hasManualSurfaceInsets = in.readInt() != 0;
-            preservePreviousSurfaceInsets = in.readInt() != 0;
+            hasManualSurfaceInsets = in.readBoolean();
+            receiveInsetsIgnoringZOrder = in.readBoolean();
+            preservePreviousSurfaceInsets = in.readBoolean();
             accessibilityIdOfAnchor = in.readLong();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mColorMode = in.readInt();
@@ -3916,6 +3927,11 @@ public interface WindowManager extends ViewManager {
                 changes |= SURFACE_INSETS_CHANGED;
             }
 
+            if (receiveInsetsIgnoringZOrder != o.receiveInsetsIgnoringZOrder) {
+                receiveInsetsIgnoringZOrder = o.receiveInsetsIgnoringZOrder;
+                changes |= SURFACE_INSETS_CHANGED;
+            }
+
             if (preservePreviousSurfaceInsets != o.preservePreviousSurfaceInsets) {
                 preservePreviousSurfaceInsets = o.preservePreviousSurfaceInsets;
                 changes |= SURFACE_INSETS_CHANGED;
@@ -4103,6 +4119,9 @@ public interface WindowManager extends ViewManager {
                 if (!preservePreviousSurfaceInsets) {
                     sb.append(" (!preservePreviousSurfaceInsets)");
                 }
+            }
+            if (receiveInsetsIgnoringZOrder) {
+                sb.append(" receive insets ignoring z-order");
             }
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
