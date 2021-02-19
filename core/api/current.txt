@@ -1394,6 +1394,7 @@ package android {
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
     field public static final int supportsUploading = 16843419; // 0x101029b
+    field public static final int suppressesSpellChecker = 16844354; // 0x1010642
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
     field public static final int switchPreferenceStyle = 16843629; // 0x101036d
@@ -51469,6 +51470,7 @@ package android.view.inputmethod {
     method public int getSubtypeCount();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
+    method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
   }
@@ -51490,6 +51492,7 @@ package android.view.inputmethod {
     method public boolean isActive(android.view.View);
     method public boolean isActive();
     method public boolean isFullscreenMode();
+    method public boolean isInputMethodSuppressingSpellChecker();
     method @Deprecated public boolean isWatchingCursor(android.view.View);
     method public void restartInput(android.view.View);
     method public void sendAppPrivateCommand(android.view.View, String, android.os.Bundle);

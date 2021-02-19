@@ -25,6 +25,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
@@ -176,6 +177,11 @@ public class SpellCheckerSession {
      * @param suggestionsLimit the maximum number of suggestions that will be returned
      */
     public void getSentenceSuggestions(TextInfo[] textInfos, int suggestionsLimit) {
+        final InputMethodManager imm = mTextServicesManager.getInputMethodManager();
+        if (imm != null && imm.isInputMethodSuppressingSpellChecker()) {
+            handleOnGetSentenceSuggestionsMultiple(new SentenceSuggestionsInfo[0]);
+            return;
+        }
         mSpellCheckerSessionListenerImpl.getSentenceSuggestionsMultiple(
                 textInfos, suggestionsLimit);
     }
@@ -203,6 +209,11 @@ public class SpellCheckerSession {
             TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
         if (DBG) {
             Log.w(TAG, "getSuggestions from " + mSpellCheckerInfo.getId());
+        }
+        final InputMethodManager imm = mTextServicesManager.getInputMethodManager();
+        if (imm != null && imm.isInputMethodSuppressingSpellChecker()) {
+            handleOnGetSuggestionsMultiple(new SuggestionsInfo[0]);
+            return;
         }
         mSpellCheckerSessionListenerImpl.getSuggestionsMultiple(
                 textInfos, suggestionsLimit, sequentialWords);
