@@ -579,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"ඉදිරියට යාමට ඔබගේ ඇඟිලි සලකුණ භාවිත කරන්න"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ඇඟිලි සලකුණු නිරූපකය"</string>
@@ -1664,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"වර්ණ නිවැරදි කිරීම"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"දීප්තිය අඩු කරන්න"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> භාවිත කිරීමට හඬ පරිමා යතුරු දෙකම තත්පර තුනකට ඔබාගෙන සිටින්න"</string>
@@ -1880,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"විහිදන්න"</string>
     <string name="close_button_text" msgid="10603510034455258">"වසන්න"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"පිළිතුරු දෙ."</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"ප්‍රතික්ෂේප ක"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"විසන්ධි කරන්න"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"එන ඇමතුම"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"කරගෙන යන ඇමතුම"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"එන ඇමතුමක් පරීක්ෂා කරන්න"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>

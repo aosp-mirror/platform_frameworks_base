@@ -150,8 +150,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Толькі Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"Рэзервовае капіраванне выклікаў праз аператара \"<xliff:g id="SPN">%s</xliff:g>\""</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не пераадрасоўваецца"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> праз <xliff:g id="TIME_DELAY">{2}</xliff:g> с."</string>
@@ -586,6 +585,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчык часова выключаны."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Каб працягнуць, выкарыстоўвайце свой адбітак пальца"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок адбіткаў пальцаў"</string>
@@ -1709,6 +1709,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Карэкцыя колеру"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Паменшыць яркасць"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
@@ -1943,6 +1944,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Разгарнуць"</string>
     <string name="close_button_text" msgid="10603510034455258">"Закрыць"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Адказаць"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Адхіліць"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Завяршыць"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Уваходны выклік"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Бягучы выклік"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Фільтраванне ўваходнага выкліку"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> выбраны</item>
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> выбрана</item>

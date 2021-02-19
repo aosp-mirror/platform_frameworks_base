@@ -93,7 +93,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Datu-konexioaren egoera"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Erantzungailuko mezuak"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi bidezko deiak"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Wifi bidezko deiak"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIMaren egoera"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"SIM txartelaren lehentasun handiko jakinarazpenak"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
@@ -122,23 +122,23 @@
     <string name="roamingText11" msgid="5245687407203281407">"Ibiltaritzari buruzko jakinarazpena aktibatuta"</string>
     <string name="roamingText12" msgid="673537506362152640">"Ibiltaritzari buruzko jakinarazpena desaktibatuta"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Zerbitzu bila"</string>
-    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Ezin izan dira konfiguratu Wi‑Fi bidezko deiak"</string>
+    <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Ezin izan dira konfiguratu wifi bidezko deiak"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"Wi-Fi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wi-Fi bidezko deiak Ezarpenak atalean. (Errore-kodea: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"Wifi bidez deiak egiteko eta mezuak bidaltzeko, eskatu operadoreari zerbitzu hori gaitzeko. Ondoren, aktibatu Wifi bidezko deiak Ezarpenak atalean. (Errore-kodea: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Arazo bat izan da Wi‑Fi bidezko deiak zure operadorearekin erregistratzean: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Arazo bat izan da wifi bidezko deiak zure operadorearekin erregistratzean: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"<xliff:g id="SPN">%s</xliff:g> operadorearen wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"<xliff:g id="SPN">%s</xliff:g> operadorearen wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"<xliff:g id="SPN">%s</xliff:g> WLAN bidezko deia"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"<xliff:g id="SPN">%s</xliff:g> wifia"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Wi-Fi bidezko deiak | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wi-Fi bidezko deiak"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Wifi bidezko deiak"</string>
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifia"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi bidezko deiak"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
@@ -148,8 +148,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wifi-sarea soilik"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g> operadorearen deietarako ordezko aukera"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> zenbakira <xliff:g id="TIME_DELAY">{2}</xliff:g> segundotan"</string>
@@ -580,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Gailu honek ez du hatz-marken sentsorerik."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> hatza"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Aurrera egiteko, erabili hatz-marka"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
@@ -1665,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Erabili lasterbidea"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Koloreen alderantzikatzea"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Koloreen zuzenketa"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Murriztu distira"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu egin da."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu egin da."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> erabiltzeko, eduki sakatuta bi bolumen-botoiak hiru segundoz"</string>
@@ -1881,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximizatu"</string>
     <string name="close_button_text" msgid="10603510034455258">"Itxi"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Erantzun"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Baztertu"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Amaitu deia"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Jasotako deia"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Deia abian da"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Jasotako dei bat bistaratzen"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> hautatuta</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> hautatuta</item>

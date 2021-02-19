@@ -148,8 +148,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"केवळ वाय-फाय"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g> बॅकअप कॉलिंग"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -580,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"या डिव्हाइसमध्ये फिंगरप्रिंट सेन्सर नाही."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेन्सर तात्पुरता बंद केला आहे."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> बोट"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"पुढे सुरू ठेवण्‍यासाठी तुमची फिंगरप्रिंट वापरा"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिंट आयकन"</string>
@@ -1665,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"ब्राइटनेस कमी करा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
@@ -1881,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"मोठे करा"</string>
     <string name="close_button_text" msgid="10603510034455258">"बंद करा"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"उत्तर द्या"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"नकार द्या"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"कॉल बंद करा"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"इनकमिंग कॉल"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"सुरू असलेला कॉल"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"इनकमिंग कॉल स्क्रीन करत आहे"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडले</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> निवडला</item>

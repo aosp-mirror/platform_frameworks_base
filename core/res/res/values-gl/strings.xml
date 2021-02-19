@@ -579,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo non ten sensor de impresión dixital."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Desactivouse o sensor temporalmente."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utiliza a túa impresión dixital para continuar"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona de impresión dixital"</string>
@@ -1664,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atallo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de cor"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de cor"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Reducir brillo"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Activouse o servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Desactivouse <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premidas as teclas do volume durante tres segudos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1880,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximizar"</string>
     <string name="close_button_text" msgid="10603510034455258">"Pechar"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Resposta"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Rexeitar"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Colgar"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chamada entrante"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Chamada en curso"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrando chamada entrante"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other">Seleccionáronse <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Seleccionouse <xliff:g id="COUNT_0">%1$d</xliff:g></item>

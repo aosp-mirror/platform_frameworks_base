@@ -325,7 +325,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"таны биеийн байдлын талаарх мэдрэгч бүхий өгөгдөлд нэвтрэх"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Цонхны агуулгыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Хүрч танихыг асаах"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Хүрэлтээр сонсохыг асаах"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Товшсон зүйлсийг чангаар хэлэх ба дэлгэцийг дохио ашиглан таних боломжтой."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Бичсэн текстээ ажиглах"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Кредит картын дугаар болон нууц үг зэрэг хувийн датаг агуулж байна."</string>
@@ -579,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Энэ төхөөрөмжид хурууны хээ мэдрэгч алга."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Мэдрэгчийг түр хугацаанд идэвхгүй болгосон."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Хурууны хээ <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Үргэлжлүүлэхийн тулд хурууны хээгээ ашиглаарай"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Хурууны хээний дүрс"</string>
@@ -1002,9 +1003,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Асуулгыг цэвэрлэх"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Асуулгыг илгээх"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Дуут хайлт"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Хүрч хайх функцийг идэвхтэй болгох уу?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрч танихыг идэвхжүүлэхийг шаардаж байна. Хүрч таних идэвхжсэн үед та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба таблеттайгаа дохиогоор харилцах боломжтой."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрч танихыг идэвхжүүлэхийг шаардаж байна. Хүрч таних идэвхжсэн тохиолдолд та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба утастайгаа дохиогоор харилцах боломжтой."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Хүрэлтээр сонсохыг идэвхжүүлэх үү?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрэлтээр сонсохыг идэвхжүүлэхийг шаардаж байна. Хүрэлтээр сонсох идэвхжсэн үед та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба таблеттайгаа дохиогоор харилцах боломжтой."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> нь Хүрэлтээр сонсохыг идэвхжүүлэхийг шаардаж байна. Хүрэлтээр сонсох идэвхжсэн тохиолдолд та хуруун доороо юу байгааг сонсох, тайлбарыг харах боломжтой ба утастайгаа дохиогоор харилцах боломжтой."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 сарын өмнө"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"1 сарын өмнө"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1664,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Товчлол ашиглах"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Өнгө хувиргалт"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Өнгөний засвар"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Гэрэлтүүлгийг багасгах"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г асаалаа."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дууны түвшний түлхүүрийг удаан дарсан. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г унтраалаа."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>-г ашиглахын тулд дууны түвшнийг ихэсгэх, багасгах түлхүүрийг 3 секундийн турш зэрэг дарна уу"</string>
@@ -1871,7 +1873,7 @@
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Мэдэгдсэн"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Дэлгэх"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Буулгах"</string>
-    <string name="expand_action_accessibility" msgid="1947657036871746627">"унтраах/асаах өргөтгөл"</string>
+    <string name="expand_action_accessibility" msgid="1947657036871746627">"асаах/унтраах өргөтгөл"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Андройд USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"USB Peripheral Port"</string>
@@ -1880,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Томруулах"</string>
     <string name="close_button_text" msgid="10603510034455258">"Хаах"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Хариулах"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Татгалзах"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Таслах"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Ирсэн дуудлага"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Дуудлага хийгдэж байна"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Ирсэн дуудлагыг харуулж байна"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> сонгосон</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> сонгосон</item>

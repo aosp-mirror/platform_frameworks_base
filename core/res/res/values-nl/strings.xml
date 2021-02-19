@@ -515,9 +515,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je Android TV-apparaat. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je telefoon. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"Bluetooth-instellingen openen"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Hiermee kan de app de lokale bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Hiermee kan de app Bluetooth op je Android TV-apparaat configureren en externe apparaten zoeken en koppelen."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Hiermee kan de app de lokale bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Hiermee kan de app de lokale bluetooth-tablet instellen en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Hiermee kan de app Bluetooth op je Android TV-apparaat isntellen en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Hiermee kan de app de lokale bluetooth-telefoon instellen en externe apparaten zoeken en koppelen."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"WiMAX-status wijzigen"</string>
@@ -579,6 +579,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dit apparaat heeft geen vingerafdruksensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor tijdelijk uitgeschakeld."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Gebruik je vingerafdruk om door te gaan."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Vingerafdruk-icoon"</string>
@@ -1346,7 +1347,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"Invoermethode selecteren"</string>
     <string name="show_ime" msgid="6406112007347443383">"Dit op het scherm weergeven terwijl het fysieke toetsenbord actief is"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtueel toetsenbord tonen"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord configureren"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Fysiek toetsenbord instellen"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om een taal en indeling te selecteren"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1369,7 +1370,7 @@
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Je moet het apparaat misschien opnieuw formatteren. Tik om het uit te werpen."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> niet ondersteund"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> werkt niet"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Tik om te configureren in een ondersteunde indeling."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Tik om in te stellen in een ondersteunde indeling."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Selecteer om in te stellen in een ondersteunde indeling."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Je moet het apparaat misschien opnieuw formatteren"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> is onverwacht verwijderd"</string>
@@ -1664,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sneltoets gebruiken"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleurinversie"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Kleurcorrectie"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Helderheid verlagen"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volumetoetsen ingedrukt gehouden. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> is ingeschakeld."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volumetoetsen ingedrukt gehouden. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> uitgeschakeld."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Houd beide volumetoetsen drie seconden ingedrukt om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruiken"</string>
@@ -1880,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximaliseren"</string>
     <string name="close_button_text" msgid="10603510034455258">"Sluiten"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"Beantwoorden"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"Weigeren"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Ophangen"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkomend gesprek"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Actief gesprek"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Een inkomend gesprek screenen"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> geselecteerd</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> geselecteerd</item>
