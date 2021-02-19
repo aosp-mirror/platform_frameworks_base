@@ -59,7 +59,7 @@ public class OneHandedBackgroundPanelOrganizerTest extends OneHandedTestCase {
     DisplayController mMockDisplayController;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
         mToken = new WindowContainerToken(mMockRealToken);
@@ -79,15 +79,6 @@ public class OneHandedBackgroundPanelOrganizerTest extends OneHandedTestCase {
         mTestableLooper.processAllMessages();
 
         assertThat(mBackgroundPanelOrganizer.getBackgroundSurface()).isNotNull();
-    }
-
-    @Test
-    public void testUnregisterOrganizer() {
-        mBackgroundPanelOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mTestableLooper.processAllMessages();
-        mBackgroundPanelOrganizer.unregisterOrganizer();
-
-        assertThat(mBackgroundPanelOrganizer.getBackgroundSurface()).isNull();
     }
 
     @Test

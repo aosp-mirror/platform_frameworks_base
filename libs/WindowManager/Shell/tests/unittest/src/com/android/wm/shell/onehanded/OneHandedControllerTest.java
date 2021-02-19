@@ -16,17 +16,20 @@
 
 package com.android.wm.shell.onehanded;
 
+import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.om.IOverlayManager;
 import android.os.Handler;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.util.ArrayMap;
 import android.view.Display;
@@ -39,19 +42,17 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedControllerTest extends OneHandedTestCase {
     Display mDisplay;
-    OneHandedController mOneHandedController;
-    OneHandedTimeoutHandler mTimeoutHandler;
+    OneHandedController mSpiedOneHandedController;
+    OneHandedTimeoutHandler mSpiedTimeoutHandler;
 
     @Mock
     DisplayController mMockDisplayController;
@@ -66,8 +67,6 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     OneHandedGestureHandler mMockGestureHandler;
     @Mock
-    OneHandedTimeoutHandler mMockTimeoutHandler;
-    @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
     @Mock
     IOverlayManager mMockOverlayManager;
@@ -80,18 +79,24 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     Handler mMockShellMainHandler;
 
+    final boolean mDefaultEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+            getTestContext().getContentResolver());
+    final boolean mDefaultSwipeToNotificationEnabled =
+            OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                    getTestContext().getContentResolver());
+
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
-        mTimeoutHandler = Mockito.spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
+        mSpiedTimeoutHandler = spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         when(mMockBackgroundOrganizer.getBackgroundSurface()).thenReturn(mMockLeash);
 
-        OneHandedController oneHandedController = new OneHandedController(
+        mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
                 mMockDisplayController,
                 mMockBackgroundOrganizer,
@@ -99,13 +104,13 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockTouchHandler,
                 mMockTutorialHandler,
                 mMockGestureHandler,
-                mTimeoutHandler,
+                mSpiedTimeoutHandler,
                 mMockUiEventLogger,
                 mMockOverlayManager,
                 mMockTaskStackListener,
                 mMockShellMainExecutor,
-                mMockShellMainHandler);
-        mOneHandedController = Mockito.spy(oneHandedController);
+                mMockShellMainHandler)
+        );
     }
 
     @Test
@@ -120,32 +125,36 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testEnabledNoRegisterAndUnregisterInSameCall() {
-        mOneHandedController.setOneHandedEnabled(true);
-
-        verify(mMockDisplayAreaOrganizer).registerOrganizer(anyInt());
+    public void testNoRegisterAndUnregisterInSameCall() {
+        if (mDefaultEnabled) {
+            verify(mMockDisplayAreaOrganizer, never()).unregisterOrganizer();
+        } else {
+            verify(mMockDisplayAreaOrganizer, never()).registerOrganizer(FEATURE_ONE_HANDED);
+        }
     }
 
     @Test
-    public void testDisabledNoRegisterAndUnregisterInSameCall() {
-        mOneHandedController.setOneHandedEnabled(false);
-
-        verify(mMockDisplayAreaOrganizer, never()).registerOrganizer(anyInt());
-    }
-
-    @Test
-    public void testStartOneHanded() {
-        mOneHandedController.setOneHandedEnabled(true);
-        mOneHandedController.startOneHanded();
+    public void testStartOneHandedShouldTriggerScheduleOffset() {
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+        mSpiedOneHandedController.setOneHandedEnabled(true);
+        mSpiedOneHandedController.startOneHanded();
 
         verify(mMockDisplayAreaOrganizer).scheduleOffset(anyInt(), anyInt());
     }
 
     @Test
+    public void testStartOneHandedShouldNotTriggerScheduleOffset() {
+        mSpiedOneHandedController.setOneHandedEnabled(true);
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(true);
+        mSpiedOneHandedController.startOneHanded();
+
+        verify(mMockDisplayAreaOrganizer, never()).scheduleOffset(anyInt(), anyInt());
+    }
+
+    @Test
     public void testStopOneHanded() {
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
-        mOneHandedController.setOneHandedEnabled(true);
-        mOneHandedController.stopOneHanded();
+        mSpiedOneHandedController.stopOneHanded();
 
         verify(mMockDisplayAreaOrganizer, never()).scheduleOffset(anyInt(), anyInt());
     }
@@ -159,71 +168,66 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRegisterTransitionCallback() {
-        OneHandedTransitionCallback callback = new OneHandedTransitionCallback() {};
-        mOneHandedController.registerTransitionCallback(callback);
+        OneHandedTransitionCallback callback = new OneHandedTransitionCallback() {
+        };
+        mSpiedOneHandedController.registerTransitionCallback(callback);
 
         verify(mMockDisplayAreaOrganizer).registerTransitionCallback(callback);
     }
 
-
     @Test
     public void testStopOneHanded_shouldRemoveTimer() {
-        mOneHandedController.stopOneHanded();
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(true);
+        mSpiedOneHandedController.stopOneHanded();
 
-        verify(mTimeoutHandler).removeTimer();
+        verify(mSpiedTimeoutHandler, atLeastOnce()).removeTimer();
     }
 
     @Test
-    public void testUpdateIsEnabled() {
-        final boolean enabled = true;
-        mOneHandedController.setOneHandedEnabled(enabled);
+    public void testUpdateEnabled() {
+        mSpiedOneHandedController.setOneHandedEnabled(true);
 
-        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
+        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(mDefaultEnabled);
+        verify(mMockGestureHandler, atLeastOnce()).onOneHandedEnabled(
+                mDefaultEnabled || mDefaultSwipeToNotificationEnabled);
     }
 
     @Test
-    public void testUpdateSwipeToNotificationIsEnabled() {
-        final boolean enabled = true;
-        mOneHandedController.setSwipeToNotificationEnabled(enabled);
+    public void testUpdateSwipeToNotificationEnabled() {
+        final boolean swipeToNotificationEnabled = true;
+        mSpiedOneHandedController.setSwipeToNotificationEnabled(swipeToNotificationEnabled);
 
-        verify(mMockGestureHandler, atLeastOnce()).onOneHandedEnabled(enabled);
+        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(mDefaultEnabled);
+        verify(mMockGestureHandler, atLeastOnce()).onOneHandedEnabled(
+                mDefaultEnabled || swipeToNotificationEnabled);
     }
 
-    @Ignore("b/167943723, refactor it and fix it")
     @Test
-    public void tesSettingsObserver_updateTapAppToExit() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.TAPS_APP_TO_EXIT, 1);
+    public void testUpdateTapAppToExitUpdate() {
+        mSpiedOneHandedController.onTaskChangeExitSettingChanged();
 
-        verify(mOneHandedController).setTaskChangeToExit(true);
+        verify(mMockTaskStackListener, atLeastOnce()).addListener(any());
     }
 
-    @Ignore("b/167943723, refactor it and fix it")
     @Test
-    public void tesSettingsObserver_updateEnabled() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
+    public void tesSettingsObserverUpdateEnabled() {
+        mSpiedOneHandedController.onEnabledSettingChanged();
 
-        verify(mOneHandedController).setOneHandedEnabled(true);
+        verify(mSpiedOneHandedController, atLeastOnce()).setOneHandedEnabled(mDefaultEnabled);
     }
 
-    @Ignore("b/167943723, refactor it and fix it")
     @Test
-    public void tesSettingsObserver_updateTimeout() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
-                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+    public void testSettingsObserverUpdateTimeout() {
+        mSpiedOneHandedController.onTimeoutSettingChanged();
 
-        verify(mMockTimeoutHandler).setTimeout(
-                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+        verify(mSpiedTimeoutHandler, atLeastOnce()).setTimeout(anyInt());
     }
 
-    @Ignore("b/167943723, refactor it and fix it")
     @Test
-    public void tesSettingsObserver_updateSwipeToNotification() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED, 1);
+    public void tesSettingsObserverUpdateSwipeToNotification() {
+        mSpiedOneHandedController.onSwipeToNotificationEnabledSettingChanged();
 
-        verify(mOneHandedController).setSwipeToNotificationEnabled(true);
+        verify(mSpiedOneHandedController, atLeastOnce()).setSwipeToNotificationEnabled(
+                !mDefaultEnabled);
     }
 }

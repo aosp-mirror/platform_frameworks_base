@@ -103,8 +103,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mPackageName = context.getPackageName();
         mContentResolver = context.getContentResolver();
         mWindowManager = context.getSystemService(WindowManager.class);
-        mAccessibilityManager = (AccessibilityManager)
-                context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        mAccessibilityManager = AccessibilityManager.getInstance(context);
 
         mStartOneHandedDescription = context.getResources().getString(
                 R.string.accessibility_action_start_one_handed);
