@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.VpnManager;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -44,6 +45,7 @@ public class ConfirmDialog extends AlertActivity
 
     private String mPackage;
 
+    private ConnectivityManager mCm;  // TODO: switch entirely to VpnManager once VPN code moves
     private VpnManager mVm;
 
     public ConfirmDialog() {
@@ -58,6 +60,7 @@ public class ConfirmDialog extends AlertActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPackage = getCallingPackage();
+        mCm = getSystemService(ConnectivityManager.class);
         mVm = getSystemService(VpnManager.class);
 
         if (mVm.prepareVpn(mPackage, null, UserHandle.myUserId())) {
@@ -69,7 +72,7 @@ public class ConfirmDialog extends AlertActivity
             finish();
             return;
         }
-        final String alwaysOnVpnPackage = mVm.getAlwaysOnVpnPackageForUser(UserHandle.myUserId());
+        final String alwaysOnVpnPackage = mCm.getAlwaysOnVpnPackageForUser(UserHandle.myUserId());
         // Can't prepare new vpn app when another vpn is always-on
         if (alwaysOnVpnPackage != null && !alwaysOnVpnPackage.equals(mPackage)) {
             finish();
