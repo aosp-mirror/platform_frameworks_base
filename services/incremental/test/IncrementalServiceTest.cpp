@@ -543,16 +543,16 @@ public:
 
 class MockFsWrapper : public FsWrapper {
 public:
-    MOCK_CONST_METHOD1(listFilesRecursive, std::vector<std::string>(std::string_view));
-    void hasNoFile() {
-        ON_CALL(*this, listFilesRecursive(_)).WillByDefault(Return(std::vector<std::string>()));
-    }
+    MOCK_CONST_METHOD2(listFilesRecursive, void(std::string_view, FileCallback));
+    void hasNoFile() { ON_CALL(*this, listFilesRecursive(_, _)).WillByDefault(Return()); }
     void hasFiles() {
-        ON_CALL(*this, listFilesRecursive(_))
+        ON_CALL(*this, listFilesRecursive(_, _))
                 .WillByDefault(Invoke(this, &MockFsWrapper::fakeFiles));
     }
-    std::vector<std::string> fakeFiles(std::string_view directoryPath) {
-        return {"base.apk", "split.apk", "lib/a.so"};
+    void fakeFiles(std::string_view directoryPath, FileCallback onFile) {
+        for (auto file : {"base.apk", "split.apk", "lib/a.so"}) {
+            if (!onFile(file)) break;
+        }
     }
 };
 
