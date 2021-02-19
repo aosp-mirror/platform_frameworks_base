@@ -91,7 +91,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
     @NonNull private ISoundTriggerHw2 mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
-    private final SoundTriggerModuleProperties mProperties;
+    private SoundTriggerModuleProperties mProperties;
 
     /**
      * Ctor.
@@ -105,7 +105,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         mAudioSessionProvider = audioSessionProvider;
 
         attachToHal();
-        mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
     }
 
     /**
@@ -175,6 +174,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
                 new SoundTriggerHw2Watchdog(mHalFactory.create()));
         mHalService.linkToDeath(this, 0);
         mHalService.registerCallback(this);
+        mProperties = ConversionUtil.hidl2aidlProperties(mHalService.getProperties());
     }
 
     /**
