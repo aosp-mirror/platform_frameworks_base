@@ -169,6 +169,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                 },
                 UserHandle.USER_ALL);
 
+        // All wallpaper color and keyguard logic only applies when Monet is enabled.
+        if (!mIsMonetEnabled) {
+            return;
+        }
+
         // Upon boot, make sure we have the most up to date colors
         mBgExecutor.execute(() -> {
             WallpaperColors lockColors = mWallpaperManager.getWallpaperColors(
