@@ -1431,7 +1431,7 @@ package android.bluetooth {
     method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public android.bluetooth.BufferConstraints getBufferConstraints();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getDynamicBufferSupport();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setBufferMillis(int, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setBufferLengthMillis(int, int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD = 1; // 0x1
     field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2; // 0x2
@@ -1631,7 +1631,7 @@ package android.bluetooth {
   public final class BufferConstraints implements android.os.Parcelable {
     ctor public BufferConstraints(@NonNull java.util.List<android.bluetooth.BufferConstraint>);
     method public int describeContents();
-    method @Nullable public android.bluetooth.BufferConstraint getCodec(int);
+    method @Nullable public android.bluetooth.BufferConstraint forCodec(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BUFFER_CODEC_MAX_NUM = 32; // 0x20
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BufferConstraints> CREATOR;
