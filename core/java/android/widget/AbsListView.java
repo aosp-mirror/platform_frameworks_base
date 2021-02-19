@@ -85,7 +85,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
-import android.widget.RemoteViews.OnClickHandler;
+import android.widget.RemoteViews.InteractionHandler;
 
 import com.android.internal.R;
 
@@ -6419,11 +6419,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @hide
      */
-    public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
+    public void setRemoteViewsInteractionHandler(InteractionHandler handler) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
         if (mRemoteAdapter != null) {
-            mRemoteAdapter.setRemoteViewsOnClickHandler(handler);
+            mRemoteAdapter.setRemoteViewsInteractionHandler(handler);
         }
     }
 
