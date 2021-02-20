@@ -40,6 +40,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceService;
@@ -144,13 +145,14 @@ public class AuthService extends SystemService {
 
     private final class AuthServiceImpl extends IAuthService.Stub {
         @Override
-        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName)
-                throws RemoteException {
+        public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+                @NonNull String opPackageName) throws RemoteException {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                return mInjector.getBiometricService().createTestSession(sensorId, opPackageName);
+                return mInjector.getBiometricService()
+                        .createTestSession(sensorId, callback, opPackageName);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
