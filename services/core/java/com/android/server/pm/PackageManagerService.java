@@ -389,6 +389,7 @@ import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationService;
+import com.android.server.pm.verify.domain.DomainVerificationUtils;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV2;
@@ -2587,6 +2588,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 CrossProfileDomainInfo xpDomainInfo, int userId, boolean debug) {
             final ArrayList<ResolveInfo> result = new ArrayList<>();
             final ArrayList<ResolveInfo> matchAllList = new ArrayList<>();
+            final ArrayList<ResolveInfo> undefinedList = new ArrayList<>();
 
             final int count = candidates.size();
             // First, try to use approved apps.
@@ -2595,32 +2597,47 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Add to the special match all list (Browser use case)
                 if (info.handleAllWebDataURI) {
                     matchAllList.add(info);
+                } else {
+                    undefinedList.add(info);
                 }
             }
-
-            Pair<List<ResolveInfo>, Integer> infosAndLevel = mDomainVerificationManager
-                    .filterToApprovedApp(intent, candidates, userId, mSettings::getPackageLPr);
-            List<ResolveInfo> approvedInfos = infosAndLevel.first;
-            Integer highestApproval = infosAndLevel.second;
 
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            // If no apps are approved for the domain, resolve only to browsers
-            if (approvedInfos.isEmpty()) {
-                // If the other profile has a result, include that and delegate to ResolveActivity
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent)) {
+                result.addAll(undefinedList);
+                // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
                         > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
                     result.add(xpDomainInfo.resolveInfo);
-                } else {
-                    includeBrowser = true;
                 }
+                includeBrowser = true;
             } else {
-                result.addAll(approvedInfos);
+                Pair<List<ResolveInfo>, Integer> infosAndLevel = mDomainVerificationManager
+                        .filterToApprovedApp(intent, undefinedList, userId,
+                                mSettings::getPackageLPr);
+                List<ResolveInfo> approvedInfos = infosAndLevel.first;
+                Integer highestApproval = infosAndLevel.second;
 
-                // If the other profile has an app that's of equal or higher approval, add it
-                if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel >= highestApproval) {
-                    result.add(xpDomainInfo.resolveInfo);
+                // If no apps are approved for the domain, resolve only to browsers
+                if (approvedInfos.isEmpty()) {
+                    // If the other profile has a result, include that and delegate to
+                    // ResolveActivity
+                    if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
+                            > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
+                        result.add(xpDomainInfo.resolveInfo);
+                    } else {
+                        includeBrowser = true;
+                    }
+                } else {
+                    result.addAll(approvedInfos);
+
+                    // If the other profile has an app that's of equal or higher approval, add it
+                    if (xpDomainInfo != null
+                            && xpDomainInfo.highestApprovalLevel >= highestApproval) {
+                        result.add(xpDomainInfo.resolveInfo);
+                    }
                 }
             }
 
