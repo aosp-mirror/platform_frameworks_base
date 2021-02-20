@@ -97,4 +97,9 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     public int getProtoEnum() {
         return BiometricsProto.CM_REMOVE;
     }
+
+    @Override
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
 }
