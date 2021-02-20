@@ -148,8 +148,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wi-Fi តែប៉ុណ្ណោះ"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"ការហៅទូរសព្ទ​បម្រុង <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
@@ -1110,7 +1109,7 @@
     <string name="cut" msgid="2561199725874745819">"កាត់"</string>
     <string name="copy" msgid="5472512047143665218">"ចម្លង"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"មិនអាច​ចម្លងទៅ​អង្គចងចាំទេ"</string>
-    <string name="paste" msgid="461843306215520225">"បិទ​ភ្ជាប់"</string>
+    <string name="paste" msgid="461843306215520225">"ដាក់ចូល"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"បិទភ្ជាប់ជាអត្ថបទធម្មតា"</string>
     <string name="replace" msgid="7842675434546657444">"ជំនួស..."</string>
     <string name="delete" msgid="1514113991712129054">"លុប"</string>
@@ -1666,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែ​ពណ៌"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"បន្ថយពន្លឺ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ចុចគ្រាប់ចុច​កម្រិត​សំឡេងទាំងពីរ​ឱ្យជាប់រយៈពេលបីវិនាទី ដើម្បីប្រើ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1882,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"ពង្រីក"</string>
     <string name="close_button_text" msgid="10603510034455258">"បិទ"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>៖ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"ឆ្លើយ"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"បដិសេធ"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"ដាក់​ចុះ"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"ការ​ហៅ​ចូល"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"ការ​ហៅដែលកំពុងដំណើរការ"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"កំពុងពិនិត្យការ​ហៅ​ចូល"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="other">បានជ្រើស <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">បានជ្រើស <xliff:g id="COUNT_0">%1$d</xliff:g></item>

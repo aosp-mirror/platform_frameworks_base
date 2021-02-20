@@ -148,8 +148,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"‏فقط Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g> تماس پشتیبان"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: هدایت نشده"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> پس از <xliff:g id="TIME_DELAY">{2}</xliff:g> ثانیه"</string>
@@ -1442,7 +1441,7 @@
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"شنونده اعلان"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"‏شنونده VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ارائه‌دهنده وضعیت"</string>
-    <string name="notification_ranker_binding_label" msgid="432708245635563763">"سرویس رتبه‌بندی اعلان"</string>
+    <string name="notification_ranker_binding_label" msgid="432708245635563763">"سرویس رده‌بندی اعلان"</string>
     <string name="vpn_title" msgid="5906991595291514182">"‏VPN فعال شد"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"‏VPN را <xliff:g id="APP">%s</xliff:g> فعال کرده است"</string>
     <string name="vpn_text" msgid="2275388920267251078">"برای مدیریت شبکه ضربه بزنید."</string>
@@ -1666,6 +1665,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استفاده از میان‌بر"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"وارونگی رنگ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحیح رنگ"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"کاهش روشنایی"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> روشن شد."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
@@ -1882,6 +1882,12 @@
     <string name="maximize_button_text" msgid="4258922519914732645">"بزرگ کردن"</string>
     <string name="close_button_text" msgid="10603510034455258">"بستن"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>:‏ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
+    <string name="call_notification_answer_action" msgid="5999246836247132937">"پاسخ"</string>
+    <string name="call_notification_decline_action" msgid="3700345945214000726">"رد کردن"</string>
+    <string name="call_notification_hang_up_action" msgid="9130720590159188131">"قطع تماس"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"تماس ورودی"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"تماس درحال انجام"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"درحال غربال کردن تماس ورودی"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
       <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
