@@ -8926,8 +8926,8 @@ public class ConnectivityServiceTest {
                 ConnectivityManager.getNetworkTypeName(TYPE_MOBILE),
                 TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
         return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
-                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, null,
-                0, INVALID_UID, mQosCallbackTracker);
+                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
+                INVALID_UID, mQosCallbackTracker);
     }
 
     @Test

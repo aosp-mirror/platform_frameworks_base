@@ -29,7 +29,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.RouteInfo;
-import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -69,7 +68,6 @@ public class Nat464Xlat {
 
     private final IDnsResolver mDnsResolver;
     private final INetd mNetd;
-    private final INetworkManagementService mNMService;
 
     // The network we're running on, and its type.
     private final NetworkAgentInfo mNetwork;
@@ -98,11 +96,9 @@ public class Nat464Xlat {
 
     private boolean mPrefixDiscoveryRunning;
 
-    public Nat464Xlat(NetworkAgentInfo nai, INetd netd, IDnsResolver dnsResolver,
-            INetworkManagementService nmService) {
+    public Nat464Xlat(NetworkAgentInfo nai, INetd netd, IDnsResolver dnsResolver) {
         mDnsResolver = dnsResolver;
         mNetd = netd;
-        mNMService = nmService;
         mNetwork = nai;
     }
 

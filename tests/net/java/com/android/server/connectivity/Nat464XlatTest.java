@@ -36,7 +36,6 @@ import android.net.LinkProperties;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkInfo;
 import android.os.Handler;
-import android.os.INetworkManagementService;
 import android.os.test.TestLooper;
 
 import androidx.test.filters.SmallTest;
@@ -67,7 +66,6 @@ public class Nat464XlatTest {
     @Mock ConnectivityService mConnectivity;
     @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
-    @Mock INetworkManagementService mNms;
     @Mock NetworkAgentInfo mNai;
 
     TestLooper mLooper;
@@ -75,7 +73,7 @@ public class Nat464XlatTest {
     NetworkAgentConfig mAgentConfig = new NetworkAgentConfig();
 
     Nat464Xlat makeNat464Xlat() {
-        return new Nat464Xlat(mNai, mNetd, mDnsResolver, mNms) {
+        return new Nat464Xlat(mNai, mNetd, mDnsResolver) {
             @Override protected int getNetId() {
                 return NETID;
             }
@@ -233,7 +231,7 @@ public class Nat464XlatTest {
         nat.interfaceRemoved(STACKED_IFACE);
         mLooper.dispatchNext();
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     @Test
@@ -370,7 +368,7 @@ public class Nat464XlatTest {
         // ConnectivityService stops clat: no-op.
         nat.stop();
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     private void checkStopBeforeClatdStarts(boolean dueToDisconnect) throws Exception {
@@ -402,7 +400,7 @@ public class Nat464XlatTest {
 
         assertIdle(nat);
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     @Test
@@ -434,7 +432,7 @@ public class Nat464XlatTest {
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     @Test
