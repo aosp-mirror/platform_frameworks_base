@@ -87,6 +87,19 @@ private:
     std::unique_ptr<SkiaDisplayList> mDisplayList;
     StartReorderBarrierDrawable* mCurrentBarrier;
 
+    template <typename Proc>
+    void applyLooper(const Paint* paint, Proc proc) {
+        const SkPaint* sk_paint = filterBitmap(paint);
+        const BlurDrawLooper* looper = paint ? paint->getLooper() : nullptr;
+        if (looper) {
+            looper->apply(*sk_paint, [&](SkPoint offset, const SkPaint& modifiedPaint) {
+                proc(offset.fX, offset.fY, &modifiedPaint);
+            });
+        } else {
+            proc(0, 0, sk_paint);
+        }
+    }
+
     /**
      *  A new SkiaDisplayList is created or recycled if available.
      *
