@@ -134,10 +134,11 @@ private:
     } mLooper;
 };
 
-class RealIncFs : public IncFsWrapper {
+class RealIncFs final : public IncFsWrapper {
 public:
     RealIncFs() = default;
     ~RealIncFs() final = default;
+    Features features() const final { return incfs::features(); }
     void listExistingMounts(const ExistingMountCallback& cb) const final {
         for (auto mount : incfs::defaultMountRegistry().copyMounts()) {
             auto binds = mount.binds(); // span() doesn't like rvalue containers, needs to save it.
@@ -152,6 +153,10 @@ public:
     ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                        incfs::NewFileParams params) const final {
         return incfs::makeFile(control, path, mode, id, params);
+    }
+    ErrorCode makeMappedFile(const Control& control, std::string_view path, int mode,
+                             incfs::NewMappedFileParams params) const final {
+        return incfs::makeMappedFile(control, path, mode, params);
     }
     ErrorCode makeDir(const Control& control, std::string_view path, int mode) const final {
         return incfs::makeDir(control, path, mode);

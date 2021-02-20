@@ -35,8 +35,6 @@ import java.util.Objects;
  *
  * @see VcnManager
  * @see VcnGatewayConnectionConfig
- *
- * @hide
  */
 public abstract class VcnControlPlaneConfig {
     /** @hide */

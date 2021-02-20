@@ -16,9 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.service.screenshot.ScreenshotHasherService.EXTRA_SCREENSHOT_HASH;
-import static android.service.screenshot.ScreenshotHasherService.EXTRA_VERIFICATION_STATUS;
-import static android.service.screenshot.ScreenshotHasherService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
+import static android.service.displayhash.DisplayHasherService.EXTRA_VERIFIED_DISPLAY_HASH;
+import static android.service.displayhash.DisplayHasherService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -46,11 +45,12 @@ import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.screenshot.IScreenshotHasherService;
-import android.service.screenshot.ScreenshotHash;
-import android.service.screenshot.ScreenshotHasherService;
+import android.service.displayhash.DisplayHasherService;
+import android.service.displayhash.IDisplayHasherService;
 import android.util.Slog;
 import android.view.MagnificationSpec;
+import android.view.displayhash.DisplayHash;
+import android.view.displayhash.VerifiedDisplayHash;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -61,29 +61,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
- * Handles requests into {@link android.service.screenshot.ScreenshotHasherService}
+ * Handles requests into {@link android.service.displayhash.DisplayHasherService}
  *
  * Do not hold the {@link WindowManagerService#mGlobalLock} when calling methods since they are
  * blocking calls into another service.
  */
-public class ScreenshotHashController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ScreenshotHashController" : TAG_WM;
+public class DisplayHashController {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayHashController" : TAG_WM;
     private static final boolean DEBUG = false;
 
     private final Object mServiceConnectionLock = new Object();
 
     @GuardedBy("mServiceConnectionLock")
-    private ScreenshotHasherServiceConnection mServiceConnection;
+    private DisplayHasherServiceConnection mServiceConnection;
 
     private final Context mContext;
 
     /**
-     * Lock used for the cached {@link #mHashingAlgorithms} array
+     * Lock used for the cached {@link #mHashAlgorithms} array
      */
-    private final Object mHashingAlgorithmsLock = new Object();
+    private final Object mHashAlgorithmsLock = new Object();
 
     @GuardedBy("mHashingAlgorithmsLock")
-    private String[] mHashingAlgorithms;
+    private String[] mHashAlgorithms;
 
     private final Handler mHandler;
 
@@ -94,24 +94,24 @@ public class ScreenshotHashController {
     private final RectF mTmpRectF = new RectF();
 
     private interface Command {
-        void run(IScreenshotHasherService service) throws RemoteException;
+        void run(IDisplayHasherService service) throws RemoteException;
     }
 
-    ScreenshotHashController(Context context) {
+    DisplayHashController(Context context) {
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
         mSalt = UUID.randomUUID().toString().getBytes();
     }
 
-    String[] getSupportedHashingAlgorithms() {
+    String[] getSupportedHashAlgorithms() {
         // We have a separate lock for the hashing algorithm array since it doesn't need to make
         // the request through the service connection. Instead, we have a lock to ensure we can
         // properly cache the hashing algorithms array so we don't need to call into the
         // ExtServices process for each request.
-        synchronized (mHashingAlgorithmsLock) {
+        synchronized (mHashAlgorithmsLock) {
             // Already have cached values
-            if (mHashingAlgorithms != null) {
-                return mHashingAlgorithms;
+            if (mHashAlgorithms != null) {
+                return mHashAlgorithms;
             }
 
             final ServiceInfo serviceInfo = getServiceInfo();
@@ -128,55 +128,48 @@ public class ScreenshotHashController {
 
             final int resourceId = serviceInfo.metaData.getInt(
                     SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS);
-            mHashingAlgorithms = res.getStringArray(resourceId);
+            mHashAlgorithms = res.getStringArray(resourceId);
 
-            return mHashingAlgorithms;
+            return mHashAlgorithms;
         }
     }
 
-    boolean verifyScreenshotHash(ScreenshotHash screenshotHash) {
+    @Nullable
+    VerifiedDisplayHash verifyDisplayHash(DisplayHash displayHash) {
         final SyncCommand syncCommand = new SyncCommand();
         Bundle results = syncCommand.run((service, remoteCallback) -> {
             try {
-                service.verifyScreenshotHash(mSalt, screenshotHash, remoteCallback);
+                service.verifyDisplayHash(mSalt, displayHash, remoteCallback);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke verifyScreenshotHash command");
+                Slog.e(TAG, "Failed to invoke verifyDisplayHash command");
             }
         });
 
-        return results.getBoolean(EXTRA_VERIFICATION_STATUS);
+        return results.getParcelable(EXTRA_VERIFIED_DISPLAY_HASH);
     }
 
-    ScreenshotHash generateScreenshotHash(HardwareBuffer screenshot, Rect bounds,
-            String hashAlgorithm) {
-        final SyncCommand syncCommand = new SyncCommand();
-        Bundle results = syncCommand.run((service, remoteCallback) -> {
-            try {
-                service.generateScreenshotHash(mSalt, screenshot, bounds, hashAlgorithm,
-                        remoteCallback);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke generateScreenshotHash command", e);
-            }
-        });
-
-        return results.getParcelable(EXTRA_SCREENSHOT_HASH);
+    void generateDisplayHash(HardwareBuffer buffer, Rect bounds,
+            String hashAlgorithm, RemoteCallback callback) {
+        connectAndRun(
+                service -> service.generateDisplayHash(mSalt, buffer, bounds, hashAlgorithm,
+                        callback));
     }
 
     /**
-     * Calculate the bounds to take the screenshot when generating the ScreenshotHash. This
-     * takes into account window transform, magnification, and display bounds.
+     * Calculate the bounds to generate the hash for. This takes into account window transform,
+     * magnification, and display bounds.
      *
      * Call while holding {@link WindowManagerService#mGlobalLock}
      *
-     * @param win Window that the ScreenshotHash is generated for.
-     * @param boundsInWindow The bounds passed in about where in the window to take the screenshot.
-     * @param outBounds The result of the calculated bounds
+     * @param win            Window that the DisplayHash is generated for.
+     * @param boundsInWindow The bounds in the window where to generate the hash.
+     * @param outBounds      The result of the calculated bounds
      */
-    void calculateScreenshotHashBoundsLocked(WindowState win, Rect boundsInWindow,
+    void calculateDisplayHashBoundsLocked(WindowState win, Rect boundsInWindow,
             Rect outBounds) {
         if (DEBUG) {
             Slog.d(TAG,
-                    "calculateScreenshotHashBoundsLocked: boundsInWindow=" + boundsInWindow);
+                    "calculateDisplayHashBoundsLocked: boundsInWindow=" + boundsInWindow);
         }
         outBounds.set(boundsInWindow);
 
@@ -195,7 +188,7 @@ public class ScreenshotHashController {
 
         if (DEBUG) {
             Slog.d(TAG,
-                    "calculateScreenshotHashBoundsLocked: boundsIntersectWindow=" + outBounds);
+                    "calculateDisplayHashBoundsLocked: boundsIntersectWindow=" + outBounds);
         }
 
         if (outBounds.isEmpty()) {
@@ -210,7 +203,7 @@ public class ScreenshotHashController {
         outBounds.set((int) mTmpRectF.left, (int) mTmpRectF.top, (int) mTmpRectF.right,
                 (int) mTmpRectF.bottom);
         if (DEBUG) {
-            Slog.d(TAG, "calculateScreenshotHashBoundsLocked: boundsInDisplay=" + outBounds);
+            Slog.d(TAG, "calculateDisplayHashBoundsLocked: boundsInDisplay=" + outBounds);
         }
 
         // Apply the magnification spec values to the bounds since the content could be magnified
@@ -221,7 +214,7 @@ public class ScreenshotHashController {
         }
 
         if (DEBUG) {
-            Slog.d(TAG, "calculateScreenshotHashBoundsLocked: boundsWithMagnification="
+            Slog.d(TAG, "calculateDisplayHashBoundsLocked: boundsWithMagnification="
                     + outBounds);
         }
 
@@ -229,12 +222,12 @@ public class ScreenshotHashController {
             return;
         }
 
-        // Intersect with the display bounds since it shouldn't take a screenshot of content
-        // outside the display since it's not visible to the user.
+        // Intersect with the display bounds since content outside the display are not visible to
+        // the user.
         final Rect displayBounds = displayContent.getBounds();
         outBounds.intersectUnchecked(displayBounds);
         if (DEBUG) {
-            Slog.d(TAG, "calculateScreenshotHashBoundsLocked: finalBounds=" + outBounds);
+            Slog.d(TAG, "calculateDisplayHashBoundsLocked: finalBounds=" + outBounds);
         }
     }
 
@@ -248,7 +241,7 @@ public class ScreenshotHashController {
                 if (DEBUG) Slog.v(TAG, "creating connection");
 
                 // Create the connection
-                mServiceConnection = new ScreenshotHasherServiceConnection();
+                mServiceConnection = new DisplayHasherServiceConnection();
 
                 final ComponentName component = getServiceComponentName();
                 if (DEBUG) Slog.v(TAG, "binding to: " + component);
@@ -279,7 +272,7 @@ public class ScreenshotHashController {
             return null;
         }
 
-        final Intent intent = new Intent(ScreenshotHasherService.SERVICE_INTERFACE);
+        final Intent intent = new Intent(DisplayHasherService.SERVICE_INTERFACE);
         intent.setPackage(packageName);
         final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
@@ -296,10 +289,10 @@ public class ScreenshotHashController {
         if (serviceInfo == null) return null;
 
         final ComponentName name = new ComponentName(serviceInfo.packageName, serviceInfo.name);
-        if (!Manifest.permission.BIND_SCREENSHOT_HASHER_SERVICE
+        if (!Manifest.permission.BIND_DISPLAY_HASHER_SERVICE
                 .equals(serviceInfo.permission)) {
             Slog.w(TAG, name.flattenToShortString() + " requires permission "
-                    + Manifest.permission.BIND_SCREENSHOT_HASHER_SERVICE);
+                    + Manifest.permission.BIND_DISPLAY_HASHER_SERVICE);
             return null;
         }
 
@@ -312,7 +305,7 @@ public class ScreenshotHashController {
         private Bundle mResult;
         private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
 
-        public Bundle run(BiConsumer<IScreenshotHasherService, RemoteCallback> func) {
+        public Bundle run(BiConsumer<IDisplayHasherService, RemoteCallback> func) {
             connectAndRun(service -> {
                 RemoteCallback callback = new RemoteCallback(result -> {
                     mResult = result;
@@ -331,9 +324,9 @@ public class ScreenshotHashController {
         }
     }
 
-    private class ScreenshotHasherServiceConnection implements ServiceConnection {
+    private class DisplayHasherServiceConnection implements ServiceConnection {
         @GuardedBy("mServiceConnectionLock")
-        private IScreenshotHasherService mRemoteService;
+        private IDisplayHasherService mRemoteService;
 
         @GuardedBy("mServiceConnectionLock")
         private ArrayList<Command> mQueuedCommands;
@@ -342,7 +335,7 @@ public class ScreenshotHashController {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Slog.v(TAG, "onServiceConnected(): " + name);
             synchronized (mServiceConnectionLock) {
-                mRemoteService = IScreenshotHasherService.Stub.asInterface(service);
+                mRemoteService = IDisplayHasherService.Stub.asInterface(service);
                 if (mQueuedCommands != null) {
                     final int size = mQueuedCommands.size();
                     if (DEBUG) Slog.d(TAG, "running " + size + " queued commands");

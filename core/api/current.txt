@@ -5556,6 +5556,7 @@ package android.app {
     method public android.graphics.drawable.Icon getSmallIcon();
     method public String getSortKey();
     method public long getTimeoutAfter();
+    method public boolean hasImage();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.media.AudioAttributes AUDIO_ATTRIBUTES_DEFAULT;
     field public static final int BADGE_ICON_LARGE = 2; // 0x2
@@ -10444,6 +10445,7 @@ package android.content {
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
     field public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
     field public static final String DEVICE_POLICY_SERVICE = "device_policy";
+    field public static final String DISPLAY_HASH_SERVICE = "display_hash";
     field public static final String DISPLAY_SERVICE = "display";
     field public static final String DOWNLOAD_SERVICE = "download";
     field public static final String DROPBOX_SERVICE = "dropbox";
@@ -21117,15 +21119,15 @@ package android.media {
   public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
     ctor public MediaCodec.CryptoException(int, @Nullable String);
     method public int getErrorCode();
-    field public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
-    field public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
-    field public static final int ERROR_INSUFFICIENT_SECURITY = 7; // 0x7
-    field public static final int ERROR_KEY_EXPIRED = 2; // 0x2
-    field public static final int ERROR_LOST_STATE = 9; // 0x9
-    field public static final int ERROR_NO_KEY = 1; // 0x1
-    field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
-    field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
-    field public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
+    field @Deprecated public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
+    field @Deprecated public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
+    field @Deprecated public static final int ERROR_INSUFFICIENT_SECURITY = 7; // 0x7
+    field @Deprecated public static final int ERROR_KEY_EXPIRED = 2; // 0x2
+    field @Deprecated public static final int ERROR_LOST_STATE = 9; // 0x9
+    field @Deprecated public static final int ERROR_NO_KEY = 1; // 0x1
+    field @Deprecated public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
+    field @Deprecated public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
+    field @Deprecated public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
   }
 
   public static final class MediaCodec.CryptoInfo {
@@ -21744,6 +21746,42 @@ package android.media {
     method public boolean verify(@NonNull byte[], @NonNull byte[], @NonNull byte[]);
   }
 
+  public static final class MediaDrm.ErrorCodes {
+    field public static final int ERROR_CERTIFICATE_MALFORMED = 10; // 0xa
+    field public static final int ERROR_CERTIFICATE_MISSING = 11; // 0xb
+    field public static final int ERROR_CRYPTO_LIBRARY = 12; // 0xc
+    field public static final int ERROR_FRAME_TOO_LARGE = 8; // 0x8
+    field public static final int ERROR_GENERIC_OEM = 13; // 0xd
+    field public static final int ERROR_GENERIC_PLUGIN = 14; // 0xe
+    field public static final int ERROR_INIT_DATA = 15; // 0xf
+    field public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4; // 0x4
+    field public static final int ERROR_INSUFFICIENT_SECURITY = 7; // 0x7
+    field public static final int ERROR_KEY_EXPIRED = 2; // 0x2
+    field public static final int ERROR_KEY_NOT_LOADED = 16; // 0x10
+    field public static final int ERROR_LICENSE_PARSE = 17; // 0x11
+    field public static final int ERROR_LICENSE_POLICY = 18; // 0x12
+    field public static final int ERROR_LICENSE_RELEASE = 19; // 0x13
+    field public static final int ERROR_LICENSE_REQUEST_REJECTED = 20; // 0x14
+    field public static final int ERROR_LICENSE_RESTORE = 21; // 0x15
+    field public static final int ERROR_LICENSE_STATE = 22; // 0x16
+    field public static final int ERROR_LOST_STATE = 9; // 0x9
+    field public static final int ERROR_MEDIA_FRAMEWORK = 23; // 0x17
+    field public static final int ERROR_NO_KEY = 1; // 0x1
+    field public static final int ERROR_PROVISIONING_CERTIFICATE = 24; // 0x18
+    field public static final int ERROR_PROVISIONING_CONFIG = 25; // 0x19
+    field public static final int ERROR_PROVISIONING_PARSE = 26; // 0x1a
+    field public static final int ERROR_PROVISIONING_RETRY = 27; // 0x1b
+    field public static final int ERROR_RESOURCE_BUSY = 3; // 0x3
+    field public static final int ERROR_RESOURCE_CONTENTION = 28; // 0x1c
+    field public static final int ERROR_SECURE_STOP_RELEASE = 29; // 0x1d
+    field public static final int ERROR_SESSION_NOT_OPENED = 5; // 0x5
+    field public static final int ERROR_STORAGE_READ = 30; // 0x1e
+    field public static final int ERROR_STORAGE_WRITE = 31; // 0x1f
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+    field public static final int ERROR_UNSUPPORTED_OPERATION = 6; // 0x6
+    field public static final int ERROR_ZERO_SUBSAMPLES = 32; // 0x20
+  }
+
   @Deprecated @IntDef({android.media.MediaDrm.HDCP_LEVEL_UNKNOWN, android.media.MediaDrm.HDCP_NONE, android.media.MediaDrm.HDCP_V1, android.media.MediaDrm.HDCP_V2, android.media.MediaDrm.HDCP_V2_1, android.media.MediaDrm.HDCP_V2_2, android.media.MediaDrm.HDCP_V2_3, android.media.MediaDrm.HDCP_NO_DIGITAL_OUTPUT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.HdcpLevel {
   }
 
@@ -21777,6 +21815,8 @@ package android.media {
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
     method @NonNull public String getDiagnosticInfo();
+    method public int getErrorCode();
+    method public boolean isTransient();
   }
 
   public static final class MediaDrm.MetricsConstants {
@@ -21843,9 +21883,10 @@ package android.media {
 
   public static final class MediaDrm.SessionException extends java.lang.RuntimeException {
     ctor public MediaDrm.SessionException(int, @Nullable String);
-    method public int getErrorCode();
-    field public static final int ERROR_RESOURCE_CONTENTION = 1; // 0x1
-    field public static final int ERROR_UNKNOWN = 0; // 0x0
+    method @Deprecated public int getErrorCode();
+    method public boolean isTransient();
+    field @Deprecated public static final int ERROR_RESOURCE_CONTENTION = 1; // 0x1
+    field @Deprecated public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
   public class MediaDrmException extends java.lang.Exception {
@@ -26992,6 +27033,15 @@ package android.net.vcn {
     method @NonNull public android.net.vcn.VcnConfig build();
   }
 
+  public abstract class VcnControlPlaneConfig {
+  }
+
+  public final class VcnControlPlaneIkeConfig extends android.net.vcn.VcnControlPlaneConfig {
+    ctor public VcnControlPlaneIkeConfig(@NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.TunnelModeChildSessionParams);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams getChildSessionParams();
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams getIkeSessionParams();
+  }
+
   public final class VcnGatewayConnectionConfig {
     method @NonNull public int[] getExposedCapabilities();
     method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
@@ -27000,7 +27050,7 @@ package android.net.vcn {
   }
 
   public static final class VcnGatewayConnectionConfig.Builder {
-    ctor public VcnGatewayConnectionConfig.Builder();
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull android.net.vcn.VcnControlPlaneConfig);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addRequiredUnderlyingCapability(int);
     method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
@@ -48244,6 +48294,7 @@ package android.view {
     method public android.view.View focusSearch(int);
     method public void forceHasOverlappingRendering(boolean);
     method public void forceLayout();
+    method @Nullable public void generateDisplayHash(@NonNull String, @Nullable android.graphics.Rect, @NonNull java.util.concurrent.Executor, @NonNull android.view.displayhash.DisplayHashResultCallback);
     method public static int generateViewId();
     method public CharSequence getAccessibilityClassName();
     method public android.view.View.AccessibilityDelegate getAccessibilityDelegate();
@@ -51195,6 +51246,41 @@ package android.view.contentcapture {
     method public default void onError(int);
     method public void onRejected();
     method public void onWrite(@NonNull android.os.ParcelFileDescriptor);
+  }
+
+}
+
+package android.view.displayhash {
+
+  public final class DisplayHash implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.displayhash.DisplayHash> CREATOR;
+  }
+
+  public final class DisplayHashManager {
+    method @NonNull public java.util.Set<java.lang.String> getSupportedHashAlgorithms();
+    method @Nullable public android.view.displayhash.VerifiedDisplayHash verifyDisplayHash(@NonNull android.view.displayhash.DisplayHash);
+  }
+
+  public interface DisplayHashResultCallback {
+    method public void onDisplayHashError(int);
+    method public void onDisplayHashResult(@NonNull android.view.displayhash.DisplayHash);
+    field public static final int DISPLAY_HASH_ERROR_INVALID_BOUNDS = -2; // 0xfffffffe
+    field public static final int DISPLAY_HASH_ERROR_MISSING_WINDOW = -3; // 0xfffffffd
+    field public static final int DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN = -4; // 0xfffffffc
+    field public static final int DISPLAY_HASH_ERROR_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public final class VerifiedDisplayHash implements android.os.Parcelable {
+    ctor public VerifiedDisplayHash(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public android.graphics.Rect getBoundsInWindow();
+    method @NonNull public String getHashAlgorithm();
+    method @NonNull public byte[] getImageHash();
+    method public long getTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.displayhash.VerifiedDisplayHash> CREATOR;
   }
 
 }
@@ -55001,6 +55087,7 @@ package android.widget {
     method public void setLabelFor(@IdRes int, @IdRes int);
     method public void setLightBackgroundLayoutId(@LayoutRes int);
     method public void setLong(@IdRes int, String, long);
+    method public void setOnCheckedChangeResponse(@IdRes int, @NonNull android.widget.RemoteViews.RemoteResponse);
     method public void setOnClickFillInIntent(@IdRes int, android.content.Intent);
     method public void setOnClickPendingIntent(@IdRes int, android.app.PendingIntent);
     method public void setOnClickResponse(@IdRes int, @NonNull android.widget.RemoteViews.RemoteResponse);
@@ -55027,6 +55114,7 @@ package android.widget {
     method public void showPrevious(@IdRes int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews> CREATOR;
+    field public static final String EXTRA_CHECKED = "android.widget.extra.CHECKED";
     field public static final String EXTRA_SHARED_ELEMENT_BOUNDS = "android.widget.extra.SHARED_ELEMENT_BOUNDS";
   }
 

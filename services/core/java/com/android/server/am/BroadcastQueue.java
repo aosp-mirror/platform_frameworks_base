@@ -825,7 +825,8 @@ public final class BroadcastQueue {
                         r.resultExtras, r.ordered, r.initialSticky, r.userId);
                 // parallel broadcasts are fire-and-forget, not bookended by a call to
                 // finishReceiverLocked(), so we manage their activity-start token here
-                if (r.allowBackgroundActivityStarts && !r.ordered) {
+                if (filter.receiverList.app != null
+                        && r.allowBackgroundActivityStarts && !r.ordered) {
                     postActivityStartTokenRemoval(filter.receiverList.app, r);
                 }
             }
