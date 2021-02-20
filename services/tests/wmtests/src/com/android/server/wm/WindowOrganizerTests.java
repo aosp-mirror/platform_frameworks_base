@@ -61,6 +61,7 @@ import static org.mockito.Mockito.clearInvocations;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager.RootTaskInfo;
+import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
@@ -976,7 +977,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(stack2.isOrganized());
 
         // Verify a back pressed does not call the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token);
+        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+                new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer, never()).onBackPressedOnTaskRoot(any());
@@ -986,7 +988,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 stack.mRemoteToken.toWindowContainerToken(), true);
 
         // Verify now that the back press does call the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token);
+        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+                new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
@@ -996,7 +999,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 stack.mRemoteToken.toWindowContainerToken(), false);
 
         // Verify now that the back press no longer calls the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token);
+        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+                new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
@@ -1201,7 +1205,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mWindowPlacerLocked.deferLayout();
 
         stack.removeImmediately();
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(record.token);
+        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(record.token,
+                new IRequestFinishCallback.Default());
         waitUntilHandlersIdle();
 
         ArrayList<PendingTaskEvent> pendingEvents = getTaskPendingEvent(stack);
