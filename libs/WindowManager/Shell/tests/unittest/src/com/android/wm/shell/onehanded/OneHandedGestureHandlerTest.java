@@ -18,10 +18,8 @@ package com.android.wm.shell.onehanded;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
+import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
@@ -29,7 +27,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -38,7 +35,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedGestureHandlerTest extends OneHandedTestCase {
-    OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
     @Mock
     DisplayController mMockDisplayController;
@@ -46,11 +42,10 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     ShellExecutor mMockShellMainExecutor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTutorialHandler = new OneHandedTutorialHandler(mContext, mMockShellMainExecutor);
         mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
-                mMockShellMainExecutor);
+                ViewConfiguration.get(mTestContext), mMockShellMainExecutor);
     }
 
     @Test
@@ -66,16 +61,6 @@ public class OneHandedGestureHandlerTest extends OneHandedTestCase {
 
         mGestureHandler.setGestureEventListener(callback);
         assertThat(mGestureHandler.mGestureEventCallback).isEqualTo(callback);
-    }
-
-    @Ignore("b/167943723, refactor it and fix it")
-    @Test
-    public void testReceiveNewConfig_whenThreeButtonModeEnabled() {
-        mGestureHandler.onOneHandedEnabled(true);
-        mGestureHandler.onThreeButtonModeEnabled(true);
-
-        assertThat(mGestureHandler.mInputMonitor).isNotNull();
-        assertThat(mGestureHandler.mInputEventReceiver).isNotNull();
     }
 
     @Test
