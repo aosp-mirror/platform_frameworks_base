@@ -4230,10 +4230,6 @@ public class CarrierConfigManager {
         public static final String KEY_RETRANSMIT_TIMER_MSEC_INT_ARRAY =
                 KEY_PREFIX + "retransmit_timer_sec_int_array";
 
-        /** Controls if wifi mac Id should be added to network access identifier(NAI) */
-        public static final String KEY_ADD_WIFI_MAC_ADDR_TO_NAI_BOOL =
-                KEY_PREFIX + "add_wifi_mac_addr_to_nai_bool";
-
         /**
          * Specifies the local identity type for IKE negotiations. Possible values are {@link
          * #ID_TYPE_FQDN}, {@link #ID_TYPE_RFC822_ADDR}, {@link #ID_TYPE_KEY_ID}
@@ -4557,7 +4553,6 @@ public class CarrierConfigManager {
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});
             defaults.putStringArray(KEY_MCC_MNCS_STRING_ARRAY, new String[] {});
-            defaults.putBoolean(KEY_ADD_WIFI_MAC_ADDR_TO_NAI_BOOL, false);
             defaults.putInt(KEY_IKE_LOCAL_ID_TYPE_INT, ID_TYPE_RFC822_ADDR);
             defaults.putInt(KEY_IKE_REMOTE_ID_TYPE_INT, ID_TYPE_FQDN);
             defaults.putBoolean(KEY_ADD_KE_TO_CHILD_SESSION_REKEY_BOOL, false);
