@@ -40788,6 +40788,7 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.Apn {
+    field @Deprecated public static final String KEY_PREFIX = "apn.";
     field public static final String KEY_SETTINGS_DEFAULT_PROTOCOL_STRING = "apn.settings_default_protocol_string";
     field public static final String KEY_SETTINGS_DEFAULT_ROAMING_PROTOCOL_STRING = "apn.settings_default_roaming_protocol_string";
     field public static final String PROTOCOL_IPV4 = "IP";

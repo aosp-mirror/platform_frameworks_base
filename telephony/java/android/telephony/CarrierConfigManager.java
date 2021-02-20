@@ -1717,8 +1717,14 @@ public class CarrierConfigManager {
      * Configs used for APN setup.
      */
     public static final class Apn {
-        /** Prefix of all Apn.KEY_* constants. */
-        private static final String KEY_PREFIX = "apn.";
+        /**
+         * Prefix of all Apn.KEY_* constants.
+         *
+         * @deprecated Since KEY_PREFIX is unnecessary to public, it will modify to private
+         * next android generation.
+         */
+        @Deprecated
+        public static final String KEY_PREFIX = "apn.";
 
         /** IPv4 internet protocol */
         public static final String PROTOCOL_IPV4 = "IP";
