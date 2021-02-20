@@ -56,6 +56,7 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     private final String[] mHistory = new String[HISTORY_SIZE];
     // Where to copy the next state into.
     private int mHistoryIndex;
+    private String mLastCallback;
 
     public CallbackHandler() {
         super(Looper.getMainLooper());
@@ -182,14 +183,20 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     @Override
     public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
                 boolean noNetworksAvailable) {
-        String log = new StringBuilder()
-                .append(SSDF.format(System.currentTimeMillis())).append(",")
+        String currentCallback = new StringBuilder()
                 .append("setConnectivityStatus: ")
                 .append("noDefaultNetwork=").append(noDefaultNetwork).append(",")
                 .append("noValidatedNetwork=").append(noValidatedNetwork).append(",")
                 .append("noNetworksAvailable=").append(noNetworksAvailable)
                 .toString();
-        recordLastCallback(log);
+        if (!currentCallback.equals(mLastCallback)) {
+            mLastCallback = currentCallback;
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append(currentCallback).append(",")
+                    .toString();
+            recordLastCallback(log);
+        }
         post(() -> {
             for (SignalCallback signalCluster : mSignalCallbacks) {
                 signalCluster.setConnectivityStatus(
@@ -200,13 +207,19 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
 
     @Override
     public void setCallIndicator(IconState statusIcon, int subId) {
-        String log = new StringBuilder()
-                .append(SSDF.format(System.currentTimeMillis())).append(",")
+        String currentCallback = new StringBuilder()
                 .append("setCallIndicator: ")
                 .append("statusIcon=").append(statusIcon).append(",")
                 .append("subId=").append(subId)
                 .toString();
-        recordLastCallback(log);
+        if (!currentCallback.equals(mLastCallback)) {
+            mLastCallback = currentCallback;
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append(currentCallback).append(",")
+                    .toString();
+            recordLastCallback(log);
+        }
         post(() -> {
             for (SignalCallback signalCluster : mSignalCallbacks) {
                 signalCluster.setCallIndicator(statusIcon, subId);
@@ -216,12 +229,18 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
 
     @Override
     public void setSubs(List<SubscriptionInfo> subs) {
-        String log = new StringBuilder()
-                .append(SSDF.format(System.currentTimeMillis())).append(",")
+        String currentCallback = new StringBuilder()
                 .append("setSubs: ")
                 .append("subs=").append(subs == null ? "" : subs.toString())
                 .toString();
-        recordLastCallback(log);
+        if (!currentCallback.equals(mLastCallback)) {
+            mLastCallback = currentCallback;
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append(currentCallback).append(",")
+                    .toString();
+            recordLastCallback(log);
+        }
         obtainMessage(MSG_SUBS_CHANGED, subs).sendToTarget();
     }
 
@@ -253,12 +272,18 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
 
     @Override
     public void setIsAirplaneMode(IconState icon) {
-        String log = new StringBuilder()
-                .append(SSDF.format(System.currentTimeMillis())).append(",")
+        String currentCallback = new StringBuilder()
                 .append("setIsAirplaneMode: ")
                 .append("icon=").append(icon)
                 .toString();
-        recordLastCallback(log);
+        if (!currentCallback.equals(mLastCallback)) {
+            mLastCallback = currentCallback;
+            String log = new StringBuilder()
+                    .append(SSDF.format(System.currentTimeMillis())).append(",")
+                    .append(currentCallback).append(",")
+                    .toString();
+            recordLastCallback(log);
+        }
         obtainMessage(MSG_AIRPLANE_MODE_CHANGED, icon).sendToTarget();;
     }
 
