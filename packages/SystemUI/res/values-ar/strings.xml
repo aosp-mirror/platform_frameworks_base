@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"لقطة شاشة موصولة"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"إغلاق لقطة الشاشة"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"معاينة لقطة الشاشة"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"الحد العلوي"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"الحد السفلي"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
@@ -418,6 +420,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"حتى شروق الشمس"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"تفعيل الوضع في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"تقليل السطوع"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"تم تفعيل الاتصال القريب المدى"</string>
@@ -448,7 +451,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"انقر مرة أخرى للفتح"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"يمكنك الفتح بالتمرير سريعًا لأعلى."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"مرِّر سريعًا للأعلى لإعادة المحاولة."</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏يجب فتح قفل الشاشة لاستخدام تقنية الاتصال قصير المدى (NFC)."</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"هذا الجهاز يخص مؤسستك."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"يمكنك التمرير سريعًا من الرمز لتشغيل الهاتف"</string>
@@ -471,9 +474,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"عرض الملف الشخصي"</string>
     <string name="user_add_user" msgid="4336657383006913022">"إضافة مستخدم"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"مستخدم جديد"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"هل تريد إنهاء جلسة الضيف؟"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"إنهاء جلسة الضيف"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"هل تريد إزالة جلسة الضيف؟"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"إنهاء الجلسة"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"إزالة"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مرحبًا بك مجددًا في جلسة الضيف"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"هل تريد متابعة جلستك؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"البدء من جديد"</string>
@@ -552,6 +556,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ثبّتت مؤسستك مرجعًا مصدّقًا في ملفك الشخصي للعمل. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"تم تثبيت مرجع مصدّق على هذا الجهاز. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات في ملفك الشخصي للعمل ولكن لا تتم مراقبتها في ملفك الشخصي."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g> اللذين يمكنهما مراقبة نشاط شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"تم ربط الملف الشخصي للعمل بـ <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
@@ -745,7 +750,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"‏تم تلقائيًا &lt;b&gt;خفض ترتيب هذا الإشعار إلى الوضع صامت&lt;/b&gt; من خلال النظام."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"‏تم تلقائيًا &lt;b&gt;زيادة ترتيب&lt;/b&gt; هذا الإشعار في مركز الإشعارات."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"‏تم تلقائيًا &lt;b&gt;خفض ترتيب&lt;/b&gt; هذا الإشعار في مركز الإشعارات."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"هل كان هذا صحيحًا؟"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"أخبِر مطوِّر البرامج برأيك. هل كان هذا صحيحًا؟"</string>
     <string name="feedback_response" msgid="4671729244976641339">"شكرًا على تعليقك"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"حسنًا"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"تم فتح عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -900,6 +905,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"الانتقال إلى <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"الإضافة إلى الموضع <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"الموضع: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"تمت إضافة البطاقة."</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"تمت إزالة البطاقة."</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"برنامج تعديل الإعدادات السريعة."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"إشعار <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"فتح الإعدادات."</string>
@@ -987,10 +994,10 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"يستخدم تطبيق <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> عملية <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> الآن."</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"استخدَم تطبيق <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> عملية <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> مؤخرًا."</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"يستخدم تطبيق <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ميزة <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> الآن."</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"استخدَم تطبيق <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ميزة <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> مؤخرًا."</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(للمؤسسات)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"مكالمة هاتفية"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"المكالمات الهاتفية"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(من خلال <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"الكاميرا"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"الموقع"</string>
@@ -998,7 +1005,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"إيقاف أجهزة الاستشعار"</string>
     <string name="device_services" msgid="1549944177856658705">"خدمات الأجهزة"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بلا عنوان"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"انقر لإعادة تشغيل هذا التطبيق والانتقال إلى وضع ملء الشاشة."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"نقل"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>

@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Екранна снимка с превъртане"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отхвърляне на екранната снимка"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Визуализация на екранната снимка"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Горна граница"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Долна граница"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запис на екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Записът на екрана се обработва"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущо известие за сесия за записване на екрана"</string>
@@ -410,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"До изгрев"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Ще се включи в <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"До <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Намаляване на яркостта"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"КБП е деактивирана"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"КБП е активирана"</string>
@@ -463,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Показване на потребителския профил"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Добавяне на потребител"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов потребител"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Да се прекрати ли сесията като гост?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Прекратяване на сесията като гост"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се премахне ли гостът?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Всички приложения и данни в тази сесия ще бъдат изтрити."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Прекратяване на сесията"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Премахване"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дошли отново в сесията като гост!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Искате ли да продължите сесията си?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Започване отначало"</string>
@@ -540,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Организацията ви е инсталирала сертифициращ орган в служебния ви потребителски профил. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На това устройство е инсталиран сертифициращ орган. Трафикът в защитената ви мрежа може да бъде наблюдаван или променян."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администраторът ви е включил функцията за регистриране на мрежовата активност, която следи трафика на устройството ви."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администраторът ви е включил функцията за регистриране на мрежовата активност, която следи трафика в служебния ви потребителски профил, но не и в личния."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Установена е връзка с приложението <xliff:g id="VPN_APP">%1$s</xliff:g>, което може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Установена е връзка с приложенията <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>, които могат да наблюдават активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Служебният ви потребителски профил е свързан с приложението <xliff:g id="VPN_APP">%1$s</xliff:g>, което може да наблюдава активността ви в мрежата, включително имейли, приложения и уебсайтове."</string>
@@ -733,7 +738,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Това известие автоматично бе &lt;b&gt;понижено до беззвучно&lt;/b&gt; от системата."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Това известие автоматично бе &lt;b&gt;класирано по-високо&lt;/b&gt; в панела ви."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Това известие автоматично бе &lt;b&gt;класирано по-ниско&lt;/b&gt; в панела ви."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Правилно ли е това?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Изпратете отзивите си на програмиста. Правилно ли е това?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Благодарим ви за отзивите!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Контролите за известията за <xliff:g id="APP_NAME">%1$s</xliff:g> са оттворени"</string>
@@ -880,6 +885,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Преместване към позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Добавяне към позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Панелът е добавен"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Панелът е премахнат"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Редактор за бързи настройки."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Известие от <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Отваряне на настройките."</string>
@@ -970,7 +977,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> използва <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> наскоро използва <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(корпоративна версия)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Телефонно обаждане"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Телефонно обаждане"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(чрез <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"камерата"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"местополож."</string>
@@ -978,7 +985,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Сензорите са изключени"</string>
     <string name="device_services" msgid="1549944177856658705">"Услуги за устройството"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Няма заглавие"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Докоснете, за да рестартирате това приложение в режим на цял екран."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Преместване"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Режимът за навигиране в системата е актуализиран. За да извършите промени, отворете настройките."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Отворете настройките, за да актуализирате режима за навигиране в системата"</string>

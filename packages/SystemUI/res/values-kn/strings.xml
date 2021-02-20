@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ಸ್ಕ್ರೀನ್‍ಶಾಟ್‍ನ ಪೂರ್ವವೀಕ್ಷಣೆ"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ಮೇಲಿನ ಗಡಿರೇಖೆ"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ಕೆಳಗಿನ ಗಡಿರೇಖೆ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
@@ -410,6 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> ಸಮಯದಲ್ಲಿ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"ಪ್ರಖರತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
@@ -463,9 +466,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ಪ್ರೊಫೈಲ್‌ ತೋರಿಸು"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ಹೊಸ ಬಳಕೆದಾರರು"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"ಅತಿಥಿ ಸೆಷನ್ ಅಂತ್ಯಗೊಳಿಸುವುದೇ?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"ಅತಿಥಿ ಸೆಷನ್ ಕೊನೆಗೊಳಿಸಿ"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಷನ್‌ನಲ್ಲಿನ ಎಲ್ಲ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"ಸೆಷನ್ ಅಂತ್ಯಗೊಳಿಸಿ"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ಮತ್ತೆ ಸುಸ್ವಾಗತ, ಅತಿಥಿ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ನಿಮ್ಮ ಸೆಷನ್‌ ಮುಂದುವರಿಸಲು ಇಚ್ಚಿಸುವಿರಾ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ಪ್ರಾರಂಭಿಸಿ"</string>
@@ -540,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಪ್ರಮಾಣಪತ್ರ ಅಂಗೀಕಾರವನ್ನು ಸ್ಥಾಪಿಸಿದೆ. ನಿಮ್ಮ ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಅಥವಾ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ರಮಾಣಪತ್ರ ಅಂಗೀಕಾರವನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿದೆ. ನಿಮ್ಮ ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಅಥವಾ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನೆಟ್‌ವರ್ಕ್ ಲಾಗಿಂಗ್ ಆನ್ ಮಾಡಿದ್ದಾರೆ. ಇದು ನಿಮ್ಮ ಸಾಧನದ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುತ್ತದೆ."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನೆಟ್‌ವರ್ಕ್‌ ಲಾಗಿಂಗ್ ಆನ್ ಮಾಡಿದ್ದಾರೆ, ಅದು ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ನಲ್ಲಿ ಇರುವ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ನಿಗಾ ಇರಿಸುತ್ತದೆ ಆದರೆ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಇರುವ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ಅಲ್ಲ."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"ನೀವು <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ. ಇದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ನೀವು <xliff:g id="VPN_APP_0">%1$s</xliff:g> ಹಾಗೂ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ. ಇವು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ. ಇದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
@@ -733,7 +738,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"ಈ ಅಧಿಸೂಚನೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಿಸ್ಟಂನಿಂದ &lt;b&gt;ಸೈಲೆಂಟ್‌ಗೆ ಹಿಂಬಡ್ತಿ ಹೊಂದಿದೆ&lt;/b&gt;."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"ಈ ಅಧಿಸೂಚನೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಮ್ಮ ಶೇಡ್‌ನಲ್ಲಿ &lt;b&gt;ಉನ್ನತ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ&lt;/b&gt;."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"ಈ ಅಧಿಸೂಚನೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಮ್ಮ ಶೇಡ್‌ನಲ್ಲಿ &lt;b&gt;ಕಡಿಮೆ ಸ್ಥಾನವನ್ನು ಹೊಂದಿದೆ&lt;/b&gt;."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"ಇದು ಸರಿಯಾಗಿತ್ತೇ?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಡೆವಲಪರ್‌ಗೆ ತಿಳಿಸಿ. ಇದು ಸರಿಯಾಗಿತ್ತೇ?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗೆ ಧನ್ಯವಾದಗಳು!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ಸರಿ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆರೆಯಲಾಗಿದೆ"</string>
@@ -880,6 +885,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ಇಲ್ಲಿಗೆ ಸರಿಸಿ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ಸ್ಥಾನಕ್ಕೆ ಸೇರಿಸಿ"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ಸ್ಥಾನ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ಟೈಲ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ಟೈಲ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳ ಎಡಿಟರ್."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ಅಧಿಸೂಚನೆ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
@@ -970,7 +977,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>, <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ಅನ್ನು ಬಳಸುತ್ತಿದೆ"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ಅನ್ನು ಬಳಸಿದೆ"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(ಎಂಟರ್‌ಪ್ರೈಸ್)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"ಫೋನ್ ಕರೆ"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ಫೋನ್ ಕರೆ"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> ಮೂಲಕ)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"ಕ್ಯಾಮರಾ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ಸ್ಥಳ"</string>
@@ -978,7 +985,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್"</string>
     <string name="device_services" msgid="1549944177856658705">"ಸಾಧನ ಸೇವೆಗಳು"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ಯಾವುದೇ ಶೀರ್ಷಿಕೆಯಿಲ್ಲ"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಮತ್ತು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ಸರಿಸಿ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>

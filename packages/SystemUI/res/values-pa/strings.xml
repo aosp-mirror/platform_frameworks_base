@@ -93,6 +93,10 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨੂੰ ਸਕ੍ਰੋਲ ਕਰੋ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖਾਰਜ ਕਰੋ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਪੂਰਵ-ਝਲਕ"</string>
+    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਜਾਰੀ ਹੈ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
@@ -410,6 +414,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਤੱਕ"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"ਚਮਕ ਘਟਾਓ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
@@ -463,9 +468,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ਪ੍ਰੋਫਾਈਲ ਦਿਖਾਓ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"ਕੀ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰਨਾ ਹੈ?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ਕੀ ਮਹਿਮਾਨ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ਹਟਾਓ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ਮਹਿਮਾਨ, ਫਿਰ ਤੁਹਾਡਾ ਸੁਆਗਤ ਹੈ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ਕੀ ਤੁਸੀਂ ਆਪਣਾ ਸੈਸ਼ਨ ਜਾਰੀ ਰੱਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ਸ਼ੁਰੂ ਕਰੋ"</string>
@@ -540,6 +546,8 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਇੱਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਟੀ ਸਥਾਪਤ ਕੀਤੀ ਗਈ ਹੈ। ਤੁਹਾਡੇ ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ ਜਾਂ ਉਸਨੂੰ ਸੋਧਿਆ ਜਾ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ਇੱਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਟੀ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਥਾਪਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਤੁਹਾਡੇ ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ ਜਾਂ ਉਸਨੂੰ ਸੋਧਿਆ ਜਾ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਨੈੱਟਵਰਕ ਲੌਗਿੰਗ ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਹੋਇਆ ਹੈ, ਜੋ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦਾ ਹੈ।"</string>
+    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
+    <skip />
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"ਤੁਸੀਂ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ਤੁਸੀਂ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -733,7 +741,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"ਸਿਸਟਮ ਨੇ ਇਸ ਸੂਚਨਾ ਦਾ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ &lt;b&gt;ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ&lt;/b&gt; \'ਤੇ ਸੈੱਟ ਕਰ ਦਿੱਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"ਤੁਹਾਡੇ ਸ਼ੇਡ ਵਿੱਚ ਇਸ ਸੂਚਨਾ ਦਾ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ &lt;b&gt;ਦਰਜਾ ਉੱਪਰ&lt;/b&gt; ਕਰ ਦਿੱਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"ਤੁਹਾਡੇ ਸ਼ੇਡ ਵਿੱਚ ਇਸ ਸੂਚਨਾ ਦਾ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ &lt;b&gt;ਦਰਜਾ ਹੇਠਾਂ&lt;/b&gt; ਕਰ ਦਿੱਤਾ ਗਿਆ ਸੀ।"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"ਕੀ ਇਹ ਸਹੀ ਸੀ?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"ਵਿਕਾਸਕਾਰ ਨੂੰ ਆਪਣੇ ਵਿਚਾਰ ਦੱਸੋ। ਕੀ ਇਹ ਸਹੀ ਸੀ?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"ਤੁਹਾਡੇ ਵਿਚਾਰ ਲਈ ਧੰਨਵਾਦ!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ਠੀਕ ਹੈ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨੂੰ ਖੋਲ੍ਹਿਆ ਗਿਆ"</string>
@@ -880,6 +888,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ਸਥਾਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ਸਥਾਨ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ਟਾਇਲ ਨੂੰ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ਟਾਇਲ ਨੂੰ ਹਟਾ ਦਿੱਤਾ ਗਿਆ"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਸੰਪਾਦਕ।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ਸੂਚਨਾ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ।"</string>
@@ -967,23 +977,17 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ਐਪਲੀਕੇਸ਼ਨਾਂ ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ।"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ਅਤੇ "</string>
-    <!-- no translation found for ongoing_privacy_dialog_using_op (4125175620929701569) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_recent_op (4255923947334262404) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_enterprise (4082735415905550729) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_phonecall (3526223335298089311) -->
-    <skip />
-    <!-- no translation found for ongoing_privacy_dialog_attribution_text (9186683306719924646) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ਐਪ <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ਨੇ ਹਾਲ ਹੀ ਵਿੱਚ <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕੀਤੀ"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(ਐਂਟਰਪ੍ਰਾਈਜ਼)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ਫ਼ੋਨ ਕਾਲ"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> ਰਾਹੀਂ)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"ਕੈਮਰਾ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ਟਿਕਾਣਾ"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ਸੈਂਸਰ ਬੰਦ ਕਰੋ"</string>
     <string name="device_services" msgid="1549944177856658705">"ਡੀਵਾਈਸ ਸੇਵਾਵਾਂ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ਕੋਈ ਸਿਰਲੇਖ ਨਹੀਂ"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਓ।"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ਲਿਜਾਓ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
