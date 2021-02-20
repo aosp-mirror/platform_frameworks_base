@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Point;
 import android.os.Handler;
@@ -474,6 +475,16 @@ public class OneHandedController {
         }
     }
 
+    private void onConfigChanged(Configuration newConfig) {
+        if (mTutorialHandler != null) {
+            if (!mIsOneHandedEnabled
+                    || newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                return;
+            }
+            mTutorialHandler.onConfigurationChanged(newConfig);
+        }
+    }
+
     public void dump(@NonNull PrintWriter pw) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
@@ -565,6 +576,13 @@ public class OneHandedController {
         public void registerGestureCallback(OneHandedGestureEventCallback callback) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.registerGestureCallback(callback);
+            });
+        }
+
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mMainExecutor.execute(() -> {
+                OneHandedController.this.onConfigChanged(newConfig);
             });
         }
     }
