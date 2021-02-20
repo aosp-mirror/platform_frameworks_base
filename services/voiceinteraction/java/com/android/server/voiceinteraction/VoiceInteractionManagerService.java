@@ -1599,20 +1599,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
 
-            private @NonNull String getDefaultRecognizer(@NonNull UserHandle user) {
-                ResolveInfo resolveInfo = mPm.resolveServiceAsUser(
-                        new Intent(RecognitionService.SERVICE_INTERFACE),
-                        PackageManager.GET_META_DATA, user.getIdentifier());
-
-                if (resolveInfo == null || resolveInfo.serviceInfo == null) {
-                    Log.w(TAG, "Unable to resolve default voice recognition service.");
-                    return "";
-                }
-
-                return new ComponentName(resolveInfo.serviceInfo.packageName,
-                        resolveInfo.serviceInfo.name).flattenToShortString();
-            }
-
             /**
              * Convert the assistant-role holder into settings. The rest of the system uses the
              * settings.
@@ -1634,9 +1620,6 @@ public class VoiceInteractionManagerService extends SystemService {
                             Settings.Secure.ASSISTANT, "", userId);
                     Settings.Secure.putStringForUser(getContext().getContentResolver(),
                             Settings.Secure.VOICE_INTERACTION_SERVICE, "", userId);
-                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                            Settings.Secure.VOICE_RECOGNITION_SERVICE, getDefaultRecognizer(user),
-                            userId);
                 } else {
                     // Assistant is singleton role
                     String pkg = roleHolders.get(0);
@@ -1663,9 +1646,6 @@ public class VoiceInteractionManagerService extends SystemService {
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_INTERACTION_SERVICE, serviceComponentName,
                                 userId);
-                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_RECOGNITION_SERVICE, serviceRecognizerName,
-                                userId);
 
                         return;
                     }
@@ -1685,9 +1665,6 @@ public class VoiceInteractionManagerService extends SystemService {
                                 activityInfo.getComponentName().flattenToShortString(), userId);
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_INTERACTION_SERVICE, "", userId);
-                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                                getDefaultRecognizer(user), userId);
                         return;
                     }
                 }
