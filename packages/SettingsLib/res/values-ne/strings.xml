@@ -592,6 +592,5 @@
     <string name="accessibility_data_signal_full" msgid="1808301899314382337">"डेटा संकेत पूर्ण।"</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट विच्छेद भयो।"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट।"</string>
-    <!-- no translation found for accessibility_no_calling (3540827068323895748) -->
-    <skip />
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"कल गर्ने सुविधा उपलब्ध छैन।"</string>
 </resources>
