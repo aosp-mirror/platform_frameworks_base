@@ -44,7 +44,6 @@ namespace android {
 namespace {
 
 using android::base::borrowed_fd;
-using android::base::ReadFully;
 using android::base::unique_fd;
 
 using namespace std::literals;
@@ -173,7 +172,7 @@ static inline int32_t readLEInt32(borrowed_fd fd) {
 static inline std::vector<char> readBytes(borrowed_fd fd) {
     int32_t size = readLEInt32(fd);
     std::vector<char> result(size);
-    ReadFully(fd, result.data(), size);
+    android::base::ReadFully(fd, result.data(), size);
     return result;
 }
 
@@ -569,7 +568,7 @@ private:
         // Awaiting adb handshake.
         char okay_buf[OKAY.size()];
         if (!android::base::ReadFully(inout, okay_buf, OKAY.size())) {
-            ALOGE("Failed to receive OKAY. Abort.");
+            ALOGE("Failed to receive OKAY. Abort. Error %d", errno);
             return false;
         }
         if (std::string_view(okay_buf, OKAY.size()) != OKAY) {
@@ -693,12 +692,12 @@ private:
                 continue;
             }
             if (res < 0) {
-                ALOGE("Failed to poll. Abort.");
+                ALOGE("Failed to poll. Abort. Error %d", res);
                 mStatusListener->reportStatus(DATA_LOADER_UNRECOVERABLE);
                 break;
             }
             if (res == mEventFd) {
-                ALOGE("Received stop signal. Sending EXIT to server.");
+                ALOGE("DataLoader requested to stop. Sending EXIT to server.");
                 sendRequest(inout, EXIT);
                 break;
             }
@@ -712,7 +711,7 @@ private:
                 auto header = readHeader(remainingData);
                 if (header.fileIdx == -1 && header.blockType == 0 && header.compressionType == 0 &&
                     header.blockIdx == 0 && header.blockSize == 0) {
-                    ALOGI("Stop signal received. Sending exit command (remaining bytes: %d).",
+                    ALOGI("Stop command received. Sending exit command (remaining bytes: %d).",
                           int(remainingData.size()));
 
                     sendRequest(inout, EXIT);
@@ -721,16 +720,15 @@ private:
                 }
                 if (header.fileIdx < 0 || header.blockSize <= 0 || header.blockType < 0 ||
                     header.compressionType < 0 || header.blockIdx < 0) {
-                    ALOGE("invalid header received. Abort.");
+                    ALOGE("Invalid header received. Abort.");
                     mStopReceiving = true;
                     break;
                 }
+
                 const FileIdx fileIdx = header.fileIdx;
                 const android::dataloader::FileId fileId = convertFileIndexToFileId(mode, fileIdx);
                 if (!android::incfs::isValidFileId(fileId)) {
-                    ALOGE("Unknown data destination for file ID %d. "
-                          "Ignore.",
-                          header.fileIdx);
+                    ALOGE("Unknown data destination for file ID %d. Ignore.", header.fileIdx);
                     continue;
                 }
 
@@ -738,7 +736,7 @@ private:
                 if (writeFd < 0) {
                     writeFd.reset(this->mIfs->openForSpecialOps(fileId).release());
                     if (writeFd < 0) {
-                        ALOGE("Failed to open file %d for writing (%d). Aborting.", header.fileIdx,
+                        ALOGE("Failed to open file %d for writing (%d). Abort.", header.fileIdx,
                               -writeFd);
                         break;
                     }
