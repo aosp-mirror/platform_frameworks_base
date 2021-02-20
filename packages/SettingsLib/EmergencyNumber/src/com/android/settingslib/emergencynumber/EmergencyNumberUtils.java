@@ -45,13 +45,22 @@ public class EmergencyNumberUtils {
 
     public static final Uri EMERGENCY_NUMBER_OVERRIDE_AUTHORITY = new Uri.Builder().scheme(
             ContentResolver.SCHEME_CONTENT)
-            .authority("com.android.emergency.numbers")
+            .authority("com.android.emergency.gesture")
             .build();
     public static final String METHOD_NAME_GET_EMERGENCY_NUMBER_OVERRIDE =
             "GET_EMERGENCY_NUMBER_OVERRIDE";
     public static final String METHOD_NAME_SET_EMERGENCY_NUMBER_OVERRIDE =
             "SET_EMERGENCY_NUMBER_OVERRIDE";
+    public static final String METHOD_NAME_SET_EMERGENCY_GESTURE = "SET_EMERGENCY_GESTURE";
+    public static final String METHOD_NAME_SET_EMERGENCY_SOUND = "SET_EMERGENCY_SOUND";
+    public static final String METHOD_NAME_GET_EMERGENCY_GESTURE_ENABLED = "GET_EMERGENCY_GESTURE";
+    public static final String METHOD_NAME_GET_EMERGENCY_GESTURE_SOUND_ENABLED =
+            "GET_EMERGENCY_SOUND";
     public static final String EMERGENCY_GESTURE_CALL_NUMBER = "emergency_gesture_call_number";
+    public static final String EMERGENCY_SETTING_VALUE = "emergency_setting_value";
+    public static final int EMERGENCY_SETTING_ON = 1;
+    public static final int EMERGENCY_SETTING_OFF = 0;
+
     @VisibleForTesting
     static final String FALL_BACK_NUMBER = "112";
 
@@ -101,6 +110,51 @@ public class EmergencyNumberUtils {
         bundle.putString(EMERGENCY_GESTURE_CALL_NUMBER, number);
         mContext.getContentResolver().call(EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
                 METHOD_NAME_SET_EMERGENCY_NUMBER_OVERRIDE, null /* args */, bundle);
+    }
+
+    /**
+     * Enable/disable the emergency gesture setting
+     */
+    public void setEmergencyGestureEnabled(boolean enabled) {
+        final Bundle bundle = new Bundle();
+        bundle.putInt(EMERGENCY_SETTING_VALUE,
+                enabled ? EMERGENCY_SETTING_ON : EMERGENCY_SETTING_OFF);
+        mContext.getContentResolver().call(EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
+                METHOD_NAME_SET_EMERGENCY_GESTURE, null /* args */, bundle);
+    }
+
+    /**
+     * Enable/disable the emergency gesture sound setting
+     */
+    public void setEmergencySoundEnabled(boolean enabled) {
+        final Bundle bundle = new Bundle();
+        bundle.putInt(EMERGENCY_SETTING_VALUE,
+                enabled ? EMERGENCY_SETTING_ON : EMERGENCY_SETTING_OFF);
+        mContext.getContentResolver().call(EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
+                METHOD_NAME_SET_EMERGENCY_SOUND, null /* args */, bundle);
+    }
+
+    /**
+     * Whether or not emergency gesture is enabled.
+     */
+    public boolean getEmergencyGestureEnabled() {
+        final Bundle bundle = mContext.getContentResolver().call(
+                EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
+                METHOD_NAME_GET_EMERGENCY_GESTURE_ENABLED, null /* args */, null /* bundle */);
+        return bundle == null ? true : bundle.getInt(EMERGENCY_SETTING_VALUE, EMERGENCY_SETTING_ON)
+                == EMERGENCY_SETTING_ON;
+    }
+
+    /**
+     * Whether or not emergency gesture sound is enabled.
+     */
+    public boolean getEmergencyGestureSoundEnabled() {
+        final Bundle bundle = mContext.getContentResolver().call(
+                EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
+                METHOD_NAME_GET_EMERGENCY_GESTURE_SOUND_ENABLED, null /* args */,
+                null /* bundle */);
+        return bundle == null ? true : bundle.getInt(EMERGENCY_SETTING_VALUE, EMERGENCY_SETTING_OFF)
+                == EMERGENCY_SETTING_ON;
     }
 
     private String getEmergencyNumberOverride() {

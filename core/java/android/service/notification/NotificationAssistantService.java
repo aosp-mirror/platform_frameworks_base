@@ -30,6 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -88,6 +89,11 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE
             = "android.service.notification.NotificationAssistantService";
+
+    /**
+     * Data type: int, the feedback rating score provided by user
+     */
+    public static final String FEEDBACK_RATING = "feedback.rating";
 
     /**
      * @hide
@@ -269,6 +275,17 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * {@link Adjustment adjustments} you are currently allowed to make.</p>
      */
     public void onAllowedAdjustmentsChanged() {
+    }
+
+    /**
+     * Implement this to know when user provides a feedback.
+     * @param key the notification key
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications.
+     * @param feedback the feedback detail
+     */
+    public void onNotificationFeedbackReceived(@NonNull String key, @NonNull RankingMap rankingMap,
+            @NonNull Bundle feedback) {
     }
 
     /**
@@ -455,6 +472,18 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public void onAllowedAdjustmentsChanged() {
             mHandler.obtainMessage(MyHandler.MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED).sendToTarget();
         }
+
+        @Override
+        public void onNotificationFeedbackReceived(String key, NotificationRankingUpdate update,
+                Bundle feedback) {
+            applyUpdateLocked(update);
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = getCurrentRanking();
+            args.arg3 = feedback;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_FEEDBACK_RECEIVED,
+                    args).sendToTarget();
+        }
     }
 
     private void setAdjustmentIssuer(@Nullable Adjustment adjustment) {
@@ -476,6 +505,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public static final int MSG_ON_PANEL_HIDDEN = 10;
         public static final int MSG_ON_NOTIFICATION_VISIBILITY_CHANGED = 11;
         public static final int MSG_ON_NOTIFICATION_CLICKED = 12;
+        public static final int MSG_ON_NOTIFICATION_FEEDBACK_RECEIVED = 13;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -587,6 +617,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     String key = (String) args.arg1;
                     args.recycle();
                     onNotificationClicked(key);
+                    break;
+                }
+                case MSG_ON_NOTIFICATION_FEEDBACK_RECEIVED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    RankingMap ranking = (RankingMap) args.arg2;
+                    Bundle feedback = (Bundle) args.arg3;
+                    args.recycle();
+                    onNotificationFeedbackReceived(key, ranking, feedback);
                     break;
                 }
             }

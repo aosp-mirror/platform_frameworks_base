@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"பபிள்"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கலாம், முழுத்திரையில் பார்க்கலாம்."</string>
+    <string name="got_it" msgid="4428750913636945527">"சரி"</string>
 </resources>

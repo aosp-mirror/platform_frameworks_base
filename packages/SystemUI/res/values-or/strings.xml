@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ସକାଳ ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>ରେ ଚାଲୁ ହେବ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"ଉଜ୍ଜ୍ୱଳତା କମାନ୍ତୁ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"ପ୍ରୋଫାଇଲ୍ ଦେଖାନ୍ତୁ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"ଅତିଥି ସେସନ୍ ଶେଷ କରିବେ?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"ଅତିଥି ସେସନ୍ ଶେଷ କରନ୍ତୁ"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ଅତିଥିଙ୍କୁ କାଢ଼ିଦେବେ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ଏହି ଅବଧିର ସମସ୍ତ ଆପ୍‌ ଓ ଡାଟା ଡିଲିଟ୍‌ ହୋଇଯିବ।"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"ସେସନ୍ ଶେଷ କରନ୍ତୁ"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"କାଢ଼ିଦିଅନ୍ତୁ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ପୁଣି ସ୍ୱାଗତ, ଅତିଥି!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"ଆପଣ ନିଜର ଅବଧି ଜାରି ରଖିବାକୁ ଚାହାନ୍ତି କି?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"ସିଷ୍ଟମ୍ ଏହି ବିଜ୍ଞପ୍ତିକୁ ସ୍ୱଚାଳିତ ଭାବେ &lt;b&gt;ନୀରବକୁ ଡିମୋଟ୍ କରିଛି&lt;/b&gt;।"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"ଆପଣଙ୍କ ସେଡରେ ସ୍ୱଚାଳିତ ଭାବେ ଏହି ବିଜ୍ଞପ୍ତିର &lt;b&gt;ରେଙ୍କ ଉପରକୁ&lt;/b&gt; କରାଯାଇଛି।"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"ଆପଣଙ୍କ ସେଡରେ ସ୍ୱଚାଳିତ ଭାବେ ଏହି ବିଜ୍ଞପ୍ତିର &lt;b&gt;ରେଙ୍କ ତଳକୁ&lt;/b&gt; କରାଯାଇଛି।"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"ଏହା ଠିକ୍ ଥିଲା କି?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"ଡେଭଲପରଙ୍କୁ ଆପଣଙ୍କ ମତାମତ ଜଣାନ୍ତୁ। ଏହା ଠିକ୍ ଥିଲା କି?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"ଆପଣଙ୍କ ମତାମତ ପାଇଁ ଧନ୍ୟବାଦ!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ଠିକ୍ ଅଛି"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ବିଜ୍ଞପ୍ତି ନିୟନ୍ତ୍ରଣ ଖୋଲା ଯାଇଛି"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>କୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ଅବସ୍ଥିତିରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ଅବସ୍ଥିତି <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ଟାଇଲ୍ ଯୋଗ କରାଯାଇଛି"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ଟାଇଲ୍ କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ଦ୍ରୁତ ସେଟିଙ୍ଗ ଏଡିଟର୍।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ବିଜ୍ଞପ୍ତି: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ସେଟିଂସ୍ ଖୋଲନ୍ତୁ।"</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛି"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ଏବେ <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ବ୍ୟବହାର କରିଛି"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(ଏଣ୍ଟରପ୍ରାଇଜ୍)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"ଫୋନକଲ୍"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"ଫୋନ୍ କଲ୍"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> ମାଧ୍ୟମରେ)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"କ୍ୟାମେରା"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ଲୋକେସନ୍‍"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ସେନ୍ସର୍‍ଗୁଡ଼ିକ ବନ୍ଦ ଅଛି"</string>
     <string name="device_services" msgid="1549944177856658705">"ଡିଭାଇସ୍‍ ସେବାଗୁଡିକ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"କୌଣସି ଶୀର୍ଷକ ନାହିଁ"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"ଏହି ଆପ୍‌କୁ ରିଷ୍ଟାର୍ଟ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ ଏବଂ ଫୁଲ୍‌ସ୍କ୍ରିନ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ନିଅନ୍ତୁ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>

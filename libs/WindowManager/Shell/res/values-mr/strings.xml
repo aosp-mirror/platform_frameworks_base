@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापित करा"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल डिसमिस केला."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"हे अ‍ॅप रीस्टार्ट करण्यासाठी आणि फुल स्क्रीन करण्यासाठी टॅप करा."</string>
+    <string name="got_it" msgid="4428750913636945527">"समजले"</string>
 </resources>

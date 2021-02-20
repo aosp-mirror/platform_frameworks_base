@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.NotificationStats;
 
@@ -87,6 +88,14 @@ public interface NotificationDelegate {
      */
     void onNotificationSmartReplySent(String key, int clickedIndex, CharSequence reply,
             int notificationLocation, boolean modifiedBeforeSending);
+
+    /**
+     * Notifies a user feedback is provided.
+     *
+     * @param key the notification key
+     * @param feedback the feedback detail
+     */
+    void onNotificationFeedbackReceived(String key, Bundle feedback);
 
     void prepareForPossibleShutdown();
 }

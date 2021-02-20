@@ -25,6 +25,7 @@ import android.app.job.JobParameters;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -32,8 +33,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.RingBufferIndices;
 import com.android.server.job.controllers.JobStatus;
-
-import java.io.PrintWriter;
 
 public final class JobPackageTracker {
     // We batch every 30 minutes.
@@ -294,34 +293,44 @@ public final class JobPackageTracker {
             }
         }
 
-        void printDuration(PrintWriter pw, long period, long duration, int count, String suffix) {
+        /** Return {@code true} if text was printed. */
+        boolean printDuration(IndentingPrintWriter pw, long period, long duration, int count,
+                String suffix) {
             float fraction = duration / (float) period;
             int percent = (int) ((fraction * 100) + .5f);
             if (percent > 0) {
-                pw.print(" ");
                 pw.print(percent);
                 pw.print("% ");
                 pw.print(count);
                 pw.print("x ");
                 pw.print(suffix);
+                return true;
             } else if (count > 0) {
-                pw.print(" ");
                 pw.print(count);
                 pw.print("x ");
                 pw.print(suffix);
+                return true;
             }
+
+            return false;
         }
 
-        void dump(PrintWriter pw, String header, String prefix, long now, long nowElapsed,
+        void dump(IndentingPrintWriter pw, String header, long now, long nowElapsed,
                 int filterAppId) {
             final long period = getTotalTime(now);
-            pw.print(prefix); pw.print(header); pw.print(" at ");
+            pw.print(header); pw.print(" at ");
             pw.print(DateFormat.format("yyyy-MM-dd-HH-mm-ss", mStartClockTime).toString());
             pw.print(" (");
             TimeUtils.formatDuration(mStartElapsedTime, nowElapsed, pw);
             pw.print(") over ");
             TimeUtils.formatDuration(period, pw);
             pw.println(":");
+            pw.increaseIndent();
+            pw.print("Max concurrency: ");
+            pw.print(mMaxTotalActive); pw.print(" total, ");
+            pw.print(mMaxFgActive); pw.println(" foreground");
+
+            pw.println();
             final int NE = mEntries.size();
             for (int i = 0; i < NE; i++) {
                 int uid = mEntries.keyAt(i);
@@ -332,15 +341,21 @@ public final class JobPackageTracker {
                 final int NP = uidMap.size();
                 for (int j = 0; j < NP; j++) {
                     PackageEntry pe = uidMap.valueAt(j);
-                    pw.print(prefix); pw.print("  ");
                     UserHandle.formatUid(pw, uid);
                     pw.print(" / "); pw.print(uidMap.keyAt(j));
                     pw.println(":");
-                    pw.print(prefix); pw.print("   ");
-                    printDuration(pw, period, pe.getPendingTime(now), pe.pendingCount, "pending");
-                    printDuration(pw, period, pe.getActiveTime(now), pe.activeCount, "active");
-                    printDuration(pw, period, pe.getActiveTopTime(now), pe.activeTopCount,
-                            "active-top");
+
+                    pw.increaseIndent();
+                    if (printDuration(pw, period,
+                            pe.getPendingTime(now), pe.pendingCount, "pending")) {
+                        pw.print(" ");
+                    }
+                    if (printDuration(pw, period,
+                            pe.getActiveTime(now), pe.activeCount, "active")) {
+                        pw.print(" ");
+                    }
+                    printDuration(pw, period,
+                            pe.getActiveTopTime(now), pe.activeTopCount, "active-top");
                     if (pe.pendingNesting > 0 || pe.hadPending) {
                         pw.print(" (pending)");
                     }
@@ -352,7 +367,6 @@ public final class JobPackageTracker {
                     }
                     pw.println();
                     if (pe.stopReasons.size() > 0) {
-                        pw.print(prefix); pw.print("    ");
                         for (int k = 0; k < pe.stopReasons.size(); k++) {
                             if (k > 0) {
                                 pw.print(", ");
@@ -364,11 +378,10 @@ public final class JobPackageTracker {
                         }
                         pw.println();
                     }
+                    pw.decreaseIndent();
                 }
             }
-            pw.print(prefix); pw.print("  Max concurrency: ");
-            pw.print(mMaxTotalActive); pw.print(" total, ");
-            pw.print(mMaxFgActive); pw.println(" foreground");
+            pw.decreaseIndent();
         }
 
         private void printPackageEntryState(ProtoOutputStream proto, long fieldId,
@@ -520,7 +533,7 @@ public final class JobPackageTracker {
         return time / (float)period;
     }
 
-    public void dump(PrintWriter pw, String prefix, int filterAppId) {
+    void dump(IndentingPrintWriter pw, int filterAppId) {
         final long now = sUptimeMillisClock.millis();
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final DataSet total;
@@ -533,11 +546,11 @@ public final class JobPackageTracker {
         mCurDataSet.addTo(total, now);
         for (int i = 1; i < mLastDataSets.length; i++) {
             if (mLastDataSets[i] != null) {
-                mLastDataSets[i].dump(pw, "Historical stats", prefix, now, nowElapsed, filterAppId);
+                mLastDataSets[i].dump(pw, "Historical stats", now, nowElapsed, filterAppId);
                 pw.println();
             }
         }
-        total.dump(pw, "Current stats", prefix, now, nowElapsed, filterAppId);
+        total.dump(pw, "Current stats", now, nowElapsed, filterAppId);
     }
 
     public void dump(ProtoOutputStream proto, long fieldId, int filterUid) {
@@ -566,12 +579,14 @@ public final class JobPackageTracker {
         proto.end(token);
     }
 
-    public boolean dumpHistory(PrintWriter pw, String prefix, int filterAppId) {
+    boolean dumpHistory(IndentingPrintWriter pw, int filterAppId) {
         final int size = mEventIndices.size();
         if (size <= 0) {
             return false;
         }
-        pw.println("  Job history:");
+        pw.increaseIndent();
+        pw.println("Job history:");
+        pw.decreaseIndent();
         final long now = sElapsedRealtimeClock.millis();
         for (int i=0; i<size; i++) {
             final int index = mEventIndices.indexOf(i);
@@ -591,7 +606,6 @@ public final class JobPackageTracker {
                 case EVENT_STOP_PERIODIC_JOB:   label = " STOP-P"; break;
                 default:                        label = "     ??"; break;
             }
-            pw.print(prefix);
             TimeUtils.formatDuration(mEventTimes[index]-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
             pw.print(" ");
             pw.print(label);
