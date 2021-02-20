@@ -19,6 +19,7 @@ package android.hardware.biometrics;
 import static android.Manifest.permission.TEST_BIOMETRIC;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -26,6 +27,9 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Common set of interfaces to test biometric-related APIs, including {@link BiometricPrompt} and
@@ -36,22 +40,58 @@ import android.util.Log;
 public class BiometricTestSession implements AutoCloseable {
     private static final String TAG = "BiometricTestSession";
 
+    /**
+     * @hide
+     */
+    public interface TestSessionProvider {
+        @NonNull
+        ITestSession createTestSession(@NonNull Context context, int sensorId,
+                @NonNull ITestSessionCallback callback) throws RemoteException;
+    }
+
     private final Context mContext;
     private final int mSensorId;
     private final ITestSession mTestSession;
 
     // Keep track of users that were tested, which need to be cleaned up when finishing.
-    private final ArraySet<Integer> mTestedUsers;
+    @NonNull private final ArraySet<Integer> mTestedUsers;
+
+    // Track the users currently cleaning up, and provide a latch that gets notified when all
+    // users have finished cleaning up. This is an imperfect system, as there can technically be
+    // multiple cleanups per user. Theoretically we should track the cleanup's BaseClientMonitor's
+    // unique ID, but it's complicated to plumb it through. This should be fine for now.
+    @Nullable private CountDownLatch mCloseLatch;
+    @NonNull private final ArraySet<Integer> mUsersCleaningUp;
+
+    private final ITestSessionCallback mCallback = new ITestSessionCallback.Stub() {
+        @Override
+        public void onCleanupStarted(int userId) {
+            Log.d(TAG, "onCleanupStarted, sensor: " + mSensorId + ", userId: " + userId);
+        }
+
+        @Override
+        public void onCleanupFinished(int userId) {
+            Log.d(TAG, "onCleanupFinished, sensor: " + mSensorId
+                    + ", userId: " + userId
+                    + ", remaining users: " + mUsersCleaningUp.size());
+            mUsersCleaningUp.remove(userId);
+
+            if (mUsersCleaningUp.isEmpty() && mCloseLatch != null) {
+                mCloseLatch.countDown();
+            }
+        }
+    };
 
     /**
      * @hide
      */
     public BiometricTestSession(@NonNull Context context, int sensorId,
-            @NonNull ITestSession testSession) {
+            @NonNull TestSessionProvider testSessionProvider) throws RemoteException {
         mContext = context;
         mSensorId = sensorId;
-        mTestSession = testSession;
+        mTestSession = testSessionProvider.createTestSession(context, sensorId, mCallback);
         mTestedUsers = new ArraySet<>();
+        mUsersCleaningUp = new ArraySet<>();
         setTestHalEnabled(true);
     }
 
@@ -176,6 +216,11 @@ public class BiometricTestSession implements AutoCloseable {
     @RequiresPermission(TEST_BIOMETRIC)
     public void cleanupInternalState(int userId) {
         try {
+            if (mUsersCleaningUp.contains(userId)) {
+                Log.w(TAG, "Cleanup already in progress for user: " + userId);
+            }
+
+            mUsersCleaningUp.add(userId);
             mTestSession.cleanupInternalState(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -185,12 +230,24 @@ public class BiometricTestSession implements AutoCloseable {
     @Override
     @RequiresPermission(TEST_BIOMETRIC)
     public void close() {
-        // Disable the test HAL first, so that enumerate is run on the real HAL, which should have
-        // no enrollments. Test-only framework enrollments will be deleted.
-        setTestHalEnabled(false);
+        // Cleanup can be performed using the test HAL, since it always responds to enumerate with
+        // zero enrollments.
+        if (!mTestedUsers.isEmpty()) {
+            mCloseLatch = new CountDownLatch(1);
+            for (int user : mTestedUsers) {
+                cleanupInternalState(user);
+            }
 
-        for (int user : mTestedUsers) {
-            cleanupInternalState(user);
+            try {
+                Log.d(TAG, "Awaiting latch...");
+                mCloseLatch.await(10, TimeUnit.SECONDS);
+                Log.d(TAG, "Finished awaiting");
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Latch interrupted", e);
+            }
         }
+
+        // Disable the test HAL after the sensor becomes idle.
+        setTestHalEnabled(false);
     }
 }
