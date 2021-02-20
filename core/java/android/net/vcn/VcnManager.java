@@ -428,20 +428,6 @@ public class VcnManager {
         private VcnStatusCallbackBinder mCbBinder;
 
         /**
-         * Invoked when the VCN for this Callback's subscription group enters safe mode.
-         *
-         * <p>A VCN will be put into safe mode if any of the gateway connections were unable to
-         * establish a connection within a system-determined timeout (while underlying networks were
-         * available).
-         *
-         * @deprecated Removed in favor of {@link #onVcnStatusChanged(int)}. To be removed in a
-         *     followup patch.
-         * @hide
-         */
-        @Deprecated
-        public void onEnteredSafeMode() {}
-
-        /**
          * Invoked when status of the VCN for this callback's subscription group changes.
          *
          * @param statusCode the code for the status change encountered by this {@link
@@ -582,12 +568,6 @@ public class VcnManager {
                 @NonNull Executor executor, @NonNull VcnStatusCallback callback) {
             mExecutor = executor;
             mCallback = callback;
-        }
-
-        @Override
-        public void onEnteredSafeMode() {
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> mCallback.onEnteredSafeMode()));
         }
 
         @Override
