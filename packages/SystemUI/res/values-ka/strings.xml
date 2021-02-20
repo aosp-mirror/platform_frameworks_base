@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"ეკრანის ანაბეჭდში გადაადგილება"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ეკრანის ანაბეჭდის დახურვა"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ეკრანის ანაბეჭდის გადახედვა"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ზედა საზღვარი"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ქვედა საზღვარი"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ეკრანის ჩამწერი"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ეკრანის ჩანაწერი მუშავდება"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"უწყვეტი შეტყობინება ეკრანის ჩაწერის სესიისთვის"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"თქვენმა ორგანიზაციამ სამსახურის პროფილში სერტიფიცირების ორგანო დააინსტალირა. თქვენი ქსელის დაცული ტრაფიკი შეიძლება შეიცვალოს, ან მასზე მონიტორინგი განხორციელდეს."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ამ მოწყობილობაზე დაინსტალირებულია სერტიფიცირების ორგანო. თქვენი ქსელის დაცული ტრაფიკი შეიძლება შეიცვალოს, ან მასზე მონიტორინგი განხორციელდეს."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"თქვენმა ადმინისტრატორმა ჩართო ქსელის ჟურნალირება, რომელიც თქვენი მოწყობილობის ტრაფიკის მონიტორინგს ახორციელებს."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"თქვენმა ადმინისტრატორმა ქსელის ჟურნალირება ჩართო, რომელიც ახორციელებს თქვენი სამსახურის პროფილის, მაგრამ არა პირადი პროფილის, ტრაფიკის მონიტორინგს."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"თქვენ დაკავშირებული ხართ <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"თქვენ დაკავშირებული ხართ <xliff:g id="VPN_APP_0">%1$s</xliff:g>-სა და <xliff:g id="VPN_APP_1">%2$s</xliff:g>-თან, რომელთაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"თქვენი სამსახურის პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>

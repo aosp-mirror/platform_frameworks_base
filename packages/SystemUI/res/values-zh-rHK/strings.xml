@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"整頁截圖"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"關閉螢幕截圖"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"螢幕截圖預覽"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"上方邊界"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"下方邊界"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"您的機構已在您的工作設定檔中安裝憑證授權單位。您的安全網絡流量可能會受監控或修改。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"此裝置已安裝憑證授權單位。您的安全網絡流量可能會受監控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"您的管理員已開啟網絡記錄功能，以監控您裝置上的流量。"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"您的管理員已開啟網絡記錄功能，可監控您工作設定檔 (而非個人設定檔) 的流量。"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"您已連接至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，此應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"您已連接至「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」，這些應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"您的工作設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，此應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>

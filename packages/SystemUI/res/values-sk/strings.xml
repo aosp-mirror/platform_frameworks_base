@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Posúvať snímku obrazovky"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zavrieť snímku obrazovky"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukážka snímky obrazovky"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Horná hranica"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Dolná hranica"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Spracúva sa záznam obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
@@ -548,6 +550,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizácia nainštalovala pre váš pracovný profil certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku vo vašom pracovnom profile, ale nie osobnom."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Pripojili ste sa k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti, vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Pripojili ste sa k aplikáciám <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ktoré môžu sledovať vašu aktivitu v sieti, vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Váš pracovný profil je pripojený k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a webových stránok."</string>
