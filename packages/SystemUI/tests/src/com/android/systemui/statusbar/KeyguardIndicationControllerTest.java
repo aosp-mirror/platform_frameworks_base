@@ -609,6 +609,16 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertThat(mTextView.getText()).isEqualTo(percentage);
     }
 
+    @Test
+    public void onRequireUnlockForNfc_showsRequireUnlockForNfcIndication() {
+        createController();
+        String message = mContext.getString(R.string.require_unlock_for_nfc);
+        mController.getKeyguardCallback().onRequireUnlockForNfc();
+        mController.setVisible(true);
+
+        assertThat(mTextView.getText()).isEqualTo(message);
+    }
+
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
     }

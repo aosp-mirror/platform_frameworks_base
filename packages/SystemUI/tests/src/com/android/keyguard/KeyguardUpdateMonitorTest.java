@@ -56,6 +56,7 @@ import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -849,6 +850,17 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testRequireUnlockForNfc_Broadcast() {
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(callback);
+        Intent intent = new Intent(NfcAdapter.ACTION_REQUIRE_UNLOCK_FOR_NFC);
+        mKeyguardUpdateMonitor.mBroadcastAllReceiver.onReceive(getContext(), intent);
+        mTestableLooper.processAllMessages();
+
+        verify(callback, atLeastOnce()).onRequireUnlockForNfc();
     }
 
     private void setKeyguardBouncerVisibility(boolean isVisible) {
