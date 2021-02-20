@@ -54,19 +54,21 @@ public class SaProposalUtilsTest {
         assertEquals(proposal, resultProposal);
     }
 
+    /** Package private so that TunnelModeChildSessionParamsUtilsTest can use it */
+    static ChildSaProposal buildTestChildSaProposal() {
+        return new ChildSaProposal.Builder()
+                .addEncryptionAlgorithm(
+                        SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12, SaProposal.KEY_LEN_AES_128)
+                .addEncryptionAlgorithm(
+                        SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12, SaProposal.KEY_LEN_AES_192)
+                .addDhGroup(SaProposal.DH_GROUP_1024_BIT_MODP)
+                .addDhGroup(SaProposal.DH_GROUP_4096_BIT_MODP)
+                .build();
+    }
+
     @Test
     public void testPersistableBundleEncodeDecodeIsLosslessChildProposal() throws Exception {
-        final ChildSaProposal proposal =
-                new ChildSaProposal.Builder()
-                        .addEncryptionAlgorithm(
-                                SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12,
-                                SaProposal.KEY_LEN_AES_128)
-                        .addEncryptionAlgorithm(
-                                SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12,
-                                SaProposal.KEY_LEN_AES_192)
-                        .addDhGroup(SaProposal.DH_GROUP_1024_BIT_MODP)
-                        .addDhGroup(SaProposal.DH_GROUP_4096_BIT_MODP)
-                        .build();
+        final ChildSaProposal proposal = buildTestChildSaProposal();
 
         final PersistableBundle bundle = ChildSaProposalUtils.toPersistableBundle(proposal);
         final SaProposal resultProposal = ChildSaProposalUtils.fromPersistableBundle(bundle);
