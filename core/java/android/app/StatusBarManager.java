@@ -27,6 +27,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -279,6 +280,23 @@ public class StatusBarManager {
             if (svc != null) {
                 svc.onNotificationClick(key,
                         NotificationVisibility.obtain(key, rank, count, visible));
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Simulate notification feedback for testing
+     *
+     * @hide
+     */
+    @TestApi
+    public void sendNotificationFeedback(@Nullable String key, @Nullable Bundle feedback) {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.onNotificationFeedbackReceived(key, feedback);
             }
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();

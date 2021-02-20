@@ -49,7 +49,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
-import android.widget.RemoteViews.OnClickHandler;
+import android.widget.RemoteViews.InteractionHandler;
 import android.widget.RemoteViewsAdapter.RemoteAdapterConnectionCallback;
 import android.widget.TextView;
 
@@ -90,7 +90,7 @@ public class AppWidgetHostView extends FrameLayout {
     View mView;
     int mViewMode = VIEW_MODE_NOINIT;
     int mLayoutId = -1;
-    private OnClickHandler mOnClickHandler;
+    private InteractionHandler mInteractionHandler;
     private boolean mOnLightBackground;
     PointF mCurrentSize = null;
 
@@ -107,9 +107,9 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * @hide
      */
-    public AppWidgetHostView(Context context, OnClickHandler handler) {
+    public AppWidgetHostView(Context context, InteractionHandler handler) {
         this(context, android.R.anim.fade_in, android.R.anim.fade_out);
-        mOnClickHandler = getHandler(handler);
+        mInteractionHandler = getHandler(handler);
     }
 
     /**
@@ -135,8 +135,8 @@ public class AppWidgetHostView extends FrameLayout {
      * @param handler
      * @hide
      */
-    public void setOnClickHandler(OnClickHandler handler) {
-        mOnClickHandler = getHandler(handler);
+    public void setInteractionHandler(InteractionHandler handler) {
+        mInteractionHandler = getHandler(handler);
     }
 
     /**
@@ -518,7 +518,7 @@ public class AppWidgetHostView extends FrameLayout {
             // layout matches, try recycling it
             if (content == null && layoutId == mLayoutId) {
                 try {
-                    remoteViews.reapply(mContext, mView, mOnClickHandler);
+                    remoteViews.reapply(mContext, mView, mInteractionHandler);
                     content = mView;
                     recycled = true;
                     if (LOGD) Log.d(TAG, "was able to recycle existing layout");
@@ -530,7 +530,7 @@ public class AppWidgetHostView extends FrameLayout {
             // Try normal RemoteView inflation
             if (content == null) {
                 try {
-                    content = remoteViews.apply(mContext, this, mOnClickHandler, mCurrentSize);
+                    content = remoteViews.apply(mContext, this, mInteractionHandler, mCurrentSize);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {
                     exception = e;
@@ -582,7 +582,7 @@ public class AppWidgetHostView extends FrameLayout {
                         mView,
                         mAsyncExecutor,
                         new ViewApplyListener(remoteViews, layoutId, true),
-                        mOnClickHandler,
+                        mInteractionHandler,
                         mCurrentSize);
             } catch (Exception e) {
                 // Reapply failed. Try apply
@@ -593,7 +593,7 @@ public class AppWidgetHostView extends FrameLayout {
                     this,
                     mAsyncExecutor,
                     new ViewApplyListener(remoteViews, layoutId, false),
-                    mOnClickHandler,
+                    mInteractionHandler,
                     mCurrentSize);
         }
     }
@@ -625,7 +625,7 @@ public class AppWidgetHostView extends FrameLayout {
                         AppWidgetHostView.this,
                         mAsyncExecutor,
                         new ViewApplyListener(mViews, mLayoutId, false),
-                        mOnClickHandler,
+                        mInteractionHandler,
                         mCurrentSize);
             } else {
                 applyContent(null, false, e);
@@ -808,11 +808,11 @@ public class AppWidgetHostView extends FrameLayout {
         return null;
     }
 
-    private OnClickHandler getHandler(OnClickHandler handler) {
+    private InteractionHandler getHandler(InteractionHandler handler) {
         return (view, pendingIntent, response) -> {
             AppWidgetManager.getInstance(mContext).noteAppWidgetTapped(mAppWidgetId);
             if (handler != null) {
-                return handler.onClickHandler(view, pendingIntent, response);
+                return handler.onInteraction(view, pendingIntent, response);
             } else {
                 return RemoteViews.startPendingIntent(view, pendingIntent,
                         response.getLaunchOptions(view));

@@ -43,6 +43,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1543,6 +1544,14 @@ public abstract class NotificationListenerService extends Service {
             mHandler.obtainMessage(MyHandler.MSG_ON_STATUS_BAR_ICON_BEHAVIOR_CHANGED,
                     hideSilentStatusIcons).sendToTarget();
         }
+
+        @Override
+        public void onNotificationFeedbackReceived(String key, NotificationRankingUpdate update,
+                Bundle feedback) {
+            // no-op in the listener
+        }
+
+
     }
 
     /**
@@ -1628,6 +1637,7 @@ public abstract class NotificationListenerService extends Service {
         private int mSuppressedVisualEffects;
         private @NotificationManager.Importance int mImportance;
         private CharSequence mImportanceExplanation;
+        private float mRankingScore;
         // System specified group key.
         private String mOverrideGroupKey;
         // Notification assistant channel override.
@@ -1668,6 +1678,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeInt(mSuppressedVisualEffects);
             out.writeInt(mImportance);
             out.writeCharSequence(mImportanceExplanation);
+            out.writeFloat(mRankingScore);
             out.writeString(mOverrideGroupKey);
             out.writeParcelable(mChannel, flags);
             out.writeStringList(mOverridePeople);
@@ -1705,6 +1716,7 @@ public abstract class NotificationListenerService extends Service {
             mSuppressedVisualEffects = in.readInt();
             mImportance = in.readInt();
             mImportanceExplanation = in.readCharSequence(); // may be null
+            mRankingScore = in.readFloat();
             mOverrideGroupKey = in.readString(); // may be null
             mChannel = in.readParcelable(cl); // may be null
             mOverridePeople = in.createStringArrayList();
@@ -1799,6 +1811,17 @@ public abstract class NotificationListenerService extends Service {
          */
         public CharSequence getImportanceExplanation() {
             return mImportanceExplanation;
+        }
+
+        /**
+         * Returns the ranking score provided by the {@link NotificationAssistantService} to
+         * sort the notifications in the shade
+         *
+         * @return the ranking score of the notification, range from -1 to 1
+         * @hide
+         */
+        public float getRankingScore() {
+            return mRankingScore;
         }
 
         /**

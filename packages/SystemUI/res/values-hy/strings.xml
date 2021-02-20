@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Մինչև լուսաբաց"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Կմիանա՝ <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Մինչև <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Նվազեցնել պայծառությունը"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC-ն անջատված է"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC-ն միացված է"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Ցույց տալ դիտարկումը"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Ավարտե՞լ հյուրի աշխատաշրջանը"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Ավարտել հյուրի աշխատաշրջանը"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին:"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Ավարտել աշխատաշրջանը"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր:"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Դուք ցանկանու՞մ եք շարունակել ձեր գործողությունը:"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Սկսել"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Այս ծանուցման կարևորության մակարդակը ավտոմատ &lt;b&gt;իջեցվել է և դարձել անձայն&lt;/b&gt;։"</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Ծանուցումների վահանակում այս ծանուցուման կարևորության մակարդակն ավտոմատ &lt;b&gt;բարձրացվել է&lt;/b&gt;։"</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Ծանուցումների վահանակում այս ծանուցուման կարևորության մակարդակն ավտոմատ &lt;b&gt;իջեցվել է&lt;/b&gt;։"</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Սա ճի՞շտ էր"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Ուղարկեք ձեր կարծիքը մշակողին։ Սա ճի՞շտ էր։"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Շնորհակալություն արձագանքելու համար"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"Եղավ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ծանուցումների կառավարումը բաց է"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Տեղափոխել դիրք <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Ավելացնել դիրք <xliff:g id="POSITION">%1$d</xliff:g>-ում"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Դիրք <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Սալիկն ավելացվեց"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Սալիկը հեռացվեց"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Արագ կարգավորումների խմբագրիչ:"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ծանուցում՝ <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Բացել կարգավորումները:"</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> հավելվածն օգտագործում է «<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>» գործառույթը"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> հավելվածը վերջերս օգտագործել է «<xliff:g id="APP_OPP_NAME">%2$s</xliff:g>» գործառույթը"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(կորպորատիվ տարբերակ)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Հեռախոսազանգ"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Հեռախոսազանգ"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g>-ի միջոցով)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"տեսախցիկը"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"վայրը"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Տվիչներն անջատած են"</string>
     <string name="device_services" msgid="1549944177856658705">"Սարքի ծառայություններ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Անանուն"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Հպեք՝ հավելվածը վերագործարկելու և լիաէկրան ռեժիմին անցնելու համար։"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Տեղափոխել"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Համակարգի նավիգացիան թարմացվեց: Փոփոխություններ անելու համար անցեք կարգավորումներ:"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Թարմացրեք համակարգի նավիգացիան կարգավորումներում"</string>

@@ -5002,6 +5002,9 @@
     <string name="stk_cc_ss_to_ussd">SS request changed to USSD request</string>
     <string name="stk_cc_ss_to_ss">Changed to new SS request</string>
 
+    <!-- Content description of the phishing alert icon in the notification. [CHAR_LIMIT=NONE] -->
+    <string name="notification_phishing_alert_content_description">Phishing alert</string>
+
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
 

@@ -47,7 +47,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
-import android.widget.RemoteViews.OnClickHandler;
+import android.widget.RemoteViews.InteractionHandler;
 
 import com.android.internal.widget.IRemoteViewsFactory;
 
@@ -107,7 +107,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private final boolean mOnLightBackground;
     private final Executor mAsyncViewLoadExecutor;
 
-    private OnClickHandler mRemoteViewsOnClickHandler;
+    private InteractionHandler mRemoteViewsInteractionHandler;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final FixedSizeRemoteViewsCache mCache;
     private int mVisibleWindowLowerBound;
@@ -386,9 +386,9 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
          *                        asynchronously (for eg, when we are already showing the loading
          *                        view)
          */
-        public void onRemoteViewsLoaded(RemoteViews view, OnClickHandler handler,
+        public void onRemoteViewsLoaded(RemoteViews view, InteractionHandler handler,
                 boolean forceApplyAsync) {
-            setOnClickHandler(handler);
+            setInteractionHandler(handler);
             applyRemoteViews(view, forceApplyAsync || ((view != null) && view.prefersAsyncApply()));
         }
 
@@ -455,7 +455,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             if (refs != null) {
                 // Notify all the references for that position of the newly loaded RemoteViews
                 for (final RemoteViewsFrameLayout ref : refs) {
-                    ref.onRemoteViewsLoaded(view, mRemoteViewsOnClickHandler, true);
+                    ref.onRemoteViewsLoaded(view, mRemoteViewsInteractionHandler, true);
                 }
             }
         }
@@ -902,9 +902,9 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         return mDataReady;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
-        mRemoteViewsOnClickHandler = handler;
+    /** @hide */
+    public void setRemoteViewsInteractionHandler(InteractionHandler handler) {
+        mRemoteViewsInteractionHandler = handler;
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1137,7 +1137,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
             if (isInCache) {
                 // Apply the view synchronously if possible, to avoid flickering
-                layout.onRemoteViewsLoaded(rv, mRemoteViewsOnClickHandler, false);
+                layout.onRemoteViewsLoaded(rv, mRemoteViewsInteractionHandler, false);
                 if (hasNewItems) {
                     mServiceHandler.sendEmptyMessage(MSG_LOAD_NEXT_ITEM);
                 }
@@ -1146,7 +1146,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 // exist, the layout will create a default view based on the firstView height.
                 layout.onRemoteViewsLoaded(
                         mCache.getMetaData().getLoadingTemplate(mContext).remoteViews,
-                        mRemoteViewsOnClickHandler,
+                        mRemoteViewsInteractionHandler,
                         false);
                 mRequestedViews.add(position, layout);
                 mCache.queueRequestedPositionToLoad(position);

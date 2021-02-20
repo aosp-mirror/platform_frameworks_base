@@ -1501,6 +1501,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
+    public void onNotificationFeedbackReceived(String key, Bundle feedback) {
+        enforceStatusBarService();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationFeedbackReceived(key, feedback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+
+    @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new StatusBarShellCommand(this, mContext)).exec(

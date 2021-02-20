@@ -3624,7 +3624,7 @@ public class Notification implements Parcelable
         private Bundle mUserExtras = new Bundle();
         private Style mStyle;
         @UnsupportedAppUsage
-        private ArrayList<Action> mActions = new ArrayList<Action>(MAX_ACTION_BUTTONS);
+        private ArrayList<Action> mActions = new ArrayList<>(MAX_ACTION_BUTTONS);
         private ArrayList<Person> mPersonList = new ArrayList<>();
         private ContrastColorUtil mColorUtil;
         private boolean mIsLegacy;
@@ -4878,6 +4878,16 @@ public class Notification implements Parcelable
             return this;
         }
 
+        private void bindPhishingAlertIcon(RemoteViews contentView, StandardTemplateParams p) {
+            // TODO(b/180334837): Get buy-in on this color, or make sure to give this the
+            //  accent color, while still accommodating the colorized state.
+            contentView.setDrawableTint(
+                    R.id.phishing_alert,
+                    false /* targetBackground */,
+                    getPrimaryTextColor(p),
+                    PorterDuff.Mode.SRC_ATOP);
+        }
+
         private Drawable getProfileBadgeDrawable() {
             if (mContext.getUserId() == UserHandle.USER_SYSTEM) {
                 // This user can never be a badged profile,
@@ -5279,6 +5289,7 @@ public class Notification implements Parcelable
                 hasTextToLeft |= bindHeaderAppName(contentView, p, true /* force */);
             }
             bindHeaderChronometerAndTime(contentView, p, hasTextToLeft);
+            bindPhishingAlertIcon(contentView, p);
             bindProfileBadge(contentView, p);
             bindAlertedIcon(contentView, p);
             bindExpandButton(contentView, p);
@@ -5474,15 +5485,18 @@ public class Notification implements Parcelable
                     RemoteViews.MARGIN_BOTTOM, bottomMarginDimen);
         }
 
-        private static List<Notification.Action> filterOutContextualActions(
-                List<Notification.Action> actions) {
-            List<Notification.Action> nonContextualActions = new ArrayList<>();
-            for (Notification.Action action : actions) {
+        /**
+         * Returns the actions that are not contextual.
+         */
+        private @NonNull List<Notification.Action> getNonContextualActions() {
+            if (mActions == null) return Collections.emptyList();
+            List<Notification.Action> contextualActions = new ArrayList<>();
+            for (Notification.Action action : mActions) {
                 if (!action.isContextual()) {
-                    nonContextualActions.add(action);
+                    contextualActions.add(action);
                 }
             }
-            return nonContextualActions;
+            return contextualActions;
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId,
@@ -5493,9 +5507,9 @@ public class Notification implements Parcelable
 
             boolean validRemoteInput = false;
 
-            // In the UI contextual actions appear separately from the standard actions, so we
+            // In the UI, contextual actions appear separately from the standard actions, so we
             // filter them out here.
-            List<Notification.Action> nonContextualActions = filterOutContextualActions(mActions);
+            List<Notification.Action> nonContextualActions = getNonContextualActions();
 
             int N = nonContextualActions.size();
             boolean emphazisedMode = mN.fullScreenIntent != null;
@@ -6751,6 +6765,31 @@ public class Notification implements Parcelable
     public boolean showsChronometer() {
         return when != 0 && extras.getBoolean(EXTRA_SHOW_CHRONOMETER);
     }
+
+    /**
+     * @return true if the notification has image
+     */
+    public boolean hasImage() {
+        if (MessagingStyle.class.equals(getNotificationStyle()) && extras != null) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (MessagingStyle.Message m : MessagingStyle.Message
+                        .getMessagesFromBundleArray(messages)) {
+                    if (m.getDataUri() != null
+                            && m.getDataMimeType() != null
+                            && m.getDataMimeType().startsWith("image/")) {
+                        return true;
+                    }
+                }
+            }
+        } else if (hasLargeIcon()) {
+            return true;
+        } else if (extras.containsKey(EXTRA_BACKGROUND_IMAGE_URI)) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * @removed
@@ -9241,7 +9280,7 @@ public class Notification implements Parcelable
                 lastAction = answerAction;
             }
             // For consistency with the standard actions bar, contextual actions are ignored.
-            for (Action action : Builder.filterOutContextualActions(mBuilder.mActions)) {
+            for (Action action : mBuilder.getNonContextualActions()) {
                 if (actions.size() >= MAX_ACTION_BUTTONS - 1) {
                     break;
                 }

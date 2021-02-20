@@ -233,6 +233,7 @@
   <java-symbol type="id" name="pin_confirm_text" />
   <java-symbol type="id" name="pin_error_message" />
   <java-symbol type="id" name="timePickerLayout" />
+  <java-symbol type="id" name="phishing_alert" />
   <java-symbol type="id" name="profile_badge" />
   <java-symbol type="id" name="alerted_icon" />
   <java-symbol type="id" name="transitionPosition" />
@@ -2814,6 +2815,7 @@
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
   <java-symbol type="id" name="pending_intent_tag" />
+  <java-symbol type="id" name="remote_checked_change_listener_tag" />
   <java-symbol type="id" name="notification_action_index_tag" />
 
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
@@ -4173,6 +4175,8 @@
   <java-symbol type="string" name="window_magnification_prompt_content" />
   <java-symbol type="string" name="turn_on_magnification_settings_action" />
   <java-symbol type="string" name="dismiss_action" />
+
+  <java-symbol type="bool" name="config_magnification_area" />
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
 

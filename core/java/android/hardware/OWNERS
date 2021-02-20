@@ -3,3 +3,6 @@ per-file *Camera*=cychen@google.com,epeev@google.com,etalvala@google.com,shuzhen
 
 # Sensor Privacy
 per-file *SensorPrivacy* = file:platform/frameworks/native:/libs/sensorprivacy/OWNERS
+
+# Sensors framework
+per-file *Sensor*,*Trigger* = file:platform/frameworks/native:/services/sensorservice/OWNERS

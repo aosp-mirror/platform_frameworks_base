@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Ata o amencer"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Activarase ás: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Utilizarase ata as: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Reducir brillo"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"A opción NFC está activada"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Engadir usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo usuario"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Queres finalizar a sesión de invitado?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Finalizar sesión de invitado"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Queres eliminar o invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Eliminaranse todas as aplicacións e datos desta sesión."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Finalizar sesión"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Eliminar"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Benvido de novo, convidado."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Queres continuar coa túa sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Comezar de novo"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"O sistema &lt;b&gt;diminuíu a Silencioso&lt;/b&gt; o nivel desta notificación de forma automática."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Esta notificación &lt;b&gt;clasificouse nun nivel superior&lt;/b&gt; de forma automática no teu ton."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Esta notificación &lt;b&gt;clasificouse nun nivel inferior&lt;/b&gt; de forma automática no teu ton."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"A información era correcta?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Faille saber a túa opinión ao programador. A información era correcta?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Grazas polo teu comentario"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"Aceptar"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Abríronse os controis de notificacións da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Engadir á posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Engadiuse a tarxeta"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Quitouse a tarxeta"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor de configuración rápida."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificación de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Abrir configuración."</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> está utilizando a aplicación <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> utilizou recentemente a aplicación <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(versión empresarial)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Chamada de teléfono"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Chamada de teléfono"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(mediante <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"a cámara"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"a localiz."</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Desactivar sensores"</string>
     <string name="device_services" msgid="1549944177856658705">"Servizos do dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sen título"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Toca o botón para reiniciar esta aplicación e abrila en pantalla completa."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Mover"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Actualizouse a navegación do sistema. Para facer cambios, vai a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Para actualizar a navegación do sistema, vai a Configuración"</string>

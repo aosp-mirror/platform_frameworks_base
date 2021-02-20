@@ -51,6 +51,7 @@ import com.android.server.connectivity.NetworkNotificationManager.NotificationTy
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalAnswers;
@@ -199,6 +200,9 @@ public class NetworkNotificationManagerTest {
     }
 
     @Test
+    @Ignore
+    // Ignored because the code under test calls Log.wtf, which crashes the tests on eng builds.
+    // TODO: re-enable after fixing this (e.g., turn Log.wtf into exceptions that this test catches)
     public void testNoInternetNotificationsNotShownForCellular() {
         mManager.showNotification(100, NO_INTERNET, mCellNai, mWifiNai, null, false);
         mManager.showNotification(101, LOST_INTERNET, mCellNai, mWifiNai, null, false);

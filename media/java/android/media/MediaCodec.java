@@ -2414,37 +2414,44 @@ final public class MediaCodec implements PlaybackComponent {
          * This indicates that the requested key was not found when trying to
          * perform a decrypt operation.  The operation can be retried after adding
          * the correct decryption key.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_NO_KEY}.
          */
-        public static final int ERROR_NO_KEY = 1;
+        public static final int ERROR_NO_KEY = MediaDrm.ErrorCodes.ERROR_NO_KEY;
 
         /**
          * This indicates that the key used for decryption is no longer
          * valid due to license term expiration.  The operation can be retried
          * after updating the expired keys.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_KEY_EXPIRED}.
          */
-        public static final int ERROR_KEY_EXPIRED = 2;
+        public static final int ERROR_KEY_EXPIRED = MediaDrm.ErrorCodes.ERROR_KEY_EXPIRED;
 
         /**
          * This indicates that a required crypto resource was not able to be
          * allocated while attempting the requested operation.  The operation
          * can be retried if the app is able to release resources.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_RESOURCE_BUSY}
          */
-        public static final int ERROR_RESOURCE_BUSY = 3;
+        public static final int ERROR_RESOURCE_BUSY = MediaDrm.ErrorCodes.ERROR_RESOURCE_BUSY;
 
         /**
          * This indicates that the output protection levels supported by the
          * device are not sufficient to meet the requirements set by the
          * content owner in the license policy.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_INSUFFICIENT_OUTPUT_PROTECTION}
          */
-        public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4;
+        public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION =
+                MediaDrm.ErrorCodes.ERROR_INSUFFICIENT_OUTPUT_PROTECTION;
 
         /**
          * This indicates that decryption was attempted on a session that is
          * not opened, which could be due to a failure to open the session,
          * closing the session prematurely, or the session being reclaimed
          * by the resource manager.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_SESSION_NOT_OPENED}
          */
-        public static final int ERROR_SESSION_NOT_OPENED = 5;
+        public static final int ERROR_SESSION_NOT_OPENED =
+                MediaDrm.ErrorCodes.ERROR_SESSION_NOT_OPENED;
 
         /**
          * This indicates that an operation was attempted that could not be
@@ -2453,23 +2460,28 @@ final public class MediaCodec implements PlaybackComponent {
          * device security features that aren't supported by the device,
          * or due to an internal error in the crypto system that prevents
          * the specified security policy from being met.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_UNSUPPORTED_OPERATION}
          */
-        public static final int ERROR_UNSUPPORTED_OPERATION = 6;
+        public static final int ERROR_UNSUPPORTED_OPERATION =
+                MediaDrm.ErrorCodes.ERROR_UNSUPPORTED_OPERATION;
 
         /**
          * This indicates that the security level of the device is not
          * sufficient to meet the requirements set by the content owner
          * in the license policy.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_INSUFFICIENT_SECURITY}
          */
-        public static final int ERROR_INSUFFICIENT_SECURITY = 7;
+        public static final int ERROR_INSUFFICIENT_SECURITY =
+                MediaDrm.ErrorCodes.ERROR_INSUFFICIENT_SECURITY;
 
         /**
          * This indicates that the video frame being decrypted exceeds
          * the size of the device's protected output buffers. When
          * encountering this error the app should try playing content
          * of a lower resolution.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_FRAME_TOO_LARGE}
          */
-        public static final int ERROR_FRAME_TOO_LARGE = 8;
+        public static final int ERROR_FRAME_TOO_LARGE = MediaDrm.ErrorCodes.ERROR_FRAME_TOO_LARGE;
 
         /**
          * This error indicates that session state has been
@@ -2477,26 +2489,37 @@ final public class MediaCodec implements PlaybackComponent {
          * of retaining crypto session state across device
          * suspend/resume. The session must be closed and a new
          * session opened to resume operation.
+         * @deprecated Please use {@link MediaDrm.ErrorCodes#ERROR_LOST_STATE}
          */
-        public static final int ERROR_LOST_STATE = 9;
+        public static final int ERROR_LOST_STATE = MediaDrm.ErrorCodes.ERROR_LOST_STATE;
 
         /** @hide */
         @IntDef({
-            ERROR_NO_KEY,
-            ERROR_KEY_EXPIRED,
-            ERROR_RESOURCE_BUSY,
-            ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
-            ERROR_SESSION_NOT_OPENED,
-            ERROR_UNSUPPORTED_OPERATION,
-            ERROR_INSUFFICIENT_SECURITY,
-            ERROR_FRAME_TOO_LARGE,
-            ERROR_LOST_STATE
+            MediaDrm.ErrorCodes.ERROR_NO_KEY,
+            MediaDrm.ErrorCodes.ERROR_KEY_EXPIRED,
+            MediaDrm.ErrorCodes.ERROR_RESOURCE_BUSY,
+            MediaDrm.ErrorCodes.ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
+            MediaDrm.ErrorCodes.ERROR_SESSION_NOT_OPENED,
+            MediaDrm.ErrorCodes.ERROR_UNSUPPORTED_OPERATION,
+            MediaDrm.ErrorCodes.ERROR_INSUFFICIENT_SECURITY,
+            MediaDrm.ErrorCodes.ERROR_FRAME_TOO_LARGE,
+            MediaDrm.ErrorCodes.ERROR_LOST_STATE,
+            MediaDrm.ErrorCodes.ERROR_GENERIC_OEM,
+            MediaDrm.ErrorCodes.ERROR_GENERIC_PLUGIN,
+            MediaDrm.ErrorCodes.ERROR_LICENSE_PARSE,
+            MediaDrm.ErrorCodes.ERROR_MEDIA_FRAMEWORK,
+            MediaDrm.ErrorCodes.ERROR_ZERO_SUBSAMPLES
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface CryptoErrorCode {}
 
         /**
-         * Retrieve the error code associated with a CryptoException
+         * Returns error code associated with this {@link CryptoException}.
+         * <p>
+         * Please refer to {@link MediaDrm.ErrorCodes} for the general error
+         * handling strategy and details about each possible return value.
+         *
+         * @return an error code defined in {@link MediaDrm.ErrorCodes}.
          */
         @CryptoErrorCode
         public int getErrorCode() {
