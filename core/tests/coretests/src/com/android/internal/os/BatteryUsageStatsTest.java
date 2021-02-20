@@ -67,8 +67,8 @@ public class BatteryUsageStatsTest {
         final BatteryStatsImpl.Uid batteryStatsUid = batteryStats.getUidStatsLocked(2000);
 
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(1, 1);
-        builder.setConsumedPower(100);
         builder.setDischargePercentage(20);
+        builder.setDischargedPowerRange(1000, 2000);
 
         final UidBatteryConsumer.Builder uidBatteryConsumerBuilder =
                 builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid);
@@ -100,6 +100,8 @@ public class BatteryUsageStatsTest {
     public void validateBatteryUsageStats(BatteryUsageStats batteryUsageStats) {
         assertThat(batteryUsageStats.getConsumedPower()).isEqualTo(100);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(20);
+        assertThat(batteryUsageStats.getDischargedPowerRange().getLower()).isEqualTo(1000);
+        assertThat(batteryUsageStats.getDischargedPowerRange().getUpper()).isEqualTo(2000);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 batteryUsageStats.getUidBatteryConsumers();

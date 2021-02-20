@@ -136,16 +136,16 @@ public class BatteryUsageStatsRule implements TestRule {
         return mBatteryStats.getUidStatsLocked(uid);
     }
 
-    public void setTime(long realtimeUs, long uptimeUs) {
-        mMockClocks.realtime = realtimeUs;
-        mMockClocks.uptime = uptimeUs;
+    public void setTime(long realtimeMs, long uptimeMs) {
+        mMockClocks.realtime = realtimeMs;
+        mMockClocks.uptime = uptimeMs;
     }
 
-    void apply(PowerCalculator... calculators) {
-        apply(BatteryUsageStatsQuery.DEFAULT, calculators);
+    BatteryUsageStats apply(PowerCalculator... calculators) {
+        return apply(BatteryUsageStatsQuery.DEFAULT, calculators);
     }
 
-    void apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
+    BatteryUsageStats apply(BatteryUsageStatsQuery query, PowerCalculator... calculators) {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(0, 0);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
@@ -158,6 +158,7 @@ public class BatteryUsageStatsRule implements TestRule {
         }
 
         mBatteryUsageStats = builder.build();
+        return mBatteryUsageStats;
     }
 
     public UidBatteryConsumer getUidBatteryConsumer(int uid) {
