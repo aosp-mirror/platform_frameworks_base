@@ -18,8 +18,9 @@ package com.android.wm.shell.onehanded;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.spy;
+
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -35,18 +36,20 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedTouchHandlerTest extends OneHandedTestCase {
+    boolean mIsEventCallback = false;
+
     private OneHandedTouchHandler mTouchHandler;
-
+    private OneHandedTimeoutHandler mSpiedTimeoutHandler;
+    private OneHandedTouchHandler.OneHandedTouchEventCallback mTouchEventCallback =
+            () -> mIsEventCallback = true;
     @Mock
-    private OneHandedTimeoutHandler mTimeoutHandler;
-
-    @Mock
-    private ShellExecutor mMainExecutor;
+    private ShellExecutor mMockShellMainExecutor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTouchHandler = new OneHandedTouchHandler(mTimeoutHandler, mMainExecutor);
+        mSpiedTimeoutHandler = spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
+        mTouchHandler = new OneHandedTouchHandler(mSpiedTimeoutHandler, mMockShellMainExecutor);
     }
 
     @Test
@@ -55,7 +58,7 @@ public class OneHandedTouchHandlerTest extends OneHandedTestCase {
         };
         mTouchHandler.registerTouchEventListener(callback);
 
-        assertThat(mTouchHandler.mTouchEventCallback).isEqualTo(callback);
+        assertThat(mIsEventCallback).isFalse();
     }
 
     @Test

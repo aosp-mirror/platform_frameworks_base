@@ -87,6 +87,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      * @param displayController        {@link DisplayController}
      */
     public OneHandedGestureHandler(Context context, DisplayController displayController,
+            ViewConfiguration viewConfig,
             ShellExecutor mainExecutor) {
         mDisplayController = displayController;
         mMainExecutor = mainExecutor;
@@ -95,7 +96,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
                 com.android.internal.R.dimen.navigation_bar_gesture_larger_height);
         mDragDistThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.gestures_onehanded_drag_threshold);
-        final float slop = ViewConfiguration.get(context).getScaledTouchSlop();
+        final float slop = viewConfig.getScaledTouchSlop();
         mSquaredSlop = slop * slop;
 
         updateIsEnabled();

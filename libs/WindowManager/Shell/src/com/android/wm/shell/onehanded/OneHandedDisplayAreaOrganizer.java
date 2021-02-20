@@ -66,8 +66,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private boolean mIsInOneHanded;
     private int mEnterExitAnimationDurationMs;
 
-    @VisibleForTesting
-    ArrayMap<WindowContainerToken, SurfaceControl> mDisplayAreaTokenMap = new ArrayMap();
+    private ArrayMap<WindowContainerToken, SurfaceControl> mDisplayAreaTokenMap = new ArrayMap();
     private DisplayController mDisplayController;
     private OneHandedAnimationController mAnimationController;
     private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
@@ -296,6 +295,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             mDisplayController.getDisplay(DEFAULT_DISPLAY).getRealSize(realSize);
         }
         return new Rect(0, 0, realSize.x, realSize.y);
+    }
+
+    @VisibleForTesting
+    ArrayMap<WindowContainerToken, SurfaceControl> getDisplayAreaTokenMap() {
+        return mDisplayAreaTokenMap;
     }
 
     /**
