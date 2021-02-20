@@ -18,7 +18,6 @@ package com.android.server.locksettings;
 
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.keystore2.AndroidKeyStoreProvider;
 import android.util.Slog;
 
 import java.io.ByteArrayOutputStream;
@@ -141,19 +140,8 @@ public class SyntheticPasswordCrypto {
         }
     }
 
-    /**
-     * TODO This function redirects keystore access to the legacy keystore during a transitional
-     *      phase during which not all calling code has been adjusted to use Keystore 2.0.
-     *      This can be reverted to a constant of "AndroidKeyStore" when b/171305684 is complete.
-     *      The specific bug for this component is b/171305115.
-     */
     static String androidKeystoreProviderName() {
-        if (AndroidKeyStoreProvider.isInstalled()) {
-            return "AndroidKeyStoreLegacy";
-        } else {
-            return "AndroidKeystore";
-        }
-
+        return "AndroidKeyStore";
     }
 
     public static byte[] decryptBlob(String keyAlias, byte[] blob, byte[] applicationId) {
