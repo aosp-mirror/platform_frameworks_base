@@ -11719,6 +11719,7 @@ package android.content.pm {
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
     field public static final int LAUNCH_MULTIPLE = 0; // 0x0
     field public static final int LAUNCH_SINGLE_INSTANCE = 3; // 0x3
+    field public static final int LAUNCH_SINGLE_INSTANCE_PER_TASK = 4; // 0x4
     field public static final int LAUNCH_SINGLE_TASK = 2; // 0x2
     field public static final int LAUNCH_SINGLE_TOP = 1; // 0x1
     field public static final int PERSIST_ACROSS_REBOOTS = 2; // 0x2

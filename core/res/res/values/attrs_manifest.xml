@@ -825,6 +825,12 @@
             <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
             Stack</a> document for more details about tasks.-->
         <enum name="singleInstance" value="3" />
+        <!-- The activity can only be running as the root activity of the task, the first activity
+            that created the task, and therefore there will only be one instance of this activity
+            in a task. In constrast to the {@code singleTask} launch mode, this activity can be
+            started in multiple instances in different tasks if the
+            {@code FLAG_ACTIVITY_MULTIPLE_TASK} is set.-->
+        <enum name="singleInstancePerTask" value="4" />
     </attr>
 
     <!-- Specify the orientation an activity should be run in.  If not
