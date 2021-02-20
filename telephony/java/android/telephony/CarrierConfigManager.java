@@ -4764,13 +4764,23 @@ public class CarrierConfigManager {
     public static final String KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL =
             "store_sim_pin_for_unattended_reboot_bool";
 
-     /**
+    /**
      * Determine whether "Enable 2G" toggle can be shown.
      *
      * Used to trade privacy/security against potentially reduced carrier coverage for some
      * carriers.
      */
     public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
+
+    /**
+     * Indicates the allowed APN types that can be used for LTE initial attach. The order of APN
+     * types in the configuration is the order of APN types that will be used for initial attach.
+     * Empty list indicates that no APN types are allowed for initial attach.
+     *
+     * @hide
+     */
+    public static final String KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY =
+            "allowed_initial_attach_apn_types_string_array";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -5330,6 +5340,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_ENABLE_2G, false);
+        sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
+                new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
     }
 
     /**
