@@ -700,7 +700,7 @@ public class TrustManagerService extends SystemService {
         if (changed) {
             dispatchDeviceLocked(userId, locked);
 
-            mAuthorizationService.onLockScreenEvent(locked, userId, null);
+            Authorization.onLockScreenEvent(locked, userId, null);
             KeyStore.getInstance().onUserLockedStateChanged(userId, locked);
             // Also update the user's profiles who have unified challenge, since they
             // share the same unlocked state (see {@link #isDeviceLocked(int)})
@@ -1258,7 +1258,7 @@ public class TrustManagerService extends SystemService {
                         mDeviceLockedForUser.put(userId, locked);
                     }
 
-                    mAuthorizationService.onLockScreenEvent(locked, userId, null);
+                    Authorization.onLockScreenEvent(locked, userId, null);
                     KeyStore.getInstance().onUserLockedStateChanged(userId, locked);
 
                     if (locked) {
