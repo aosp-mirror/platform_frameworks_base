@@ -54,10 +54,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.service.screenshot.ScreenshotHash;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
@@ -850,11 +850,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public ScreenshotHash generateScreenshotHash(IWindow window, Rect boundsInWindow,
-            String hashAlgorithm) {
+    public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
+            RemoteCallback callback) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            return mService.generateScreenshotHash(this, window, boundsInWindow, hashAlgorithm);
+            mService.generateDisplayHash(this, window, boundsInWindow, hashAlgorithm, callback);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

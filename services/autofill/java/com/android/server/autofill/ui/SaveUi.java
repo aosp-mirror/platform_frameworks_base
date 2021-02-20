@@ -388,18 +388,20 @@ final class SaveUi {
             }
         }
 
-        final RemoteViews.OnClickHandler handler = (view, pendingIntent, response) -> {
-            Intent intent = response.getLaunchOptions(view).first;
-            final boolean isValid = isValidLink(pendingIntent, intent);
-            if (!isValid) {
-                final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, mType);
-                log.setType(MetricsEvent.TYPE_UNKNOWN);
-                mMetricsLogger.write(log);
-                return false;
-            }
+        final RemoteViews.InteractionHandler handler =
+                (view, pendingIntent, response) -> {
+                    Intent intent = response.getLaunchOptions(view).first;
+                    final boolean isValid = isValidLink(pendingIntent, intent);
+                    if (!isValid) {
+                        final LogMaker log =
+                                newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, mType);
+                        log.setType(MetricsEvent.TYPE_UNKNOWN);
+                        mMetricsLogger.write(log);
+                        return false;
+                    }
 
-            startIntentSenderWithRestore(pendingIntent, intent);
-            return true;
+                    startIntentSenderWithRestore(pendingIntent, intent);
+                    return true;
         };
 
         try {

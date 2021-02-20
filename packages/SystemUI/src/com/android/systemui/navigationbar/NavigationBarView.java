@@ -76,6 +76,7 @@ import com.android.systemui.navigationbar.buttons.ContextualButton;
 import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
 import com.android.systemui.navigationbar.buttons.DeadZone;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
+import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.navigationbar.gestural.FloatingRotationButton;
@@ -97,6 +98,8 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class NavigationBarView extends FrameLayout implements
@@ -129,6 +132,7 @@ public class NavigationBarView extends FrameLayout implements
     private final Region mTmpRegion = new Region();
     private final int[] mTmpPosition = new int[2];
     private Rect mTmpBounds = new Rect();
+    private Map<View, Rect> mButtonFullTouchableRegions = new HashMap<>();
 
     private KeyButtonDrawable mBackIcon;
     private KeyButtonDrawable mHomeDefaultIcon;
@@ -973,9 +977,18 @@ public class NavigationBarView extends FrameLayout implements
                 getButtonLocations(true /* includeFloatingRotationButton */, true /* inScreen */));
     }
 
+    private void updateButtonTouchRegionCache() {
+        FrameLayout navBarLayout = mIsVertical
+                ? mNavigationInflaterView.mVertical
+                : mNavigationInflaterView.mHorizontal;
+        mButtonFullTouchableRegions = ((NearestTouchFrame) navBarLayout
+                .findViewById(R.id.nav_buttons)).getFullTouchableChildRegions();
+    }
+
     private Region getButtonLocations(boolean includeFloatingRotationButton,
             boolean inScreenSpace) {
         mTmpRegion.setEmpty();
+        updateButtonTouchRegionCache();
         updateButtonLocation(getBackButton(), inScreenSpace);
         updateButtonLocation(getHomeButton(), inScreenSpace);
         updateButtonLocation(getRecentsButton(), inScreenSpace);
@@ -997,6 +1010,12 @@ public class NavigationBarView extends FrameLayout implements
     private void updateButtonLocation(ButtonDispatcher button, boolean inScreenSpace) {
         View view = button.getCurrentView();
         if (view == null || !button.isVisible()) {
+            return;
+        }
+        // If the button is tappable from perspective of NearestTouchFrame, then we'll
+        // include the regions where the tap is valid instead of just the button layout location
+        if (mButtonFullTouchableRegions.containsKey(view)) {
+            mTmpRegion.op(mButtonFullTouchableRegions.get(view), Op.UNION);
             return;
         }
         updateButtonLocation(view, inScreenSpace);

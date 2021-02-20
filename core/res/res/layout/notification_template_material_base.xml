@@ -30,6 +30,7 @@
         android:layout_gravity="center_vertical|start"
         android:layout_marginStart="@dimen/notification_left_icon_start"
         android:background="@drawable/notification_large_icon_outline"
+        android:clipToOutline="true"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         android:visibility="gone"
@@ -54,6 +55,7 @@
         android:layout_marginBottom="@dimen/notification_right_icon_headerless_margin"
         android:layout_marginEnd="@dimen/notification_header_expand_icon_size"
         android:background="@drawable/notification_large_icon_outline"
+        android:clipToOutline="true"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         />

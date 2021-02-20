@@ -69,4 +69,6 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"পৰিচালনা কৰক"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল অগ্ৰাহ্য কৰা হৈছে"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"এপ্‌টো ৰিষ্টাৰ্ট কৰিবলৈ আৰু পূৰ্ণ স্ক্ৰীন ব্যৱহাৰ কৰিবলৈ টিপক।"</string>
+    <string name="got_it" msgid="4428750913636945527">"বুজি পালোঁ"</string>
 </resources>
