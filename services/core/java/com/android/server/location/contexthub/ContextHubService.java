@@ -124,9 +124,6 @@ public class ContextHubService extends IContextHubService.Stub {
     // True if WiFi is available for the Context Hub
     private boolean mIsWifiAvailable = false;
 
-    // True if audio is disabled for the ContextHub
-    private boolean mIsAudioDisabled = false;
-
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
 
@@ -1084,10 +1081,8 @@ public class ContextHubService extends IContextHubService.Stub {
         SensorPrivacyManager manager = SensorPrivacyManager.getInstance(mContext);
         boolean disabled = manager.isIndividualSensorPrivacyEnabled(
                 SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE);
-        if (mIsAudioDisabled != disabled) {
-            mIsAudioDisabled = disabled;
-            mContextHubWrapper.onMicrophoneDisableSettingChanged(disabled);
-        }
+        Log.d(TAG, "Mic Disabled Setting: " + disabled);
+        mContextHubWrapper.onMicrophoneDisableSettingChanged(disabled);
     }
 
 
