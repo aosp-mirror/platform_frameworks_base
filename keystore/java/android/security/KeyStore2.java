@@ -107,7 +107,6 @@ public class KeyStore2 {
             try {
                 return request.execute(service);
             } catch (ServiceSpecificException e) {
-                Log.e(TAG, "KeyStore exception", e);
                 throw getKeyStoreException(e.errorCode);
             } catch (RemoteException e) {
                 if (firstTry) {
