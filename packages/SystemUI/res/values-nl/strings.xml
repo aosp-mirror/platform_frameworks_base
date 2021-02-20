@@ -345,7 +345,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Locatie"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Locatie uit"</string>
     <string name="quick_settings_camera_label" msgid="1367149596242401934">"Camera blokkeren"</string>
-    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Microfoon dempen"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Microfoon uitzetten"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Media-apparaat"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Alleen noodoproepen"</string>
@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Tot zonsopgang"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Helderheid verlagen"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC is uitgeschakeld"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC is ingeschakeld"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Profiel weergeven"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Gebruiker toevoegen"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nieuwe gebruiker"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Gastsessie beëindigen?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Gastsessie beëindigen"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Gast verwijderen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps en gegevens in deze sessie worden verwijderd."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Sessie beëindigen"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Verwijderen"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welkom terug, gast!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Wil je doorgaan met je sessie?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Opnieuw starten"</string>
@@ -612,16 +614,16 @@
     <string name="ring_toggle_title" msgid="5973120187287633224">"Gesprekken"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Bellen"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Trillen"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Dempen"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Geluid staat uit"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Telefoon op trillen"</string>
-    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Telefoon gedempt"</string>
+    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Telefoongeluid staat uit"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tik om dempen op te heffen."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tik om in te stellen op trillen. Toegankelijkheidsservices kunnen zijn gedempt."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tik om te dempen. Toegankelijkheidsservices kunnen zijn gedempt."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tik om in te stellen op trillen. Het geluid van toegankelijkheidsservices kan hierdoor uitgaan."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tik om te dempen. Het geluid van toegankelijkheidsservices kan hierdoor uitgaan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tik om in te stellen op trillen."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tik om te dempen."</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"dempen"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"dempen opheffen"</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tik om geluid uit te zetten."</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"geluid uit"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"geluid aanzetten"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"trillen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s-volumeknoppen"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gesprekken en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
@@ -716,7 +718,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden ingesteld"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Melding via proxy"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Alle meldingen van <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Meer weergeven"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Deze melding is automatisch &lt;b&gt;verlaagd naar Stil&lt;/b&gt; door het systeem."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Deze melding is automatisch &lt;b&gt;hoger gerangschikt&lt;/b&gt; in je meldingenpaneel."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Deze melding is automatisch &lt;b&gt;lager gerangschikt&lt;/b&gt; in je meldingenpaneel."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Is dit juist?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Stuur de ontwikkelaar feedback. Was dit goed?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Bedankt voor je feedback."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Beheeropties voor meldingen voor <xliff:g id="APP_NAME">%1$s</xliff:g> geopend"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Verplaatsen naar <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Toevoegen aan positie <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Positie <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Tegel toegevoegd"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Tegel verwijderd"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor voor \'Snelle instellingen\'."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-melding: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Instellingen openen."</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> gebruikt de <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> heeft de <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> recent gebruikt"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(zakelijke versie)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Telefoongesprek"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefoongesprek"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(via <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"camera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"locatie"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensoren uit"</string>
     <string name="device_services" msgid="1549944177856658705">"Apparaatservices"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Geen titel"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Tik om deze app opnieuw te starten en te openen op het volledige scherm."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Verplaatsen"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ga naar Instellingen om de systeemnavigatie te updaten"</string>

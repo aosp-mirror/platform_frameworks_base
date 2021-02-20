@@ -16,8 +16,14 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.service.notification.NotificationAssistantService.FEEDBACK_RATING;
+
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_ALERTED;
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_DEMOTED;
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_PROMOTED;
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_SILENCED;
+
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -36,20 +42,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 
 public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsContent {
 
     private static final String TAG = "FeedbackInfo";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final String FEEDBACK_KEY = "feedback_key";
 
     private NotificationGuts mGutsContainer;
     private NotificationListenerService.Ranking mRanking;
@@ -146,15 +149,15 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
             sb.append(String.format(
                     "[DEBUG]: oldImportance=%d, newImportance=%d, ranking=%d\n\n",
                     mRanking.getChannel().getImportance(), mRanking.getImportance(),
-                    mRanking.getRankingAdjustment()));
+                    mRanking.getRankingScore()));
         }
-        if (status == mFeedbackController.STATUS_ALERTED) {
+        if (status == STATUS_ALERTED) {
             sb.append(mContext.getText(R.string.feedback_alerted));
-        } else if (status == mFeedbackController.STATUS_SILENCED) {
+        } else if (status == STATUS_SILENCED) {
             sb.append(mContext.getText(R.string.feedback_silenced));
-        } else if (status == mFeedbackController.STATUS_PROMOTED) {
+        } else if (status == STATUS_PROMOTED) {
             sb.append(mContext.getText(R.string.feedback_promoted));
-        } else if (status == mFeedbackController.STATUS_DEMOTED) {
+        } else if (status == STATUS_DEMOTED) {
             sb.append(mContext.getText(R.string.feedback_demoted));
         }
         sb.append(" ");
@@ -182,7 +185,8 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
 
     private void handleFeedback(boolean positive) {
         Bundle feedback = new Bundle();
-        feedback.putBoolean(FEEDBACK_KEY, positive);
+        feedback.putInt(FEEDBACK_RATING, positive ? 1 : -1);
+
         sendFeedbackToAssistant(feedback);
     }
 
@@ -191,19 +195,8 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
             return;
         }
 
-        //TODO(b/154257994): remove this when feedback apis are in place
-        final int count = mNotificationEntryManager.getActiveNotificationsCount();
-        final int rank = mEntry.getRanking().getRank();
-        NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(mEntry);
-        final NotificationVisibility nv = NotificationVisibility.obtain(
-                mEntry.getKey(), rank, count, true, location);
-        Notification.Action action = new Notification.Action.Builder(null, null,
-                null)
-                .addExtras(feedback)
-                .build();
         try {
-            mStatusBarService.onNotificationActionClick(mRanking.getKey(), -1, action, nv, true);
+            mStatusBarService.onNotificationFeedbackReceived(mRanking.getKey(), feedback);
         } catch (RemoteException e) {
             if (DEBUG) {
                 Log.e(TAG, "Failed to send feedback to assistant", e);

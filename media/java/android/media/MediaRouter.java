@@ -384,7 +384,12 @@ public class MediaRouter {
         }
 
         public Display[] getAllPresentationDisplays() {
-            return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+            try {
+                return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+            } catch (RuntimeException ex) {
+                Log.e(TAG, "Unable to get displays.", ex);
+                return null;
+            }
         }
 
         private void updatePresentationDisplays(int changedDisplayId) {

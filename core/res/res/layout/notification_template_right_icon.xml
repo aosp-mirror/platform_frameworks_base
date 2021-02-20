@@ -22,6 +22,7 @@
     android:layout_marginEnd="@dimen/notification_header_expand_icon_size"
     android:layout_marginTop="@dimen/notification_right_icon_big_margin_top"
     android:background="@drawable/notification_large_icon_outline"
+    android:clipToOutline="true"
     android:importantForAccessibility="no"
     android:scaleType="centerCrop"
     />

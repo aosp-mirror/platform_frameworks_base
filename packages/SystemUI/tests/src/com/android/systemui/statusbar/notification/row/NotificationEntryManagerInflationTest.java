@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.service.notification.NotificationListenerService;
@@ -80,7 +81,9 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowCom
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
+import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -140,7 +143,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    @Mock private InflatedSmartReplies mInflatedSmartReplies;
+    @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
+    @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
 
     private StatusBarNotification mSbn;
     private NotificationListenerService.RankingMap mRankingMap;
@@ -206,8 +210,21 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mock(ConversationNotificationProcessor.class),
                 mock(MediaFeatureFlag.class),
                 mBgExecutor,
-                (sysuiContext, notifPackageContext, entry, existingRepliesAndAction) ->
-                        mInflatedSmartReplies);
+                new SmartReplyStateInflater() {
+                    @Override
+                    public InflatedSmartReplyState inflateSmartReplyState(NotificationEntry entry) {
+                        return mInflatedSmartReplyState;
+                    }
+
+                    @Override
+                    public InflatedSmartReplyViewHolder inflateSmartReplyViewHolder(
+                            Context sysuiContext, Context notifPackageContext,
+                            NotificationEntry entry,
+                            InflatedSmartReplyState existingSmartReplyState,
+                            InflatedSmartReplyState newSmartReplyState) {
+                        return mInflatedSmartReplies;
+                    }
+                });
         mRowContentBindStage = new RowContentBindStage(
                 binder,
                 mock(NotifInflationErrorManager.class),

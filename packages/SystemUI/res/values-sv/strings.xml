@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Till soluppgången"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aktivera kl. <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Till <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Minska ljusstyrkan"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC är inaktiverat"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC är aktiverat"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Visa profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Lägg till användare"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny användare"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Vill du avsluta gästsessionen?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Avsluta gästsession"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vill du ta bort gästen?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alla appar och data i denna session kommer att raderas."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Avsluta session"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ta bort"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Välkommen tillbaka gäst!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vill du fortsätta sessionen?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Börja om"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Aviseringens relevans &lt;b&gt;ändrades till Tyst&lt;/b&gt; automatiskt av systemet."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Aviseringens relevans i meddelandepanelen &lt;b&gt;höjdes&lt;/b&gt; automatiskt."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Aviseringens relevans i meddelandepanelen &lt;b&gt;sänktes&lt;/b&gt; automatiskt."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Stämmer detta?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Ge utvecklaren din feedback. Stämmer detta?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Tack för din feedback!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Aviseringsinställningarna för <xliff:g id="APP_NAME">%1$s</xliff:g> är öppna"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flytta till <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Lägg till på position <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Position <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Kortet har lagts till"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Kortet har tagits bort"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redigerare för snabbinställningar."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-avisering: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Öppna inställningarna."</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> använder <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> använde <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> nyligen"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(företag)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Telefonsamtal"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonsamtal"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(genom <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"plats"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensorer har inaktiverats"</string>
     <string name="device_services" msgid="1549944177856658705">"Enhetstjänster"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen titel"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Tryck för att starta om appen i helskärmsläge."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Flytta"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen har uppdaterats. Öppna inställningarna om du vill ändra något."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Öppna inställningarna och uppdatera systemnavigeringen"</string>

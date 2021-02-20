@@ -410,6 +410,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"காலை வரை"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"ஒளிர்வைக் குறை"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC முடக்கப்பட்டது"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC இயக்கப்பட்டது"</string>
@@ -463,9 +464,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"சுயவிவரத்தைக் காட்டு"</string>
     <string name="user_add_user" msgid="4336657383006913022">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"புதியவர்"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"விருந்தினர் அமர்வை நிறைவுசெய்யவா?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"விருந்தினர் அமர்வை நிறைவுசெய்"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"கெஸ்ட்டை அகற்றவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா பயன்பாடுகளும், தரவும் நீக்கப்படும்."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"அமர்வை நிறைவுசெய்"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"மீண்டும் தொடங்கு"</string>
@@ -733,7 +735,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"சிஸ்டத்தால் தானாகவே இந்த அறிவிப்பு &lt;b&gt;நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது&lt;/b&gt;."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"அறிவிப்பு விவரத்தில் தானாகவே இந்த அறிவிப்பின் &lt;b&gt;முக்கியத்துவம் உயர்த்தப்பட்டது&lt;/b&gt;."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"அறிவிப்பு விவரத்தில் தானாகவே இந்த அறிவிப்பின் &lt;b&gt;முக்கியத்துவம் குறைக்கப்பட்டது&lt;/b&gt;."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"இது சரியானதா?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"உங்கள் கருத்தை டெவெலப்பருக்குத் தெரியப்படுத்துங்கள். இது சரியானதா?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"உங்கள் கருத்துக்கு நன்றி!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"சரி"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் திறக்கப்பட்டன"</string>
@@ -880,6 +882,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>க்கு நகர்த்தும்"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g>ல் சேர்க்கும்"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"இடம்: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"கட்டம் சேர்க்கப்பட்டது"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"கட்டம் அகற்றப்பட்டது"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"விரைவு அமைப்புகள் திருத்தி."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> அறிவிப்பு: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"அமைப்புகளைத் திற."</string>
@@ -970,7 +974,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ஆப்ஸ் <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> பயன்படுத்துகிறது"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"சமீபத்தில் <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ஆப்ஸ் <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> பயன்படுத்தியுள்ளது"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(நிறுவனப் பதிப்பு)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"மொபைல் அழைப்பு"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"மொபைல் அழைப்பு"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> மூலம்)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"கேமரா"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"இருப்பிடம்"</string>
@@ -978,7 +982,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"சென்சார்களை ஆஃப் செய்தல்"</string>
     <string name="device_services" msgid="1549944177856658705">"சாதன சேவைகள்"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"தலைப்பு இல்லை"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கலாம், முழுத்திரையில் பார்க்கலாம்."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"நகர்த்து"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>

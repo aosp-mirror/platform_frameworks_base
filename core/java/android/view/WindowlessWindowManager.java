@@ -23,8 +23,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.service.screenshot.ScreenshotHash;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.window.ClientWindowFrames;
@@ -487,8 +487,7 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public ScreenshotHash generateScreenshotHash(IWindow window, Rect boundsInWindow,
-            String hashAlgorithm) {
-        return null;
+    public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
+            RemoteCallback callback) {
     }
 }

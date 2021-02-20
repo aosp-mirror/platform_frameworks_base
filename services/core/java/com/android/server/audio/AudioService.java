@@ -178,6 +178,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -330,7 +331,8 @@ public class AudioService extends IAudioService.Stub
 
     private SettingsObserver mSettingsObserver;
 
-    private int mMode = AudioSystem.MODE_NORMAL;
+    private AtomicInteger mMode = new AtomicInteger(AudioSystem.MODE_NORMAL);
+
     // protects mRingerMode
     private final Object mSettingsLock = new Object();
 
@@ -2996,7 +2998,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /*package*/ int getHearingAidStreamType() {
-        return getHearingAidStreamType(getMode());
+        return getHearingAidStreamType(mMode.get());
     }
 
     private int getHearingAidStreamType(int mode) {
@@ -3136,7 +3138,8 @@ public class AudioService extends IAudioService.Stub
 
     private void dumpAudioMode(PrintWriter pw) {
         pw.println("\nAudio mode: ");
-        pw.println("- Current mode = " + AudioSystem.modeToString(getMode()));
+        pw.println("- Requested mode = " + AudioSystem.modeToString(getMode()));
+        pw.println("- Actual mode = " + AudioSystem.modeToString(mMode.get()));
         pw.println("- Mode owner: ");
         SetModeDeathHandler hdlr = getAudioModeOwnerHandler();
         if (hdlr != null) {
@@ -4477,10 +4480,10 @@ public class AudioService extends IAudioService.Stub
             pid = currentModeHandler.getPid();
         }
         if (DEBUG_MODE) {
-            Log.v(TAG, "onUpdateAudioMode() mode: " + mode + ", mMode: " + mMode
-                    + " requestedMode: " + requestedMode);
+            Log.v(TAG, "onUpdateAudioMode() new mode: " + mode + ", current mode: "
+                    + mMode.get() + " requested mode: " + requestedMode);
         }
-        if (mode != mMode) {
+        if (mode != mMode.get()) {
             final long identity = Binder.clearCallingIdentity();
             int status = mAudioSystem.setPhoneState(mode, uid);
             Binder.restoreCallingIdentity(identity);
@@ -4488,8 +4491,7 @@ public class AudioService extends IAudioService.Stub
                 if (DEBUG_MODE) {
                     Log.v(TAG, "onUpdateAudioMode: mode successfully set to " + mode);
                 }
-                int previousMode = mMode;
-                mMode = mode;
+                int previousMode = mMode.getAndSet(mode);
                 // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
                 mModeLogger.log(new PhoneStateEvent(requesterPackage, requesterPid,
                         requestedMode, pid, mode));
@@ -5413,8 +5415,10 @@ public class AudioService extends IAudioService.Stub
         IsInCall = telecomManager.isInCall();
         Binder.restoreCallingIdentity(ident);
 
-        return (IsInCall || getMode() == AudioManager.MODE_IN_COMMUNICATION ||
-                getMode() == AudioManager.MODE_IN_CALL);
+        int mode = mMode.get();
+        return (IsInCall
+                || mode == AudioManager.MODE_IN_COMMUNICATION
+                || mode == AudioManager.MODE_IN_CALL);
     }
 
     /**
