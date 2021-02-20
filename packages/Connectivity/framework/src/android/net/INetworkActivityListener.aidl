@@ -13,7 +13,7 @@
 ** limitations under the License.
 */
 
-package android.os;
+package android.net;
 
 /**
  * @hide
