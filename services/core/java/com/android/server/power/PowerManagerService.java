@@ -176,6 +176,8 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_VR_MODE_CHANGED = 1 << 13;
     // Dirty bit: attentive timer may have timed out
     private static final int DIRTY_ATTENTIVE = 1 << 14;
+    // Dirty bit: phone flipped to face down
+    private static final int DIRTY_FACE_DOWN = 1 << 15;
 
     // Summarizes the state of all active wakelocks.
     private static final int WAKE_LOCK_CPU = 1 << 0;
@@ -263,6 +265,7 @@ public final class PowerManagerService extends SystemService
     private final BatterySaverStateMachine mBatterySaverStateMachine;
     private final BatterySavingStats mBatterySavingStats;
     private final AttentionDetector mAttentionDetector;
+    private final FaceDownDetector mFaceDownDetector;
     private final BinderService mBinderService;
     private final LocalService mLocalService;
     private final NativeWrapper mNativeWrapper;
@@ -547,6 +550,10 @@ public final class PowerManagerService extends SystemService
     public final float mScreenBrightnessMaximumVr;
     public final float mScreenBrightnessDefaultVr;
 
+    // Value we store for tracking face down behavior.
+    private boolean mIsFaceDown = false;
+    private long mLastFlipTime = 0L;
+
     // The screen brightness mode.
     // One of the Settings.System.SCREEN_BRIGHTNESS_MODE_* constants.
     private int mScreenBrightnessModeSetting;
@@ -791,8 +798,10 @@ public final class PowerManagerService extends SystemService
     @VisibleForTesting
     static class Injector {
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
-                SuspendBlocker suspendBlocker, WindowManagerPolicy policy) {
-            return new Notifier(looper, context, batteryStats, suspendBlocker, policy);
+                SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
+                FaceDownDetector faceDownDetector) {
+            return new Notifier(
+                    looper, context, batteryStats, suspendBlocker, policy, faceDownDetector);
         }
 
         SuspendBlocker createSuspendBlocker(PowerManagerService service, String name) {
@@ -906,6 +915,7 @@ public final class PowerManagerService extends SystemService
         mAmbientDisplaySuppressionController =
                 mInjector.createAmbientDisplaySuppressionController(context);
         mAttentionDetector = new AttentionDetector(this::onUserAttention, mLock);
+        mFaceDownDetector = new FaceDownDetector(this::onFlip);
 
         mBatterySavingStats = new BatterySavingStats(mLock);
         mBatterySaverPolicy =
@@ -1011,6 +1021,26 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void onFlip(boolean isFaceDown) {
+        long millisUntilNormalTimeout = 0;
+        synchronized (mLock) {
+            mIsFaceDown = isFaceDown;
+            if (isFaceDown) {
+                final long currentTime = mClock.uptimeMillis();
+                mLastFlipTime = currentTime;
+                final long sleepTimeout = getSleepTimeoutLocked(-1L);
+                final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout, -1L);
+                millisUntilNormalTimeout =
+                        mLastUserActivityTime + screenOffTimeout - mClock.uptimeMillis();
+                mDirty |= DIRTY_FACE_DOWN;
+                updatePowerStateLocked();
+            }
+        }
+        if (isFaceDown) {
+            mFaceDownDetector.setMillisSaved(millisUntilNormalTimeout);
+        }
+    }
+
     @Override
     public void onStart() {
         publishBinderService(Context.POWER_SERVICE, mBinderService, /* allowIsolated= */ false,
@@ -1065,7 +1095,7 @@ public final class PowerManagerService extends SystemService
             mBatteryStats = BatteryStatsService.getService();
             mNotifier = mInjector.createNotifier(Looper.getMainLooper(), mContext, mBatteryStats,
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Broadcasts"),
-                    mPolicy);
+                    mPolicy, mFaceDownDetector);
 
             mWirelessChargerDetector = mInjector.createWirelessChargerDetector(sensorManager,
                     mInjector.createSuspendBlocker(
@@ -1099,6 +1129,7 @@ public final class PowerManagerService extends SystemService
 
         mBatterySaverController.systemReady();
         mBatterySaverPolicy.systemReady();
+        mFaceDownDetector.systemReady(mContext);
 
         // Register for settings changes.
         resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -2283,9 +2314,11 @@ public final class PowerManagerService extends SystemService
                     || getWakefulnessLocked() == WAKEFULNESS_DOZING) {
                 final long attentiveTimeout = getAttentiveTimeoutLocked();
                 final long sleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
-                final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout,
+                long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout,
                         attentiveTimeout);
                 final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+                screenOffTimeout =
+                        getScreenOffTimeoutWithFaceDownLocked(screenOffTimeout, screenDimDuration);
                 final boolean userInactiveOverride = mUserInactiveOverrideFromWindowManager;
                 final long nextProfileTimeout = getNextProfileTimeoutLocked(now);
 
@@ -2539,6 +2572,16 @@ public final class PowerManagerService extends SystemService
     private long getScreenDimDurationLocked(long screenOffTimeout) {
         return Math.min(mMaximumScreenDimDurationConfig,
                 (long)(screenOffTimeout * mMaximumScreenDimRatioConfig));
+    }
+
+    private long getScreenOffTimeoutWithFaceDownLocked(
+            long screenOffTimeout, long screenDimDuration) {
+        // If face down, we decrease the timeout to equal the dim duration so that the
+        // device will go into a dim state.
+        if (mIsFaceDown) {
+            return Math.min(screenDimDuration, screenOffTimeout);
+        }
+        return screenOffTimeout;
     }
 
     /**
@@ -3859,6 +3902,8 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDisplayReady=" + mDisplayReady);
             pw.println("  mHoldingWakeLockSuspendBlocker=" + mHoldingWakeLockSuspendBlocker);
             pw.println("  mHoldingDisplaySuspendBlocker=" + mHoldingDisplaySuspendBlocker);
+            pw.println("  mLastFlipTime=" + mLastFlipTime);
+            pw.println("  mIsFaceDown=" + mIsFaceDown);
 
             pw.println();
             pw.println("Settings and Configuration:");
@@ -4002,6 +4047,8 @@ public final class PowerManagerService extends SystemService
         if (mNotifier != null) {
             mNotifier.dump(pw);
         }
+
+        mFaceDownDetector.dump(pw);
 
         mAmbientDisplaySuppressionController.dump(pw);
     }

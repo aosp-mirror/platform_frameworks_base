@@ -211,7 +211,8 @@ public class PowerManagerServiceTest {
         mService = new PowerManagerService(mContextSpy, new Injector() {
             @Override
             Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
-                    SuspendBlocker suspendBlocker, WindowManagerPolicy policy) {
+                    SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
+                    FaceDownDetector faceDownDetector) {
                 return mNotifierMock;
             }
 
