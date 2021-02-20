@@ -1280,7 +1280,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void unlockKeystore(byte[] password, int userHandle) {
         if (DEBUG) Slog.v(TAG, "Unlock keystore for user: " + userHandle);
-        new Authorization().onLockScreenEvent(false, userHandle, password);
+        Authorization.onLockScreenEvent(false, userHandle, password);
         // TODO(b/120484642): Update keystore to accept byte[] passwords
         String passwordString = password == null ? null : new String(password);
         final KeyStore ks = KeyStore.getInstance();
