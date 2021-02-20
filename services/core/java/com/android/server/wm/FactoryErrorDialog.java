@@ -41,6 +41,11 @@ final class FactoryErrorDialog extends BaseErrorDialog {
     public void onStop() {
     }
 
+    @Override
+    protected void closeDialog() {
+        /* Do nothing */
+    }
+
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             throw new RuntimeException("Rebooting from failed factory test");
