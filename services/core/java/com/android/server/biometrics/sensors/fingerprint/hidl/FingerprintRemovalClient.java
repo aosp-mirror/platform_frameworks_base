@@ -39,13 +39,16 @@ import java.util.Map;
 class FingerprintRemovalClient extends RemovalClient<Fingerprint, IBiometricsFingerprint> {
     private static final String TAG = "FingerprintRemovalClient";
 
+    private final int mBiometricId;
+
     FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
             @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
+        super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
+        mBiometricId = biometricId;
     }
 
     @Override

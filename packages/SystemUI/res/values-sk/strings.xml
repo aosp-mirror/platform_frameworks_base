@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Posúvať snímku obrazovky"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zavrieť snímku obrazovky"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukážka snímky obrazovky"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Horná hranica"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Dolná hranica"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Spracúva sa záznam obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
@@ -414,6 +416,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do východu slnka"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Zapne sa o <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"Znížiť jas"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC je deaktivované"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC je aktivované"</string>
@@ -467,9 +470,10 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Zobraziť profil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Pridať používateľa"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nový používateľ"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Chcete ukončiť reláciu hosťa?"</string>
+    <string name="guest_exit_button" msgid="3059840571760915762">"Ukončiť reláciu hosťa"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Odstrániť hosťa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Ukončiť reláciu"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstrániť"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Hosť, vitajte späť!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relácii pokračovať?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začať odznova"</string>
@@ -546,6 +550,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizácia nainštalovala pre váš pracovný profil certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku vo vašom pracovnom profile, ale nie osobnom."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Pripojili ste sa k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti, vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Pripojili ste sa k aplikáciám <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ktoré môžu sledovať vašu aktivitu v sieti, vrátane správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Váš pracovný profil je pripojený k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a webových stránok."</string>
@@ -739,7 +744,7 @@
     <string name="feedback_silenced" msgid="9116540317466126457">"Systém toto upozornenie automaticky &lt;b&gt;preradil nižšie do kategórie Tiché&lt;/b&gt;."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"Toto upozornenie bolo na vašom paneli automaticky &lt;b&gt;preradené vyššie&lt;/b&gt;."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"Toto upozornenie bolo na vašom paneli automaticky &lt;b&gt;preradené nižšie&lt;/b&gt;."</string>
-    <string name="feedback_prompt" msgid="2278631214125128281">"Bolo toto správne?"</string>
+    <string name="feedback_prompt" msgid="3656728972307896379">"Pošlite vývojárovi svoju spätnú väzbu. Bolo toto správne?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Ďakujeme za váš názor."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Ovládanie upozornení pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> je otvorené"</string>
@@ -890,6 +895,8 @@
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Presunúť na <xliff:g id="POSITION">%1$d</xliff:g>. pozíciu"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Pridať na <xliff:g id="POSITION">%1$d</xliff:g>. pozíciu"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g>. pozícia"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Karta bola pridaná"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Karta bola odstránená"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor rýchlych nastavení"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Upozornenie <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Otvoriť nastavenia"</string>
@@ -980,7 +987,7 @@
     <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> používa aplikáciu <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Aplikácia <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> použila nedávno aplikáciu <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(podniková verzia)"</string>
-    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Telefonický hovor"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"Telefonický hovor"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(prostredníctvom aplikácie <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparát"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"poloha"</string>
@@ -988,7 +995,6 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzory sú vypnuté"</string>
     <string name="device_services" msgid="1549944177856658705">"Služby zariadenia"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"Klepnutím reštartujete túto aplikáciu a prejdete do režimu celej obrazovky."</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Presunúť"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigácia v systéme bola aktualizovaná. Ak chcete vykonať zmeny, prejdite do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Prejdite do Nastavení a aktualizujte navigáciu v systéme"</string>

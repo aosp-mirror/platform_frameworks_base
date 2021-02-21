@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
@@ -123,7 +124,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
         public void onUserSwitching(int newUserId) {
-            scheduleInternalCleanup(newUserId);
+            scheduleInternalCleanup(newUserId, null /* callback */);
             scheduleGetFeature(mSensorId, new Binder(), newUserId,
                     BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
                     null, mContext.getOpPackageName());
@@ -437,7 +438,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         Slog.d(TAG, "Face HAL ready, HAL ID: " + halId);
         if (halId != 0) {
             scheduleLoadAuthenticatorIds();
-            scheduleInternalCleanup(ActivityManager.getCurrentUser());
+            scheduleInternalCleanup(ActivityManager.getCurrentUser(), null /* callback */);
             scheduleGetFeature(mSensorId, new Binder(),
                     ActivityManager.getCurrentUser(),
                     BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION, null,
@@ -671,6 +672,20 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         });
     }
 
+    @Override
+    public void scheduleRemoveAll(int sensorId, @NonNull IBinder token, int userId,
+            @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
+        mHandler.post(() -> {
+            scheduleUpdateActiveUserWithoutHandler(userId);
+
+            // For IBiometricsFace@1.0, remove(0) means remove all enrollments
+            final FaceRemovalClient client = new FaceRemovalClient(mContext, mLazyDaemon, token,
+                    new ClientMonitorCallbackConverter(receiver), 0 /* faceId */, userId,
+                    opPackageName,
+                    FaceUtils.getLegacyInstance(mSensorId), mSensorId, mAuthenticatorIds);
+            mScheduler.scheduleClientMonitor(client);
+        });
+    }
 
     @Override
     public void scheduleResetLockout(int sensorId, int userId, @NonNull byte[] hardwareAuthToken) {
@@ -742,7 +757,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         });
     }
 
-    private void scheduleInternalCleanup(int userId) {
+    private void scheduleInternalCleanup(int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -750,13 +766,14 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceInternalCleanupClient client = new FaceInternalCleanupClient(mContext,
                     mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId, enrolledList,
                     FaceUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
-            mScheduler.scheduleClientMonitor(client);
+            mScheduler.scheduleClientMonitor(client, callback);
         });
     }
 
     @Override
-    public void scheduleInternalCleanup(int sensorId, int userId) {
-        scheduleInternalCleanup(userId);
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable BaseClientMonitor.Callback callback) {
+        scheduleInternalCleanup(userId, callback);
     }
 
     @Override
@@ -930,7 +947,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @NonNull
     @Override
-    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        return new BiometricTestSessionImpl(mContext, mSensorId, this, mHalResultController);
+    public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+            @NonNull String opPackageName) {
+        return new BiometricTestSessionImpl(mContext, mSensorId, callback, this,
+                mHalResultController);
     }
 }

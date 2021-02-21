@@ -259,10 +259,7 @@ public class PackageWatchdog {
             mIsPackagesReady = true;
             mHealthCheckController.setCallbacks(packageName -> onHealthCheckPassed(packageName),
                     packages -> onSupportedPackages(packages),
-                    () -> {
-                            syncRequestsAsync();
-                            mSyncRequired = true;
-                    });
+                    this::onSyncRequestNotified);
             setPropertyChangedListenerLocked();
             updateConfigs();
             registerConnectivityModuleHealthListener();
@@ -537,6 +534,7 @@ public class PackageWatchdog {
         synchronized (mLock) {
             mIsHealthCheckEnabled = enabled;
             mHealthCheckController.setEnabled(enabled);
+            mSyncRequired = true;
             // Prune to update internal state whenever health check is enabled/disabled
             syncState("health check state " + (enabled ? "enabled" : "disabled"));
         }
@@ -785,6 +783,13 @@ public class PackageWatchdog {
 
         if (isStateChanged) {
             syncState("updated health check supported packages " + supportedPackages);
+        }
+    }
+
+    private void onSyncRequestNotified() {
+        synchronized (mLock) {
+            mSyncRequired = true;
+            syncRequestsAsync();
         }
     }
 

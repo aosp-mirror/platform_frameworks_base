@@ -286,7 +286,7 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     }
 
     private void resetStateLocked() {
-        if (mRecordingInProgress && mPackageName != null && mFeatureId != null) {
+        if (mRecordingInProgress && mPackageName != null) {
             finishProxyOp(mPackageName, mFeatureId);
         }
 

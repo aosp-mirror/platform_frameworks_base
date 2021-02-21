@@ -43,6 +43,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
@@ -109,7 +110,8 @@ public class FingerprintService extends SystemService implements BiometricServic
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
         @Override
-        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
+                @NonNull String opPackageName) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -119,7 +121,7 @@ public class FingerprintService extends SystemService implements BiometricServic
                 return null;
             }
 
-            return provider.createTestSession(sensorId, opPackageName);
+            return provider.createTestSession(sensorId, callback, opPackageName);
         }
 
         @Override
@@ -499,7 +501,21 @@ public class FingerprintService extends SystemService implements BiometricServic
                     opPackageName);
         }
 
-        @Override
+        @Override // Binder call
+        public void removeAll(final IBinder token, final int userId,
+                final IFingerprintServiceReceiver receiver, final String opPackageName) {
+            Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
+
+            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for removeAll");
+                return;
+            }
+            provider.second.scheduleRemoveAll(provider.first, token, receiver, userId,
+                    opPackageName);
+        }
+
+        @Override // Binder call
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback,
                 final String opPackageName) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);

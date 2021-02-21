@@ -316,6 +316,13 @@ public final class WMShell extends SystemUI
                 }
             }
         });
+
+        mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
+            @Override
+            public void onConfigChanged(Configuration newConfig) {
+                oneHanded.onConfigChanged(newConfig);
+            }
+        });
     }
 
     @VisibleForTesting

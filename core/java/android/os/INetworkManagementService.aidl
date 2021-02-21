@@ -24,7 +24,6 @@ import android.net.Network;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.UidRange;
-import android.os.INetworkActivityListener;
 
 /**
  * @hide
@@ -294,46 +293,12 @@ interface INetworkManagementService
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isBandwidthControlEnabled();
 
-    /**
-     * Sets idletimer for an interface.
-     *
-     * This either initializes a new idletimer or increases its
-     * reference-counting if an idletimer already exists for given
-     * {@code iface}.
-     *
-     * {@code type} is the type of the interface, such as TYPE_MOBILE.
-     *
-     * Every {@code addIdleTimer} should be paired with a
-     * {@link removeIdleTimer} to cleanup when the network disconnects.
-     */
-    void addIdleTimer(String iface, int timeout, int type);
-
-    /**
-     * Removes idletimer for an interface.
-     */
-    void removeIdleTimer(String iface);
-
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
     void setFirewallInterfaceRule(String iface, boolean allow);
     void setFirewallUidRule(int chain, int uid, int rule);
     void setFirewallUidRules(int chain, in int[] uids, in int[] rules);
     void setFirewallChainEnabled(int chain, boolean enable);
-
-    /**
-     * Start listening for mobile activity state changes.
-     */
-    void registerNetworkActivityListener(INetworkActivityListener listener);
-
-    /**
-     * Stop listening for mobile activity state changes.
-     */
-    void unregisterNetworkActivityListener(INetworkActivityListener listener);
-
-    /**
-     * Check whether the mobile radio is currently active.
-     */
-    boolean isNetworkActive();
 
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
 

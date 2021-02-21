@@ -114,6 +114,21 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     public static final int SENSOR_ID_ANY = -1;
 
+    private static class RemoveTracker {
+        static final int REMOVE_SINGLE = 1;
+        static final int REMOVE_ALL = 2;
+        @IntDef({REMOVE_SINGLE, REMOVE_ALL})
+        @interface RemoveRequest {}
+
+        final @RemoveRequest int mRemoveRequest;
+        @Nullable final Fingerprint mSingleFingerprint;
+
+        RemoveTracker(@RemoveRequest int request, @Nullable Fingerprint fingerprint) {
+            mRemoveRequest = request;
+            mSingleFingerprint = fingerprint;
+        }
+    }
+
     private IFingerprintService mService;
     private Context mContext;
     private IBinder mToken = new Binder();
@@ -123,9 +138,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private RemovalCallback mRemovalCallback;
     private GenerateChallengeCallback mGenerateChallengeCallback;
     private CryptoObject mCryptoObject;
-    private Fingerprint mRemovalFingerprint;
+    @Nullable private RemoveTracker mRemoveTracker;
     private Handler mHandler;
-
 
     /**
      * Retrieves a list of properties for all fingerprint sensors on the device.
@@ -154,7 +168,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public BiometricTestSession createTestSession(int sensorId) {
         try {
             return new BiometricTestSession(mContext, sensorId,
-                    mService.createTestSession(sensorId, mContext.getOpPackageName()));
+                    (context, sensorId1, callback) -> mService
+                            .createTestSession(sensorId1, callback, context.getOpPackageName()));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -735,15 +750,27 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public void remove(Fingerprint fp, int userId, RemovalCallback callback) {
         if (mService != null) try {
             mRemovalCallback = callback;
-            mRemovalFingerprint = fp;
+            mRemoveTracker = new RemoveTracker(RemoveTracker.REMOVE_SINGLE, fp);
             mService.remove(mToken, fp.getBiometricId(), userId, mServiceReceiver,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Slog.w(TAG, "Remote exception in remove: ", e);
-            if (callback != null) {
-                callback.onRemovalError(fp, FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                            0 /* vendorCode */));
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes all face templates for the given user.
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void removeAll(int userId, @NonNull RemovalCallback callback) {
+        if (mService != null) {
+            try {
+                mRemovalCallback = callback;
+                mRemoveTracker = new RemoveTracker(RemoveTracker.REMOVE_ALL, null /* fp */);
+                mService.removeAll(mToken, userId, mServiceReceiver, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1044,16 +1071,29 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mRemovalCallback == null) {
             return;
         }
-        if (fingerprint == null) {
-            Slog.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
+
+        if (mRemoveTracker == null) {
+            Slog.w(TAG, "Removal tracker is null");
             return;
         }
 
-        int fingerId = fingerprint.getBiometricId();
-        int reqFingerId = mRemovalFingerprint.getBiometricId();
-        if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
-            Slog.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
-            return;
+        if (mRemoveTracker.mRemoveRequest == RemoveTracker.REMOVE_SINGLE) {
+            if (fingerprint == null) {
+                Slog.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
+                return;
+            }
+
+            if (mRemoveTracker.mSingleFingerprint == null) {
+                Slog.e(TAG, "Missing fingerprint");
+                return;
+            }
+
+            final int fingerId = fingerprint.getBiometricId();
+            int reqFingerId = mRemoveTracker.mSingleFingerprint.getBiometricId();
+            if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
+                Slog.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
+                return;
+            }
         }
 
         mRemovalCallback.onRemovalSucceeded(fingerprint, remaining);
@@ -1110,7 +1150,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
                     getErrorString(mContext, errMsgId, vendorCode));
         } else if (mRemovalCallback != null) {
-            mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
+            final Fingerprint fp = mRemoveTracker != null
+                    ? mRemoveTracker.mSingleFingerprint : null;
+            mRemovalCallback.onRemovalError(fp, clientErrMsgId,
                     getErrorString(mContext, errMsgId, vendorCode));
         }
     }
