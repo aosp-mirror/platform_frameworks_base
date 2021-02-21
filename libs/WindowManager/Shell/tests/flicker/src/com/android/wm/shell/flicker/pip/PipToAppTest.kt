@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -50,7 +49,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true) { configuration ->
             setup {
                 eachRun {
@@ -102,9 +101,9 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun appReplacesPipLayer() {
         testSpec.assertLayers {
-            this.showsLayer(PIP_WINDOW_TITLE)
+            this.isVisible(PIP_WINDOW_TITLE)
                 .then()
-                .showsLayer(pipApp.launcherName)
+                .isVisible(pipApp.launcherName)
         }
     }
 

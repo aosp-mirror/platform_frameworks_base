@@ -16,17 +16,16 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.Bundle
 import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
+import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import org.junit.FixMethodOrder
@@ -46,7 +45,7 @@ import org.junit.runners.Parameterized
 class AppPairsTestPairPrimaryAndSecondaryApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             super.transition(this, it)
             transitions {
@@ -75,10 +74,10 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
     fun appsEndingBounds() {
         testSpec.assertLayersEnd {
             val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-            this.hasVisibleRegion(primaryApp.defaultWindowName,
-                appPairsHelper.getPrimaryBounds(dividerRegion))
-                .hasVisibleRegion(secondaryApp.defaultWindowName,
-                    appPairsHelper.getSecondaryBounds(dividerRegion))
+            this.coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion),
+                primaryApp.defaultWindowName)
+                .coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion),
+                    secondaryApp.defaultWindowName)
         }
     }
 

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -29,6 +28,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.startRotation
@@ -50,7 +50,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true) { configuration ->
             setup {
                 eachRun {
@@ -97,9 +97,9 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Test
     fun pipLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.showsLayer(PIP_WINDOW_TITLE)
+            this.isVisible(PIP_WINDOW_TITLE)
                 .then()
-                .hidesLayer(PIP_WINDOW_TITLE)
+                .isInvisible(PIP_WINDOW_TITLE)
         }
     }
 
@@ -116,7 +116,7 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Postsubmit
     @Test
     fun navBarLayerRotatesAndScales() =
-        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
     @FlakyTest(bugId = 151179149)
     @Test

@@ -16,12 +16,10 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -34,6 +32,7 @@ import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.layerBecomesVisible
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -53,7 +52,7 @@ import org.junit.runners.Parameterized
 class NonResizableDismissInLegacySplitScreen(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             cleanSetup(this, configuration)
             setup {

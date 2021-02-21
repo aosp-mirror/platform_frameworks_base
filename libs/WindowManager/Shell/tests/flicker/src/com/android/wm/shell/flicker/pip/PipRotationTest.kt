@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -56,7 +55,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     private val startingBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
     private val endingBounds = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = false) { configuration ->
             setup {
                 test {
@@ -113,8 +112,8 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_StartingBounds() {
         testSpec.assertLayersStart {
-            hasVisibleRegion(fixedApp.defaultWindowName, startingBounds)
-            coversAtMostRegion(startingBounds, pipApp.defaultWindowName)
+            coversExactly(startingBounds, fixedApp.defaultWindowName)
+            coversAtMost(startingBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -122,8 +121,8 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     @Test
     fun appLayerRotates_EndingBounds() {
         testSpec.assertLayersEnd {
-            hasVisibleRegion(fixedApp.defaultWindowName, endingBounds)
-            coversAtMostRegion(endingBounds, pipApp.defaultWindowName)
+            coversExactly(endingBounds, fixedApp.defaultWindowName)
+            coversAtMost(endingBounds, pipApp.defaultWindowName)
         }
     }
 
