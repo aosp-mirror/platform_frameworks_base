@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Captura de pantalla lliscant"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignora la captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Previsualització de la captura de pantalla"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Marge superior"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Marge inferior"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravació de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processant gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"La teva organització ha instal·lat una autoritat de certificació al teu perfil de treball. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"S\'ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'administrador ha activat el registre de xarxa, que monitora el trànsit al teu perfil de treball, però no al personal."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Estàs connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Estàs connectat a <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que poden supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"El teu perfil de treball està connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com ara els correus electrònics, les aplicacions i els llocs web."</string>

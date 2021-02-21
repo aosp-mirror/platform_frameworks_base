@@ -16,13 +16,12 @@
 
 package com.android.systemui.shared.system;
 
-import android.os.Bundle;
+import android.graphics.Matrix;
 import android.os.Looper;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.InputChannel;
 import android.view.InputEvent;
-import android.view.InputEventSender;
 import android.view.MotionEvent;
 
 /**
@@ -51,6 +50,12 @@ public class InputChannelCompat {
      */
     public static boolean mergeMotionEvent(MotionEvent src, MotionEvent target) {
         return target.addBatch(src);
+    }
+
+    /** @see MotionEvent#createRotateMatrix */
+    public static Matrix createRotationMatrix(
+            /*@Surface.Rotation*/ int rotation, int displayW, int displayH) {
+        return MotionEvent.createRotateMatrix(rotation, displayW, displayH);
     }
 
     /**

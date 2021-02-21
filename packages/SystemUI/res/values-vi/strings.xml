@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Cuộn để phóng to ảnh chụp màn hình"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Đóng ảnh chụp màn hình"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Xem trước ảnh chụp màn hình"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Ranh giới trên"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Ranh giới dưới"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Trình ghi màn hình"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Đang xử lý video ghi màn hình"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Tổ chức của bạn đã cài đặt một tổ chức phát hành chứng chỉ trong hồ cơ công việc của bạn. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Một tổ chức phát hành chứng chỉ được cài đặt trên thiết bị này. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Quản trị viên của bạn đã bật tính năng ghi nhật ký mạng. Tính năng này giám sát lưu lượng truy cập trên thiết bị của bạn."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Quản trị viên của bạn đã bật tính năng ghi nhật ký mạng. Tính năng này giám sát lưu lượng truy cập trong hồ sơ công việc chứ không giám sát lưu lượng truy cập trong hồ sơ cá nhân của bạn."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Bạn đang kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Bạn đang kết nối với <xliff:g id="VPN_APP_0">%1$s</xliff:g> và <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Các ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Hồ sơ công việc của bạn được kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>, ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>

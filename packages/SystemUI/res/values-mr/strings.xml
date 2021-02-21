@@ -93,6 +93,10 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रीनशॉटवर स्क्रोल करा"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट डिसमिस करा"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉटचे पूर्वावलोकन"</string>
+    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
@@ -542,6 +546,8 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपल्या संस्थेने आपल्या कार्य प्रोफाइलवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपल्या प्रशासकाने नेटवर्क लॉगिंग सुरू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
+    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
+    <skip />
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"तुम्‍ही <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"तुम्‍ही <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसहित आपल्‍या नेटवर्क क्रिया मॉनिटर करू शकते."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"तुमचे कार्य प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>

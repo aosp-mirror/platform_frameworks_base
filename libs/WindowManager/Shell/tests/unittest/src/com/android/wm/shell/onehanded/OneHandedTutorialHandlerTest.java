@@ -17,10 +17,12 @@
 package com.android.wm.shell.onehanded;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.om.IOverlayManager;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
 
@@ -37,12 +39,15 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
-    @Mock
-    OneHandedTouchHandler mTouchHandler;
-    OneHandedTutorialHandler mTutorialHandler;
-    OneHandedGestureHandler mGestureHandler;
     OneHandedTimeoutHandler mTimeoutHandler;
     OneHandedController mOneHandedController;
+
+    @Mock
+    OneHandedGestureHandler mMockGestureHandler;
+    @Mock
+    OneHandedTouchHandler mMockTouchHandler;
+    @Mock
+    OneHandedTutorialHandler mMockTutorialHandler;
     @Mock
     DisplayController mMockDisplayController;
     @Mock
@@ -64,18 +69,17 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTutorialHandler = new OneHandedTutorialHandler(mContext, mMockShellMainExecutor);
         mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
-                mMockShellMainExecutor);
+
+        when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         mOneHandedController = new OneHandedController(
                 getContext(),
                 mMockDisplayController,
                 mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
-                mTouchHandler,
-                mTutorialHandler,
-                mGestureHandler,
+                mMockTouchHandler,
+                mMockTutorialHandler,
+                mMockGestureHandler,
                 mTimeoutHandler,
                 mMockUiEventLogger,
                 mMockOverlayManager,
@@ -86,6 +90,6 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testRegisterForDisplayAreaOrganizer() {
-        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mTutorialHandler);
+        verify(mMockDisplayAreaOrganizer).registerTransitionCallback(mMockTutorialHandler);
     }
 }

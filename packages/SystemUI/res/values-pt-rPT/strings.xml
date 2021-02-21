@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Deslocar captura de ecrã"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignorar captura de ecrã"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pré-visualização da captura de ecrã"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Limite superior"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Limite inferior"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de ecrã"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"A processar a gravação de ecrã"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação persistente de uma sessão de gravação de ecrã"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"A sua entidade instalou uma autoridade de certificação no seu perfil de trabalho. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Está instalada uma autoridade de certificação neste dispositivo. O tráfego da sua rede segura pode ser monitorizado ou alterado."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"O gestor ativou os registos de rede, que monitorizam o tráfego no seu dispositivo."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"O seu administrador ativou os registos de rede, que monitorizam o tráfego no seu perfil de trabalho, mas não no seu perfil pessoal."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Está ligado à rede <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Está ligado às redes <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>, que podem monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"O seu perfil de trabalho está ligado à rede <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>

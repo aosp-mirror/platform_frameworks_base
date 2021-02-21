@@ -28,7 +28,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 

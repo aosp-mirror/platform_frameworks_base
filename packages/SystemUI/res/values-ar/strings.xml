@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"لقطة شاشة موصولة"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"إغلاق لقطة الشاشة"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"معاينة لقطة الشاشة"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"الحد العلوي"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"الحد السفلي"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
@@ -554,6 +556,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ثبّتت مؤسستك مرجعًا مصدّقًا في ملفك الشخصي للعمل. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"تم تثبيت مرجع مصدّق على هذا الجهاز. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات في ملفك الشخصي للعمل ولكن لا تتم مراقبتها في ملفك الشخصي."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g> اللذين يمكنهما مراقبة نشاط شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"تم ربط الملف الشخصي للعمل بـ <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>

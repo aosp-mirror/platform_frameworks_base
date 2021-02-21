@@ -93,6 +93,10 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Przewiń zrzut ekranu"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zamknij zrzut ekranu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Podgląd zrzutu ekranu"</string>
+    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
+    <skip />
+    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Przetwarzam nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
@@ -445,7 +449,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Kliknij ponownie, by otworzyć"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Przesuń w górę, by otworzyć"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Przesuń w górę, by spróbować ponownie"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odblokuj, by użyć NFC"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odblokuj, by użyć komunikacji NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"To urządzenie należy do Twojej organizacji"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Właściciel tego urządzenia: <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Aby włączyć telefon, przesuń palcem od ikony"</string>
@@ -548,6 +552,8 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Twoja organizacja zainstalowała urząd certyfikacji w Twoim profilu służbowym. Zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Urząd certyfikacji zainstalowany na tym urządzeniu. Twój zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu."</string>
+    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
+    <skip />
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Łączysz się z aplikacjami <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, które mogą monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Twój profil służbowy jest połączony z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>

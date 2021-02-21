@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Здымак экрана з пракруткай"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Адхіліць здымак экрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Перадпрагляд здымка экрана"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Верхняя граніца"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Ніжняя граніца"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запіс экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Апрацоўваецца запіс экрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
@@ -548,6 +550,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ваша арганізацыя ўсталявала ў вашым працоўным профілі цэнтр сертыфікацыі. Ваш абаронены сеткавы трафік могуць праглядваць ці змяняць."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На гэтай прыладзе ўсталяваны цэнтр сертыфікацыі. Ваш абаронены сеткавы трафік могуць праглядваць ці змяняць."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратар уключыў вядзенне журнала сеткі, з дапамогай якога адсочваецца трафік на вашай прыладзе."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Ваш адміністратар уключыў вядзенне журнала сеткі, з дапамогай якога адсочваецца трафік у вашым працоўным профілі. Трафік вашага асабістага профілю застаецца недаступным."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Вы падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай дзейнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Вы падключаны да праграм <xliff:g id="VPN_APP_0">%1$s</xliff:g> і <xliff:g id="VPN_APP_1">%2$s</xliff:g>, якія могуць сачыць за вашай сеткавай дзейнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ваш працоўны профіль падключаны да праграмы <xliff:g id="VPN_APP">%1$s</xliff:g>, якая можа сачыць за вашай сеткавай актыўнасцю, уключаючы электронную пошту, праграмы і вэб-сайты."</string>

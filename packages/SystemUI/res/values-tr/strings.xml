@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Kayan ekran görüntüsü"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran görüntüsü önizlemesi"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Üst sınır"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Alt sınır"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedicisi"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran kaydı işleniyor"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Kuruluşunuz iş profilinize bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Bu cihazda bir sertifika yetkilisi yüklü. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Yöneticiniz,cihazınızdaki trafiği izleyen ağ günlük kaydını açtı."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Yöneticiniz, iş profilinizdeki trafiği izleyen ancak kişisel profilinizdeki trafiği izlemeyen ağ günlük kaydını açtı."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"E-postalarınız, uygulamalarınız ve web siteleriniz de dahil olmak üzere ağ etkinliğinizi takip edebilen <xliff:g id="VPN_APP">%1$s</xliff:g> ağına bağlısınız."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"E-postalar, uygulamalar ve web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilen <xliff:g id="VPN_APP_0">%1$s</xliff:g> ve <xliff:g id="VPN_APP_1">%2$s</xliff:g> uygulamalarına bağlısınız."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"İş profiliniz, e-postalar, uygulamalar ve web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilen <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı."</string>
