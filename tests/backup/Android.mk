@@ -24,6 +24,9 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS := -Wall -Werror
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := backup_helper_test
+LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+LOCAL_LICENSE_CONDITIONS := notice
+LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA_APPS)
 LOCAL_SHARED_LIBRARIES := libandroidfw libutils
 
