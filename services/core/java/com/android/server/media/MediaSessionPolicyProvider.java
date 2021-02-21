@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * without any parameters.
  */
 // TODO: Move this class to apex/media/
-public abstract class SessionPolicyProvider {
+public abstract class MediaSessionPolicyProvider {
     @IntDef(value = {
             SESSION_POLICY_IGNORE_BUTTON_RECEIVER,
             SESSION_POLICY_IGNORE_BUTTON_SESSION
@@ -55,7 +55,7 @@ public abstract class SessionPolicyProvider {
      */
     static final int SESSION_POLICY_IGNORE_BUTTON_SESSION = 1 << 1;
 
-    public SessionPolicyProvider(Context context) {
+    public MediaSessionPolicyProvider(Context context) {
         // Constructor used for reflection
     }
 
