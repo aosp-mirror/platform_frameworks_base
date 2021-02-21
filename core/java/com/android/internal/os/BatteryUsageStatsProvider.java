@@ -113,8 +113,13 @@ public class BatteryUsageStatsProvider {
     }
 
     private BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
-        // TODO(b/174186358): read extra power component number from configuration
-        final int customPowerComponentCount = 0;
+        final long[] customMeasuredEnergiesMicroJoules =
+                mStats.getCustomMeasuredEnergiesMicroJoules();
+        final int customPowerComponentCount = customMeasuredEnergiesMicroJoules != null
+                        ? customMeasuredEnergiesMicroJoules.length
+                        : 0;
+
+        // TODO(b/174186358): read extra time component number from configuration
         final int customTimeComponentCount = 0;
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder =
