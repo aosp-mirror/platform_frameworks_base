@@ -88,6 +88,7 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.AndroidKeyStoreMaintenance;
 import android.security.Authorization;
 import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
@@ -224,7 +225,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
-
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private ManagedProfilePasswordCache mManagedProfilePasswordCache;
 
@@ -795,6 +795,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 // Notify keystore that a new user was added.
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                AndroidKeyStoreMaintenance.onUserAdded(userHandle);
                 final KeyStore ks = KeyStore.getInstance();
                 final UserInfo parentInfo = mUserManager.getProfileParent(userHandle);
                 final int parentHandle = parentInfo != null ? parentInfo.id : -1;
@@ -1266,6 +1267,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void setKeystorePassword(byte[] password, int userHandle) {
+        AndroidKeyStoreMaintenance.onUserPasswordChanged(userHandle, password);
         final KeyStore ks = KeyStore.getInstance();
         // TODO(b/120484642): Update keystore to accept byte[] passwords
         String passwordString = password == null ? null : new String(password);
@@ -2292,6 +2294,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.removeUser(userId);
         mStrongAuth.removeUser(userId);
 
+        AndroidKeyStoreMaintenance.onUserRemoved(userId);
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
         mManagedProfilePasswordCache.removePassword(userId);
@@ -2902,11 +2905,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         FingerprintManager mFingerprintManager = mInjector.getFingerprintManager();
         if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
             if (mFingerprintManager.hasEnrolledFingerprints(userId)) {
-                CountDownLatch latch = new CountDownLatch(1);
-                // For the purposes of M and N, groupId is the same as userId.
-                Fingerprint finger = new Fingerprint(null, userId, 0, 0);
-                mFingerprintManager.remove(finger, userId,
-                        fingerprintManagerRemovalCallback(latch));
+                final CountDownLatch latch = new CountDownLatch(1);
+                mFingerprintManager.removeAll(userId, fingerprintManagerRemovalCallback(latch));
                 try {
                     latch.await(10000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
@@ -2920,9 +2920,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         FaceManager mFaceManager = mInjector.getFaceManager();
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
             if (mFaceManager.hasEnrolledTemplates(userId)) {
-                CountDownLatch latch = new CountDownLatch(1);
-                Face face = new Face(null, 0, 0);
-                mFaceManager.remove(face, userId, faceManagerRemovalCallback(latch));
+                final CountDownLatch latch = new CountDownLatch(1);
+                mFaceManager.removeAll(userId, faceManagerRemovalCallback(latch));
                 try {
                     latch.await(10000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
@@ -2936,10 +2935,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             CountDownLatch latch) {
         return new FingerprintManager.RemovalCallback() {
             @Override
-            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence err) {
-                Slog.e(TAG, String.format(
-                        "Can't remove fingerprint %d in group %d. Reason: %s",
-                        fp.getBiometricId(), fp.getGroupId(), err));
+            public void onRemovalError(@Nullable Fingerprint fp, int errMsgId, CharSequence err) {
+                Slog.e(TAG, "Unable to remove fingerprint, error: " + err);
                 latch.countDown();
             }
 
@@ -2955,9 +2952,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private FaceManager.RemovalCallback faceManagerRemovalCallback(CountDownLatch latch) {
         return new FaceManager.RemovalCallback() {
             @Override
-            public void onRemovalError(Face face, int errMsgId, CharSequence err) {
-                Slog.e(TAG, String.format("Can't remove face %d. Reason: %s",
-                        face.getBiometricId(), err));
+            public void onRemovalError(@Nullable Face face, int errMsgId, CharSequence err) {
+                Slog.e(TAG, "Unable to remove face, error: " + err);
                 latch.countDown();
             }
 

@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Isithombe seskrini sokuskrola"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Cashisa isithombe-skrini"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukubuka kuqala isithombe-skrini"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Umngcele ophezulu"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Umngcele ophansi"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Irekhoda yesikrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Icubungula okokuqopha iskrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Isaziso esiqhubekayo seseshini yokurekhoda isikrini"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Inhlangano yakho ifake ukugunyaza kwesitifiketi kuphrofayela yakho yomsebenzi. Ithrafikhi yenethiwekhi yakho evikelekile ingaqashwa noma ilungiswe."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Ukugunyaza kwesitifiketi kufakwe kule divayisi. Ithrafikhi yenethiwekhi yakho evikelekile ingaqashelwa noma ilungiswe."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Umlawuli wakho uvule ukungena kwedivayisi yakho, okuqapha ithrafikhi kudivayisi yakho."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Umlawuli wakho uvule ukungena kwenethiwekhi, okuhlola ithrafikhi kudivayisi yakho yephrofayela yomsebenzi kodwa hhayi kuphrofayela yakho yomuntu siqu."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Uxhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>, engaqapha umsebenzi wenethiwekhi yakho, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Uxhumeke ku-<xliff:g id="VPN_APP_0">%1$s</xliff:g> naku-<xliff:g id="VPN_APP_1">%2$s</xliff:g>, okungaqaphela umsebenzi wakho wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Iphrofayela yakho yomsebenzi ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>, engaqapha umsebenzi wenethiwekhi yakho, ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi."</string>

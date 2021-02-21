@@ -66,6 +66,8 @@ struct Constants {
     static constexpr auto blockSize = 4096;
     static constexpr auto systemPackage = "android"sv;
 
+    static constexpr auto userStatusDelay = 100ms;
+
     static constexpr auto progressUpdateInterval = 1000ms;
     static constexpr auto perUidTimeoutOffset = progressUpdateInterval * 2;
     static constexpr auto minPerUidTimeout = progressUpdateInterval * 3;
@@ -2306,13 +2308,24 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         LOG(ERROR) << "Mount ID mismatch: expected " << id() << ", but got: " << mountId;
         return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
     }
+    if (newStatus == IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE) {
+        // User-provided status, let's postpone the handling to avoid possible deadlocks.
+        mService.addTimedJob(*mService.mTimedQueue, id(), Constants::userStatusDelay,
+                             [this, newStatus]() { setCurrentStatus(newStatus); });
+        return binder::Status::ok();
+    }
 
+    setCurrentStatus(newStatus);
+    return binder::Status::ok();
+}
+
+void IncrementalService::DataLoaderStub::setCurrentStatus(int newStatus) {
     int targetStatus, oldStatus;
     DataLoaderStatusListener listener;
     {
         std::unique_lock lock(mMutex);
         if (mCurrentStatus == newStatus) {
-            return binder::Status::ok();
+            return;
         }
 
         oldStatus = mCurrentStatus;
@@ -2332,14 +2345,12 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
                << newStatus << " (target " << targetStatus << ")";
 
     if (listener) {
-        listener->onStatusChanged(mountId, newStatus);
+        listener->onStatusChanged(id(), newStatus);
     }
 
     fsmStep();
 
     mStatusCondition.notify_all();
-
-    return binder::Status::ok();
 }
 
 binder::Status IncrementalService::DataLoaderStub::reportStreamHealth(MountId mountId,

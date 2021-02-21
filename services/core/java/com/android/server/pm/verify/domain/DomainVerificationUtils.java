@@ -28,7 +28,7 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
-final class DomainVerificationUtils {
+public final class DomainVerificationUtils {
 
     /**
      * Consolidates package exception messages. A generic unavailable message is included since the
@@ -40,7 +40,7 @@ final class DomainVerificationUtils {
         throw new NameNotFoundException("Package " + packageName + " unavailable");
     }
 
-    static boolean isDomainVerificationIntent(Intent intent) {
+    public static boolean isDomainVerificationIntent(Intent intent) {
         return intent.isWebIntent()
                 && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
                 && intent.hasCategory(Intent.CATEGORY_DEFAULT);

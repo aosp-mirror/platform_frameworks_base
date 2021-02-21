@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"スクリーンショットをスクロールします"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"上部境界"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"下部境界"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"組織によって、あなたの仕事用プロファイルに認証局がインストールされました。保護されたネットワーク トラフィックが監視、変更される場合があります。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"このデバイスには認証局がインストールされています。保護されたネットワーク トラフィックが監視、変更される可能性があります。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"管理者がネットワーク ログを有効にしているため、このデバイスのトラフィックが監視されています。"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"管理者がネットワーク ログを有効にしているため、仕事用プロファイルのトラフィックは監視されています（個人用プロファイルは対象外）。"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> と <xliff:g id="VPN_APP_1">%2$s</xliff:g> に接続しています。これらのアプリは、あなたのネットワーク アクティビティ（メール、アプリ、ウェブサイト）を監視できます。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"この仕事用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>

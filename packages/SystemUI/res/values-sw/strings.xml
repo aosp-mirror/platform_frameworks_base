@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Fanya picha ya skrini iwe ndefu"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ondoa picha ya skrini"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Onyesho la kukagua picha ya skrini"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Mpaka wa sehemu ya juu"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Mpaka wa sehemu ya chini"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Kinasa Skrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Shirika lako limesakinisha mamlaka ya cheti katika wasifu wako wa kazini. Huenda shughuli kwenye mtandao wako salama zikafuatiliwa au kubadilishwa."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Mamlaka ya cheti imesakinishwa kwenye kifaa hiki. Huenda shughuli kwenye mtandao wako salama zikafuatiliwa au kubadilishwa."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Msimamizi wako amewasha kumbukumbu ya kuingia mtandaoni, ambayo hufuatilia shughuli kwenye kifaa chako."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Msimamizi wako amewasha kumbukumbu ya kuingia mtandaoni ambayo hufuatilia shughuli kwenye wasifu wako wa kazini ila si kwenye wasifu wako wa binafsi."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Umeunganishwa kwenye <xliff:g id="VPN_APP_0">%1$s</xliff:g> na <xliff:g id="VPN_APP_1">%2$s</xliff:g>, ambazo zinaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Wasifu wako wa kazini umeunganishwa kwenye <xliff:g id="VPN_APP">%1$s</xliff:g>, ambayo inaweza kufuatilia shughuli za mtandao wako, ikiwa ni pamoja na barua pepe, programu na tovuti."</string>

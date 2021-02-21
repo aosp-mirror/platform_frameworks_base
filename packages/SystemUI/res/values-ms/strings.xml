@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Penatalan tangkapan skrin"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ketepikan tangkapan skrin"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pratonton tangkapan skrin"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Sempadan atas"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Sempadan bawah"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Perakam Skrin"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses rakaman skrin"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pemberitahuan breterusan untuk sesi rakaman skrin"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisasi anda memasang sijil kuasa dalam profil kerja anda. Trafik rangkaian selamat anda mungkin dipantau atau diubah suai."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Sijil kuasa dipasang pada peranti ini. Trafik rangkaian selamat anda mungkin dipantau atau diubah suai."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Pentadbir anda telah menghidupkan pengelogan rangkaian yang memantau trafik pada peranti anda."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Pentadbir anda telah menghidupkan pengelogan rangkaian yang memantau trafik dalam profil kerja anda tetapi bukan dalam profil peribadi anda."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Anda dihubungkan ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Anda dihubungkan ke <xliff:g id="VPN_APP_0">%1$s</xliff:g> dan <xliff:g id="VPN_APP_1">%2$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profil kerja anda dihubungkan ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang dapat memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web."</string>

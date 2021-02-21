@@ -65,7 +65,7 @@ class NetworkTemplateTest {
             setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true)
             setSSID(ssid)
         }
-        return NetworkState(type, lp, caps, mock(Network::class.java), subscriberId, ssid)
+        return NetworkState(type, lp, caps, mock(Network::class.java), subscriberId)
     }
 
     private fun NetworkTemplate.assertMatches(ident: NetworkIdentity) =

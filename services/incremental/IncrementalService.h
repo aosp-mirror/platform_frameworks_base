@@ -234,6 +234,8 @@ private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
         binder::Status reportStreamHealth(MountId mount, int newStatus) final;
 
+        void setCurrentStatus(int newStatus);
+
         sp<content::pm::IDataLoader> getDataLoader();
 
         bool bind();

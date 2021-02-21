@@ -27,23 +27,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.TestShellExecutor;
-import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -52,7 +46,7 @@ public class OneHandedTimeoutHandlerTest extends OneHandedTestCase {
     private TestShellExecutor mMainExecutor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         mMainExecutor = new TestShellExecutor();
         mTimeoutHandler = Mockito.spy(new OneHandedTimeoutHandler(mMainExecutor));
