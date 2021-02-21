@@ -105,7 +105,8 @@ public class InstallStart extends Activity {
         }
 
         Intent nextActivity = new Intent(intent);
-        nextActivity.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        nextActivity.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
+                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         // The the installation source as the nextActivity thinks this activity is the source, hence
         // set the originating UID and sourceInfo explicitly

@@ -327,6 +327,13 @@ final class UiModeManagerService extends SystemService {
       	mCurrentUser = userHandle;
         getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
         verifySetupWizardCompleted();
+        synchronized (mLock) {
+            // only update if the value is actually changed
+            if (updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
+                   mCurrentUser)) {
+                updateLocked(0, 0);
+            }
+        }
     }
 
     @Override
@@ -354,11 +361,10 @@ final class UiModeManagerService extends SystemService {
                         new IntentFilter(Intent.ACTION_DOCK_EVENT));
                 IntentFilter batteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
                 context.registerReceiver(mBatteryReceiver, batteryFilter);
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(Intent.ACTION_USER_SWITCHED);
                 context.registerReceiver(mSettingsRestored,
                         new IntentFilter(Intent.ACTION_SETTING_RESTORED));
-                context.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
+                context.registerReceiver(mOnShutdown,
+                        new IntentFilter(Intent.ACTION_SHUTDOWN));
                 updateConfigurationLocked();
                 applyConfigurationExternallyLocked();
             }
@@ -403,6 +409,21 @@ final class UiModeManagerService extends SystemService {
         }, TAG + ".onStart");
         publishBinderService(Context.UI_MODE_SERVICE, mService);
         publishLocalService(UiModeManagerInternal.class, mLocalService);
+    }
+
+    private final BroadcastReceiver mOnShutdown = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mNightMode == MODE_NIGHT_AUTO) {
+                persistComputedNightMode(mCurrentUser);
+            }
+        }
+    };
+
+    private void persistComputedNightMode(int userId) {
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.UI_NIGHT_MODE_LAST_COMPUTED, mComputedNightMode ? 1 : 0,
+                userId);
     }
 
     private final BroadcastReceiver mSettingsRestored = new BroadcastReceiver() {
@@ -506,6 +527,10 @@ final class UiModeManagerService extends SystemService {
                     Secure.getLongForUser(context.getContentResolver(),
                             Secure.DARK_THEME_CUSTOM_END_TIME,
                             DEFAULT_CUSTOM_NIGHT_END_TIME.toNanoOfDay() / 1000L, userId) * 1000);
+            if (mNightMode == MODE_NIGHT_AUTO) {
+                mComputedNightMode = Secure.getIntForUser(context.getContentResolver(),
+                        Secure.UI_NIGHT_MODE_LAST_COMPUTED, 0, userId) != 0;
+            }
         }
 
         return oldNightMode != mNightMode;
@@ -1593,20 +1618,6 @@ final class UiModeManagerService extends SystemService {
                         + "; isIt=" + isIt);
                 }
                 return isIt;
-            }
-        }
-    }
-
-    private final class UserSwitchedReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            synchronized (mLock) {
-                final int currentId = intent.getIntExtra(
-                        Intent.EXTRA_USER_HANDLE, USER_SYSTEM);
-                // only update if the value is actually changed
-                if (updateNightModeFromSettingsLocked(context, context.getResources(), currentId)) {
-                    updateLocked(0, 0);
-                }
             }
         }
     }

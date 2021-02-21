@@ -654,4 +654,21 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         fakeExecutor.runAllReady()
         verify(mockController).unregisterCallback(any())
     }
+
+    @Test
+    fun nullPlaybackStateUnregistersCallback() {
+        viewModel.updateController(mockController)
+        val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
+        verify(mockController).registerCallback(captor.capture())
+        val callback = captor.value
+        // WHEN the callback receives a null state
+        callback.onPlaybackStateChanged(null)
+        with(fakeExecutor) {
+            advanceClockToNext()
+            runAllReady()
+        }
+        // THEN we unregister callback (as a result of clearing the controller)
+        fakeExecutor.runAllReady()
+        verify(mockController).unregisterCallback(any())
+    }
 }

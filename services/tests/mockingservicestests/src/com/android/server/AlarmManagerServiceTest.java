@@ -100,6 +100,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -1075,6 +1076,38 @@ public class AlarmManagerServiceTest {
             verify(pis[i]).send(eq(mMockContext), eq(0), any(Intent.class), any(),
                     any(Handler.class), isNull(), any());
         }
+    }
+
+    /**
+     * This tests that all non wakeup alarms are sent even when the mPendingNonWakeupAlarms gets
+     * modified before the send is complete. This avoids bugs like b/175701084.
+     */
+    @Test
+    public void allNonWakeupAlarmsSentAtomically() throws Exception {
+        final int numAlarms = 5;
+        final AtomicInteger alarmsFired = new AtomicInteger(0);
+        for (int i = 0; i < numAlarms; i++) {
+            final IAlarmListener listener = new IAlarmListener.Stub() {
+                @Override
+                public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+                    alarmsFired.incrementAndGet();
+                    mService.mPendingNonWakeupAlarms.clear();
+                }
+            };
+            setTestAlarmWithListener(ELAPSED_REALTIME, mNowElapsedTest + i + 5, listener);
+        }
+        doReturn(true).when(mService).checkAllowNonWakeupDelayLocked(anyLong());
+        // Advance time past all expirations.
+        mNowElapsedTest += numAlarms + 5;
+        mTestTimer.expire();
+        assertEquals(numAlarms, mService.mPendingNonWakeupAlarms.size());
+
+        // All of these alarms should be sent on interactive state change to true
+        mService.interactiveStateChangedLocked(false);
+        mService.interactiveStateChangedLocked(true);
+
+        assertEquals(numAlarms, alarmsFired.get());
+        assertEquals(0, mService.mPendingNonWakeupAlarms.size());
     }
 
     @Test

@@ -47,6 +47,7 @@
             android:name="com.android.carrierdefaultapp.CaptivePortalLoginActivity"
             android:label="@string/action_bar_label"
             android:exported="true"
+            android:permission="android.permission.MODIFY_PHONE_STATE"
             android:theme="@style/AppTheme"
             android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>

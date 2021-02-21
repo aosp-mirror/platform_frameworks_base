@@ -39,17 +39,19 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     private final ChooserProfileDescriptor[] mItems;
     private final boolean mIsSendAction;
     private int mBottomOffset;
+    private int mMaxTargetsPerRow;
 
     ChooserMultiProfilePagerAdapter(Context context,
             ChooserActivity.ChooserGridAdapter adapter,
             UserHandle personalProfileUserHandle,
             UserHandle workProfileUserHandle,
-            boolean isSendAction) {
+            boolean isSendAction, int maxTargetsPerRow) {
         super(context, /* currentPage */ 0, personalProfileUserHandle, workProfileUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
         mIsSendAction = isSendAction;
+        mMaxTargetsPerRow = maxTargetsPerRow;
     }
 
     ChooserMultiProfilePagerAdapter(Context context,
@@ -58,7 +60,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
             @Profile int defaultProfile,
             UserHandle personalProfileUserHandle,
             UserHandle workProfileUserHandle,
-            boolean isSendAction) {
+            boolean isSendAction, int maxTargetsPerRow) {
         super(context, /* currentPage */ defaultProfile, personalProfileUserHandle,
                 workProfileUserHandle);
         mItems = new ChooserProfileDescriptor[] {
@@ -66,6 +68,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
                 createProfileDescriptor(workAdapter)
         };
         mIsSendAction = isSendAction;
+        mMaxTargetsPerRow = maxTargetsPerRow;
     }
 
     private ChooserProfileDescriptor createProfileDescriptor(
@@ -114,7 +117,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         ChooserActivity.ChooserGridAdapter chooserGridAdapter =
                 getItem(pageIndex).chooserGridAdapter;
         GridLayoutManager glm = (GridLayoutManager) recyclerView.getLayoutManager();
-        glm.setSpanCount(chooserGridAdapter.getMaxTargetsPerRow());
+        glm.setSpanCount(mMaxTargetsPerRow);
         glm.setSpanSizeLookup(
                 new GridLayoutManager.SpanSizeLookup() {
                     @Override

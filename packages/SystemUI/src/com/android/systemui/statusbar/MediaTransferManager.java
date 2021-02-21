@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -36,10 +35,9 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.Dependency;
-import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -51,7 +49,7 @@ import java.util.List;
  */
 public class MediaTransferManager {
     private final Context mContext;
-    private final ActivityStarter mActivityStarter;
+    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
     private MediaDevice mDevice;
     private List<View> mViews = new ArrayList<>();
     private LocalMediaManager mLocalMediaManager;
@@ -74,12 +72,7 @@ public class MediaTransferManager {
             ViewParent parent = view.getParent();
             StatusBarNotification statusBarNotification =
                     getRowForParent(parent).getEntry().getSbn();
-            final Intent intent = new Intent()
-                    .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
-                    .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
-                            statusBarNotification.getPackageName());
-            mActivityStarter.startActivity(intent, false, true /* dismissShade */,
-                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            mMediaOutputDialogFactory.create(statusBarNotification.getPackageName(), true);
             return true;
         }
     };
@@ -107,7 +100,7 @@ public class MediaTransferManager {
 
     public MediaTransferManager(Context context) {
         mContext = context;
-        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mMediaOutputDialogFactory = Dependency.get(MediaOutputDialogFactory.class);
         LocalBluetoothManager lbm = Dependency.get(LocalBluetoothManager.class);
         InfoMediaManager imm = new InfoMediaManager(mContext, null, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, null);

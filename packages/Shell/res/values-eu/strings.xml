@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="app_label" msgid="3701846017049540910">"Shell-interfazea"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Akatsen txostenak"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Akatsen <xliff:g id="ID">#%d</xliff:g> txostena egiten ari gara"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Akatsen <xliff:g id="ID">#%d</xliff:g> txostena egin da"</string>
@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Hautatu hau akatsen txostena argazkirik gabe partekatzeko edo itxaron pantaila-argazkia atera arte"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Sakatu akatsen txostena argazkirik gabe partekatzeko edo itxaron pantaila-argazkia atera arte"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Sakatu akatsen txostena argazkirik gabe partekatzeko edo itxaron pantaila-argazkia atera arte"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Errore-txostenek sistemaren erregistro-fitxategietako datuak dauzkate, eta, haietan, kontuzkotzat jotzen duzun informazioa ager daiteke (adibidez, aplikazioen erabilera eta kokapen-datuak). Errore-txostenak partekatzen badituzu, partekatu soilik pertsona eta aplikazio fidagarriekin."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Errore-txostenek sistemaren erregistro-fitxategietako datuak dauzkate eta, haietan, kontuzkotzat jotzen duzun informazioa ager daiteke (adibidez, aplikazioen erabilera eta kokapen-datuak). Errore-txostenak partekatzen badituzu, partekatu soilik pertsona eta aplikazio fidagarriekin."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ez erakutsi berriro"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Akatsen txostenak"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Ezin izan da irakurri akatsen txostena"</string>

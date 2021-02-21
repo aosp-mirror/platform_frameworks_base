@@ -79,7 +79,9 @@ public class UriGrantsManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         mContext = new UriGrantsMockContext(InstrumentationRegistry.getContext());
-        mService = UriGrantsManagerService.createForTest(mContext.getFilesDir()).getLocalService();
+        mService = UriGrantsManagerService
+            .createForTest(mContext, mContext.getFilesDir())
+            .getLocalService();
     }
 
     /**

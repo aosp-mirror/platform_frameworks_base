@@ -62,7 +62,7 @@
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"잘못된 비밀번호"</string>
-    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN 오류"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"잘못된 PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요.</item>
       <item quantity="one">1초 후에 다시 시도하세요.</item>

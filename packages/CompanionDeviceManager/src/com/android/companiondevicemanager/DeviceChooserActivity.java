@@ -18,6 +18,8 @@ package com.android.companiondevicemanager;
 
 import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
 
+import static java.util.Objects.requireNonNull;
+
 import android.app.Activity;
 import android.companion.CompanionDeviceManager;
 import android.content.Intent;
@@ -114,6 +116,11 @@ public class DeviceChooserActivity extends Activity {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getCallingPackage() {
+        return requireNonNull(getService().mRequest.getCallingPackage());
     }
 
     @Override

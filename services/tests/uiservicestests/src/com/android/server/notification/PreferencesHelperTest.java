@@ -96,6 +96,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.StatsEvent;
 import android.util.Xml;
@@ -3284,12 +3285,51 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setImportantConversation(true);
         mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
-        List<ConversationChannelWrapper> convos = mHelper.getConversations(false);
+        List<ConversationChannelWrapper> convos =
+                mHelper.getConversations(IntArray.wrap(new int[] {0}), false);
 
         assertEquals(3, convos.size());
         assertTrue(conversationWrapperContainsChannel(convos, channel));
         assertTrue(conversationWrapperContainsChannel(convos, diffConvo));
         assertTrue(conversationWrapperContainsChannel(convos, channel2));
+    }
+
+    @Test
+    public void testGetConversations_multiUser() {
+        String convoId = "convo";
+        NotificationChannel messages =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
+
+        NotificationChannel messagesUser10 =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(
+                PKG_O, UID_O + UserHandle.PER_USER_RANGE, messagesUser10, true, false);
+
+        NotificationChannel messagesFromB =
+                new NotificationChannel("B person msgs", "messages from B", IMPORTANCE_DEFAULT);
+        messagesFromB.setConversationId(messages.getId(), "different convo");
+        mHelper.createNotificationChannel(PKG_O, UID_O, messagesFromB, true, false);
+
+        NotificationChannel messagesFromBUser10 =
+                new NotificationChannel("B person msgs", "messages from B", IMPORTANCE_DEFAULT);
+        messagesFromBUser10.setConversationId(messagesUser10.getId(), "different convo");
+        mHelper.createNotificationChannel(
+                PKG_O, UID_O + UserHandle.PER_USER_RANGE, messagesFromBUser10, true, false);
+
+
+        List<ConversationChannelWrapper> convos =
+                mHelper.getConversations(IntArray.wrap(new int[] {0}), false);
+
+        assertEquals(1, convos.size());
+        assertTrue(conversationWrapperContainsChannel(convos, messagesFromB));
+
+        convos =
+                mHelper.getConversations(IntArray.wrap(new int[] {0, UserHandle.getUserId(UID_O + UserHandle.PER_USER_RANGE)}), false);
+
+        assertEquals(2, convos.size());
+        assertTrue(conversationWrapperContainsChannel(convos, messagesFromB));
+        assertTrue(conversationWrapperContainsChannel(convos, messagesFromBUser10));
     }
 
     @Test
@@ -3322,7 +3362,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setImportantConversation(true);
         mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
-        List<ConversationChannelWrapper> convos = mHelper.getConversations(false);
+        List<ConversationChannelWrapper> convos =
+                mHelper.getConversations(IntArray.wrap(new int[] {0}), false);
 
         assertEquals(2, convos.size());
         assertTrue(conversationWrapperContainsChannel(convos, channel));
@@ -3360,7 +3401,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel2.setConversationId(calls.getId(), convoId);
         mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
-        List<ConversationChannelWrapper> convos = mHelper.getConversations(true);
+        List<ConversationChannelWrapper> convos =
+                mHelper.getConversations(IntArray.wrap(new int[] {0}), true);
 
         assertEquals(2, convos.size());
         assertTrue(conversationWrapperContainsChannel(convos, channel));

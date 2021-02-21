@@ -54,7 +54,7 @@
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Miejsce na kod PIN karty SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"Miejsce na kod PUK karty SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"Następny alarm ustawiony na: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Usuń"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Usuwanie"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"Wyłącz eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"Nie można wyłączyć karty eSIM"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Nie można wyłączyć karty eSIM z powodu błędu."</string>

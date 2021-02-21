@@ -46,7 +46,7 @@ class MediaTimeoutListener @Inject constructor(
     /**
      * Callback representing that a media object is now expired:
      * @param token Media session unique identifier
-     * @param pauseTimeuot True when expired for {@code PAUSED_MEDIA_TIMEOUT}
+     * @param pauseTimeout True when expired for {@code PAUSED_MEDIA_TIMEOUT}
      */
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
@@ -57,11 +57,10 @@ class MediaTimeoutListener @Inject constructor(
         // Having an old key means that we're migrating from/to resumption. We should update
         // the old listener to make sure that events will be dispatched to the new location.
         val migrating = oldKey != null && key != oldKey
-        var wasPlaying = false
         if (migrating) {
             val reusedListener = mediaListeners.remove(oldKey)
             if (reusedListener != null) {
-                wasPlaying = reusedListener.playing ?: false
+                val wasPlaying = reusedListener.playing ?: false
                 if (DEBUG) Log.d(TAG, "migrating key $oldKey to $key, for resumption")
                 reusedListener.mediaData = data
                 reusedListener.key = key
@@ -159,9 +158,8 @@ class MediaTimeoutListener @Inject constructor(
                         Log.v(TAG, "Execute timeout for $key")
                     }
                     timedOut = true
-                    if (dispatchEvents) {
-                        timeoutCallback(key, timedOut)
-                    }
+                    // this event is async, so it's safe even when `dispatchEvents` is false
+                    timeoutCallback(key, timedOut)
                 }, PAUSED_MEDIA_TIMEOUT)
             } else {
                 expireMediaTimeout(key, "playback started - $state, $key")

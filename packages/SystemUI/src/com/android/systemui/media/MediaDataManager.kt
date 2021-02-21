@@ -610,7 +610,8 @@ class MediaDataManager(
             // Move to resume key (aka package name) if that key doesn't already exist.
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
             val updated = removed.copy(token = null, actions = listOf(resumeAction),
-                    actionsToShowInCompact = listOf(0), active = false, resumption = true)
+                    actionsToShowInCompact = listOf(0), active = false, resumption = true,
+                    isClearable = true)
             val pkg = removed?.packageName
             val migrate = mediaEntries.put(pkg, updated) == null
             // Notify listeners of "new" controls when migrating or removed and update when not

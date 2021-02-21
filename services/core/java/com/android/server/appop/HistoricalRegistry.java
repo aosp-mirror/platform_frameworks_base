@@ -669,10 +669,12 @@ final class HistoricalRegistry {
 
     void shutdown() {
         synchronized (mInMemoryLock) {
-            if (mMode != AppOpsManager.HISTORICAL_MODE_DISABLED) {
-                persistPendingHistory();
+            if (mMode == AppOpsManager.HISTORICAL_MODE_DISABLED) {
+                return;
             }
         }
+        // Do not call persistPendingHistory inside the memory lock, due to possible deadlock
+        persistPendingHistory();
     }
 
     void persistPendingHistory() {

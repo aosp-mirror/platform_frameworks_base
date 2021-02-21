@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Aktivdir"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"AVRCP 1.5 (Defolt)"</item>
+    <item msgid="8036025277512210160">"AVRCP 1.4 (Defolt)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
-    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
+    <item msgid="8317734704797203949">"AVRCP 1.5"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_version_values">
-    <item msgid="4041937689950033942">"avrcp15"</item>
+    <item msgid="8965800440990431014">"avrcp14"</item>
     <item msgid="1613629084012791988">"avrcp13"</item>
-    <item msgid="99467845610592181">"avrcp14"</item>
+    <item msgid="4398977131424970917">"avrcp15"</item>
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">

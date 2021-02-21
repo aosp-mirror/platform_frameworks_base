@@ -30,7 +30,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਬਿਨਾਂ ਆਪਣੀ ਬੱਗ ਰਿਪੋਰਟ ਨੂੰ ਸਾਂਝੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਜਾਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੇ ਪੂਰੇ ਹੋਣ ਦੀ ਉਡੀਕ ਕਰੋ"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"ਬੱਗ ਰਿਪੋਰਟਾਂ ਵਿੱਚ ਸਿਸਟਮ ਦੀਆਂ ਵੱਖ-ਵੱਖ ਲੌਗ ਫ਼ਾਈਲਾਂ ਦਾ ਡਾਟਾ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਉਹ ਡਾਟਾ ਸ਼ਾਮਲ ਹੋ ਸਕਦਾ ਹੈ ਜਿਸ ਨੂੰ ਤੁਸੀਂ ਸੰਵੇਦਨਸ਼ੀਲ ਮੰਨਦੇ ਹੋ (ਜਿਵੇਂ ਕਿ ਐਪ-ਵਰਤੋਂ ਅਤੇ ਟਿਕਾਣਾ ਡਾਟਾ)। ਬੱਗ ਰਿਪੋਰਟਾਂ ਨੂੰ ਸਿਰਫ਼ ਆਪਣੇ ਭਰੋਸੇਯੋਗ ਲੋਕਾਂ ਅਤੇ ਐਪਾਂ ਨਾਲ ਸਾਂਝਾ ਕਰੋ।"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ਦੁਬਾਰਾ ਨਾ  ਦਿਖਾਓ"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"ਬੱਗ ਰਿਪੋਰਟਾਂ"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"ਬਗ ਰਿਪੋਰਟਾਂ"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ਬਗ ਰਿਪੋਰਟ ਫ਼ਾਈਲ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕੀ"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ਬੱਗ ਰਿਪੋਰਟ ਵੇਰਵਿਆਂ ਨੂੰ ਜ਼ਿਪ ਫ਼ਾਈਲ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ਬਿਨਾਂ-ਨਾਮ"</string>

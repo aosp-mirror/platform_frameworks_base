@@ -45,7 +45,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"SIM-карта салыңыз."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM-карта жок же ал окулбай калган. SIM-карта салыңыз."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Жараксыз SIM-карта."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"SIM картаңыз биротоло өчүрүлдү.\n Башка SIM-карта алыш үчүн зымсыз кызмат көрсөтүүчүгө кайрылыңыз."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"SIM-картаңыз биротоло өчүрүлдү.\n Башка SIM-карта алыш үчүн зымсыз кызмат көрсөтүүчүгө кайрылыңыз."</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM-карта кулпуланган."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"SIM-карта PUK-код менен кулпуланган."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"SIM-карта бөгөттөн чыгарылууда…"</string>
@@ -80,7 +80,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM-карта бөгөттөн чыгарылууда…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4–8 сандан турган PIN-кодду териңиз."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-код 8 же андан көп сандан турушу керек."</string>
-    <string name="kg_invalid_puk" msgid="1774337070084931186">"PUK-кодду кайрадан туура киргизиңиз. Кайталанган аракеттер SIM картаны биротоло жараксыз кылат."</string>
+    <string name="kg_invalid_puk" msgid="1774337070084931186">"PUK-кодду кайрадан туура киргизиңиз. Кайталанган аракеттер SIM-картаны биротоло жараксыз кылат."</string>
     <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Өтө көп графикалык ачкычты тартуу аракети болду"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"PIN-кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
@@ -98,7 +98,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM-картанын PIN-кодун ачуу кыйрады!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM-картанын PUK-кодун ачуу кыйрады!"</string>
     <string name="kg_pin_accepted" msgid="1625501841604389716">"Код кабыл алынды!"</string>
-    <string name="keyguard_carrier_default" msgid="6359808469637388586">"Интернет жок."</string>
+    <string name="keyguard_carrier_default" msgid="6359808469637388586">"Байланыш жок."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Учак режими"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Түзмөк кайра күйгүзүлгөндөн кийин графикалык ачкычты тартуу талап кылынат"</string>

@@ -1060,7 +1060,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // descendant. E.g. if a display is pending to be removed because it contains an
                 // activity with {@link ActivityRecord#mIsExiting} is true, the display may be
                 // removed when completing the removal of the last activity from
-                // {@link ActivityRecord#checkCompleteDeferredRemoval}.
+                // {@link ActivityRecord#handleCompleteDeferredRemoval}.
                 return false;
             }
         }
@@ -2555,8 +2555,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             pw.print(prefix); pw.println("ContainerAnimator:");
             mSurfaceAnimator.dump(pw, prefix + "  ");
         }
-        if (mLastOrientationSource != null) {
+        if (mLastOrientationSource != null && this == mDisplayContent) {
             pw.println(prefix + "mLastOrientationSource=" + mLastOrientationSource);
+            pw.println(prefix + "deepestLastOrientationSource=" + getLastOrientationSource());
         }
     }
 

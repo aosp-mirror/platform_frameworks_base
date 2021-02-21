@@ -432,6 +432,14 @@ public class TelecomManager {
             "android.telecom.extra.CALL_DISCONNECT_MESSAGE";
 
     /**
+     * A string value for {@link #EXTRA_CALL_DISCONNECT_MESSAGE}, indicates the call was dropped by
+     * lower layers
+     * @hide
+     */
+    public static final String CALL_AUTO_DISCONNECT_MESSAGE_STRING =
+            "Call dropped by lower layers";
+
+    /**
      * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
      * containing the component name of the associated connection service.
      * @hide

@@ -7898,6 +7898,12 @@ public final class Settings {
         public static final String UI_NIGHT_MODE_OVERRIDE_ON = "ui_night_mode_override_on";
 
         /**
+         * The last computed night mode bool the last time the phone was on
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_LAST_COMPUTED = "ui_night_mode_last_computed";
+
+        /**
          * The current night mode that has been overridden to turn off by the system.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.

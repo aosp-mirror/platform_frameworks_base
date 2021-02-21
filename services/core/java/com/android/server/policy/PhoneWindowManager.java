@@ -1466,8 +1466,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
         if (mHasFeatureLeanback) {
             isSetupComplete &= isTvUserSetupComplete();
+        } else if (mHasFeatureAuto) {
+            isSetupComplete &= isAutoUserSetupComplete();
         }
         return isSetupComplete;
+    }
+
+    private boolean isAutoUserSetupComplete() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                "android.car.SETUP_WIZARD_IN_PROGRESS", 0, UserHandle.USER_CURRENT) == 0;
     }
 
     private boolean isTvUserSetupComplete() {

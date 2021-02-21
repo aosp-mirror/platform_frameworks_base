@@ -99,7 +99,8 @@ public class CarNavigationButton extends LinearLayout {
         if (mHighlightWhenSelected) {
             // Always apply selected alpha if the button does not toggle alpha based on selection
             // state.
-            setAlpha(!mHighlightWhenSelected || mSelected ? mSelectedAlpha : mUnselectedAlpha);
+            mIcon.setAlpha(
+                    !mHighlightWhenSelected || mSelected ? mSelectedAlpha : mUnselectedAlpha);
         }
         if (mShowMoreWhenSelected && mMoreIcon != null) {
             mMoreIcon.setVisibility(selected ? VISIBLE : GONE);

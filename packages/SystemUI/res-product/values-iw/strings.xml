@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"ניסית לבטל את נעילת הטלפון <xliff:g id="NUMBER">%d</xliff:g> פעמים. פרופיל העבודה יוסר וכל נתוני הפרופיל יימחקו."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, ,תישלח אליך בקשה לבטל את נעילת הטאבלט באמצעות חשבון אימייל‏.\n\n יש לנסות שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%2$d</xliff:g> ניסיונות כושלים נוספים, תשילח אליך בקשה לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\n יש לנסות שוב בעוד <xliff:g id="NUMBER_2">%3$d</xliff:g> שניות."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"לאפשרויות נוספות, יש לבטל את נעילת הטלפון"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"לאפשרויות נוספות, יש לבטל את נעילת הטאבלט"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"לאפשרויות נוספות, יש לבטל את נעילת המכשיר"</string>
 </resources>

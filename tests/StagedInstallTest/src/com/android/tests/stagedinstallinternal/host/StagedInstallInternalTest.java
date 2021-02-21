@@ -28,6 +28,7 @@ import android.platform.test.annotations.LargeTest;
 
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
+import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.ProcessInfo;
@@ -39,6 +40,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedInstallInternalTest extends BaseHostJUnit4Test {
@@ -182,9 +186,55 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assertThat(sessionIds.length).isEqualTo(3);
     }
 
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailure() throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedInstallationShouldCleanUpOnValidationFailure");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage()
+            throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    public void testOrphanedStagingDirectoryGetsCleanedUpOnReboot() throws Exception {
+        //create random directories in /data/app-staging folder
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("mkdir /data/app-staging/session_123");
+        getDevice().executeShellCommand("mkdir /data/app-staging/random_name");
+        getDevice().disableAdbRoot();
+
+        assertThat(getStagingDirectories()).isNotEmpty();
+        getDevice().reboot();
+        assertThat(getStagingDirectories()).isEmpty();
+    }
+
+    private List<String> getStagingDirectories() throws DeviceNotAvailableException {
+        String baseDir = "/data/app-staging";
+        try {
+            getDevice().enableAdbRoot();
+            return getDevice().getFileEntry(baseDir).getChildren(false)
+                    .stream().filter(entry -> entry.getName().matches("session_\\d+"))
+                    .map(entry -> entry.getName())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Return an empty list if any error
+            return Collections.EMPTY_LIST;
+        } finally {
+            getDevice().disableAdbRoot();
+        }
+    }
+
     private void restartSystemServer() throws Exception {
         // Restart the system server
-        final long oldStartTime = getDevice().getProcessByName("system_server").getStartTime();
+        long oldStartTime = getDevice().getProcessByName("system_server").getStartTime();
 
         getDevice().enableAdbRoot(); // Need root to restart system server
         assertThat(getDevice().executeShellCommand("am restart")).contains("Restart the system");

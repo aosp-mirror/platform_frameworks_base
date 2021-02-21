@@ -56,5 +56,7 @@
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
         <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>
+        <permission name="android.permission.READ_DREAM_STATE"/>
+        <permission name="android.permission.READ_DREAM_SUPPRESSION"/>
     </privapp-permissions>
 </permissions>
