@@ -61,12 +61,10 @@ public class ScreenPowerCalculator extends PowerCalculator {
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final PowerAndDuration totalPowerAndDuration = new PowerAndDuration();
-        final boolean forceUsePowerProfileModel = (query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL) != 0;
 
         final boolean useEnergyData = calculateTotalDurationAndPower(totalPowerAndDuration,
                 batteryStats, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED,
-                forceUsePowerProfileModel);
+                query.shouldForceUsePowerProfileModel());
 
         builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE,
