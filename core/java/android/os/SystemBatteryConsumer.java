@@ -51,6 +51,7 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
             // Reserved: UNACCOUNTED,
             // Reserved: USER,
             DRAIN_TYPE_WIFI,
+            DRAIN_TYPE_CUSTOM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DrainType {
@@ -66,6 +67,7 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     public static final int DRAIN_TYPE_PHONE = 9;
     public static final int DRAIN_TYPE_SCREEN = 10;
     public static final int DRAIN_TYPE_WIFI = 13;
+    public static final int DRAIN_TYPE_CUSTOM = 14;
 
     @DrainType
     private final int mDrainType;

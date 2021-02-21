@@ -46,6 +46,7 @@ import org.junit.runners.Suite;
         BstatsCpuTimesValidationTest.class,
         CameraPowerCalculatorTest.class,
         CpuPowerCalculatorTest.class,
+        CustomMeasuredPowerCalculatorTest.class,
         DischargedPowerCalculatorTest.class,
         FlashlightPowerCalculatorTest.class,
         GnssPowerCalculatorTest.class,
