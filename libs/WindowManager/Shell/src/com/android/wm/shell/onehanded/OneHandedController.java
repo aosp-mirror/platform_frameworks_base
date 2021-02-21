@@ -67,6 +67,7 @@ public class OneHandedController {
     private volatile boolean mIsOneHandedEnabled;
     private volatile boolean mIsSwipeToNotificationEnabled;
     private boolean mTaskChangeToExit;
+    private boolean mLockedDisabled;
     private float mOffSetFraction;
 
     private final Context mContext;
@@ -263,6 +264,10 @@ public class OneHandedController {
 
     @VisibleForTesting
     void startOneHanded() {
+        if (isLockedDisabled()) {
+            Slog.d(TAG, "Temporary lock disabled");
+            return;
+        }
         if (!mDisplayAreaOrganizer.isInOneHanded()) {
             final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
@@ -433,6 +438,11 @@ public class OneHandedController {
         return displaySize;
     }
 
+    @VisibleForTesting
+    boolean isLockedDisabled() {
+        return mLockedDisabled;
+    }
+
     private void updateOneHandedEnabled() {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
             stopOneHanded();
@@ -485,6 +495,14 @@ public class OneHandedController {
         }
     }
 
+    @VisibleForTesting
+    void setLockedDisabled(boolean locked, boolean enabled) {
+        if (enabled == mIsOneHandedEnabled) {
+            return;
+        }
+        mLockedDisabled = locked && !enabled;
+    }
+
     private void onConfigChanged(Configuration newConfig) {
         if (mTutorialHandler != null) {
             if (!mIsOneHandedEnabled
@@ -500,6 +518,8 @@ public class OneHandedController {
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mOffSetFraction=");
         pw.println(mOffSetFraction);
+        pw.print(innerPrefix + "mLockedDisabled=");
+        pw.println(mLockedDisabled);
 
         if (mDisplayAreaOrganizer != null) {
             mDisplayAreaOrganizer.dump(pw);
@@ -572,6 +592,13 @@ public class OneHandedController {
         public void setThreeButtonModeEnabled(boolean enabled) {
             mMainExecutor.execute(() -> {
                 OneHandedController.this.setThreeButtonModeEnabled(enabled);
+            });
+        }
+
+        @Override
+        public void setLockedDisabled(boolean locked, boolean enabled) {
+            mMainExecutor.execute(() -> {
+                OneHandedController.this.setLockedDisabled(locked, enabled);
             });
         }
 
