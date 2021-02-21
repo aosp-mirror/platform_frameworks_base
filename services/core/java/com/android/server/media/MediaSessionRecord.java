@@ -895,7 +895,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
-                if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
+                if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
                         != 0) {
                     return;
                 }
@@ -911,7 +911,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void setMediaButtonBroadcastReceiver(ComponentName receiver) throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
-                if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
+                if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
                         != 0) {
                     return;
                 }

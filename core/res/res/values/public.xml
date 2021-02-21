@@ -3153,6 +3153,10 @@
     <public name="config_systemShell" />
     <!-- @hide @SystemApi -->
     <public name="config_systemContacts" />
+    <!-- @hide @SystemApi -->
+    <public name="config_customMediaKeyDispatcher" />
+    <!-- @hide @SystemApi -->
+    <public name="config_customMediaSessionPolicyProvider" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

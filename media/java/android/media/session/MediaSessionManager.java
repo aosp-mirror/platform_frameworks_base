@@ -958,9 +958,9 @@ public final class MediaSessionManager {
      * @hide
      */
     @VisibleForTesting
-    public void setCustomMediaKeyDispatcherForTesting(@Nullable String name) {
+    public void setCustomMediaKeyDispatcher(@Nullable String name) {
         try {
-            mService.setCustomMediaKeyDispatcherForTesting(name);
+            mService.setCustomMediaKeyDispatcher(name);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set custom media key dispatcher name", e);
         }
@@ -968,19 +968,55 @@ public final class MediaSessionManager {
 
     /**
      * Set the component name for the custom
-     * {@link com.android.server.media.SessionPolicyProvider} class. Set to null to restore to the
-     * custom {@link com.android.server.media.SessionPolicyProvider} class name retrieved from the
-     * config value.
+     * {@link com.android.server.media.MediaSessionPolicyProvider} class. Set to null to restore to
+     * the custom {@link com.android.server.media.MediaSessionPolicyProvider} class name retrieved
+     * from the config value.
      *
      * @hide
      */
     @VisibleForTesting
-    public void setCustomSessionPolicyProviderForTesting(@Nullable String name) {
+    public void setCustomMediaSessionPolicyProvider(@Nullable String name) {
         try {
-            mService.setCustomSessionPolicyProviderForTesting(name);
+            mService.setCustomMediaSessionPolicyProvider(name);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set custom session policy provider name", e);
         }
+    }
+
+    /**
+     * Get the component name for the custom {@link com.android.server.media.MediaKeyDispatcher}
+     * class.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean hasCustomMediaKeyDispatcher(@NonNull String componentName) {
+        Objects.requireNonNull(componentName, "componentName shouldn't be null");
+        try {
+            return mService.hasCustomMediaKeyDispatcher(componentName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to check if custom media key dispatcher with given component"
+                    + " name exists", e);
+        }
+        return false;
+    }
+
+    /**
+     * Get the component name for the custom
+     * {@link com.android.server.media.MediaSessionPolicyProvider} class.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean hasCustomMediaSessionPolicyProvider(@NonNull String componentName) {
+        Objects.requireNonNull(componentName, "componentName shouldn't be null");
+        try {
+            return mService.hasCustomMediaSessionPolicyProvider(componentName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to check if custom media session policy provider with given"
+                    + " component name exists", e);
+        }
+        return false;
     }
 
     /**

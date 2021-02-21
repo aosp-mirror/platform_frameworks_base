@@ -16,7 +16,7 @@
 
 package com.android.server.media;
 
-import static com.android.server.media.SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION;
+import static com.android.server.media.MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION;
 
 import android.media.Session2Token;
 import android.media.session.MediaSession;
