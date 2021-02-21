@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
+import android.os.BatteryUsageStatsQuery;
 import android.os.SystemBatteryConsumer;
 import android.view.Display;
 
@@ -33,18 +34,29 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class AmbientDisplayPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
+    private static final long MINUTE_IN_MS = 60 * 1000;
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
-            .setAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY, 360.0);
+            .setAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY, 10.0);
 
     @Test
-    public void testTimerBasedModel() {
+    public void testMeasuredEnergyBasedModel() {
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
-        stats.noteScreenStateLocked(Display.STATE_ON, 1000, 1000, 1000);
-        stats.noteScreenStateLocked(Display.STATE_DOZE, 2000, 2000, 2000);
-        stats.noteScreenStateLocked(Display.STATE_OFF, 3000, 3000, 3000);
+        stats.updateDisplayEnergyLocked(300_000_000, Display.STATE_ON, 0);
+
+        stats.noteScreenStateLocked(Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
+                30 * MINUTE_IN_MS);
+
+        stats.updateDisplayEnergyLocked(200_000_000, Display.STATE_DOZE,
+                30 * MINUTE_IN_MS);
+
+        stats.noteScreenStateLocked(Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
+                120 * MINUTE_IN_MS);
+
+        stats.updateDisplayEnergyLocked(100_000_000, Display.STATE_OFF,
+                120 * MINUTE_IN_MS);
 
         AmbientDisplayPowerCalculator calculator =
                 new AmbientDisplayPowerCalculator(mStatsRule.getPowerProfile());
@@ -55,8 +67,32 @@ public class AmbientDisplayPowerCalculatorTest {
                 mStatsRule.getSystemBatteryConsumer(
                         SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY);
         assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
-                .isEqualTo(1000);
+                .isEqualTo(90 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
-                .isWithin(PRECISION).of(0.1);
+                .isWithin(PRECISION).of(7.5075075);
+    }
+
+    @Test
+    public void testPowerProfileBasedModel() {
+        BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        stats.noteScreenStateLocked(Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
+                30 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
+                120 * MINUTE_IN_MS);
+
+        AmbientDisplayPowerCalculator calculator =
+                new AmbientDisplayPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build(),
+                calculator);
+
+        SystemBatteryConsumer consumer =
+                mStatsRule.getSystemBatteryConsumer(
+                        SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY);
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE))
+                .isEqualTo(90 * MINUTE_IN_MS);
+        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE))
+                .isWithin(PRECISION).of(15.0);
     }
 }
