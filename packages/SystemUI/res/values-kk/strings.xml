@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Скриншотты айналдыру"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Скриншотты жабу"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Скриншотты алдын ала қарау"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Жоғарғы шектік сызық"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Төменгі шектік сызық"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Экран жазғыш"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экран жазғыш бейнесін өңдеу"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды бейнеге жазудың ағымдағы хабарландыруы"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ұйымыңыз жұмыс профиліңізде сертификат орнатқан. Қорғалған желі трафигіңіз бақылануы немесе өзгертілуі мүмкін."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Осы құрылғыда сертификат орнатылған. Қорғалған желі трафигіңіз бақылануы немесе өзгертілуі мүмкін."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Әкімші құрылғыңыздағы трафикті бақылайтын желі журналын жүргізуді қосқан."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Әкімші жеке профильдегі емес, жұмыс профиліндегі трафикті қадағалау үшін желі журналын жүргізуді қосып қойған."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Желідегі әрекеттеріңізді, соның ішінде электрондық хабарларды, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="VPN_APP">%1$s</xliff:g> желісіне қосылдыңыз."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Желідегі әрекеттеріңізді, соның ішінде электрондық хабарларды, қолданбаларды және вебсайттарды бақылай алатын <xliff:g id="VPN_APP_0">%1$s</xliff:g> және <xliff:g id="VPN_APP_1">%2$s</xliff:g> желілеріне қосылдыңыз."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Жұмыс профиліңіз желідегі белсенділігіңізді, соның ішінде электрондық хабарларды, қолданбаларды және веб-сайттарды бақылай алатын <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған."</string>

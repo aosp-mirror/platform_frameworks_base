@@ -36,6 +36,7 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
+import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -58,6 +59,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
      * rejected (blue) exclusions.
      */
     private static final String GESTURE_EXCLUSION_PROP = "debug.pointerlocation.showexclusion";
+
+    private static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
+            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
 
     public static class PointerState {
         // Trace of previous points.
@@ -352,6 +356,21 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     .toString(), 1 + itemW * 6, base, mTextPaint);
         }
 
+        int saveId = canvas.save();
+        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
+            // Rotate negative (since we're rotating the drawing canvas vs the output).
+            canvas.rotate(-90.0f * mContext.getDisplay().getRotation());
+            switch (mContext.getDisplay().getRotation()) {
+                case Surface.ROTATION_90:
+                    canvas.translate(-canvas.getHeight(), 0);
+                    break;
+                case Surface.ROTATION_180:
+                    canvas.translate(-canvas.getWidth(), -canvas.getHeight());
+                    break;
+                case Surface.ROTATION_270:
+                    canvas.translate(0, -canvas.getWidth());
+            }
+        }
         // Pointer trace.
         for (int p = 0; p < NP; p++) {
             final PointerState ps = mPointers.get(p);
@@ -399,7 +418,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
             if (mCurDown && ps.mCurDown) {
                 // Draw crosshairs.
                 canvas.drawLine(0, ps.mCoords.y, getWidth(), ps.mCoords.y, mTargetPaint);
-                canvas.drawLine(ps.mCoords.x, 0, ps.mCoords.x, getHeight(), mTargetPaint);
+                // Extend crosshairs to cover screen regardless of rotation (ie. since the rotated
+                // canvas can "expose" content past 0 and up-to the largest screen dimension).
+                canvas.drawLine(ps.mCoords.x, -getHeight(), ps.mCoords.x,
+                        Math.max(getHeight(), getWidth()), mTargetPaint);
 
                 // Draw current point.
                 int pressureLevel = (int)(ps.mCoords.pressure * 255);
@@ -458,6 +480,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 }
             }
         }
+        canvas.restoreToCount(saveId);
     }
 
     private void logMotionEvent(String type, MotionEvent event) {

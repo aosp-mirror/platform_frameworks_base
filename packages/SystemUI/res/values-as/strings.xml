@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"স্ক্ৰীনশ্বট স্ক্ৰ’ল কৰক"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্ৰীনশ্বট অগ্ৰাহ্য কৰক"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্ৰীনশ্বটৰ পূৰ্বদৰ্শন"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ওপৰৰ সীমাৰেখা"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"তলৰ সীমাৰেখা"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"স্ক্ৰীন ৰেকৰ্ডাৰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"স্ক্রীন ৰেকৰ্ডিঙৰ প্ৰক্ৰিয়াকৰণ হৈ আছে"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রীণ ৰেকৰ্ডিং ছেশ্বন চলি থকা সময়ত পোৱা জাননী"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"আপোনাৰ প্ৰতিষ্ঠানে আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰিছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"এই ডিভাইচটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰা হৈছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ ডিভাইচটোত নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰে।"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইলত ট্ৰেফিক নিৰীক্ষণ কৰে কিন্তু আপোনাৰ ব্যক্তিগত প্ৰ’ফাইলত নকৰে।"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"আপুনি <xliff:g id="VPN_APP">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"আপুনি <xliff:g id="VPN_APP_0">%1$s</xliff:g> আৰু <xliff:g id="VPN_APP_1">%2$s</xliff:g>ৰে সংযুক্ত হৈ আছে, যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"আপুনি <xliff:g id="VPN_APP">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>

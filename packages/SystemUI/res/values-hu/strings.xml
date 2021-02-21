@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Görgethető képernyőkép"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Képernyőkép elvetése"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Képernyőkép előnézete"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Felső határ"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Alsó határ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Képernyőrögzítő"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Képernyőrögzítés feldolgozása"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Folyamatban lévő értesítés képernyőrögzítési munkamenethez"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Szervezete tanúsítványkibocsátót telepített a munkaprofilba. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Az eszközre tanúsítványkibocsátó van telepítve. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"A rendszergazda bekapcsolta az eszköz forgalmát figyelő hálózati naplózást."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"A rendszergazda bekapcsolta a hálózati naplózást, amely a munkaprofilban figyeli a forgalmat, a személyes profilban azonban nem."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Ön kapcsolódik a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazáshoz, amely figyelheti hálózati tevékenységét, beleértve a levelezést, valamint az alkalmazás- és webhelyhasználatot."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Ön csatlakozik a(z) <xliff:g id="VPN_APP_0">%1$s</xliff:g> és a(z) <xliff:g id="VPN_APP_1">%2$s</xliff:g> alkalmazásokhoz, amelyek figyelhetik hálózati tevékenységét, beleértve a levelezést, valamint az alkalmazás- és webhelyhasználatot."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Munkaprofilja csatlakozik a(z) <xliff:g id="VPN_APP">%1$s</xliff:g> alkalmazáshoz, amely figyelheti hálózati tevékenységét, beleértve a levelezést, az alkalmazásokat és a webhelyeket."</string>

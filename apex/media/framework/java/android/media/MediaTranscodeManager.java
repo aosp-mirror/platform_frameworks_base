@@ -295,8 +295,8 @@ public final class MediaTranscodeManager {
                 /* ignore */
             }
         }
-
-        throw new UnsupportedOperationException("Failed to connect to MediaTranscoding service");
+        Log.w(TAG, "Failed to get service");
+        return null;
     }
 
     /*
@@ -463,8 +463,7 @@ public final class MediaTranscodeManager {
                 }
             };
 
-    private ITranscodingClient registerClient(IMediaTranscodingService service)
-            throws UnsupportedOperationException {
+    private ITranscodingClient registerClient(IMediaTranscodingService service) {
         synchronized (mLock) {
             try {
                 // Registers the client with MediaTranscoding service.
@@ -476,13 +475,12 @@ public final class MediaTranscodeManager {
                 if (mTranscodingClient != null) {
                     mTranscodingClient.asBinder().linkToDeath(() -> onClientDied(), /* flags */ 0);
                 }
-                return mTranscodingClient;
-            } catch (RemoteException re) {
-                Log.e(TAG, "Failed to register new client due to exception " + re);
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to register new client due to exception " + ex);
                 mTranscodingClient = null;
             }
         }
-        throw new UnsupportedOperationException("Failed to register new client");
+        return mTranscodingClient;
     }
 
     /**
@@ -495,7 +493,9 @@ public final class MediaTranscodeManager {
         mUid = Os.getuid();
         mPid = Os.getpid();
         IMediaTranscodingService service = getService(false /*retry*/);
-        mTranscodingClient = registerClient(service);
+        if (service != null) {
+            mTranscodingClient = registerClient(service);
+        }
     }
 
     public static final class TranscodingRequest {
@@ -1567,6 +1567,10 @@ public final class MediaTranscodeManager {
                     if (mTranscodingClient == null) {
                         // Try to register with the service again.
                         IMediaTranscodingService service = getService(false /*retry*/);
+                        if (service == null) {
+                            throw new MediaTranscodingException.ServiceNotAvailableException(
+                                    "Service rebooting. Try again later");
+                        }
                         mTranscodingClient = registerClient(service);
                         // If still fails, throws an exception to tell client to try later.
                         if (mTranscodingClient == null) {

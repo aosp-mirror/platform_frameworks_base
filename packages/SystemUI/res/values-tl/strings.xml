@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"I-scroll ang screenshot"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"I-dismiss ang screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Preview ng screenshot"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Pinakamataas na limitasyon"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Pinakamababang limitasyon"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Nag-install ang iyong organisasyon ng awtoridad sa certificate sa iyong profile sa trabaho. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"May naka-install sa device na ito na isang awtoridad sa certificate. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa device mo."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa profile mo sa trabaho pero hindi sa iyong personal na profile."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Nakakonekta ka sa <xliff:g id="VPN_APP">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Nakakonekta ka sa <xliff:g id="VPN_APP_0">%1$s</xliff:g> at <xliff:g id="VPN_APP_1">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho, na maaaring sumubaybay sa aktibidad sa iyong network, kasama ang mga email, app, at website."</string>

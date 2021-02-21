@@ -37,6 +37,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -69,6 +70,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.DeviceConfig;
@@ -167,6 +169,9 @@ public class InputManagerService extends IInputManager.Stub
 
     /** TODO(b/169067926): Remove this. */
     private static final boolean UNTRUSTED_TOUCHES_TOAST = false;
+
+    public static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
+            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
 
     // Pointer to native input manager service object.
     private final long mPtr;
@@ -518,8 +523,51 @@ public class InputManagerService extends IInputManager.Stub
         nativeReloadDeviceAliases(mPtr);
     }
 
+    /** Rotates CCW by `delta` 90-degree increments. */
+    private static void rotateBounds(Rect inOutBounds, int parentW, int parentH, int delta) {
+        int rdelta = ((delta % 4) + 4) % 4;
+        int origLeft = inOutBounds.left;
+        switch (rdelta) {
+            case 0:
+                return;
+            case 1:
+                inOutBounds.left = inOutBounds.top;
+                inOutBounds.top = parentW - inOutBounds.right;
+                inOutBounds.right = inOutBounds.bottom;
+                inOutBounds.bottom = parentW - origLeft;
+                return;
+            case 2:
+                inOutBounds.left = parentW - inOutBounds.right;
+                inOutBounds.right = parentW - origLeft;
+                return;
+            case 3:
+                inOutBounds.left = parentH - inOutBounds.bottom;
+                inOutBounds.bottom = inOutBounds.right;
+                inOutBounds.right = parentH - inOutBounds.top;
+                inOutBounds.top = origLeft;
+                return;
+        }
+    }
+
     private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
-        nativeSetDisplayViewports(mPtr, viewports.toArray(new DisplayViewport[0]));
+        final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
+        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
+            // Remove all viewport operations. They will be built-into the window transforms.
+            for (int i = viewports.size() - 1; i >= 0; --i) {
+                final DisplayViewport v = vArray[i] = viewports.get(i).makeCopy();
+                // deviceWidth/Height are apparently in "rotated" space, so flip them if needed.
+                int dw = (v.orientation % 2) == 0 ? v.deviceWidth : v.deviceHeight;
+                int dh = (v.orientation % 2) == 0 ? v.deviceHeight : v.deviceWidth;
+                v.logicalFrame.set(0, 0, dw, dh);
+                v.physicalFrame.set(0, 0, dw, dh);
+                v.orientation = 0;
+            }
+        } else {
+            for (int i = viewports.size() - 1; i >= 0; --i) {
+                vArray[i] = viewports.get(i);
+            }
+        }
+        nativeSetDisplayViewports(mPtr, vArray);
     }
 
     /**

@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Vieritä kuvakaappausta"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Hylkää kuvakaappaus"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Kuvakaappauksen esikatselu"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Yläraja"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Alaraja"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Näytön tallentaja"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
@@ -441,7 +443,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Avaa napauttamalla uudelleen"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Avaa pyyhkäisemällä ylös"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yritä uudelleen pyyhkäisemällä ylös"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus käyttääksesi NFC:tä"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus, jotta voit käyttää NFC:tä"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Organisaatiosi omistaa tämän laitteen"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> omistaa tämän laitteen"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Avaa puhelu pyyhkäisemällä."</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisaatiosi lisäsi työprofiiliin varmenteen myöntäjän. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Laitteeseen on asennettu varmenteen myöntäjä. Suojattua verkkoliikennettäsi voidaan valvoa tai muuttaa."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Järjestelmänvalvoja on ottanut käyttöön verkkolokitietojen tallentamisen, joka valvoo laitteellasi tapahtuvaa liikennettä."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Järjestelmänvalvoja on ottanut käyttöön verkkolokitietojen tallentamisen. Sen avulla seurataan liikennettä työprofiilissasi mutta ei henkilökohtaisessa profiilissasi."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Olet yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Olet yhteydessä sovelluksiin <xliff:g id="VPN_APP_0">%1$s</xliff:g> ja <xliff:g id="VPN_APP_1">%2$s</xliff:g>, jotka voivat valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Työprofiilisi on yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa toimintaasi verkossa, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>

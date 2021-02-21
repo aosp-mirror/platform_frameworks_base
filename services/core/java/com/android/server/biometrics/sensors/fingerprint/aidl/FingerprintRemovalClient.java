@@ -39,20 +39,22 @@ import java.util.Map;
 class FingerprintRemovalClient extends RemovalClient<Fingerprint, ISession> {
     private static final String TAG = "FingerprintRemovalClient";
 
+    private final int[] mBiometricIds;
+
     FingerprintRemovalClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
-            @Nullable ClientMonitorCallbackConverter listener, int biometricId, int userId,
+            @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
             @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, biometricId, userId, owner, utils, sensorId,
+        super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
                 authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
+        mBiometricIds = biometricIds;
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            final int[] ids = new int[] {mBiometricId};
-            getFreshDaemon().removeEnrollments(mSequentialId, ids);
+            getFreshDaemon().removeEnrollments(mSequentialId, mBiometricIds);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting remove", e);
             mCallback.onClientFinished(this, false /* success */);

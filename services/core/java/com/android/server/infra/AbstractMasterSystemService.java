@@ -371,6 +371,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             int durationMs) {
         Slog.i(mTag, "setTemporaryService(" + userId + ") to " + componentName + " for "
                 + durationMs + "ms");
+        if (mServiceNameResolver == null) {
+            return;
+        }
         enforceCallingPermissionForManagement();
 
         Objects.requireNonNull(componentName);
@@ -404,6 +407,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         enforceCallingPermissionForManagement();
 
         synchronized (mLock) {
+            if (mServiceNameResolver == null) {
+                return false;
+            }
             final boolean changed = mServiceNameResolver.setDefaultServiceEnabled(userId, enabled);
             if (!changed) {
                 if (verbose) {
@@ -433,6 +439,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     public final boolean isDefaultServiceEnabled(@UserIdInt int userId) {
         enforceCallingPermissionForManagement();
+
+        if (mServiceNameResolver == null) {
+            return false;
+        }
 
         synchronized (mLock) {
             return mServiceNameResolver.isDefaultServiceEnabled(userId);
@@ -957,6 +967,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             @Override
             public void onPackageModified(String packageName) {
                 if (verbose) Slog.v(mTag, "onPackageModified(): " + packageName);
+
+                if (mServiceNameResolver == null) {
+                    return;
+                }
 
                 final int userId = getChangingUserId();
                 final String serviceName = mServiceNameResolver.getDefaultServiceName(userId);

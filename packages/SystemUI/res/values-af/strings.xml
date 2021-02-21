@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Rollees skermskoot"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Maak skermkiekie toe"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skermkiekievoorskou"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Boonste grens"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Onderste grens"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skermopnemer"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Verwerk tans skermopname"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Deurlopende kennisgewing vir \'n skermopnamesessie"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Jou organisasie het \'n sertifikaatoutoriteit in jou werkprofiel geïnstalleer. Jou veilige netwerkverkeer kan gemonitor of gewysig word."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"\'n Sertifikaatoutoriteit is op hierdie toestel geïnstalleer. Jou veilige netwerkverkeer kan gemonitor of gewysig word."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Jou administrateur het netwerkloginskrywing aangeskakel, wat verkeer op jou toestel monitor."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Jou administrateur het netwerkloglêers aangeskakel wat verkeer in jou werkprofiel maar nie in jou persoonlike profiel monitor nie."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Jy is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Jy is gekoppel aan <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Jou werkprofiel is gekoppel aan <xliff:g id="VPN_APP">%1$s</xliff:g>, wat jou netwerkaktiwiteit, insluitend e-posse, programme en webwerwe, kan monitor."</string>

@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Ekraanipildi kerimine"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekraanipildist loobumine"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekraanipildi eelvaade"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Ülempiir"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Alampiir"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekraanisalvestuse töötlemine"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Teie organisatsioon installis teie tööprofiilile sertifikaadi volituse. Teie turvalist võrguliiklust võidakse jälgida ja muuta."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Sertifikaadi volitus on sellesse seadmesse installitud. Teie turvalist võrguliiklust võidakse jälgida ja muuta."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Teie administraator lülitas sisse võrgu logimise funktsiooni, mis jälgib teie seadmes liiklust."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Teie administraator on sisse lülitanud võrgu logimise funktsiooni, mis jälgib liiklust teie võrguprofiilil, kuid mitte teie isiklikul profiilil."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Teil on ühendus rakendusega <xliff:g id="VPN_APP">%1$s</xliff:g>, mis saab jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Teil on ühendus rakendustega <xliff:g id="VPN_APP_0">%1$s</xliff:g> ja <xliff:g id="VPN_APP_1">%2$s</xliff:g>, mis saavad jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Teie tööprofiil on ühendatud rakendusega <xliff:g id="VPN_APP">%1$s</xliff:g>, mis saab jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>

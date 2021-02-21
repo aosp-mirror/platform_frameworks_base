@@ -1002,7 +1002,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);
-        mPointerEventDispatcher = new PointerEventDispatcher(inputChannel);
+        mPointerEventDispatcher = new PointerEventDispatcher(inputChannel, this);
 
         // Tap Listeners are supported for:
         // 1. All physical displays (multi-display).

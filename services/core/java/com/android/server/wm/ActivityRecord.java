@@ -436,6 +436,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
     final @Nullable String launchedFromFeatureId; // always the feature in launchedFromPackage
+    final boolean launchedFromHomeProcess; // as per original caller
     final Intent intent;    // the original intent that generated us
     final String shortComponentName; // the short component name of the intent
     final String resolvedType; // as per original caller;
@@ -1667,6 +1668,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
         launchedFromFeatureId = _launchedFromFeature;
+        launchedFromHomeProcess = _caller != null && _caller.isHomeProcess();
         shortComponentName = _intent.getComponent().flattenToShortString();
         resolvedType = _resolvedType;
         componentSpecified = _componentSpecified;

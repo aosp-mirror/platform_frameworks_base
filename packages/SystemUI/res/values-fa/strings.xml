@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"نماگرفت پیمایشی"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"رد کردن نماگرفت"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"پیش‌نمایش نماگرفت"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"مرز بالایی"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"مرز پایینی"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ضبط‌کننده صفحه‌نمایش"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"درحال پردازش ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اعلان درحال انجام برای جلسه ضبط صفحه‌نمایش"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"سازمان شما مرجع گواهینامه‌ای در نمایه کاری شما نصب کرده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"مرجع گواهینامه‌ای در این دستگاه نصب شده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"سرپرست سیستم شما گزارش‌گیری از شبکه را (که ترافیک دستگاه شما را پایش می‌کند) روشن کرده است."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"سرپرست شما گزارش‌گیری شبکه را که بر ترافیک نمایه کاری‌تان نظارت می‌کند، اما بر ترافیک نمایه شخصی‌تان نظارت نمی‌کند روشن کرده است."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کند."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"به <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> متصل شده‌اید، که می‌توانند فعالیت شما را در شبکه (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کنند."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"نمایه کاری شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است، که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌ها) را پایش کند."</string>

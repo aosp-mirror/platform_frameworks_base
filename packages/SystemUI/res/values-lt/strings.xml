@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Viso puslapio ekrano kopija"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Praleisti ekrano kopiją"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekrano kopijos peržiūra"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Viršutinė riba"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Apatinė riba"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrano vaizdo įrašytuvas"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Apdorojam. ekrano vaizdo įraš."</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Šiuo metu rodomas ekrano įrašymo sesijos pranešimas"</string>
@@ -548,6 +550,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Jūsų organizacija įdiegė darbo profilyje sertifikato įgaliojimą. Jūsų saugaus tinklo srautas gali būti stebimas arba keičiamas."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Šiame įrenginyje įdiegtas sertifikato įgaliojimas. Jūsų saugaus tinklo srautas gali būti stebimas arba keičiamas."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratorius įjungė tinklo duomenų įrašymą į žurnalą. Įjungus šią funkciją stebimas srautas jūsų įrenginyje."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratorius įjungė tinklo duomenų įrašymą į žurnalą. Įjungus šią funkciją stebimas srautas jūsų darbo, bet ne asmeniniame profilyje."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Esate prisijungę prie programų „<xliff:g id="VPN_APP_0">%1$s</xliff:g>“ ir „<xliff:g id="VPN_APP_1">%2$s</xliff:g>“, kurios gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Darbo profilis susietas su programa „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
