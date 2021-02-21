@@ -78,9 +78,9 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
         Slog.i(TAG, "notifying " + reasonName + " is inactive");
         dpmi.notifyUnsafeOperationStateChanged(this, reason, false);
 
-        Slog.i(TAG, "returning " + reasonName
-                + " and restoring DevicePolicySafetyChecker to " + mRealSafetyChecker);
-        mService.setDevicePolicySafetyCheckerUnchecked(mRealSafetyChecker);
+        Slog.i(TAG, "returning " + reasonName);
+
+        disableSelf();
         return reason;
     }
 
@@ -89,11 +89,24 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
         boolean safe = mReason != reason;
         Slog.i(TAG, "isSafeOperation(" + operationSafetyReasonToString(reason) + "): " + safe);
 
+        disableSelf();
         return safe;
     }
 
     @Override
     public void onFactoryReset(IResultReceiver callback) {
         throw new UnsupportedOperationException();
+    }
+
+    private void disableSelf() {
+        Slog.i(TAG, "restoring DevicePolicySafetyChecker to " + mRealSafetyChecker);
+        mService.setDevicePolicySafetyCheckerUnchecked(mRealSafetyChecker);
+    }
+
+    @Override
+    public String toString() {
+        return "OneTimeSafetyChecker[id=" + System.identityHashCode(this)
+                + ", reason=" + operationSafetyReasonToString(mReason)
+                + ", operation=" + operationToString(mOperation) + ']';
     }
 }
