@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ಸ್ಕ್ರೀನ್‍ಶಾಟ್‍ನ ಪೂರ್ವವೀಕ್ಷಣೆ"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ಮೇಲಿನ ಗಡಿರೇಖೆ"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ಕೆಳಗಿನ ಗಡಿರೇಖೆ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಪ್ರಮಾಣಪತ್ರ ಅಂಗೀಕಾರವನ್ನು ಸ್ಥಾಪಿಸಿದೆ. ನಿಮ್ಮ ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಅಥವಾ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ರಮಾಣಪತ್ರ ಅಂಗೀಕಾರವನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿದೆ. ನಿಮ್ಮ ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು ಅಥವಾ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನೆಟ್‌ವರ್ಕ್ ಲಾಗಿಂಗ್ ಆನ್ ಮಾಡಿದ್ದಾರೆ. ಇದು ನಿಮ್ಮ ಸಾಧನದ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುತ್ತದೆ."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ನೆಟ್‌ವರ್ಕ್‌ ಲಾಗಿಂಗ್ ಆನ್ ಮಾಡಿದ್ದಾರೆ, ಅದು ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ನಲ್ಲಿ ಇರುವ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ನಿಗಾ ಇರಿಸುತ್ತದೆ ಆದರೆ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಇರುವ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ಅಲ್ಲ."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"ನೀವು <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ. ಇದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ನೀವು <xliff:g id="VPN_APP_0">%1$s</xliff:g> ಹಾಗೂ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ. ಇವು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ <xliff:g id="VPN_APP">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ. ಇದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>

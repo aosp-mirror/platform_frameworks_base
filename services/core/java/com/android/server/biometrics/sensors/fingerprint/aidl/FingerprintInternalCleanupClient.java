@@ -60,7 +60,7 @@ class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint
             String owner, BiometricUtils<Fingerprint> utils, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         return new FingerprintRemovalClient(context, lazyDaemon, token,
-                null /* ClientMonitorCallbackConverter */, biometricId, userId, owner, utils,
-                sensorId, authenticatorIds);
+                null /* ClientMonitorCallbackConverter */, new int[] {biometricId}, userId, owner,
+                utils, sensorId, authenticatorIds);
     }
 }

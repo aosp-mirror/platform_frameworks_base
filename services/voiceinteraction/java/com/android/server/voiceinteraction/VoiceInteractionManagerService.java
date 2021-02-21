@@ -430,25 +430,17 @@ public class VoiceInteractionManagerService extends SystemService {
                 // Eventually it will be an error to not specify this.
                 setCurInteractor(new ComponentName(curInteractorInfo.getServiceInfo().packageName,
                         curInteractorInfo.getServiceInfo().name), userHandle);
-                if (curInteractorInfo.getRecognitionService() != null) {
-                    setCurRecognizer(
-                            new ComponentName(curInteractorInfo.getServiceInfo().packageName,
-                                    curInteractorInfo.getRecognitionService()), userHandle);
-                    return;
-                }
+            } else {
+                // No voice interactor, so clear the setting.
+                setCurInteractor(null, userHandle);
             }
 
-            // No voice interactor, we'll just set up a simple recognizer.
-            initSimpleRecognizer(curInteractorInfo, userHandle);
+            initRecognizer(userHandle);
         }
 
-        public void initSimpleRecognizer(VoiceInteractionServiceInfo curInteractorInfo,
-                int userHandle) {
+        public void initRecognizer(int userHandle) {
             ComponentName curRecognizer = findAvailRecognizer(null, userHandle);
             if (curRecognizer != null) {
-                if (curInteractorInfo == null) {
-                    setCurInteractor(null, userHandle);
-                }
                 setCurRecognizer(curRecognizer, userHandle);
             }
         }
@@ -1607,20 +1599,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
 
-            private @NonNull String getDefaultRecognizer(@NonNull UserHandle user) {
-                ResolveInfo resolveInfo = mPm.resolveServiceAsUser(
-                        new Intent(RecognitionService.SERVICE_INTERFACE),
-                        PackageManager.GET_META_DATA, user.getIdentifier());
-
-                if (resolveInfo == null || resolveInfo.serviceInfo == null) {
-                    Log.w(TAG, "Unable to resolve default voice recognition service.");
-                    return "";
-                }
-
-                return new ComponentName(resolveInfo.serviceInfo.packageName,
-                        resolveInfo.serviceInfo.name).flattenToShortString();
-            }
-
             /**
              * Convert the assistant-role holder into settings. The rest of the system uses the
              * settings.
@@ -1642,9 +1620,6 @@ public class VoiceInteractionManagerService extends SystemService {
                             Settings.Secure.ASSISTANT, "", userId);
                     Settings.Secure.putStringForUser(getContext().getContentResolver(),
                             Settings.Secure.VOICE_INTERACTION_SERVICE, "", userId);
-                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                            Settings.Secure.VOICE_RECOGNITION_SERVICE, getDefaultRecognizer(user),
-                            userId);
                 } else {
                     // Assistant is singleton role
                     String pkg = roleHolders.get(0);
@@ -1671,9 +1646,6 @@ public class VoiceInteractionManagerService extends SystemService {
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_INTERACTION_SERVICE, serviceComponentName,
                                 userId);
-                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_RECOGNITION_SERVICE, serviceRecognizerName,
-                                userId);
 
                         return;
                     }
@@ -1693,9 +1665,6 @@ public class VoiceInteractionManagerService extends SystemService {
                                 activityInfo.getComponentName().flattenToShortString(), userId);
                         Settings.Secure.putStringForUser(getContext().getContentResolver(),
                                 Settings.Secure.VOICE_INTERACTION_SERVICE, "", userId);
-                        Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                                Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                                getDefaultRecognizer(user), userId);
                         return;
                     }
                 }
@@ -1772,7 +1741,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     synchronized (VoiceInteractionManagerServiceStub.this) {
                         Slog.i(TAG, "Force stopping current voice recognizer: "
                                 + getCurRecognizer(userHandle));
-                        initSimpleRecognizer(null, userHandle);
+                        // TODO: Figure out why the interactor was being cleared and document it.
+                        setCurInteractor(null, userHandle);
+                        initRecognizer(userHandle);
                     }
                 }
                 return hitInt || hitRec;
@@ -1793,6 +1764,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (isPackageAppearing(pkgName) != PACKAGE_UNCHANGED) {
                     return;
                 }
+                if (getCurRecognizer(mCurUser) == null) {
+                    initRecognizer(mCurUser);
+                }
                 final String curInteractorStr = Settings.Secure.getStringForUser(
                         mContext.getContentResolver(),
                         Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);
@@ -1807,12 +1781,6 @@ public class VoiceInteractionManagerService extends SystemService {
                                 availInteractorInfo.getServiceInfo().packageName,
                                 availInteractorInfo.getServiceInfo().name);
                         setCurInteractor(availInteractor, mCurUser);
-                        if (getCurRecognizer(mCurUser) == null &&
-                                availInteractorInfo.getRecognitionService() != null) {
-                            setCurRecognizer(new ComponentName(
-                                    availInteractorInfo.getServiceInfo().packageName,
-                                    availInteractorInfo.getRecognitionService()), mCurUser);
-                        }
                     }
                 } else {
                     if (didSomePackagesChange()) {
@@ -1843,10 +1811,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     if (curRecognizer == null) {
                         // Could a new recognizer appear when we don't have one pre-installed?
                         if (anyPackagesAppearing()) {
-                            curRecognizer = findAvailRecognizer(null, userHandle);
-                            if (curRecognizer != null) {
-                                setCurRecognizer(curRecognizer, userHandle);
-                            }
+                            initRecognizer(userHandle);
                         }
                         return;
                     }

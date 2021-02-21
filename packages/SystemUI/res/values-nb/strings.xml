@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Rull skjermdumpen"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Avvis skjermdumpen"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning av skjermdump"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Øvre grense"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Nedre grense"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skjermopptaker"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandler skjermopptaket"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Vedvarende varsel for et skjermopptak"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organisasjonen din installerte en sertifiseringsinstans i jobbprofilen din. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"En sertifiseringsinstans er installert på denne enheten. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken på enheten din."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken i jobbprofilen din, men ikke i den personlige profilen din."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Du er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Du er koblet til <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Jobbprofilen din er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-poster, apper og nettsteder."</string>

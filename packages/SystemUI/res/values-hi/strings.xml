@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रीनशॉट को स्क्रोल करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"स्क्रीनशाॉट की ऊपर की सीमा"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"स्क्रीनशॉट की नीचे की सीमा"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
@@ -443,7 +445,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"खोलने के लिए फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
-    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए, स्क्रीन को अनलॉक करें"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए स्क्रीन को अनलॉक करें"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> के पास है"</string>
     <string name="phone_hint" msgid="6682125338461375925">"फ़ोन के लिए आइकॉन से स्वाइप करें"</string>
@@ -544,6 +546,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपके संगठन ने आपकी वर्क प्रोफ़ाइल में एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपके व्यवस्थापक ने नेटवर्क लॉगिंग चालू किया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"आपके एडमिन ने नेटवर्क लॉगिंग की सुविधा चालू कर दी है, जिससे आपकी वर्क प्रोफ़ाइल पर आने वाले ट्रैफ़िक की निगरानी की जाती है. हालांकि, इससे आपकी निजी प्रोफ़ाइल की निगरानी नहीं की जाती."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"आप <xliff:g id="VPN_APP_0">%1$s</xliff:g> और <xliff:g id="VPN_APP_1">%2$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"आपकी वर्क प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>

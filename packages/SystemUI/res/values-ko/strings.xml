@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"스크롤 스크린샷"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"스크린샷 닫기"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"스크린샷 미리보기"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"상단 경계"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"하단 경계"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"화면 녹화"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"화면 녹화 처리 중"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"화면 녹화 세션에 관한 지속적인 알림"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"조직에서 직장 프로필에 인증기관을 설치했습니다. 보안 네트워크 트래픽을 모니터링 또는 수정할 수 있습니다."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"이 기기에는 인증기관이 설치되어 있습니다. 보안 네트워크 트래픽을 모니터링 또는 수정할 수 있습니다."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"관리자가 기기에서 발생하는 트래픽을 모니터링하는 네트워크 로깅을 사용 설정했습니다."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"관리자가 직장 프로필에서 발생하는 트래픽을 모니터링하는 네트워크 로깅을 사용 설정했습니다. 하지만 개인 프로필은 모니터링되지 않습니다."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> 및 <xliff:g id="VPN_APP_1">%2$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"직장 프로필이 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>

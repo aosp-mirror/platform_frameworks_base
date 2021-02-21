@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Derulați captura de ecran"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Închideți captura de ecran"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Previzualizare a capturii de ecran"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Marginea superioară"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Marginea inferioară"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder pentru ecran"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Se procesează înregistrarea"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificare în curs pentru o sesiune de înregistrare a ecranului"</string>
@@ -545,6 +547,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizația dvs. a instalat un certificat CA în profilul dvs. de serviciu. Traficul dvs. sigur de rețea poate fi monitorizat sau modificat."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Pe acest dispozitiv este instalat un certificat CA. Traficul dvs. sigur de rețea poate fi monitorizat sau modificat."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratorul dvs. a activat înregistrarea în jurnal pentru rețea, funcție ce monitorizează traficul de pe dispozitivul dvs."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratorul a activat înregistrarea în jurnal pentru rețea, funcție ce monitorizează traficul în profilul dvs. de serviciu, dar nu și în profilul personal."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"V-ați conectat la aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"V-ați conectat la <xliff:g id="VPN_APP_0">%1$s</xliff:g> și la <xliff:g id="VPN_APP_1">%2$s</xliff:g>, care vă pot monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profilul dvs. de serviciu este conectat la <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>

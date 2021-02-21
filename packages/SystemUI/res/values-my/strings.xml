@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"ဖန်သားပြင်ဓာတ်ပုံကို လှိမ့်ရန်"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ဖန်သားပြင်ဓာတ်ပုံကို ပယ်သည်"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ဖန်သားပြင်ဓာတ်ပုံ အစမ်းကြည့်ရှုခြင်း"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ထိပ်ပိုင်းအနားသတ်"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"အောက်ခြေအနားသတ်"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ဖန်သားပြင် ရိုက်ကူးမှု"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ဖန်သားပြင်ရိုက်ကူးနေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
@@ -542,6 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"သင်၏ အဖွဲ့အစည်းသည် သင်၏ အလုပ်ပရိုဖိုင်တွင် စီမံခန့်ခွဲမှုဆိုင်ရာ အသိအမှတ်ပြုလက်မှတ်ကို ထည့်သွင်းထားပါသည်။ လုံခြုံမှုရှိသော ကွန်ရက်ဒေတာစီးဆင်းမှုကို စောင့်ကြည့်ခြင်း သို့မဟုတ် ပြုပြင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ဤစက်ပစ္စည်းတွင် စီမံခန့်ခွဲမှုဆိုင်ရာ အသိအမှတ်ပြုလက်မှတ်ကို ထည့်သွင်းထားပါသည်။ လုံခြုံမှုရှိသော ကွန်ရက်ဒေတာစီးဆင်းမှုကို စောင့်ကြည့်ခြင်း သို့မဟုတ် ပြုပြင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"စက်ပစ္စည်းပေါ်ရှိ ဒေတာစီးဆင်းမှုများကို စောင့်ကြည့်နိုင်သည့်  ကွန်ရက်မှတ်တမ်းတင်ခြင်းစနစ်ကို သင်၏ စီမံခန့်ခွဲသူက ဖွင့်ထားပါသည်။"</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"သင်၏စီမံခန့်ခွဲသူက ကွန်ရက်မှတ်တမ်းတင်ခြင်းကို ဖွင့်လိုက်သည်။ ၎င်းသည် သင့်အလုပ်ပရိုဖိုင်ရှိ ဒေတာစီးဆင်းမှုကို စောင့်ကြည့်သော်လည်း ကိုယ်ပိုင်ပရိုဖိုင်တွင် မစောင့်ကြည့်ပါ။"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"သင်သည် သင်၏ အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"သင်သည် သင်၏ အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP_0">%1$s</xliff:g> နှင့် <xliff:g id="VPN_APP_1">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"သင်၏အလုပ်ပရိုဖိုင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင်၏ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>

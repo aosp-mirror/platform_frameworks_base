@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Ritināt ekrānuzņēmumu"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Nerādīt ekrānuzņēmumu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekrānuzņēmuma priekšskatījums"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Augšējā robeža"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Apakšējā robeža"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrāna ierakstītājs"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekrāna ieraksta apstrāde"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
@@ -545,6 +547,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Jūsu organizācija instalēja sertifikātu jūsu darba profilā. Jūsu drošā tīkla datplūsma var tikt uzraudzīta."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Šajā ierīcē ir instalēts sertifikāts. Drošā tīkla datplūsma var tikt uzraudzīta."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrators ieslēdza tīkla reģistrēšanu, kuru izmanto, lai pārraudzītu datplūsmu jūsu ierīcē."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrators ir ieslēdzis tīkla reģistrēšanu, kuru izmanto, lai pārraudzītu datplūsmu jūsu darba profilā, bet ne personīgajā profilā."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Ir izveidots savienojums ar lietotnēm <xliff:g id="VPN_APP_0">%1$s</xliff:g> un <xliff:g id="VPN_APP_1">%2$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Jūsu darba profilam ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp saņemtos un nosūtītos e-pasta ziņojumus, instalētās lietotnes un apmeklētās tīmekļa vietnes."</string>

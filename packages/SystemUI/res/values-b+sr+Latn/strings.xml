@@ -93,6 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Pomerajte snimak ekrana"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Gornja granica"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Donja granica"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač ekrana"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađujemo video snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obaveštenje o sesiji snimanja ekrana je aktivno"</string>
@@ -545,6 +547,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizacija je na poslovnom profilu instalirala autoritet za izdavanje sertifikata. Bezbedni mrežni saobraćaj može da se prati ili menja."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Na ovom uređaju je instaliran autoritet za izdavanje sertifikata. Bezbedni mrežni saobraćaj može da se prati ili menja."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator je uključio evidentiranje mreže, koje prati saobraćaj na uređaju."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio evidentiranje mreže, koje prati saobraćaj na poslovnom profilu, ali ne i na ličnom profilu."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Povezani ste sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Povezani ste sa aplikacijama <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>, koje mogu da nadgledaju aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Poslovni profil je povezan sa aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može da nadgleda aktivnosti na mreži, uključujući imejlove, aplikacije i veb-sajtove."</string>
