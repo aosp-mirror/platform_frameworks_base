@@ -1419,6 +1419,16 @@ static jint android_media_AudioTrack_getDualMonoMode(JNIEnv *env, jobject thiz,
     return nativeToJavaStatus(status);
 }
 
+static void android_media_AudioTrack_setPlayerIId(JNIEnv *env, jobject thiz, jint playerIId) {
+    sp<AudioTrack> track = getAudioTrack(env, thiz);
+    if (track == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Unable to retrieve AudioTrack pointer for setPlayerIId()");
+    }
+    ALOGV("%s: playerIId %d", __func__, playerIId);
+    track->setPlayerIId(playerIId);
+}
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
@@ -1496,6 +1506,7 @@ static const JNINativeMethod gMethods[] = {
          (void *)android_media_AudioTrack_getAudioDescriptionMixLeveldB},
         {"native_set_dual_mono_mode", "(I)I", (void *)android_media_AudioTrack_setDualMonoMode},
         {"native_get_dual_mono_mode", "([I)I", (void *)android_media_AudioTrack_getDualMonoMode},
+        {"native_setPlayerIId", "(I)V", (void *)android_media_AudioTrack_setPlayerIId},
 };
 
 // field names found in android/media/AudioTrack.java
