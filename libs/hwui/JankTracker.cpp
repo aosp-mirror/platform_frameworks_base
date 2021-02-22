@@ -236,7 +236,6 @@ void JankTracker::dumpFrames(int fd) {
 }
 
 void JankTracker::reset() {
-    std::lock_guard lock(mDataMutex);
     mFrames.clear();
     mData->reset();
     (*mGlobalData)->reset();
