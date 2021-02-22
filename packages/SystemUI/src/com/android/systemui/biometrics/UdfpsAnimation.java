@@ -19,8 +19,10 @@ package com.android.systemui.biometrics;
 import android.content.Context;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
 
@@ -33,6 +35,7 @@ public abstract class UdfpsAnimation extends Drawable {
 
     @NonNull protected final Context mContext;
     @NonNull protected final Drawable mFingerprintDrawable;
+    @Nullable private View mView;
 
     public UdfpsAnimation(@NonNull Context context) {
         mContext = context;
@@ -53,6 +56,10 @@ public abstract class UdfpsAnimation extends Drawable {
         mFingerprintDrawable.setAlpha(alpha);
     }
 
+    public void setAnimationView(UdfpsAnimationView view) {
+        mView = view;
+    }
+
     /**
      * @return The amount of padding that's needed on each side of the sensor, in pixels.
      */
@@ -65,5 +72,11 @@ public abstract class UdfpsAnimation extends Drawable {
      */
     public int getPaddingY() {
         return 0;
+    }
+
+    protected void postInvalidateView() {
+        if (mView != null) {
+            mView.postInvalidate();
+        }
     }
 }
