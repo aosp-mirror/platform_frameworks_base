@@ -423,12 +423,8 @@ public class DomainVerificationService extends SystemService
                 for (int pkgStateIndex = 0; pkgStateIndex < pkgStateSize; pkgStateIndex++) {
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(pkgStateIndex);
                     if (userId == UserHandle.USER_ALL) {
-                        SparseArray<DomainVerificationUserState> userStates =
-                                pkgState.getUserSelectionStates();
-                        int userStatesSize = userStates.size();
-                        for (int userStateIndex = 0; userStateIndex < userStatesSize;
-                                userStateIndex++) {
-                            userStates.valueAt(userStateIndex)
+                        for (int aUserId : mConnection.getAllUserIds()) {
+                            pkgState.getOrCreateUserSelectionState(aUserId)
                                     .setLinkHandlingAllowed(allowed);
                         }
                     } else {
@@ -436,7 +432,6 @@ public class DomainVerificationService extends SystemService
                                 .setLinkHandlingAllowed(allowed);
                     }
                 }
-
             }
         } else {
             synchronized (mLock) {
@@ -500,28 +495,33 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void setDomainVerificationUserSelectionInternal(@UserIdInt int userId,
-            @Nullable String packageName, boolean enabled, @NonNull ArraySet<String> domains)
+            @Nullable String packageName, boolean enabled, @Nullable ArraySet<String> domains)
             throws NameNotFoundException {
         mEnforcer.assertInternal(mConnection.getCallingUid());
+
 
         if (packageName == null) {
             synchronized (mLock) {
                 Set<String> validDomains = new ArraySet<>();
-
                 int size = mAttachedPkgStates.size();
                 for (int index = 0; index < size; index++) {
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
                     String pkgName = pkgState.getPackageName();
                     PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
-                    if (pkgSetting == null || pkgSetting.getPkg() == null) {
+                    AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
+                    if (pkg == null) {
                         continue;
                     }
 
-                    validDomains.clear();
-                    validDomains.addAll(domains);
+                    if (domains == null) {
+                        validDomains = mCollector.collectAllWebDomains(pkg);
+                    } else {
+                        validDomains.clear();
+                        validDomains.addAll(domains);
+                    }
 
                     setDomainVerificationUserSelectionInternal(userId, pkgState,
-                            pkgSetting.getPkg(), enabled, validDomains);
+                            pkg, enabled, validDomains);
                 }
             }
         } else {
@@ -532,12 +532,16 @@ public class DomainVerificationService extends SystemService
                 }
 
                 PackageSetting pkgSetting = mConnection.getPackageSettingLocked(packageName);
-                if (pkgSetting == null || pkgSetting.getPkg() == null) {
+                AndroidPackage pkg = pkgSetting == null ? null : pkgSetting.getPkg();
+                if (pkg == null) {
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
                 }
 
+                Set<String> validDomains =
+                        domains == null ? mCollector.collectAllWebDomains(pkg) : domains;
+
                 setDomainVerificationUserSelectionInternal(userId, pkgState, pkgSetting.getPkg(),
-                        enabled, domains);
+                        enabled, validDomains);
             }
         }
 
@@ -549,12 +553,10 @@ public class DomainVerificationService extends SystemService
             boolean enabled, Set<String> domains) {
         domains.retainAll(mCollector.collectAllWebDomains(pkg));
 
-        SparseArray<DomainVerificationUserState> userStates =
-                pkgState.getUserSelectionStates();
         if (userId == UserHandle.USER_ALL) {
-            int size = userStates.size();
-            for (int index = 0; index < size; index++) {
-                DomainVerificationUserState userState = userStates.valueAt(index);
+            for (int aUserId : mConnection.getAllUserIds()) {
+                DomainVerificationUserState userState =
+                        pkgState.getOrCreateUserSelectionState(aUserId);
                 if (enabled) {
                     userState.addHosts(domains);
                 } else {
