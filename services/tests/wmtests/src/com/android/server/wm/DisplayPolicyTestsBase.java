@@ -117,7 +117,7 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
     static Pair<DisplayInfo, WmDisplayCutout> displayInfoAndCutoutForRotation(int rotation,
             boolean withDisplayCutout, boolean isLongEdgeCutout) {
         final DisplayInfo info = new DisplayInfo();
-        WmDisplayCutout cutout = null;
+        WmDisplayCutout cutout = WmDisplayCutout.NO_CUTOUT;
 
         final boolean flippedDimensions = rotation == ROTATION_90 || rotation == ROTATION_270;
         info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;

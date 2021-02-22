@@ -20,8 +20,6 @@ import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
 import static android.view.InsetsStateProto.SOURCES;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
-import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
@@ -106,14 +104,11 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_NAVIGATION_BAR = 1;
     public static final int ITYPE_CAPTION_BAR = 2;
 
-    // The always visible types are visible to all windows regardless of the z-order.
-    public static final int FIRST_ALWAYS_VISIBLE_TYPE = 3;
-    public static final int ITYPE_TOP_GESTURES = FIRST_ALWAYS_VISIBLE_TYPE;
+    public static final int ITYPE_TOP_GESTURES = 3;
     public static final int ITYPE_BOTTOM_GESTURES = 4;
     public static final int ITYPE_LEFT_GESTURES = 5;
     public static final int ITYPE_RIGHT_GESTURES = 6;
 
-    /** Additional gesture inset types that map into {@link Type.MANDATORY_SYSTEM_GESTURES}. */
     public static final int ITYPE_TOP_MANDATORY_GESTURES = 7;
     public static final int ITYPE_BOTTOM_MANDATORY_GESTURES = 8;
     public static final int ITYPE_LEFT_MANDATORY_GESTURES = 9;
@@ -123,7 +118,6 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_TOP_DISPLAY_CUTOUT = 12;
     public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 13;
     public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 14;
-    public static final int LAST_ALWAYS_VISIBLE_TYPE = ITYPE_BOTTOM_DISPLAY_CUTOUT;
 
     public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 15;
     public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 16;
@@ -185,18 +179,6 @@ public class InsetsState implements Parcelable {
 
     public InsetsState(InsetsState copy, boolean copySources) {
         set(copy, copySources);
-    }
-
-    /**
-     * Mirror the always visible sources from the other state. They will share the same object for
-     * the always visible types.
-     *
-     * @param other the state to mirror the mirrored sources from.
-     */
-    public void mirrorAlwaysVisibleInsetsSources(InsetsState other) {
-        for (int type = FIRST_ALWAYS_VISIBLE_TYPE; type <= LAST_ALWAYS_VISIBLE_TYPE; type++) {
-            mSources[type] = other.mSources[type];
-        }
     }
 
     /**
@@ -380,14 +362,14 @@ public class InsetsState implements Parcelable {
         processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                 insets, type);
 
-        if (type == MANDATORY_SYSTEM_GESTURES) {
+        if (type == Type.MANDATORY_SYSTEM_GESTURES) {
             // Mandatory system gestures are also system gestures.
             // TODO: find a way to express this more generally. One option would be to define
             //       Type.systemGestureInsets() as NORMAL | MANDATORY, but then we lose the
             //       ability to set systemGestureInsets() independently from
             //       mandatorySystemGestureInsets() in the Builder.
             processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
-                    insets, SYSTEM_GESTURES);
+                    insets, Type.SYSTEM_GESTURES);
         }
     }
 
@@ -493,9 +475,14 @@ public class InsetsState implements Parcelable {
      * to the client.
      *
      * @param type The {@link InternalInsetsType} of the source to remove
+     * @return {@code true} if this InsetsState was modified; {@code false} otherwise.
      */
-    public void removeSource(@InternalInsetsType int type) {
+    public boolean removeSource(@InternalInsetsType int type) {
+        if (mSources[type] == null) {
+            return false;
+        }
         mSources[type] = null;
+        return true;
     }
 
     /**
@@ -552,6 +539,24 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    /**
+     * Sets the values from the other InsetsState. But for sources, only specific types of source
+     * would be set.
+     *
+     * @param other the other InsetsState.
+     * @param types the only types of sources would be set.
+     */
+    public void set(InsetsState other, @InsetsType int types) {
+        mDisplayFrame.set(other.mDisplayFrame);
+        mDisplayCutout.set(other.mDisplayCutout);
+        mRoundedCorners = other.getRoundedCorners();
+        final ArraySet<Integer> t = toInternalType(types);
+        for (int i = t.size() - 1; i >= 0; i--) {
+            final int type = t.valueAt(i);
+            mSources[type] = other.mSources[type];
+        }
+    }
+
     public void addSource(InsetsSource source) {
         mSources[source.getType()] = source;
     }
@@ -574,6 +579,18 @@ public class InsetsState implements Parcelable {
         }
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);
+        }
+        if ((types & Type.SYSTEM_GESTURES) != 0) {
+            result.add(ITYPE_LEFT_GESTURES);
+            result.add(ITYPE_TOP_GESTURES);
+            result.add(ITYPE_RIGHT_GESTURES);
+            result.add(ITYPE_BOTTOM_GESTURES);
+        }
+        if ((types & Type.MANDATORY_SYSTEM_GESTURES) != 0) {
+            result.add(ITYPE_LEFT_MANDATORY_GESTURES);
+            result.add(ITYPE_TOP_MANDATORY_GESTURES);
+            result.add(ITYPE_RIGHT_MANDATORY_GESTURES);
+            result.add(ITYPE_BOTTOM_MANDATORY_GESTURES);
         }
         if ((types & Type.DISPLAY_CUTOUT) != 0) {
             result.add(ITYPE_LEFT_DISPLAY_CUTOUT);
