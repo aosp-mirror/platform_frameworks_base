@@ -14,7 +14,6 @@
 
 package com.android.systemui.utils.leaks;
 
-import android.os.UserHandle;
 import android.testing.LeakCheck;
 
 import com.android.systemui.tuner.TunerService;
@@ -78,12 +77,15 @@ public class FakeTunerService extends TunerService {
     }
 
     @Override
-    public void setTunerEnabled(UserHandle user, boolean enabled) {
+    public void setTunerEnabled(boolean enabled) {
         mEnabled = enabled;
     }
 
     @Override
-    public boolean isTunerEnabled(UserHandle user) {
+    public boolean isTunerEnabled() {
         return mEnabled;
     }
+
+    @Override
+    public void showResetRequest(Runnable onDisabled) {}
 }
