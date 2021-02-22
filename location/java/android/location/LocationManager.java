@@ -2921,7 +2921,8 @@ public class LocationManager {
         protected void registerTransport(GnssStatusTransport transport)
                             throws RemoteException {
             getService().registerGnssStatusCallback(transport, transport.getPackage(),
-                    transport.getAttributionTag());
+                    transport.getAttributionTag(),
+                    AppOpsManager.toReceiverId(transport.getListener()));
         }
 
         @Override
@@ -2938,7 +2939,8 @@ public class LocationManager {
         protected void registerTransport(GnssNmeaTransport transport)
                             throws RemoteException {
             getService().registerGnssNmeaCallback(transport, transport.getPackage(),
-                    transport.getAttributionTag());
+                    transport.getAttributionTag(),
+                    AppOpsManager.toReceiverId(transport.getListener()));
         }
 
         @Override
@@ -2955,7 +2957,8 @@ public class LocationManager {
         protected void registerTransport(GnssMeasurementsTransport transport)
                             throws RemoteException {
             getService().addGnssMeasurementsListener(transport.getRequest(), transport,
-                    transport.getPackage(), transport.getAttributionTag());
+                    transport.getPackage(), transport.getAttributionTag(),
+                    AppOpsManager.toReceiverId(transport.getListener()));
         }
 
         @Override
@@ -2987,7 +2990,8 @@ public class LocationManager {
         protected void registerTransport(GnssNavigationTransport transport)
                             throws RemoteException {
             getService().addGnssNavigationMessageListener(transport,
-                    transport.getPackage(), transport.getAttributionTag());
+                    transport.getPackage(), transport.getAttributionTag(),
+                    AppOpsManager.toReceiverId(transport.getListener()));
         }
 
         @Override

@@ -479,7 +479,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void startGnssBatch(long periodNanos, ILocationListener listener, String packageName,
-            String attributionTag, String listenerId) {
+            @Nullable String attributionTag, String listenerId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         if (mGnssManagerService == null) {
@@ -616,7 +616,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Nullable
     @Override
     public ICancellationSignal getCurrentLocation(String provider, LocationRequest request,
-            ILocationCallback consumer, String packageName, String attributionTag,
+            ILocationCallback consumer, String packageName, @Nullable String attributionTag,
             String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
@@ -640,7 +640,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public void registerLocationListener(String provider, LocationRequest request,
             ILocationListener listener, String packageName, @Nullable String attributionTag,
-            @Nullable String listenerId) {
+            String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -791,7 +791,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public Location getLastLocation(String provider, LastLocationRequest request,
-            String packageName, String attributionTag) {
+            String packageName, @Nullable String attributionTag) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
@@ -858,9 +858,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
-            String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.registerGnssStatusCallback(listener, packageName, attributionTag);
+            mGnssManagerService.registerGnssStatusCallback(listener, packageName, attributionTag,
+                    listenerId);
         }
     }
 
@@ -873,9 +874,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerGnssNmeaCallback(IGnssNmeaListener listener, String packageName,
-            String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.registerGnssNmeaCallback(listener, packageName, attributionTag);
+            mGnssManagerService.registerGnssNmeaCallback(listener, packageName, attributionTag,
+                    listenerId);
         }
     }
 
@@ -887,11 +889,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void addGnssMeasurementsListener(@Nullable GnssMeasurementRequest request,
-            IGnssMeasurementsListener listener, String packageName, String attributionTag) {
+    public void addGnssMeasurementsListener(GnssMeasurementRequest request,
+            IGnssMeasurementsListener listener, String packageName, @Nullable String attributionTag,
+            String listenerId) {
         if (mGnssManagerService != null) {
             mGnssManagerService.addGnssMeasurementsListener(request, listener, packageName,
-                    attributionTag);
+                    attributionTag, listenerId);
         }
     }
 
@@ -937,10 +940,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
-            String packageName, String attributionTag) {
+            String packageName, @Nullable String attributionTag, String listenerId) {
         if (mGnssManagerService != null) {
             mGnssManagerService.addGnssNavigationMessageListener(listener, packageName,
-                    attributionTag);
+                    attributionTag, listenerId);
         }
     }
 
