@@ -24,9 +24,10 @@
 
     <!--
     The test declared in this instrumentation can be run via this command
-    "adb shell am instrument -w com.android.framework.permission.tests/android.test.InstrumentationTestRunner"
+    $ adb shell am instrument \
+       -w com.android.framework.permission.tests/androidx.test.runner.AndroidJUnitRunner
     -->
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.framework.permission.tests"
                      android:label="Tests for private API framework permissions"/>
 
