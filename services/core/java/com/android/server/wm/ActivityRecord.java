@@ -567,6 +567,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mVoiceInteraction;
 
     private int mPendingRelaunchCount;
+    long mRelaunchStartTime;
 
     // True if we are current in the process of removing this app token from the display
     private boolean mRemovingFromDisplay = false;
@@ -3357,7 +3358,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task.isDragResizing();
     }
 
+    @VisibleForTesting
     void startRelaunching() {
+        if (mPendingRelaunchCount == 0) {
+            mRelaunchStartTime = SystemClock.elapsedRealtime();
+        }
         if (shouldFreezeBounds()) {
             freezeBounds();
         }
@@ -3396,6 +3401,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Update keyguard flags upon finishing relaunch.
             checkKeyguardFlagsChanged();
         }
+
+        final Task rootTask = getRootTask();
+        if (rootTask != null && rootTask.shouldSleepOrShutDownActivities()) {
+            // Activity is always relaunched to either resumed or paused state. If it was
+            // relaunched while hidden (by keyguard or smth else), it should be stopped.
+            rootTask.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                    false /* preserveWindows */);
+        }
     }
 
     void clearRelaunching() {
@@ -3404,6 +3417,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         unfreezeBounds();
         mPendingRelaunchCount = 0;
+        mRelaunchStartTime = 0;
     }
 
     /**

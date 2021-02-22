@@ -1321,6 +1321,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "-567946587": {
+      "message": "Requested redraw for orientation change: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
     "-561092364": {
       "message": "onPointerDownOutsideFocusLocked called on %s",
       "level": "INFO",
