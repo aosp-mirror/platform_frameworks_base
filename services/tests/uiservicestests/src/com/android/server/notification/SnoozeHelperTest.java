@@ -46,6 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.android.server.UiServiceTestCase;
+import com.android.server.pm.PackageManagerService;
 
 
 @SmallTest
@@ -78,6 +79,16 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 25);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+    }
+
+    @Test
+    public void testSnoozeSentToAndroid() throws Exception {
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r, 1000);
+        ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
+        verify(mAm, times(1)).setExactAndAllowWhileIdle(
+                anyInt(), anyLong(), captor.capture());
+        assertEquals("android", captor.getValue().getIntent().getPackage());
     }
 
     @Test
