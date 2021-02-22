@@ -1096,13 +1096,7 @@ public final class GnssMeasurement implements Parcelable {
      * Gets the carrier frequency of the tracked signal.
      *
      * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60 MHz,
-     * L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
-     * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
-     *
-     * <p> For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two raw
-     * measurement objects will be reported for this same satellite, in one of the measurement
-     * objects, all the values related to L1 will be filled, and in the other all of the values
-     * related to L5 will be filled.
+     * L5 = 1176.45 MHz, varying GLO channels, etc.
      *
      * <p>The value is only available if {@link #hasCarrierFrequencyHz()} is {@code true}.
      *
@@ -1382,7 +1376,8 @@ public final class GnssMeasurement implements Parcelable {
      * <p> AGC acts as a variable gain amplifier adjusting the power of the incoming signal. The AGC
      * level may be used to indicate potential interference. Higher gain (and/or lower input power)
      * shall be output as a positive number. Hence in cases of strong jamming, in the band of this
-     * signal, this value will go more negative.
+     * signal, this value will go more negative. This value must be consistent given the same level
+     * of the incoming signal power.
      *
      * <p> Note: Different hardware designs (e.g. antenna, pre-amplification, or other RF HW
      * components) may also affect the typical output of of this value on any given hardware design
