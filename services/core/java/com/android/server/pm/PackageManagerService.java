@@ -4701,6 +4701,10 @@ public class PackageManagerService extends IPackageManager.Stub
     // and an image with the flag set false does not use snapshots.
     private static final boolean SNAPSHOT_ENABLED = true;
 
+    // The per-instance snapshot disable/enable flag.  This is generally set to false in
+    // test instances and set to SNAPSHOT_ENABLED in operational instances.
+    private final boolean mSnapshotEnabled;
+
     /**
      * Return the live computer.
      */
@@ -4713,7 +4717,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * The live computer will be returned if snapshots are disabled.
      */
     private Computer snapshotComputer() {
-        if (!SNAPSHOT_ENABLED) {
+        if (!mSnapshotEnabled) {
             return mLiveComputer;
         }
         if (Thread.holdsLock(mLock)) {
@@ -6048,15 +6052,12 @@ public class PackageManagerService extends IPackageManager.Stub
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
 
-        // Create the computer as soon as the state objects have been installed.  The
-        // cached computer is the same as the live computer until the end of the
-        // constructor, at which time the invalidation method updates it.  The cache is
-        // corked initially to ensure a cached computer is not built until the end of the
-        // constructor.
-        sSnapshotCorked = true;
+        // Disable snapshots in this instance of PackageManagerService, which is only used
+        // for testing.  The instance still needs a live computer.  The snapshot computer
+        // is set to null since it must never be used by this instance.
+        mSnapshotEnabled = false;
         mLiveComputer = createLiveComputer();
-        mSnapshotComputer = mLiveComputer;
-        registerObserver();
+        mSnapshotComputer = null;
 
         mPackages.putAll(testParams.packages);
         mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
@@ -6069,7 +6070,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mIncrementalVersion = testParams.incrementalVersion;
 
         invalidatePackageInfoCache();
-        sSnapshotCorked = false;
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest,
@@ -6215,6 +6215,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // constructor, at which time the invalidation method updates it.  The cache is
         // corked initially to ensure a cached computer is not built until the end of the
         // constructor.
+        mSnapshotEnabled = SNAPSHOT_ENABLED;
         sSnapshotCorked = true;
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = mLiveComputer;
