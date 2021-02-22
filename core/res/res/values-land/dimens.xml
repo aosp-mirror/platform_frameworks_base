@@ -78,4 +78,5 @@
 
     <dimen name="chooser_preview_width">480dp</dimen>
 
+    <dimen name="toast_y_offset">24dp</dimen>
 </resources>
