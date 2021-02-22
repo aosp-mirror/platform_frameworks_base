@@ -147,5 +147,10 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.DEVELOPMENT_SETTINGS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.NOTIFICATION_FEEDBACK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.RESTRICTED_NETWORKING_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.ONE_HANDED_KEYGUARD_SIDE,
+                new InclusiveIntegerRangeValidator(
+                        /* first= */Global.ONE_HANDED_KEYGUARD_SIDE_LEFT,
+                        /* last= */Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT));
     }
 }
