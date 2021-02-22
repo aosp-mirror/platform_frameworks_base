@@ -1873,6 +1873,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS అభ్యర్థన వీడియో కాల్‌కి మార్చబడింది"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS అభ్యర్థన USSD అభ్యర్థనకు మార్చబడింది"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"కొత్త SS అభ్యర్థనకు మార్చబడింది"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ఫిషింగ్ అలర్ట్"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"కార్యాలయ ప్రొఫైల్‌"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"హెచ్చరించబడింది"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"విస్తరింపజేయి"</string>
