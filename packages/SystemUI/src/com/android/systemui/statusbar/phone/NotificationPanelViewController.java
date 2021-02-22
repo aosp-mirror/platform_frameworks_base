@@ -474,7 +474,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private ArrayList<Consumer<ExpandableNotificationRow>>
             mTrackingHeadsUpListeners =
             new ArrayList<>();
-    private ArrayList<Runnable> mVerticalTranslationListener = new ArrayList<>();
+    private Runnable mVerticalTranslationListener;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     private int mPanelAlpha;
@@ -2954,9 +2954,8 @@ public class NotificationPanelViewController extends PanelViewController {
     protected void setHorizontalPanelTranslation(float translation) {
         mNotificationStackScrollLayoutController.setTranslationX(translation);
         mQsFrame.setTranslationX(translation);
-        int size = mVerticalTranslationListener.size();
-        for (int i = 0; i < size; i++) {
-            mVerticalTranslationListener.get(i).run();
+        if (mVerticalTranslationListener != null) {
+            mVerticalTranslationListener.run();
         }
     }
 
@@ -3249,12 +3248,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mTrackingHeadsUpListeners.remove(listener);
     }
 
-    public void addVerticalTranslationListener(Runnable verticalTranslationListener) {
-        mVerticalTranslationListener.add(verticalTranslationListener);
-    }
-
-    public void removeVerticalTranslationListener(Runnable verticalTranslationListener) {
-        mVerticalTranslationListener.remove(verticalTranslationListener);
+    public void setVerticalTranslationListener(Runnable verticalTranslationListener) {
+        mVerticalTranslationListener = verticalTranslationListener;
     }
 
     public void setHeadsUpAppearanceController(
