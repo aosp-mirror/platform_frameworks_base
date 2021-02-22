@@ -65,10 +65,12 @@ public final class BatteryController extends RestrictingController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasPowerConstraint()) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
             mTrackedTasks.add(taskStatus);
             taskStatus.setTrackingController(JobStatus.TRACKING_BATTERY);
-            taskStatus.setChargingConstraintSatisfied(mChargeTracker.isOnStablePower());
-            taskStatus.setBatteryNotLowConstraintSatisfied(mChargeTracker.isBatteryNotLow());
+            taskStatus.setChargingConstraintSatisfied(nowElapsed, mChargeTracker.isOnStablePower());
+            taskStatus.setBatteryNotLowConstraintSatisfied(
+                    nowElapsed, mChargeTracker.isBatteryNotLow());
         }
     }
 
@@ -97,14 +99,15 @@ public final class BatteryController extends RestrictingController {
         if (DEBUG) {
             Slog.d(TAG, "maybeReportNewChargingStateLocked: " + stablePower);
         }
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         boolean reportChange = false;
         for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
             final JobStatus ts = mTrackedTasks.valueAt(i);
-            boolean previous = ts.setChargingConstraintSatisfied(stablePower);
+            boolean previous = ts.setChargingConstraintSatisfied(nowElapsed, stablePower);
             if (previous != stablePower) {
                 reportChange = true;
             }
-            previous = ts.setBatteryNotLowConstraintSatisfied(batteryNotLow);
+            previous = ts.setBatteryNotLowConstraintSatisfied(nowElapsed, batteryNotLow);
             if (previous != batteryNotLow) {
                 reportChange = true;
             }
