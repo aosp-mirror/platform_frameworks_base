@@ -72,6 +72,7 @@ import static com.android.server.am.AppProfiler.TAG_PSS;
 import static com.android.server.am.ProcessList.TAG_PROCESS_OBSERVERS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationExitInfo;
@@ -228,6 +229,22 @@ public final class OomAdjuster {
     private final ActiveUids mTmpUidRecords;
     private final ArrayDeque<ProcessRecord> mTmpQueue;
     private final ArraySet<ProcessRecord> mPendingProcessSet = new ArraySet<>();
+
+    /**
+     * Flag to mark if there is an ongoing oomAdjUpdate: potentially the oomAdjUpdate
+     * could be called recursively because of the indirect calls during the update;
+     * however the oomAdjUpdate itself doesn't support recursion - in this case we'd
+     * have to queue up the new targets found during the update, and perform another
+     * round of oomAdjUpdate at the end of last update.
+     */
+    @GuardedBy("mService")
+    private boolean mOomAdjUpdateOngoing = false;
+
+    /**
+     * Flag to mark if there is a pending full oomAdjUpdate.
+     */
+    @GuardedBy("mService")
+    private boolean mPendingFullOomAdjUpdate = false;
 
     private final PlatformCompatCache mPlatformCompatCache;
 
@@ -439,6 +456,23 @@ public final class OomAdjuster {
         if (oomAdjAll && mConstants.OOMADJ_UPDATE_QUICK) {
             return updateOomAdjLSP(app, oomAdjReason);
         }
+        if (checkAndEnqueueOomAdjTargetLocked(app)) {
+            // Simply return true as there is an oomAdjUpdate ongoing
+            return true;
+        }
+        try {
+            mOomAdjUpdateOngoing = true;
+            return performUpdateOomAdjLSP(app, oomAdjAll, oomAdjReason);
+        } finally {
+            // Kick off the handling of any pending targets enqueued during the above update
+            mOomAdjUpdateOngoing = false;
+            updateOomAdjPendingTargetsLocked(oomAdjReason);
+        }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    private boolean performUpdateOomAdjLSP(ProcessRecord app, boolean oomAdjAll,
+            String oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
         final ProcessStateRecord state = app.mState;
         final boolean wasCached = state.isCached();
@@ -453,20 +487,21 @@ public final class OomAdjuster {
                 ? state.getCurRawAdj() : ProcessList.UNKNOWN_ADJ;
         // Check if this process is in the pending list too, remove from pending list if so.
         mPendingProcessSet.remove(app);
-        boolean success = updateOomAdjLSP(app, cachedAdj, topApp, false,
+        boolean success = performUpdateOomAdjLSP(app, cachedAdj, topApp, false,
                 SystemClock.uptimeMillis());
         if (oomAdjAll
                 && (wasCached != state.isCached()
                     || state.getCurRawAdj() == ProcessList.UNKNOWN_ADJ)) {
             // Changed to/from cached state, so apps after it in the LRU
             // list may also be changed.
-            updateOomAdjLSP(oomAdjReason);
+            performUpdateOomAdjLSP(oomAdjReason);
         }
+
         return success;
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    private boolean updateOomAdjLSP(ProcessRecord app, int cachedAdj,
+    private boolean performUpdateOomAdjLSP(ProcessRecord app, int cachedAdj,
             ProcessRecord TOP_APP, boolean doingAll, long now) {
         if (app.getThread() == null) {
             return false;
@@ -519,6 +554,22 @@ public final class OomAdjuster {
 
     @GuardedBy({"mService", "mProcLock"})
     private void updateOomAdjLSP(String oomAdjReason) {
+        if (checkAndEnqueueOomAdjTargetLocked(null)) {
+            // Simply return as there is an oomAdjUpdate ongoing
+            return;
+        }
+        try {
+            mOomAdjUpdateOngoing = true;
+            performUpdateOomAdjLSP(oomAdjReason);
+        } finally {
+            // Kick off the handling of any pending targets enqueued during the above update
+            mOomAdjUpdateOngoing = false;
+            updateOomAdjPendingTargetsLocked(oomAdjReason);
+        }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    private void performUpdateOomAdjLSP(String oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
         // Clear any pending ones because we are doing a full update now.
         mPendingProcessSet.clear();
@@ -548,6 +599,23 @@ public final class OomAdjuster {
             return true;
         }
 
+        if (checkAndEnqueueOomAdjTargetLocked(app)) {
+            // Simply return true as there is an oomAdjUpdate ongoing
+            return true;
+        }
+
+        try {
+            mOomAdjUpdateOngoing = true;
+            return performUpdateOomAdjLSP(app, oomAdjReason);
+        } finally {
+            // Kick off the handling of any pending targets enqueued during the above update
+            mOomAdjUpdateOngoing = false;
+            updateOomAdjPendingTargetsLocked(oomAdjReason);
+        }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    private boolean performUpdateOomAdjLSP(ProcessRecord app, String oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReason);
@@ -567,7 +635,7 @@ public final class OomAdjuster {
         state.resetCachedInfo();
         // Check if this process is in the pending list too, remove from pending list if so.
         mPendingProcessSet.remove(app);
-        boolean success = updateOomAdjLSP(app, cachedAdj, topApp, false,
+        boolean success = performUpdateOomAdjLSP(app, cachedAdj, topApp, false,
                 SystemClock.uptimeMillis());
         if (!success || (wasCached == state.isCached() && oldAdj != ProcessList.INVALID_ADJ
                 && wasBackground == ActivityManager.isProcStateBackground(
@@ -696,14 +764,59 @@ public final class OomAdjuster {
     }
 
     /**
+     * Check if there is an ongoing oomAdjUpdate, enqueue the given process record
+     * to {@link #mPendingProcessSet} if there is one.
+     *
+     * @param app The target app to get an oomAdjUpdate, or a full oomAdjUpdate if it's null.
+     * @return {@code true} if there is an ongoing oomAdjUpdate.
+     */
+    @GuardedBy("mService")
+    private boolean checkAndEnqueueOomAdjTargetLocked(@Nullable ProcessRecord app) {
+        if (!mOomAdjUpdateOngoing) {
+            return false;
+        }
+        if (app != null) {
+            mPendingProcessSet.add(app);
+        } else {
+            mPendingFullOomAdjUpdate = true;
+        }
+        return true;
+    }
+
+    /**
      * Kick off an oom adj update pass for the pending targets which are enqueued via
      * {@link #enqueueOomAdjTargetLocked}.
      */
     @GuardedBy("mService")
     void updateOomAdjPendingTargetsLocked(String oomAdjReason) {
+        // First check if there is pending full update
+        if (mPendingFullOomAdjUpdate) {
+            mPendingFullOomAdjUpdate = false;
+            mPendingProcessSet.clear();
+            updateOomAdjLocked(oomAdjReason);
+            return;
+        }
         if (mPendingProcessSet.isEmpty()) {
             return;
         }
+
+        if (mOomAdjUpdateOngoing) {
+            // There's another oomAdjUpdate ongoing, return from here now;
+            // that ongoing update would call us again at the end of it.
+            return;
+        }
+        try {
+            mOomAdjUpdateOngoing = true;
+            performUpdateOomAdjPendingTargetsLocked(oomAdjReason);
+        } finally {
+            // Kick off the handling of any pending targets enqueued during the above update
+            mOomAdjUpdateOngoing = false;
+            updateOomAdjPendingTargetsLocked(oomAdjReason);
+        }
+    }
+
+    @GuardedBy("mService")
+    private void performUpdateOomAdjPendingTargetsLocked(String oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReason);
@@ -1846,8 +1959,8 @@ public final class OomAdjuster {
                         computeOomAdjLSP(client, cachedAdj, topApp, doingAll, now,
                                 cycleReEval, true);
                     } else {
-                        cstate.setCurRawAdj(cstate.getSetAdj());
-                        cstate.setCurRawProcState(cstate.getSetProcState());
+                        cstate.setCurRawAdj(cstate.getCurAdj());
+                        cstate.setCurRawProcState(cstate.getCurProcState());
                     }
 
                     int clientAdj = cstate.getCurRawAdj();
@@ -2130,8 +2243,8 @@ public final class OomAdjuster {
                 if (computeClients) {
                     computeOomAdjLSP(client, cachedAdj, topApp, doingAll, now, cycleReEval, true);
                 } else {
-                    cstate.setCurRawAdj(cstate.getSetAdj());
-                    cstate.setCurRawProcState(cstate.getSetProcState());
+                    cstate.setCurRawAdj(cstate.getCurAdj());
+                    cstate.setCurRawProcState(cstate.getCurProcState());
                 }
 
                 if (shouldSkipDueToCycle(state, cstate, procState, adj, cycleReEval)) {
