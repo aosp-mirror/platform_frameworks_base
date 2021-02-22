@@ -309,6 +309,7 @@ public class SnoozeHelper {
         return PendingIntent.getBroadcast(mContext,
                 REQUEST_CODE_REPOST,
                 new Intent(REPOST_ACTION)
+                        .setPackage("android")
                         .setData(new Uri.Builder().scheme(REPOST_SCHEME).appendPath(key).build())
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                         .putExtra(EXTRA_KEY, key)
