@@ -191,7 +191,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         initDimens();
     }
 
-    protected void updateBackgroundColors() {
+    /**
+     * Reload background colors from resources and invalidate views.
+     */
+    public void updateBackgroundColors() {
         updateColors();
         initBackground();
         updateBackgroundTint();
