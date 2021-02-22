@@ -473,7 +473,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
 
     @Override
     public void onOpNoted(int code, int uid, String packageName,
-            @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
+            String attributionTag, @AppOpsManager.OpFlags int flags,
+            @AppOpsManager.Mode int result) {
         if (DEBUG) {
             Log.w(TAG, "Noted op: " + code + " with result "
                     + AppOpsManager.MODE_NAMES[result] + " for package " + packageName);

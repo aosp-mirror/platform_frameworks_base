@@ -3124,7 +3124,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass,
                     true /* edit */);
             if (ops == null) {
-                scheduleOpNotedIfNeededLocked(code, uid, packageName, flags,
+                scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
                 if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
@@ -3142,7 +3142,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final UidState uidState = ops.uidState;
             if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
                 attributedOp.rejected(uidState.state, flags);
-                scheduleOpNotedIfNeededLocked(code, uid, packageName, flags,
+                scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
                 return AppOpsManager.MODE_IGNORED;
             }
@@ -3155,7 +3155,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
                     attributedOp.rejected(uidState.state, flags);
-                    scheduleOpNotedIfNeededLocked(code, uid, packageName, flags, uidMode);
+                    scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
+                            uidMode);
                     return uidMode;
                 }
             } else {
@@ -3167,7 +3168,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName);
                     attributedOp.rejected(uidState.state, flags);
-                    scheduleOpNotedIfNeededLocked(code, uid, packageName, flags, mode);
+                    scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
+                            mode);
                     return mode;
                 }
             }
@@ -3177,7 +3179,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 + packageName + (attributionTag == null ? ""
                                 : "." + attributionTag));
             }
-            scheduleOpNotedIfNeededLocked(code, uid, packageName, flags,
+            scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                     AppOpsManager.MODE_ALLOWED);
             attributedOp.accessed(proxyUid, proxyPackageName, proxyAttributionTag, uidState.state,
                     flags);
@@ -3580,7 +3582,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag, bypass, true /* edit */);
             if (ops == null) {
                 if (!dryRun) {
-                    scheduleOpStartedIfNeededLocked(code, uid, packageName,
+                    scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                             flags, AppOpsManager.MODE_IGNORED);
                 }
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
@@ -3590,7 +3592,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Op op = getOpLocked(ops, code, uid, true);
             if (isOpRestrictedLocked(uid, code, packageName, bypass)) {
                 if (!dryRun) {
-                    scheduleOpStartedIfNeededLocked(code, uid, packageName,
+                    scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                             flags, AppOpsManager.MODE_IGNORED);
                 }
                 return AppOpsManager.MODE_IGNORED;
@@ -3611,7 +3613,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     if (!dryRun) {
                         attributedOp.rejected(uidState.state, flags);
-                        scheduleOpStartedIfNeededLocked(code, uid, packageName, flags, uidMode);
+                        scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
+                                flags, uidMode);
                     }
                     return uidMode;
                 }
@@ -3626,7 +3629,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                             + packageName);
                     if (!dryRun) {
                         attributedOp.rejected(uidState.state, flags);
-                        scheduleOpStartedIfNeededLocked(code, uid, packageName, flags, mode);
+                        scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
+                                flags, mode);
                     }
                     return mode;
                 }
@@ -3634,7 +3638,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName);
             if (!dryRun) {
-                scheduleOpStartedIfNeededLocked(code, uid, packageName, flags,
+                scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_ALLOWED);
                 try {
                     attributedOp.started(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
@@ -3774,7 +3778,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void scheduleOpStartedIfNeededLocked(int code, int uid, String pkgName,
-            @OpFlags int flags, @Mode int result) {
+            String attributionTag, @OpFlags int flags, @Mode int result) {
         ArraySet<StartedCallback> dispatchedCallbacks = null;
         final int callbackListCount = mStartedWatchers.size();
         for (int i = 0; i < callbackListCount; i++) {
@@ -3799,18 +3803,21 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 AppOpsService::notifyOpStarted,
-                this, dispatchedCallbacks, code, uid, pkgName, flags, result));
+                this, dispatchedCallbacks, code, uid, pkgName, attributionTag, flags,
+                result));
     }
 
     private void notifyOpStarted(ArraySet<StartedCallback> callbacks,
-            int code, int uid, String packageName, @OpFlags int flags, @Mode int result) {
+            int code, int uid, String packageName, String attributionTag, @OpFlags int flags,
+            @Mode int result) {
         final long identity = Binder.clearCallingIdentity();
         try {
             final int callbackCount = callbacks.size();
             for (int i = 0; i < callbackCount; i++) {
                 final StartedCallback callback = callbacks.valueAt(i);
                 try {
-                    callback.mCallback.opStarted(code, uid, packageName, flags, result);
+                    callback.mCallback.opStarted(code, uid, packageName, attributionTag, flags,
+                            result);
                 } catch (RemoteException e) {
                     /* do nothing */
                 }
@@ -3821,7 +3828,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void scheduleOpNotedIfNeededLocked(int code, int uid, String packageName,
-            @OpFlags int flags, @Mode int result) {
+            String attributionTag, @OpFlags int flags, @Mode int result) {
         ArraySet<NotedCallback> dispatchedCallbacks = null;
         final int callbackListCount = mNotedWatchers.size();
         for (int i = 0; i < callbackListCount; i++) {
@@ -3842,11 +3849,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 AppOpsService::notifyOpChecked,
-                this, dispatchedCallbacks, code, uid, packageName, flags, result));
+                this, dispatchedCallbacks, code, uid, packageName, attributionTag, flags,
+                result));
     }
 
     private void notifyOpChecked(ArraySet<NotedCallback> callbacks,
-            int code, int uid, String packageName, @OpFlags int flags, @Mode int result) {
+            int code, int uid, String packageName, String attributionTag, @OpFlags int flags,
+            @Mode int result) {
         // There are features watching for checks in our process. The callbacks in
         // these features may require permissions our remote caller does not have.
         final long identity = Binder.clearCallingIdentity();
@@ -3855,7 +3864,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 final NotedCallback callback = callbacks.valueAt(i);
                 try {
-                    callback.mCallback.opNoted(code, uid, packageName, flags, result);
+                    callback.mCallback.opNoted(code, uid, packageName, attributionTag, flags,
+                            result);
                 } catch (RemoteException e) {
                     /* do nothing */
                 }

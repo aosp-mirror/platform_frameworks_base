@@ -201,14 +201,15 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         @Override
-        public void onOpStarted(int code, int uid, String packageName,
+        public void onOpStarted(int code, int uid, String packageName, String attributionTag,
                 @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
-            onOpNoted(code, uid, packageName, flags, result);
+            onOpNoted(code, uid, packageName, attributionTag, flags, result);
         }
 
         @Override
         public void onOpNoted(int code, int uid, String packageName,
-                @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
+                String attributionTag, @AppOpsManager.OpFlags int flags,
+                @AppOpsManager.Mode int result) {
             if (result != MODE_ALLOWED || (flags & AppOpsManager.OP_FLAGS_ALL_TRUSTED) == 0) {
                 return;
             }
