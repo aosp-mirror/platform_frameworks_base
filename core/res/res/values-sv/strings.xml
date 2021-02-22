@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ger appen läs- och skrivbehörighet till konfigurationen för Stör ej."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"börja visa behörighetsanvändningen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Gör att innehavaren kan öppna behörighetsanvändning för en app. Ska inte behövas för vanliga appar."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"åtkomst till sensordata med en hög samplingsfrekvens"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tillåter att appen får åtkomst till sensordata med en högre samplingsfrekvens än 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Övervaka försök att låsa upp skärmen"</string>
@@ -1869,6 +1871,8 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS-begäran har ändrats till videosamtal"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS-begäran har ändrats till en USSD-begäran"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Har ändrats till ny SS-begäran"</string>
+    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Jobbprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Aviserad"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Utöka"</string>

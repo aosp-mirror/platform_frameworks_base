@@ -251,7 +251,7 @@
     <string name="global_action_logout" msgid="6093581310002476511">"Amaitu saioa"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Pantaila-argazkia"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Akatsen txostena"</string>
-    <string name="bugreport_message" msgid="5212529146119624326">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
+    <string name="bugreport_message" msgid="5212529146119624326">"Gailuaren oraingo egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Txosten dinamikoa"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Aukera hau erabili beharko zenuke ia beti. Txostenaren jarraipena egin ahal izango duzu eta arazoari buruzko xehetasunak eman ahal izango dituzu. Baliteke gutxitan erabili behar izaten diren atalak ez agertzea, denbora aurrezteko."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Txosten osoa"</string>
@@ -674,7 +674,7 @@
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"atzitu DRM ziurtagiriak"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM ziurtagiriak hornitzea eta erabiltzeko baimena ematen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"Jaso Android Beam transferentzien egoera"</string>
-    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Uneko Android Beam transferentziei buruzko informazioa jasotzeko baimena ematen die aplikazioei"</string>
+    <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Oraingo Android Beam transferentziei buruzko informazioa jasotzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"kendu DRM ziurtagiriak"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"DRM ziurtagiriak kentzea baimentzen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"lotu operadorearen mezularitza-zerbitzuari"</string>
@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ez molestatzeko moduaren konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"hasi ikusteko baimena erabiltzen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"atzitu sentsoreen datuen laginak abiadura handian"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikazioak 200 Hz-tik gorako abiaduran hartu ahal izango ditu sentsoreen datuen laginak"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ezarri pasahitzen arauak"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolatu pantaila blokeoaren pasahitzen eta PINen luzera eta onartutako karaktereak."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>
@@ -1197,7 +1199,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Eskala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Erakutsi beti"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Gaitu hori berriro Sistemaren ezarpenak &gt; Aplikazioak &gt; Deskargatutakoak."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak ez du onartzen uneko pantailaren tamaina eta espero ez bezala joka lezake."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak ez du onartzen pantailaren tamaina, eta baliteke espero ez bezala jokatzea."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Erakutsi beti"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Android sistema eragilearen bertsio bateraezin baterako dago egina <xliff:g id="APP_NAME">%1$s</xliff:g>; beraz, espero ez bezala funtziona lezake. Baliteke aplikazioaren bertsio eguneratuago bat eskuragarri egotea."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Erakutsi beti"</string>
@@ -1227,9 +1229,9 @@
     <string name="new_app_description" msgid="1958903080400806644">"Gorde gabe itxiko da <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak memoria-muga gainditu du"</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"Prest dago <xliff:g id="PROC">%1$s</xliff:g> memoria-iraulketaren txostena"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Sortu da uneko memoria-iraulketaren txostena. Sakatu partekatzeko."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Uneko memoria-iraulketaren txostena partekatu nahi duzu?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak memoria-muga (<xliff:g id="SIZE">%2$s</xliff:g>) gainditu du. Uneko memoria-iraulketaren txostena sortu da, garatzailearekin parteka dezazun. Kontuz: baliteke txosten horrek aplikazioak atzi dezakeen informazio pertsonala izatea."</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Sortu da memoria-iraulketaren txostena. Sakatu partekatzeko."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Memoria-iraulketaren txostena partekatu nahi duzu?"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak memoria-muga (<xliff:g id="SIZE">%2$s</xliff:g>) gainditu du. Memoria-iraulketaren txostena sortu da, garatzailearekin parteka dezazun. Kontuz: baliteke txosten horrek aplikazioak atzi dezakeen informazio pertsonala izatea."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> prozesuak bere memoria-muga (<xliff:g id="SIZE">%2$s</xliff:g>) gainditu du. Memoria-iraulketaren txosten bat duzu erabilgarri, hura partekatu nahi baduzu ere. Kontuz: baliteke txosten horrek prozesuak atzi dezakeen kontuzko informazio pertsonala izatea eta datu horien barnean zuk idatzitakoak egotea, besteak beste."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> prozesuaren memoria-iraulketaren txosten bat duzu erabilgarri, hura partekatu nahi baduzu ere. Kontuz: baliteke txosten horrek prozesuak atzi dezakeen kontuzko informazio pertsonala izatea eta datu horien barnean zuk idatzitakoak egotea, besteak beste."</string>
     <string name="sendText" msgid="493003724401350724">"Aukeratu testurako ekintza"</string>
@@ -1357,7 +1359,7 @@
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desaktibatu"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> egiaztatzen…"</string>
-    <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Uneko edukia berrikusten"</string>
+    <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Edukia berrikusten"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Euskarri berria: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Sakatu konfiguratzeko"</string>
@@ -1638,7 +1640,7 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Erabilerraztasun-eginbideetarako lasterbidea aktibatu nahi duzu?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Eduki sakatuta bolumen-botoiak segundo batzuez erabilerraztasun-eginbideak aktibatzeko. Hori eginez gero, baliteke zure mugikorraren funtzionamendua aldatzea.\n\nUneko eginbideak:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nHautatutako eginbideak aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Eduki sakatuta bolumen-botoiak segundo batzuez erabilerraztasun-eginbideak aktibatzeko. Hori eginez gero, baliteke zure mugikorraren funtzionamendua aldatzea.\n\nEginbideak:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nHautatutako eginbideak aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> zerbitzuaren lasterbidea aktibatu nahi duzu?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Eduki sakatuta bolumen-botoiak segundo batzuez <xliff:g id="SERVICE">%1$s</xliff:g> izeneko erabilerraztasun-eginbidea aktibatzeko. Honen bidez, baliteke zure mugikorraren funtzionamendua aldatzea.\n\nLasterbide hau beste eginbide batengatik aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
@@ -1676,7 +1678,7 @@
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Eginbide batetik bestera aldatzeko, pasatu bi hatz pantailaren behealdetik gora eta eduki sakatuta une batez."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Eginbide batetik bestera aldatzeko, pasatu hiru hatz pantailaren behealdetik gora eta eduki sakatuta une batez."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Lupa"</string>
-    <string name="user_switched" msgid="7249833311585228097">"Uneko erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switched" msgid="7249833311585228097">"Erabiltzailea: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailera aldatzen…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzailearen saioa amaitzen…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Jabea"</string>
@@ -1776,7 +1778,7 @@
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Idatzi administratzailearen PIN kodea"</string>
     <string name="restr_pin_enter_pin" msgid="373139384161304555">"Idatzi PINa"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Okerra"</string>
-    <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Uneko PINa"</string>
+    <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Oraingo PINa"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"PIN berria"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Berretsi PIN berria"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Konfiguratu debekuak aldatu ahal izateko idatzi beharko den PIN kodea"</string>
@@ -1869,6 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideo-deira aldatu da"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS eskaera berrira aldatu da"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-alerta"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Work profila"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Egin du soinua"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Zabaldu"</string>
