@@ -633,8 +633,8 @@
     <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"အက်ပ်အား အသုံးပြုသူက ခေါ်ဆိုမှုအဝင် မျက်နှာပြင် ဘယ်အချိန်မှာ ဘယ်လို မြင်ရမှာကို ထိန်းချုပ်ခွင့်ပေးရန်"</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"တယ်လီဖုန်း ဝန်ဆောင်မှုများနှင့် အပြန်အလှန် တုံ့ပြန်မှု"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"အက်ပ်အား ခေါ်ဆိုမှုများ လုပ်ခြင်း/လက်ခံခြင်း ပြုလုပ်နိုင်ရန် တယ်လီဖုန်း ဝန်ဆောင်မှုများနှင့် အပြန်အလှန် တုံ့ပြန်မှုကို ခွင့်ပြုသည်။"</string>
-    <string name="permlab_control_incall_experience" msgid="6436863486094352987">"အသုံးပြုသူ အတွက် ခေါ်ဆိုမှုအဝင် လုပ်ကိုင်ပုံကို စီစဉ်ပေးခြင်း"</string>
-    <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"အက်ပ်အား အသုံးပြုသူ အတွက် ခေါ်ဆိုမှုအဝင် လုပ်ကိုင်ပုံကို စီစဉ်ခွင့် ပြုသည်။"</string>
+    <string name="permlab_control_incall_experience" msgid="6436863486094352987">"အဝင်ခေါ်ဆိုမှုအတွက် အသုံးပြုသူ၏ နှစ်သက်မှုကို ခွင့်ပြုခြင်း"</string>
+    <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"အဝင်ခေါ်ဆိုမှုအတွက် အသုံးပြုသူ၏ နှစ်သက်မှုကို ပံ့ပိုးပေးရန် အက်ပ်အား ခွင့်ပြုသည်။"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"ရာဇဝင်အလိုက် ကွန်ယက်သုံစွဲမှုအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"အက်ပ်အား အထူး ကွန်ရက်များ နှင့် အက်ပ်များ အတွက် ကွန်ရက် အသုံးပြုမှု မှတ်တမ်းကို ဖတ်ကြားခွင့် ပြုသည်။"</string>
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"ကွန်ယက်မူဝါဒအား စီမံခြင်း"</string>
