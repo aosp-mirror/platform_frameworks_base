@@ -55082,6 +55082,8 @@ package android.widget {
     method public void setChronometer(@IdRes int, long, String, boolean);
     method public void setChronometerCountDown(@IdRes int, boolean);
     method public void setColor(@IdRes int, @NonNull String, @ColorRes int);
+    method public void setColorInt(@IdRes int, @NonNull String, @ColorInt int, @ColorInt int);
+    method public void setColorStateList(@IdRes int, @NonNull String, @Nullable android.content.res.ColorStateList, @Nullable android.content.res.ColorStateList);
     method public void setColorStateList(@IdRes int, @NonNull String, @ColorRes int);
     method public void setCompoundButtonChecked(@IdRes int, boolean);
     method public void setContentDescription(@IdRes int, CharSequence);
@@ -55092,6 +55094,7 @@ package android.widget {
     method public void setFloatDimen(@IdRes int, @NonNull String, @DimenRes int);
     method public void setFloatDimen(@IdRes int, @NonNull String, float, int);
     method public void setIcon(@IdRes int, String, android.graphics.drawable.Icon);
+    method public void setIcon(@IdRes int, @NonNull String, @Nullable android.graphics.drawable.Icon, @Nullable android.graphics.drawable.Icon);
     method public void setImageViewBitmap(@IdRes int, android.graphics.Bitmap);
     method public void setImageViewIcon(@IdRes int, android.graphics.drawable.Icon);
     method public void setImageViewResource(@IdRes int, @DrawableRes int);
