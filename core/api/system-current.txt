@@ -9376,6 +9376,10 @@ package android.telephony {
     field public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL = "support_cdma_1x_voice_calls_bool";
   }
 
+  public static final class CarrierConfigManager.Ims {
+    field public static final String KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY = "ims.publish_service_desc_feature_tag_map_override_string_array";
+  }
+
   public static final class CarrierConfigManager.Wifi {
     field public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT = "wifi.hotspot_maximum_client_count";
     field public static final String KEY_PREFIX = "wifi.";
