@@ -1572,12 +1572,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
         if (rotation == ROTATION_UNDEFINED) {
-            // The display rotation won't be changed by current top activity. If there was fixed
-            // rotation activity, its rotated state should be cleared to cancel the adjustments.
-            if (hasTopFixedRotationLaunchingApp()
-                    // Avoid breaking recents animation.
-                    && !mFixedRotationLaunchingApp.getTask().isAnimatingByRecents()) {
-                clearFixedRotationLaunchingApp();
+            // The display rotation won't be changed by current top activity. The client side
+            // adjustments of previous rotated activity should be cleared earlier. Otherwise if
+            // the current top is in the same process, it may get the rotated state. The transform
+            // will be cleared later with transition callback to ensure smooth animation.
+            if (hasTopFixedRotationLaunchingApp()) {
+                mFixedRotationLaunchingApp.notifyFixedRotationTransform(false /* enabled */);
             }
             return false;
         }
