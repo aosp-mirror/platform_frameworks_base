@@ -287,6 +287,13 @@ public final class WMShell extends SystemUI
 
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
+                if (showing) {
+                    // When keyguard shown, temperory lock OHM disabled to avoid mis-trigger.
+                    oneHanded.setLockedDisabled(true /* locked */, false /* enabled */);
+                } else {
+                    // Reset locked.
+                    oneHanded.setLockedDisabled(false /* locked */, false /* enabled */);
+                }
                 oneHanded.stopOneHanded();
             }
         };

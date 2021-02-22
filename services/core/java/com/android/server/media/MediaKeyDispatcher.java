@@ -77,7 +77,7 @@ public abstract class MediaKeyDispatcher {
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_MUTE, 0);
     }
 
-    // TODO: Move this method into SessionPolicyProvider.java for better readability.
+    // TODO: Move this method into MediaSessionPolicyProvider.java for better readability.
     /**
      * Implement this to customize the logic for which MediaSession should consume which key event.
      *

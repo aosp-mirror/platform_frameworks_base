@@ -9033,7 +9033,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void updateDefaultNetworksForOemNetworkPreference(
             @NonNull final Set<NetworkRequestInfo> nris) {
-        handleRemoveNetworkRequests(mDefaultNetworkRequests);
+        // Pass in a defensive copy as this collection will be updated on remove.
+        handleRemoveNetworkRequests(new ArraySet<>(mDefaultNetworkRequests));
         addPerAppDefaultNetworkRequests(nris);
     }
 
