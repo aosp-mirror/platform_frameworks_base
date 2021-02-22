@@ -39,8 +39,7 @@ public class MediaOutputConstants {
     /**
      * A string extra specifying a media package name.
      */
-    public static final String EXTRA_PACKAGE_NAME =
-            "com.android.settings.panel.extra.PACKAGE_NAME";
+    public static final String EXTRA_PACKAGE_NAME = "package_name";
 
     /**
      * An intent action to launch media output dialog.
