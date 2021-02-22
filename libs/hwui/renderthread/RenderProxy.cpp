@@ -230,7 +230,10 @@ void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
 }
 
 void RenderProxy::resetProfileInfo() {
-    mRenderThread.queue().runSync([=]() { mContext->resetFrameStats(); });
+    mRenderThread.queue().runSync([=]() {
+        std::lock_guard lock(mRenderThread.getJankDataMutex());
+        mContext->resetFrameStats();
+    });
 }
 
 uint32_t RenderProxy::frameTimePercentile(int percentile) {
