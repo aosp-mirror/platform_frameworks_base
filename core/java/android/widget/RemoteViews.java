@@ -211,6 +211,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_RADIO_GROUP_CHECKED = 27;
     private static final int SET_VIEW_OUTLINE_RADIUS_TAG = 28;
     private static final int SET_ON_CHECKED_CHANGE_RESPONSE_TAG = 29;
+    private static final int NIGHT_MODE_REFLECTION_ACTION_TAG = 30;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -1877,6 +1878,73 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private final class NightModeReflectionAction extends BaseReflectionAction {
+
+        private final Object mLightValue;
+        private final Object mDarkValue;
+
+        NightModeReflectionAction(
+                @IdRes int viewId,
+                String methodName,
+                int type,
+                Object lightValue,
+                Object darkValue) {
+            super(viewId, methodName, type);
+            mLightValue = lightValue;
+            mDarkValue = darkValue;
+        }
+
+        NightModeReflectionAction(Parcel in) {
+            super(in);
+            switch (this.type) {
+                case ICON:
+                    mLightValue = in.readTypedObject(Icon.CREATOR);
+                    mDarkValue = in.readTypedObject(Icon.CREATOR);
+                    break;
+                case COLOR_STATE_LIST:
+                    mLightValue = in.readTypedObject(ColorStateList.CREATOR);
+                    mDarkValue = in.readTypedObject(ColorStateList.CREATOR);
+                    break;
+                case INT:
+                    mLightValue = in.readInt();
+                    mDarkValue = in.readInt();
+                    break;
+                default:
+                    throw new ActionException("Unexpected night mode action type: " + this.type);
+            }
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            switch (this.type) {
+                case ICON:
+                case COLOR_STATE_LIST:
+                    out.writeTypedObject((Parcelable) mLightValue, flags);
+                    out.writeTypedObject((Parcelable) mDarkValue, flags);
+                    break;
+                case INT:
+                    out.writeInt((int) mLightValue);
+                    out.writeInt((int) mDarkValue);
+                    break;
+            }
+        }
+
+        @Nullable
+        @Override
+        protected Object getParameterValue(@Nullable View view) throws ActionException {
+            if (view == null) return null;
+
+            Configuration configuration = view.getResources().getConfiguration();
+            return configuration.isNightModeActive() ? mDarkValue : mLightValue;
+        }
+
+        @Override
+        public int getActionTag() {
+            return NIGHT_MODE_REFLECTION_ACTION_TAG;
+        }
+    }
+
     /**
      * This is only used for async execution of actions and it not parcelable.
      */
@@ -3243,6 +3311,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetViewOutlinePreferredRadiusAction(parcel);
             case SET_ON_CHECKED_CHANGE_RESPONSE_TAG:
                 return new SetOnCheckedChangeResponse(parcel);
+            case NIGHT_MODE_REFLECTION_ACTION_TAG:
+                return new NightModeReflectionAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -4130,6 +4200,30 @@ public class RemoteViews implements Parcelable, Filter {
                 ResourceReflectionAction.COLOR_RESOURCE, colorResource));
     }
 
+    /**
+     * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param notNight The value to pass to the method when the view's configuration is set to
+     *                 {@link Configuration#UI_MODE_NIGHT_NO}
+     * @param night The value to pass to the method when the view's configuration is set to
+     *                 {@link Configuration#UI_MODE_NIGHT_YES}
+     */
+    public void setColorInt(
+            @IdRes int viewId,
+            @NonNull String methodName,
+            @ColorInt int notNight,
+            @ColorInt int night) {
+        addAction(
+                new NightModeReflectionAction(
+                        viewId,
+                        methodName,
+                        BaseReflectionAction.INT,
+                        notNight,
+                        night));
+    }
+
 
     /**
      * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
@@ -4143,6 +4237,30 @@ public class RemoteViews implements Parcelable, Filter {
     public void setColorStateList(@IdRes int viewId, String methodName, ColorStateList value) {
         addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.COLOR_STATE_LIST,
                 value));
+    }
+
+    /**
+     * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param notNight The value to pass to the method when the view's configuration is set to
+     *                 {@link Configuration#UI_MODE_NIGHT_NO}
+     * @param night The value to pass to the method when the view's configuration is set to
+     *                 {@link Configuration#UI_MODE_NIGHT_YES}
+     */
+    public void setColorStateList(
+            @IdRes int viewId,
+            @NonNull String methodName,
+            @Nullable ColorStateList notNight,
+            @Nullable ColorStateList night) {
+        addAction(
+                new NightModeReflectionAction(
+                        viewId,
+                        methodName,
+                        BaseReflectionAction.COLOR_STATE_LIST,
+                        notNight,
+                        night));
     }
 
     /**
@@ -4353,6 +4471,30 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setIcon(@IdRes int viewId, String methodName, Icon value) {
         addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.ICON, value));
+    }
+
+    /**
+     * Call a method taking one Icon on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param notNight The value to pass to the method when the view's configuration is set to
+     *                 {@link Configuration#UI_MODE_NIGHT_NO}
+     * @param night The value to pass to the method when the view's configuration is set to
+     *                 {@link Configuration#UI_MODE_NIGHT_YES}
+     */
+    public void setIcon(
+            @IdRes int viewId,
+            @NonNull String methodName,
+            @Nullable Icon notNight,
+            @Nullable Icon night) {
+        addAction(
+                new NightModeReflectionAction(
+                        viewId,
+                        methodName,
+                        BaseReflectionAction.ICON,
+                        notNight,
+                        night));
     }
 
     /**
