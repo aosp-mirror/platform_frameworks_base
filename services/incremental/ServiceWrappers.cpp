@@ -287,11 +287,10 @@ private:
             auto it = mJobs.begin();
             // Always acquire begin(). We can't use it after unlock as mTimedJobs can change.
             for (; it != mJobs.end() && it->when <= now; it = mJobs.begin()) {
-                auto job = std::move(it->what);
-                mJobs.erase(it);
+                auto jobNode = mJobs.extract(it);
 
                 lock.unlock();
-                job();
+                jobNode.value().what();
                 lock.lock();
             }
             nextJobTs = it != mJobs.end() ? it->when : kInfinityTs;
@@ -313,20 +312,20 @@ private:
     std::thread mThread;
 };
 
-class RealFsWrapper : public FsWrapper {
+class RealFsWrapper final : public FsWrapper {
 public:
     RealFsWrapper() = default;
     ~RealFsWrapper() = default;
 
-    std::vector<std::string> listFilesRecursive(std::string_view directoryPath) const final {
-        std::vector<std::string> files;
+    void listFilesRecursive(std::string_view directoryPath, FileCallback onFile) const final {
         for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
             if (!entry.is_regular_file()) {
                 continue;
             }
-            files.push_back(entry.path().c_str());
+            if (!onFile(entry.path().native())) {
+                break;
+            }
         }
-        return files;
     }
 };
 
