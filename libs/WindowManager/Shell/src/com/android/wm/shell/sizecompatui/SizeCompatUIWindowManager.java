@@ -24,12 +24,14 @@ import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
+import android.view.View;
 import android.view.WindowlessWindowManager;
 
 import com.android.wm.shell.R;
 
 /**
- * Holds view hierarchy of a root surface and helps to inflate {@link SizeCompatRestartButton}.
+ * Holds view hierarchy of a root surface and helps to inflate {@link SizeCompatRestartButton} or
+ * {@link SizeCompatHintPopup}.
  */
 class SizeCompatUIWindowManager extends WindowlessWindowManager {
 
@@ -67,16 +69,37 @@ class SizeCompatUIWindowManager extends WindowlessWindowManager {
     }
 
     /** Inflates {@link SizeCompatRestartButton} on to the root surface. */
-    SizeCompatRestartButton createSizeCompatUI() {
-        if (mViewHost == null) {
-            mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+    SizeCompatRestartButton createSizeCompatButton() {
+        if (mViewHost != null) {
+            throw new IllegalStateException(
+                    "A UI has already been created with this window manager.");
         }
+
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
 
         final SizeCompatRestartButton button = (SizeCompatRestartButton)
                 LayoutInflater.from(mContext).inflate(R.layout.size_compat_ui, null);
         button.inject(mLayout);
-        mViewHost.setView(button, mLayout.getWindowLayoutParams());
+        mViewHost.setView(button, mLayout.getButtonWindowLayoutParams());
         return button;
+    }
+
+    /** Inflates {@link SizeCompatHintPopup} on to the root surface. */
+    SizeCompatHintPopup createSizeCompatHint() {
+        if (mViewHost != null) {
+            throw new IllegalStateException(
+                    "A UI has already been created with this window manager.");
+        }
+
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+
+        final SizeCompatHintPopup hint = (SizeCompatHintPopup)
+                LayoutInflater.from(mContext).inflate(R.layout.size_compat_mode_hint, null);
+        // Measure how big the hint is.
+        hint.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        hint.inject(mLayout);
+        mViewHost.setView(hint, mLayout.getHintWindowLayoutParams(hint));
+        return hint;
     }
 
     /** Releases the surface control and tears down the view hierarchy. */

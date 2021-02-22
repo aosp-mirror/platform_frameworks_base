@@ -50,7 +50,7 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     /** Whether the IME is shown on display id. */
     private final Set<Integer> mDisplaysWithIme = new ArraySet<>(1);
 
-    /** The showing buttons by task id. */
+    /** The showing UIs by task id. */
     private final SparseArray<SizeCompatUILayout> mActiveLayouts = new SparseArray<>(0);
 
     /** Avoid creating display context frequently for non-default display. */
@@ -77,12 +77,12 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     }
 
     /**
-     * Called when the Task info changed. Creates and updates the restart button if there is an
-     * activity in size compat, or removes the restart button if there is no size compat activity.
+     * Called when the Task info changed. Creates and updates the size compat UI if there is an
+     * activity in size compat, or removes the UI if there is no size compat activity.
      *
      * @param displayId display the task and activity are in.
      * @param taskId task the activity is in.
-     * @param taskConfig task config to place the restart button with.
+     * @param taskConfig task config to place the size compat UI with.
      * @param sizeCompatActivity the size compat activity in the task. Can be {@code null} if the
      *                           top activity in this Task is not in size compat.
      * @param taskListener listener to handle the Task Surface placement.
@@ -94,10 +94,10 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
             // Null token means the current foreground activity is not in size compatibility mode.
             removeLayout(taskId);
         } else if (mActiveLayouts.contains(taskId)) {
-            // Button already exists, update the button layout.
+            // UI already exists, update the UI layout.
             updateLayout(taskId, taskConfig, sizeCompatActivity, taskListener);
         } else {
-            // Create a new restart button.
+            // Create a new size compat UI.
             createLayout(displayId, taskId, taskConfig, sizeCompatActivity, taskListener);
         }
     }
@@ -106,7 +106,7 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     public void onDisplayRemoved(int displayId) {
         mDisplayContextCache.remove(displayId);
 
-        // Remove all buttons on the removed display.
+        // Remove all size compat UIs on the removed display.
         final List<Integer> toRemoveTaskIds = new ArrayList<>();
         forAllLayoutsOnDisplay(displayId, layout -> toRemoveTaskIds.add(layout.getTaskId()));
         for (int i = toRemoveTaskIds.size() - 1; i >= 0; i--) {
@@ -128,7 +128,7 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
             mDisplaysWithIme.remove(displayId);
         }
 
-        // Hide the button when input method is showing.
+        // Hide the size compat UIs when input method is showing.
         forAllLayoutsOnDisplay(displayId, layout -> layout.updateImeVisibility(isShowing));
     }
 
