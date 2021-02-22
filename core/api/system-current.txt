@@ -6850,6 +6850,28 @@ package android.net.util {
 
 }
 
+package android.net.vcn {
+
+  public class VcnManager {
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void addVcnNetworkPolicyListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnNetworkPolicyListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.vcn.VcnNetworkPolicyResult applyVcnNetworkPolicy(@NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties);
+    method public void removeVcnNetworkPolicyListener(@NonNull android.net.vcn.VcnManager.VcnNetworkPolicyListener);
+  }
+
+  public static interface VcnManager.VcnNetworkPolicyListener {
+    method public void onPolicyChanged();
+  }
+
+  public final class VcnNetworkPolicyResult implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method public boolean isTeardownRequested();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnNetworkPolicyResult> CREATOR;
+  }
+
+}
+
 package android.net.wifi {
 
   public final class WifiMigration {
