@@ -25,7 +25,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
-import com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE
+import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsDialog
 import com.android.systemui.dagger.qualifiers.Background
@@ -92,7 +92,7 @@ class DeviceControlsTile @Inject constructor(
     override fun isAvailable(): Boolean {
         return featureFlags.isKeyguardLayoutEnabled &&
                 controlsLockscreen &&
-                controlsComponent.getVisibility() != UNAVAILABLE
+                controlsComponent.getControlsController().isPresent
     }
 
     override fun newTileState(): QSTile.State {
@@ -119,7 +119,7 @@ class DeviceControlsTile @Inject constructor(
     }
 
     override fun handleClick() {
-        if (state.state != Tile.STATE_UNAVAILABLE) {
+        if (state.state == Tile.STATE_ACTIVE) {
             mUiHandler.post {
                 createDialog()
                 controlsDialog?.show(controlsComponent.getControlsUiController().get())
@@ -129,15 +129,21 @@ class DeviceControlsTile @Inject constructor(
 
     override fun handleUpdateState(state: QSTile.State, arg: Any?) {
         state.label = tileLabel
-        state.secondaryLabel = ""
-        state.stateDescription = ""
+
         state.contentDescription = state.label
         state.icon = icon
-        if (hasControlsApps.get()) {
-            state.state = Tile.STATE_ACTIVE
+        if (controlsComponent.isEnabled() && hasControlsApps.get()) {
             if (controlsDialog == null) {
                 mUiHandler.post(this::createDialog)
             }
+            if (controlsComponent.getVisibility() == AVAILABLE) {
+                state.state = Tile.STATE_ACTIVE
+                state.secondaryLabel = ""
+            } else {
+                state.state = Tile.STATE_INACTIVE
+                state.secondaryLabel = mContext.getText(R.string.controls_tile_locked)
+            }
+            state.stateDescription = state.secondaryLabel
         } else {
             state.state = Tile.STATE_UNAVAILABLE
             dismissDialog()
