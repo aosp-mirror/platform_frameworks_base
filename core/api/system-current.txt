@@ -1546,6 +1546,10 @@ package android.bluetooth {
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
   }
 
+  public final class BluetoothMapClient implements android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.SEND_SMS) public boolean sendMessage(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.net.Uri>, @NonNull String, @Nullable android.app.PendingIntent, @Nullable android.app.PendingIntent);
+  }
+
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
@@ -1578,6 +1582,7 @@ package android.bluetooth {
     field public static final int CONNECTION_POLICY_FORBIDDEN = 0; // 0x0
     field public static final int CONNECTION_POLICY_UNKNOWN = -1; // 0xffffffff
     field public static final int HEADSET_CLIENT = 16; // 0x10
+    field public static final int MAP_CLIENT = 18; // 0x12
     field public static final int PAN = 5; // 0x5
     field public static final int PBAP_CLIENT = 17; // 0x11
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
