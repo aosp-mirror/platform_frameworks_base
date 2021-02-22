@@ -95,18 +95,6 @@ public class AppOpsCoordinator implements Coordinator {
                             sbn.getUser().getIdentifier())) {
                 return true;
             }
-
-            // Filters out system alert notifications when unneeded
-            if (mForegroundServiceController.isSystemAlertNotification(sbn)) {
-                final String[] apps = sbn.getNotification().extras.getStringArray(
-                        Notification.EXTRA_FOREGROUND_APPS);
-                if (apps != null && apps.length >= 1) {
-                    if (!mForegroundServiceController.isSystemAlertWarningNeeded(
-                            sbn.getUser().getIdentifier(), apps[0])) {
-                        return true;
-                    }
-                }
-            }
             return false;
         }
     };

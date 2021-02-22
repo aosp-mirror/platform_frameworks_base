@@ -171,62 +171,10 @@ public class NotificationFilterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSuppressSystemAlertNotification() {
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
-        StatusBarNotification sbn = mRow.getEntry().getSbn();
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[]{"something"});
-        sbn.getNotification().extras = bundle;
-
-        assertTrue(mNotificationFilter.shouldFilterOut(mRow.getEntry()));
-    }
-
-    @Test
-    public void testDoNotSuppressSystemAlertNotification() {
-        StatusBarNotification sbn = mRow.getEntry().getSbn();
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[]{"something"});
-        sbn.getNotification().extras = bundle;
-
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
-
-        assertFalse(mNotificationFilter.shouldFilterOut(mRow.getEntry()));
-
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
-
-        assertFalse(mNotificationFilter.shouldFilterOut(mRow.getEntry()));
-
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
-
-        assertFalse(mNotificationFilter.shouldFilterOut(mRow.getEntry()));
-    }
-
-    @Test
-    public void testDoNotSuppressMalformedSystemAlertNotification() {
-        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
-
-        // missing extra
-        assertFalse(mNotificationFilter.shouldFilterOut(mRow.getEntry()));
-
-        StatusBarNotification sbn = mRow.getEntry().getSbn();
-        Bundle bundle = new Bundle();
-        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[]{});
-        sbn.getNotification().extras = bundle;
-
-        // extra missing values
-        assertFalse(mNotificationFilter.shouldFilterOut(mRow.getEntry()));
-    }
-
-    @Test
     public void testShouldFilterHiddenNotifications() {
         initStatusBarNotification(false);
         // setup
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
-        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
 
         // test should filter out hidden notifications:
         // hidden
