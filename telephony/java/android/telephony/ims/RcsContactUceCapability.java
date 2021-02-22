@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -343,5 +344,40 @@ public final class RcsContactUceCapability implements Parcelable {
      */
     public @NonNull Uri getContactUri() {
         return mContactUri;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("RcsContactUceCapability");
+        if (mCapabilityMechanism == CAPABILITY_MECHANISM_PRESENCE) {
+            builder.append("(presence) {");
+        } else if (mCapabilityMechanism == CAPABILITY_MECHANISM_OPTIONS) {
+            builder.append("(options) {");
+        } else {
+            builder.append("(?) {");
+        }
+        if (Build.IS_ENG) {
+            builder.append("uri=");
+            builder.append(mContactUri);
+        } else {
+            builder.append("uri (isNull)=");
+            builder.append(mContactUri != null ? "XXX" : "null");
+        }
+        builder.append(", sourceType=");
+        builder.append(mSourceType);
+        builder.append(", requestResult=");
+        builder.append(mRequestResult);
+
+        if (mCapabilityMechanism == CAPABILITY_MECHANISM_PRESENCE) {
+            builder.append(", presenceTuples={");
+            builder.append(mPresenceTuples);
+            builder.append("}");
+        } else if (mCapabilityMechanism == CAPABILITY_MECHANISM_OPTIONS) {
+            builder.append(", featureTags={");
+            builder.append(mFeatureTags);
+            builder.append("}");
+        }
+
+        return builder.toString();
     }
 }
