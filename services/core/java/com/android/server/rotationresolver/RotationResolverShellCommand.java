@@ -16,12 +16,13 @@
 
 package com.android.server.rotationresolver;
 
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.os.CancellationSignal;
 import android.os.ShellCommand;
 import android.rotationresolver.RotationResolverInternal.RotationResolverCallbackInternal;
+import android.text.TextUtils;
 import android.view.Surface;
 
 import java.io.PrintWriter;
@@ -59,7 +60,7 @@ final class RotationResolverShellCommand extends ShellCommand {
         }
     }
 
-    final TestableRotationCallbackInternal mTestableRotationCallbackInternal =
+    static final TestableRotationCallbackInternal sTestableRotationCallbackInternal =
             new TestableRotationCallbackInternal();
 
     @Override
@@ -73,20 +74,47 @@ final class RotationResolverShellCommand extends ShellCommand {
                 return runResolveRotation();
             case "get-last-resolution":
                 return getLastResolution();
+            case "set-testing-package":
+                return setTestRotationResolverPackage(getNextArgRequired());
+            case "get-bound-package":
+                return getBoundPackageName();
+            case "clear-testing-package":
+                return resetTestRotationResolverPackage();
             default:
                 return handleDefaultCommands(cmd);
         }
     }
 
+    private int getBoundPackageName() {
+        final PrintWriter out = getOutPrintWriter();
+        final ComponentName componentName = mService.getComponentName();
+        out.println(componentName == null ? "" : componentName.getPackageName());
+        return 0;
+    }
+
+    private int setTestRotationResolverPackage(String testingPackage) {
+        if (!TextUtils.isEmpty((testingPackage))) {
+            mService.setTestingPackage(testingPackage);
+            sTestableRotationCallbackInternal.reset();
+        }
+        return 0;
+    }
+
+    private int resetTestRotationResolverPackage() {
+        mService.setTestingPackage("");
+        sTestableRotationCallbackInternal.reset();
+        return 0;
+    }
+
     private int runResolveRotation() {
-        mService.resolveRotationLocked(mTestableRotationCallbackInternal, Surface.ROTATION_0,
+        mService.resolveRotationLocked(sTestableRotationCallbackInternal, Surface.ROTATION_0,
                 Surface.ROTATION_0, "", 2000L, new CancellationSignal());
         return 0;
     }
 
     private int getLastResolution() {
         final PrintWriter out = getOutPrintWriter();
-        out.println(mTestableRotationCallbackInternal.getLastCallbackCode());
+        out.println(sTestableRotationCallbackInternal.getLastCallbackCode());
         return 0;
     }
 
@@ -99,5 +127,8 @@ final class RotationResolverShellCommand extends ShellCommand {
         pw.println();
         pw.println("  resolve-rotation: request a rotation resolution.");
         pw.println("  get-last-resolution: show the last rotation resolution result.");
+        pw.println("  set-testing-package: Set the testing package that implements the service.");
+        pw.println("  get-bound-package: print the bound package that implements the service.");
+        pw.println("  clear-testing-package: reset the testing package.");
     }
 }
