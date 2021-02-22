@@ -622,7 +622,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
                 .getDefaultColor();
         updateBackgroundDimming();
-        mShelf.onUiModeChanged();
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof ActivatableNotificationView) {
+                ((ActivatableNotificationView) child).updateBackgroundColors();
+            }
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)

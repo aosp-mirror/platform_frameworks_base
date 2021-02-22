@@ -223,6 +223,7 @@ public class NotificationStackScrollLayoutController {
             updateShowEmptyShadeView();
             mView.updateCornerRadius();
             mView.updateBgColor();
+            mView.updateDecorViews();
             mView.reinflateViews();
         }
 
