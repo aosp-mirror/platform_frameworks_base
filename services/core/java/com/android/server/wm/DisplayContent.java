@@ -5467,9 +5467,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     // apply the correct override config.
                     changes = mAtmService.updateGlobalConfigurationLocked(values,
                             false /* initLocale */, false /* persistent */,
-                            UserHandle.USER_NULL /* userId */, deferResume);
+                            UserHandle.USER_NULL /* userId */);
                 } else {
-                    changes = performDisplayOverrideConfigUpdate(values, deferResume);
+                    changes = performDisplayOverrideConfigUpdate(values);
                 }
             }
 
@@ -5487,7 +5487,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return kept;
     }
 
-    int performDisplayOverrideConfigUpdate(Configuration values, boolean deferResume) {
+    int performDisplayOverrideConfigUpdate(Configuration values) {
         mTempConfig.setTo(getRequestedOverrideConfiguration());
         final int changes = mTempConfig.updateFrom(values);
         if (changes != 0) {
