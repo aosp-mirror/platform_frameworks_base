@@ -9841,7 +9841,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
-        return liveComputer().queryIntentActivitiesInternal(intent,
+        return snapshotComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
     }
 
@@ -10328,7 +10328,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
-        return liveComputer().queryIntentServicesInternal(intent,
+        return snapshotComputer().queryIntentServicesInternal(intent,
                 resolvedType, flags, userId, callingUid,
                 includeInstantApps);
     }
