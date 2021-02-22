@@ -99,10 +99,16 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
         runPhase("expireRollbacks");
         mLogger.start(getDevice());
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.A");
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.B");
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.C");
     }
 
     @After
     public void tearDown() throws Exception {
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.A");
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.B");
+        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.C");
         mLogger.stop();
         runPhase("expireRollbacks");
         deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
@@ -283,7 +289,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackApexWithApk() throws Exception {
-        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.A");
         pushTestApex();
         runPhase("testRollbackApexWithApk_Phase1_Install");
         getDevice().reboot();
@@ -297,7 +302,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackApexWithApkCrashing() throws Exception {
-        getDevice().uninstallPackage("com.android.cts.install.lib.testapp.A");
         pushTestApex();
 
         // Install an apex with apk that crashes
