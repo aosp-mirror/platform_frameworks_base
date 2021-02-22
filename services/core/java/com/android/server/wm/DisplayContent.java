@@ -461,8 +461,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Remove this display when animation on it has completed. */
     private boolean mDeferredRemoval;
 
-    final DockedStackDividerController mDividerControllerLocked;
-    final PinnedStackController mPinnedStackControllerLocked;
+    final DockedTaskDividerController mDividerControllerLocked;
+    final PinnedTaskController mPinnedTaskControllerLocked;
 
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
     /** A collection of windows that provide tap exclude regions inside of them. */
@@ -1031,8 +1031,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mDisplayPolicy.systemReady();
         }
         mWindowCornerRadius = mDisplayPolicy.getWindowCornerRadius();
-        mDividerControllerLocked = new DockedStackDividerController(this);
-        mPinnedStackControllerLocked = new PinnedStackController(mWmService, this);
+        mDividerControllerLocked = new DockedTaskDividerController(this);
+        mPinnedTaskControllerLocked = new PinnedTaskController(mWmService, this);
 
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
                 .setOpaque(true)
@@ -1586,7 +1586,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // has it own policy for bounds, the activity bounds based on parent is unknown.
             return false;
         }
-        if (mPinnedStackControllerLocked.isPipActiveOrWindowingModeChanging()) {
+        if (mPinnedTaskControllerLocked.isPipActiveOrWindowingModeChanging()) {
             // Use normal rotation animation because seamless PiP rotation is not supported yet.
             return false;
         }
@@ -2315,12 +2315,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    DockedStackDividerController getDockedDividerController() {
+    DockedTaskDividerController getDockedDividerController() {
         return mDividerControllerLocked;
     }
 
-    PinnedStackController getPinnedStackController() {
-        return mPinnedStackControllerLocked;
+    PinnedTaskController getPinnedTaskController() {
+        return mPinnedTaskControllerLocked;
     }
 
     /**
@@ -2401,10 +2401,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * for bounds calculations.
      */
     void preOnConfigurationChanged() {
-        final PinnedStackController pinnedStackController = getPinnedStackController();
+        final PinnedTaskController pinnedTaskController = getPinnedTaskController();
 
-        if (pinnedStackController != null) {
-            getPinnedStackController().onConfigurationChanged();
+        if (pinnedTaskController != null) {
+            getPinnedTaskController().onConfigurationChanged();
         }
     }
 
@@ -2943,7 +2943,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final boolean imeVisible = imeWin != null && imeWin.isVisible()
                 && imeWin.isDisplayed();
         final int imeHeight = getInputMethodWindowVisibleHeight();
-        mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
+        mPinnedTaskControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
     }
 
     int getInputMethodWindowVisibleHeight() {
@@ -3214,7 +3214,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         pw.println();
-        mPinnedStackControllerLocked.dump(prefix, pw);
+        mPinnedTaskControllerLocked.dump(prefix, pw);
 
         pw.println();
         mDisplayFrames.dump(prefix, pw);

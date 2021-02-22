@@ -36,13 +36,12 @@ import android.service.screenshot.ScreenshotHash;
 import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
-import android.view.IDockedStackListener;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IOnKeyguardExitResult;
-import android.view.IPinnedStackListener;
+import android.view.IPinnedTaskListener;
 import android.view.IScrollCaptureCallbacks;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
@@ -445,12 +444,12 @@ interface IWindowManager
      * Sets the region the user can touch the divider. This region will be excluded from the region
      * which is used to cause a focus switch when dispatching touch.
      */
-    void setDockedStackDividerTouchRegion(in Rect touchableRegion);
+    void setDockedTaskDividerTouchRegion(in Rect touchableRegion);
 
     /**
-     * Registers a listener that will be called when the pinned stack state changes.
+     * Registers a listener that will be called when the pinned task state changes.
      */
-    void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
+    void registerPinnedTaskListener(int displayId, IPinnedTaskListener listener);
 
     /**
      * Requests Keyboard Shortcuts from the displayed window.

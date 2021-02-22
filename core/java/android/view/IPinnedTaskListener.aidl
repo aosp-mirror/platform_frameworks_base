@@ -23,11 +23,11 @@ import android.graphics.Rect;
 import android.view.DisplayInfo;
 
 /**
- * Listener for changes to the pinned stack made by the WindowManager.
+ * Listener for changes to the pinned task made by the WindowManager.
  *
  * @hide
  */
-oneway interface IPinnedStackListener {
+oneway interface IPinnedTaskListener {
 
     /**
      * Called when the window manager has detected a change that would cause the movement bounds

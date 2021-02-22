@@ -226,7 +226,7 @@ import android.view.IDisplayWindowListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
-import android.view.IPinnedStackListener;
+import android.view.IPinnedTaskListener;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
 import android.view.IScrollCaptureCallbacks;
@@ -2970,7 +2970,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean isValidPictureInPictureAspectRatio(DisplayContent displayContent, float aspectRatio) {
-        return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
+        return displayContent.getPinnedTaskController().isValidPictureInPictureAspectRatio(
                 aspectRatio);
     }
 
@@ -6869,7 +6869,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setDockedStackDividerTouchRegion(Rect touchRegion) {
+    public void setDockedTaskDividerTouchRegion(Rect touchRegion) {
         synchronized (mGlobalLock) {
             final DisplayContent dc = getDefaultDisplayContentLocked();
             dc.getDockedDividerController().setTouchRegion(touchRegion);
@@ -6894,10 +6894,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
     }
 
-    @Override
-    public void registerPinnedStackListener(int displayId, IPinnedStackListener listener) {
+    public void registerPinnedTaskListener(int displayId, IPinnedTaskListener listener) {
         if (!checkCallingPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
-                "registerPinnedStackListener()")) {
+                "registerPinnedTaskListener()")) {
             return;
         }
         if (!mAtmService.mSupportsPictureInPicture) {
@@ -6905,7 +6904,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            displayContent.getPinnedStackController().registerPinnedStackListener(listener);
+            displayContent.getPinnedTaskController().registerPinnedTaskListener(listener);
         }
     }
 

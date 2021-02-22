@@ -189,7 +189,7 @@ public class TaskStackChangeListeners {
         }
 
         @Override
-        public void onActivityDismissingDockedStack() {
+        public void onActivityDismissingDockedTask() {
             mHandler.sendEmptyMessage(ON_ACTIVITY_DISMISSING_DOCKED_STACK);
         }
 
