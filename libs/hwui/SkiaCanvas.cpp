@@ -188,7 +188,7 @@ void SkiaCanvas::restoreUnclippedLayer(int restoreCount, const SkPaint& paint) {
     }
 
     if (mCanvas->getSaveCount() == restoreCount + 1) {
-        SkCanvasPriv::DrawBehind(mCanvas, *filterPaint(paint));
+        SkCanvasPriv::DrawBehind(mCanvas, filterPaint(paint));
         this->restore();
     }
 }
@@ -431,15 +431,14 @@ void SkiaCanvas::drawColor(int color, SkBlendMode mode) {
     mCanvas->drawColor(color, mode);
 }
 
-SkiaCanvas::PaintCoW&& SkiaCanvas::filterPaint(PaintCoW&& paint) const {
+void SkiaCanvas::onFilterPaint(SkPaint& paint) {
     if (mPaintFilter) {
-        mPaintFilter->filter(&paint.writeable());
+        mPaintFilter->filter(&paint);
     }
-    return std::move(paint);
 }
 
 void SkiaCanvas::drawPaint(const SkPaint& paint) {
-    mCanvas->drawPaint(*filterPaint(paint));
+    mCanvas->drawPaint(filterPaint(paint));
 }
 
 // ----------------------------------------------------------------------------
@@ -457,13 +456,11 @@ void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint,
         points += 2;
     }
 
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawPoints(mode, count, pts.get(), p);
-    });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawPoints(mode, count, pts.get(), p); });
 }
 
 void SkiaCanvas::drawPoint(float x, float y, const Paint& paint) {
-    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawPoint(x, y, p); });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawPoint(x, y, p); });
 }
 
 void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint) {
@@ -472,9 +469,8 @@ void SkiaCanvas::drawPoints(const float* points, int count, const Paint& paint) 
 
 void SkiaCanvas::drawLine(float startX, float startY, float stopX, float stopY,
                           const Paint& paint) {
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawLine(startX, startY, stopX, stopY, p);
-    });
+    applyLooper(&paint,
+                [&](const SkPaint& p) { mCanvas->drawLine(startX, startY, stopX, stopY, p); });
 }
 
 void SkiaCanvas::drawLines(const float* points, int count, const Paint& paint) {
@@ -484,46 +480,44 @@ void SkiaCanvas::drawLines(const float* points, int count, const Paint& paint) {
 
 void SkiaCanvas::drawRect(float left, float top, float right, float bottom, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
-    apply_looper(&paint, [&](const SkPaint& p) {
+    applyLooper(&paint, [&](const SkPaint& p) {
         mCanvas->drawRect({left, top, right, bottom}, p);
     });
 }
 
 void SkiaCanvas::drawRegion(const SkRegion& region, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
-    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawRegion(region, p); });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawRegion(region, p); });
 }
 
 void SkiaCanvas::drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
                                const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawRoundRect(rect, rx, ry, p);
-    });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawRoundRect(rect, rx, ry, p); });
 }
 
 void SkiaCanvas::drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
                                 const Paint& paint) {
-    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawDRRect(outer, inner, p); });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawDRRect(outer, inner, p); });
 }
 
 void SkiaCanvas::drawCircle(float x, float y, float radius, const Paint& paint) {
     if (CC_UNLIKELY(radius <= 0 || paint.nothingToDraw())) return;
-    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawCircle(x, y, radius, p); });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawCircle(x, y, radius, p); });
 }
 
 void SkiaCanvas::drawOval(float left, float top, float right, float bottom, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect oval = SkRect::MakeLTRB(left, top, right, bottom);
-    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawOval(oval, p); });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawOval(oval, p); });
 }
 
 void SkiaCanvas::drawArc(float left, float top, float right, float bottom, float startAngle,
                          float sweepAngle, bool useCenter, const Paint& paint) {
     if (CC_UNLIKELY(paint.nothingToDraw())) return;
     SkRect arc = SkRect::MakeLTRB(left, top, right, bottom);
-    apply_looper(&paint, [&](const SkPaint& p) {
+    applyLooper(&paint, [&](const SkPaint& p) {
         if (fabs(sweepAngle) >= 360.0f) {
             mCanvas->drawOval(arc, p);
         } else {
@@ -537,13 +531,11 @@ void SkiaCanvas::drawPath(const SkPath& path, const Paint& paint) {
     if (CC_UNLIKELY(path.isEmpty() && (!path.isInverseFillType()))) {
         return;
     }
-    apply_looper(&paint, [&](const SkPaint& p) { mCanvas->drawPath(path, p); });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawPath(path, p); });
 }
 
 void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, const Paint& paint) {
-    apply_looper(&paint, [&](const SkPaint& p) {
-        mCanvas->drawVertices(vertices, mode, p);
-    });
+    applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawVertices(vertices, mode, p); });
 }
 
 // ----------------------------------------------------------------------------
@@ -552,7 +544,7 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     auto image = bitmap.makeImage();
-    apply_looper(paint, [&](const SkPaint& p) {
+    applyLooper(paint, [&](const SkPaint& p) {
         auto sampling = SkSamplingOptions(p.getFilterQuality());
         mCanvas->drawImage(image, left, top, sampling, &p);
     });
@@ -562,7 +554,7 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint*
     auto image = bitmap.makeImage();
     SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
-    apply_looper(paint, [&](const SkPaint& p) {
+    applyLooper(paint, [&](const SkPaint& p) {
         auto sampling = SkSamplingOptions(p.getFilterQuality());
         mCanvas->drawImage(image, 0, 0, sampling, &p);
     });
@@ -575,7 +567,7 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float s
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
-    apply_looper(paint, [&](const SkPaint& p) {
+    applyLooper(paint, [&](const SkPaint& p) {
         auto sampling = SkSamplingOptions(p.getFilterQuality());
         mCanvas->drawImageRect(image, srcRect, dstRect, sampling, &p,
                                SkCanvas::kFast_SrcRectConstraint);
@@ -672,11 +664,11 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
     pnt.setShader(image->makeShader(sampling));
 
     auto v = builder.detach();
-    apply_looper(&pnt, [&](const SkPaint& p) {
+    applyLooper(&pnt, [&](const SkPaint& p) {
         SkPaint copy(p);
         auto s = SkSamplingOptions(p.getFilterQuality());
         if (s != sampling) {
-            // apply_looper changed the quality?
+            // applyLooper changed the quality?
             copy.setShader(image->makeShader(s));
         }
         mCanvas->drawVertices(v, SkBlendMode::kModulate, copy);
@@ -707,7 +699,7 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     auto image = bitmap.makeImage();
-    apply_looper(paint, [&](const SkPaint& p) {
+    applyLooper(paint, [&](const SkPaint& p) {
         auto filter = SkSamplingOptions(p.getFilterQuality()).filter;
         mCanvas->drawImageLattice(image.get(), lattice, dst, filter, &p);
     });
@@ -746,9 +738,7 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
 
     sk_sp<SkTextBlob> textBlob(builder.make());
 
-    apply_looper(&paintCopy, [&](const SkPaint& p) {
-        mCanvas->drawTextBlob(textBlob, 0, 0, p);
-    });
+    applyLooper(&paintCopy, [&](const SkPaint& p) { mCanvas->drawTextBlob(textBlob, 0, 0, p); });
     drawTextDecorations(x, y, totalAdvance, paintCopy);
 }
 
@@ -788,9 +778,7 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
 
     sk_sp<SkTextBlob> textBlob(builder.make());
 
-    apply_looper(&paintCopy, [&](const SkPaint& p) {
-        mCanvas->drawTextBlob(textBlob, 0, 0, p);
-    });
+    applyLooper(&paintCopy, [&](const SkPaint& p) { mCanvas->drawTextBlob(textBlob, 0, 0, p); });
 }
 
 // ----------------------------------------------------------------------------

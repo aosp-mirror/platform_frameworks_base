@@ -170,36 +170,23 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 // Recording Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint) {
-    bool fixBlending = false;
-    bool fixAA = false;
-    if (paint) {
-        // kClear blend mode is drawn as kDstOut on HW for compatibility with Android O and
-        // older.
-        fixBlending = sApiLevel <= 27 && paint->getBlendMode() == SkBlendMode::kClear;
-        fixAA = paint->isAntiAlias();
+void SkiaRecordingCanvas::FilterForImage(SkPaint& paint) {
+    // kClear blend mode is drawn as kDstOut on HW for compatibility with Android O and
+    // older.
+    if (sApiLevel <= 27 && paint.getBlendMode() == SkBlendMode::kClear) {
+        paint.setBlendMode(SkBlendMode::kDstOut);
     }
 
-    if (fixBlending || fixAA) {
-        SkPaint& tmpPaint = paint.writeable();
-
-        if (fixBlending) {
-            tmpPaint.setBlendMode(SkBlendMode::kDstOut);
-        }
-
-        // disabling AA on bitmap draws matches legacy HWUI behavior
-        tmpPaint.setAntiAlias(false);
-    }
-
-    return filterPaint(std::move(paint));
+    // disabling AA on bitmap draws matches legacy HWUI behavior
+    paint.setAntiAlias(false);
 }
 
-static SkFilterMode Paint_to_filter(const SkPaint* paint) {
-    return paint && paint->getFilterQuality() != kNone_SkFilterQuality ? SkFilterMode::kLinear
-                                                                       : SkFilterMode::kNearest;
+static SkFilterMode Paint_to_filter(const SkPaint& paint) {
+    return paint.getFilterQuality() != kNone_SkFilterQuality ? SkFilterMode::kLinear
+                                                             : SkFilterMode::kNearest;
 }
 
-static SkSamplingOptions Paint_to_sampling(const SkPaint* paint) {
+static SkSamplingOptions Paint_to_sampling(const SkPaint& paint) {
     // Android only has 1-bit for "filter", so we don't try to cons-up mipmaps or cubics
     return SkSamplingOptions(Paint_to_filter(paint), SkMipmapMode::kNone);
 }
@@ -207,9 +194,12 @@ static SkSamplingOptions Paint_to_sampling(const SkPaint* paint) {
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     sk_sp<SkImage> image = bitmap.makeImage();
 
-    applyLooper(paint, [&](SkScalar x, SkScalar y, const SkPaint* p) {
-        mRecorder.drawImage(image, left + x, top + y, Paint_to_sampling(p), p, bitmap.palette());
-    });
+    applyLooper(
+            paint,
+            [&](const SkPaint& p) {
+                mRecorder.drawImage(image, left, top, Paint_to_sampling(p), &p, bitmap.palette());
+            },
+            FilterForImage);
 
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
@@ -225,9 +215,12 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, con
 
     sk_sp<SkImage> image = bitmap.makeImage();
 
-    applyLooper(paint, [&](SkScalar x, SkScalar y, const SkPaint* p) {
-        mRecorder.drawImage(image, x, y, Paint_to_sampling(p), p, bitmap.palette());
-    });
+    applyLooper(
+            paint,
+            [&](const SkPaint& p) {
+                mRecorder.drawImage(image, 0, 0, Paint_to_sampling(p), &p, bitmap.palette());
+            },
+            FilterForImage);
 
     if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
@@ -242,10 +235,13 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
 
     sk_sp<SkImage> image = bitmap.makeImage();
 
-    applyLooper(paint, [&](SkScalar x, SkScalar y, const SkPaint* p) {
-        mRecorder.drawImageRect(image, srcRect, dstRect.makeOffset(x, y), Paint_to_sampling(p),
-                                p, SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
-    });
+    applyLooper(
+            paint,
+            [&](const SkPaint& p) {
+                mRecorder.drawImageRect(image, srcRect, dstRect, Paint_to_sampling(p), &p,
+                                        SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
+            },
+            FilterForImage);
 
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
         !dstRect.isEmpty()) {
@@ -281,10 +277,12 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     // HWUI always draws 9-patches with linear filtering, regardless of the Paint.
     const SkFilterMode filter = SkFilterMode::kLinear;
 
-    applyLooper(paint, [&](SkScalar x, SkScalar y, const SkPaint* p) {
-        mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), filter, p,
-                                   bitmap.palette());
-    });
+    applyLooper(
+            paint,
+            [&](const SkPaint& p) {
+                mRecorder.drawImageLattice(image, lattice, dst, filter, &p, bitmap.palette());
+            },
+            FilterForImage);
 
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
