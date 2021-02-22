@@ -18,6 +18,7 @@ package com.android.wm.shell.sizecompatui;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityClient;
@@ -68,6 +70,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private DisplayLayout mDisplayLayout;
     @Mock private SizeCompatRestartButton mButton;
+    @Mock private SizeCompatHintPopup mHint;
     private Configuration mTaskConfig;
 
     private SizeCompatUILayout mLayout;
@@ -81,8 +84,13 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
                 TASK_ID, mActivityToken, mTaskListener, mDisplayLayout, false /* hasShownHint*/);
 
         spyOn(mLayout);
-        spyOn(mLayout.mWindowManager);
-        doReturn(mButton).when(mLayout.mWindowManager).createSizeCompatUI();
+        spyOn(mLayout.mButtonWindowManager);
+        doReturn(mButton).when(mLayout.mButtonWindowManager).createSizeCompatButton();
+
+        final SizeCompatUIWindowManager hintWindowManager = mLayout.createHintWindowManager();
+        spyOn(hintWindowManager);
+        doReturn(mHint).when(hintWindowManager).createSizeCompatHint();
+        doReturn(hintWindowManager).when(mLayout).createHintWindowManager();
     }
 
     @Test
@@ -90,24 +98,45 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         // Not create button if IME is showing.
         mLayout.createSizeCompatButton(true /* isImeShowing */);
 
-        verify(mLayout.mWindowManager, never()).createSizeCompatUI();
+        verify(mLayout.mButtonWindowManager, never()).createSizeCompatButton();
         assertNull(mLayout.mButton);
+        assertNull(mLayout.mHintWindowManager);
+        assertNull(mLayout.mHint);
 
+        // Not create hint popup.
+        mLayout.mShouldShowHint = false;
         mLayout.createSizeCompatButton(false /* isImeShowing */);
 
-        verify(mLayout.mWindowManager).createSizeCompatUI();
+        verify(mLayout.mButtonWindowManager).createSizeCompatButton();
         assertNotNull(mLayout.mButton);
+        assertNull(mLayout.mHintWindowManager);
+        assertNull(mLayout.mHint);
+
+        // Create hint popup.
+        mLayout.release();
+        mLayout.mShouldShowHint = true;
+        mLayout.createSizeCompatButton(false /* isImeShowing */);
+
+        verify(mLayout.mButtonWindowManager, times(2)).createSizeCompatButton();
+        assertNotNull(mLayout.mButton);
+        assertNotNull(mLayout.mHintWindowManager);
+        verify(mLayout.mHintWindowManager).createSizeCompatHint();
+        assertNotNull(mLayout.mHint);
+        assertFalse(mLayout.mShouldShowHint);
     }
 
     @Test
     public void testRelease() {
         mLayout.createSizeCompatButton(false /* isImeShowing */);
+        final SizeCompatUIWindowManager hintWindowManager = mLayout.mHintWindowManager;
 
         mLayout.release();
 
         assertNull(mLayout.mButton);
-        verify(mButton).remove();
-        verify(mLayout.mWindowManager).release();
+        assertNull(mLayout.mHint);
+        verify(hintWindowManager).release();
+        assertNull(mLayout.mHintWindowManager);
+        verify(mLayout.mButtonWindowManager).release();
     }
 
     @Test
@@ -119,7 +148,7 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         mLayout.updateSizeCompatInfo(mTaskConfig, mActivityToken, mTaskListener,
                 false /* isImeShowing */);
 
-        verify(mLayout, never()).updateSurfacePosition();
+        verify(mLayout, never()).updateButtonSurfacePosition();
         verify(mLayout, never()).release();
         verify(mLayout, never()).createSizeCompatButton(anyBoolean());
 
@@ -140,7 +169,8 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         mLayout.updateSizeCompatInfo(newTaskConfiguration, mActivityToken, newTaskListener,
                 false /* isImeShowing */);
 
-        verify(mLayout).updateSurfacePosition();
+        verify(mLayout).updateButtonSurfacePosition();
+        verify(mLayout).updateHintSurfacePosition();
     }
 
     @Test
@@ -152,14 +182,16 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
                 mContext.getResources(), false, false);
 
         mLayout.updateDisplayLayout(displayLayout1);
-        verify(mLayout).updateSurfacePosition();
+        verify(mLayout).updateButtonSurfacePosition();
+        verify(mLayout).updateHintSurfacePosition();
 
         // No update if the display bounds is the same.
         clearInvocations(mLayout);
         final DisplayLayout displayLayout2 = new DisplayLayout(displayInfo,
                 mContext.getResources(), false, false);
         mLayout.updateDisplayLayout(displayLayout2);
-        verify(mLayout, never()).updateSurfacePosition();
+        verify(mLayout, never()).updateButtonSurfacePosition();
+        verify(mLayout, never()).updateHintSurfacePosition();
     }
 
     @Test
@@ -202,5 +234,30 @@ public class SizeCompatUILayoutTest extends ShellTestCase {
         mLayout.onRestartButtonClicked();
 
         verify(ActivityClient.getInstance()).restartActivityProcessIfVisible(mActivityToken);
+    }
+
+    @Test
+    public void testOnRestartButtonLongClicked_showHint() {
+        mLayout.dismissHint();
+
+        assertNull(mLayout.mHint);
+
+        mLayout.onRestartButtonLongClicked();
+
+        assertNotNull(mLayout.mHint);
+    }
+
+    @Test
+    public void testDismissHint() {
+        mLayout.onRestartButtonLongClicked();
+        final SizeCompatUIWindowManager hintWindowManager = mLayout.mHintWindowManager;
+        assertNotNull(mLayout.mHint);
+        assertNotNull(hintWindowManager);
+
+        mLayout.dismissHint();
+
+        assertNull(mLayout.mHint);
+        assertNull(mLayout.mHintWindowManager);
+        verify(hintWindowManager).release();
     }
 }
