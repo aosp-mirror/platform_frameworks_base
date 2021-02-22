@@ -334,6 +334,11 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".screenshot.LongScreenshotActivity"
+                  android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+                  android:process=":screenshot"
+                  android:finishOnTaskLaunch="true" />
+
         <activity android:name=".screenrecord.ScreenRecordDialog"
             android:theme="@style/ScreenRecord"
             android:showForAllUsers="true"
