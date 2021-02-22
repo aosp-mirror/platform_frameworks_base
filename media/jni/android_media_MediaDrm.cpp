@@ -424,7 +424,7 @@ static bool isSessionException(status_t err) {
 static bool throwExceptionAsNecessary(
         JNIEnv *env, const sp<IDrm> &drm, status_t err, const char *msg = NULL) {
     std::string msgStr;
-    if (drm != NULL) {
+    if (drm != NULL && err != OK) {
         msgStr = DrmUtils::GetExceptionMessage(err, msg, drm);
         msg = msgStr.c_str();
     }
