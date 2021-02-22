@@ -251,7 +251,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // @GuardedBy("mProviderManagers")
     // hold lock for writes, no lock necessary for simple reads
-    private final CopyOnWriteArrayList<LocationProviderManager> mProviderManagers =
+    final CopyOnWriteArrayList<LocationProviderManager> mProviderManagers =
             new CopyOnWriteArrayList<>();
 
     LocationManagerService(Context context, Injector injector, LocationEventLog eventLog) {
@@ -283,7 +283,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Nullable
-    private LocationProviderManager getLocationProviderManager(String providerName) {
+    LocationProviderManager getLocationProviderManager(String providerName) {
         if (providerName == null) {
             return null;
         }
@@ -1268,13 +1268,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         ipw.println("Historical Aggregate Location Provider Data:");
         ipw.increaseIndent();
-        ArrayMap<String, ArrayMap<String, LocationEventLog.AggregateStats>> aggregateStats =
+        ArrayMap<String, ArrayMap<CallerIdentity, LocationEventLog.AggregateStats>> aggregateStats =
                 mEventLog.copyAggregateStats();
         for (int i = 0; i < aggregateStats.size(); i++) {
             ipw.print(aggregateStats.keyAt(i));
             ipw.println(":");
             ipw.increaseIndent();
-            ArrayMap<String, LocationEventLog.AggregateStats> providerStats =
+            ArrayMap<CallerIdentity, LocationEventLog.AggregateStats> providerStats =
                     aggregateStats.valueAt(i);
             for (int j = 0; j < providerStats.size(); j++) {
                 ipw.print(providerStats.keyAt(j));
@@ -1342,7 +1342,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 if (provider != null && !provider.equals(manager.getName())) {
                     continue;
                 }
-                if (identity.equalsIgnoringListenerId(manager.getIdentity())) {
+                if (identity.equals(manager.getIdentity())) {
                     return true;
                 }
             }

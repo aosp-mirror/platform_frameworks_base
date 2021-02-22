@@ -123,9 +123,10 @@ public class LocationProviderManagerTest {
             .setPowerUsage(POWER_USAGE_HIGH)
             .setAccuracy(ProviderProperties.ACCURACY_FINE)
             .build();
+    private static final CallerIdentity PROVIDER_IDENTITY = CallerIdentity.forTest(CURRENT_USER, 1,
+            "mypackage", "attribution");
     private static final CallerIdentity IDENTITY = CallerIdentity.forTest(CURRENT_USER, 1,
-            "mypackage",
-            "attribution");
+            "mypackage", "attribution", "listener");
     private static final WorkSource WORK_SOURCE = new WorkSource(IDENTITY.getUid());
 
     private Random mRandom;
@@ -169,7 +170,7 @@ public class LocationProviderManagerTest {
         mPassive.startManager();
         mPassive.setRealProvider(new PassiveLocationProvider(mContext));
 
-        mProvider = new TestProvider(PROPERTIES, IDENTITY);
+        mProvider = new TestProvider(PROPERTIES, PROVIDER_IDENTITY);
         mProvider.setProviderAllowed(true);
 
         mManager = new LocationProviderManager(mContext, mInjector, eventLog, NAME, mPassive);
@@ -351,7 +352,7 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_ClearOnMockRemoval() {
-        MockLocationProvider mockProvider = new MockLocationProvider(PROPERTIES, IDENTITY);
+        MockLocationProvider mockProvider = new MockLocationProvider(PROPERTIES, PROVIDER_IDENTITY);
         mockProvider.setAllowed(true);
         mManager.setMockProvider(mockProvider);
 
@@ -441,7 +442,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_SameProcess() throws Exception {
         CallerIdentity identity = CallerIdentity.forTest(CURRENT_USER, Process.myPid(), "mypackage",
-                "attribution");
+                "attribution", "listener");
 
         ILocationListener listener = createMockLocationListener();
         mManager.registerLocationRequest(
@@ -477,7 +478,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_Unregister_SameProcess() throws Exception {
         CallerIdentity identity = CallerIdentity.forTest(CURRENT_USER, Process.myPid(), "mypackage",
-                "attribution");
+                "attribution", "listener");
 
         ILocationListener listener = createMockLocationListener();
         mManager.registerLocationRequest(
@@ -604,7 +605,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testRegisterListener_Wakelock() throws Exception {
         CallerIdentity identity = CallerIdentity.forTest(CURRENT_USER, Process.myPid(), "mypackage",
-                "attribution");
+                "attribution", "listener");
 
         ILocationListener listener = createMockLocationListener();
         mManager.registerLocationRequest(

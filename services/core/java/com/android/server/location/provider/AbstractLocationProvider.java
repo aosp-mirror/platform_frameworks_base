@@ -196,9 +196,12 @@ public abstract class AbstractLocationProvider {
      */
     protected AbstractLocationProvider(Executor executor, @Nullable CallerIdentity identity,
             @Nullable ProviderProperties properties) {
+        Preconditions.checkArgument(identity == null || identity.getListenerId() == null);
         mExecutor = executor;
         mInternalState = new AtomicReference<>(new InternalState(null,
-                State.EMPTY_STATE.withIdentity(identity).withProperties(properties)));
+                State.EMPTY_STATE
+                        .withIdentity(identity)
+                        .withProperties(properties)));
         mController = new Controller();
     }
 
@@ -273,6 +276,7 @@ public abstract class AbstractLocationProvider {
      * Call this method to report a change in provider packages.
      */
     protected void setIdentity(@Nullable CallerIdentity identity) {
+        Preconditions.checkArgument(identity == null || identity.getListenerId() == null);
         setState(state -> state.withIdentity(identity));
     }
 
@@ -334,6 +338,8 @@ public abstract class AbstractLocationProvider {
     private class Controller implements LocationProviderController {
 
         private boolean mStarted = false;
+
+        Controller() {}
 
         @Override
         public State setListener(@Nullable Listener listener) {
