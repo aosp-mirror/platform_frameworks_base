@@ -34,7 +34,6 @@
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SyncScreenCaptureListener.h>
 
-#include <ui/DisplayInfo.h>
 #include <ui/GraphicTypes.h>
 #include <ui/PixelFormat.h>
 

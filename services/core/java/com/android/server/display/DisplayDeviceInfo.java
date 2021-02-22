@@ -466,7 +466,7 @@ final class DisplayDeviceInfo {
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));
-        sb.append(", HdrCapabilities ").append(hdrCapabilities);
+        sb.append(", hdrCapabilities ").append(hdrCapabilities);
         sb.append(", allmSupported ").append(allmSupported);
         sb.append(", gameContentTypeSupported ").append(gameContentTypeSupported);
         sb.append(", density ").append(densityDpi);
