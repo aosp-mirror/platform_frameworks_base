@@ -77,18 +77,22 @@ public:
     using ErrorCode = incfs::ErrorCode;
     using UniqueFd = incfs::UniqueFd;
     using WaitResult = incfs::WaitResult;
+    using Features = incfs::Features;
 
     using ExistingMountCallback =
             std::function<void(std::string_view root, std::string_view backingDir,
                                std::span<std::pair<std::string_view, std::string_view>> binds)>;
 
     virtual ~IncFsWrapper() = default;
+    virtual Features features() const = 0;
     virtual void listExistingMounts(const ExistingMountCallback& cb) const = 0;
     virtual Control openMount(std::string_view path) const = 0;
     virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
                                   IncFsFd blocksWritten) const = 0;
     virtual ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                                incfs::NewFileParams params) const = 0;
+    virtual ErrorCode makeMappedFile(const Control& control, std::string_view path, int mode,
+                                     incfs::NewMappedFileParams params) const = 0;
     virtual ErrorCode makeDir(const Control& control, std::string_view path, int mode) const = 0;
     virtual ErrorCode makeDirs(const Control& control, std::string_view path, int mode) const = 0;
     virtual incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;

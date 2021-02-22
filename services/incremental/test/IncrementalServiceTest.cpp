@@ -322,6 +322,7 @@ private:
 
 class MockIncFs : public IncFsWrapper {
 public:
+    MOCK_CONST_METHOD0(features, Features());
     MOCK_CONST_METHOD1(listExistingMounts, void(const ExistingMountCallback& cb));
     MOCK_CONST_METHOD1(openMount, Control(std::string_view path));
     MOCK_CONST_METHOD4(createControl,
@@ -330,6 +331,9 @@ public:
     MOCK_CONST_METHOD5(makeFile,
                        ErrorCode(const Control& control, std::string_view path, int mode, FileId id,
                                  NewFileParams params));
+    MOCK_CONST_METHOD4(makeMappedFile,
+                       ErrorCode(const Control& control, std::string_view path, int mode,
+                                 NewMappedFileParams params));
     MOCK_CONST_METHOD3(makeDir, ErrorCode(const Control& control, std::string_view path, int mode));
     MOCK_CONST_METHOD3(makeDirs,
                        ErrorCode(const Control& control, std::string_view path, int mode));
