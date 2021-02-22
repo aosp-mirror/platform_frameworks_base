@@ -25,7 +25,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
-import android.widget.ImageButton;
+import android.widget.Button;
 
 import androidx.test.filters.SmallTest;
 
@@ -42,14 +42,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for {@link SizeCompatRestartButton}.
+ * Tests for {@link SizeCompatHintPopup}.
  *
  * Build/Install/Run:
- *  atest WMShellUnitTests:SizeCompatRestartButtonTest
+ *  atest WMShellUnitTests:SizeCompatHintPopupTest
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class SizeCompatRestartButtonTest extends ShellTestCase {
+public class SizeCompatHintPopupTest extends ShellTestCase {
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private IBinder mActivityToken;
@@ -57,7 +57,7 @@ public class SizeCompatRestartButtonTest extends ShellTestCase {
     @Mock private DisplayLayout mDisplayLayout;
 
     private SizeCompatUILayout mLayout;
-    private SizeCompatRestartButton mButton;
+    private SizeCompatHintPopup mHint;
 
     @Before
     public void setUp() {
@@ -66,30 +66,20 @@ public class SizeCompatRestartButtonTest extends ShellTestCase {
         final int taskId = 1;
         mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mContext, new Configuration(),
                 taskId, mActivityToken, mTaskListener, mDisplayLayout, false /* hasShownHint*/);
-        mButton = (SizeCompatRestartButton)
-                LayoutInflater.from(mContext).inflate(R.layout.size_compat_ui, null);
-        mButton.inject(mLayout);
+        mHint = (SizeCompatHintPopup)
+                LayoutInflater.from(mContext).inflate(R.layout.size_compat_mode_hint, null);
+        mHint.inject(mLayout);
 
         spyOn(mLayout);
     }
 
     @Test
     public void testOnClick() {
-        doNothing().when(mLayout).onRestartButtonClicked();
+        doNothing().when(mLayout).dismissHint();
 
-        final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
+        final Button button = mHint.findViewById(R.id.got_it);
         button.performClick();
 
-        verify(mLayout).onRestartButtonClicked();
-    }
-
-    @Test
-    public void testOnLongClick() {
-        doNothing().when(mLayout).onRestartButtonLongClicked();
-
-        final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
-        button.performLongClick();
-
-        verify(mLayout).onRestartButtonLongClicked();
+        verify(mLayout).dismissHint();
     }
 }

@@ -19,39 +19,35 @@ package com.android.wm.shell.sizecompatui;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
 
-/** Button to restart the size compat activity. */
-public class SizeCompatRestartButton extends FrameLayout implements View.OnClickListener,
-        View.OnLongClickListener {
+/** Popup to show the hint about the {@link SizeCompatRestartButton}. */
+public class SizeCompatHintPopup extends FrameLayout implements View.OnClickListener {
 
     private SizeCompatUILayout mLayout;
 
-    public SizeCompatRestartButton(@NonNull Context context) {
+    public SizeCompatHintPopup(Context context) {
         super(context);
     }
 
-    public SizeCompatRestartButton(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public SizeCompatHintPopup(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public SizeCompatRestartButton(@NonNull Context context, @Nullable AttributeSet attrs,
-            int defStyleAttr) {
+    public SizeCompatHintPopup(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public SizeCompatRestartButton(@NonNull Context context, @Nullable AttributeSet attrs,
-            int defStyleAttr, int defStyleRes) {
+    public SizeCompatHintPopup(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -62,24 +58,14 @@ public class SizeCompatRestartButton extends FrameLayout implements View.OnClick
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        final ImageButton restartButton = findViewById(R.id.size_compat_restart_button);
-        final ColorStateList color = ColorStateList.valueOf(Color.LTGRAY);
-        final GradientDrawable mask = new GradientDrawable();
-        mask.setShape(GradientDrawable.OVAL);
-        mask.setColor(color);
-        restartButton.setBackground(new RippleDrawable(color, null /* content */, mask));
-        restartButton.setOnClickListener(this);
-        restartButton.setOnLongClickListener(this);
+        final Button gotItButton = findViewById(R.id.got_it);
+        gotItButton.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY),
+                null /* content */, null /* mask */));
+        gotItButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        mLayout.onRestartButtonClicked();
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        mLayout.onRestartButtonLongClicked();
-        return true;
+        mLayout.dismissHint();
     }
 }
