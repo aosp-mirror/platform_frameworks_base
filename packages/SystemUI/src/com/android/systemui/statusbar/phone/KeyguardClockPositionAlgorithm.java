@@ -344,8 +344,11 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private float burnInPreventionOffsetX() {
-        return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
-                - mBurnInPreventionOffsetX;
+        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
+            return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
+                    - mBurnInPreventionOffsetX;
+        }
+        return getBurnInOffset(mBurnInPreventionOffsetX, true /* xAxis */);
     }
 
     public static class Result {
