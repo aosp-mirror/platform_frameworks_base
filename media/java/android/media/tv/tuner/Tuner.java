@@ -932,8 +932,8 @@ public class Tuner implements AutoCloseable  {
     public int connectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
                 "linkFrontendToCiCam")) {
-            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)
-                    && checkCiCamResource(ciCamId)) {
+            if (checkCiCamResource(ciCamId)
+                    && checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
                 return nativeLinkCiCam(ciCamId);
             }
         }
