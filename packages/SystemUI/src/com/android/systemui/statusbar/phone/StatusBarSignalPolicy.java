@@ -40,7 +40,7 @@ import java.util.Objects;
 public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
     private static final String TAG = "StatusBarSignalPolicy";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.INFO);
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final String mSlotAirplane;
     private final String mSlotMobile;

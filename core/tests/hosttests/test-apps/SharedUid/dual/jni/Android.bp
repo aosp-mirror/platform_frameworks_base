@@ -17,6 +17,15 @@
 // This Android.bp supplies the rules for building a library of JNI code for
 // use by our example of how to bundle a shared library with an APK.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_test_library {
 
     // This is the target being built.

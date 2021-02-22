@@ -767,7 +767,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // Last recorded battery energy capacity.
     // This is used for computing foregrund power per application.
     // See: PowerForUid below
-    private long mLastBatteryEnergyCapacityNWh = 0;
+    private long mLastBatteryEnergyCapacityNwh = 0;
 
     private static final class PowerForUid {
         public long energyNwh = 0;
@@ -1089,12 +1089,12 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private int mNumConnectivityChange;
 
-    private int mBatteryVolt = -1;
-    private int mBatteryCharge = -1;
-    private int mEstimatedBatteryCapacity = -1;
+    private int mBatteryVoltageMv = -1;
+    private int mBatteryChargeUah = -1;
+    private int mEstimatedBatteryCapacityMah = -1;
 
-    private int mMinLearnedBatteryCapacity = -1;
-    private int mMaxLearnedBatteryCapacity = -1;
+    private int mMinLearnedBatteryCapacityUah = -1;
+    private int mMaxLearnedBatteryCapacityUah = -1;
 
     private long mBatteryTimeToFullSeconds = -1;
 
@@ -1175,17 +1175,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override
     public int getEstimatedBatteryCapacity() {
-        return mEstimatedBatteryCapacity;
+        return mEstimatedBatteryCapacityMah;
     }
 
     @Override
     public int getMinLearnedBatteryCapacity() {
-        return mMinLearnedBatteryCapacity;
+        return mMinLearnedBatteryCapacityUah;
     }
 
     @Override
     public int getMaxLearnedBatteryCapacity() {
-        return mMaxLearnedBatteryCapacity;
+        return mMaxLearnedBatteryCapacityUah;
     }
 
     public BatteryStatsImpl() {
@@ -3416,7 +3416,7 @@ public class BatteryStatsImpl extends BatteryStats {
             firstToken |= DELTA_EVENT_FLAG;
         }
 
-        final boolean batteryChargeChanged = cur.batteryChargeUAh != last.batteryChargeUAh;
+        final boolean batteryChargeChanged = cur.batteryChargeUah != last.batteryChargeUah;
         if (batteryChargeChanged) {
             firstToken |= DELTA_BATTERY_CHARGE_FLAG;
         }
@@ -3505,8 +3505,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mLastHistoryStepLevel = cur.batteryLevel;
 
         if (batteryChargeChanged) {
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryChargeUAh=" + cur.batteryChargeUAh);
-            dest.writeInt(cur.batteryChargeUAh);
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryChargeUah=" + cur.batteryChargeUah);
+            dest.writeInt(cur.batteryChargeUah);
         }
         dest.writeDouble(cur.modemRailChargeMah);
         dest.writeDouble(cur.wifiRailChargeMah);
@@ -3756,7 +3756,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if ((firstToken&DELTA_BATTERY_CHARGE_FLAG) != 0) {
-            cur.batteryChargeUAh = src.readInt();
+            cur.batteryChargeUah = src.readInt();
         }
         cur.modemRailChargeMah = src.readDouble();
         cur.wifiRailChargeMah = src.readDouble();
@@ -7220,6 +7220,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public boolean getIsOnBattery() {
         return mOnBattery;
+    }
+
+    @Override public long getStatsStartRealtime() {
+        return mRealtimeStartUs;
     }
 
     @UnsupportedAppUsage
@@ -10745,11 +10749,6 @@ public class BatteryStatsImpl extends BatteryStats {
         long realtimeUs = mClocks.elapsedRealtime() * 1000;
         initTimes(uptimeUs, realtimeUs);
         mStartPlatformVersion = mEndPlatformVersion = Build.ID;
-        mDischargeStartLevel = 0;
-        mDischargeUnplugLevel = 0;
-        mDischargePlugLevel = -1;
-        mDischargeCurrentLevel = 0;
-        mCurrentBatteryLevel = 0;
         initDischarge(realtimeUs);
         clearHistoryLocked();
         updateDailyDeadlineLocked();
@@ -10835,6 +10834,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeLightDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeDeepDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
+        mDischargeStartLevel = 0;
+        mDischargeUnplugLevel = 0;
+        mDischargePlugLevel = -1;
+        mDischargeCurrentLevel = 0;
+        mCurrentBatteryLevel = 0;
     }
 
     @UnsupportedAppUsage
@@ -10873,9 +10877,9 @@ public class BatteryStatsImpl extends BatteryStats {
             firstCpuOfCluster += mPowerProfile.getNumCoresInCpuCluster(i);
         }
 
-        if (mEstimatedBatteryCapacity == -1) {
+        if (mEstimatedBatteryCapacityMah == -1) {
             // Initialize the estimated battery capacity to a known preset one.
-            mEstimatedBatteryCapacity = (int) mPowerProfile.getBatteryCapacity();
+            mEstimatedBatteryCapacityMah = (int) mPowerProfile.getBatteryCapacity();
         }
     }
 
@@ -11439,12 +11443,12 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (mPowerProfile != null) {
-            mEstimatedBatteryCapacity = (int) mPowerProfile.getBatteryCapacity();
+            mEstimatedBatteryCapacityMah = (int) mPowerProfile.getBatteryCapacity();
         } else {
-            mEstimatedBatteryCapacity = -1;
+            mEstimatedBatteryCapacityMah = -1;
         }
-        mMinLearnedBatteryCapacity = -1;
-        mMaxLearnedBatteryCapacity = -1;
+        mMinLearnedBatteryCapacityUah = -1;
+        mMaxLearnedBatteryCapacityUah = -1;
         mInteractiveTimer.reset(false, elapsedRealtimeUs);
         mPowerSaveModeEnabledTimer.reset(false, elapsedRealtimeUs);
         mLastIdleTimeStartMs = elapsedRealtimeMillis;
@@ -11563,7 +11567,9 @@ public class BatteryStatsImpl extends BatteryStats {
         initDischarge(elapsedRealtimeUs);
 
         clearHistoryLocked();
-        mBatteryStatsHistory.resetAllFiles();
+        if (mBatteryStatsHistory != null) {
+            mBatteryStatsHistory.resetAllFiles();
+        }
 
         // Flush external data, gathering snapshots, but don't process it since it is pre-reset data
         mIgnoreNextExternalStats = true;
@@ -13212,7 +13218,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     protected void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime,
-            final boolean onBattery, final int oldStatus, final int level, final int chargeUAh) {
+            final boolean onBattery, final int oldStatus, final int level, final int chargeUah) {
         boolean doWrite = false;
         Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
         m.arg1 = onBattery ? 1 : 0;
@@ -13268,10 +13274,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 doWrite = true;
                 resetAllStatsLocked(mSecUptime, mSecRealtime);
-                if (chargeUAh > 0 && level > 0) {
-                    mBatteryCharge = chargeUAh;
+                if (chargeUah > 0 && level > 0) {
+                    mBatteryChargeUah = chargeUah;
                     // Only use the reported coulomb charge value if it is supported and reported.
-                    mEstimatedBatteryCapacity = (int) ((chargeUAh / 1000) / (level / 100.0));
+                    mEstimatedBatteryCapacityMah = (int) ((chargeUah / 1000) / (level / 100.0));
                 }
                 mDischargeStartLevel = level;
                 reset = true;
@@ -13386,16 +13392,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
-            final int level, /* not final */ int temp, final int volt, final int chargeUAh,
-            final int chargeFullUAh, final long chargeTimeToFullSeconds) {
-        setBatteryStateLocked(status, health, plugType, level, temp, volt, chargeUAh,
-                chargeFullUAh, chargeTimeToFullSeconds,
+            final int level, /* not final */ int temp, final int voltageMv, final int chargeUah,
+            final int chargeFullUah, final long chargeTimeToFullSeconds) {
+        setBatteryStateLocked(status, health, plugType, level, temp, voltageMv, chargeUah,
+                chargeFullUah, chargeTimeToFullSeconds,
                 mClocks.elapsedRealtime(), mClocks.uptimeMillis(), System.currentTimeMillis());
     }
 
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
-            final int level, /* not final */ int temp, final int volt, final int chargeUAh,
-            final int chargeFullUAh, final long chargeTimeToFullSeconds,
+            final int level, /* not final */ int temp, final int voltageMv, final int chargeUah,
+            final int chargeFullUah, final long chargeTimeToFullSeconds,
             final long elapsedRealtimeMs, final long uptimeMs, final long currentTimeMs) {
         // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
         temp = Math.max(0, temp);
@@ -13421,7 +13427,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistoryCur.states2 |= HistoryItem.STATE2_CHARGING_FLAG;
             mHistoryCur.batteryStatus = (byte)status;
             mHistoryCur.batteryLevel = (byte)level;
-            mHistoryCur.batteryChargeUAh = chargeUAh;
+            mHistoryCur.batteryChargeUah = chargeUah;
             mMaxChargeStepLevel = mMinDischargeStepLevel =
                     mLastChargeStepLevel = mLastDischargeStepLevel = level;
             mLastChargingStateLevel = level;
@@ -13444,10 +13450,10 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (ENABLE_FOREGROUND_STATS_COLLECTION) {
-            mBatteryVolt = volt;
+            mBatteryVoltageMv = voltageMv;
             if (onBattery) {
-                final long energyNwh = (volt * (long) chargeUAh);
-                final long energyDelta = mLastBatteryEnergyCapacityNWh - energyNwh;
+                final long energyNwh = (voltageMv * (long) chargeUah);
+                final long energyDelta = mLastBatteryEnergyCapacityNwh - energyNwh;
                 for (int i = 0; i < mForegroundUids.size(); i++) {
                     final int uid = mForegroundUids.get(i);
                     if (uid == INVALID_UID) {
@@ -13458,7 +13464,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (pfu.baseTimeMs <= 0) {
                         pfu.baseTimeMs = currentTimeMs;
                     } else {
-                        // Check if mLastBatteryEnergyCapacityNWh > energyNwh,
+                        // Check if mLastBatteryEnergyCapacityNwh > energyNwh,
                         // to make sure we only count discharges
                         if (energyDelta > 0) {
                             pfu.energyNwh += energyDelta;
@@ -13476,7 +13482,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         pfu.baseTimeMs = currentTimeMs;
                     }
                 }
-                mLastBatteryEnergyCapacityNWh = energyNwh;
+                mLastBatteryEnergyCapacityNwh = energyNwh;
             } else if (onBattery != mOnBattery) {
                 // Transition to onBattery = false
                 mUidToPower.values().forEach(v -> v.baseTimeMs = 0);
@@ -13494,10 +13500,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistoryCur.batteryHealth = (byte)health;
             mHistoryCur.batteryPlugType = (byte)plugType;
             mHistoryCur.batteryTemperature = (short)temp;
-            mHistoryCur.batteryVoltage = (char)volt;
-            if (chargeUAh < mHistoryCur.batteryChargeUAh) {
+            mHistoryCur.batteryVoltage = (char) voltageMv;
+            if (chargeUah < mHistoryCur.batteryChargeUah) {
                 // Only record discharges
-                final long chargeDiff = mHistoryCur.batteryChargeUAh - chargeUAh;
+                final long chargeDiff = mHistoryCur.batteryChargeUah - chargeUah;
                 mDischargeCounter.addCountLocked(chargeDiff);
                 mDischargeScreenOffCounter.addCountLocked(chargeDiff);
                 if (Display.isDozeState(mScreenState)) {
@@ -13509,8 +13515,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     mDischargeDeepDozeCounter.addCountLocked(chargeDiff);
                 }
             }
-            mHistoryCur.batteryChargeUAh = chargeUAh;
-            setOnBatteryLocked(elapsedRealtimeMs, uptimeMs, onBattery, oldStatus, level, chargeUAh);
+            mHistoryCur.batteryChargeUah = chargeUah;
+            setOnBatteryLocked(elapsedRealtimeMs, uptimeMs, onBattery, oldStatus, level, chargeUah);
         } else {
             boolean changed = false;
             if (mHistoryCur.batteryLevel != level) {
@@ -13539,16 +13545,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.batteryTemperature = (short)temp;
                 changed = true;
             }
-            if (volt > (mHistoryCur.batteryVoltage+20)
-                    || volt < (mHistoryCur.batteryVoltage-20)) {
-                mHistoryCur.batteryVoltage = (char)volt;
+            if (voltageMv > (mHistoryCur.batteryVoltage + 20)
+                    || voltageMv < (mHistoryCur.batteryVoltage - 20)) {
+                mHistoryCur.batteryVoltage = (char) voltageMv;
                 changed = true;
             }
-            if (chargeUAh >= (mHistoryCur.batteryChargeUAh+10)
-                    || chargeUAh <= (mHistoryCur.batteryChargeUAh-10)) {
-                if (chargeUAh < mHistoryCur.batteryChargeUAh) {
+            if (chargeUah >= (mHistoryCur.batteryChargeUah + 10)
+                    || chargeUah <= (mHistoryCur.batteryChargeUah - 10)) {
+                if (chargeUah < mHistoryCur.batteryChargeUah) {
                     // Only record discharges
-                    final long chargeDiff = mHistoryCur.batteryChargeUAh - chargeUAh;
+                    final long chargeDiff = mHistoryCur.batteryChargeUah - chargeUah;
                     mDischargeCounter.addCountLocked(chargeDiff);
                     mDischargeScreenOffCounter.addCountLocked(chargeDiff);
                     if (Display.isDozeState(mScreenState)) {
@@ -13560,7 +13566,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         mDischargeDeepDozeCounter.addCountLocked(chargeDiff);
                     }
                 }
-                mHistoryCur.batteryChargeUAh = chargeUAh;
+                mHistoryCur.batteryChargeUah = chargeUah;
                 changed = true;
             }
             long modeBits = (((long)mInitStepMode) << STEP_LEVEL_INITIAL_MODE_SHIFT)
@@ -13632,12 +13638,12 @@ public class BatteryStatsImpl extends BatteryStats {
             mRecordingHistory = DEBUG;
         }
 
-        if (mMinLearnedBatteryCapacity == -1) {
-            mMinLearnedBatteryCapacity = chargeFullUAh;
+        if (mMinLearnedBatteryCapacityUah == -1) {
+            mMinLearnedBatteryCapacityUah = chargeFullUah;
         } else {
-            mMinLearnedBatteryCapacity = Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
+            mMinLearnedBatteryCapacityUah = Math.min(mMinLearnedBatteryCapacityUah, chargeFullUah);
         }
-        mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
+        mMaxLearnedBatteryCapacityUah = Math.max(mMaxLearnedBatteryCapacityUah, chargeFullUah);
 
         mBatteryTimeToFullSeconds = chargeTimeToFullSeconds;
     }
@@ -14912,9 +14918,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
         mCurrentBatteryLevel = in.readInt();
-        mEstimatedBatteryCapacity = in.readInt();
-        mMinLearnedBatteryCapacity = in.readInt();
-        mMaxLearnedBatteryCapacity = in.readInt();
+        mEstimatedBatteryCapacityMah = in.readInt();
+        mMinLearnedBatteryCapacityUah = in.readInt();
+        mMaxLearnedBatteryCapacityUah = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
@@ -15416,9 +15422,9 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(mCurrentBatteryLevel);
-        out.writeInt(mEstimatedBatteryCapacity);
-        out.writeInt(mMinLearnedBatteryCapacity);
-        out.writeInt(mMaxLearnedBatteryCapacity);
+        out.writeInt(mEstimatedBatteryCapacityMah);
+        out.writeInt(mMinLearnedBatteryCapacityUah);
+        out.writeInt(mMaxLearnedBatteryCapacityUah);
         out.writeInt(getLowDischargeAmountSinceCharge());
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
@@ -15917,9 +15923,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mRealtimeUs = in.readLong();
         mRealtimeStartUs = in.readLong();
         mOnBattery = in.readInt() != 0;
-        mEstimatedBatteryCapacity = in.readInt();
-        mMinLearnedBatteryCapacity = in.readInt();
-        mMaxLearnedBatteryCapacity = in.readInt();
+        mEstimatedBatteryCapacityMah = in.readInt();
+        mMinLearnedBatteryCapacityUah = in.readInt();
+        mMaxLearnedBatteryCapacityUah = in.readInt();
         mOnBatteryInternal = false; // we are no longer really running.
         mOnBatteryTimeBase.readFromParcel(in);
         mOnBatteryScreenOffTimeBase.readFromParcel(in);
@@ -16156,9 +16162,9 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mRealtimeUs);
         out.writeLong(mRealtimeStartUs);
         out.writeInt(mOnBattery ? 1 : 0);
-        out.writeInt(mEstimatedBatteryCapacity);
-        out.writeInt(mMinLearnedBatteryCapacity);
-        out.writeInt(mMaxLearnedBatteryCapacity);
+        out.writeInt(mEstimatedBatteryCapacityMah);
+        out.writeInt(mMinLearnedBatteryCapacityUah);
+        out.writeInt(mMaxLearnedBatteryCapacityUah);
         mOnBatteryTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
         mOnBatteryScreenOffTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
 
@@ -16414,8 +16420,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         if (ENABLE_FOREGROUND_STATS_COLLECTION) {
-            long actualCharge = -1;
-            long actualEnergy = -1;
+            long actualChargeUah = -1;
+            long actualEnergyNwh = -1;
             try {
                 IBatteryPropertiesRegistrar registrar =
                         IBatteryPropertiesRegistrar.Stub.asInterface(
@@ -16424,27 +16430,27 @@ public class BatteryStatsImpl extends BatteryStats {
                     BatteryProperty prop = new BatteryProperty();
                     if (registrar.getProperty(
                                 BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER, prop) == 0) {
-                        actualCharge = prop.getLong();
+                        actualChargeUah = prop.getLong();
                     }
                     prop = new BatteryProperty();
                     if (registrar.getProperty(
                                 BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER, prop) == 0) {
-                        actualEnergy = prop.getLong();
+                        actualEnergyNwh = prop.getLong();
                     }
                 }
             } catch (RemoteException e) {
                 // Ignore.
             }
-            pw.printf("ActualCharge (uAh): %d\n", (int) actualCharge);
-            pw.printf("ActualEnergy (nWh): %d\n", actualEnergy);
-            pw.printf("mBatteryCharge (uAh): %d\n", mBatteryCharge);
-            pw.printf("mBatteryVolts (mV): %d\n", mBatteryVolt);
-            pw.printf("est energy (nWh): %d\n", mBatteryVolt * (long) mBatteryCharge);
-            pw.printf("mEstimatedBatteryCapacity (mAh): %d\n", mEstimatedBatteryCapacity);
-            pw.printf("mMinLearnedBatteryCapacity (uAh): %d\n", mMinLearnedBatteryCapacity);
-            pw.printf("mMaxLearnedBatteryCapacity (uAh): %d\n", mMaxLearnedBatteryCapacity);
+            pw.printf("ActualCharge (uAh): %d\n", (int) actualChargeUah);
+            pw.printf("ActualEnergy (nWh): %d\n", actualEnergyNwh);
+            pw.printf("mBatteryCharge (uAh): %d\n", mBatteryChargeUah);
+            pw.printf("mBatteryVolts (mV): %d\n", mBatteryVoltageMv);
+            pw.printf("est energy (nWh): %d\n", mBatteryVoltageMv * (long) mBatteryChargeUah);
+            pw.printf("mEstimatedBatteryCapacity (mAh): %d\n", mEstimatedBatteryCapacityMah);
+            pw.printf("mMinLearnedBatteryCapacity (uAh): %d\n", mMinLearnedBatteryCapacityUah);
+            pw.printf("mMaxLearnedBatteryCapacity (uAh): %d\n", mMaxLearnedBatteryCapacityUah);
             pw.printf("est. capacity: %f\n",
-                    (float) actualCharge / (mEstimatedBatteryCapacity * 1000));
+                    (float) actualChargeUah / (mEstimatedBatteryCapacityMah * 1000));
             pw.printf("mCurrentBatteryLevel: %d\n", mCurrentBatteryLevel);
             pw.println("Total Power per app:");
             mUidToPower.entrySet().forEach(e ->

@@ -84,6 +84,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     final boolean mDefaultSwipeToNotificationEnabled =
             OneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
                     getTestContext().getContentResolver());
+    final boolean mDefaultTapAppToExitEnabled = OneHandedSettingsUtil.getSettingsTapsAppToExit(
+            getTestContext().getContentResolver());
 
     @Before
     public void setUp() {
@@ -176,7 +178,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testStopOneHanded_shouldRemoveTimer() {
+    public void testStopOneHandedShouldRemoveTimer() {
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(true);
         mSpiedOneHandedController.stopOneHanded();
 
@@ -193,27 +195,29 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testUpdateSwipeToNotificationEnabled() {
-        final boolean swipeToNotificationEnabled = true;
-        mSpiedOneHandedController.setSwipeToNotificationEnabled(swipeToNotificationEnabled);
+    public void testUpdateSwipeToNotification() {
+        mSpiedOneHandedController.setSwipeToNotificationEnabled(mDefaultSwipeToNotificationEnabled);
 
         verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(mDefaultEnabled);
         verify(mMockGestureHandler, atLeastOnce()).onOneHandedEnabled(
-                mDefaultEnabled || swipeToNotificationEnabled);
+                mDefaultEnabled || mDefaultSwipeToNotificationEnabled);
     }
 
     @Test
-    public void testUpdateTapAppToExitUpdate() {
+    public void testSettingsObserverUpdateTapAppToExit() {
         mSpiedOneHandedController.onTaskChangeExitSettingChanged();
-
-        verify(mMockTaskStackListener, atLeastOnce()).addListener(any());
+        if (mDefaultTapAppToExitEnabled) {
+            verify(mMockTaskStackListener, atLeastOnce()).addListener(any());
+        } else {
+            verify(mMockTaskStackListener, atLeastOnce()).removeListener(any());
+        }
     }
 
     @Test
-    public void tesSettingsObserverUpdateEnabled() {
+    public void testSettingsObserverUpdateEnabled() {
         mSpiedOneHandedController.onEnabledSettingChanged();
 
-        verify(mSpiedOneHandedController, atLeastOnce()).setOneHandedEnabled(mDefaultEnabled);
+        verify(mSpiedOneHandedController).setOneHandedEnabled(mDefaultEnabled);
     }
 
     @Test
@@ -224,10 +228,63 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void tesSettingsObserverUpdateSwipeToNotification() {
+    public void testSettingsObserverUpdateSwipeToNotification() {
         mSpiedOneHandedController.onSwipeToNotificationEnabledSettingChanged();
 
-        verify(mSpiedOneHandedController, atLeastOnce()).setSwipeToNotificationEnabled(
-                !mDefaultEnabled);
+        // Swipe to notification function is opposite with one handed mode function
+        if (mDefaultSwipeToNotificationEnabled) {
+            verify(mSpiedOneHandedController).setSwipeToNotificationEnabled(
+                    mDefaultSwipeToNotificationEnabled);
+        } else {
+            verify(mSpiedOneHandedController, never()).setSwipeToNotificationEnabled(
+                    mDefaultSwipeToNotificationEnabled);
+        }
+    }
+
+    @Test
+    public void testLockedOneHandedDisabled() {
+        // Default mLockDisabled is false
+        assertThat(mSpiedOneHandedController.isLockedDisabled()).isFalse();
+
+        mSpiedOneHandedController.setOneHandedEnabled(true);
+        mSpiedOneHandedController.setLockedDisabled(false /* locked */, true /* enabled */);
+
+        // If mOneHandedEnabled == enabled, then keep unlocked
+        assertThat(mSpiedOneHandedController.isLockedDisabled()).isFalse();
+
+        // If prefer locked enabled state and 'mOneHandedEnabled == enabled', then unlocked
+        mSpiedOneHandedController.setLockedDisabled(true /* locked */, true /* enabled */);
+
+        assertThat(mSpiedOneHandedController.isLockedDisabled()).isFalse();
+
+        // If prefer locked disabled state and 'mOneHandedEnabled != enabled', then locked disabled
+        mSpiedOneHandedController.setLockedDisabled(true /* locked */, false /* enabled */);
+
+        assertThat(mSpiedOneHandedController.isLockedDisabled()).isTrue();
+
+        // If prefer unlock disabled state and 'mOneHandedEnabled != enabled', then unlocked
+        mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
+
+        assertThat(mSpiedOneHandedController.isLockedDisabled()).isFalse();
+    }
+
+    @Test
+    public void testKeyguardShowingLockOneHandedDisabled() {
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+        mSpiedOneHandedController.setOneHandedEnabled(true);
+        mSpiedOneHandedController.setLockedDisabled(true /* locked */, false /* enabled */);
+        mSpiedOneHandedController.startOneHanded();
+
+        verify(mMockDisplayAreaOrganizer, never()).scheduleOffset(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testResetKeyguardShowingLockOneHandedDisabled() {
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+        mSpiedOneHandedController.setOneHandedEnabled(true);
+        mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
+        mSpiedOneHandedController.startOneHanded();
+
+        verify(mMockDisplayAreaOrganizer).scheduleOffset(anyInt(), anyInt());
     }
 }
