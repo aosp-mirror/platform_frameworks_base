@@ -26,7 +26,7 @@ import android.view.DisplayCutout;
 import android.view.DragEvent;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.window.ClientWindowFrames;
@@ -134,5 +134,5 @@ oneway interface IWindow {
      *
      * @param callbacks to receive responses
      */
-    void requestScrollCapture(in IScrollCaptureCallbacks callbacks);
+    void requestScrollCapture(in IScrollCaptureResponseListener callbacks);
 }

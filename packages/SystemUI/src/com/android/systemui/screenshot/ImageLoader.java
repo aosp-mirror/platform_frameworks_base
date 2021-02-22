@@ -21,7 +21,6 @@ import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 
@@ -43,6 +42,16 @@ public class ImageLoader {
         @Nullable Uri uri;
         @Nullable File fileName;
         @Nullable Bitmap bitmap;
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Result{");
+            sb.append("uri=").append(uri);
+            sb.append(", fileName=").append(fileName);
+            sb.append(", bitmap=").append(bitmap);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     @Inject
@@ -54,7 +63,7 @@ public class ImageLoader {
      * Loads an image via URI from ContentResolver.
      *
      * @param uri the identifier of the image to load
-     * @return a listenable future result
+     * @return a listenable future result containing a bitmap
      */
     ListenableFuture<Result> load(Uri uri) {
         return CallbackToFutureAdapter.getFuture(completer -> {
@@ -76,7 +85,7 @@ public class ImageLoader {
      * permissions to read this file/path.
      *
      * @param file the system file path of the image to load
-     * @return a listenable future result
+     * @return a listenable future result containing a bitmap
      */
     ListenableFuture<Result> load(File file) {
         return CallbackToFutureAdapter.getFuture(completer -> {

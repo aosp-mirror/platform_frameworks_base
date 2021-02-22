@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Parcelable;
+import android.os.RemoteException;
 
 import com.android.internal.util.DataClass;
 
@@ -57,11 +58,22 @@ public class ScrollCaptureResponse implements Parcelable {
     @DataClass.PluralOf("message")
     private ArrayList<String> mMessages = new ArrayList<>();
 
-    /** Whether a connection has been returned. */
+    /** Whether an active connection is present. */
     public boolean isConnected() {
-        return mConnection != null;
+        return mConnection != null && mConnection.asBinder().isBinderAlive();
     }
 
+    /** Closes a connection returned with this response. */
+    public void close() {
+        if (mConnection != null) {
+            try {
+                mConnection.close();
+            } catch (RemoteException e) {
+                // Ignore
+            }
+            mConnection = null;
+        }
+    }
 
 
 
@@ -367,10 +379,10 @@ public class ScrollCaptureResponse implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1612282689462L,
+            time = 1614833185795L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/view/ScrollCaptureResponse.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String mDescription\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.MaySetToNull android.view.IScrollCaptureConnection mConnection\nprivate @android.annotation.Nullable android.graphics.Rect mWindowBounds\nprivate @android.annotation.Nullable android.graphics.Rect mBoundsInWindow\nprivate @android.annotation.Nullable java.lang.String mWindowTitle\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"message\") java.util.ArrayList<java.lang.String> mMessages\npublic  boolean isConnected()\nclass ScrollCaptureResponse extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genGetters=true)")
+            inputSignatures = "private @android.annotation.NonNull java.lang.String mDescription\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.MaySetToNull android.view.IScrollCaptureConnection mConnection\nprivate @android.annotation.Nullable android.graphics.Rect mWindowBounds\nprivate @android.annotation.Nullable android.graphics.Rect mBoundsInWindow\nprivate @android.annotation.Nullable java.lang.String mWindowTitle\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"message\") java.util.ArrayList<java.lang.String> mMessages\npublic  boolean isConnected()\npublic  void close()\nclass ScrollCaptureResponse extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genGetters=true)")
     @Deprecated
     private void __metadata() {}
 

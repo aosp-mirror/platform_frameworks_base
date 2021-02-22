@@ -24,7 +24,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.MergedConfiguration;
 import android.view.DragEvent;
-import android.view.IScrollCaptureCallbacks;
+import android.view.IScrollCaptureResponseListener;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
@@ -159,9 +159,9 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
+    public void requestScrollCapture(IScrollCaptureResponseListener listener) {
         try {
-            callbacks.onScrollCaptureResponse(
+            listener.onScrollCaptureResponse(
                     new ScrollCaptureResponse.Builder().setDescription("Not Implemented").build());
 
         } catch (RemoteException ex) {

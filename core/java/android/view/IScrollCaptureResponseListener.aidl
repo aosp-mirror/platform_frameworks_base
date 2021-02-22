@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package android.view;
 
-import java.util.function.Consumer;
+import android.graphics.Rect;
+import android.view.ScrollCaptureResponse;
+import android.view.Surface;
 
-/** Accepts and retains the most recent value for verification */
-class TestableConsumer<T> implements Consumer<T> {
-    T mValue;
-
-    @Override
-    public void accept(T t) {
-        mValue = t;
-    }
-
-    public T getValue() {
-        return mValue;
-    }
+/**
+ * Asynchronous callback channel for the initial response to a scroll capture request.
+ *
+ * {@hide}
+ */
+interface IScrollCaptureResponseListener {
+    /**
+     * Provides the initial response to a scroll capture request.
+     *
+     * @param response the response which describes the result
+     */
+    oneway void onScrollCaptureResponse(in ScrollCaptureResponse response);
 }

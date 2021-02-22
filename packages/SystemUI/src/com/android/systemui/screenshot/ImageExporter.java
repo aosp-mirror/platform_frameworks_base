@@ -213,6 +213,20 @@ class ImageExporter {
         CompressFormat format;
         boolean published;
         boolean deleted;
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Result{");
+            sb.append("uri=").append(uri);
+            sb.append(", requestId=").append(requestId);
+            sb.append(", fileName='").append(fileName).append('\'');
+            sb.append(", timestamp=").append(timestamp);
+            sb.append(", format=").append(format);
+            sb.append(", published=").append(published);
+            sb.append(", deleted=").append(deleted);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     private static class Task {
