@@ -16,29 +16,16 @@
 
 package com.android.systemui.screenshot;
 
-import android.annotation.IdRes;
 import android.annotation.UiThread;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewTreeObserver.InternalInsetsInfo;
-import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
-import android.view.Window;
-import android.widget.ImageView;
 
-import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
 import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
-import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -50,7 +37,7 @@ import java.util.concurrent.Executor;
 /**
  * Interaction controller between the UI and ScrollCaptureClient.
  */
-public class ScrollCaptureController implements OnComputeInternalInsetsListener {
+public class ScrollCaptureController {
     private static final String TAG = "ScrollCaptureController";
     private static final float MAX_PAGES_DEFAULT = 3f;
 
@@ -64,13 +51,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private boolean mAtTopEdge;
     private Session mSession;
 
-    // TODO: Support saving without additional action.
-    private enum PendingAction {
-        SHARE,
-        EDIT,
-        SAVE
-    }
-
     public static final int MAX_HEIGHT = 12000;
 
     private final Connection mConnection;
@@ -80,36 +60,19 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private final Executor mBgExecutor;
     private final ImageExporter mImageExporter;
     private final ImageTileSet mImageTileSet;
-    private final UiEventLogger mUiEventLogger;
 
     private ZonedDateTime mCaptureTime;
     private UUID mRequestId;
-    private RequestCallback mCallback;
-    private Window mWindow;
-    private ImageView mPreview;
-    private View mSave;
-    private View mCancel;
-    private View mEdit;
-    private View mShare;
-    private CropView mCropView;
-    private MagnifierView mMagnifierView;
+    private ScrollCaptureCallback mCaptureCallback;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
-            Executor bgExecutor, ImageExporter exporter, UiEventLogger uiEventLogger) {
+            Executor bgExecutor, ImageExporter exporter) {
         mContext = context;
         mConnection = connection;
         mUiExecutor = uiExecutor;
         mBgExecutor = bgExecutor;
         mImageExporter = exporter;
-        mUiEventLogger = uiEventLogger;
         mImageTileSet = new ImageTileSet(context.getMainThreadHandler());
-    }
-
-    /**
-     * @param window the window to display the preview
-     */
-    public void attach(Window window) {
-        mWindow = window;
     }
 
     /**
@@ -117,134 +80,38 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
      *
      * @param callback request callback to report back to the service
      */
-    public void start(RequestCallback callback) {
+    public void start(ScrollCaptureCallback callback) {
         mCaptureTime = ZonedDateTime.now();
         mRequestId = UUID.randomUUID();
-        mCallback = callback;
-
-        setContentView(R.layout.long_screenshot);
-        mWindow.getDecorView().getViewTreeObserver()
-                .addOnComputeInternalInsetsListener(this);
-        mPreview = findViewById(R.id.preview);
-
-        mSave = findViewById(R.id.save);
-        mCancel = findViewById(R.id.cancel);
-        mEdit = findViewById(R.id.edit);
-        mShare = findViewById(R.id.share);
-        mCropView = findViewById(R.id.crop_view);
-        mMagnifierView = findViewById(R.id.magnifier);
-        mCropView.setCropInteractionListener(mMagnifierView);
-
-        mSave.setOnClickListener(this::onClicked);
-        mCancel.setOnClickListener(this::onClicked);
-        mEdit.setOnClickListener(this::onClicked);
-        mShare.setOnClickListener(this::onClicked);
+        mCaptureCallback = callback;
 
         float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
                 SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
         mConnection.start(this::startCapture, maxPages);
     }
 
-
-    /** Ensure the entire window is touchable */
-    public void onComputeInternalInsets(InternalInsetsInfo inoutInfo) {
-        inoutInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
-    }
-
-    void disableButtons() {
-        mSave.setEnabled(false);
-        mCancel.setEnabled(false);
-        mEdit.setEnabled(false);
-        mShare.setEnabled(false);
-    }
-
-    private void onClicked(View v) {
-        Log.d(TAG, "button clicked!");
-
-        int id = v.getId();
-        v.setPressed(true);
-        disableButtons();
-        if (id == R.id.save) {
-            startExport(PendingAction.SAVE);
-        } else if (id == R.id.cancel) {
-            doFinish();
-        } else if (id == R.id.edit) {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
-            startExport(PendingAction.EDIT);
-        } else if (id == R.id.share) {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
-            startExport(PendingAction.SHARE);
-        }
-    }
-
-    private void doFinish() {
-        mPreview.setImageDrawable(null);
-        mMagnifierView.setImageTileset(null);
-        mImageTileSet.clear();
-        mCallback.onFinish();
-        mWindow.getDecorView().getViewTreeObserver()
-                .removeOnComputeInternalInsetsListener(this);
-    }
-
-    private void startExport(PendingAction action) {
+    /**
+     * @param topCrop    [0,1) fraction of the top of the image to be cropped out.
+     * @param bottomCrop (0, 1] fraction to be cropped out, e.g. 0.7 will crop out the bottom 30%.
+     */
+    public void startExport(float topCrop, float bottomCrop, ExportCallback callback) {
         Rect croppedPortion = new Rect(
                 0,
-                (int) (mImageTileSet.getHeight() * mCropView.getTopBoundary()),
+                (int) (mImageTileSet.getHeight() * topCrop),
                 mImageTileSet.getWidth(),
-                (int) (mImageTileSet.getHeight() * mCropView.getBottomBoundary()));
+                (int) (mImageTileSet.getHeight() * bottomCrop));
         ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
                 mBgExecutor, mRequestId, mImageTileSet.toBitmap(croppedPortion), mCaptureTime);
         exportFuture.addListener(() -> {
             try {
                 ImageExporter.Result result = exportFuture.get();
-                if (action == PendingAction.EDIT) {
-                    doEdit(result.uri);
-                } else if (action == PendingAction.SHARE) {
-                    doShare(result.uri);
-                }
-                doFinish();
+                callback.onExportComplete(result.uri);
             } catch (InterruptedException | ExecutionException e) {
                 Log.e(TAG, "failed to export", e);
-                mCallback.onFinish();
+                callback.onError();
             }
         }, mUiExecutor);
     }
-
-    private void doEdit(Uri uri) {
-        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
-        Intent intent = new Intent(Intent.ACTION_EDIT);
-        if (!TextUtils.isEmpty(editorPackage)) {
-            intent.setComponent(ComponentName.unflattenFromString(editorPackage));
-        }
-        intent.setType("image/png");
-        intent.setData(uri);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-    }
-
-    private void doShare(Uri uri) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("image/png");
-        intent.setData(uri);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Intent sharingChooserIntent = Intent.createChooser(intent, null)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        mContext.startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
-    }
-
-    private void setContentView(@IdRes int id) {
-        mWindow.setContentView(id);
-    }
-
-    <T extends View> T findViewById(@IdRes int res) {
-        return mWindow.findViewById(res);
-    }
-
 
     private void onCaptureResult(CaptureResult result) {
         Log.d(TAG, "onCaptureResult: " + result);
@@ -327,11 +194,26 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         Log.d(TAG, "afterCaptureComplete");
 
         if (mImageTileSet.isEmpty()) {
-            session.end(mCallback::onFinish);
+            mCaptureCallback.onError();
         } else {
-            mPreview.setImageDrawable(mImageTileSet.getDrawable());
-            mMagnifierView.setImageTileset(mImageTileSet);
-            mCropView.animateBoundaryTo(CropView.CropBoundary.BOTTOM, 0.5f);
+            mCaptureCallback.onComplete(mImageTileSet);
         }
     }
+
+    /**
+     * Callback for image capture completion or error.
+     */
+    public interface ScrollCaptureCallback {
+        void onComplete(ImageTileSet imageTileSet);
+        void onError();
+    }
+
+    /**
+     * Callback for image export completion or error.
+     */
+    public interface ExportCallback {
+        void onExportComplete(Uri outputUri);
+        void onError();
+    }
+
 }
