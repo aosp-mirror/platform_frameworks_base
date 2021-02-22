@@ -20,7 +20,7 @@ import android.media.AudioManager;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
-import com.android.server.media.SessionPolicyProvider.SessionPolicy;
+import com.android.server.media.MediaSessionPolicyProvider.SessionPolicy;
 
 import java.io.PrintWriter;
 

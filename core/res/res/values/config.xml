@@ -4592,11 +4592,12 @@
         <item>com.android.systemui</item>
     </string-array>
 
-    <!-- Package name of custom media key dispatcher class used by MediaSessionService. -->
+    <!-- Component name of custom media key dispatcher class used by MediaSessionService. -->
     <string name="config_customMediaKeyDispatcher"></string>
 
-    <!-- Package name of custom session policy provider class used by MediaSessionService. -->
-    <string name="config_customSessionPolicyProvider"></string>
+    <!-- Component name of custom media session policy provider class used by
+         MediaSessionService. -->
+    <string name="config_customMediaSessionPolicyProvider"></string>
 
     <!-- The max scale for the wallpaper when it's zoomed in -->
     <item name="config_wallpaperMaxScale" format="float" type="dimen">1.10</item>

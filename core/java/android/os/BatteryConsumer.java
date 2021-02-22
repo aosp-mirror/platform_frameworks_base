@@ -130,7 +130,7 @@ public abstract class BatteryConsumer {
      * Total power consumed by this consumer, in mAh.
      */
     public double getConsumedPower() {
-        return mPowerComponents.getTotalPowerConsumed();
+        return mPowerComponents.getTotalConsumedPower();
     }
 
     /**

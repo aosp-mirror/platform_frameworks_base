@@ -333,6 +333,8 @@ package android {
   }
 
   public static final class R.string {
+    field public static final int config_customMediaKeyDispatcher = 17039404; // 0x104002c
+    field public static final int config_customMediaSessionPolicyProvider = 17039405; // 0x104002d
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
     field public static final int config_defaultCallRedirection = 17039397; // 0x1040025

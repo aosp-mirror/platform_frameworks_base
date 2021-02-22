@@ -15,7 +15,12 @@
  */
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.SystemBatteryConsumer;
+import android.os.UidBatteryConsumer;
 
 /**
  * Calculates the amount of power consumed by custom energy consumers (i.e. consumers of type
@@ -23,6 +28,38 @@ import android.os.BatteryStats;
  */
 public class CustomMeasuredPowerCalculator extends PowerCalculator {
     public CustomMeasuredPowerCalculator(PowerProfile powerProfile) {
+    }
+
+    @Override
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
+        final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
+                batteryStats.getCustomMeasuredEnergiesMicroJoules());
+        if (customMeasuredPowerMah != null) {
+            final SystemBatteryConsumer.Builder systemBatteryConsumerBuilder =
+                    builder.getOrCreateSystemBatteryConsumerBuilder(
+                            SystemBatteryConsumer.DRAIN_TYPE_CUSTOM);
+            for (int i = 0; i < customMeasuredPowerMah.length; i++) {
+                systemBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
+                        customMeasuredPowerMah[i]);
+            }
+        }
+    }
+
+    @Override
+    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
+                u.getCustomMeasuredEnergiesMicroJoules());
+        if (customMeasuredPowerMah != null) {
+            for (int i = 0; i < customMeasuredPowerMah.length; i++) {
+                app.setConsumedPowerForCustomComponent(
+                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
+                        customMeasuredPowerMah[i]);
+            }
+        }
     }
 
     @Override
