@@ -65,6 +65,7 @@ final class RotationResolverManagerPerUserService extends
     @GuardedBy("mLock")
     RemoteRotationResolverService mRemoteService;
 
+    private static String sTestingPackage;
     private ComponentName mComponentName;
 
     RotationResolverManagerPerUserService(@NonNull RotationResolverManagerService main,
@@ -136,19 +137,43 @@ final class RotationResolverManagerPerUserService extends
     }
 
     /**
+     * Set the testing package name.
+     *
+     * @param packageName the name of the package that implements {@link RotationResolverService}
+     *                    and is used for testing only.
+     */
+    @VisibleForTesting
+    void setTestingPackage(String packageName) {
+        sTestingPackage = packageName;
+        mComponentName = resolveRotationResolverService(getContext());
+    }
+
+    /**
+     * get the currently bound component name.
+     */
+    @VisibleForTesting
+    ComponentName getComponentName() {
+        return mComponentName;
+    }
+
+    /**
      * Provides rotation resolver service component name at runtime, making sure it's provided
      * by the system.
      */
-    private static ComponentName resolveRotationResolverService(Context context) {
-        final String serviceConfigPackage = getServiceConfigPackage(context);
-
+    static ComponentName resolveRotationResolverService(Context context) {
         String resolvedPackage;
         int flags = PackageManager.MATCH_SYSTEM_ONLY;
-
-        if (!TextUtils.isEmpty(serviceConfigPackage)) {
-            resolvedPackage = serviceConfigPackage;
+        if (!TextUtils.isEmpty(sTestingPackage)) {
+            // Testing Package is set.
+            resolvedPackage = sTestingPackage;
+            flags = PackageManager.GET_META_DATA;
         } else {
-            return null;
+            final String serviceConfigPackage = getServiceConfigPackage(context);
+            if (!TextUtils.isEmpty(serviceConfigPackage)) {
+                resolvedPackage = serviceConfigPackage;
+            } else {
+                return null;
+            }
         }
 
         final Intent intent = new Intent(
@@ -158,14 +183,15 @@ final class RotationResolverManagerPerUserService extends
                 flags, context.getUserId());
         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
             Slog.wtf(TAG, String.format("Service %s not found in package %s",
-                    RotationResolverService.SERVICE_INTERFACE, serviceConfigPackage
-            ));
+                    RotationResolverService.SERVICE_INTERFACE, resolvedPackage));
             return null;
         }
 
         final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
         final String permission = serviceInfo.permission;
         if (Manifest.permission.BIND_ROTATION_RESOLVER_SERVICE.equals(permission)) {
+            Slog.i(TAG, String.format("Successfully bound the service from package: %s",
+                    resolvedPackage));
             return serviceInfo.getComponentName();
         }
         Slog.e(TAG, String.format(
