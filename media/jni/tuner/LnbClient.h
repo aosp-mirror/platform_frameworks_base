@@ -126,9 +126,6 @@ private:
      */
     sp<ILnb> mLnb;
 
-    shared_ptr<TunerLnbCallback> mAidlCallback;
-    sp<HidlLnbCallback> mHidlCallback;
-
     LnbId mId;
 };
 }  // namespace android
