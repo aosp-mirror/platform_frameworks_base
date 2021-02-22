@@ -31,4 +31,6 @@ oneway interface IRecognitionServiceManager {
         in IBinder clientToken,
         boolean onDevice,
         in IRecognitionServiceManagerCallback callback);
+
+    void setTemporaryComponent(in ComponentName componentName);
 }

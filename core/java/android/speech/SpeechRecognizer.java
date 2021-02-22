@@ -17,6 +17,8 @@
 package android.speech;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +37,8 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class provides access to the speech recognition service. This service allows access to the
@@ -52,7 +56,7 @@ import java.util.List;
  */
 public class SpeechRecognizer {
     /** DEBUG value to enable verbose debug prints */
-    private final static boolean DBG = false;
+    private static final boolean DBG = false;
 
     /** Log messages identifier */
     private static final String TAG = "SpeechRecognizer";
@@ -113,10 +117,11 @@ public class SpeechRecognizer {
     public static final int ERROR_SERVER_DISCONNECTED = 11;
 
     /** action codes */
-    private final static int MSG_START = 1;
-    private final static int MSG_STOP = 2;
-    private final static int MSG_CANCEL = 3;
-    private final static int MSG_CHANGE_LISTENER = 4;
+    private static final int MSG_START = 1;
+    private static final int MSG_STOP = 2;
+    private static final int MSG_CANCEL = 3;
+    private static final int MSG_CHANGE_LISTENER = 4;
+    private static final int MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT = 5;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
@@ -134,6 +139,7 @@ public class SpeechRecognizer {
 
     /** Handler that will execute the main tasks */
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -149,9 +155,18 @@ public class SpeechRecognizer {
                 case MSG_CHANGE_LISTENER:
                     handleChangeListener((RecognitionListener) msg.obj);
                     break;
+                case MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT:
+                    handleSetTemporaryComponent((ComponentName) msg.obj);
+                    break;
             }
         }
     };
+
+    /**
+     * Temporary queue, saving the messages until the connection will be established, afterwards,
+     * only mHandler will receive the messages
+     */
+    private final Queue<Message> mPendingTasks = new LinkedBlockingQueue<>();
 
     /** The Listener that will receive all the callbacks */
     private final InternalListener mListener = new InternalListener();
@@ -287,11 +302,9 @@ public class SpeechRecognizer {
 
         if (mService == null) {
             // First time connection: first establish a connection, then dispatch #startListening.
-            connectToSystemService(
-                    () -> putMessage(Message.obtain(mHandler, MSG_START, recognizerIntent)));
-        } else {
-            putMessage(Message.obtain(mHandler, MSG_START, recognizerIntent));
+            connectToSystemService();
         }
+        putMessage(Message.obtain(mHandler, MSG_START, recognizerIntent));
     }
 
     /**
@@ -336,6 +349,22 @@ public class SpeechRecognizer {
         putMessage(Message.obtain(mHandler, MSG_CANCEL));
     }
 
+    /**
+     * Sets a temporary component to power on-device speech recognizer.
+     *
+     * <p>This is only expected to be called in tests, system would reject calls from client apps.
+     *
+     * @param componentName name of the component to set temporary replace speech recognizer. {@code
+     *        null} value resets the recognizer to default.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setTemporaryOnDeviceRecognizer(@Nullable ComponentName componentName) {
+        mHandler.sendMessage(
+                Message.obtain(mHandler, MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT, componentName));
+    }
+
     private static void checkIsCalledFromMainThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new RuntimeException(
@@ -344,7 +373,11 @@ public class SpeechRecognizer {
     }
 
     private void putMessage(Message msg) {
-        mHandler.sendMessage(msg);
+        if (mService == null) {
+            mPendingTasks.offer(msg);
+        } else {
+            mHandler.sendMessage(msg);
+        }
     }
 
     /** sends the actual message to the service */
@@ -395,6 +428,22 @@ public class SpeechRecognizer {
         }
     }
 
+    private void handleSetTemporaryComponent(ComponentName componentName) {
+        if (DBG) {
+            Log.d(TAG, "handleSetTemporaryComponent, componentName=" + componentName);
+        }
+
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+
+        try {
+            mManagerService.setTemporaryComponent(componentName);
+        } catch (final RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkOpenConnection() {
         if (mService != null) {
             return true;
@@ -422,16 +471,13 @@ public class SpeechRecognizer {
         }
 
         mService = null;
+        mPendingTasks.clear();
         mListener.mInternalListener = null;
     }
 
     /** Establishes a connection to system server proxy and initializes the session. */
-    private void connectToSystemService(Runnable onSuccess) {
-        mManagerService = IRecognitionServiceManager.Stub.asInterface(
-                ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE));
-
-        if (mManagerService == null) {
-            mListener.onError(ERROR_CLIENT);
+    private void connectToSystemService() {
+        if (!maybeInitializeManagerService()) {
             return;
         }
 
@@ -450,19 +496,40 @@ public class SpeechRecognizer {
                     new IRecognitionServiceManagerCallback.Stub(){
                         @Override
                         public void onSuccess(IRecognitionService service) throws RemoteException {
+                            if (DBG) {
+                                Log.i(TAG, "Connected to speech recognition service");
+                            }
                             mService = service;
-                            onSuccess.run();
+                            while (!mPendingTasks.isEmpty()) {
+                                mHandler.sendMessage(mPendingTasks.poll());
+                            }
                         }
 
                         @Override
                         public void onError(int errorCode) throws RemoteException {
-                            Log.e(TAG, "Bind to system recognition service failed");
+                            Log.e(TAG, "Bind to system recognition service failed with error "
+                                    + errorCode);
                             mListener.onError(errorCode);
                         }
                     });
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    private boolean maybeInitializeManagerService() {
+        if (mManagerService != null) {
+            return true;
+        }
+
+        mManagerService = IRecognitionServiceManager.Stub.asInterface(
+                ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE));
+
+        if (mManagerService == null && mListener != null) {
+            mListener.onError(ERROR_CLIENT);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -505,15 +572,15 @@ public class SpeechRecognizer {
     private static class InternalListener extends IRecognitionListener.Stub {
         private RecognitionListener mInternalListener;
 
-        private final static int MSG_BEGINNING_OF_SPEECH = 1;
-        private final static int MSG_BUFFER_RECEIVED = 2;
-        private final static int MSG_END_OF_SPEECH = 3;
-        private final static int MSG_ERROR = 4;
-        private final static int MSG_READY_FOR_SPEECH = 5;
-        private final static int MSG_RESULTS = 6;
-        private final static int MSG_PARTIAL_RESULTS = 7;
-        private final static int MSG_RMS_CHANGED = 8;
-        private final static int MSG_ON_EVENT = 9;
+        private static final int MSG_BEGINNING_OF_SPEECH = 1;
+        private static final int MSG_BUFFER_RECEIVED = 2;
+        private static final int MSG_END_OF_SPEECH = 3;
+        private static final int MSG_ERROR = 4;
+        private static final int MSG_READY_FOR_SPEECH = 5;
+        private static final int MSG_RESULTS = 6;
+        private static final int MSG_PARTIAL_RESULTS = 7;
+        private static final int MSG_RMS_CHANGED = 8;
+        private static final int MSG_ON_EVENT = 9;
 
         private final Handler mInternalHandler = new Handler(Looper.getMainLooper()) {
             @Override
