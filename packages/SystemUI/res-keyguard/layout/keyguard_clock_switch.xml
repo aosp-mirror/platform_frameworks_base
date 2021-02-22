@@ -64,7 +64,7 @@
         android:id="@+id/new_lockscreen_clock_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:visibility="gone">
         <com.android.keyguard.AnimatableClockView
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:textSize="100dp"
+            android:textSize="60dp"
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
