@@ -113,6 +113,19 @@ public abstract class PowerCalculator {
     }
 
     /**
+     * Returns either the measured energy converted to mAh or a usage-based estimate.
+     */
+    protected static double getMeasuredOrEstimatedPower(long measuredEnergyUj,
+            UsageBasedPowerEstimator powerEstimator, long durationMs,
+            boolean forceUsePowerProfileModel) {
+        if (measuredEnergyUj != BatteryStats.ENERGY_DATA_UNAVAILABLE
+                && !forceUsePowerProfileModel) {
+            return uJtoMah(measuredEnergyUj);
+        }
+        return powerEstimator.calculatePower(durationMs);
+    }
+
+    /**
      * Converts charge in mAh to string.
      */
     public static String formatCharge(double power) {

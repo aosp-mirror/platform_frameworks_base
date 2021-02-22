@@ -48,7 +48,7 @@ public class ScreenPowerCalculatorTest {
             .setAveragePower(PowerProfile.POWER_SCREEN_FULL, 48.0);
 
     @Test
-    public void testEnergyBasedModel() {
+    public void testMeasuredEnergyBasedModel() {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         batteryStats.noteScreenStateLocked(Display.STATE_ON, 0, 0, 0);

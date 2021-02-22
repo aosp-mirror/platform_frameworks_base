@@ -79,6 +79,14 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return mUserIds;
     }
 
+    /**
+     * Returns true if the power calculations must be based on the PowerProfile constants,
+     * even if measured energy data is available.
+     */
+    public boolean shouldForceUsePowerProfileModel() {
+        return (mFlags & FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL) != 0;
+    }
+
     private BatteryUsageStatsQuery(Parcel in) {
         mFlags = in.readInt();
         mUserIds = new int[in.readInt()];

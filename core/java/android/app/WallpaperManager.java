@@ -117,6 +117,9 @@ public class WallpaperManager {
     private static final String PROP_LOCK_WALLPAPER = "ro.config.lock_wallpaper";
     /** {@hide} */
     private static final String PROP_WALLPAPER_COMPONENT = "ro.config.wallpaper_component";
+    /** {@hide} */
+    private static final String VALUE_CMF_COLOR =
+            android.os.SystemProperties.get("ro.boot.hardware.color");
 
     /**
      * Activity Action: Show settings for choosing wallpaper. Do not use directly to construct
@@ -2064,7 +2067,11 @@ public class WallpaperManager {
             return null;
         } else {
             whichProp = PROP_WALLPAPER;
-            defaultResId = com.android.internal.R.drawable.default_wallpaper;
+            final int defaultColorResId = context.getResources().getIdentifier(
+                    "default_wallpaper_" + VALUE_CMF_COLOR, "drawable", "android");
+            defaultResId =
+                    defaultColorResId == 0 ? com.android.internal.R.drawable.default_wallpaper
+                            : defaultColorResId;
         }
         final String path = SystemProperties.get(whichProp);
         if (!TextUtils.isEmpty(path)) {
