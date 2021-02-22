@@ -216,6 +216,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return;
         }
 
+        if (results == null) return;
+
         for (int i = 0; i < results.length; i++) {
             final StateResidencyResult result = results[i];
             RpmStats.PowerStateSubsystem subsystem =
@@ -257,7 +259,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return EMPTY;
         }
 
-        if (results.length == 0) return EMPTY;
+        if (results == null || results.length == 0) return EMPTY;
 
         int charsLeft = MAX_LOW_POWER_STATS_SIZE;
         StringBuilder builder = new StringBuilder("SubsystemPowerState");

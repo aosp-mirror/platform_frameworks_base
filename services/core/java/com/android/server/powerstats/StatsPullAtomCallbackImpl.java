@@ -87,6 +87,8 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
             return StatsManager.PULL_SKIP;
         }
 
+        if (energyMeasurements == null) return StatsManager.PULL_SKIP;
+
         for (int i = 0; i < energyMeasurements.length; i++) {
             // Only report energy measurements that have been accumulated since boot
             final EnergyMeasurement energyMeasurement = energyMeasurements[i];
@@ -134,6 +136,8 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
             Slog.e(TAG, "Failed to getStateResidencyAsync", e);
             return StatsManager.PULL_SKIP;
         }
+
+        if (results == null) return StatsManager.PULL_SKIP;
 
         for (int i = 0; i < results.length; i++) {
             final StateResidencyResult result = results[i];
