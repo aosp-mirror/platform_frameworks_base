@@ -42,10 +42,10 @@ import android.net.UidRange;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.system.OsConstants;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -55,7 +55,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.net.module.util.CollectionUtils;
 import com.android.server.LocalServices;
-import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +80,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
 
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final SystemConfigManager mSystemConfigManager;
     private final INetd mNetd;
     private final Dependencies mDeps;
 
@@ -124,6 +124,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             @NonNull final Dependencies deps) {
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mSystemConfigManager = context.getSystemService(SystemConfigManager.class);
         mNetd = netd;
         mDeps = deps;
     }
@@ -175,20 +176,18 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
 
         mUsers.addAll(mUserManager.getUserHandles(true /* excludeDying */));
 
-        final SparseArray<ArraySet<String>> systemPermission =
-                SystemConfig.getInstance().getSystemPermissions();
-        for (int i = 0; i < systemPermission.size(); i++) {
-            ArraySet<String> perms = systemPermission.valueAt(i);
-            int uid = systemPermission.keyAt(i);
-            int netdPermission = 0;
-            // Get the uids of native services that have UPDATE_DEVICE_STATS or INTERNET permission.
-            if (perms != null) {
-                netdPermission |= perms.contains(UPDATE_DEVICE_STATS)
-                        ? INetd.PERMISSION_UPDATE_DEVICE_STATS : 0;
-                netdPermission |= perms.contains(INTERNET)
-                        ? INetd.PERMISSION_INTERNET : 0;
+        final SparseArray<String> netdPermToSystemPerm = new SparseArray<>();
+        netdPermToSystemPerm.put(INetd.PERMISSION_INTERNET, INTERNET);
+        netdPermToSystemPerm.put(INetd.PERMISSION_UPDATE_DEVICE_STATS, UPDATE_DEVICE_STATS);
+        for (int i = 0; i < netdPermToSystemPerm.size(); i++) {
+            final int netdPermission = netdPermToSystemPerm.keyAt(i);
+            final String systemPermission = netdPermToSystemPerm.valueAt(i);
+            final int[] hasPermissionUids =
+                    mSystemConfigManager.getSystemPermissionUids(systemPermission);
+            for (int j = 0; j < hasPermissionUids.length; j++) {
+                final int uid = hasPermissionUids[j];
+                netdPermsUids.put(uid, netdPermsUids.get(uid) | netdPermission);
             }
-            netdPermsUids.put(uid, netdPermsUids.get(uid) | netdPermission);
         }
         log("Users: " + mUsers.size() + ", Apps: " + mApps.size());
         update(mUsers, mApps, true);
