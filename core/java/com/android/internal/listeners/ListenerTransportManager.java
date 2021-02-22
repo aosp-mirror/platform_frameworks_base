@@ -17,6 +17,7 @@
 package com.android.internal.listeners;
 
 import android.os.RemoteException;
+import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -36,13 +37,17 @@ public abstract class ListenerTransportManager<TTransport extends ListenerTransp
     @GuardedBy("mRegistrations")
     private final Map<Object, WeakReference<TTransport>> mRegistrations;
 
-    protected ListenerTransportManager() {
+    protected ListenerTransportManager(boolean allowServerSideTransportRemoval) {
         // using weakhashmap means that the transport may be GCed if the server drops its reference,
         // and thus the listener may be GCed as well if the client drops that reference. if the
         // server will never drop a reference without warning (ie, transport removal may only be
         // initiated from the client side), then arraymap or similar may be used without fear of
         // memory leaks.
-        mRegistrations = new WeakHashMap<>();
+        if (allowServerSideTransportRemoval) {
+            mRegistrations = new WeakHashMap<>();
+        } else {
+            mRegistrations = new ArrayMap<>();
+        }
     }
 
     /**
@@ -53,16 +58,21 @@ public abstract class ListenerTransportManager<TTransport extends ListenerTransp
             synchronized (mRegistrations) {
                 // ordering of operations is important so that if an error occurs at any point we
                 // are left in a reasonable state
-                registerTransport(transport);
-                WeakReference<TTransport> oldTransportRef = mRegistrations.put(key,
-                        new WeakReference<>(transport));
+                TTransport oldTransport;
+                WeakReference<TTransport> oldTransportRef = mRegistrations.get(key);
                 if (oldTransportRef != null) {
-                    TTransport oldTransport = oldTransportRef.get();
-                    if (oldTransport != null) {
-                        oldTransport.unregister();
-                        unregisterTransport(oldTransport);
-                    }
+                    oldTransport = oldTransportRef.get();
+                } else {
+                    oldTransport = null;
                 }
+
+                if (oldTransport == null) {
+                    registerTransport(transport);
+                } else {
+                    registerTransport(transport, oldTransport);
+                    oldTransport.unregister();
+                }
+                mRegistrations.put(key, new WeakReference<>(transport));
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -91,7 +101,33 @@ public abstract class ListenerTransportManager<TTransport extends ListenerTransp
         }
     }
 
+    /**
+     * Registers a new transport.
+     */
     protected abstract void registerTransport(TTransport transport) throws RemoteException;
 
+    /**
+     * Registers a new transport that is replacing the given old transport. Implementations must
+     * ensure that if they throw a remote exception, the call does not have any side effects.
+     */
+    protected void registerTransport(TTransport transport, TTransport oldTransport)
+            throws RemoteException {
+        registerTransport(transport);
+        try {
+            unregisterTransport(oldTransport);
+        } catch (RemoteException e) {
+            try {
+                // best effort to ensure there are no side effects
+                unregisterTransport(transport);
+            } catch (RemoteException suppressed) {
+                e.addSuppressed(suppressed);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Unregisters an existing transport.
+     */
     protected abstract void unregisterTransport(TTransport transport) throws RemoteException;
 }
