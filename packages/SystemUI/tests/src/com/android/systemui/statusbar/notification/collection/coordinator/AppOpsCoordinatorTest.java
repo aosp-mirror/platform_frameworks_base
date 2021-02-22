@@ -115,41 +115,6 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
-    public void filterTest_systemAlertNotificationUnnecessary() {
-        // GIVEN the alert notification isn't needed for this user
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Notification.EXTRA_FOREGROUND_APPS,
-                new String[]{TEST_PKG});
-        mEntryBuilder.modifyNotification(mContext)
-                .setExtras(extras);
-        NotificationEntry entry = mEntryBuilder.build();
-        StatusBarNotification sbn = entry.getSbn();
-        when(mForegroundServiceController.isSystemAlertWarningNeeded(sbn.getUserId(), TEST_PKG))
-                .thenReturn(false);
-
-        // GIVEN the notification is a system alert notification + not a disclosure notification
-        when(mForegroundServiceController.isSystemAlertNotification(sbn)).thenReturn(true);
-        when(mForegroundServiceController.isDisclosureNotification(sbn)).thenReturn(false);
-
-
-        // THEN filter out the notification
-        assertTrue(mForegroundFilter.shouldFilterOut(entry, 0));
-    }
-
-    @Test
-    public void filterTest_doNotFilter() {
-        NotificationEntry entry = mEntryBuilder.build();
-        StatusBarNotification sbn = entry.getSbn();
-
-        // GIVEN the notification isn't a system alert notification nor a disclosure notification
-        when(mForegroundServiceController.isSystemAlertNotification(sbn)).thenReturn(false);
-        when(mForegroundServiceController.isDisclosureNotification(sbn)).thenReturn(false);
-
-        // THEN don't filter out the notification
-        assertFalse(mForegroundFilter.shouldFilterOut(entry, 0));
-    }
-
-    @Test
     public void testIncludeFGSInSection_importanceDefault() {
         // GIVEN the notification represents a colorized foreground service with > min importance
         mEntryBuilder
