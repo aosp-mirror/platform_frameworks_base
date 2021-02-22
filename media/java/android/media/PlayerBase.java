@@ -78,7 +78,7 @@ public abstract class PlayerBase {
 
     private final int mImplType;
     // uniquely identifies the Player Interface throughout the system (P I Id)
-    private int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
+    protected int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 
     @GuardedBy("mLock")
     private int mState;
