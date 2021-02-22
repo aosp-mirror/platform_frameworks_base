@@ -384,6 +384,14 @@ static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
     }
 }
 
+static void nativeSetDefaultBufferSize(JNIEnv* env, jclass clazz, jlong nativeObject,
+                                       jint width, jint height) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    if (ctrl != NULL) {
+        ctrl->updateDefaultBufferSize(width, height);
+    }
+}
+
 static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
     int left = env->GetIntField(rectObj, gRectClassInfo.left);
     int top = env->GetIntField(rectObj, gRectClassInfo.top);
@@ -1744,6 +1752,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDisconnect", "(J)V",
             (void*)nativeDisconnect },
+    {"nativeUpdateDefaultBufferSize", "(JII)V",
+            (void*)nativeSetDefaultBufferSize},
     {"nativeCreateTransaction", "()J",
             (void*)nativeCreateTransaction },
     {"nativeApplyTransaction", "(JZ)V",

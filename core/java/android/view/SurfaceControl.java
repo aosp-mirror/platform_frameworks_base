@@ -34,6 +34,7 @@ import android.annotation.Size;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.ColorSpace;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -94,6 +95,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
+    private static native void nativeUpdateDefaultBufferSize(long nativeObject, int width, int height);
     private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
             ScreenCaptureListener captureListener);
     private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
@@ -1078,6 +1080,11 @@ public final class SurfaceControl implements Parcelable {
                 throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
             }
+            boolean isBqLayer = isBufferQueueLayer();
+            if (isBqLayer) {
+                setBLASTLayer();
+            }
+
             return new SurfaceControl(
                     mSession, mName, mWidth, mHeight, mFormat, mFlags, mParent, mMetadata,
                     mLocalOwnerView, mCallsite);
@@ -1134,9 +1141,6 @@ public final class SurfaceControl implements Parcelable {
             return setFlags(FX_SURFACE_NORMAL, FX_SURFACE_MASK);
         }
 
-        /**
-         * Set the initial size of the controlled surface's buffers in pixels.
-         */
         private void unsetBufferSize() {
             mWidth = 0;
             mHeight = 0;
@@ -1301,11 +1305,14 @@ public final class SurfaceControl implements Parcelable {
             return  (mFlags & FX_SURFACE_EFFECT) == FX_SURFACE_EFFECT;
         }
 
+        private boolean isBufferQueueLayer() {
+            return (mFlags & FX_SURFACE_NORMAL) == FX_SURFACE_NORMAL;
+        }
+
         /**
          * @hide
          */
         public Builder setBLASTLayer() {
-            unsetBufferSize();
             return setFlags(FX_SURFACE_BLAST, FX_SURFACE_MASK);
         }
 
@@ -2644,8 +2651,7 @@ public final class SurfaceControl implements Parcelable {
                 final Point size = mResizedSurfaces.valueAt(i);
                 final SurfaceControl surfaceControl = mResizedSurfaces.keyAt(i);
                 synchronized (surfaceControl.mLock) {
-                    surfaceControl.mWidth = size.x;
-                    surfaceControl.mHeight = size.y;
+                    surfaceControl.resize(size.x, size.y);
                 }
             }
             mResizedSurfaces.clear();
@@ -3535,5 +3541,14 @@ public final class SurfaceControl implements Parcelable {
      */
     public static Transaction getGlobalTransaction() {
         return sGlobalTransaction;
+    }
+
+    /**
+     * @hide
+     */
+    public void resize(int w, int h) {
+        mWidth = w;
+        mHeight = h;
+        nativeUpdateDefaultBufferSize(mNativeObject, w, h);
     }
 }
