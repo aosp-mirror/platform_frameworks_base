@@ -49,8 +49,6 @@ TunerClient::TunerClient() {
     if (mTunerService == NULL) {
         ALOGE("Failed to get tuner service");
     } else {
-        // TODO: b/178124017 update TRM in TunerService independently.
-        mTunerService->updateTunerResources();
         mTunerService->getTunerHalVersion(&mTunerVersion);
     }
 }
