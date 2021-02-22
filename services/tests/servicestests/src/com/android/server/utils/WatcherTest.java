@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -619,6 +620,129 @@ public class WatcherTest {
     }
 
     @Test
+    public void testWatchedLongSparseArray() {
+        final String name = "WatchedLongSparseArray";
+        WatchableTester tester;
+
+        // Create a few leaves
+        Leaf leafA = new Leaf();
+        Leaf leafB = new Leaf();
+        Leaf leafC = new Leaf();
+        Leaf leafD = new Leaf();
+
+        // Test WatchedLongSparseArray
+        WatchedLongSparseArray<Leaf> array = new WatchedLongSparseArray<>();
+        array.put(INDEX_A, leafA);
+        array.put(INDEX_B, leafB);
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        leafA.tick();
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        leafA.tick();
+        tester.verify(1, "Updates with registration");
+        leafB.tick();
+        tester.verify(2, "Updates with registration");
+        array.remove(INDEX_B);
+        tester.verify(3, "Removed b");
+        leafB.tick();
+        tester.verify(3, "Updates with b not watched");
+        array.put(INDEX_B, leafB);
+        array.put(INDEX_C, leafB);
+        tester.verify(5, "Added b twice");
+        leafB.tick();
+        tester.verify(6, "Changed b - single notification");
+        array.remove(INDEX_C);
+        tester.verify(7, "Removed first b");
+        leafB.tick();
+        tester.verify(8, "Changed b - single notification");
+        array.remove(INDEX_B);
+        tester.verify(9, "Removed second b");
+        leafB.tick();
+        tester.verify(9, "Updated leafB - no change");
+        array.clear();
+        tester.verify(10, "Cleared array");
+        leafB.tick();
+        tester.verify(10, "Change to b not in array");
+
+        // Special methods
+        array.put(INDEX_A, leafA);
+        array.put(INDEX_B, leafB);
+        array.put(INDEX_C, leafC);
+        tester.verify(13, "Added c");
+        leafC.tick();
+        tester.verify(14, "Ticked c");
+        array.setValueAt(array.indexOfKey(INDEX_C), leafD);
+        tester.verify(15, "Replaced c with d");
+        leafC.tick();
+        tester.verify(15, "Ticked c (c not registered)");
+        leafD.tick();
+        tester.verify(16, "Ticked d and c (c not registered)");
+        array.append(INDEX_D, leafC);
+        tester.verify(17, "Append c");
+        leafC.tick();
+        leafD.tick();
+        tester.verify(19, "Ticked d and c");
+        assertEquals("Verify four elements", 4, array.size());
+        // Figure out which elements are at which indices.
+        Leaf[] x = new Leaf[4];
+        for (int i = 0; i < 4; i++) {
+            x[i] = array.valueAt(i);
+        }
+        array.removeAt(1);
+        tester.verify(20, "Removed one element");
+        x[1].tick();
+        tester.verify(20, "Ticked one removed element");
+        x[2].tick();
+        tester.verify(21, "Ticked one remaining element");
+
+        // Snapshot
+        {
+            final WatchedLongSparseArray<Leaf> arraySnap = array.snapshot();
+            tester.verify(21, "Generate snapshot (no changes)");
+            // Verify that the snapshot is a proper copy of the source.
+            assertEquals(name + " snap same size",
+                         array.size(), arraySnap.size());
+            for (int i = 0; i < array.size(); i++) {
+                for (int j = 0; j < arraySnap.size(); j++) {
+                    assertTrue(name + " elements differ",
+                               array.valueAt(i) != arraySnap.valueAt(j));
+                }
+                assertTrue(name + " element copy",
+                           array.valueAt(i).equals(arraySnap.valueAt(i)));
+            }
+            leafD.tick();
+            tester.verify(22, "Tick after snapshot");
+            // Verify that the array snapshot is sealed
+            verifySealed(name, ()->arraySnap.put(INDEX_A, leafB));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
+        }
+        // Recreate the snapshot since the test corrupted it.
+        {
+            final WatchedLongSparseArray<Leaf> arraySnap = array.snapshot();
+            // Verify that elements are also snapshots
+            final Leaf arraySnapElement = arraySnap.valueAt(0);
+            verifySealed("ArraySnapshotElement", ()->arraySnapElement.tick());
+        }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out";
+            LongSparseArray<Leaf> base = new LongSparseArray<>();
+            array.copyTo(base);
+            WatchedLongSparseArray<Leaf> copy = new WatchedLongSparseArray<>();
+            copy.copyFrom(base);
+            final int end = array.size();
+            assertTrue(msg + " size mismatch " + end + " " + copy.size(), end == copy.size());
+            for (int i = 0; i < end; i++) {
+                final long key = array.keyAt(i);
+                assertTrue(msg, array.get(i) == copy.get(i));
+            }
+        }
+    }
+
+    @Test
     public void testWatchedSparseBooleanArray() {
         final String name = "WatchedSparseBooleanArray";
         WatchableTester tester;
@@ -732,5 +856,44 @@ public class WatcherTest {
                 assertTrue(msg, array.get(i) == copy.get(i));
             }
         }
+    }
+
+    @Test
+    public void testNestedArrays() {
+        final String name = "NestedArrays";
+        WatchableTester tester;
+
+        // Create a few leaves
+        Leaf leafA = new Leaf();
+        Leaf leafB = new Leaf();
+        Leaf leafC = new Leaf();
+        Leaf leafD = new Leaf();
+
+        // Test nested arrays.
+        WatchedLongSparseArray<Leaf> lsaA = new WatchedLongSparseArray<>();
+        lsaA.put(2, leafA);
+        WatchedLongSparseArray<Leaf> lsaB = new WatchedLongSparseArray<>();
+        lsaB.put(4, leafB);
+        WatchedLongSparseArray<Leaf> lsaC = new WatchedLongSparseArray<>();
+        lsaC.put(6, leafC);
+
+        WatchedArrayMap<String, WatchedLongSparseArray<Leaf>> array =
+                new WatchedArrayMap<>();
+        array.put("A", lsaA);
+        array.put("B", lsaB);
+
+        // Test WatchedSparseIntArray
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        tester.register();
+        tester.verify(0, "Initial array - post registration");
+        leafA.tick();
+        tester.verify(1, "tick grand-leaf");
+        lsaA.put(2, leafD);
+        tester.verify(2, "replace leafA");
+        leafA.tick();
+        tester.verify(2, "tick unregistered leafA");
+        leafD.tick();
+        tester.verify(3, "tick leafD");
     }
 }
