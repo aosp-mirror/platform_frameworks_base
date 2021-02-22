@@ -170,6 +170,7 @@ public class PipTouchHandler {
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
+        mPipUiEventLogger = pipUiEventLogger;
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
@@ -186,6 +187,8 @@ public class PipTouchHandler {
                 () -> {
                     if (mPipBoundsState.isStashed()) {
                         animateToUnStashedState();
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
                         mPipBoundsState.setStashed(STASH_TYPE_NONE);
                     } else {
                         mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
@@ -205,8 +208,6 @@ public class PipTouchHandler {
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds, mainExecutor);
-
-        mPipUiEventLogger = pipUiEventLogger;
 
         mEnableStash = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -867,6 +868,8 @@ public class PipTouchHandler {
                 if (mEnableStash && shouldStash(vel, getPossiblyMotionBounds())) {
                     mMotionHelper.stashToEdge(vel.x, vel.y, this::stashEndAction /* endAction */);
                 } else {
+                    mPipUiEventLogger.log(
+                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
                     mPipBoundsState.setStashed(STASH_TYPE_NONE);
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
@@ -897,6 +900,8 @@ public class PipTouchHandler {
                 if (!mTouchState.isWaitingForDoubleTap()) {
                     if (mPipBoundsState.isStashed()) {
                         animateToUnStashedState();
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_UNSTASHED);
                         mPipBoundsState.setStashed(STASH_TYPE_NONE);
                     } else {
                         // User has stalled long enough for this not to be a drag or a double tap,
@@ -921,9 +926,15 @@ public class PipTouchHandler {
                     && mPipExclusionBoundsChangeListener.get() != null) {
                 mPipExclusionBoundsChangeListener.get().accept(mPipBoundsState.getBounds());
             }
-            if (mPipBoundsState.getBounds().left < 0) {
+            if (mPipBoundsState.getBounds().left < 0
+                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
+                mPipUiEventLogger.log(
+                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_LEFT);
                 mPipBoundsState.setStashed(STASH_TYPE_LEFT);
-            } else {
+            } else if (mPipBoundsState.getBounds().left >= 0
+                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
+                mPipUiEventLogger.log(
+                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_RIGHT);
                 mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
             }
         }
