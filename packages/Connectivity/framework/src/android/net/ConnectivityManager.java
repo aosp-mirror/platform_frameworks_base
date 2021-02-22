@@ -1070,58 +1070,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Calls VpnManager#isAlwaysOnVpnPackageSupportedForUser.
-     * @deprecated TODO: remove when callers have migrated to VpnManager.
-     * @hide
-     */
-    @Deprecated
-    public boolean isAlwaysOnVpnPackageSupportedForUser(int userId, @Nullable String vpnPackage) {
-        return getVpnManager().isAlwaysOnVpnPackageSupportedForUser(userId, vpnPackage);
-    }
-
-    /**
-    * Calls VpnManager#setAlwaysOnVpnPackageForUser.
-     * @deprecated TODO: remove when callers have migrated to VpnManager.
-     * @hide
-     */
-    @Deprecated
-    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
-            boolean lockdownEnabled, @Nullable List<String> lockdownAllowlist) {
-        return getVpnManager().setAlwaysOnVpnPackageForUser(userId, vpnPackage, lockdownEnabled,
-                lockdownAllowlist);
-    }
-
-    /**
-     * Calls VpnManager#getAlwaysOnVpnPackageForUser.
-     * @deprecated TODO: remove when callers have migrated to VpnManager.
-     * @hide
-     */
-    @Deprecated
-    public String getAlwaysOnVpnPackageForUser(int userId) {
-        return getVpnManager().getAlwaysOnVpnPackageForUser(userId);
-    }
-
-    /**
-     * Calls VpnManager#isVpnLockdownEnabled.
-     * @deprecated TODO: remove when callers have migrated to VpnManager.
-     * @hide
-     */
-    @Deprecated
-    public boolean isVpnLockdownEnabled(int userId) {
-        return getVpnManager().isVpnLockdownEnabled(userId);
-    }
-
-    /**
-     * Calls VpnManager#getVpnLockdownAllowlist.
-     * @deprecated TODO: remove when callers have migrated to VpnManager.
-     * @hide
-     */
-    @Deprecated
-    public List<String> getVpnLockdownAllowlist(int userId) {
-        return getVpnManager().getVpnLockdownAllowlist(userId);
-    }
-
-    /**
      * Adds or removes a requirement for given UID ranges to use the VPN.
      *
      * If set to {@code true}, informs the system that the UIDs in the specified ranges must not
@@ -3167,16 +3115,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Calls VpnManager#updateLockdownVpn.
-     * @deprecated TODO: remove when callers have migrated to VpnManager.
-     * @hide
-     */
-    @Deprecated
-    public boolean updateLockdownVpn() {
-        return getVpnManager().updateLockdownVpn();
-    }
-
-    /**
      * Set sign in error notification to visible or invisible
      *
      * @hide
@@ -4537,8 +4475,6 @@ public class ConnectivityManager {
         try {
             mService.factoryReset();
             mTetheringManager.stopAllTethering();
-            // TODO: Migrate callers to VpnManager#factoryReset.
-            getVpnManager().factoryReset();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4830,15 +4766,6 @@ public class ConnectivityManager {
         }
 
         return new TestNetworkManager(ITestNetworkManager.Stub.asInterface(tnBinder));
-    }
-
-    /**
-     * Temporary hack to shim calls from ConnectivityManager to VpnManager. We cannot store a
-     * private final mVpnManager because ConnectivityManager is initialized before VpnManager.
-     * @hide TODO: remove.
-     */
-    public VpnManager getVpnManager() {
-        return mContext.getSystemService(VpnManager.class);
     }
 
     /** @hide */
