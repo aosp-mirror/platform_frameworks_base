@@ -25,6 +25,7 @@
 #include <renderthread/CanvasContext.h>
 #endif
 #include <TreeInfo.h>
+#include <effects/StretchEffect.h>
 #include <hwui/Paint.h>
 #include <utils/TraceUtils.h>
 
@@ -549,6 +550,7 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 jmethodID gPositionListener_PositionChangedMethod;
+jmethodID gPositionListener_ApplyStretchMethod;
 jmethodID gPositionListener_PositionLostMethod;
 
 static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
@@ -571,6 +573,11 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             Matrix4 transform;
             info.damageAccumulator->computeCurrentTransform(&transform);
             const RenderProperties& props = node.properties();
+
+            if (info.stretchEffectCount) {
+                handleStretchEffect(info, transform);
+            }
+
             uirenderer::Rect bounds(props.getWidth(), props.getHeight());
             transform.mapRect(bounds);
 
@@ -613,7 +620,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             JNIEnv* env = jnienv();
             jobject localref = env->NewLocalRef(mWeakRef);
             if (CC_UNLIKELY(!localref)) {
-                jnienv()->DeleteWeakGlobalRef(mWeakRef);
+                env->DeleteWeakGlobalRef(mWeakRef);
                 mWeakRef = nullptr;
                 return;
             }
@@ -632,6 +639,32 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", mVm);
             }
             return env;
+        }
+
+        void handleStretchEffect(const TreeInfo& info, const Matrix4& transform) {
+            // Search up to find the nearest stretcheffect parent
+            const StretchEffect* effect = info.damageAccumulator->findNearestStretchEffect();
+            if (!effect) {
+                return;
+            }
+
+            uirenderer::Rect area = effect->stretchArea;
+            transform.mapRect(area);
+            JNIEnv* env = jnienv();
+
+            jobject localref = env->NewLocalRef(mWeakRef);
+            if (CC_UNLIKELY(!localref)) {
+                env->DeleteWeakGlobalRef(mWeakRef);
+                mWeakRef = nullptr;
+                return;
+            }
+#ifdef __ANDROID__  // Layoutlib does not support CanvasContext
+            env->CallVoidMethod(localref, gPositionListener_ApplyStretchMethod,
+                                info.canvasContext.getFrameNumber(), area.left, area.top,
+                                area.right, area.bottom, effect->stretchDirection.fX,
+                                effect->stretchDirection.fY, effect->maxStretchAmount);
+#endif
+            env->DeleteLocalRef(localref);
         }
 
         void doUpdatePositionAsync(jlong frameNumber, jint left, jint top,
@@ -775,6 +808,8 @@ int register_android_view_RenderNode(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/graphics/RenderNode$PositionUpdateListener");
     gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
             "positionChanged", "(JIIII)V");
+    gPositionListener_ApplyStretchMethod =
+            GetMethodIDOrDie(env, clazz, "applyStretch", "(JFFFFFFF)V");
     gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,
             "positionLost", "(J)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));

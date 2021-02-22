@@ -142,6 +142,9 @@ public final class SurfaceControl implements Parcelable {
             int layerStack);
     private static native void nativeSetBlurRegions(long transactionObj, long nativeObj,
             float[][] regions, int length);
+    private static native void nativeSetStretchEffect(long transactionObj, long nativeObj,
+            float left, float top, float right, float bottom, float vecX, float vecY,
+            float maxStretchAmount);
 
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -2967,6 +2970,17 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setBlurRegions(SurfaceControl sc, float[][] regions) {
             checkPreconditions(sc);
             nativeSetBlurRegions(mNativeObject, sc.mNativeObject, regions, regions.length);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Transaction setStretchEffect(SurfaceControl sc, float left, float top, float right,
+                float bottom, float vecX, float vecY, float maxStretchAmount) {
+            checkPreconditions(sc);
+            nativeSetStretchEffect(mNativeObject, sc.mNativeObject, left, top, right, bottom,
+                    vecX, vecY, maxStretchAmount);
             return this;
         }
 
