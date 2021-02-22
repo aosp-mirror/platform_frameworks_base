@@ -16,22 +16,22 @@
 
 package com.android.internal.os;
 
-/**
- * Reads total CPU time bpf map.
- */
+import android.annotation.Nullable;
+
+/** Reads total CPU time bpf map. */
 public final class KernelCpuTotalBpfMapReader {
     private KernelCpuTotalBpfMapReader() {
     }
 
-    /** Reads total CPU time from bpf map. */
-    public static native boolean read(Callback callback);
-
-    /** Callback accepting values read from bpf map. */
-    public interface Callback {
-        /**
-         * Accepts values read from bpf map: cluster index, frequency in kilohertz and time in
-         * milliseconds that the cpu cluster spent at the frequency (excluding sleep).
-         */
-        void accept(int cluster, int freqKhz, long timeMs);
+    /** Reads total CPU times (excluding sleep) per frequency in milliseconds from bpf map. */
+    @Nullable
+    public static long[] read() {
+        if (!KernelCpuBpfTracking.startTracking()) {
+            return null;
+        }
+        return readInternal();
     }
+
+    @Nullable
+    private static native long[] readInternal();
 }
