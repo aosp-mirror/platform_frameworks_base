@@ -24,16 +24,16 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
-import android.util.jar.StrictJarFile;
 import android.util.JsonReader;
 import android.util.Log;
+import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,7 +53,10 @@ public class DexMetadataHelper {
     /** $> adb shell 'setprop log.tag.DexMetadataHelper VERBOSE' */
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     /** $> adb shell 'setprop pm.dexopt.dm.require_manifest true' */
-    private static String PROPERTY_DM_JSON_MANIFEST_REQUIRED = "pm.dexopt.dm.require_manifest";
+    private static final String PROPERTY_DM_JSON_MANIFEST_REQUIRED =
+            "pm.dexopt.dm.require_manifest";
+    /** $> adb shell 'setprop pm.dexopt.dm.require_fsverity true' */
+    private static final String PROPERTY_DM_FSVERITY_REQUIRED = "pm.dexopt.dm.require_fsverity";
 
     private static final String DEX_METADATA_FILE_EXTENSION = ".dm";
 
@@ -67,6 +70,13 @@ public class DexMetadataHelper {
     /** Return true if the given path is a dex metadata path. */
     private static boolean isDexMetadataPath(String path) {
         return path.endsWith(DEX_METADATA_FILE_EXTENSION);
+    }
+
+    /**
+     * Returns whether fs-verity is required to install a dex metadata
+     */
+    public static boolean isFsVerityRequired() {
+        return SystemProperties.getBoolean(PROPERTY_DM_FSVERITY_REQUIRED, false);
     }
 
     /**
