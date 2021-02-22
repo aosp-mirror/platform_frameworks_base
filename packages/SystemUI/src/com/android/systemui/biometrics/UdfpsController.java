@@ -44,7 +44,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -324,7 +323,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             case IUdfpsOverlayController.REASON_ENROLL_ENROLLING:
                 return new UdfpsAnimationEnroll(mContext);
             case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
-                return new UdfpsAnimationKeyguard(mView, mContext, mStatusBarStateController);
+                return new UdfpsAnimationKeyguard(mContext, mStatusBarStateController);
             case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
                 return new UdfpsAnimationFpmOther(mContext);
             default:
