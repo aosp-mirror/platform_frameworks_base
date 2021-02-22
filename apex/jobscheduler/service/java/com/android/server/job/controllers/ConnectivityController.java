@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
@@ -461,11 +462,12 @@ public final class ConnectivityController extends RestrictingController implemen
         final Network network = mConnManager.getActiveNetworkForUid(
                 jobStatus.getSourceUid(), jobStatus.shouldIgnoreNetworkBlocking());
         final NetworkCapabilities capabilities = getNetworkCapabilities(network);
-        return updateConstraintsSatisfied(jobStatus, network, capabilities);
+        return updateConstraintsSatisfied(jobStatus, sElapsedRealtimeClock.millis(),
+                network, capabilities);
     }
 
-    private boolean updateConstraintsSatisfied(JobStatus jobStatus, Network network,
-            NetworkCapabilities capabilities) {
+    private boolean updateConstraintsSatisfied(JobStatus jobStatus, final long nowElapsed,
+            Network network, NetworkCapabilities capabilities) {
         // TODO: consider matching against non-active networks
 
         final boolean ignoreBlocked = jobStatus.shouldIgnoreNetworkBlocking();
@@ -476,7 +478,7 @@ public final class ConnectivityController extends RestrictingController implemen
         final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
         final boolean changed = jobStatus
-                .setConnectivityConstraintSatisfied(connected && satisfied);
+                .setConnectivityConstraintSatisfied(nowElapsed, connected && satisfied);
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to
@@ -530,6 +532,7 @@ public final class ConnectivityController extends RestrictingController implemen
         NetworkCapabilities exemptedNetworkCapabilities = null;
         boolean exemptedNetworkMatch = false;
 
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         boolean changed = false;
         for (int i = jobs.size() - 1; i >= 0; i--) {
             final JobStatus js = jobs.valueAt(i);
@@ -555,7 +558,7 @@ public final class ConnectivityController extends RestrictingController implemen
             // job hasn't yet been evaluated against the currently
             // active network; typically when we just lost a network.
             if (match || !Objects.equals(js.network, net)) {
-                changed |= updateConstraintsSatisfied(js, net, netCap);
+                changed |= updateConstraintsSatisfied(js, nowElapsed, net, netCap);
             }
         }
         return changed;
