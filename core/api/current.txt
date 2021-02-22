@@ -11782,6 +11782,8 @@ package android.content.pm {
     field public int category;
     field public String className;
     field public int compatibleWidthLimitDp;
+    field public int compileSdkVersion;
+    field @Nullable public String compileSdkVersionCodename;
     field public String dataDir;
     field public int descriptionRes;
     field public String deviceProtectedDataDir;
