@@ -98,7 +98,16 @@ public class PipUiEventLogger {
         PICTURE_IN_PICTURE_CHANGE_ASPECT_RATIO(609),
 
         @UiEvent(doc = "User resize of the picture-in-picture window")
-        PICTURE_IN_PICTURE_RESIZE(610);
+        PICTURE_IN_PICTURE_RESIZE(610),
+
+        @UiEvent(doc = "User unstashed picture-in-picture")
+        PICTURE_IN_PICTURE_STASH_UNSTASHED(709),
+
+        @UiEvent(doc = "User stashed picture-in-picture to the left side")
+        PICTURE_IN_PICTURE_STASH_LEFT(710),
+
+        @UiEvent(doc = "User stashed picture-in-picture to the right side")
+        PICTURE_IN_PICTURE_STASH_RIGHT(711);
 
         private final int mId;
 
