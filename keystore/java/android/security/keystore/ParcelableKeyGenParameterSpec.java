@@ -59,7 +59,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mSpec.getKeystoreAlias());
         out.writeInt(mSpec.getPurposes());
-        out.writeInt(mSpec.getUid());
+        out.writeInt(mSpec.getNamespace());
         out.writeInt(mSpec.getKeySize());
 
         // Only needs to support RSAKeyGenParameterSpec and ECGenParameterSpec.
@@ -125,7 +125,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
     private ParcelableKeyGenParameterSpec(Parcel in) {
         final String keystoreAlias = in.readString();
         final int purposes = in.readInt();
-        final int uid = in.readInt();
+        final int namespace = in.readInt();
         final int keySize = in.readInt();
 
         final int keySpecType = in.readInt();
@@ -177,7 +177,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         // KeyGenParameterSpec constructor (whereas using a builder would silently drop them).
         mSpec = new KeyGenParameterSpec(
                 keystoreAlias,
-                uid,
+                namespace,
                 keySize,
                 algorithmSpec,
                 certificateSubject,
