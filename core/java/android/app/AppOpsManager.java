@@ -6553,14 +6553,15 @@ public class AppOpsManager {
     public interface OnOpNotedListener {
         /**
          * Called when an op was noted.
-         *
          * @param code The op code.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
          * @param flags The flags of this op
          * @param result The result of the note.
          */
-        void onOpNoted(int code, int uid, String packageName, @OpFlags int flags, @Mode int result);
+        void onOpNoted(int code, int uid, String packageName, String attributionTag,
+                @OpFlags int flags, @Mode int result);
     }
 
     /**
@@ -6593,14 +6594,15 @@ public class AppOpsManager {
          * Called when an op was started.
          *
          * Note: This is only for op starts. It is not called when an op is noted or stopped.
-         *
          * @param op The op code.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
          * @param flags The flags of this op
          * @param result The result of the start.
          */
-        void onOpStarted(int op, int uid, String packageName, @OpFlags int flags, @Mode int result);
+        void onOpStarted(int op, int uid, String packageName, String attributionTag,
+                @OpFlags int flags, @Mode int result);
     }
 
     AppOpsManager(Context context, IAppOpsService service) {
@@ -7183,8 +7185,9 @@ public class AppOpsManager {
              }
              cb = new IAppOpsStartedCallback.Stub() {
                  @Override
-                 public void opStarted(int op, int uid, String packageName, int flags, int mode) {
-                     callback.onOpStarted(op, uid, packageName, flags, mode);
+                 public void opStarted(int op, int uid, String packageName, String attributionTag,
+                         int flags, int mode) {
+                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode);
                  }
              };
              mStartedWatchers.put(callback, cb);
@@ -7250,8 +7253,9 @@ public class AppOpsManager {
             }
             cb = new IAppOpsNotedCallback.Stub() {
                 @Override
-                public void opNoted(int op, int uid, String packageName, int flags, int mode) {
-                    callback.onOpNoted(op, uid, packageName, flags, mode);
+                public void opNoted(int op, int uid, String packageName, String attributionTag,
+                        int flags, int mode) {
+                    callback.onOpNoted(op, uid, packageName, attributionTag, flags, mode);
                 }
             };
             mNotedWatchers.put(callback, cb);
