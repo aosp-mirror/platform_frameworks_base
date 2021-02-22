@@ -1708,7 +1708,7 @@ class ActivityStarter {
 
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
-        final Task topRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
+        final Task topRootTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         if (topRootTask != null) {
             startResult = deliverToCurrentTopIfNeeded(topRootTask, intentGrants);
             if (startResult != START_SUCCESS) {
