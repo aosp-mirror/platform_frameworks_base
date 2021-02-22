@@ -16,6 +16,9 @@
 
 package android.net.vcn.persistablebundleutils;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
 import static org.junit.Assert.assertEquals;
 
 import android.net.InetAddresses;
@@ -30,6 +33,8 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
@@ -86,6 +91,27 @@ public class TunnelModeChildSessionParamsUtilsTest {
 
         final TunnelModeChildSessionParams sessionParams =
                 createBuilderMinimum().setLifetimeSeconds(hardLifetime, softLifetime).build();
+        verifyPersistableBundleEncodeDecodeIsLossless(sessionParams);
+    }
+
+    @Test
+    public void testSetConfigRequestsEncodeDecodeIsLossless() throws Exception {
+        final int ipv6PrefixLen = 64;
+        final Inet4Address ipv4Address =
+                (Inet4Address) InetAddresses.parseNumericAddress("192.0.2.100");
+        final Inet6Address ipv6Address =
+                (Inet6Address) InetAddresses.parseNumericAddress("2001:db8::1");
+
+        final TunnelModeChildSessionParams sessionParams =
+                createBuilderMinimum()
+                        .addInternalAddressRequest(AF_INET)
+                        .addInternalAddressRequest(AF_INET6)
+                        .addInternalAddressRequest(ipv4Address)
+                        .addInternalAddressRequest(ipv6Address, ipv6PrefixLen)
+                        .addInternalDnsServerRequest(AF_INET)
+                        .addInternalDnsServerRequest(AF_INET6)
+                        .addInternalDhcpServerRequest(AF_INET)
+                        .build();
         verifyPersistableBundleEncodeDecodeIsLossless(sessionParams);
     }
 }
