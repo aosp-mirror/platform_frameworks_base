@@ -1007,6 +1007,9 @@
     <!-- Settings item title to select the default behavior for transcoding if an encodig is not supported by an app. [CHAR LIMIT=85] -->
     <string name="transcode_default">Assume apps support modern formats</string>
 
+    <!-- Settings item title to select whether to show transcoding notifications. [CHAR LIMIT=85] -->
+    <string name="transcode_notification">Show transcoding notifications</string>
+
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
