@@ -22,12 +22,10 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.tv.micdisclosure.AudioRecordingDisclosureBar;
 
 import javax.inject.Inject;
 
@@ -36,11 +34,6 @@ import dagger.Lazy;
 /**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav.
  * Serves as a collection of UI components, rather than showing its own UI.
- * The following is the list of elements that constitute the TV-specific status bar:
- * <ul>
- * <li> {@link AudioRecordingDisclosureBar} - shown whenever applications are conducting audio
- * recording, discloses the responsible applications </li>
- * </ul>
  */
 @SysUISingleton
 public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
@@ -65,11 +58,6 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
             barService.registerStatusBar(mCommandQueue);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
-        }
-
-        if (mContext.getResources().getBoolean(R.bool.audio_recording_disclosure_enabled)) {
-            // Creating AudioRecordingDisclosureBar and just letting it run
-            new AudioRecordingDisclosureBar(mContext);
         }
     }
 
