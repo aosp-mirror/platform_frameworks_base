@@ -16,55 +16,78 @@
 
 package com.android.wm.shell.transition;
 
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.R;
+import com.android.internal.policy.AttributeCache;
+import com.android.internal.policy.TransitionAnimation;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 
 /** The default handler that handles anything not already handled. */
 public class DefaultTransitionHandler implements Transitions.TransitionHandler {
+    private static final int MAX_ANIMATION_DURATION = 3000;
+
     private final TransactionPool mTransactionPool;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
+    private final TransitionAnimation mTransitionAnimation;
 
     /** Keeps track of the currently-running animations associated with each transition. */
     private final ArrayMap<IBinder, ArrayList<Animator>> mAnimations = new ArrayMap<>();
 
-    DefaultTransitionHandler(@NonNull TransactionPool transactionPool,
+    private float mTransitionAnimationScaleSetting = 1.0f;
+
+    DefaultTransitionHandler(@NonNull TransactionPool transactionPool, Context context,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
         mTransactionPool = transactionPool;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
+        mTransitionAnimation = new TransitionAnimation(context, false /* debug */, Transitions.TAG);
+
+        AttributeCache.init(context);
     }
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "start default transition animation, info = %s", info);
         if (mAnimations.containsKey(transition)) {
             throw new IllegalStateException("Got a duplicate startAnimation call for "
                     + transition);
         }
         final ArrayList<Animator> animations = new ArrayList<>();
         mAnimations.put(transition, animations);
-        final boolean isOpening = Transitions.isOpeningType(info.getType());
 
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
@@ -77,19 +100,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything with an animating parent
             if (change.getParent() != null) continue;
 
-            final int mode = change.getMode();
-            if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
-                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                    // This received a transferred starting window, so don't animate
-                    continue;
-                }
-                // fade in
-                startExampleAnimation(
-                        animations, change.getLeash(), true /* show */, onAnimFinish);
-            } else if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
-                // fade out
-                startExampleAnimation(
-                        animations, change.getLeash(), false /* show */, onAnimFinish);
+            Animation a = loadAnimation(info.getType(), change);
+            if (a != null) {
+                startAnimInternal(animations, a, change.getLeash(), onAnimFinish);
             }
         }
         t.apply();
@@ -105,32 +118,93 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return null;
     }
 
-    // TODO(shell-transitions): real animations
-    private void startExampleAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull SurfaceControl leash, boolean show, @NonNull Runnable finishCallback) {
-        final float end = show ? 1.f : 0.f;
-        final float start = 1.f - end;
+    @Override
+    public void setAnimScaleSetting(float scale) {
+        mTransitionAnimationScaleSetting = scale;
+    }
+
+    @Nullable
+    private Animation loadAnimation(int type, TransitionInfo.Change change) {
+        // TODO(b/178678389): It should handle more type animation here
+        Animation a = null;
+
+        final boolean isOpening = Transitions.isOpeningType(type);
+        final int mode = change.getMode();
+        final int flags = change.getFlags();
+
+        if (mode == TRANSIT_OPEN && isOpening) {
+            if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+                // This received a transferred starting window, so don't animate
+                return null;
+            }
+
+            if (change.getTaskInfo() != null) {
+                a = mTransitionAnimation.loadDefaultAnimationAttr(
+                        R.styleable.WindowAnimation_taskOpenEnterAnimation);
+            } else {
+                a = mTransitionAnimation.loadDefaultAnimationRes((flags & FLAG_TRANSLUCENT) == 0
+                        ? R.anim.activity_open_enter : R.anim.activity_translucent_open_enter);
+            }
+        } else if (mode == TRANSIT_TO_FRONT && isOpening) {
+            if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+                // This received a transferred starting window, so don't animate
+                return null;
+            }
+
+            a = mTransitionAnimation.loadDefaultAnimationAttr(
+                    R.styleable.WindowAnimation_taskToFrontEnterAnimation);
+        } else if (mode == TRANSIT_CLOSE && !isOpening) {
+            if (change.getTaskInfo() != null) {
+                a = mTransitionAnimation.loadDefaultAnimationAttr(
+                        R.styleable.WindowAnimation_taskCloseExitAnimation);
+            } else {
+                a = mTransitionAnimation.loadDefaultAnimationRes((flags & FLAG_TRANSLUCENT) == 0
+                        ? R.anim.activity_close_exit : R.anim.activity_translucent_close_exit);
+            }
+        } else if (mode == TRANSIT_TO_BACK && !isOpening) {
+            a = mTransitionAnimation.loadDefaultAnimationAttr(
+                    R.styleable.WindowAnimation_taskToBackExitAnimation);
+        } else if (mode == TRANSIT_CHANGE) {
+            // In the absence of a specific adapter, we just want to keep everything stationary.
+            a = new AlphaAnimation(1.f, 1.f);
+            a.setDuration(TransitionAnimation.DEFAULT_APP_TRANSITION_DURATION);
+        }
+
+        if (a != null) {
+            Rect start = change.getStartAbsBounds();
+            Rect end = change.getEndAbsBounds();
+            a.restrictDuration(MAX_ANIMATION_DURATION);
+            a.initialize(end.width(), end.height(), start.width(), start.height());
+            a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
+        }
+        return a;
+    }
+
+    private void startAnimInternal(@NonNull ArrayList<Animator> animations, @NonNull Animation anim,
+            @NonNull SurfaceControl leash, @NonNull Runnable finishCallback) {
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
-        final ValueAnimator va = ValueAnimator.ofFloat(start, end);
-        va.setDuration(500);
+        final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
+        final Transformation transformation = new Transformation();
+        final float[] matrix = new float[9];
+        // Animation length is already expected to be scaled.
+        va.overrideDurationScale(1.0f);
+        va.setDuration(anim.computeDurationHint());
         va.addUpdateListener(animation -> {
-            float fraction = animation.getAnimatedFraction();
-            transaction.setAlpha(leash, start * (1.f - fraction) + end * fraction);
-            transaction.apply();
+            final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
+
+            applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix);
         });
+
         final Runnable finisher = () -> {
-            transaction.setAlpha(leash, end);
-            transaction.apply();
+            applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix);
+
             mTransactionPool.release(transaction);
             mMainExecutor.execute(() -> {
                 animations.remove(va);
                 finishCallback.run();
             });
         };
-        va.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) { }
-
+        va.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 finisher.run();
@@ -140,11 +214,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             public void onAnimationCancel(Animator animation) {
                 finisher.run();
             }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) { }
         });
         animations.add(va);
         mAnimExecutor.execute(va::start);
+    }
+
+    private static void applyTransformation(long time, SurfaceControl.Transaction t,
+            SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix) {
+        anim.getTransformation(time, transformation);
+        t.setMatrix(leash, transformation.getMatrix(), matrix);
+        t.setAlpha(leash, transformation.getAlpha());
+        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        t.apply();
     }
 }
