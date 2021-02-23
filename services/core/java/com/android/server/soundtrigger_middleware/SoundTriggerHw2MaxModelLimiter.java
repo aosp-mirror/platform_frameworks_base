@@ -25,8 +25,6 @@ import android.media.soundtrigger_middleware.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * This is a decorator around ISoundTriggerHw2, which implements enforcement of the maximum number
  * of models supported by the HAL, for HAL implementations older than V2.4 that do not support
@@ -40,7 +38,9 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
     private final int mMaxModels;
 
     // This counter is used to enforce the maximum number of loaded models.
-    private final @NonNull AtomicInteger mNumLoadedModels = new AtomicInteger();
+    private int mNumLoadedModels = 0;
+
+    private GlobalCallback mGlobalCallback;
 
     public SoundTriggerHw2MaxModelLimiter(
             ISoundTriggerHw2 delegate, int maxModels) {
@@ -65,36 +65,54 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
 
     @Override
     public void registerCallback(GlobalCallback callback) {
-        mDelegate.registerCallback(callback);
+        mGlobalCallback = callback;
+        mDelegate.registerCallback(mGlobalCallback);
     }
 
     @Override
     public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
-        tryIncrementNumLoadedModels();
-        try {
-            return mDelegate.loadSoundModel(soundModel, callback);
-        } catch (Exception e) {
-            decrementNumLoadedModels();
-            throw e;
+        synchronized (this) {
+            if (mNumLoadedModels == mMaxModels) {
+                throw new RecoverableException(Status.RESOURCE_CONTENTION);
+            }
+            int result = mDelegate.loadSoundModel(soundModel, callback);
+            ++mNumLoadedModels;
+            return result;
         }
     }
 
     @Override
     public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
             ModelCallback callback) {
-        tryIncrementNumLoadedModels();
-        try {
-            return mDelegate.loadPhraseSoundModel(soundModel, callback);
-        } catch (Exception e) {
-            decrementNumLoadedModels();
-            throw e;
+        synchronized (this) {
+            if (mNumLoadedModels == mMaxModels) {
+                throw new RecoverableException(Status.RESOURCE_CONTENTION);
+            }
+            int result = mDelegate.loadPhraseSoundModel(soundModel, callback);
+            ++mNumLoadedModels;
+            return result;
         }
     }
 
     @Override
     public void unloadSoundModel(int modelHandle) {
-        mDelegate.unloadSoundModel(modelHandle);
-        decrementNumLoadedModels();
+        boolean wasAtMaxCapacity;
+        synchronized (this) {
+            wasAtMaxCapacity = mNumLoadedModels-- == mMaxModels;
+        }
+        try {
+            mDelegate.unloadSoundModel(modelHandle);
+        } catch (Exception e) {
+            synchronized (this) {
+                ++mNumLoadedModels;
+            }
+            throw e;
+        }
+        if (wasAtMaxCapacity) {
+            // It is legal to invoke callbacks from within unloadSoundModel().
+            // See README.md for details.
+            mGlobalCallback.tryAgain();
+        }
     }
 
     @Override
@@ -145,24 +163,5 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
     @Override
     public void flushCallbacks() {
         mDelegate.flushCallbacks();
-    }
-
-    /**
-     * Attempts to increment the number of loaded models and throws a {@link
-     * RecoverableException} if the maximum number of concurrent models is exceeded (while keeping
-     * the count unchanged).
-     */
-    private void tryIncrementNumLoadedModels() {
-        if (mNumLoadedModels.incrementAndGet() > mMaxModels) {
-            mNumLoadedModels.decrementAndGet();
-            throw new RecoverableException(Status.RESOURCE_CONTENTION);
-        }
-    }
-
-    /**
-     * Decrements the number of loaded models.
-     */
-    private void decrementNumLoadedModels() {
-        mNumLoadedModels.decrementAndGet();
     }
 }

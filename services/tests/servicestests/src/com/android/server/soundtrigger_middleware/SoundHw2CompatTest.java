@@ -341,12 +341,19 @@ public class SoundHw2CompatTest {
     public void testMaxModels() throws Exception {
         assumeFalse(mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw);
 
+        // Register global callback.
+        ISoundTriggerHw2.GlobalCallback globalCallback = mock(
+                ISoundTriggerHw2.GlobalCallback.class);
+        mCanonical.registerCallback(globalCallback);
+
         ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
                 ISoundTriggerHw2.ModelCallback.class);
         final int maxModels = TestUtil.createDefaultProperties(false).maxSoundModels;
+        int[] modelHandles = new int[maxModels];
+
         // Load as many models as we're allowed.
         for (int i = 0; i < maxModels; ++i) {
-            loadGenericModel(canonicalCallback);
+            modelHandles[i] = loadGenericModel(canonicalCallback);
             verifyNoMoreInteractions(mHalDriver);
             clearInvocations(mHalDriver);
         }
@@ -360,6 +367,13 @@ public class SoundHw2CompatTest {
         } catch (RecoverableException e) {
             assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
+
+        // Unload a single model and expect a tryAgain().
+        mCanonical.unloadSoundModel(modelHandles[0]);
+        verify(mHalDriver).unloadSoundModel(modelHandles[0]);
+
+        mCanonical.flushCallbacks();
+        verify(globalCallback).tryAgain();
     }
 
     private void testLoadGenericModelBusy_2_4() throws Exception {
