@@ -17,6 +17,7 @@
 package android.net.vcn;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.net.NetworkCapabilities;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,12 +28,13 @@ import java.util.Objects;
  * VcnNetworkPolicyResult represents the Network policy result for a Network transport applying its
  * VCN policy via {@link VcnManager#applyVcnNetworkPolicy(NetworkCapabilities, LinkProperties)}.
  *
- * <p>Transports that are bringing up networks capable of acting as a VCN's underlying network
- * should query for policy state upon any capability changes (e.g. changing of TRUSTED bit), and
- * when prompted by VcnManagementService via VcnNetworkPolicyListener.
+ * <p>Bearers that are bringing up networks capable of acting as a VCN's underlying network should
+ * query for Network policy results upon any capability changes (e.g. changing of TRUSTED bit), and
+ * when prompted by VcnManagementService via {@link VcnManager.VcnNetworkPolicyListener}.
  *
  * @hide
  */
+@SystemApi
 public final class VcnNetworkPolicyResult implements Parcelable {
     private final boolean mIsTearDownRequested;
     private final NetworkCapabilities mNetworkCapabilities;
@@ -51,16 +53,19 @@ public final class VcnNetworkPolicyResult implements Parcelable {
     }
 
     /**
-     * Returns whether this Carrier VCN policy policy result requires that the underlying Network
-     * should be torn down.
+     * Returns whether this VCN policy result requires that the underlying Network should be torn
+     * down.
+     *
+     * <p>Upon querying for the current Network policy result, the bearer must check this method,
+     * and MUST tear down the corresponding Network if it returns true.
      */
     public boolean isTeardownRequested() {
         return mIsTearDownRequested;
     }
 
     /**
-     * Returns the NetworkCapabilities with Carrier VCN policy bits applied to the provided
-     * capabilities.
+     * Returns the NetworkCapabilities that the bearer should be using for the corresponding
+     * Network.
      */
     @NonNull
     public NetworkCapabilities getNetworkCapabilities() {
