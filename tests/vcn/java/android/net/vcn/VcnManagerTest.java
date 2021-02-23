@@ -207,7 +207,7 @@ public class VcnManagerTest {
         cbBinder.onGatewayConnectionError(
                 UNDERLYING_NETWORK_CAPABILITIES,
                 VcnManager.VCN_ERROR_CODE_NETWORK_ERROR,
-                "java.net.UnknownHostException",
+                UnknownHostException.class.getName(),
                 "exception_message");
         verify(mMockStatusCallback)
                 .onGatewayConnectionError(
