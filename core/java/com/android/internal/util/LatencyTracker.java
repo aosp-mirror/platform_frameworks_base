@@ -175,7 +175,7 @@ public class LatencyTracker {
             mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
             for (int action : ACTIONS_ALL) {
                 mTraceThresholdPerAction[action] =
-                    properties.getInt(getTraceTriggerNameForAction(action), -1);
+                    properties.getInt(getNameOfAction(STATSD_ACTION[action]), -1);
             }
         }
     }
