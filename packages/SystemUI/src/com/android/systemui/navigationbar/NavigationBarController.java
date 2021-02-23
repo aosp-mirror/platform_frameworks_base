@@ -25,7 +25,6 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -54,7 +53,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -116,7 +114,7 @@ public class NavigationBarController implements Callbacks,
     // Tracks config changes that will actually recreate the nav bar
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-                    | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS
+                    | ActivityInfo.CONFIG_SCREEN_LAYOUT
                     | ActivityInfo.CONFIG_UI_MODE);
 
     @Inject
@@ -171,6 +169,7 @@ public class NavigationBarController implements Callbacks,
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavBarOverlayController = navBarOverlayController;
+        mNavigationModeController.addListener(this);
     }
 
     @Override
@@ -188,17 +187,18 @@ public class NavigationBarController implements Callbacks,
 
     @Override
     public void onNavigationModeChanged(int mode) {
-        // Workaround for b/132825155, for secondary users, we currently don't receive configuration
-        // changes on overlay package change since SystemUI runs for the system user. In this case,
-        // trigger a new configuration change to ensure that the nav bar is updated in the same way.
-        int userId = ActivityManagerWrapper.getInstance().getCurrentUserId();
-        if (userId != UserHandle.USER_SYSTEM) {
-            mHandler.post(() -> {
-                for (int i = 0; i < mNavigationBars.size(); i++) {
-                    recreateNavigationBar(mNavigationBars.keyAt(i));
+        mHandler.post(() -> {
+            for (int i = 0; i < mNavigationBars.size(); i++) {
+                NavigationBar navBar = mNavigationBars.valueAt(i);
+                if (navBar == null) {
+                    continue;
                 }
-            });
-        }
+                NavigationBarView view = (NavigationBarView) mNavigationBars.get(i).getView();
+                if (view != null) {
+                    view.updateStates();
+                }
+            }
+        });
     }
 
     @Override
