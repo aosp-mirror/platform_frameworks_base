@@ -87,22 +87,7 @@ private:
     std::unique_ptr<SkiaDisplayList> mDisplayList;
     StartReorderBarrierDrawable* mCurrentBarrier;
 
-    template <typename Proc>
-    void applyLooper(const Paint* paint, Proc proc) {
-        SkPaint skp;
-        BlurDrawLooper* looper = nullptr;
-        if (paint) {
-            skp = *filterBitmap(paint);
-            looper = paint->getLooper();
-        }
-        if (looper) {
-            looper->apply(skp, [&](SkPoint offset, const SkPaint& modifiedPaint) {
-                proc(offset.fX, offset.fY, &modifiedPaint);
-            });
-        } else {
-            proc(0, 0, &skp);
-        }
-    }
+    static void FilterForImage(SkPaint&);
 
     /**
      *  A new SkiaDisplayList is created or recycled if available.
@@ -113,7 +98,7 @@ private:
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
 
-    PaintCoW&& filterBitmap(PaintCoW&& paint);
+    using INHERITED = SkiaCanvas;
 };
 
 }  // namespace skiapipeline
