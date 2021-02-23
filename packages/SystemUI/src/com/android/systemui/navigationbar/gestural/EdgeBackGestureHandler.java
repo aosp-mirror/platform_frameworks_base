@@ -93,6 +93,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
 
+    private static final int MAX_NUM_LOGGED_PREDICTIONS = 10;
+    private static final int MAX_NUM_LOGGED_GESTURES = 10;
+
     // Temporary log until b/176302696 is resolved
     static final boolean DEBUG_MISSING_GESTURE = true;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
@@ -222,8 +225,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private String mPackageName;
     private float mMLResults;
 
-    private static final int MAX_LOGGED_PREDICTIONS = 10;
+    // For debugging
     private ArrayDeque<String> mPredictionLog = new ArrayDeque<>();
+    private ArrayDeque<String> mGestureLog = new ArrayDeque<>();
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
@@ -607,7 +611,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         }
         // Check if we are within the tightest bounds beyond which
         // we would not need to run the ML model.
-        boolean withinRange = x <= mMLEnableWidth + mLeftInset
+        boolean withinRange = x < mMLEnableWidth + mLeftInset
                 || x >= (mDisplaySize.x - mMLEnableWidth - mRightInset);
         if (!withinRange) {
             int results = -1;
@@ -617,17 +621,20 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 // Denotes whether we should proceed with the gesture.
                 // Even if it is false, we may want to log it assuming
                 // it is not invalid due to exclusion.
-                withinRange = x <= mEdgeWidthLeft + mLeftInset
+                withinRange = x < mEdgeWidthLeft + mLeftInset
                         || x >= (mDisplaySize.x - mEdgeWidthRight - mRightInset);
             }
         }
 
         // For debugging purposes
-        if (mPredictionLog.size() >= MAX_LOGGED_PREDICTIONS) {
+        if (mPredictionLog.size() >= MAX_NUM_LOGGED_PREDICTIONS) {
             mPredictionLog.removeFirst();
         }
-        mPredictionLog.addLast(String.format("[%d,%d,%d,%f,%d]",
-                x, y, app, mMLResults, withinRange ? 1 : 0));
+        mPredictionLog.addLast(String.format("Prediction [%d,%d,%d,%d,%f,%d]",
+                System.currentTimeMillis(), x, y, app, mMLResults, withinRange ? 1 : 0));
+        if (DEBUG_MISSING_GESTURE) {
+            Log.d(DEBUG_MISSING_GESTURE_TAG, mPredictionLog.peekLast());
+        }
 
         // Always allow if the user is in a transient sticky immersive state
         if (mIsNavBarShownTransiently) {
@@ -689,6 +696,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private void onMotionEvent(MotionEvent ev) {
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
+            if (DEBUG_MISSING_GESTURE) {
+                Log.d(DEBUG_MISSING_GESTURE_TAG, "Start gesture: " + ev);
+            }
+
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mInputEventReceiver.setBatchingEnabled(false);
@@ -708,6 +719,19 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 mDownPoint.set(ev.getX(), ev.getY());
                 mEndPoint.set(-1, -1);
                 mThresholdCrossed = false;
+            }
+
+            // For debugging purposes
+            if (mGestureLog.size() >= MAX_NUM_LOGGED_GESTURES) {
+                mGestureLog.removeFirst();
+            }
+            mGestureLog.addLast(String.format(
+                    "Gesture [%d,alw=%B,%B, %B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
+                    System.currentTimeMillis(), mAllowGesture, mIsOnLeftEdge, mIsBackGestureAllowed,
+                    QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
+                    mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
+            if (DEBUG_MISSING_GESTURE) {
+                Log.d(DEBUG_MISSING_GESTURE_TAG, mGestureLog.peekLast());
             }
         } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {
@@ -827,18 +851,29 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     public void dump(PrintWriter pw) {
         pw.println("EdgeBackGestureHandler:");
         pw.println("  mIsEnabled=" + mIsEnabled);
+        pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mIsBackGestureAllowed=" + mIsBackGestureAllowed);
+        pw.println("  mIsGesturalModeEnabled=" + mIsGesturalModeEnabled);
+        pw.println("  mIsNavBarShownTransiently=" + mIsNavBarShownTransiently);
+        pw.println("  mGestureBlockingActivityRunning=" + mGestureBlockingActivityRunning);
         pw.println("  mAllowGesture=" + mAllowGesture);
+        pw.println("  mUseMLModel=" + mUseMLModel);
         pw.println("  mDisabledForQuickstep=" + mDisabledForQuickstep);
         pw.println("  mStartingQuickstepRotation=" + mStartingQuickstepRotation);
         pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
-        pw.println("  mIsAttached=" + mIsAttached);
+        pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
-        pw.println("  mIsNavBarShownTransiently=" + mIsNavBarShownTransiently);
-        pw.println("  mPredictionLog=" + String.join(";", mPredictionLog));
+        pw.println("  mLeftInset=" + mLeftInset);
+        pw.println("  mRightInset=" + mRightInset);
+        pw.println("  mMLEnableWidth=" + mMLEnableWidth);
+        pw.println("  mMLModelThreshold=" + mMLModelThreshold);
+        pw.println("  mTouchSlop=" + mTouchSlop);
+        pw.println("  mBottomGestureHeight=" + mBottomGestureHeight);
+        pw.println("  mPredictionLog=" + String.join("\n", mPredictionLog));
+        pw.println("  mGestureLog=" + String.join("\n", mGestureLog));
         pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
     }
 
