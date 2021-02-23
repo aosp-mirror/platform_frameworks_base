@@ -1690,7 +1690,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         pw.println("Hanging the system...");
         pw.flush();
-        mInterface.hang(new Binder(), allowRestart);
+        try {
+            mInterface.hang(getShellCallback().getShellCallbackBinder(), allowRestart);
+        } catch (NullPointerException e) {
+            pw.println("Hanging failed, since caller " + Binder.getCallingPid() +
+                    " did not provide a ShellCallback!");
+            pw.flush();
+            return 1;
+        }
         return 0;
     }
 
