@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowFramesProto.COMPAT_FRAME;
 import static com.android.server.wm.WindowFramesProto.CONTAINING_FRAME;
 import static com.android.server.wm.WindowFramesProto.DISPLAY_FRAME;
 import static com.android.server.wm.WindowFramesProto.FRAME;
@@ -177,7 +178,7 @@ public class WindowFrames {
         mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
         mContainingFrame.dumpDebug(proto, CONTAINING_FRAME);
         mFrame.dumpDebug(proto, FRAME);
-
+        mCompatFrame.dumpDebug(proto, COMPAT_FRAME);
         proto.end(token);
     }
 
