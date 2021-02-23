@@ -71,7 +71,7 @@ class PipLegacySplitScreenTest(
             }
             transitions {
                 testApp.launchViaIntent()
-                device.launchSplitScreen()
+                device.launchSplitScreen(wmHelper)
                 imeApp.launchViaIntent()
                 waitForAnimationComplete()
             }

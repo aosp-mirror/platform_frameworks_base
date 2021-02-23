@@ -100,7 +100,7 @@ class ResizeLegacySplitScreen(
                             device.pressHome()
                             testAppTop.launchViaIntent(wmHelper)
                             device.waitForIdle()
-                            device.launchSplitScreen()
+                            device.launchSplitScreen(wmHelper)
                             val snapshot =
                                 device.findObject(By.res(device.launcherPackageName, "snapshot"))
                             snapshot.click()
