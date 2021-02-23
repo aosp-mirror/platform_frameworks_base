@@ -238,8 +238,10 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * from the camera device, to produce a single high-quality output result.
      *
      * <p>Note that single capture requests currently do not support
-     * client parameters. Settings included in the request will
-     * be entirely overridden by the device-specific extension. </p>
+     * client parameters except for {@link CaptureRequest#JPEG_ORIENTATION orientation} and
+     * {@link CaptureRequest#JPEG_QUALITY quality} in case of ImageFormat.JPEG output target.
+     * The rest of the settings included in the request will be entirely overridden by
+     * the device-specific extension. </p>
      *
      * <p>The {@link CaptureRequest.Builder#addTarget} supports only one
      * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surface. {@link CaptureRequest}
