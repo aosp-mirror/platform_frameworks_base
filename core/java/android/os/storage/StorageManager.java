@@ -2124,6 +2124,52 @@ public class StorageManager {
         }
     }
 
+
+    /** @hide */
+    @IntDef(prefix = { "MOUNT_MODE_" }, value = {
+            MOUNT_MODE_EXTERNAL_NONE,
+            MOUNT_MODE_EXTERNAL_DEFAULT,
+            MOUNT_MODE_EXTERNAL_INSTALLER,
+            MOUNT_MODE_EXTERNAL_PASS_THROUGH,
+            MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE
+    })
+    /** @hide */
+    public @interface MountMode {}
+
+    /**
+     * No external storage should be mounted.
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
+    /**
+     * Default external storage should be mounted.
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_DEFAULT = IVold.REMOUNT_MODE_DEFAULT;
+    /**
+     * Mount mode for package installers which should give them access to
+     * all obb dirs in addition to their package sandboxes
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_INSTALLER = IVold.REMOUNT_MODE_INSTALLER;
+    /**
+     * The lower file system should be bind mounted directly on external storage
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_PASS_THROUGH = IVold.REMOUNT_MODE_PASS_THROUGH;
+
+    /**
+     * Use the regular scoped storage filesystem, but Android/ should be writable.
+     * Used to support the applications hosting DownloadManager and the MTP server.
+     * @hide
+     */
+    @SystemApi
+    public static final int MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE =
+            IVold.REMOUNT_MODE_ANDROID_WRITABLE;
     /**
      * Flag indicating that a disk space allocation request should operate in an
      * aggressive mode. This flag should only be rarely used in situations that
@@ -2295,6 +2341,28 @@ public class StorageManager {
                     mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the External Storage mount mode corresponding to the given uid and packageName.
+     * These mount modes specify different views and access levels for
+     * different apps on external storage.
+     *
+     * @params uid UID of the application
+     * @params packageName name of the package
+     * @return {@code MountMode} for the given uid and packageName.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
+    @SystemApi
+    @MountMode
+    public int getExternalStorageMountMode(int uid, @NonNull String packageName) {
+        try {
+            return mStorageManager.getExternalStorageMountMode(uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
