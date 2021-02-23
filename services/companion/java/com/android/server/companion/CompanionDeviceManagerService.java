@@ -31,6 +31,8 @@ import android.annotation.CheckResult;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -667,6 +669,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
+    void onDeviceConnected(String address) {
+    }
+
+    void onDeviceDisconnected(String address) {
+    }
+
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
                 + "list USER_ID\n"
@@ -711,4 +719,17 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
+
+    private class BluetoothDeviceConnectedListener
+            extends BluetoothAdapter.BluetoothConnectionCallback {
+        @Override
+        public void onDeviceConnected(BluetoothDevice device) {
+            CompanionDeviceManagerService.this.onDeviceConnected(device.getAddress());
+        }
+
+        @Override
+        public void onDeviceDisconnected(BluetoothDevice device) {
+            CompanionDeviceManagerService.this.onDeviceDisconnected(device.getAddress());
+        }
+    }
 }
