@@ -108,6 +108,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -198,6 +199,13 @@ public class HdmiControlService extends SystemService {
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason {
     }
+
+    private final Executor mServiceThreadExecutor = new Executor() {
+        @Override
+        public void execute(Runnable r) {
+            runOnServiceThread(r);
+        }
+    };
 
     // Logical address of the active source.
     @GuardedBy("mLock")
@@ -520,14 +528,14 @@ public class HdmiControlService extends SystemService {
                                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
                         setControlEnabled(enabled);
                     }
-                });
+                }, mServiceThreadExecutor);
         mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override
                     public void onChange(String setting) {
                         initializeCec(INITIATED_BY_ENABLE_CEC);
                     }
-                });
+                }, mServiceThreadExecutor);
         mHdmiCecConfig.registerChangeListener(
                 HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
                 new HdmiCecConfig.SettingChangeListener() {
@@ -537,7 +545,7 @@ public class HdmiControlService extends SystemService {
                             setCecOption(OptionKey.WAKEUP, tv().getAutoWakeup());
                         }
                     }
-                });
+                }, mServiceThreadExecutor);
     }
 
     private void bootCompleted() {
