@@ -17,12 +17,7 @@
 package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -32,7 +27,6 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -40,6 +34,7 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
@@ -52,7 +47,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
     private static final String TAG = "FaceAuthenticationClient";
 
-    private final NotificationManager mNotificationManager;
+
     private final UsageStats mUsageStats;
 
     private final int[] mBiometricPromptIgnoreList;
@@ -72,7 +67,6 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
                 lockoutTracker, isKeyguard);
-        mNotificationManager = context.getSystemService(NotificationManager.class);
         mUsageStats = usageStats;
 
         final Resources resources = getContext().getResources();
@@ -188,41 +182,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         mLastAcquire = acquireInfo;
 
         if (acquireInfo == FaceManager.FACE_ACQUIRED_RECALIBRATE) {
-            final String name =
-                    getContext().getString(R.string.face_recalibrate_notification_name);
-            final String title =
-                    getContext().getString(R.string.face_recalibrate_notification_title);
-            final String content =
-                    getContext().getString(R.string.face_recalibrate_notification_content);
-
-            final Intent intent = new Intent("android.settings.FACE_SETTINGS");
-            intent.setPackage("com.android.settings");
-
-            final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(getContext(),
-                    0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE /* flags */,
-                    null /* options */, UserHandle.CURRENT);
-
-            final String channelName = "FaceEnrollNotificationChannel";
-
-            NotificationChannel channel = new NotificationChannel(channelName, name,
-                    NotificationManager.IMPORTANCE_HIGH);
-            Notification notification = new Notification.Builder(getContext(), channelName)
-                    .setSmallIcon(R.drawable.ic_lock)
-                    .setContentTitle(title)
-                    .setContentText(content)
-                    .setSubText(name)
-                    .setOnlyAlertOnce(true)
-                    .setLocalOnly(true)
-                    .setAutoCancel(true)
-                    .setCategory(Notification.CATEGORY_SYSTEM)
-                    .setContentIntent(pendingIntent)
-                    .setVisibility(Notification.VISIBILITY_SECRET)
-                    .build();
-
-            mNotificationManager.createNotificationChannel(channel);
-            mNotificationManager.notifyAsUser(Face10.NOTIFICATION_TAG,
-                    Face10.NOTIFICATION_ID, notification,
-                    UserHandle.CURRENT);
+            ReEnrollNotificationUtils.showReEnrollmentNotification(getContext());
         }
 
         final boolean shouldSend = shouldSend(acquireInfo, vendorCode);
