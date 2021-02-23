@@ -28,6 +28,8 @@ import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.net.module.util.CollectionUtils.toIntArray;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -50,13 +52,12 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.CollectionUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -204,7 +205,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         if (app.requestedPermissions == null || app.requestedPermissionsFlags == null) {
             return false;
         }
-        final int index = ArrayUtils.indexOf(app.requestedPermissions, permission);
+        final int index = CollectionUtils.indexOf(app.requestedPermissions, permission);
         if (index < 0 || index >= app.requestedPermissionsFlags.length) return false;
         return (app.requestedPermissionsFlags[index] & REQUESTED_PERMISSION_GRANTED) != 0;
     }
@@ -244,15 +245,6 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         // hasRestrictedNetworkPermission. If uid is in the mApps list that means uid has one of
         // permissions at least.
         return mApps.containsKey(uid);
-    }
-
-    private int[] toIntArray(Collection<Integer> list) {
-        int[] array = new int[list.size()];
-        int i = 0;
-        for (Integer item : list) {
-            array[i++] = item;
-        }
-        return array;
     }
 
     private void update(Set<UserHandle> users, Map<Integer, Boolean> apps, boolean add) {
@@ -662,23 +654,23 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             if (allPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(
                         INetd.PERMISSION_INTERNET | INetd.PERMISSION_UPDATE_DEVICE_STATS,
-                        ArrayUtils.convertToIntArray(allPermissionAppIds));
+                        toIntArray(allPermissionAppIds));
             }
             if (internetPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_INTERNET,
-                        ArrayUtils.convertToIntArray(internetPermissionAppIds));
+                        toIntArray(internetPermissionAppIds));
             }
             if (updateStatsPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_UPDATE_DEVICE_STATS,
-                        ArrayUtils.convertToIntArray(updateStatsPermissionAppIds));
+                        toIntArray(updateStatsPermissionAppIds));
             }
             if (noPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_NONE,
-                        ArrayUtils.convertToIntArray(noPermissionAppIds));
+                        toIntArray(noPermissionAppIds));
             }
             if (uninstalledAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_UNINSTALLED,
-                        ArrayUtils.convertToIntArray(uninstalledAppIds));
+                        toIntArray(uninstalledAppIds));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Pass appId list of special permission failed." + e);
