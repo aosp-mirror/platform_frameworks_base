@@ -21,6 +21,7 @@ import android.content.Context;
 import android.view.View;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.FeatureFlags;
 
 import java.util.function.Consumer;
 
@@ -31,14 +32,20 @@ import javax.inject.Inject;
 public class NavigationBarOverlayController {
 
     protected final Context mContext;
+    protected final FeatureFlags mFeatureFlags;
 
     @Inject
-    public NavigationBarOverlayController(Context context) {
+    public NavigationBarOverlayController(Context context, FeatureFlags featureFlags) {
         mContext = context;
+        mFeatureFlags = featureFlags;
     }
 
     public Context getContext() {
         return mContext;
+    }
+
+    public boolean isNavigationBarOverlayEnabled() {
+        return mFeatureFlags.isNavigationBarOverlayEnabled();
     }
 
     /**
