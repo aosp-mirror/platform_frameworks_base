@@ -19,6 +19,7 @@ package android.media;
 import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -1133,6 +1134,7 @@ public final class MediaCodecInfo {
          * in the ranges returned by {@link #getInputChannelCountRanges}
          *
          */
+        @IntRange(from = 1, to = 255)
         public int getMaxInputChannelCount() {
             int overall_max = 0;
             for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
@@ -1151,6 +1153,7 @@ public final class MediaCodecInfo {
          * This returns the lowest channel count in the ranges returned by
          * {@link #getInputChannelCountRanges}.
          */
+        @IntRange(from = 1, to = 255)
         public int getMinInputChannelCount() {
             int overall_min = MAX_INPUT_CHANNEL_COUNT;
             for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
