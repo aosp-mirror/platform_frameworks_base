@@ -133,5 +133,8 @@ cc_test {
     ],
     static_libs: [
         "libgmock",
-    ]
+    ],
+    test_options: {
+        unit_test: true,
+    },
 }
