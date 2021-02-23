@@ -55124,6 +55124,7 @@ package android.widget {
     method public void setChronometerCountDown(@IdRes int, boolean);
     method public void setColor(@IdRes int, @NonNull String, @ColorRes int);
     method public void setColorInt(@IdRes int, @NonNull String, @ColorInt int, @ColorInt int);
+    method public void setColorStateList(@IdRes int, @NonNull String, @Nullable android.content.res.ColorStateList);
     method public void setColorStateList(@IdRes int, @NonNull String, @Nullable android.content.res.ColorStateList, @Nullable android.content.res.ColorStateList);
     method public void setColorStateList(@IdRes int, @NonNull String, @ColorRes int);
     method public void setCompoundButtonChecked(@IdRes int, boolean);
@@ -55166,6 +55167,12 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
+    method public void setViewLayoutHeight(@IdRes int, float, int);
+    method public void setViewLayoutHeightDimen(@IdRes int, @DimenRes int);
+    method public void setViewLayoutMargin(@IdRes int, int, float, int);
+    method public void setViewLayoutMarginDimen(@IdRes int, int, @DimenRes int);
+    method public void setViewLayoutWidth(@IdRes int, float, int);
+    method public void setViewLayoutWidthDimen(@IdRes int, @DimenRes int);
     method public void setViewOutlinePreferredRadius(@IdRes int, float, int);
     method public void setViewOutlinePreferredRadiusDimen(@IdRes int, @DimenRes int);
     method public void setViewPadding(@IdRes int, @Px int, @Px int, @Px int, @Px int);
@@ -55176,6 +55183,12 @@ package android.widget {
     field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews> CREATOR;
     field public static final String EXTRA_CHECKED = "android.widget.extra.CHECKED";
     field public static final String EXTRA_SHARED_ELEMENT_BOUNDS = "android.widget.extra.SHARED_ELEMENT_BOUNDS";
+    field public static final int MARGIN_BOTTOM = 3; // 0x3
+    field public static final int MARGIN_END = 5; // 0x5
+    field public static final int MARGIN_LEFT = 0; // 0x0
+    field public static final int MARGIN_RIGHT = 2; // 0x2
+    field public static final int MARGIN_START = 4; // 0x4
+    field public static final int MARGIN_TOP = 1; // 0x1
   }
 
   public static class RemoteViews.ActionException extends java.lang.RuntimeException {
