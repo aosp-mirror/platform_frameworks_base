@@ -16,12 +16,16 @@
 
 package com.android.server;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.INetd.IF_STATE_DOWN;
+import static android.net.INetd.IF_STATE_UP;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -36,6 +40,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.InetAddresses;
+import android.net.InterfaceConfigurationParcel;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
 import android.net.IpSecManager;
@@ -48,7 +53,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.os.Binder;
-import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.system.Os;
 import android.test.mock.MockContext;
@@ -148,10 +152,17 @@ public class IpSecServiceParameterizedTest {
             }
             throw new SecurityException("Unavailable permission requested");
         }
+
+        @Override
+        public int checkCallingOrSelfPermission(String permission) {
+            if (android.Manifest.permission.NETWORK_STACK.equals(permission)) {
+                return PERMISSION_GRANTED;
+            }
+            throw new UnsupportedOperationException();
+        }
     };
 
     INetd mMockNetd;
-    INetworkManagementService mNetworkManager;
     PackageManager mMockPkgMgr;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
@@ -181,10 +192,9 @@ public class IpSecServiceParameterizedTest {
     @Before
     public void setUp() throws Exception {
         mMockNetd = mock(INetd.class);
-        mNetworkManager = mock(INetworkManagementService.class);
         mMockPkgMgr = mock(PackageManager.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
-        mIpSecService = new IpSecService(mMockContext, mNetworkManager, mMockIpSecSrvConfig);
+        mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
 
         // Injecting mock netd
         when(mMockIpSecSrvConfig.getNetdInstance()).thenReturn(mMockNetd);
@@ -644,7 +654,10 @@ public class IpSecServiceParameterizedTest {
     }
 
     private IpSecTunnelInterfaceResponse createAndValidateTunnel(
-            String localAddr, String remoteAddr, String pkgName) {
+            String localAddr, String remoteAddr, String pkgName) throws Exception {
+        final InterfaceConfigurationParcel config = new InterfaceConfigurationParcel();
+        config.flags = new String[] {IF_STATE_DOWN};
+        when(mMockNetd.interfaceGetCfg(anyString())).thenReturn(config);
         IpSecTunnelInterfaceResponse createTunnelResp =
                 mIpSecService.createTunnelInterface(
                         mSourceAddr, mDestinationAddr, fakeNetwork, new Binder(), pkgName);
@@ -674,7 +687,8 @@ public class IpSecServiceParameterizedTest {
                         anyInt(),
                         anyInt(),
                         anyInt());
-        verify(mNetworkManager).setInterfaceUp(createTunnelResp.interfaceName);
+        verify(mMockNetd).interfaceSetCfg(argThat(
+                config -> Arrays.asList(config.flags).contains(IF_STATE_UP)));
     }
 
     @Test
