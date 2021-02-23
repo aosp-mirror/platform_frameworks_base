@@ -4147,6 +4147,16 @@ public class CarrierConfigManager {
     public static final String KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL =
             "network_temp_not_metered_supported_bool";
 
+    /**
+     * Indicates the allowed APN types that can be used for LTE initial attach. The order of APN
+     * types in the configuration is the order of APN types that will be used for initial attach.
+     * Empty list indicates that no APN types are allowed for initial attach.
+     *
+     * @hide
+     */
+    public static final String KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY =
+            "allowed_initial_attach_apn_types_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -4698,6 +4708,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
+        sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
+                new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
     }
 
     /**
