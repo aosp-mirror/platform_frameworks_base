@@ -16,11 +16,17 @@
 
 package com.android.server.wm.flicker.close
 
+import android.app.Instrumentation
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
@@ -35,12 +41,12 @@ import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -51,86 +57,119 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseAppBackButtonTest(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
+class CloseAppBackButtonTest(private val testSpec: FlickerTestParameter) {
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val testApp = SimpleAppHelper(instrumentation)
+
+    @FlickerBuilderProvider
+    fun buildFlicker(): FlickerBuilder {
+        return FlickerBuilder(instrumentation).apply {
+            withTestName { testSpec.name }
+            repeat { testSpec.config.repetitions }
+            setup {
+                test {
+                    device.wakeUpAndGoToHomeScreen()
+                }
+                eachRun {
+                    this.setRotation(testSpec.config.startRotation)
+                    testApp.launchViaIntent(wmHelper)
+                }
+            }
+            transitions {
+                device.pressBack()
+                wmHelper.waitForHomeActivityVisible()
+            }
+            teardown {
+                eachRun {
+                    this.setRotation(Surface.ROTATION_0)
+                }
+                test {
+                    testApp.exit()
+                }
+            }
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun launcherReplacesAppWindowAsTopWindow() =
+        testSpec.launcherReplacesAppWindowAsTopWindow(testApp)
+
+    @Presubmit
+    @Test
+    fun wallpaperWindowBecomesVisible() = testSpec.wallpaperWindowBecomesVisible()
+
+    @Presubmit
+    @Test
+    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
+        Surface.ROTATION_0)
+
+    @Presubmit
+    @Test
+    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun wallpaperLayerReplacesAppLayer() = testSpec.wallpaperLayerReplacesAppLayer(testApp)
+
+    @Presubmit
+    @Test
+    fun navBarLayerRotatesAndScales() {
+        Assume.assumeFalse(testSpec.isRotated)
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    }
+
+    @FlakyTest
+    @Test
+    fun navBarLayerRotatesAndScales_Flaky() {
+        Assume.assumeTrue(testSpec.isRotated)
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales() {
+        Assume.assumeFalse(testSpec.isRotated)
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    }
+
+    @FlakyTest
+    @Test
+    fun statusBarLayerRotatesScales_Flaky() {
+        Assume.assumeTrue(testSpec.isRotated)
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    }
+
+    @FlakyTest(bugId = 173684672)
+    @Test
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest(bugId = 173684672)
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<Array<Any>> {
-            val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val testApp = SimpleAppHelper(instrumentation)
-            return FlickerTestRunnerFactory.getInstance()
-                .buildTest(instrumentation, repetitions = 5) { configuration ->
-                    withTestName { buildTestTag(configuration) }
-                    repeat { configuration.repetitions }
-                    setup {
-                        test {
-                            device.wakeUpAndGoToHomeScreen()
-                        }
-                        eachRun {
-                            this.setRotation(configuration.startRotation)
-                            testApp.launchViaIntent(wmHelper)
-                        }
-                    }
-                    transitions {
-                        device.pressBack()
-                        wmHelper.waitForHomeActivityVisible()
-                    }
-                    teardown {
-                        eachRun {
-                            this.setRotation(Surface.ROTATION_0)
-                        }
-                        test {
-                            testApp.exit()
-                        }
-                    }
-                    assertions {
-                        val isRotated = configuration.startRotation.isRotated()
-
-                        presubmit {
-                            windowManagerTrace {
-                                navBarWindowIsAlwaysVisible()
-                                statusBarWindowIsAlwaysVisible()
-                                launcherReplacesAppWindowAsTopWindow(testApp)
-                                wallpaperWindowBecomesVisible()
-                            }
-
-                            layersTrace {
-                                noUncoveredRegions(configuration.startRotation,
-                                    Surface.ROTATION_0)
-                                navBarLayerIsAlwaysVisible()
-                                statusBarLayerIsAlwaysVisible()
-                                wallpaperLayerReplacesAppLayer(testApp)
-
-                                if (!isRotated) {
-                                    navBarLayerRotatesAndScales(configuration.startRotation,
-                                        Surface.ROTATION_0)
-                                    statusBarLayerRotatesScales(configuration.startRotation,
-                                        Surface.ROTATION_0)
-                                }
-                            }
-                        }
-
-                        flaky {
-                            windowManagerTrace {
-                                visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173684672)
-                            }
-
-                            layersTrace {
-                                visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173684672)
-
-                                if (isRotated) {
-                                    navBarLayerRotatesAndScales(configuration.startRotation,
-                                        Surface.ROTATION_0)
-                                    statusBarLayerRotatesScales(configuration.startRotation,
-                                        Surface.ROTATION_0)
-                                }
-                            }
-                        }
-                    }
-                }
+        fun getParams(): List<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(repetitions = 5)
         }
     }
 }

@@ -16,11 +16,15 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.os.Bundle
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -32,6 +36,7 @@ import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -42,73 +47,89 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipToAppTest(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : PipTransitionBase(InstrumentationRegistry.getInstrumentation()) {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): List<Array<Any>> {
-            val testSpec = getTransition(eachRun = true) { configuration ->
-                setup {
-                    eachRun {
-                        this.setRotation(configuration.startRotation)
-                    }
-                }
-                teardown {
-                    eachRun {
-                        this.setRotation(Surface.ROTATION_0)
-                    }
-                }
-                transitions {
-                    pipApp.expandPipWindowToApp(wmHelper)
-                }
-                assertions {
-                    presubmit {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-
-                            all("appReplacesPipWindow") {
-                                this.showsAppWindow(PIP_WINDOW_TITLE)
-                                    .then()
-                                    .showsAppWindowOnTop(pipApp.launcherName)
-                            }
-                        }
-
-                        layersTrace {
-                            statusBarLayerIsAlwaysVisible()
-                            statusBarLayerRotatesScales(configuration.startRotation,
-                                Surface.ROTATION_0)
-
-                            all("appReplacesPipLayer") {
-                                this.showsLayer(PIP_WINDOW_TITLE)
-                                    .then()
-                                    .showsLayer(pipApp.launcherName)
-                            }
-                        }
-                    }
-
-                    flaky {
-                        layersTrace {
-                            navBarLayerIsAlwaysVisible(bugId = 140855415)
-                            noUncoveredRegions(configuration.startRotation, Surface.ROTATION_0)
-                            navBarLayerRotatesAndScales(configuration.startRotation,
-                                Surface.ROTATION_0, bugId = 140855415)
-                        }
-
-                        eventLog {
-                            focusChanges(
-                                "NexusLauncherActivity", pipApp.launcherName,
-                                "NexusLauncherActivity", bugId = 151179149)
-                        }
-                    }
+class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = buildTransition(eachRun = true) { configuration ->
+            setup {
+                eachRun {
+                    this.setRotation(configuration.startRotation)
                 }
             }
+            teardown {
+                eachRun {
+                    this.setRotation(Surface.ROTATION_0)
+                }
+            }
+            transitions {
+                pipApp.expandPipWindowToApp(wmHelper)
+            }
+        }
 
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
-                testSpec, supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+    @FlakyTest(bugId = 140855415)
+    @Test
+    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun appReplacesPipWindow() {
+        testSpec.assertWm {
+            this.showsAppWindow(PIP_WINDOW_TITLE)
+                .then()
+                .showsAppWindowOnTop(pipApp.launcherName)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales() =
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
+
+    @Presubmit
+    @Test
+    fun appReplacesPipLayer() {
+        testSpec.assertLayers {
+            this.showsLayer(PIP_WINDOW_TITLE)
+                .then()
+                .showsLayer(pipApp.launcherName)
+        }
+    }
+
+    @FlakyTest
+    @Test
+    fun noUncoveredRegions() =
+        testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    fun navBarLayerRotatesAndScales() =
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
+
+    @FlakyTest(bugId = 151179149)
+    @Test
+    fun focusChanges() = testSpec.focusChanges("NexusLauncherActivity",
+        pipApp.launcherName, "NexusLauncherActivity")
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): List<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
+                    repetitions = 5)
         }
     }
 }
