@@ -2699,6 +2699,10 @@ public class SubscriptionManager {
      * Checks whether the app with the given context is authorized to manage the given subscription
      * according to its metadata.
      *
+     * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
+     * true). To check for permissions for non-embedded subscription as well,
+     * {@see android.telephony.TelephonyManager#hasCarrierPrivileges}.
+     *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
      */
@@ -2710,6 +2714,10 @@ public class SubscriptionManager {
      * Checks whether the given app is authorized to manage the given subscription. An app can only
      * be authorized if it is included in the {@link android.telephony.UiccAccessRule} of the
      * {@link android.telephony.SubscriptionInfo} with the access status.
+     *
+     * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded} returns
+     * true). To check for permissions for non-embedded subscription as well,
+     * {@see android.telephony.TelephonyManager#hasCarrierPrivileges}.
      *
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
