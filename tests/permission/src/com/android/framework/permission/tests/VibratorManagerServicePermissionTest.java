@@ -16,69 +16,135 @@
 
 package com.android.framework.permission.tests;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
+import static junit.framework.Assert.fail;
+
+import android.Manifest;
 import android.content.Context;
 import android.os.Binder;
 import android.os.CombinedVibrationEffect;
-import android.os.IBinder;
 import android.os.IVibratorManagerService;
+import android.os.IVibratorStateListener;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 
 /**
  * Verify that Hardware apis cannot be called without required permissions.
  */
-@SmallTest
-public class VibratorManagerServicePermissionTest extends TestCase {
+@Presubmit
+@RunWith(JUnit4.class)
+public class VibratorManagerServicePermissionTest {
+
+    private static final String PACKAGE_NAME = "com.android.framework.permission.tests";
+    private static final CombinedVibrationEffect EFFECT =
+            CombinedVibrationEffect.createSynced(
+                    VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+    private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder()
+            .setUsage(VibrationAttributes.USAGE_ALARM)
+            .build();
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     private IVibratorManagerService mVibratorService;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         mVibratorService = IVibratorManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VIBRATOR_MANAGER_SERVICE));
     }
 
-    /**
-     * Test that calling {@link android.os.IVibratorManagerService#vibrate(int, String,
-     * CombinedVibrationEffect, VibrationAttributes, String, IBinder)} requires permissions.
-     * <p>Tests permission:
-     * {@link android.Manifest.permission#VIBRATE}
-     */
-    public void testVibrate() throws RemoteException {
-        try {
-            CombinedVibrationEffect effect =
-                    CombinedVibrationEffect.createSynced(
-                            VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
-            VibrationAttributes attrs = new VibrationAttributes.Builder()
-                    .setUsage(VibrationAttributes.USAGE_ALARM)
-                    .build();
-            mVibratorService.vibrate(Process.myUid(), null, effect, attrs,
-                    "testVibrate", new Binder());
-            fail("vibrate did not throw SecurityException as expected");
-        } catch (SecurityException e) {
-            // expected
-        }
+    @After
+    public void cleanUp() {
+        getInstrumentation().getUiAutomation().dropShellPermissionIdentity();
     }
 
-    /**
-     * Test that calling {@link android.os.IVibratorManagerService#cancelVibrate(IBinder)} requires
-     * permissions.
-     * <p>Tests permission:
-     * {@link android.Manifest.permission#VIBRATE}
-     */
-    public void testCancelVibrate() throws RemoteException {
-        try {
-            mVibratorService.cancelVibrate(new Binder());
-            fail("cancelVibrate did not throw SecurityException as expected");
-        } catch (SecurityException e) {
-            // expected
-        }
+    @Test
+    public void testIsVibratingFails() throws RemoteException {
+        expectSecurityException("ACCESS_VIBRATOR_STATE");
+        mVibratorService.isVibrating(1);
+    }
+
+    @Test
+    public void testRegisterVibratorStateListenerFails() throws RemoteException {
+        expectSecurityException("ACCESS_VIBRATOR_STATE");
+        IVibratorStateListener listener = new IVibratorStateListener.Stub() {
+            @Override
+            public void onVibrating(boolean vibrating) {
+                fail("Listener callback was not expected.");
+            }
+        };
+        mVibratorService.registerVibratorStateListener(1, listener);
+    }
+
+    @Test
+    public void testUnregisterVibratorStateListenerFails() throws RemoteException {
+        expectSecurityException("ACCESS_VIBRATOR_STATE");
+        mVibratorService.unregisterVibratorStateListener(1, null);
+    }
+
+    @Test
+    public void testSetAlwaysOnEffectFails() throws RemoteException {
+        expectSecurityException("VIBRATE_ALWAYS_ON");
+        mVibratorService.setAlwaysOnEffect(Process.myUid(), PACKAGE_NAME, 1, EFFECT, ATTRS);
+    }
+
+    @Test
+    public void testVibrateWithoutPermissionFails() throws RemoteException {
+        expectSecurityException("VIBRATE");
+        mVibratorService.vibrate(Process.myUid(), PACKAGE_NAME, EFFECT, ATTRS, "testVibrate",
+                new Binder());
+    }
+
+    @Test
+    public void testVibrateWithVibratePermissionAndSameProcessUidIsAllowed()
+            throws RemoteException {
+        getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                Manifest.permission.VIBRATE);
+        mVibratorService.vibrate(Process.myUid(), PACKAGE_NAME, EFFECT, ATTRS, "testVibrate",
+                new Binder());
+    }
+
+    @Test
+    public void testVibrateWithVibratePermissionAndDifferentUidsFails() throws RemoteException {
+        expectSecurityException("UPDATE_APP_OPS_STATS");
+        getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                Manifest.permission.VIBRATE);
+        mVibratorService.vibrate(Process.SYSTEM_UID, "android", EFFECT, ATTRS, "testVibrate",
+                new Binder());
+    }
+
+    @Test
+    public void testVibrateWithAllPermissionsAndDifferentUidsIsAllowed() throws RemoteException {
+        getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                Manifest.permission.VIBRATE,
+                Manifest.permission.UPDATE_APP_OPS_STATS);
+        mVibratorService.vibrate(Process.SYSTEM_UID, "android", EFFECT, ATTRS, "testVibrate",
+                new Binder());
+    }
+
+    @Test
+    public void testCancelVibrateFails() throws RemoteException {
+        expectSecurityException("VIBRATE");
+        mVibratorService.cancelVibrate(new Binder());
+    }
+
+    private void expectSecurityException(String expectedPermission) {
+        exceptionRule.expect(SecurityException.class);
+        exceptionRule.expectMessage("permission." + expectedPermission);
     }
 }

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.timedetector.ITimeDetectorService;
 import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.content.Context;
 import android.os.RemoteException;
@@ -45,6 +46,7 @@ public final class TimeManager {
 
     private final Object mLock = new Object();
     private final ITimeZoneDetectorService mITimeZoneDetectorService;
+    private final ITimeDetectorService mITimeDetectorService;
 
     @GuardedBy("mLock")
     private ITimeZoneDetectorListener mTimeZoneDetectorReceiver;
@@ -62,6 +64,8 @@ public final class TimeManager {
         // internal refactoring.
         mITimeZoneDetectorService = ITimeZoneDetectorService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TIME_ZONE_DETECTOR_SERVICE));
+        mITimeDetectorService = ITimeDetectorService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.TIME_DETECTOR_SERVICE));
     }
 
     /**
@@ -212,6 +216,25 @@ public final class TimeManager {
                     mTimeZoneDetectorReceiver = null;
                 }
             }
+        }
+    }
+
+    /**
+     * Suggests the current time from an external time source. For example, a form factor-specific
+     * HAL. This time <em>may</em> be used to set the device system clock, depending on the device
+     * configuration and user settings. This method call is processed asynchronously.
+     * See {@link ExternalTimeSuggestion} for more details.
+     * {@hide}
+     */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    public void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion) {
+        if (DEBUG) {
+            Log.d(TAG, "suggestExternalTime called: " + timeSuggestion);
+        }
+        try {
+            mITimeDetectorService.suggestExternalTime(timeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

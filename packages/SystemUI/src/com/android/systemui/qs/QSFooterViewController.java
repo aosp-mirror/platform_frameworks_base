@@ -95,7 +95,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                     mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                         if (isTunerEnabled()) {
                             mTunerService.showResetRequest(
-                                    mUserTracker.getUserHandle(),
                                     () -> {
                                         // Relaunch settings so that the tuner disappears.
                                         startSettingsActivity();
@@ -103,7 +102,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
                         } else {
                             Toast.makeText(getContext(), R.string.tuner_toast,
                                     Toast.LENGTH_LONG).show();
-                            mTunerService.setTunerEnabled(mUserTracker.getUserHandle(), true);
+                            mTunerService.setTunerEnabled(true);
                         }
                         startSettingsActivity();
 
@@ -238,6 +237,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     }
 
     private boolean isTunerEnabled() {
-        return mTunerService.isTunerEnabled(mUserTracker.getUserHandle());
+        return mTunerService.isTunerEnabled();
     }
 }

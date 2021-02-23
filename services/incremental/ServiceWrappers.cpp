@@ -134,10 +134,11 @@ private:
     } mLooper;
 };
 
-class RealIncFs : public IncFsWrapper {
+class RealIncFs final : public IncFsWrapper {
 public:
     RealIncFs() = default;
     ~RealIncFs() final = default;
+    Features features() const final { return incfs::features(); }
     void listExistingMounts(const ExistingMountCallback& cb) const final {
         for (auto mount : incfs::defaultMountRegistry().copyMounts()) {
             auto binds = mount.binds(); // span() doesn't like rvalue containers, needs to save it.
@@ -152,6 +153,10 @@ public:
     ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                        incfs::NewFileParams params) const final {
         return incfs::makeFile(control, path, mode, id, params);
+    }
+    ErrorCode makeMappedFile(const Control& control, std::string_view path, int mode,
+                             incfs::NewMappedFileParams params) const final {
+        return incfs::makeMappedFile(control, path, mode, params);
     }
     ErrorCode makeDir(const Control& control, std::string_view path, int mode) const final {
         return incfs::makeDir(control, path, mode);
@@ -282,11 +287,10 @@ private:
             auto it = mJobs.begin();
             // Always acquire begin(). We can't use it after unlock as mTimedJobs can change.
             for (; it != mJobs.end() && it->when <= now; it = mJobs.begin()) {
-                auto job = std::move(it->what);
-                mJobs.erase(it);
+                auto jobNode = mJobs.extract(it);
 
                 lock.unlock();
-                job();
+                jobNode.value().what();
                 lock.lock();
             }
             nextJobTs = it != mJobs.end() ? it->when : kInfinityTs;
@@ -308,20 +312,20 @@ private:
     std::thread mThread;
 };
 
-class RealFsWrapper : public FsWrapper {
+class RealFsWrapper final : public FsWrapper {
 public:
     RealFsWrapper() = default;
     ~RealFsWrapper() = default;
 
-    std::vector<std::string> listFilesRecursive(std::string_view directoryPath) const final {
-        std::vector<std::string> files;
+    void listFilesRecursive(std::string_view directoryPath, FileCallback onFile) const final {
         for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
             if (!entry.is_regular_file()) {
                 continue;
             }
-            files.push_back(entry.path().c_str());
+            if (!onFile(entry.path().native())) {
+                break;
+            }
         }
-        return files;
     }
 };
 

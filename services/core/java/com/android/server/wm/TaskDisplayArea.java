@@ -974,9 +974,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         onRootTaskOrderChanged(rootTask);
     }
 
-    void resetPreferredTopFocusableRootTaskIfBelow(Task task) {
+    /** Reset the mPreferredTopFocusableRootTask if it is or below the given task. */
+    void resetPreferredTopFocusableRootTaskIfNeeded(Task task) {
         if (mPreferredTopFocusableRootTask != null
-                && mPreferredTopFocusableRootTask.compareTo(task) < 0) {
+                && mPreferredTopFocusableRootTask.compareTo(task) <= 0) {
             mPreferredTopFocusableRootTask = null;
         }
     }

@@ -5373,11 +5373,11 @@ class Task extends WindowContainer<WindowContainer> {
         }
         final boolean wasHidden = isForceHidden();
         mForceHiddenFlags = newFlags;
-        if (wasHidden && isFocusableAndVisible()) {
+        if (wasHidden != isForceHidden() && isTopActivityFocusable()) {
             // The change in force-hidden state will change visibility without triggering a root
             // task order change, so we should reset the preferred top focusable root task to ensure
             // it's not used if a new activity is started from this task.
-            getDisplayArea().resetPreferredTopFocusableRootTaskIfBelow(this);
+            getDisplayArea().resetPreferredTopFocusableRootTaskIfNeeded(this);
         }
         return true;
     }

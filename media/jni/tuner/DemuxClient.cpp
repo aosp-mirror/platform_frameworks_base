@@ -216,7 +216,7 @@ Result DemuxClient::disconnectCiCam() {
 Result DemuxClient::close() {
     if (mTunerDemux != NULL) {
         Status s = mTunerDemux->close();
-        mDemux = NULL;
+        mTunerDemux = NULL;
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 

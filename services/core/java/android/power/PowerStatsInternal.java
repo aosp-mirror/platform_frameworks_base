@@ -50,7 +50,8 @@ public abstract class PowerStatsInternal {
      *                          requested.
      *
      * @return A Future containing a list of {@link EnergyConsumerResult} objects containing energy
-     *         consumer results for all listed {@link EnergyConsumerId}.
+     *         consumer results for all listed {@link EnergyConsumerId}. null if
+     *         {@link EnergyConsumer} not supported
      */
     @NonNull
     public abstract CompletableFuture<EnergyConsumerResult[]> getEnergyConsumedAsync(
@@ -59,8 +60,10 @@ public abstract class PowerStatsInternal {
     /**
      * Returns the power entity info for all available {@link PowerEntity}
      *
-     * @return List of available {@link PowerEntity}
+     * @return List of available {@link PowerEntity} or null if {@link PowerEntity} not
+     * supported
      */
+    @Nullable
     public abstract PowerEntity[] getPowerEntityInfo();
 
     /**
@@ -71,7 +74,8 @@ public abstract class PowerStatsInternal {
      *                          requested.
      *
      * @return A Future containing a list of {@link StateResidencyResult} objects containing state
-     *         residency results for all listed {@link PowerEntity.id}.
+     *         residency results for all listed {@link PowerEntity.id}. null if {@link PowerEntity}
+     *         not supported
      */
     @NonNull
     public abstract CompletableFuture<StateResidencyResult[]> getStateResidencyAsync(
@@ -80,8 +84,9 @@ public abstract class PowerStatsInternal {
     /**
      * Returns the channel info for all available {@link Channel}
      *
-     * @return List of available {@link Channel}
+     * @return List of available {@link Channel} or null if {@link Channel} not supported
      */
+    @Nullable
     public abstract Channel[] getEnergyMeterInfo();
 
     /**
@@ -91,7 +96,8 @@ public abstract class PowerStatsInternal {
      * @param channelIds Array of {@link Channel.id} for accumulated energy is being requested.
      *
      * @return A Future containing a list of {@link EnergyMeasurement} objects containing
-     *         accumulated energy measurements for all listed {@link Channel.id}.
+     *         accumulated energy measurements for all listed {@link Channel.id}. null if
+     *         {@link Channel} not supported
      */
     @NonNull
     public abstract CompletableFuture<EnergyMeasurement[]> readEnergyMeterAsync(

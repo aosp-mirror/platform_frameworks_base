@@ -437,7 +437,11 @@ public abstract class VibrationEffect implements Parcelable {
      * @hide
      */
     protected static int scale(int amplitude, float scaleFactor) {
-        return (int) (scale((float) amplitude / MAX_AMPLITUDE, scaleFactor) * MAX_AMPLITUDE);
+        if (amplitude == 0) {
+            return 0;
+        }
+        int scaled = (int) (scale((float) amplitude / MAX_AMPLITUDE, scaleFactor) * MAX_AMPLITUDE);
+        return MathUtils.constrain(scaled, 1, MAX_AMPLITUDE);
     }
 
     /**
@@ -473,7 +477,7 @@ public abstract class VibrationEffect implements Parcelable {
         float a = (expMaxX + 1f) / (expMaxX - 1f);
         float fx = (expX - 1f) / (expX + 1f);
 
-        return a * fx;
+        return MathUtils.constrain(a * fx, 0f, 1f);
     }
 
     /** @hide */
@@ -536,9 +540,10 @@ public abstract class VibrationEffect implements Parcelable {
         /** @hide */
         @Override
         public OneShot resolve(int defaultAmplitude) {
-            if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
+            if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude <= 0) {
                 throw new IllegalArgumentException(
-                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+                        "amplitude must be between 1 and 255 inclusive (amplitude="
+                        + defaultAmplitude + ")");
             }
             if (mAmplitude == DEFAULT_AMPLITUDE) {
                 return new OneShot(mDuration, defaultAmplitude);

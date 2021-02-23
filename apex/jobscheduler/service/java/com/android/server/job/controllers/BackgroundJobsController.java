@@ -17,6 +17,7 @@
 package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -59,6 +60,8 @@ public final class BackgroundJobsController extends StateController {
 
     private final AppStateTrackerImpl mAppStateTracker;
 
+    private final UpdateJobFunctor mUpdateJobFunctor = new UpdateJobFunctor();
+
     public BackgroundJobsController(JobSchedulerService service) {
         super(service);
 
@@ -69,7 +72,7 @@ public final class BackgroundJobsController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
-        updateSingleJobRestrictionLocked(jobStatus, UNKNOWN);
+        updateSingleJobRestrictionLocked(jobStatus, sElapsedRealtimeClock.millis(), UNKNOWN);
     }
 
     @Override
@@ -79,7 +82,7 @@ public final class BackgroundJobsController extends StateController {
 
     @Override
     public void evaluateStateLocked(JobStatus jobStatus) {
-        updateSingleJobRestrictionLocked(jobStatus, UNKNOWN);
+        updateSingleJobRestrictionLocked(jobStatus, sElapsedRealtimeClock.millis(), UNKNOWN);
     }
 
     @Override
@@ -163,33 +166,34 @@ public final class BackgroundJobsController extends StateController {
     }
 
     private void updateJobRestrictionsLocked(int filterUid, int newActiveState) {
-        final UpdateJobFunctor updateTrackedJobs = new UpdateJobFunctor(newActiveState);
+        mUpdateJobFunctor.prepare(newActiveState);
 
         final long start = DEBUG ? SystemClock.elapsedRealtimeNanos() : 0;
 
         final JobStore store = mService.getJobStore();
         if (filterUid > 0) {
-            store.forEachJobForSourceUid(filterUid, updateTrackedJobs);
+            store.forEachJobForSourceUid(filterUid, mUpdateJobFunctor);
         } else {
-            store.forEachJob(updateTrackedJobs);
+            store.forEachJob(mUpdateJobFunctor);
         }
 
         final long time = DEBUG ? (SystemClock.elapsedRealtimeNanos() - start) : 0;
         if (DEBUG) {
             Slog.d(TAG, String.format(
                     "Job status updated: %d/%d checked/total jobs, %d us",
-                    updateTrackedJobs.mCheckedCount,
-                    updateTrackedJobs.mTotalCount,
+                    mUpdateJobFunctor.mCheckedCount,
+                    mUpdateJobFunctor.mTotalCount,
                     (time / 1000)
-                    ));
+            ));
         }
 
-        if (updateTrackedJobs.mChanged) {
+        if (mUpdateJobFunctor.mChanged) {
             mStateChangedListener.onControllerStateChanged();
         }
     }
 
-    boolean updateSingleJobRestrictionLocked(JobStatus jobStatus, int activeState) {
+    boolean updateSingleJobRestrictionLocked(JobStatus jobStatus, final long nowElapsed,
+            int activeState) {
         final int uid = jobStatus.getSourceUid();
         final String packageName = jobStatus.getSourcePackageName();
 
@@ -205,26 +209,32 @@ public final class BackgroundJobsController extends StateController {
         if (isActive && jobStatus.getStandbyBucket() == NEVER_INDEX) {
             jobStatus.maybeLogBucketMismatch();
         }
-        boolean didChange = jobStatus.setBackgroundNotRestrictedConstraintSatisfied(canRun);
+        boolean didChange =
+                jobStatus.setBackgroundNotRestrictedConstraintSatisfied(nowElapsed, canRun);
         didChange |= jobStatus.setUidActive(isActive);
         return didChange;
     }
 
     private final class UpdateJobFunctor implements Consumer<JobStatus> {
-        final int activeState;
+        int mActiveState;
         boolean mChanged = false;
         int mTotalCount = 0;
         int mCheckedCount = 0;
+        long mUpdateTimeElapsed = 0;
 
-        public UpdateJobFunctor(int newActiveState) {
-            activeState = newActiveState;
+        void prepare(int newActiveState) {
+            mActiveState = newActiveState;
+            mUpdateTimeElapsed = sElapsedRealtimeClock.millis();
+            mChanged = false;
+            mTotalCount = 0;
+            mCheckedCount = 0;
         }
 
         @Override
         public void accept(JobStatus jobStatus) {
             mTotalCount++;
             mCheckedCount++;
-            if (updateSingleJobRestrictionLocked(jobStatus, activeState)) {
+            if (updateSingleJobRestrictionLocked(jobStatus, mUpdateTimeElapsed, mActiveState)) {
                 mChanged = true;
             }
         }

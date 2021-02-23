@@ -61,9 +61,11 @@ public final class StorageController extends StateController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasStorageNotLowConstraint()) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
             mTrackedTasks.add(taskStatus);
             taskStatus.setTrackingController(JobStatus.TRACKING_STORAGE);
-            taskStatus.setStorageNotLowConstraintSatisfied(mStorageTracker.isStorageNotLow());
+            taskStatus.setStorageNotLowConstraintSatisfied(
+                    nowElapsed, mStorageTracker.isStorageNotLow());
         }
     }
 
@@ -76,12 +78,13 @@ public final class StorageController extends StateController {
     }
 
     private void maybeReportNewStorageState() {
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         final boolean storageNotLow = mStorageTracker.isStorageNotLow();
         boolean reportChange = false;
         synchronized (mLock) {
             for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
                 final JobStatus ts = mTrackedTasks.valueAt(i);
-                reportChange |= ts.setStorageNotLowConstraintSatisfied(storageNotLow);
+                reportChange |= ts.setStorageNotLowConstraintSatisfied(nowElapsed, storageNotLow);
             }
         }
         if (storageNotLow) {

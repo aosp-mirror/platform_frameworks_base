@@ -322,6 +322,7 @@ private:
 
 class MockIncFs : public IncFsWrapper {
 public:
+    MOCK_CONST_METHOD0(features, Features());
     MOCK_CONST_METHOD1(listExistingMounts, void(const ExistingMountCallback& cb));
     MOCK_CONST_METHOD1(openMount, Control(std::string_view path));
     MOCK_CONST_METHOD4(createControl,
@@ -330,6 +331,9 @@ public:
     MOCK_CONST_METHOD5(makeFile,
                        ErrorCode(const Control& control, std::string_view path, int mode, FileId id,
                                  NewFileParams params));
+    MOCK_CONST_METHOD4(makeMappedFile,
+                       ErrorCode(const Control& control, std::string_view path, int mode,
+                                 NewMappedFileParams params));
     MOCK_CONST_METHOD3(makeDir, ErrorCode(const Control& control, std::string_view path, int mode));
     MOCK_CONST_METHOD3(makeDirs,
                        ErrorCode(const Control& control, std::string_view path, int mode));
@@ -539,16 +543,16 @@ public:
 
 class MockFsWrapper : public FsWrapper {
 public:
-    MOCK_CONST_METHOD1(listFilesRecursive, std::vector<std::string>(std::string_view));
-    void hasNoFile() {
-        ON_CALL(*this, listFilesRecursive(_)).WillByDefault(Return(std::vector<std::string>()));
-    }
+    MOCK_CONST_METHOD2(listFilesRecursive, void(std::string_view, FileCallback));
+    void hasNoFile() { ON_CALL(*this, listFilesRecursive(_, _)).WillByDefault(Return()); }
     void hasFiles() {
-        ON_CALL(*this, listFilesRecursive(_))
+        ON_CALL(*this, listFilesRecursive(_, _))
                 .WillByDefault(Invoke(this, &MockFsWrapper::fakeFiles));
     }
-    std::vector<std::string> fakeFiles(std::string_view directoryPath) {
-        return {"base.apk", "split.apk", "lib/a.so"};
+    void fakeFiles(std::string_view directoryPath, FileCallback onFile) {
+        for (auto file : {"base.apk", "split.apk", "lib/a.so"}) {
+            if (!onFile(file)) break;
+        }
     }
 };
 

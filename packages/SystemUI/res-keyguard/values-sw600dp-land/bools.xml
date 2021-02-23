@@ -14,8 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="#FFFFFFFF" />
-    <corners android:radius="@dimen/toast_bg_radius" />
-</shape>
+
+<resources>
+    <bool name="can_use_one_handed_bouncer">true</bool>
+</resources>

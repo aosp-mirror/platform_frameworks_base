@@ -130,7 +130,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         // insets state with the global one.
         final InsetsState insetsState =
                 win.getDisplayContent().getInsetsStateController().getRawInsetsState();
-        win.mAboveInsetsState = insetsState;
+        win.mAboveInsetsState.set(insetsState);
     }
 
     public void setRotation(int rotation, boolean includingWindows) {

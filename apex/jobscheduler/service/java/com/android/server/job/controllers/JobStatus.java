@@ -73,6 +73,8 @@ public final class JobStatus {
     private static final String TAG = "JobScheduler.JobStatus";
     static final boolean DEBUG = JobSchedulerService.DEBUG;
 
+    private static final int NUM_CONSTRAINT_CHANGE_HISTORY = 10;
+
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
@@ -349,6 +351,10 @@ public final class JobStatus {
      * 'first' is the earliest/delay time, and 'second' is the latest/deadline time.
      */
     private Pair<Long, Long> mPersistedUtcTimes;
+
+    private int mConstraintChangeHistoryIndex = 0;
+    private final long[] mConstraintUpdatedTimesElapsed = new long[NUM_CONSTRAINT_CHANGE_HISTORY];
+    private final int[] mConstraintStatusHistory = new int[NUM_CONSTRAINT_CHANGE_HISTORY];
 
     /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
@@ -1090,28 +1096,28 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setChargingConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_CHARGING, state);
+    boolean setChargingConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CHARGING, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setBatteryNotLowConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_BATTERY_NOT_LOW, state);
+    boolean setBatteryNotLowConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_BATTERY_NOT_LOW, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setStorageNotLowConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_STORAGE_NOT_LOW, state);
+    boolean setStorageNotLowConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_STORAGE_NOT_LOW, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setTimingDelayConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_TIMING_DELAY, state);
+    boolean setTimingDelayConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_TIMING_DELAY, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setDeadlineConstraintSatisfied(boolean state) {
-        if (setConstraintSatisfied(CONSTRAINT_DEADLINE, state)) {
+    boolean setDeadlineConstraintSatisfied(final long nowElapsed, boolean state) {
+        if (setConstraintSatisfied(CONSTRAINT_DEADLINE, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyDeadlineSatisfied = !job.isPeriodic() && hasDeadlineConstraint() && state;
             return true;
@@ -1120,24 +1126,25 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setIdleConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_IDLE, state);
+    boolean setIdleConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_IDLE, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setConnectivityConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
+    boolean setConnectivityConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setContentTriggerConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, state);
+    boolean setContentTriggerConstraintSatisfied(final long nowElapsed, boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, nowElapsed, state);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setDeviceNotDozingConstraintSatisfied(boolean state, boolean whitelisted) {
+    boolean setDeviceNotDozingConstraintSatisfied(final long nowElapsed,
+            boolean state, boolean whitelisted) {
         dozeWhitelisted = whitelisted;
-        if (setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state)) {
+        if (setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyNotDozing = state || canRunInDoze();
             return true;
@@ -1146,8 +1153,8 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setBackgroundNotRestrictedConstraintSatisfied(boolean state) {
-        if (setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, state)) {
+    boolean setBackgroundNotRestrictedConstraintSatisfied(final long nowElapsed, boolean state) {
+        if (setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyNotRestrictedInBg = state;
             return true;
@@ -1156,8 +1163,8 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setQuotaConstraintSatisfied(boolean state) {
-        if (setConstraintSatisfied(CONSTRAINT_WITHIN_QUOTA, state)) {
+    boolean setQuotaConstraintSatisfied(final long nowElapsed, boolean state) {
+        if (setConstraintSatisfied(CONSTRAINT_WITHIN_QUOTA, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyWithinQuota = state;
             return true;
@@ -1166,8 +1173,8 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setExpeditedJobQuotaConstraintSatisfied(boolean state) {
-        if (setConstraintSatisfied(CONSTRAINT_WITHIN_EXPEDITED_QUOTA, state)) {
+    boolean setExpeditedJobQuotaConstraintSatisfied(final long nowElapsed, boolean state) {
+        if (setConstraintSatisfied(CONSTRAINT_WITHIN_EXPEDITED_QUOTA, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyWithinExpeditedQuota = state;
             // DeviceIdleJobsController currently only tracks jobs with the WILL_BE_FOREGROUND flag.
@@ -1190,7 +1197,7 @@ public final class JobStatus {
     }
 
     /** @return true if the constraint was changed, false otherwise. */
-    boolean setConstraintSatisfied(int constraint, boolean state) {
+    boolean setConstraintSatisfied(int constraint, final long nowElapsed, boolean state) {
         boolean old = (satisfiedConstraints&constraint) != 0;
         if (old == state) {
             return false;
@@ -1212,6 +1219,12 @@ public final class JobStatus {
                             : FrameworkStatsLog
                                     .SCHEDULED_JOB_CONSTRAINT_CHANGED__STATE__UNSATISFIED);
         }
+
+        mConstraintUpdatedTimesElapsed[mConstraintChangeHistoryIndex] = nowElapsed;
+        mConstraintStatusHistory[mConstraintChangeHistoryIndex] = satisfiedConstraints;
+        mConstraintChangeHistoryIndex =
+                (mConstraintChangeHistoryIndex + 1) % NUM_CONSTRAINT_CHANGE_HISTORY;
+
         return true;
     }
 
@@ -1700,7 +1713,7 @@ public final class JobStatus {
     }
 
     // Dumpsys infrastructure
-    public void dump(IndentingPrintWriter pw,  boolean full, long elapsedRealtimeMillis) {
+    public void dump(IndentingPrintWriter pw,  boolean full, long nowElapsed) {
         UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);
 
@@ -1830,6 +1843,22 @@ public final class JobStatus {
             dumpConstraints(pw,
                     ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA) & ~satisfiedConstraints));
             pw.println();
+
+            pw.println("Constraint history:");
+            pw.increaseIndent();
+            for (int h = 0; h < NUM_CONSTRAINT_CHANGE_HISTORY; ++h) {
+                final int idx = (h + mConstraintChangeHistoryIndex) % NUM_CONSTRAINT_CHANGE_HISTORY;
+                if (mConstraintUpdatedTimesElapsed[idx] == 0) {
+                    continue;
+                }
+                TimeUtils.formatDuration(mConstraintUpdatedTimesElapsed[idx], nowElapsed, pw);
+                // dumpConstraints prepends with a space, so no need to add a space after the =
+                pw.print(" =");
+                dumpConstraints(pw, mConstraintStatusHistory[idx]);
+                pw.println();
+            }
+            pw.decreaseIndent();
+
             if (dozeWhitelisted) {
                 pw.println("Doze whitelisted: true");
             }
@@ -1910,26 +1939,25 @@ public final class JobStatus {
         pw.increaseIndent();
         if (whenStandbyDeferred != 0) {
             pw.print("Deferred since: ");
-            TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);
+            TimeUtils.formatDuration(whenStandbyDeferred, nowElapsed, pw);
             pw.println();
         }
         if (mFirstForceBatchedTimeElapsed != 0) {
             pw.print("Time since first force batch attempt: ");
-            TimeUtils.formatDuration(mFirstForceBatchedTimeElapsed, elapsedRealtimeMillis, pw);
+            TimeUtils.formatDuration(mFirstForceBatchedTimeElapsed, nowElapsed, pw);
             pw.println();
         }
         pw.decreaseIndent();
 
         pw.print("Enqueue time: ");
-        TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
+        TimeUtils.formatDuration(enqueueTime, nowElapsed, pw);
         pw.println();
         pw.print("Run time: earliest=");
-        formatRunTime(pw, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, elapsedRealtimeMillis);
+        formatRunTime(pw, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, nowElapsed);
         pw.print(", latest=");
-        formatRunTime(pw, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, elapsedRealtimeMillis);
+        formatRunTime(pw, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, nowElapsed);
         pw.print(", original latest=");
-        formatRunTime(pw, mOriginalLatestRunTimeElapsedMillis,
-                NO_LATEST_RUNTIME, elapsedRealtimeMillis);
+        formatRunTime(pw, mOriginalLatestRunTimeElapsedMillis, NO_LATEST_RUNTIME, nowElapsed);
         pw.println();
         if (numFailures != 0) {
             pw.print("Num failures: "); pw.println(numFailures);

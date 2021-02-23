@@ -2111,7 +2111,8 @@ public final class ActiveServices {
         private final AppOpsManager.OnOpNotedListener mOpNotedCallback =
                 new AppOpsManager.OnOpNotedListener() {
                     @Override
-                    public void onOpNoted(int op, int uid, String pkgName, int flags, int result) {
+                    public void onOpNoted(int op, int uid, String pkgName,
+                            String attributionTag, int flags, int result) {
                         incrementOpCountIfNeeded(op, uid, result);
                     }
         };
@@ -2119,7 +2120,8 @@ public final class ActiveServices {
         private final AppOpsManager.OnOpStartedListener mOpStartedCallback =
                 new AppOpsManager.OnOpStartedListener() {
                     @Override
-                    public void onOpStarted(int op, int uid, String pkgName, int flags,
+                    public void onOpStarted(int op, int uid, String pkgName,
+                            String attributionTag, int flags,
                             int result) {
                         incrementOpCountIfNeeded(op, uid, result);
                     }

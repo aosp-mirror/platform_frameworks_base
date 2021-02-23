@@ -22,16 +22,16 @@ namespace android {
 namespace uirenderer {
 namespace test {
 
-const DisplayInfo& getDisplayInfo() {
-    static DisplayInfo info = [] {
-        DisplayInfo info;
+const ui::StaticDisplayInfo& getDisplayInfo() {
+    static ui::StaticDisplayInfo info = [] {
+        ui::StaticDisplayInfo info;
 #if HWUI_NULL_GPU
         info.density = 2.f;
 #else
         const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
         LOG_ALWAYS_FATAL_IF(!token, "%s: No internal display", __FUNCTION__);
 
-        const status_t status = SurfaceComposerClient::getDisplayInfo(token, &info);
+        const status_t status = SurfaceComposerClient::getStaticDisplayInfo(token, &info);
         LOG_ALWAYS_FATAL_IF(status, "%s: Failed to get display info", __FUNCTION__);
 #endif
         return info;

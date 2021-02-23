@@ -19,13 +19,13 @@ package com.android.wm.shell.sizecompatui;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
+import android.widget.ImageButton;
 
 import androidx.test.filters.SmallTest;
 
@@ -71,45 +71,25 @@ public class SizeCompatRestartButtonTest extends ShellTestCase {
         mButton.inject(mLayout);
 
         spyOn(mLayout);
-        spyOn(mButton);
-        doNothing().when(mButton).showHint();
     }
 
     @Test
     public void testOnClick() {
         doNothing().when(mLayout).onRestartButtonClicked();
 
-        mButton.onClick(mButton);
+        final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
+        button.performClick();
 
         verify(mLayout).onRestartButtonClicked();
     }
 
     @Test
     public void testOnLongClick() {
-        verify(mButton, never()).showHint();
+        doNothing().when(mLayout).onRestartButtonLongClicked();
 
-        mButton.onLongClick(mButton);
+        final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
+        button.performLongClick();
 
-        verify(mButton).showHint();
-    }
-
-    @Test
-    public void testOnAttachedToWindow_showHint() {
-        mLayout.mShouldShowHint = false;
-        mButton.onAttachedToWindow();
-
-        verify(mButton, never()).showHint();
-
-        mLayout.mShouldShowHint = true;
-        mButton.onAttachedToWindow();
-
-        verify(mButton).showHint();
-    }
-
-    @Test
-    public void testRemove() {
-        mButton.remove();
-
-        verify(mButton).dismissHint();
+        verify(mLayout).onRestartButtonLongClicked();
     }
 }
