@@ -186,7 +186,8 @@ public abstract class Vibrator {
     /**
      * Return the ID of this vibrator.
      *
-     * @return The id of the vibrator controlled by this service.
+     * @return A non-negative integer representing the id of the vibrator controlled by this
+     * service, or -1 this service is not attached to any physical vibrator.
      */
     public int getId() {
         return -1;
