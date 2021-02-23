@@ -83,7 +83,7 @@ class ReOpenImeWindowTest(
                         }
                     }
                     transitions {
-                        device.reopenAppFromOverview()
+                        device.reopenAppFromOverview(wmHelper)
                         wmHelper.waitImeWindowShown()
                     }
                     teardown {

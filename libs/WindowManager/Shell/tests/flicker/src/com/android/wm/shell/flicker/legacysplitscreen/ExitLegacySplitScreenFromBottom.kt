@@ -60,8 +60,18 @@ class ExitLegacySplitScreenFromBottom(
                     buildTestTag("testExitLegacySplitScreenFromBottom", configuration)
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
+                setup {
+                    eachRun {
+                        splitScreenApp.launchViaIntent(wmHelper)
+                        device.launchSplitScreen(wmHelper)
+                    }
+                }
+                teardown {
+                    eachRun {
+                        splitScreenApp.exit(wmHelper)
+                    }
+                }
                 transitions {
-                    device.launchSplitScreen()
                     device.exitSplitScreenFromBottom()
                 }
                 assertions {

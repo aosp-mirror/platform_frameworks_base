@@ -64,7 +64,7 @@ class OpenAppToLegacySplitScreen(
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
                 transitions {
-                    device.launchSplitScreen()
+                    device.launchSplitScreen(wmHelper)
                     wmHelper.waitForAppTransitionIdle()
                 }
                 assertions {

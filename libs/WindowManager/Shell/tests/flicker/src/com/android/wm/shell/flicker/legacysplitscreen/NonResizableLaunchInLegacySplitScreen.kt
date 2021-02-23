@@ -60,9 +60,13 @@ class NonResizableLaunchInLegacySplitScreen(
                     buildTestTag("testNonResizableLaunchInLegacySplitScreen", configuration)
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
+                setup {
+                    eachRun {
+                        splitScreenApp.launchViaIntent(wmHelper)
+                        device.launchSplitScreen(wmHelper)
+                    }
+                }
                 transitions {
-                    splitScreenApp.launchViaIntent(wmHelper)
-                    device.launchSplitScreen()
                     nonResizeableApp.launchViaIntent(wmHelper)
                     wmHelper.waitForAppTransitionIdle()
                 }

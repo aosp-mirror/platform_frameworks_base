@@ -62,7 +62,7 @@ class EnterSplitScreenDockActivity(
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
                 transitions {
-                    device.launchSplitScreen()
+                    device.launchSplitScreen(wmHelper)
                 }
                 assertions {
                     layersTrace {

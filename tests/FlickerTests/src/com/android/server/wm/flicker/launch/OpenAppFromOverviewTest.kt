@@ -81,7 +81,7 @@ class OpenAppFromOverviewTest(
                         }
                     }
                     transitions {
-                        device.reopenAppFromOverview()
+                        device.reopenAppFromOverview(wmHelper)
                         wmHelper.waitForFullScreenApp(testApp.component)
                     }
                     teardown {
