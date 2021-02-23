@@ -43,7 +43,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +58,7 @@ import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnConfigTest;
+import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.net.wifi.WifiInfo;
 import android.os.IBinder;
@@ -783,7 +783,7 @@ public class VcnManagementServiceTest {
                 true /* hasPermissionsforSubGroup */,
                 true /* hasLocationPermission */);
 
-        verify(mMockStatusCallback, times(1)).onEnteredSafeMode();
+        verify(mMockStatusCallback).onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
     }
 
     @Test
@@ -795,7 +795,8 @@ public class VcnManagementServiceTest {
                 false /* hasPermissionsforSubGroup */,
                 true /* hasLocationPermission */);
 
-        verify(mMockStatusCallback, never()).onEnteredSafeMode();
+        verify(mMockStatusCallback, never())
+                .onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
     }
 
     @Test
@@ -807,7 +808,8 @@ public class VcnManagementServiceTest {
                 true /* hasPermissionsforSubGroup */,
                 false /* hasLocationPermission */);
 
-        verify(mMockStatusCallback, never()).onEnteredSafeMode();
+        verify(mMockStatusCallback, never())
+                .onVcnStatusChanged(VcnManager.VCN_STATUS_CODE_SAFE_MODE);
     }
 
     @Test
