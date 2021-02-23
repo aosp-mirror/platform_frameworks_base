@@ -149,7 +149,7 @@ public class Tuner implements AutoCloseable  {
     /**
      * Invalid 64-bit filter ID.
      */
-    public static final long INVALID_FILTER_ID_64BIT =
+    public static final long INVALID_FILTER_ID_LONG =
             android.hardware.tv.tuner.V1_1.Constants.Constant64Bit.INVALID_FILTER_ID_64BIT;
     /**
      * Invalid frequency that is used as the default frontend frequency setting.
