@@ -115,7 +115,8 @@ public class SystemUIFactory {
                     .setShellCommandHandler(mWMComponent.getShellCommandHandler())
                     .setAppPairs(mWMComponent.getAppPairs())
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
-                    .setTransitions(mWMComponent.getTransitions());
+                    .setTransitions(mWMComponent.getTransitions())
+                    .setStartingSurface(mWMComponent.getStartingSurface());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
@@ -129,7 +130,8 @@ public class SystemUIFactory {
                     .setShellCommandHandler(Optional.ofNullable(null))
                     .setAppPairs(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
-                    .setTransitions(Transitions.createEmptyForTesting());
+                    .setTransitions(Transitions.createEmptyForTesting())
+                    .setStartingSurface(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (initializeComponents) {
