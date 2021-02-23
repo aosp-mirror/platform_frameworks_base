@@ -113,9 +113,10 @@ void DeviceCallback::onDeviceGetReport(uint32_t requestId, uint8_t reportId) {
     checkAndClearException(env, "onDeviceGetReport");
 }
 
-void DeviceCallback::onDeviceOutput(uint8_t rType, const std::vector<uint8_t>& data) {
+void DeviceCallback::onDeviceOutput(uint8_t eventId, uint8_t rType,
+                                    const std::vector<uint8_t>& data) {
     JNIEnv* env = getJNIEnv();
-    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceOutput, rType,
+    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceOutput, eventId, rType,
                         toJbyteArray(env, data).get());
     checkAndClearException(env, "onDeviceOutput");
 }
@@ -261,6 +262,7 @@ int Device::handleEvents(int events) {
                 ALOGD("Received SET_REPORT: id=%" PRIu32 " rnum=%" PRIu8 " data=%s", set_report.id,
                       set_report.rnum, toString(data).c_str());
             }
+            mDeviceCallback->onDeviceOutput(UHID_SET_REPORT, set_report.rtype, data);
             break;
         }
         case UHID_OUTPUT: {
@@ -269,7 +271,7 @@ int Device::handleEvents(int events) {
             if (DEBUG_OUTPUT) {
                 ALOGD("UHID_OUTPUT rtype=%" PRIu8 " data=%s", output.rtype, toString(data).c_str());
             }
-            mDeviceCallback->onDeviceOutput(output.rtype, data);
+            mDeviceCallback->onDeviceOutput(UHID_OUTPUT, output.rtype, data);
             break;
         }
         default: {
@@ -365,7 +367,7 @@ int register_com_android_commands_hid_Device(JNIEnv* env) {
     uhid::gDeviceCallbackClassInfo.onDeviceGetReport =
             env->GetMethodID(clazz, "onDeviceGetReport", "(II)V");
     uhid::gDeviceCallbackClassInfo.onDeviceOutput =
-            env->GetMethodID(clazz, "onDeviceOutput", "(B[B)V");
+            env->GetMethodID(clazz, "onDeviceOutput", "(BB[B)V");
     uhid::gDeviceCallbackClassInfo.onDeviceError =
             env->GetMethodID(clazz, "onDeviceError", "()V");
     if (uhid::gDeviceCallbackClassInfo.onDeviceOpen == NULL ||

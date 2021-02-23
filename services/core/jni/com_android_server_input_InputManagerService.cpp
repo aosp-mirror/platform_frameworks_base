@@ -158,6 +158,20 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID constructor;
+    jfieldID lightTypeSingle;
+    jfieldID lightTypePlayerId;
+    jfieldID lightTypeRgb;
+} gLightClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID constructor;
+    jmethodID add;
+} gArrayListClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID constructor;
     jmethodID keyAt;
     jmethodID valueAt;
     jmethodID size;
@@ -1923,6 +1937,79 @@ static jintArray nativeGetVibratorIds(JNIEnv* env, jclass clazz, jlong ptr, jint
     return vibIdArray;
 }
 
+static jobject nativeGetLights(JNIEnv* env, jclass clazz, jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    jobject jLights = env->NewObject(gArrayListClassInfo.clazz, gArrayListClassInfo.constructor);
+
+    std::vector<int> lightIds = im->getInputManager()->getReader()->getLightIds(deviceId);
+
+    for (size_t i = 0; i < lightIds.size(); i++) {
+        const InputDeviceLightInfo* lightInfo =
+                im->getInputManager()->getReader()->getLightInfo(deviceId, lightIds[i]);
+        if (lightInfo == nullptr) {
+            ALOGW("Failed to get input device %d light info for id %d", deviceId, lightIds[i]);
+            continue;
+        }
+
+        jint jTypeId = 0;
+        if (lightInfo->type == InputDeviceLightType::SINGLE) {
+            jTypeId =
+                    env->GetStaticIntField(gLightClassInfo.clazz, gLightClassInfo.lightTypeSingle);
+        } else if (lightInfo->type == InputDeviceLightType::PLAYER_ID) {
+            jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
+                                             gLightClassInfo.lightTypePlayerId);
+        } else if (lightInfo->type == InputDeviceLightType::RGB ||
+                   lightInfo->type == InputDeviceLightType::MULTI_COLOR) {
+            jTypeId = env->GetStaticIntField(gLightClassInfo.clazz, gLightClassInfo.lightTypeRgb);
+        } else {
+            ALOGW("Unknown light type %d", lightInfo->type);
+            continue;
+        }
+        ScopedLocalRef<jobject>
+                lightObj(env,
+                         env->NewObject(gLightClassInfo.clazz, gLightClassInfo.constructor,
+                                        (jint)lightInfo->id, (jint)lightInfo->ordinal, jTypeId,
+                                        env->NewStringUTF(lightInfo->name.c_str())));
+        // Add light object to list
+        env->CallBooleanMethod(jLights, gArrayListClassInfo.add, lightObj.get());
+    }
+
+    return jLights;
+}
+
+static jint nativeGetLightPlayerId(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                   jint lightId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    std::optional<int32_t> ret =
+            im->getInputManager()->getReader()->getLightPlayerId(deviceId, lightId);
+
+    return static_cast<jint>(ret.value_or(0));
+}
+
+static jint nativeGetLightColor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                jint lightId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    std::optional<int32_t> ret =
+            im->getInputManager()->getReader()->getLightColor(deviceId, lightId);
+    return static_cast<jint>(ret.value_or(0));
+}
+
+static void nativeSetLightPlayerId(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                   jint lightId, jint playerId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getReader()->setLightPlayerId(deviceId, lightId, playerId);
+}
+
+static void nativeSetLightColor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                jint lightId, jint color) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getReader()->setLightColor(deviceId, lightId, color);
+}
+
 static jint nativeGetBatteryCapacity(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
@@ -2192,6 +2279,11 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeCancelVibrate", "(JII)V", (void*)nativeCancelVibrate},
         {"nativeIsVibrating", "(JI)Z", (void*)nativeIsVibrating},
         {"nativeGetVibratorIds", "(JI)[I", (void*)nativeGetVibratorIds},
+        {"nativeGetLights", "(JI)Ljava/util/List;", (void*)nativeGetLights},
+        {"nativeGetLightPlayerId", "(JII)I", (void*)nativeGetLightPlayerId},
+        {"nativeGetLightColor", "(JII)I", (void*)nativeGetLightColor},
+        {"nativeSetLightPlayerId", "(JIII)V", (void*)nativeSetLightPlayerId},
+        {"nativeSetLightColor", "(JIII)V", (void*)nativeSetLightColor},
         {"nativeGetBatteryCapacity", "(JI)I", (void*)nativeGetBatteryCapacity},
         {"nativeGetBatteryStatus", "(JI)I", (void*)nativeGetBatteryStatus},
         {"nativeReloadKeyboardLayouts", "(J)V", (void*)nativeReloadKeyboardLayouts},
@@ -2385,6 +2477,27 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gTouchCalibrationClassInfo.getAffineTransform, gTouchCalibrationClassInfo.clazz,
             "getAffineTransform", "()[F");
+
+    // Light
+    FIND_CLASS(gLightClassInfo.clazz, "android/hardware/lights/Light");
+    gLightClassInfo.clazz = jclass(env->NewGlobalRef(gLightClassInfo.clazz));
+    GET_METHOD_ID(gLightClassInfo.constructor, gLightClassInfo.clazz, "<init>",
+                  "(IIILjava/lang/String;)V");
+
+    gLightClassInfo.clazz = jclass(env->NewGlobalRef(gLightClassInfo.clazz));
+    gLightClassInfo.lightTypeSingle =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_INPUT_SINGLE", "I");
+    gLightClassInfo.lightTypePlayerId =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_INPUT_PLAYER_ID", "I");
+    gLightClassInfo.lightTypeRgb =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_INPUT_RGB", "I");
+
+    // ArrayList
+    FIND_CLASS(gArrayListClassInfo.clazz, "java/util/ArrayList");
+    gArrayListClassInfo.clazz = jclass(env->NewGlobalRef(gArrayListClassInfo.clazz));
+    GET_METHOD_ID(gArrayListClassInfo.constructor, gArrayListClassInfo.clazz, "<init>", "()V");
+    GET_METHOD_ID(gArrayListClassInfo.add, gArrayListClassInfo.clazz, "add",
+                  "(Ljava/lang/Object;)Z");
 
     // SparseArray
     FIND_CLASS(gSparseArrayClassInfo.clazz, "android/util/SparseArray");

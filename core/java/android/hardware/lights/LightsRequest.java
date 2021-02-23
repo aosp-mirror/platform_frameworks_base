@@ -17,17 +17,17 @@
 package android.hardware.lights;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 /**
  * Encapsulates a request to modify the state of multiple lights.
  *
- * @hide
  */
-@SystemApi
 public final class LightsRequest {
 
     /** Visible to {@link LightsManager.Session}. */
@@ -50,6 +50,30 @@ public final class LightsRequest {
     }
 
     /**
+     * Get a list of Light as ids.  The ids will returned in same order as the lights passed
+     * in Builder.
+     *
+     * @return List of light ids
+     */
+    public @NonNull List<Integer> getLights() {
+        List<Integer> lightList = new ArrayList<Integer>(mLightIds.length);
+        for (int i = 0; i < mLightIds.length; i++) {
+            lightList.add(mLightIds[i]);
+        }
+        return lightList;
+    }
+
+    /**
+     * Get a list of LightState.  The states will be returned in same order as the light states
+     * passed in Builder.
+     *
+     * @return List of light states
+     */
+    public @NonNull List<LightState> getLightStates() {
+        return Arrays.asList(mLightStates);
+    }
+
+    /**
      * Builder for creating device light change requests.
      */
     public static final class Builder {
@@ -62,7 +86,7 @@ public final class LightsRequest {
          * @param light the light to modify
          * @param state the desired color and intensity of the light
          */
-        public @NonNull Builder setLight(@NonNull Light light, @NonNull LightState state) {
+        public @NonNull Builder addLight(@NonNull Light light, @NonNull LightState state) {
             Preconditions.checkNotNull(light);
             Preconditions.checkNotNull(state);
             mChanges.put(light.getId(), state);
