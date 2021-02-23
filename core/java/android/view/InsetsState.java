@@ -156,7 +156,7 @@ public class InsetsState implements Parcelable {
     static final int ISIDE_FLOATING = 4;
     static final int ISIDE_UNKNOWN = 5;
 
-    private InsetsSource[] mSources = new InsetsSource[SIZE];
+    private final InsetsSource[] mSources = new InsetsSource[SIZE];
 
     /**
      * The frame of the display these sources are relative to.
@@ -804,7 +804,7 @@ public class InsetsState implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         mDisplayFrame.writeToParcel(dest, flags);
         mDisplayCutout.writeToParcel(dest, flags);
-        dest.writeParcelableArray(mSources, 0);
+        dest.writeTypedArray(mSources, 0 /* parcelableFlags */);
         dest.writeTypedObject(mRoundedCorners, flags);
     }
 
@@ -820,9 +820,9 @@ public class InsetsState implements Parcelable {
     };
 
     public void readFromParcel(Parcel in) {
-        mDisplayFrame.set(Rect.CREATOR.createFromParcel(in));
-        mDisplayCutout.set(DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in));
-        mSources = in.readParcelableArray(null, InsetsSource.class);
+        mDisplayFrame.readFromParcel(in);
+        mDisplayCutout.readFromParcel(in);
+        in.readTypedArray(mSources, InsetsSource.CREATOR);
         mRoundedCorners = in.readTypedObject(RoundedCorners.CREATOR);
     }
 

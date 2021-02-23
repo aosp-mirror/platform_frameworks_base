@@ -77,8 +77,8 @@ public class InsetsSourceControl implements Parcelable {
 
     public InsetsSourceControl(Parcel in) {
         mType = in.readInt();
-        mLeash = in.readParcelable(null /* loader */);
-        mSurfacePosition = in.readParcelable(null /* loader */);
+        mLeash = in.readTypedObject(SurfaceControl.CREATOR);
+        mSurfacePosition = in.readTypedObject(Point.CREATOR);
         mSkipAnimationOnce = in.readBoolean();
     }
 
@@ -119,8 +119,8 @@ public class InsetsSourceControl implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeParcelable(mLeash, 0 /* flags*/);
-        dest.writeParcelable(mSurfacePosition, 0 /* flags*/);
+        dest.writeTypedObject(mLeash, 0 /* parcelableFlags */);
+        dest.writeTypedObject(mSurfacePosition, 0 /* parcelableFlags */);
         dest.writeBoolean(mSkipAnimationOnce);
     }
 
