@@ -49,6 +49,12 @@ java_sdk_library {
 
     compile_dex: true,
     default_to_stubs: true,
+
+    // Additional hiddenapi annotations are provided in a separate module.
+    // TODO(b/180295980) - investigate whether this can be removed
+    hiddenapi_additional_annotations: [
+        "android.test.base-hiddenapi-annotations",
+    ],
 }
 
 // Build the android.test.base_static library
@@ -91,8 +97,9 @@ java_library_static {
 // ===============================================
 // This contains the android.test classes from android.test.base plus
 // the com.android.internal.util.Predicate[s] classes. This is only
-// intended for inclusion in android.test.legacy and must not be used
-// elsewhere.
+// intended for inclusion in android.test.legacy and in
+// android.test.base-hiddenapi-annotations to avoid a dependency cycle and must
+// not be used elsewhere.
 java_library_static {
     name: "android.test.base-minus-junit",
 
