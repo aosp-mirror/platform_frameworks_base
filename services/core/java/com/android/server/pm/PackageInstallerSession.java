@@ -1010,9 +1010,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException(
                         "DataLoader installation of APEX modules is not allowed.");
             }
+
             if (this.params.dataLoaderParams.getComponentName().getPackageName()
-                    == SYSTEM_DATA_LOADER_PACKAGE) {
-                assertShellOrSystemCalling("System data loaders");
+                    == SYSTEM_DATA_LOADER_PACKAGE && mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.USE_SYSTEM_DATA_LOADERS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("You need the "
+                        + "com.android.permission.USE_SYSTEM_DATA_LOADERS permission "
+                        + "to use system data loaders");
             }
         }
 
