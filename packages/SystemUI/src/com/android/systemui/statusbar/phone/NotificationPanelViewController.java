@@ -374,6 +374,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
+    private int mStatusBarHeaderHeightKeyguard;
     private int mNotificationsHeaderCollideDistance;
     private float mEmptyDragAmount;
     private float mDownX;
@@ -772,6 +773,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 .setMaxLengthSeconds(0.4f).build();
         mStatusBarMinHeight = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeaderHeightKeyguard = mResources.getDimensionPixelSize(
+                R.dimen.status_bar_header_height_keyguard);
         mQsPeekHeight = mResources.getDimensionPixelSize(R.dimen.qs_peek_height);
         mNotificationsHeaderCollideDistance = mResources.getDimensionPixelSize(
                 R.dimen.header_notifications_collide_distance);
@@ -1069,7 +1072,7 @@ public class NotificationPanelViewController extends PanelViewController {
             int totalHeight = mView.getHeight();
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
-            int userSwitcherPreferredY = mStatusBarMinHeight;
+            int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
             final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
                     .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
@@ -1078,7 +1081,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     ? mKeyguardQsUserSwitchController.getUserIconHeight()
                     : (mKeyguardUserSwitcherController != null
                             ? mKeyguardUserSwitcherController.getUserIconHeight() : 0);
-            mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
+            mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
+                    totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
                     getExpandedFraction(),
                     totalHeight,

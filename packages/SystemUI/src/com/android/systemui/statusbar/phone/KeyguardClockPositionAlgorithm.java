@@ -89,7 +89,8 @@ public class KeyguardClockPositionAlgorithm {
     private int mNotificationStackHeight;
 
     /**
-     * Minimum top margin to avoid overlap with status bar.
+     * Minimum top margin to avoid overlap with status bar, lock icon, or multi-user switcher
+     * avatar.
      */
     private int mMinTopMargin;
 
@@ -186,15 +187,15 @@ public class KeyguardClockPositionAlgorithm {
     /**
      * Sets up algorithm values.
      */
-    public void setup(int statusBarMinHeight, int maxShadeBottom, int notificationStackHeight,
-            float panelExpansion, int parentHeight, int keyguardStatusHeight,
-            int userSwitchHeight, int clockPreferredY, int userSwitchPreferredY,
-            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
-            boolean bypassEnabled, int unlockedStackScrollerPadding, boolean showLockIcon,
-            float qsExpansion, int cutoutTopInset) {
-        mMinTopMargin = statusBarMinHeight + (showLockIcon
-                ? mContainerTopPaddingWithLockIcon : mContainerTopPaddingWithoutLockIcon)
-                + userSwitchHeight;
+    public void setup(int keyguardStatusBarHeaderHeight, int maxShadeBottom,
+            int notificationStackHeight, float panelExpansion, int parentHeight,
+            int keyguardStatusHeight, int userSwitchHeight, int clockPreferredY,
+            int userSwitchPreferredY, boolean hasCustomClock, boolean hasVisibleNotifs, float dark,
+            float emptyDragAmount, boolean bypassEnabled, int unlockedStackScrollerPadding,
+            boolean showLockIcon, float qsExpansion, int cutoutTopInset) {
+        mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(showLockIcon
+                        ? mContainerTopPaddingWithLockIcon : mContainerTopPaddingWithoutLockIcon,
+                userSwitchHeight);
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
