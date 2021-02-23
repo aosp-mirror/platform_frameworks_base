@@ -35,15 +35,14 @@ package com.android.internal.graphics.palette;
 import android.graphics.Color;
 import android.util.TimingLogger;
 
+import com.android.internal.graphics.palette.Palette.Swatch;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-
-import com.android.internal.graphics.ColorUtils;
-import com.android.internal.graphics.palette.Palette.Swatch;
 
 /**
  * Copied from: frameworks/support/v7/palette/src/main/java/android/support/v7/
@@ -77,20 +76,17 @@ final class ColorCutQuantizer implements Quantizer {
     int[] mHistogram;
     List<Swatch> mQuantizedColors;
     TimingLogger mTimingLogger;
-    Palette.Filter[] mFilters;
 
     private final float[] mTempHsl = new float[3];
 
     /**
      * Execute color quantization.
      *
-     * @param pixels histogram representing an image's pixel data
+     * @param pixels    histogram representing an image's pixel data
      * @param maxColors The maximum number of colors that should be in the result palette.
-     * @param filters Set of filters to use in the quantization stage
      */
-    public void quantize(final int[] pixels, final int maxColors, final Palette.Filter[] filters) {
+    public void quantize(final int[] pixels, final int maxColors) {
         mTimingLogger = LOG_TIMINGS ? new TimingLogger(LOG_TAG, "Creation") : null;
-        mFilters = filters;
 
         final int[] hist = mHistogram = new int[1 << (QUANTIZE_WORD_WIDTH * 3)];
         for (int i = 0; i < pixels.length; i++) {
@@ -108,10 +104,6 @@ final class ColorCutQuantizer implements Quantizer {
         // Now let's count the number of distinct colors
         int distinctColorCount = 0;
         for (int color = 0; color < hist.length; color++) {
-            if (hist[color] > 0 && shouldIgnoreColor(color)) {
-                // If we should ignore the color, set the population to 0
-                hist[color] = 0;
-            }
             if (hist[color] > 0) {
                 // If the color has population, increase the distinct color count
                 distinctColorCount++;
@@ -186,7 +178,7 @@ final class ColorCutQuantizer implements Quantizer {
      * and splitting them. Once split, the new box and the remaining box are offered back to the
      * queue.
      *
-     * @param queue {@link java.util.PriorityQueue} to poll for boxes
+     * @param queue   {@link java.util.PriorityQueue} to poll for boxes
      * @param maxSize Maximum amount of boxes to split
      */
     private void splitBoxes(final PriorityQueue<Vbox> queue, final int maxSize) {
@@ -216,11 +208,7 @@ final class ColorCutQuantizer implements Quantizer {
         ArrayList<Swatch> colors = new ArrayList<>(vboxes.size());
         for (Vbox vbox : vboxes) {
             Swatch swatch = vbox.getAverageColor();
-            if (!shouldIgnoreColor(swatch)) {
-                // As we're averaging a color box, we can still get colors which we do not want, so
-                // we check again here
-                colors.add(swatch);
-            }
+            colors.add(swatch);
         }
         return colors;
     }
@@ -230,7 +218,7 @@ final class ColorCutQuantizer implements Quantizer {
      */
     private class Vbox {
         // lower and upper index are inclusive
-        private int mLowerIndex;
+        private final int mLowerIndex;
         private int mUpperIndex;
         // Population of colors within this box
         private int mPopulation;
@@ -373,7 +361,7 @@ final class ColorCutQuantizer implements Quantizer {
             modifySignificantOctet(colors, longestDimension, mLowerIndex, mUpperIndex);
 
             final int midPoint = mPopulation / 2;
-            for (int i = mLowerIndex, count = 0; i <= mUpperIndex; i++)  {
+            for (int i = mLowerIndex, count = 0; i <= mUpperIndex; i++) {
                 count += hist[colors[i]];
                 if (count >= midPoint) {
                     // we never want to split on the upperIndex, as this will result in the same
@@ -447,27 +435,6 @@ final class ColorCutQuantizer implements Quantizer {
         }
     }
 
-    private boolean shouldIgnoreColor(int color565) {
-        final int rgb = approximateToRgb888(color565);
-        ColorUtils.colorToHSL(rgb, mTempHsl);
-        return shouldIgnoreColor(rgb, mTempHsl);
-    }
-
-    private boolean shouldIgnoreColor(Swatch color) {
-        return shouldIgnoreColor(color.getRgb(), color.getHsl());
-    }
-
-    private boolean shouldIgnoreColor(int rgb, float[] hsl) {
-        if (mFilters != null && mFilters.length > 0) {
-            for (int i = 0, count = mFilters.length; i < count; i++) {
-                if (!mFilters[i].isAllowed(rgb, hsl)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     /**
      * Comparator which sorts {@link Vbox} instances based on their volume, in descending order
      */
@@ -498,7 +465,8 @@ final class ColorCutQuantizer implements Quantizer {
     }
 
     private static int approximateToRgb888(int color) {
-        return approximateToRgb888(quantizedRed(color), quantizedGreen(color), quantizedBlue(color));
+        return approximateToRgb888(quantizedRed(color), quantizedGreen(color),
+                quantizedBlue(color));
     }
 
     /**
