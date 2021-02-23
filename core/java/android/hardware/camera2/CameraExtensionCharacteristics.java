@@ -35,6 +35,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
 
+import java.util.HashSet;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -153,12 +154,8 @@ public final class CameraExtensionCharacteristics {
         mChars = chars;
     }
 
-    private static List<Size> generateSupportedSizes(List<SizeList> sizesList,
-                                                     Integer format,
-                                                     StreamConfigurationMap streamMap) {
-        // Per API contract it is assumed that the extension is able to support all
-        // camera advertised sizes for a given format in case it doesn't return
-        // a valid non-empty size list.
+    private static ArrayList<Size> getSupportedSizes(List<SizeList> sizesList,
+            Integer format) {
         ArrayList<Size> ret = new ArrayList<>();
         if ((sizesList != null) && (!sizesList.isEmpty())) {
             for (SizeList entry : sizesList) {
@@ -170,11 +167,34 @@ public final class CameraExtensionCharacteristics {
                 }
             }
         }
+
+        return ret;
+    }
+
+    private static List<Size> generateSupportedSizes(List<SizeList> sizesList,
+                                                     Integer format,
+                                                     StreamConfigurationMap streamMap) {
+        // Per API contract it is assumed that the extension is able to support all
+        // camera advertised sizes for a given format in case it doesn't return
+        // a valid non-empty size list.
+        ArrayList<Size> ret = getSupportedSizes(sizesList, format);
         Size[] supportedSizes = streamMap.getOutputSizes(format);
-        if (supportedSizes != null) {
+        if ((ret.isEmpty()) && (supportedSizes != null)) {
             ret.addAll(Arrays.asList(supportedSizes));
         }
         return ret;
+    }
+
+    private static List<Size> generateJpegSupportedSizes(List<SizeList> sizesList,
+            StreamConfigurationMap streamMap) {
+        ArrayList<Size> extensionSizes = getSupportedSizes(sizesList, ImageFormat.YUV_420_888);
+        HashSet<Size> supportedSizes = extensionSizes.isEmpty() ? new HashSet<>(Arrays.asList(
+                streamMap.getOutputSizes(ImageFormat.YUV_420_888))) : new HashSet<>(extensionSizes);
+        HashSet<Size> supportedJpegSizes = new HashSet<>(Arrays.asList(streamMap.getOutputSizes(
+                ImageFormat.JPEG)));
+        supportedSizes.retainAll(supportedJpegSizes);
+
+        return new ArrayList<>(supportedSizes);
     }
 
     /**
@@ -488,8 +508,8 @@ public final class CameraExtensionCharacteristics {
      * {@link StreamConfigurationMap#getOutputSizes}.</p>
      *
      * <p>Device-specific extensions currently support at most two
-     * multi-frame capture surface formats, ImageFormat.YUV_420_888 or
-     * ImageFormat.JPEG.</p>
+     * multi-frame capture surface formats. ImageFormat.JPEG will be supported by all
+     * extensions and ImageFormat.YUV_420_888 may or may not be supported.</p>
      *
      * @param extension the extension type
      * @param format    device-specific extension output format
@@ -526,14 +546,17 @@ public final class CameraExtensionCharacteristics {
                             format, streamMap);
                 } else if (format == ImageFormat.JPEG) {
                     extenders.second.init(mCameraId, mChars.getNativeMetadata());
-                    if (extenders.second.getCaptureProcessor() == null) {
+                    if (extenders.second.getCaptureProcessor() != null) {
+                        // The framework will perform the additional encoding pass on the
+                        // processed YUV_420 buffers.
+                        return generateJpegSupportedSizes(
+                                extenders.second.getSupportedResolutions(), streamMap);
+                    } else {
                         return generateSupportedSizes(null, format, streamMap);
                     }
-
-                    return new ArrayList<>();
+                } else {
+                    throw new IllegalArgumentException("Unsupported format: " + format);
                 }
-
-                throw new IllegalArgumentException("Unsupported format: " + format);
             } finally {
                 unregisterClient(clientId);
             }
