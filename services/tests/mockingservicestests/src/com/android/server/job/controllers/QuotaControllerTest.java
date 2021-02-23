@@ -31,6 +31,7 @@ import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.JobSchedulerService.sSystemClock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,6 +59,7 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.job.JobInfo;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -85,6 +87,7 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
 import com.android.server.job.controllers.QuotaController.ExecutionStats;
 import com.android.server.job.controllers.QuotaController.QcConstants;
+import com.android.server.job.controllers.QuotaController.ShrinkableDebits;
 import com.android.server.job.controllers.QuotaController.TimingSession;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -125,6 +128,7 @@ public class QuotaControllerTest {
     private int mSourceUid;
     private PowerAllowlistInternal.TempAllowlistChangeListener mTempAllowlistListener;
     private IUidObserver mUidObserver;
+    private UsageStatsManagerInternal.UsageEventListener mUsageEventListener;
     DeviceConfig.Properties.Builder mDeviceConfigPropertiesBuilder;
 
     private MockitoSession mMockingSession;
@@ -218,6 +222,8 @@ public class QuotaControllerTest {
                 ArgumentCaptor.forClass(IUidObserver.class);
         ArgumentCaptor<PowerAllowlistInternal.TempAllowlistChangeListener> taChangeCaptor =
                 ArgumentCaptor.forClass(PowerAllowlistInternal.TempAllowlistChangeListener.class);
+        ArgumentCaptor<UsageStatsManagerInternal.UsageEventListener> ueListenerCaptor =
+                ArgumentCaptor.forClass(UsageStatsManagerInternal.UsageEventListener.class);
         mQuotaController = new QuotaController(mJobSchedulerService,
                 mock(BackgroundJobsController.class), mock(ConnectivityController.class));
 
@@ -229,6 +235,8 @@ public class QuotaControllerTest {
         verify(mPowerAllowlistInternal)
                 .registerTempAllowlistChangeListener(taChangeCaptor.capture());
         mTempAllowlistListener = taChangeCaptor.getValue();
+        verify(mUsageStatsManager).registerListener(ueListenerCaptor.capture());
+        mUsageEventListener = ueListenerCaptor.getValue();
         try {
             verify(activityManager).registerUidObserver(
                     uidObserverCaptor.capture(),
@@ -288,7 +296,7 @@ public class QuotaControllerTest {
                 verify(foregroundUids, timeout(2 * SECOND_IN_MILLIS).times(1)).delete(eq(uid));
                 assertFalse(foregroundUids.get(uid));
             }
-            waitForQuietBackground();
+            waitForNonDelayedMessagesProcessed();
         } catch (Exception e) {
             fail("exception encountered: " + e.getMessage());
         }
@@ -385,13 +393,8 @@ public class QuotaControllerTest {
         }
     }
 
-    private void waitForQuietBackground() throws Exception {
-        for (int i = 0; i < 5; ++i) {
-            if (!mQuotaController.isActiveBackgroundProcessing()) {
-                break;
-            }
-            Thread.sleep(500);
-        }
+    private void waitForNonDelayedMessagesProcessed() {
+        mQuotaController.getHandler().runWithScissors(() -> {}, 15_000);
     }
 
     @Test
@@ -1330,7 +1333,9 @@ public class QuotaControllerTest {
                         timeUsedMs, 5), true);
         JobStatus job = createExpeditedJobStatus("testGetMaxJobExecutionTimeLocked_EJ", 0);
         setStandbyBucket(RARE_INDEX, job);
-        mQuotaController.maybeStartTrackingJobLocked(job, null);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+        }
 
         setCharging();
         synchronized (mQuotaController.mLock) {
@@ -5157,5 +5162,258 @@ public class QuotaControllerTest {
                 argThat(msg -> msg.what == QuotaController.MSG_REACHED_EJ_QUOTA),
                 eq(10 * SECOND_IN_MILLIS));
         verify(handler, never()).sendMessageDelayed(any(), eq(remainingTimeMs));
+    }
+
+    @Test
+    public void testEJDebitTallying() {
+        setStandbyBucket(RARE_INDEX);
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, 10 * MINUTE_IN_MILLIS);
+        // 15 seconds for each 30 second chunk.
+        setDeviceConfigLong(QcConstants.KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, 30 * SECOND_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_TOP_APP_MS, 15 * SECOND_IN_MILLIS);
+
+        // No history. Debits should be 0.
+        ShrinkableDebits debit = mQuotaController.getEJDebitsLocked(SOURCE_USER_ID, SOURCE_PACKAGE);
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(10 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Regular job shouldn't affect EJ tally.
+        JobStatus regJob = createJobStatus("testEJDebitTallying", 1);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(regJob, null);
+            mQuotaController.prepareForExecutionLocked(regJob);
+        }
+        advanceElapsedClock(5000);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(regJob, null, false);
+        }
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(10 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // EJ job should affect EJ tally.
+        JobStatus eJob = createExpeditedJobStatus("testEJDebitTallying", 2);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(eJob, null);
+            mQuotaController.prepareForExecutionLocked(eJob);
+        }
+        advanceElapsedClock(5 * MINUTE_IN_MILLIS);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(eJob, null, false);
+        }
+        assertEquals(5 * MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(5 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Instantaneous event for a different user shouldn't affect tally.
+        advanceElapsedClock(5 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_INTERACTION_MS, MINUTE_IN_MILLIS);
+
+        UsageEvents.Event event =
+                new UsageEvents.Event(UsageEvents.Event.USER_INTERACTION, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID + 10, event);
+        assertEquals(5 * MINUTE_IN_MILLIS, debit.getTallyLocked());
+
+        // Instantaneous event for correct user should reduce tally.
+        advanceElapsedClock(5 * MINUTE_IN_MILLIS);
+
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(4 * MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(6 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Activity start shouldn't reduce tally, but duration with activity started should affect
+        // remaining EJ time.
+        advanceElapsedClock(5 * MINUTE_IN_MILLIS);
+        event = new UsageEvents.Event(UsageEvents.Event.ACTIVITY_RESUMED, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        assertEquals(4 * MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(6 * MINUTE_IN_MILLIS + 15 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        assertEquals(4 * MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(6 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // With activity pausing/stopping/destroying, tally should be updated.
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        event = new UsageEvents.Event(UsageEvents.Event.ACTIVITY_DESTROYED, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(3 * MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(7 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    @Test
+    public void testEJDebitTallying_StaleSession() {
+        setStandbyBucket(RARE_INDEX);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_RARE_MS, 10 * MINUTE_IN_MILLIS);
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        TimingSession ts = new TimingSession(nowElapsed, nowElapsed + 10 * MINUTE_IN_MILLIS, 5);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE, ts, true);
+
+        // Make the session stale.
+        advanceElapsedClock(12 * MINUTE_IN_MILLIS + mQcConstants.EJ_WINDOW_SIZE_MS);
+
+        // With lazy deletion, we don't update the tally until getRemainingEJExecutionTimeLocked()
+        // is called, so call that first.
+        assertEquals(10 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        ShrinkableDebits debit = mQuotaController.getEJDebitsLocked(SOURCE_USER_ID, SOURCE_PACKAGE);
+        assertEquals(0, debit.getTallyLocked());
+    }
+
+    /**
+     * Tests that rewards are properly accounted when there's no EJ running and the rewards exceed
+     * the accumulated debits.
+     */
+    @Test
+    public void testEJDebitTallying_RewardExceedDebits_NoActiveSession() {
+        setStandbyBucket(WORKING_INDEX);
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_WORKING_MS, 30 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_INTERACTION_MS, MINUTE_IN_MILLIS);
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        TimingSession ts = new TimingSession(nowElapsed - 5 * MINUTE_IN_MILLIS,
+                nowElapsed - 4 * MINUTE_IN_MILLIS, 2);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE, ts, true);
+
+        ShrinkableDebits debit = mQuotaController.getEJDebitsLocked(SOURCE_USER_ID, SOURCE_PACKAGE);
+        assertEquals(MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(29 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        UsageEvents.Event event =
+                new UsageEvents.Event(UsageEvents.Event.USER_INTERACTION, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(30 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(30 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Excessive rewards don't increase maximum quota.
+        event = new UsageEvents.Event(UsageEvents.Event.USER_INTERACTION, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(30 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /**
+     * Tests that rewards are properly accounted when there's an active EJ running and the rewards
+     * exceed the accumulated debits.
+     */
+    @Test
+    public void testEJDebitTallying_RewardExceedDebits_ActiveSession() {
+        setStandbyBucket(WORKING_INDEX);
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+        setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_WORKING_MS, 30 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_INTERACTION_MS, MINUTE_IN_MILLIS);
+        // 15 seconds for each 30 second chunk.
+        setDeviceConfigLong(QcConstants.KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, 30 * SECOND_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_EJ_REWARD_TOP_APP_MS, 15 * SECOND_IN_MILLIS);
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        TimingSession ts = new TimingSession(nowElapsed - 5 * MINUTE_IN_MILLIS,
+                nowElapsed - 4 * MINUTE_IN_MILLIS, 2);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE, ts, true);
+
+        ShrinkableDebits debit = mQuotaController.getEJDebitsLocked(SOURCE_USER_ID, SOURCE_PACKAGE);
+        assertEquals(MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(29 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // With rewards coming in while an EJ is running, the remaining execution time should be
+        // adjusted accordingly (decrease due to EJ running + increase from reward).
+        JobStatus eJob =
+                createExpeditedJobStatus("testEJDebitTallying_RewardExceedDebits_ActiveSession", 1);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(eJob, null);
+            mQuotaController.prepareForExecutionLocked(eJob);
+        }
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        assertEquals(MINUTE_IN_MILLIS, debit.getTallyLocked());
+        assertEquals(28 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        UsageEvents.Event event =
+                new UsageEvents.Event(UsageEvents.Event.USER_INTERACTION, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(29 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(28 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // Activity start shouldn't reduce tally, but duration with activity started should affect
+        // remaining EJ time.
+        event = new UsageEvents.Event(UsageEvents.Event.ACTIVITY_RESUMED, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        assertEquals(0, debit.getTallyLocked());
+        // Decrease by 30 seconds for running EJ, increase by 15 seconds due to ongoing activity.
+        assertEquals(27 * MINUTE_IN_MILLIS + 45 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+        advanceElapsedClock(30 * SECOND_IN_MILLIS);
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(27 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(27 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        event = new UsageEvents.Event(UsageEvents.Event.USER_INTERACTION, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(28 * MINUTE_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(27 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        // At this point, with activity pausing/stopping/destroying, since we're giving a reward,
+        // tally should remain 0, and time remaining shouldn't change since it was accounted for
+        // at every step.
+        event = new UsageEvents.Event(UsageEvents.Event.ACTIVITY_DESTROYED, sSystemClock.millis());
+        event.mPackage = SOURCE_PACKAGE;
+        mUsageEventListener.onUsageEvent(SOURCE_USER_ID, event);
+        waitForNonDelayedMessagesProcessed();
+        assertEquals(0, debit.getTallyLocked());
+        assertEquals(27 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS,
+                mQuotaController.getRemainingEJExecutionTimeLocked(SOURCE_USER_ID, SOURCE_PACKAGE));
     }
 }
