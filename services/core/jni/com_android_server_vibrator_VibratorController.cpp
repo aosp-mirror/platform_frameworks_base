@@ -238,12 +238,12 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, j
     return result.isOk() ? result.value().count() : -1;
 }
 
-static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
-                                          jobjectArray composition, jlong vibrationId) {
+static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                           jobjectArray composition, jlong vibrationId) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorPerformComposedEffect failed because native wrapper was not initialized");
-        return;
+        return -1;
     }
     size_t size = env->GetArrayLength(composition);
     std::vector<aidl::CompositeEffect> effects;
@@ -252,7 +252,8 @@ static void vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong
         effects.push_back(effectFromJavaPrimitive(env, element));
     }
     auto callback = wrapper->createCallback(vibrationId);
-    wrapper->hal()->performComposedEffect(effects, callback);
+    auto result = wrapper->hal()->performComposedEffect(effects, callback);
+    return result.isOk() ? result.value().count() : -1;
 }
 
 static jlong vibratorGetCapabilities(JNIEnv* env, jclass /* clazz */, jlong ptr) {
@@ -296,7 +297,7 @@ static const JNINativeMethod method_table[] = {
         {"vibratorSetAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
         {"vibratorPerformEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
         {"vibratorPerformComposedEffect",
-         "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;J)V",
+         "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;J)J",
          (void*)vibratorPerformComposedEffect},
         {"vibratorGetSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
         {"vibratorGetSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
