@@ -1237,15 +1237,23 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
     if (mDemuxClient != NULL) {
         mDemuxClient->setFrontendDataSource(mFeClient);
     }
-    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject);
-    mFeClient->setCallback(feClientCb);
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jobject tuner(env->NewLocalRef(mObject));
+    if (env->IsSameObject(tuner, nullptr)) {
+        ALOGE("openFrontendByHandle"
+                "Tuner object has been freed. Failed to open frontend.");
+        env->DeleteWeakGlobalRef(mObject);
+        return NULL;
+    }
+
+    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject);
+    mFeClient->setCallback(feClientCb);
     // TODO: add more fields to frontend
     return env->NewObject(
             env->FindClass("android/media/tv/tuner/Tuner$Frontend"),
             gFields.frontendInitID,
-            mObject,
+            tuner,
             (jint) mFeId);
 }
 
@@ -1793,16 +1801,14 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
         dvrObj =
                 env->NewObject(
                         env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"),
-                        gFields.dvrRecorderInitID,
-                        mObject);
+                        gFields.dvrRecorderInitID);
         dvrClient->incStrong(dvrObj);
         env->SetLongField(dvrObj, gFields.dvrRecorderContext, (jlong)dvrClient.get());
     } else {
         dvrObj =
                 env->NewObject(
                         env->FindClass("android/media/tv/tuner/dvr/DvrPlayback"),
-                        gFields.dvrPlaybackInitID,
-                        mObject);
+                        gFields.dvrPlaybackInitID);
         dvrClient->incStrong(dvrObj);
         env->SetLongField(dvrObj, gFields.dvrPlaybackContext, (jlong)dvrClient.get());
     }
