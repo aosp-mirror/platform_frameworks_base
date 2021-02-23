@@ -342,7 +342,6 @@ public final class IncrementalManager {
             storage.unregisterLoadingProgressListener();
         }
 
-        // TODO(b/165841827): handle reboot and app update
         public boolean registerCallback(@NonNull IncrementalStorage storage,
                 @NonNull IPackageLoadingProgressCallback callback) {
             final int storageId = storage.getId();
@@ -362,30 +361,6 @@ public final class IncrementalManager {
                 }
             }
             return storage.registerLoadingProgressListener(this);
-        }
-
-        public boolean unregisterCallback(@NonNull IncrementalStorage storage,
-                @NonNull IPackageLoadingProgressCallback callback) {
-            final int storageId = storage.getId();
-            final RemoteCallbackList<IPackageLoadingProgressCallback> callbacksForStorage;
-            synchronized (mCallbacks) {
-                callbacksForStorage = mCallbacks.get(storageId);
-                if (callbacksForStorage == null) {
-                    // no callback has ever been registered on this storage
-                    return false;
-                }
-                if (!callbacksForStorage.unregister(callback)) {
-                    // the callback was not registered
-                    return false;
-                }
-                if (callbacksForStorage.getRegisteredCallbackCount() > 0) {
-                    // other callbacks are still listening on this storage
-                    return true;
-                }
-                mCallbacks.delete(storageId);
-            }
-            // stop listening for this storage
-            return storage.unregisterLoadingProgressListener();
         }
 
         @Override
