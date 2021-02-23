@@ -2556,8 +2556,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 params.flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
             }
 
-            params.blurBehindRadius = a.getDimensionPixelSize(
-                    android.R.styleable.Window_windowBlurBehindRadius, 0);
+            params.setBlurBehindRadius(a.getDimensionPixelSize(
+                    android.R.styleable.Window_windowBlurBehindRadius, 0));
         }
 
         setBackgroundBlurRadius(a.getDimensionPixelSize(

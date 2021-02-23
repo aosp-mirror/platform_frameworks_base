@@ -50181,12 +50181,14 @@ package android.view {
     method public final int copyFrom(android.view.WindowManager.LayoutParams);
     method public String debug(String);
     method public int describeContents();
+    method public int getBlurBehindRadius();
     method public int getColorMode();
     method public int getFitInsetsSides();
     method public int getFitInsetsTypes();
     method public final CharSequence getTitle();
     method public boolean isFitInsetsIgnoringVisibility();
     method public static boolean mayUseInputMethod(int);
+    method public void setBlurBehindRadius(@IntRange(from=0) int);
     method public void setColorMode(int);
     method public void setFitInsetsIgnoringVisibility(boolean);
     method public void setFitInsetsSides(int);
@@ -50297,7 +50299,6 @@ package android.view {
     field @Deprecated public static final int TYPE_TOAST = 2005; // 0x7d5
     field public static final int TYPE_WALLPAPER = 2013; // 0x7dd
     field public float alpha;
-    field public int blurBehindRadius;
     field public float buttonBrightness;
     field public float dimAmount;
     field public int flags;
