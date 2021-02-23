@@ -791,7 +791,9 @@ public final class ImsCallProfile implements Parcelable {
                 + ", emergencyCallTesting=" + mEmergencyCallTesting
                 + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency
                 + ", mRestrictCause=" + mRestrictCause
-                + ", mCallerNumberVerstat= " + mCallerNumberVerificationStatus + " }";
+                + ", mCallerNumberVerstat= " + mCallerNumberVerificationStatus
+                + ", mAcceptedRtpHeaderExtensions= " + mAcceptedRtpHeaderExtensionTypes
+                + " }";
     }
 
     @Override
