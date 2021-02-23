@@ -32,6 +32,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import static java.util.Arrays.asList;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -50,7 +52,9 @@ import org.junit.Test;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -62,20 +66,25 @@ public class LocationTimeZoneProviderTest {
     private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 123456789L;
 
     private TestThreadingDomain mTestThreadingDomain;
-
     private TestProviderListener mProviderListener;
+    private FakeTimeZoneIdValidator mTimeZoneAvailabilityChecker;
 
     @Before
     public void setUp() {
         mTestThreadingDomain = new TestThreadingDomain();
         mProviderListener = new TestProviderListener();
+        mTimeZoneAvailabilityChecker = new FakeTimeZoneIdValidator();
     }
 
     @Test
     public void lifecycle() {
         String providerName = "arbitrary";
         TestLocationTimeZoneProvider provider =
-                new TestLocationTimeZoneProvider(mTestThreadingDomain, providerName);
+                new TestLocationTimeZoneProvider(
+                        mTestThreadingDomain,
+                        providerName,
+                        mTimeZoneAvailabilityChecker);
+        mTimeZoneAvailabilityChecker.validIds("Europe/London");
 
         // initialize()
         provider.initialize(mProviderListener);
@@ -163,7 +172,10 @@ public class LocationTimeZoneProviderTest {
     public void defaultHandleTestCommandImpl() {
         String providerName = "primary";
         TestLocationTimeZoneProvider provider =
-                new TestLocationTimeZoneProvider(mTestThreadingDomain, providerName);
+                new TestLocationTimeZoneProvider(
+                        mTestThreadingDomain,
+                        providerName,
+                        mTimeZoneAvailabilityChecker);
 
         TestCommand testCommand = TestCommand.createForTests("test", new Bundle());
         AtomicReference<Bundle> resultReference = new AtomicReference<>();
@@ -180,8 +192,12 @@ public class LocationTimeZoneProviderTest {
     public void stateRecording() {
         String providerName = "primary";
         TestLocationTimeZoneProvider provider =
-                new TestLocationTimeZoneProvider(mTestThreadingDomain, providerName);
+                new TestLocationTimeZoneProvider(
+                        mTestThreadingDomain,
+                        providerName,
+                        mTimeZoneAvailabilityChecker);
         provider.setStateChangeRecordingEnabled(true);
+        mTimeZoneAvailabilityChecker.validIds("Europe/London");
 
         // initialize()
         provider.initialize(mProviderListener);
@@ -218,6 +234,34 @@ public class LocationTimeZoneProviderTest {
         provider.assertLatestRecordedState(PROVIDER_STATE_DESTROYED);
     }
 
+    @Test
+    public void considerSuggestionWithInvalidTimeZoneIdsAsUncertain() {
+        String providerName = "primary";
+        TestLocationTimeZoneProvider provider =
+                new TestLocationTimeZoneProvider(
+                        mTestThreadingDomain,
+                        providerName,
+                        mTimeZoneAvailabilityChecker);
+        provider.setStateChangeRecordingEnabled(true);
+        provider.initialize(mProviderListener);
+
+        ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
+        Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
+        Duration arbitraryInitializationTimeoutFuzz = Duration.ofMinutes(2);
+        provider.startUpdates(config, arbitraryInitializationTimeout,
+                arbitraryInitializationTimeoutFuzz);
+
+        List<String> invalidTimeZoneIds = asList("Atlantic/Atlantis");
+        TimeZoneProviderSuggestion invalidIdSuggestion = new TimeZoneProviderSuggestion.Builder()
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .setTimeZoneIds(invalidTimeZoneIds)
+                .build();
+        TimeZoneProviderEvent event =
+                TimeZoneProviderEvent.createSuggestionEvent(invalidIdSuggestion);
+        provider.simulateProviderEventReceived(event);
+        provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_UNCERTAIN);
+    }
+
     /** A test stand-in for the real {@link LocationTimeZoneProviderController}'s listener. */
     private static class TestProviderListener implements ProviderListener {
 
@@ -251,8 +295,9 @@ public class LocationTimeZoneProviderTest {
 
         /** Creates the instance. */
         TestLocationTimeZoneProvider(@NonNull ThreadingDomain threadingDomain,
-                @NonNull String providerName) {
-            super(threadingDomain, providerName);
+                @NonNull String providerName,
+                @NonNull TimeZoneIdValidator timeZoneIdValidator) {
+            super(threadingDomain, providerName, timeZoneIdValidator);
         }
 
         @Override
@@ -307,5 +352,20 @@ public class LocationTimeZoneProviderTest {
             assertEquals(expectedStateEnum,
                     recordedStates.get(recordedStates.size() - 1).stateEnum);
         }
+    }
+
+    private static final class FakeTimeZoneIdValidator
+            implements LocationTimeZoneProvider.TimeZoneIdValidator {
+        private final Set<String> mValidTimeZoneIds = new HashSet<>();
+
+        @Override
+        public boolean isValid(@NonNull String timeZoneId) {
+            return mValidTimeZoneIds.contains(timeZoneId);
+        }
+
+        public void validIds(String... timeZoneIdss) {
+            mValidTimeZoneIds.addAll(asList(timeZoneIdss));
+        }
+
     }
 }
