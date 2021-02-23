@@ -4877,7 +4877,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
+    void dumpPermissions(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
             DumpState dumpState) {
         LegacyPermissionSettings.dumpPermissions(pw, packageName, permissionNames,
                 mPermissionDataProvider.getLegacyPermissions(),
