@@ -282,6 +282,15 @@ public final class ImsCallProfile implements Parcelable {
     public static final String EXTRA_PICTURE_URL = "android.telephony.ims.extra.PICTURE_URL";
 
     /**
+     * Boolean extra indicating whether the call is a business call.
+     *
+     * This extra will be set to {@code true} if and only if the SIP INVITE headers contain the
+     * "Organization" header.
+     */
+    public static final String EXTRA_IS_BUSINESS_CALL =
+            "android.telephony.ims.extra.IS_BUSINESS_CALL";
+
+    /**
      * Values for EXTRA_OIR / EXTRA_CNAP
      */
     /**
