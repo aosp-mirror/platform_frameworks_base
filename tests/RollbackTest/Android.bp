@@ -105,6 +105,7 @@ apex {
   key: "com.android.apex.apkrollback.test.key",
   apps: ["TestAppAv1"],
   installable: false,
+  updatable: false,
 }
 
 apex {
@@ -115,6 +116,7 @@ apex {
   key: "com.android.apex.apkrollback.test.key",
   apps: ["TestAppAv2"],
   installable: false,
+  updatable: false,
 }
 
 apex {
@@ -125,4 +127,5 @@ apex {
   key: "com.android.apex.apkrollback.test.key",
   apps: ["TestAppACrashingV2"],
   installable: false,
+  updatable: false,
 }
