@@ -52,6 +52,7 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.Notification;
@@ -733,7 +734,7 @@ public final class ActiveServices {
                             + "could not resolve client package " + callingPackage);
                 }
                 if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, aInfo.uid)) {
-                    throw new IllegalStateException(msg);
+                    throw new ForegroundServiceStartNotAllowedException(msg);
                 }
                 return null;
             }
@@ -1818,7 +1819,7 @@ public final class ActiveServices {
                         ignoreForeground = true;
                         if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
                                 r.appInfo.uid)) {
-                            throw new IllegalStateException(msg);
+                            throw new ForegroundServiceStartNotAllowedException(msg);
                         }
                     }
                 }
