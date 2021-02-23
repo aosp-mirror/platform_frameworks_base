@@ -66,6 +66,10 @@ public final class CachedAppOptimizer {
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_5 = "compact_throttle_5";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_6 = "compact_throttle_6";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_MIN_OOM_ADJ =
+            "compact_throttle_min_oom_adj";
+    @VisibleForTesting static final String KEY_COMPACT_THROTTLE_MAX_OOM_ADJ =
+            "compact_throttle_max_oom_adj";
     @VisibleForTesting static final String KEY_COMPACT_STATSD_SAMPLE_RATE =
             "compact_statsd_sample_rate";
     @VisibleForTesting static final String KEY_FREEZER_STATSD_SAMPLE_RATE =
@@ -101,6 +105,10 @@ public final class CachedAppOptimizer {
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_4 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_5 = 10 * 60 * 1000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_6 = 10 * 60 * 1000;
+    @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ =
+            ProcessList.CACHED_APP_MIN_ADJ;
+    @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ =
+            ProcessList.CACHED_APP_MAX_ADJ;
     // The sampling rate to push app compaction events into statsd for upload.
     @VisibleForTesting static final float DEFAULT_STATSD_SAMPLE_RATE = 0.1f;
     @VisibleForTesting static final long DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB = 12_000L;
@@ -186,6 +194,10 @@ public final class CachedAppOptimizer {
                                 updateFullDeltaRssThrottle();
                             } else if (KEY_COMPACT_PROC_STATE_THROTTLE.equals(name)) {
                                 updateProcStateThrottle();
+                            } else if (KEY_COMPACT_THROTTLE_MIN_OOM_ADJ.equals(name)) {
+                                updateMinOomAdjThrottle();
+                            } else if (KEY_COMPACT_THROTTLE_MAX_OOM_ADJ.equals(name)) {
+                                updateMaxOomAdjThrottle();
                             }
                         }
                     }
@@ -216,6 +228,12 @@ public final class CachedAppOptimizer {
     @VisibleForTesting volatile long mCompactThrottleBFGS = DEFAULT_COMPACT_THROTTLE_5;
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting volatile long mCompactThrottleMinOomAdj =
+            DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting volatile long mCompactThrottleMaxOomAdj =
+            DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ;
     @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
     private volatile boolean mUseFreezer = DEFAULT_USE_FREEZER;
@@ -282,6 +300,7 @@ public final class CachedAppOptimizer {
      * starts the background thread if necessary.
      */
     public void init() {
+        // TODO: initialize flags to default and only update them if values are set in DeviceConfig
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(), mOnFlagsChangedListener);
         synchronized (mPhenotypeFlagLock) {
@@ -294,6 +313,8 @@ public final class CachedAppOptimizer {
             updateFullDeltaRssThrottle();
             updateProcStateThrottle();
             updateUseFreezer();
+            updateMinOomAdjThrottle();
+            updateMaxOomAdjThrottle();
         }
     }
 
@@ -328,6 +349,8 @@ public final class CachedAppOptimizer {
             pw.println("  " + KEY_COMPACT_THROTTLE_4 + "=" + mCompactThrottleFullFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_5 + "=" + mCompactThrottleBFGS);
             pw.println("  " + KEY_COMPACT_THROTTLE_6 + "=" + mCompactThrottlePersistent);
+            pw.println("  " + KEY_COMPACT_THROTTLE_MIN_OOM_ADJ + "=" + mCompactThrottleMinOomAdj);
+            pw.println("  " + KEY_COMPACT_THROTTLE_MAX_OOM_ADJ + "=" + mCompactThrottleMaxOomAdj);
             pw.println("  " + KEY_COMPACT_STATSD_SAMPLE_RATE + "=" + mCompactStatsdSampleRate);
             pw.println("  " + KEY_COMPACT_FULL_RSS_THROTTLE_KB + "="
                     + mFullAnonRssThrottleKb);
@@ -367,12 +390,23 @@ public final class CachedAppOptimizer {
 
     @GuardedBy("mProcLock")
     void compactAppFull(ProcessRecord app) {
-        app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_FULL);
-        mPendingCompactionProcesses.add(app);
-        mCompactionHandler.sendMessage(
+        // Apply OOM adj score throttle for Full App Compaction.
+        if ((app.mState.getSetAdj() < mCompactThrottleMinOomAdj
+                || app.mState.getSetAdj() > mCompactThrottleMaxOomAdj)
+                && app.mState.getCurAdj() >= mCompactThrottleMinOomAdj
+                && app.mState.getCurAdj() <= mCompactThrottleMaxOomAdj) {
+            app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_FULL);
+            mPendingCompactionProcesses.add(app);
+            mCompactionHandler.sendMessage(
                 mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.mState.getSetAdj(), app.mState.getSetProcState()));
-
+                    COMPACT_PROCESS_MSG, app.mState.getSetAdj(), app.mState.getSetProcState()));
+        } else {
+            if (DEBUG_COMPACTION) {
+                Slog.d(TAG_AM, "Skipping full compaction for " + app.processName
+                        + " oom adj score changed from " + app.mState.getSetAdj()
+                        + " to " + app.mState.getCurAdj());
+            }
+        }
     }
 
     @GuardedBy("mProcLock")
@@ -629,6 +663,7 @@ public final class CachedAppOptimizer {
     @GuardedBy("mPhenotypeFlagLock")
     private void updateCompactionThrottles() {
         boolean useThrottleDefaults = false;
+        // TODO: improve efficiency by calling DeviceConfig only once for all flags.
         String throttleSomeSomeFlag =
                 DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_1);
@@ -647,12 +682,20 @@ public final class CachedAppOptimizer {
         String throttlePersistentFlag =
                 DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_COMPACT_THROTTLE_6);
+        String throttleMinOomAdjFlag =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_COMPACT_THROTTLE_MIN_OOM_ADJ);
+        String throttleMaxOomAdjFlag =
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_COMPACT_THROTTLE_MAX_OOM_ADJ);
 
         if (TextUtils.isEmpty(throttleSomeSomeFlag) || TextUtils.isEmpty(throttleSomeFullFlag)
                 || TextUtils.isEmpty(throttleFullSomeFlag)
                 || TextUtils.isEmpty(throttleFullFullFlag)
                 || TextUtils.isEmpty(throttleBFGSFlag)
-                || TextUtils.isEmpty(throttlePersistentFlag)) {
+                || TextUtils.isEmpty(throttlePersistentFlag)
+                || TextUtils.isEmpty(throttleMinOomAdjFlag)
+                || TextUtils.isEmpty(throttleMaxOomAdjFlag)) {
             // Set defaults for all if any are not set.
             useThrottleDefaults = true;
         } else {
@@ -663,6 +706,8 @@ public final class CachedAppOptimizer {
                 mCompactThrottleFullFull = Integer.parseInt(throttleFullFullFlag);
                 mCompactThrottleBFGS = Integer.parseInt(throttleBFGSFlag);
                 mCompactThrottlePersistent = Integer.parseInt(throttlePersistentFlag);
+                mCompactThrottleMinOomAdj = Long.parseLong(throttleMinOomAdjFlag);
+                mCompactThrottleMaxOomAdj = Long.parseLong(throttleMaxOomAdjFlag);
             } catch (NumberFormatException e) {
                 useThrottleDefaults = true;
             }
@@ -675,6 +720,8 @@ public final class CachedAppOptimizer {
             mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
             mCompactThrottleBFGS = DEFAULT_COMPACT_THROTTLE_5;
             mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
+            mCompactThrottleMinOomAdj = DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ;
+            mCompactThrottleMaxOomAdj = DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ;
         }
     }
 
@@ -726,6 +773,28 @@ public final class CachedAppOptimizer {
                         "Unable to parse default app compact proc state throttle "
                                 + DEFAULT_COMPACT_PROC_STATE_THROTTLE);
             }
+        }
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateMinOomAdjThrottle() {
+        mCompactThrottleMinOomAdj = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            KEY_COMPACT_THROTTLE_MIN_OOM_ADJ, DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ);
+
+        // Should only compact cached processes.
+        if (mCompactThrottleMinOomAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+            mCompactThrottleMinOomAdj = DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ;
+        }
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateMaxOomAdjThrottle() {
+        mCompactThrottleMaxOomAdj = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            KEY_COMPACT_THROTTLE_MAX_OOM_ADJ, DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ);
+
+        // Should only compact cached processes.
+        if (mCompactThrottleMaxOomAdj > ProcessList.CACHED_APP_MAX_ADJ) {
+            mCompactThrottleMaxOomAdj = DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ;
         }
     }
 
