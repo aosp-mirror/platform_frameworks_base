@@ -60,10 +60,15 @@ class EnterSplitScreenNonResizableNotDock(
                     buildTestTag("testLegacySplitScreenNonResizeableActivityNotDock", configuration)
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
+                teardown {
+                    eachRun {
+                        nonResizeableApp.exit(wmHelper)
+                    }
+                }
                 transitions {
                     nonResizeableApp.launchViaIntent(wmHelper)
-                    device.openQuickstep()
-                    if (device.canSplitScreen()) {
+                    device.openQuickstep(wmHelper)
+                    if (device.canSplitScreen(wmHelper)) {
                         Assert.fail("Non-resizeable app should not enter split screen")
                     }
                 }
@@ -93,7 +98,7 @@ class EnterSplitScreenNonResizableNotDock(
                 }
             }
             return FlickerTestRunnerFactory.getInstance().buildTest(
-                instrumentation, defaultTransitionSetup, testSpec,
+                instrumentation, cleanSetup, testSpec,
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 supportedRotations = listOf(Surface.ROTATION_0 /* bugId = 178685668 */))
         }

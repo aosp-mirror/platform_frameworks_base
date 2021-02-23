@@ -27,6 +27,7 @@ import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
@@ -62,8 +63,8 @@ class EnterSplitScreenLaunchToSide(
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
                 transitions {
-                    device.launchSplitScreen()
-                    secondaryApp.reopenAppFromOverview()
+                    device.launchSplitScreen(wmHelper)
+                    device.reopenAppFromOverview(wmHelper)
                 }
                 assertions {
                     layersTrace {

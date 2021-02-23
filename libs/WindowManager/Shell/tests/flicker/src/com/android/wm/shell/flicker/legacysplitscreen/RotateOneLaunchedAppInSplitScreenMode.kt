@@ -64,7 +64,7 @@ class RotateOneLaunchedAppInSplitScreenMode(
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
                 transitions {
                     this.setRotation(configuration.startRotation)
-                    device.launchSplitScreen()
+                    device.launchSplitScreen(wmHelper)
                 }
                 assertions {
                     layersTrace {

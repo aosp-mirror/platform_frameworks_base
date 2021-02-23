@@ -29,6 +29,7 @@ import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.layerBecomesVisible
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
@@ -60,12 +61,15 @@ class NonResizableDismissInLegacySplitScreen(
                     buildTestTag("testNonResizableDismissInLegacySplitScreen", configuration)
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
+                setup {
+                    eachRun {
+                        nonResizeableApp.launchViaIntent(wmHelper)
+                        splitScreenApp.launchViaIntent(wmHelper)
+                        device.launchSplitScreen(wmHelper)
+                    }
+                }
                 transitions {
-                    nonResizeableApp.launchViaIntent(wmHelper)
-                    splitScreenApp.launchViaIntent(wmHelper)
-                    device.launchSplitScreen()
-                    nonResizeableApp.reopenAppFromOverview()
-                    wmHelper.waitForAppTransitionIdle()
+                    device.reopenAppFromOverview(wmHelper)
                 }
                 assertions {
                     layersTrace {

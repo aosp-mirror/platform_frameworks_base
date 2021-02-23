@@ -80,13 +80,12 @@ class LegacySplitScreenToLauncher(
                 setup {
                     test {
                         device.wakeUpAndGoToHomeScreen()
-                        device.openQuickStepAndClearRecentAppsFromOverview()
+                        device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     }
                     eachRun {
                         testApp.launchViaIntent(wmHelper)
                         this.setRotation(configuration.endRotation)
-                        device.launchSplitScreen()
-                        device.waitForIdle()
+                        device.launchSplitScreen(wmHelper)
                     }
                 }
                 teardown {
