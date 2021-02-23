@@ -194,7 +194,9 @@ class RebootEscrowManager {
         }
 
         public void reportMetric(boolean success) {
-            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, success);
+            // TODO(b/179105110) design error code; and report the true value for other fields.
+            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, 0, 1, 1,
+                    -1, 0);
         }
 
         public RebootEscrowEventLog getEventLog() {
