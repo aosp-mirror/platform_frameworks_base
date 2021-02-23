@@ -142,18 +142,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-//TODO onStop schedule unbind in 5 seconds
-//TODO make sure APIs are only callable from currently focused app
-//TODO schedule stopScan on activity destroy(except if configuration change)
-//TODO on associate called again after configuration change -> replace old callback with new
-//TODO avoid leaking calling activity in IFindDeviceCallback (see PrintManager#print for example)
 /** @hide */
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService implements Binder.DeathRecipient {
 
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
             CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME,
-            ".DeviceDiscoveryService");
+            ".CompanionDeviceDiscoveryService");
 
     private static final long DEVICE_DISAPPEARED_TIMEOUT_MS = 10 * 1000;
     private static final long DEVICE_DISAPPEARED_UNBIND_TIMEOUT_MS = 10 * 60 * 1000;
