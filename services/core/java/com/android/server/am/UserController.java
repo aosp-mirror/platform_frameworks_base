@@ -122,7 +122,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
@@ -518,18 +517,12 @@ class UserController implements Handler.Callback {
             if (!mInjector.getUserManager().isPreCreated(userId)) {
                 mHandler.sendMessage(mHandler.obtainMessage(REPORT_LOCKED_BOOT_COMPLETE_MSG,
                         userId, 0));
-                Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
-                        | Intent.FLAG_RECEIVER_OFFLOAD
-                        | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
-                        new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                        AppOpsManager.OP_NONE,
-                        getTemporaryAppAllowlistBroadcastOptions(REASON_LOCKED_BOOT_COMPLETED)
-                                .toBundle(), true,
-                        false, MY_PID, SYSTEM_UID,
-                        Binder.getCallingUid(), Binder.getCallingPid(), userId);
+                // In case of headless system user mode, do not send boot complete broadcast for
+                // system user as it is sent by sendBootCompleted call.
+                if (!(UserManager.isHeadlessSystemUserMode() && uss.mHandle.isSystem())) {
+                    // ACTION_LOCKED_BOOT_COMPLETED
+                    sendLockedBootCompletedBroadcast(resultTo, userId);
+                }
             }
         }
 
@@ -550,6 +543,21 @@ class UserController implements Handler.Callback {
         } else {
             maybeUnlockUser(userId);
         }
+    }
+
+    private void sendLockedBootCompletedBroadcast(IIntentReceiver receiver, @UserIdInt int userId) {
+        final Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
+                | Intent.FLAG_RECEIVER_OFFLOAD
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        mInjector.broadcastIntent(intent, null, receiver, 0, null, null,
+                new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
+                AppOpsManager.OP_NONE,
+                getTemporaryAppAllowlistBroadcastOptions(REASON_LOCKED_BOOT_COMPLETED)
+                        .toBundle(), true,
+                false, MY_PID, SYSTEM_UID,
+                Binder.getCallingUid(), Binder.getCallingPid(), userId);
     }
 
     /**
@@ -2167,26 +2175,22 @@ class UserController implements Handler.Callback {
     }
 
     void sendBootCompleted(IIntentReceiver resultTo) {
-        final boolean systemUserFinishedBooting;
-
         // Get a copy of mStartedUsers to use outside of lock
         SparseArray<UserState> startedUsers;
         synchronized (mLock) {
-            systemUserFinishedBooting = mCurrentUserId != UserHandle.USER_SYSTEM;
             startedUsers = mStartedUsers.clone();
         }
         for (int i = 0; i < startedUsers.size(); i++) {
             UserState uss = startedUsers.valueAt(i);
-            if (systemUserFinishedBooting && uss.mHandle.isSystem()) {
-                // On Automotive, at this point the system user has already been started and
-                // unlocked, and some of the tasks we do here have already been done. So skip those
-                // in that case.
-                // TODO(b/132262830): this workdound shouldn't be necessary once we move the
-                // headless-user start logic to UserManager-land
-                Slog.d(TAG, "sendBootCompleted(): skipping on non-current system user");
-                continue;
+            if (!UserManager.isHeadlessSystemUserMode()) {
+                finishUserBoot(uss, resultTo);
+            } else if (uss.mHandle.isSystem()) {
+                // In case of headless system user mode, send only locked boot complete broadcast
+                // for system user since finishUserBoot call will be made using other code path;
+                // for non-system user, do nothing since finishUserBoot will be called elsewhere.
+                sendLockedBootCompletedBroadcast(resultTo, uss.mHandle.getIdentifier());
+                return;
             }
-            finishUserBoot(uss, resultTo);
         }
     }
 
