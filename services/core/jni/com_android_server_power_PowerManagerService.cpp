@@ -103,7 +103,8 @@ static bool setPowerMode(Mode mode, bool enabled) {
     return result == power::HalResult::SUCCESSFUL;
 }
 
-void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
+void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType,
+                                                     int32_t displayId) {
     if (gPowerManagerServiceObj) {
         // Throttle calls into user activity by event type.
         // We're a little conservative about argument checking here in case the caller
@@ -127,7 +128,7 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 
         env->CallVoidMethod(gPowerManagerServiceObj,
                 gPowerManagerServiceClassInfo.userActivityFromNative,
-                nanoseconds_to_milliseconds(eventTime), eventType, 0);
+                nanoseconds_to_milliseconds(eventTime), eventType, displayId, 0);
         checkAndClearExceptionFromCallback(env, "userActivityFromNative");
     }
 }
@@ -285,7 +286,7 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
     FIND_CLASS(clazz, "com/android/server/power/PowerManagerService");
 
     GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivityFromNative, clazz,
-            "userActivityFromNative", "(JII)V");
+            "userActivityFromNative", "(JIII)V");
 
     // Initialize
     for (int i = 0; i <= USER_ACTIVITY_EVENT_LAST; i++) {
