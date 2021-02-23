@@ -275,6 +275,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PROFCOLLECT_NATIVE_BOOT = "profcollect_native_boot";
 
     /**
+     * Namespace for features related to Reboot Readiness detection.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_REBOOT_READINESS = "reboot_readiness";
+
+    /**
      * Namespace for Rollback flags that are applied immediately.
      *
      * @hide
