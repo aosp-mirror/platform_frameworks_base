@@ -249,5 +249,20 @@ void DamageAccumulator::finish(SkRect* totalDirty) {
     mHead->pendingDirty.setEmpty();
 }
 
+const StretchEffect* DamageAccumulator::findNearestStretchEffect() const {
+    DirtyStack* frame = mHead;
+    while (frame->prev != frame) {
+        frame = frame->prev;
+        if (frame->type == TransformRenderNode) {
+            const auto& effect =
+                    frame->renderNode->properties().layerProperties().getStretchEffect();
+            if (!effect.isEmpty()) {
+                return &effect;
+            }
+        }
+    }
+    return nullptr;
+}
+
 } /* namespace uirenderer */
 } /* namespace android */

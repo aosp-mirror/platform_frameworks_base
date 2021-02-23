@@ -52,6 +52,7 @@ import java.util.Map;
  * used by AudioService. As its methods are called on the message handler thread
  * of AudioService, the actual work is offloaded to a dedicated thread.
  * This helps keeping AudioService responsive.
+ *
  * @hide
  */
 class SoundEffectsHelper {
@@ -89,15 +90,18 @@ class SoundEffectsHelper {
         final String mFileName;
         int mSampleId;
         boolean mLoaded;  // for effects in SoundPool
+
         Resource(String fileName) {
             mFileName = fileName;
             mSampleId = EFFECT_NOT_IN_SOUND_POOL;
         }
+
         void unload() {
             mSampleId = EFFECT_NOT_IN_SOUND_POOL;
             mLoaded = false;
         }
     }
+
     // All the fields below are accessed by the worker thread exclusively
     private final List<Resource> mResources = new ArrayList<Resource>();
     private final int[] mEffects = new int[AudioManager.NUM_SOUND_EFFECTS]; // indexes in mResources
@@ -116,9 +120,9 @@ class SoundEffectsHelper {
     }
 
     /**
-     *  Unloads samples from the sound pool.
-     *  This method can be called to free some memory when
-     *  sound effects are disabled.
+     * Unloads samples from the sound pool.
+     * This method can be called to free some memory when
+     * sound effects are disabled.
      */
     /*package*/ void unloadSoundEffects() {
         sendMsg(MSG_UNLOAD_EFFECTS, 0, 0, null, 0);
@@ -385,12 +389,12 @@ class SoundEffectsHelper {
                     }
                 }
 
-                boolean fastScrollSoundEffectsParsed = allFastScrollSoundsParsed(parserCounter);
+                boolean navigationRepeatFxParsed = allNavigationRepeatSoundsParsed(parserCounter);
                 boolean homeSoundParsed = parserCounter.getOrDefault(AudioManager.FX_HOME, 0) > 0;
-                if (fastScrollSoundEffectsParsed || homeSoundParsed) {
+                if (navigationRepeatFxParsed || homeSoundParsed) {
                     AudioManager audioManager = mContext.getSystemService(AudioManager.class);
-                    if (audioManager != null && fastScrollSoundEffectsParsed) {
-                        audioManager.setFastScrollSoundEffectsEnabled(true);
+                    if (audioManager != null && navigationRepeatFxParsed) {
+                        audioManager.setNavigationRepeatSoundEffectsEnabled(true);
                     }
                     if (audioManager != null && homeSoundParsed) {
                         audioManager.setHomeSoundEffectEnabled(true);
@@ -410,13 +414,13 @@ class SoundEffectsHelper {
         }
     }
 
-    private boolean allFastScrollSoundsParsed(Map<Integer, Integer> parserCounter) {
+    private boolean allNavigationRepeatSoundsParsed(Map<Integer, Integer> parserCounter) {
         int numFastScrollSoundEffectsParsed =
-                parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_1, 0)
-                        + parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_2, 0)
-                        + parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_3, 0)
-                        + parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_4, 0);
-        return numFastScrollSoundEffectsParsed == AudioManager.NUM_FAST_SCROLL_SOUND_EFFECTS;
+                parserCounter.getOrDefault(AudioManager.FX_FOCUS_NAVIGATION_REPEAT_1, 0)
+                        + parserCounter.getOrDefault(AudioManager.FX_FOCUS_NAVIGATION_REPEAT_2, 0)
+                        + parserCounter.getOrDefault(AudioManager.FX_FOCUS_NAVIGATION_REPEAT_3, 0)
+                        + parserCounter.getOrDefault(AudioManager.FX_FOCUS_NAVIGATION_REPEAT_4, 0);
+        return numFastScrollSoundEffectsParsed == AudioManager.NUM_NAVIGATION_REPEAT_SOUND_EFFECTS;
     }
 
     private int findOrAddResourceByFileName(String fileName) {

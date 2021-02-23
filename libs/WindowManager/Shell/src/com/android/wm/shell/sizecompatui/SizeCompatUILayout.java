@@ -30,7 +30,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
-import android.view.Gravity;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
@@ -43,7 +42,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 
 /**
  * Records and handles layout of size compat UI on a task with size compat activity. Helps to
- * calculate proper bounds when configuration or button position changes.
+ * calculate proper bounds when configuration or UI position changes.
  */
 class SizeCompatUILayout {
     private static final String TAG = "SizeCompatUILayout";
@@ -56,12 +55,18 @@ class SizeCompatUILayout {
     private IBinder mActivityToken;
     private ShellTaskOrganizer.TaskListener mTaskListener;
     private DisplayLayout mDisplayLayout;
-    @VisibleForTesting
-    final SizeCompatUIWindowManager mWindowManager;
 
+    @VisibleForTesting
+    final SizeCompatUIWindowManager mButtonWindowManager;
+    @VisibleForTesting
+    @Nullable
+    SizeCompatUIWindowManager mHintWindowManager;
     @VisibleForTesting
     @Nullable
     SizeCompatRestartButton mButton;
+    @VisibleForTesting
+    @Nullable
+    SizeCompatHintPopup mHint;
     final int mButtonSize;
     final int mPopupOffsetX;
     final int mPopupOffsetY;
@@ -79,7 +84,7 @@ class SizeCompatUILayout {
         mTaskListener = taskListener;
         mDisplayLayout = displayLayout;
         mShouldShowHint = !hasShownHint;
-        mWindowManager = new SizeCompatUIWindowManager(mContext, taskConfig, this);
+        mButtonWindowManager = new SizeCompatUIWindowManager(mContext, taskConfig, this);
 
         mButtonSize =
                 mContext.getResources().getDimensionPixelSize(R.dimen.size_compat_button_size);
@@ -87,21 +92,52 @@ class SizeCompatUILayout {
         mPopupOffsetY = mButtonSize;
     }
 
-    /** Creates the button window. */
+    /** Creates the activity restart button window. */
     void createSizeCompatButton(boolean isImeShowing) {
         if (isImeShowing || mButton != null) {
             // When ime is showing, wait until ime is dismiss to create UI.
             return;
         }
-        mButton = mWindowManager.createSizeCompatUI();
-        updateSurfacePosition();
+        mButton = mButtonWindowManager.createSizeCompatButton();
+        updateButtonSurfacePosition();
+
+        if (mShouldShowHint) {
+            // Only show by default for the first time.
+            mShouldShowHint = false;
+            createSizeCompatHint();
+        }
     }
 
-    /** Releases the button window. */
+    /** Creates the restart button hint window. */
+    private void createSizeCompatHint() {
+        if (mHint != null) {
+            // Hint already shown.
+            return;
+        }
+        mHintWindowManager = createHintWindowManager();
+        mHint = mHintWindowManager.createSizeCompatHint();
+        updateHintSurfacePosition();
+    }
+
+    @VisibleForTesting
+    SizeCompatUIWindowManager createHintWindowManager() {
+        return new SizeCompatUIWindowManager(mContext, mTaskConfig, this);
+    }
+
+    /** Dismisses the hint window. */
+    void dismissHint() {
+        mHint = null;
+        if (mHintWindowManager != null) {
+            mHintWindowManager.release();
+            mHintWindowManager = null;
+        }
+    }
+
+    /** Releases the UI windows. */
     void release() {
-        mButton.remove();
+        dismissHint();
         mButton = null;
-        mWindowManager.release();
+        mButtonWindowManager.release();
     }
 
     /** Called when size compat info changed. */
@@ -115,7 +151,10 @@ class SizeCompatUILayout {
 
         // Update configuration.
         mContext = mContext.createConfigurationContext(taskConfig);
-        mWindowManager.setConfiguration(taskConfig);
+        mButtonWindowManager.setConfiguration(taskConfig);
+        if (mHintWindowManager != null) {
+            mHintWindowManager.setConfiguration(taskConfig);
+        }
 
         if (mButton == null || prevTaskListener != taskListener) {
             // TaskListener changed, recreate the button for new surface parent.
@@ -126,14 +165,19 @@ class SizeCompatUILayout {
 
         if (!taskConfig.windowConfiguration.getBounds()
                 .equals(prevTaskConfig.windowConfiguration.getBounds())) {
-            // Reposition the button surface.
-            updateSurfacePosition();
+            // Reposition the UI surfaces.
+            updateButtonSurfacePosition();
+            updateHintSurfacePosition();
         }
 
         if (taskConfig.getLayoutDirection() != prevTaskConfig.getLayoutDirection()) {
             // Update layout for RTL.
             mButton.setLayoutDirection(taskConfig.getLayoutDirection());
-            updateSurfacePosition();
+            updateButtonSurfacePosition();
+            if (mHint != null) {
+                mHint.setLayoutDirection(taskConfig.getLayoutDirection());
+                updateHintSurfacePosition();
+            }
         }
     }
 
@@ -149,8 +193,9 @@ class SizeCompatUILayout {
         displayLayout.getStableBounds(curStableBounds);
         mDisplayLayout = displayLayout;
         if (!prevStableBounds.equals(curStableBounds)) {
-            // Stable bounds changed, update button surface position.
-            updateSurfacePosition();
+            // Stable bounds changed, update UI surface positions.
+            updateButtonSurfacePosition();
+            updateHintSurfacePosition();
         }
     }
 
@@ -162,27 +207,46 @@ class SizeCompatUILayout {
             return;
         }
 
+        // Hide size compat UIs when IME is showing.
         final int newVisibility = isImeShowing ? View.GONE : View.VISIBLE;
         if (mButton.getVisibility() != newVisibility) {
             mButton.setVisibility(newVisibility);
         }
+        if (mHint != null && mHint.getVisibility() != newVisibility) {
+            mHint.setVisibility(newVisibility);
+        }
     }
 
     /** Gets the layout params for restart button. */
-    WindowManager.LayoutParams getWindowLayoutParams() {
+    WindowManager.LayoutParams getButtonWindowLayoutParams() {
         final WindowManager.LayoutParams winParams = new WindowManager.LayoutParams(
+                // Cannot be wrap_content as this determines the actual window size
                 mButtonSize, mButtonSize,
                 TYPE_APPLICATION_OVERLAY,
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
-        winParams.gravity = getGravity(getLayoutDirection());
         winParams.token = new Binder();
-        winParams.setTitle(SizeCompatRestartButton.class.getSimpleName() + mContext.getDisplayId());
+        winParams.setTitle(SizeCompatRestartButton.class.getSimpleName() + getTaskId());
         winParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         return winParams;
     }
 
-    /** Called when it is ready to be placed button surface button. */
+    /** Gets the layout params for hint popup. */
+    WindowManager.LayoutParams getHintWindowLayoutParams(SizeCompatHintPopup hint) {
+        final WindowManager.LayoutParams winParams = new WindowManager.LayoutParams(
+                // Cannot be wrap_content as this determines the actual window size
+                hint.getMeasuredWidth(), hint.getMeasuredHeight(),
+                TYPE_APPLICATION_OVERLAY,
+                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        winParams.token = new Binder();
+        winParams.setTitle(SizeCompatHintPopup.class.getSimpleName() + getTaskId());
+        winParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
+        winParams.windowAnimations = android.R.style.Animation_InputMethod;
+        return winParams;
+    }
+
+    /** Called when it is ready to be placed size compat UI surface. */
     void attachToParentSurface(SurfaceControl.Builder b) {
         mTaskListener.attachChildSurfaceToTask(mTaskId, b);
     }
@@ -192,13 +256,17 @@ class SizeCompatUILayout {
         ActivityClient.getInstance().restartActivityProcessIfVisible(mActivityToken);
     }
 
+    /** Called when the restart button is long clicked. */
+    void onRestartButtonLongClicked() {
+        createSizeCompatHint();
+    }
+
     @VisibleForTesting
-    void updateSurfacePosition() {
-        if (mButton == null || mWindowManager.getSurfaceControl() == null) {
+    void updateButtonSurfacePosition() {
+        if (mButton == null || mButtonWindowManager.getSurfaceControl() == null) {
             return;
         }
-        // The hint popup won't be at the correct position.
-        mButton.dismissHint();
+        final SurfaceControl leash = mButtonWindowManager.getSurfaceControl();
 
         // Use stable bounds to prevent the button from overlapping with system bars.
         final Rect taskBounds = mTaskConfig.windowConfiguration.getBounds();
@@ -212,8 +280,30 @@ class SizeCompatUILayout {
                 : stableBounds.right - taskBounds.left - mButtonSize;
         final int positionY = stableBounds.bottom - taskBounds.top - mButtonSize;
 
-        mSyncQueue.runInSync(t ->
-                t.setPosition(mWindowManager.getSurfaceControl(), positionX, positionY));
+        mSyncQueue.runInSync(t -> t.setPosition(leash, positionX, positionY));
+    }
+
+    void updateHintSurfacePosition() {
+        if (mHint == null || mHintWindowManager == null
+                || mHintWindowManager.getSurfaceControl() == null) {
+            return;
+        }
+        final SurfaceControl leash = mHintWindowManager.getSurfaceControl();
+
+        // Use stable bounds to prevent the hint from overlapping with system bars.
+        final Rect taskBounds = mTaskConfig.windowConfiguration.getBounds();
+        final Rect stableBounds = new Rect();
+        mDisplayLayout.getStableBounds(stableBounds);
+        stableBounds.intersect(taskBounds);
+
+        // Position of the hint in the container coordinate.
+        final int positionX = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
+                ? stableBounds.left - taskBounds.left + mPopupOffsetX
+                : stableBounds.right - taskBounds.left - mPopupOffsetX - mHint.getMeasuredWidth();
+        final int positionY =
+                stableBounds.bottom - taskBounds.top - mPopupOffsetY - mHint.getMeasuredHeight();
+
+        mSyncQueue.runInSync(t -> t.setPosition(leash, positionX, positionY));
     }
 
     int getDisplayId() {
@@ -226,10 +316,5 @@ class SizeCompatUILayout {
 
     private int getLayoutDirection() {
         return mContext.getResources().getConfiguration().getLayoutDirection();
-    }
-
-    static int getGravity(int layoutDirection) {
-        return Gravity.BOTTOM
-                | (layoutDirection == View.LAYOUT_DIRECTION_RTL ? Gravity.START : Gravity.END);
     }
 }

@@ -217,41 +217,30 @@ static jobjectArray nativeGetStateResidency(JNIEnv *env, jclass clazz, jintArray
     jobjectArray stateResidencyResultArray = nullptr;
     Return<void> ret = gPowerStatsHalV1_0_ptr->getPowerEntityStateResidencyData(
             powerEntityIdVector, [&env, &stateResidencyResultArray](auto results, auto status) {
-                if (status != Status::SUCCESS) {
-                    ALOGE("Error getting power entity state residency data");
-                } else {
-                    stateResidencyResultArray =
-                            env->NewObjectArray(results.size(), class_SRR, nullptr);
-                    for (int i = 0; i < results.size(); i++) {
-                        jobjectArray stateResidencyArray =
-                                env->NewObjectArray(results[i].stateResidencyData.size(), class_SR,
-                                                    nullptr);
-                        for (int j = 0; j < results[i].stateResidencyData.size(); j++) {
-                            jobject stateResidency = env->NewObject(class_SR, method_SR_init);
-                            env->SetIntField(stateResidency, field_SR_id,
-                                             results[i].stateResidencyData[j].powerEntityStateId);
-                            env->SetLongField(stateResidency, field_SR_totalTimeInStateMs,
-                                              results[i].stateResidencyData[j].totalTimeInStateMs);
-                            env->SetLongField(stateResidency, field_SR_totalStateEntryCount,
-                                              results[i]
-                                                      .stateResidencyData[j]
-                                                      .totalStateEntryCount);
-                            env->SetLongField(stateResidency, field_SR_lastEntryTimestampMs,
-                                              results[i]
-                                                      .stateResidencyData[j]
-                                                      .lastEntryTimestampMs);
-                            env->SetObjectArrayElement(stateResidencyArray, j, stateResidency);
-                            env->DeleteLocalRef(stateResidency);
-                        }
-                        jobject stateResidencyResult = env->NewObject(class_SRR, method_SRR_init);
-                        env->SetIntField(stateResidencyResult, field_SRR_id,
-                                         results[i].powerEntityId);
-                        env->SetObjectField(stateResidencyResult, field_SRR_stateResidencyData,
-                                            stateResidencyArray);
-                        env->SetObjectArrayElement(stateResidencyResultArray, i,
-                                                   stateResidencyResult);
-                        env->DeleteLocalRef(stateResidencyResult);
+                stateResidencyResultArray = env->NewObjectArray(results.size(), class_SRR, nullptr);
+                for (int i = 0; i < results.size(); i++) {
+                    jobjectArray stateResidencyArray =
+                            env->NewObjectArray(results[i].stateResidencyData.size(), class_SR,
+                                                nullptr);
+                    for (int j = 0; j < results[i].stateResidencyData.size(); j++) {
+                        jobject stateResidency = env->NewObject(class_SR, method_SR_init);
+                        env->SetIntField(stateResidency, field_SR_id,
+                                         results[i].stateResidencyData[j].powerEntityStateId);
+                        env->SetLongField(stateResidency, field_SR_totalTimeInStateMs,
+                                          results[i].stateResidencyData[j].totalTimeInStateMs);
+                        env->SetLongField(stateResidency, field_SR_totalStateEntryCount,
+                                          results[i].stateResidencyData[j].totalStateEntryCount);
+                        env->SetLongField(stateResidency, field_SR_lastEntryTimestampMs,
+                                          results[i].stateResidencyData[j].lastEntryTimestampMs);
+                        env->SetObjectArrayElement(stateResidencyArray, j, stateResidency);
+                        env->DeleteLocalRef(stateResidency);
                     }
+                    jobject stateResidencyResult = env->NewObject(class_SRR, method_SRR_init);
+                    env->SetIntField(stateResidencyResult, field_SRR_id, results[i].powerEntityId);
+                    env->SetObjectField(stateResidencyResult, field_SRR_stateResidencyData,
+                                        stateResidencyArray);
+                    env->SetObjectArrayElement(stateResidencyResultArray, i, stateResidencyResult);
+                    env->DeleteLocalRef(stateResidencyResult);
                 }
             });
     if (!checkResult(ret, __func__)) {
@@ -320,30 +309,25 @@ static jobjectArray nativeReadEnergyMeters(JNIEnv *env, jclass clazz, jintArray 
             gPowerStatsHalV1_0_ptr
                     ->getEnergyData(channelIdVector,
                                     [&env, &energyMeasurementArray](auto energyData, auto status) {
-                                        if (status != Status::SUCCESS) {
-                                            ALOGW("Error getting energy data");
-                                        } else {
-                                            energyMeasurementArray =
-                                                    env->NewObjectArray(energyData.size(), class_EM,
-                                                                        nullptr);
-                                            for (int i = 0; i < energyData.size(); i++) {
-                                                jobject energyMeasurement =
-                                                        env->NewObject(class_EM, method_EM_init);
-                                                env->SetIntField(energyMeasurement, field_EM_id,
-                                                                 energyData[i].index);
-                                                env->SetLongField(energyMeasurement,
-                                                                  field_EM_timestampMs,
-                                                                  energyData[i].timestamp);
-                                                env->SetLongField(energyMeasurement,
-                                                                  field_EM_durationMs,
-                                                                  energyData[i].timestamp);
-                                                env->SetLongField(energyMeasurement,
-                                                                  field_EM_energyUWs,
-                                                                  energyData[i].energy);
-                                                env->SetObjectArrayElement(energyMeasurementArray,
-                                                                           i, energyMeasurement);
-                                                env->DeleteLocalRef(energyMeasurement);
-                                            }
+                                        energyMeasurementArray =
+                                                env->NewObjectArray(energyData.size(), class_EM,
+                                                                    nullptr);
+                                        for (int i = 0; i < energyData.size(); i++) {
+                                            jobject energyMeasurement =
+                                                    env->NewObject(class_EM, method_EM_init);
+                                            env->SetIntField(energyMeasurement, field_EM_id,
+                                                             energyData[i].index);
+                                            env->SetLongField(energyMeasurement,
+                                                              field_EM_timestampMs,
+                                                              energyData[i].timestamp);
+                                            env->SetLongField(energyMeasurement,
+                                                              field_EM_durationMs,
+                                                              energyData[i].timestamp);
+                                            env->SetLongField(energyMeasurement, field_EM_energyUWs,
+                                                              energyData[i].energy);
+                                            env->SetObjectArrayElement(energyMeasurementArray, i,
+                                                                       energyMeasurement);
+                                            env->DeleteLocalRef(energyMeasurement);
                                         }
                                     });
 

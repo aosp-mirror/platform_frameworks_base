@@ -1617,7 +1617,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
     // Need a shared pointer: will be passing it into all unpacking jobs.
     std::shared_ptr<ZipArchive> zipFile(zipFileHandle, [](ZipArchiveHandle h) { CloseArchive(h); });
     void* cookie = nullptr;
-    const auto libFilePrefix = path::join(constants().libDir, abi) + "/";
+    const auto libFilePrefix = path::join(constants().libDir, abi) += "/";
     if (StartIteration(zipFile.get(), &cookie, libFilePrefix, constants().libSuffix)) {
         LOG(ERROR) << "Failed to start zip iteration for " << apkFullPath;
         return false;
@@ -1627,6 +1627,17 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
 
     auto openZipTs = Clock::now();
 
+    auto mapFiles = (mIncFs->features() & incfs::Features::v2);
+    incfs::FileId sourceId;
+    if (mapFiles) {
+        sourceId = mIncFs->getFileId(ifs->control, apkFullPath);
+        if (!incfs::isValidFileId(sourceId)) {
+            LOG(WARNING) << "Error getting IncFS file ID for apk path '" << apkFullPath
+                         << "', mapping disabled";
+            mapFiles = false;
+        }
+    }
+
     std::vector<Job> jobQueue;
     ZipEntry entry;
     std::string_view fileName;
@@ -1635,13 +1646,16 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
             continue;
         }
 
+        const auto entryUncompressed = entry.method == kCompressStored;
+        const auto entryPageAligned = (entry.offset & (constants().blockSize - 1)) == 0;
+
         if (!extractNativeLibs) {
             // ensure the file is properly aligned and unpacked
-            if (entry.method != kCompressStored) {
+            if (!entryUncompressed) {
                 LOG(WARNING) << "Library " << fileName << " must be uncompressed to mmap it";
                 return false;
             }
-            if ((entry.offset & (constants().blockSize - 1)) != 0) {
+            if (!entryPageAligned) {
                 LOG(WARNING) << "Library " << fileName
                              << " must be page-aligned to mmap it, offset = 0x" << std::hex
                              << entry.offset;
@@ -1665,6 +1679,28 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
             continue;
         }
 
+        if (mapFiles && entryUncompressed && entryPageAligned && entry.uncompressed_length > 0) {
+            incfs::NewMappedFileParams mappedFileParams = {
+                    .sourceId = sourceId,
+                    .sourceOffset = entry.offset,
+                    .size = entry.uncompressed_length,
+            };
+
+            if (auto res = mIncFs->makeMappedFile(ifs->control, targetLibPathAbsolute, 0755,
+                                                  mappedFileParams);
+                res == 0) {
+                if (perfLoggingEnabled()) {
+                    auto doneTs = Clock::now();
+                    LOG(INFO) << "incfs: Mapped " << libName << ": "
+                              << elapsedMcs(startFileTs, doneTs) << "mcs";
+                }
+                continue;
+            } else {
+                LOG(WARNING) << "Failed to map file for: '" << targetLibPath << "' errno: " << res
+                             << "; falling back to full extraction";
+            }
+        }
+
         // Create new lib file without signature info
         incfs::NewFileParams libFileParams = {
                 .size = entry.uncompressed_length,
@@ -1673,7 +1709,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
                 .metadata = {targetLibPath.c_str(), (IncFsSize)targetLibPath.size()},
         };
         incfs::FileId libFileId = idFromMetadata(targetLibPath);
-        if (auto res = mIncFs->makeFile(ifs->control, targetLibPathAbsolute, 0777, libFileId,
+        if (auto res = mIncFs->makeFile(ifs->control, targetLibPathAbsolute, 0755, libFileId,
                                         libFileParams)) {
             LOG(ERROR) << "Failed to make file for: " << targetLibPath << " errno: " << res;
             // If one lib file fails to be created, abort others as well
@@ -1900,25 +1936,33 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPath(
-        const IncFsMount& ifs, std::string_view storagePath, bool stopOnFirstIncomplete) const {
-    ssize_t totalBlocks = 0, filledBlocks = 0;
-    const auto filePaths = mFs->listFilesRecursive(storagePath);
-    for (const auto& filePath : filePaths) {
+        const IncFsMount& ifs, std::string_view storagePath,
+        const bool stopOnFirstIncomplete) const {
+    ssize_t totalBlocks = 0, filledBlocks = 0, error = 0;
+    mFs->listFilesRecursive(storagePath, [&, this](auto filePath) {
         const auto [filledBlocksCount, totalBlocksCount] =
                 mIncFs->countFilledBlocks(ifs.control, filePath);
+        if (filledBlocksCount == -EOPNOTSUPP || filledBlocksCount == -ENOTSUP ||
+            filledBlocksCount == -ENOENT) {
+            // a kind of a file that's not really being loaded, e.g. a mapped range
+            // an older IncFS used to return ENOENT in this case, so handle it the same way
+            return true;
+        }
         if (filledBlocksCount < 0) {
             LOG(ERROR) << "getLoadingProgress failed to get filled blocks count for: " << filePath
                        << " errno: " << filledBlocksCount;
-            return {filledBlocksCount, filledBlocksCount};
+            error = filledBlocksCount;
+            return false;
         }
         totalBlocks += totalBlocksCount;
         filledBlocks += filledBlocksCount;
         if (stopOnFirstIncomplete && filledBlocks < totalBlocks) {
-            break;
+            return false;
         }
-    }
+        return true;
+    });
 
-    return {filledBlocks, totalBlocks};
+    return error ? LoadingProgress{error, error} : LoadingProgress{filledBlocks, totalBlocks};
 }
 
 bool IncrementalService::updateLoadingProgress(

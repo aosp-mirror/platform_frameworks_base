@@ -14615,11 +14615,6 @@ package android.graphics {
     enum_constant public static final android.graphics.BlurMaskFilter.Blur SOLID;
   }
 
-  public final class BlurShader extends android.graphics.Shader {
-    ctor public BlurShader(float, float, @Nullable android.graphics.Shader);
-    ctor public BlurShader(float, float, @Nullable android.graphics.Shader, @NonNull android.graphics.Shader.TileMode);
-  }
-
   public class Camera {
     ctor public Camera();
     method public void applyToCanvas(android.graphics.Canvas);
@@ -18536,6 +18531,23 @@ package android.hardware.camera2.params {
 }
 
 package android.hardware.display {
+
+  public final class DeviceProductInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConnectionToSinkType();
+    method public int getManufactureWeek();
+    method public int getManufactureYear();
+    method @NonNull public String getManufacturerPnpId();
+    method public int getModelYear();
+    method @Nullable public String getName();
+    method @NonNull public String getProductId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_TO_SINK_BUILT_IN = 1; // 0x1
+    field public static final int CONNECTION_TO_SINK_DIRECT = 2; // 0x2
+    field public static final int CONNECTION_TO_SINK_TRANSITIVE = 3; // 0x3
+    field public static final int CONNECTION_TO_SINK_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.DeviceProductInfo> CREATOR;
+  }
 
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int);
@@ -46613,6 +46625,7 @@ package android.view {
     method public long getAppVsyncOffsetNanos();
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method @Nullable public android.view.DisplayCutout getCutout();
+    method @Nullable public android.hardware.display.DeviceProductInfo getDeviceProductInfo();
     method public int getDisplayId();
     method public int getFlags();
     method public android.view.Display.HdrCapabilities getHdrCapabilities();
@@ -55055,6 +55068,8 @@ package android.widget {
     method public void setChronometer(@IdRes int, long, String, boolean);
     method public void setChronometerCountDown(@IdRes int, boolean);
     method public void setColor(@IdRes int, @NonNull String, @ColorRes int);
+    method public void setColorInt(@IdRes int, @NonNull String, @ColorInt int, @ColorInt int);
+    method public void setColorStateList(@IdRes int, @NonNull String, @Nullable android.content.res.ColorStateList, @Nullable android.content.res.ColorStateList);
     method public void setColorStateList(@IdRes int, @NonNull String, @ColorRes int);
     method public void setCompoundButtonChecked(@IdRes int, boolean);
     method public void setContentDescription(@IdRes int, CharSequence);
@@ -55065,6 +55080,7 @@ package android.widget {
     method public void setFloatDimen(@IdRes int, @NonNull String, @DimenRes int);
     method public void setFloatDimen(@IdRes int, @NonNull String, float, int);
     method public void setIcon(@IdRes int, String, android.graphics.drawable.Icon);
+    method public void setIcon(@IdRes int, @NonNull String, @Nullable android.graphics.drawable.Icon, @Nullable android.graphics.drawable.Icon);
     method public void setImageViewBitmap(@IdRes int, android.graphics.Bitmap);
     method public void setImageViewIcon(@IdRes int, android.graphics.drawable.Icon);
     method public void setImageViewResource(@IdRes int, @DrawableRes int);

@@ -35,6 +35,7 @@ namespace uirenderer {
 struct DirtyStack;
 class RenderNode;
 class Matrix4;
+class StretchEffect;
 
 class DamageAccumulator {
     PREVENT_COPY_AND_ASSIGN(DamageAccumulator);
@@ -61,6 +62,8 @@ public:
     void computeCurrentTransform(Matrix4* outMatrix) const;
 
     void finish(SkRect* totalDirty);
+
+    const StretchEffect* findNearestStretchEffect() const;
 
 private:
     void pushCommon();

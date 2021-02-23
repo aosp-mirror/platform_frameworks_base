@@ -258,9 +258,9 @@ public final class TimeController extends StateController {
 
         if (jobDeadline <= nowElapsedMillis) {
             if (job.hasTimingDelayConstraint()) {
-                job.setTimingDelayConstraintSatisfied(true);
+                job.setTimingDelayConstraintSatisfied(nowElapsedMillis, true);
             }
-            job.setDeadlineConstraintSatisfied(true);
+            job.setDeadlineConstraintSatisfied(nowElapsedMillis, true);
             return true;
         }
         return false;
@@ -332,7 +332,7 @@ public final class TimeController extends StateController {
     private boolean evaluateTimingDelayConstraint(JobStatus job, long nowElapsedMillis) {
         final long jobDelayTime = job.getEarliestRunTime();
         if (jobDelayTime <= nowElapsedMillis) {
-            job.setTimingDelayConstraintSatisfied(true);
+            job.setTimingDelayConstraintSatisfied(nowElapsedMillis, true);
             return true;
         }
         return false;

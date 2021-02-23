@@ -187,10 +187,7 @@ public class SystemUIToast implements ToastPlugin.Toast {
             mPluginToast.onOrientationChange(orientation);
         }
 
-        mDefaultY = mContext.getResources().getDimensionPixelSize(
-                mToastStyleEnabled
-                        ? com.android.systemui.R.dimen.toast_y_offset
-                        : R.dimen.toast_y_offset);
+        mDefaultY = mContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
         mDefaultGravity =
                 mContext.getResources().getInteger(R.integer.config_toastDefaultGravity);
     }

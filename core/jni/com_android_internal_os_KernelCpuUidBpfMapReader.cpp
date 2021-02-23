@@ -82,25 +82,9 @@ static jboolean KernelCpuUidFreqTimeBpfMapReader_readBpfData(JNIEnv *env, jobjec
     return true;
 }
 
-static jlongArray KernelCpuUidFreqTimeBpfMapReader_getDataDimensions(JNIEnv *env, jobject) {
-    auto freqs = android::bpf::getCpuFreqs();
-    if (!freqs) return NULL;
-
-    std::vector<uint64_t> allFreqs;
-    for (const auto &vec : *freqs) std::copy(vec.begin(), vec.end(), std::back_inserter(allFreqs));
-
-    auto ar = env->NewLongArray(allFreqs.size());
-    if (ar != NULL) {
-        env->SetLongArrayRegion(ar, 0, allFreqs.size(),
-                                reinterpret_cast<const jlong *>(allFreqs.data()));
-    }
-    return ar;
-}
-
 static const JNINativeMethod gFreqTimeMethods[] = {
         {"removeUidRange", "(II)Z", (void *)KernelCpuUidFreqTimeBpfMapReader_removeUidRange},
         {"readBpfData", "()Z", (void *)KernelCpuUidFreqTimeBpfMapReader_readBpfData},
-        {"getDataDimensions", "()[J", (void *)KernelCpuUidFreqTimeBpfMapReader_getDataDimensions},
 };
 
 static jboolean KernelCpuUidActiveTimeBpfMapReader_readBpfData(JNIEnv *env, jobject thiz) {
@@ -186,10 +170,6 @@ static const readerMethods gAllMethods[] = {
         {"KernelCpuUidClusterTimeBpfMapReader", gClusterTimeMethods, NELEM(gClusterTimeMethods)},
 };
 
-static jboolean KernelCpuUidBpfMapReader_startTrackingBpfTimes(JNIEnv *, jobject) {
-    return android::bpf::startTrackingUidTimes();
-}
-
 int register_com_android_internal_os_KernelCpuUidBpfMapReader(JNIEnv *env) {
     gSparseArrayClassInfo.clazz = FindClassOrDie(env, "android/util/SparseArray");
     gSparseArrayClassInfo.clazz = MakeGlobalRefOrDie(env, gSparseArrayClassInfo.clazz);
@@ -198,14 +178,10 @@ int register_com_android_internal_os_KernelCpuUidBpfMapReader(JNIEnv *env) {
     gSparseArrayClassInfo.get =
             GetMethodIDOrDie(env, gSparseArrayClassInfo.clazz, "get", "(I)Ljava/lang/Object;");
     constexpr auto readerName = "com/android/internal/os/KernelCpuUidBpfMapReader";
-    constexpr JNINativeMethod method = {"startTrackingBpfTimes", "()Z",
-                                        (void *)KernelCpuUidBpfMapReader_startTrackingBpfTimes};
-
-    int ret = RegisterMethodsOrDie(env, readerName, &method, 1);
-    if (ret < 0) return ret;
     auto c = FindClassOrDie(env, readerName);
     gmData = GetFieldIDOrDie(env, c, "mData", "Landroid/util/SparseArray;");
 
+    int ret = 0;
     for (const auto &m : gAllMethods) {
         auto fullName = android::base::StringPrintf("%s$%s", readerName, m.name);
         ret = RegisterMethodsOrDie(env, fullName.c_str(), m.methods, m.numMethods);
