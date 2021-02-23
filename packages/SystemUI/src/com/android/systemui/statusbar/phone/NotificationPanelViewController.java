@@ -196,7 +196,8 @@ public class NotificationPanelViewController extends PanelViewController {
             new MyOnHeadsUpChangedListener();
     private final HeightListener mHeightListener = new HeightListener();
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
-    private final StatusBarStateListener mStatusBarStateListener = new StatusBarStateListener();
+    @VisibleForTesting final StatusBarStateListener mStatusBarStateListener =
+            new StatusBarStateListener();
     private final ExpansionCallback mExpansionCallback = new ExpansionCallback();
     private final BiometricUnlockController mBiometricUnlockController;
     private final NotificationPanelView mView;
@@ -280,18 +281,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public void onKeyguardVisibilityChanged(boolean showing) {
-                    if (mDisabledUdfpsController == null
-                            && mAuthController.getUdfpsRegion() != null
-                            && mAuthController.isUdfpsEnrolled(
-                                   KeyguardUpdateMonitor.getCurrentUser())) {
-                        mLayoutInflater.inflate(R.layout.disabled_udfps_view, mView);
-                        mDisabledUdfpsController = new DisabledUdfpsController(
-                                mView.findViewById(R.id.disabled_udfps_view),
-                                mStatusBarStateController,
-                                mUpdateMonitor,
-                                mAuthController,
-                                mStatusBarKeyguardViewManager);
-                        mDisabledUdfpsController.init();
+                    if (showing) {
+                        updateDisabledUdfpsController();
                     }
                 }
     };
@@ -473,7 +464,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private ArrayList<Consumer<ExpandableNotificationRow>>
             mTrackingHeadsUpListeners =
             new ArrayList<>();
-    private ArrayList<Runnable> mVerticalTranslationListener = new ArrayList<>();
+    private Runnable mVerticalTranslationListener;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     private int mPanelAlpha;
@@ -867,25 +858,16 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void updateResources() {
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
-        ViewGroup.LayoutParams lp = mQsFrame.getLayoutParams();
-        if (lp.width != qsWidth) {
-            lp.width = qsWidth;
-            mQsFrame.setLayoutParams(lp);
-        }
-
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
-        lp = mNotificationStackScrollLayoutController.getLayoutParams();
-        if (lp.width != panelWidth) {
-            lp.width = panelWidth;
-            mNotificationStackScrollLayoutController.setLayoutParams(lp);
-        }
 
-        // In order to change the constraints at runtime, all children of the Constraint Layout
-        // must have ids.
+        // To change the constraints at runtime, all children of the ConstraintLayout must have ids
         ensureAllViewsHaveIds(mNotificationContainerParent);
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(mNotificationContainerParent);
         if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+            // width = 0 to take up all available space within constraints
+            qsWidth = 0;
+            panelWidth = 0;
             constraintSet.connect(R.id.qs_frame, END, R.id.qs_edge_guideline, END);
             constraintSet.connect(
                     R.id.notification_stack_scroller, START,
@@ -894,6 +876,8 @@ public class NotificationPanelViewController extends PanelViewController {
             constraintSet.connect(R.id.qs_frame, END, PARENT_ID, END);
             constraintSet.connect(R.id.notification_stack_scroller, START, PARENT_ID, START);
         }
+        constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
+        constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
         constraintSet.applyTo(mNotificationContainerParent);
     }
 
@@ -1852,7 +1836,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
-    private void setQsExpanded(boolean expanded) {
+    @VisibleForTesting void setQsExpanded(boolean expanded) {
         boolean changed = mQsExpanded != expanded;
         if (changed) {
             mQsExpanded = expanded;
@@ -1955,8 +1939,10 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQsState() {
         mNotificationStackScrollLayoutController.setQsExpanded(mQsExpanded);
         mNotificationStackScrollLayoutController.setScrollingEnabled(
-                mBarState != KEYGUARD && (!mQsExpanded
-                        || mQsExpansionFromOverscroll));
+                mBarState != KEYGUARD
+                        && (!mQsExpanded
+                            || mQsExpansionFromOverscroll
+                            || Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)));
 
         if (mKeyguardUserSwitcherController != null && mQsExpanded
                 && !mStackScrollerOverscrolling) {
@@ -2236,13 +2222,16 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected boolean canCollapsePanelOnTouch() {
-        if (!isInSettings()) {
-            return mBarState == KEYGUARD
-                    || mIsPanelCollapseOnQQS
-                    || mNotificationStackScrollLayoutController.isScrolledToBottom();
-        } else {
+        if (!isInSettings() && mBarState == KEYGUARD) {
             return true;
         }
+
+        if (mNotificationStackScrollLayoutController.isScrolledToBottom()) {
+            return true;
+        }
+
+        return !Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)
+                && (isInSettings() || mIsPanelCollapseOnQQS);
     }
 
     @Override
@@ -2920,7 +2909,8 @@ public class NotificationPanelViewController extends PanelViewController {
      * @param x the x-coordinate the touch event
      */
     protected void updateHorizontalPanelPosition(float x) {
-        if (mNotificationStackScrollLayoutController.getWidth() * 1.75f > mView.getWidth()) {
+        if (mNotificationStackScrollLayoutController.getWidth() * 1.75f > mView.getWidth()
+                || Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
             resetHorizontalPanelPosition();
             return;
         }
@@ -2948,9 +2938,8 @@ public class NotificationPanelViewController extends PanelViewController {
     protected void setHorizontalPanelTranslation(float translation) {
         mNotificationStackScrollLayoutController.setTranslationX(translation);
         mQsFrame.setTranslationX(translation);
-        int size = mVerticalTranslationListener.size();
-        for (int i = 0; i < size; i++) {
-            mVerticalTranslationListener.get(i).run();
+        if (mVerticalTranslationListener != null) {
+            mVerticalTranslationListener.run();
         }
     }
 
@@ -3243,12 +3232,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mTrackingHeadsUpListeners.remove(listener);
     }
 
-    public void addVerticalTranslationListener(Runnable verticalTranslationListener) {
-        mVerticalTranslationListener.add(verticalTranslationListener);
-    }
-
-    public void removeVerticalTranslationListener(Runnable verticalTranslationListener) {
-        mVerticalTranslationListener.remove(verticalTranslationListener);
+    public void setVerticalTranslationListener(Runnable verticalTranslationListener) {
+        mVerticalTranslationListener = verticalTranslationListener;
     }
 
     public void setHeadsUpAppearanceController(
@@ -3566,6 +3551,25 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    private void updateDisabledUdfpsController() {
+        final boolean udfpsEnrolled = mAuthController.getUdfpsRegion() != null
+                && mAuthController.isUdfpsEnrolled(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (mDisabledUdfpsController == null && udfpsEnrolled) {
+            mLayoutInflater.inflate(R.layout.disabled_udfps_view, mView);
+            mDisabledUdfpsController = new DisabledUdfpsController(
+                    mView.findViewById(R.id.disabled_udfps_view),
+                    mStatusBarStateController,
+                    mUpdateMonitor,
+                    mAuthController,
+                    mStatusBarKeyguardViewManager);
+            mDisabledUdfpsController.init();
+        } else if (mDisabledUdfpsController != null && !udfpsEnrolled) {
+            mDisabledUdfpsController.destroy();
+            mDisabledUdfpsController = null;
+        }
+    }
+
     private class OnHeightChangedListener implements ExpandableView.OnHeightChangedListener {
         @Override
         public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
@@ -3615,6 +3619,10 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationStackScrollLayout.OnOverscrollTopChangedListener {
         @Override
         public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
+            // When in split shade, overscroll shouldn't carry through to QS
+            if (Utils.shouldUseSplitNotificationShade(mFeatureFlags, mResources)) {
+                return;
+            }
             cancelQsAnimation();
             if (!mQsExpansionEnabled) {
                 amount = 0f;
@@ -3981,6 +3989,7 @@ public class NotificationPanelViewController extends PanelViewController {
             FragmentHostManager.get(mView).addTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.addCallback(mStatusBarStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
+            updateDisabledUdfpsController();
             mUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
             // Theme might have changed between inflating this view and attaching it to the
             // window, so

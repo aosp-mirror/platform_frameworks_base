@@ -1536,6 +1536,7 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    @TestApi
     public static boolean isUserKeyUnlocked(int userId) {
         if (sStorageManager == null) {
             sStorageManager = IStorageManager.Stub

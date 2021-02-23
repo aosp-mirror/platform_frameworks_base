@@ -141,6 +141,10 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             mChangeListeners.get(i).onMergedOverrideConfigurationChanged(
                     mMergedOverrideConfiguration);
         }
+        dispatchConfigurationToChildren();
+    }
+
+    void dispatchConfigurationToChildren() {
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final ConfigurationContainer child = getChildAt(i);
             child.onConfigurationChanged(mFullConfiguration);

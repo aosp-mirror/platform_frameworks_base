@@ -400,6 +400,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="StretchySurfaceViewActivity"
+                  android:label="SurfaceView/Stretchy Movement"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="GetBitmapSurfaceViewActivity"
              android:label="SurfaceView/GetBitmap with Camera source"
              android:exported="true">

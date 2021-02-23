@@ -1002,10 +1002,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         return false;
     }
 
-    public void onUiModeChanged() {
-        updateBackgroundColors();
-    }
-
     public void setController(NotificationShelfController notificationShelfController) {
         mController = notificationShelfController;
     }

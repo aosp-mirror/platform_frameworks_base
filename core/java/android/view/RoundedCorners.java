@@ -335,7 +335,7 @@ public class RoundedCorners implements Parcelable {
         }
         if (o instanceof RoundedCorners) {
             RoundedCorners r = (RoundedCorners) o;
-            return Arrays.deepEquals(mRoundedCorners, ((RoundedCorners) o).mRoundedCorners);
+            return Arrays.deepEquals(mRoundedCorners, r.mRoundedCorners);
         }
         return false;
     }

@@ -359,8 +359,9 @@ public class QuotaControllerTest {
         // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
         js.setStandbyBucket(FREQUENT_INDEX);
         // Make sure Doze and background-not-restricted don't affect tests.
-        js.setDeviceNotDozingConstraintSatisfied(/* state */ true, /* allowlisted */false);
-        js.setBackgroundNotRestrictedConstraintSatisfied(true);
+        js.setDeviceNotDozingConstraintSatisfied(/* nowElapsed */ sElapsedRealtimeClock.millis(),
+                /* state */ true, /* allowlisted */false);
+        js.setBackgroundNotRestrictedConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         return js;
     }
 

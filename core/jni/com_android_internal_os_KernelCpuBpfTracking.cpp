@@ -24,8 +24,48 @@ static jboolean KernelCpuBpfTracking_isSupported(JNIEnv *, jobject) {
     return android::bpf::isTrackingUidTimesSupported() ? JNI_TRUE : JNI_FALSE;
 }
 
+static jboolean KernelCpuBpfTracking_startTrackingInternal(JNIEnv *, jobject) {
+    return android::bpf::startTrackingUidTimes();
+}
+
+static jlongArray KernelCpuBpfTracking_getFreqsInternal(JNIEnv *env, jobject) {
+    auto freqs = android::bpf::getCpuFreqs();
+    if (!freqs) return NULL;
+
+    std::vector<uint64_t> allFreqs;
+    for (const auto &vec : *freqs) std::copy(vec.begin(), vec.end(), std::back_inserter(allFreqs));
+
+    auto ar = env->NewLongArray(allFreqs.size());
+    if (ar != NULL) {
+        env->SetLongArrayRegion(ar, 0, allFreqs.size(),
+                                reinterpret_cast<const jlong *>(allFreqs.data()));
+    }
+    return ar;
+}
+
+static jintArray KernelCpuBpfTracking_getFreqsClustersInternal(JNIEnv *env, jobject) {
+    auto freqs = android::bpf::getCpuFreqs();
+    if (!freqs) return NULL;
+
+    std::vector<uint32_t> freqsClusters;
+    uint32_t clusters = freqs->size();
+    for (uint32_t c = 0; c < clusters; ++c) {
+        freqsClusters.insert(freqsClusters.end(), (*freqs)[c].size(), c);
+    }
+
+    auto ar = env->NewIntArray(freqsClusters.size());
+    if (ar != NULL) {
+        env->SetIntArrayRegion(ar, 0, freqsClusters.size(),
+                               reinterpret_cast<const jint *>(freqsClusters.data()));
+    }
+    return ar;
+}
+
 static const JNINativeMethod methods[] = {
         {"isSupported", "()Z", (void *)KernelCpuBpfTracking_isSupported},
+        {"startTrackingInternal", "()Z", (void *)KernelCpuBpfTracking_startTrackingInternal},
+        {"getFreqsInternal", "()[J", (void *)KernelCpuBpfTracking_getFreqsInternal},
+        {"getFreqsClustersInternal", "()[I", (void *)KernelCpuBpfTracking_getFreqsClustersInternal},
 };
 
 int register_com_android_internal_os_KernelCpuBpfTracking(JNIEnv *env) {

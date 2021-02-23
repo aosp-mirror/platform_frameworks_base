@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -37,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
+import static com.android.server.wm.utils.WmDisplayCutout.NO_CUTOUT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -300,9 +302,9 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        mImeWindow.mAboveInsetsState = state;
+        mImeWindow.mAboveInsetsState.set(state);
         mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
-                state, displayInfo, null /* displayCutout */, null /* roundedCorners*/);
+                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS);
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);

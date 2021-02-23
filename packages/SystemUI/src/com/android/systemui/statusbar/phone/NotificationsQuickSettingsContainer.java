@@ -18,14 +18,12 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
-import androidx.annotation.DimenRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.systemui.R;
@@ -80,22 +78,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         FragmentHostManager.get(this).removeTagListener(QS.TAG, this);
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        reloadWidth(mQsFrame, R.dimen.qs_panel_width);
-        reloadWidth(mStackScroller, R.dimen.notification_panel_width);
-    }
-
-    /**
-     * Loads the given width resource and sets it on the given View.
-     */
-    private void reloadWidth(View view, @DimenRes int width) {
-        LayoutParams params = (LayoutParams) view.getLayoutParams();
-        params.width = getResources().getDimensionPixelSize(width);
-        view.setLayoutParams(params);
     }
 
     @Override

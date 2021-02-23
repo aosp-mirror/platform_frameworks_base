@@ -272,6 +272,16 @@ public final class RenderNode {
         void positionChanged(long frameNumber, int left, int top, int right, int bottom);
 
         /**
+         * Call to apply a stretch effect to any child SurfaceControl layers
+         *
+         * TODO: Fold this into positionChanged & have HWUI do the ASurfaceControl calls?
+         *
+         * @hide
+         */
+        default void applyStretch(long frameNumber, float left, float top, float right,
+                float bottom, float vecX, float vecY, float maxStretch) { }
+
+        /**
          * Called by native on RenderThread to notify that the view is no longer in the
          * draw tree. UI thread is blocked at this point.
          *
@@ -310,6 +320,14 @@ public final class RenderNode {
         public void positionLost(long frameNumber) {
             for (PositionUpdateListener pul : mListeners) {
                 pul.positionLost(frameNumber);
+            }
+        }
+
+        @Override
+        public void applyStretch(long frameNumber, float left, float top, float right, float bottom,
+                float vecX, float vecY, float maxStretch) {
+            for (PositionUpdateListener pul : mListeners) {
+                pul.applyStretch(frameNumber, left, top, right, bottom, vecX, vecY, maxStretch);
             }
         }
     }
@@ -707,7 +725,7 @@ public final class RenderNode {
         if (1.0 < vecY || vecY < -1.0) {
             throw new IllegalArgumentException("vecY must be in the range [-1, 1], was " + vecY);
         }
-        if (top <= bottom || right <= left) {
+        if (top >= bottom || left >= right) {
             throw new IllegalArgumentException(
                     "Stretch region must not be empty, got "
                             + new RectF(left, top, right, bottom).toString());
