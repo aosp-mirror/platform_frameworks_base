@@ -26,6 +26,7 @@ import android.hardware.Battery;
 import android.hardware.SensorManager;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.hardware.lights.LightsManager;
 import android.os.Build;
 import android.os.NullVibrator;
 import android.os.Parcel;
@@ -88,6 +89,9 @@ public final class InputDevice implements Parcelable {
 
     @GuardedBy("mMotionRanges")
     private Battery mBattery;
+
+    @GuardedBy("mMotionRanges")
+    private LightsManager mLightsManager;
 
     /**
      * A mask for input source classes.
@@ -856,6 +860,21 @@ public final class InputDevice implements Parcelable {
             mBattery = InputManager.getInstance().getInputDeviceBattery(mId, mHasBattery);
         }
         return mBattery;
+    }
+
+    /**
+     * Gets the lights manager associated with the device, if there is one.
+     * Even if the device does not have lights, the result is never null.
+     * Use {@link LightsManager#getLights} to determine whether any lights is
+     * present.
+     *
+     * @return The lights manager associated with the device, never null.
+     */
+    public @NonNull LightsManager getLightsManager() {
+        if (mLightsManager == null) {
+            mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
+        }
+        return mLightsManager;
     }
 
     /**
