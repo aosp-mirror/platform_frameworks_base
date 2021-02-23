@@ -92,6 +92,11 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
     private final @NonNull Set<Integer> mActiveModels = new HashSet<>();
 
     /**
+     * Notifier for changes in capture state.
+     */
+    private final @NonNull ICaptureStateNotifier mNotifier;
+
+    /**
      * Whether capture is active.
      */
     private boolean mCaptureState;
@@ -109,7 +114,8 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
             @NonNull ISoundTriggerHw2 delegate,
             @NonNull ICaptureStateNotifier notifier) {
         mDelegate = delegate;
-        mCaptureState = notifier.registerListener(this);
+        mNotifier = notifier;
+        mCaptureState = mNotifier.registerListener(this);
     }
 
     @Override
@@ -408,6 +414,12 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
             }
             break;
         }
+    }
+
+    @Override
+    public void detach() {
+        mDelegate.detach();
+        mNotifier.unregisterListener(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

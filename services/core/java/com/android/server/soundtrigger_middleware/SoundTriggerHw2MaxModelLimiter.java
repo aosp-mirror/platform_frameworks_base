@@ -54,6 +54,11 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
     }
 
     @Override
+    public void detach() {
+        mDelegate.detach();
+    }
+
+    @Override
     public Properties getProperties() {
         return mDelegate.getProperties();
     }

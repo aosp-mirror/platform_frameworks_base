@@ -58,6 +58,13 @@ class ExternalCaptureStateTracker implements ICaptureStateNotifier {
         }
     }
 
+    @Override
+    public void unregisterListener(Listener listener) {
+        synchronized (mListeners) {
+            mListeners.remove(listener);
+        }
+    }
+
     /**
      * Routine for the background thread. Keeps trying to reconnect.
      */

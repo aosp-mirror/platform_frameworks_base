@@ -230,6 +230,11 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         mUnderlying.reboot();
     }
 
+    @Override
+    public void detach() {
+        mUnderlying.detach();
+    }
+
     private class ModelCallbackEnforcer implements ModelCallback {
         private final ModelCallback mUnderlying;
 

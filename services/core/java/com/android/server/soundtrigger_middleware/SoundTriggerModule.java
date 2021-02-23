@@ -163,6 +163,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      * Resets the transient state of this object.
      */
     private void reset() {
+        mHalService.detach();
         attachToHal();
     }
 

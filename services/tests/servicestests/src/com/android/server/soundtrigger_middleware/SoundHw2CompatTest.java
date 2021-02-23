@@ -177,8 +177,10 @@ public class SoundHw2CompatTest {
 
     @After
     public void tearDown() {
+        mCanonical.detach();
         verifyNoMoreInteractions(mHalDriver);
         verifyNoMoreInteractions(mRebootRunnable);
+        mCaptureStateNotifier.verifyNoMoreListeners();
     }
 
     @Test
@@ -1054,11 +1056,20 @@ public class SoundHw2CompatTest {
             return false;
         }
 
+        @Override
+        public void unregisterListener(Listener listener) {
+            mListeners.remove(listener);
+        }
+
         public void setState(boolean state) {
             mState = state;
             for (Listener listener : mListeners) {
                 listener.onCaptureStateChange(state);
             }
+        }
+
+        public void verifyNoMoreListeners() {
+            assertEquals(0, mListeners.size());
         }
     }
 }

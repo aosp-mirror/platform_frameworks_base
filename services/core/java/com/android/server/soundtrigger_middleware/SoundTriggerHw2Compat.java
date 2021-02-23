@@ -167,6 +167,11 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     }
 
     @Override
+    public void detach() {
+        // No-op.
+    }
+
+    @Override
     public android.hardware.soundtrigger.V2_3.Properties getProperties() {
         return mProperties;
     }

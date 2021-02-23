@@ -21,8 +21,6 @@ import android.annotation.NonNull;
 /**
  * Allow registering listeners for tracking changes in audio capture state (when recording starts /
  * stops). The client will be notified in a synchronized manner.
- * For simplicity, there is currently no way to unregister a listener the tracker. This is possible
- * to add if the need ever arises.
  */
 interface ICaptureStateNotifier {
     interface Listener {
@@ -36,4 +34,10 @@ interface ICaptureStateNotifier {
      * @return The state at the time of registration.
      */
     boolean registerListener(@NonNull Listener listener);
+
+    /**
+     * Unregister a listener, previously registered with {@link #registerListener(Listener)}.
+     * Once this call returns, no more invocations of the listener will be made.
+     */
+    void unregisterListener(@NonNull Listener listener);
 }

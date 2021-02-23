@@ -63,6 +63,12 @@ interface ISoundTriggerHw2 {
     void reboot();
 
     /**
+     * Called when this interface is guaranteed to no longer be used and can free up any resources
+     * used.
+     */
+    void detach();
+
+    /**
      * @see ISoundTriggerHw#getProperties_2_3(ISoundTriggerHw.getProperties_2_3Callback)
      */
     Properties getProperties();

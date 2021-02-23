@@ -148,6 +148,11 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
         mUnderlying.reboot();
     }
 
+    @Override
+    public void detach() {
+        mUnderlying.detach();
+    }
+
     private class Watchdog implements AutoCloseable {
         private final @NonNull
         TimerTask mTask;
