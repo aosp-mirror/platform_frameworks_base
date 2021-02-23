@@ -64,6 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2,
         ICaptureStateNotifier.Listener {
     private final @NonNull ISoundTriggerHw2 mDelegate;
+    private GlobalCallback mGlobalCallback;
 
     /**
      * Information about a model that is currently loaded. This is needed in order to be able to
@@ -71,7 +72,7 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
      */
     private static class LoadedModel {
         final int type;
-        final @NonNull ISoundTriggerHw2.ModelCallback callback;
+        final @NonNull ModelCallback callback;
 
         private LoadedModel(int type, @NonNull ModelCallback callback) {
             this.type = type;
@@ -155,6 +156,8 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
                                 () -> notifyAbort(modelHandle, model));
                     }
                 }
+            } else {
+                mGlobalCallback.tryAgain();
             }
 
             mCaptureState = active;
@@ -184,12 +187,13 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
 
     @Override
     public void registerCallback(GlobalCallback callback) {
-        mDelegate.registerCallback(new GlobalCallback() {
+        mGlobalCallback = new GlobalCallback() {
             @Override
             public void tryAgain() {
                 mCallbackThread.push(callback::tryAgain);
             }
-        });
+        };
+        mDelegate.registerCallback(mGlobalCallback);
     }
 
     @Override

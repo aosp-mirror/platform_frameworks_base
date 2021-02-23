@@ -697,7 +697,12 @@ public class SoundHw2CompatTest {
                 || mSupportConcurrentCapture);
         verify(mCaptureStateNotifier, atLeast(1)).registerListener(any());
 
-        // First load.
+        // Register global callback.
+        ISoundTriggerHw2.GlobalCallback globalCallback = mock(
+                ISoundTriggerHw2.GlobalCallback.class);
+        mCanonical.registerCallback(globalCallback);
+
+        // Load.
         ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
                 ISoundTriggerHw2.ModelCallback.class);
         final int handle = loadGenericModel(canonicalCallback);
@@ -721,6 +726,13 @@ public class SoundHw2CompatTest {
                 android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.ABORT,
                 eventCaptor.getValue().header.status);
         assertEquals(handle, eventCaptor.getValue().header.model);
+
+        // Deactivate external capture.
+        mCaptureStateNotifier.setState(false);
+
+        // Expect a tryAgain().
+        mCanonical.flushCallbacks();
+        verify(globalCallback).tryAgain();
     }
 
     @Test
@@ -729,7 +741,12 @@ public class SoundHw2CompatTest {
                 || mSupportConcurrentCapture);
         verify(mCaptureStateNotifier, atLeast(1)).registerListener(any());
 
-        // First load (this registers the callback).
+        // Register global callback.
+        ISoundTriggerHw2.GlobalCallback globalCallback = mock(
+                ISoundTriggerHw2.GlobalCallback.class);
+        mCanonical.registerCallback(globalCallback);
+
+        // Load (this registers the callback).
         ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
                 ISoundTriggerHw2.ModelCallback.class);
         final int handle = loadGenericModel(canonicalCallback);
@@ -746,6 +763,13 @@ public class SoundHw2CompatTest {
         } catch (RecoverableException e) {
             assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
+
+        // Deactivate external capture.
+        mCaptureStateNotifier.setState(false);
+
+        // Expect a tryAgain().
+        mCanonical.flushCallbacks();
+        verify(globalCallback).tryAgain();
     }
 
     @Test
