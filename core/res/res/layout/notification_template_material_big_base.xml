@@ -38,11 +38,7 @@
             android:layout_gravity="top"
             >
 
-            <include
-                layout="@layout/notification_template_header"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/notification_header_big_height"
-                />
+            <include layout="@layout/notification_template_header" />
 
             <LinearLayout
                 android:id="@+id/notification_main_column"

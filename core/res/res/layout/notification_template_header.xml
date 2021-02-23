@@ -17,8 +17,8 @@
 <NotificationHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_header"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/notification_header_solo_height"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/notification_header_height"
     android:layout_marginBottom="@dimen/notification_header_margin_bottom"
     android:clipChildren="false"
     android:gravity="center_vertical"
