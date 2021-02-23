@@ -34,9 +34,13 @@ java_test_host {
     srcs: [
         "tests/**/*.kt",
     ],
+    test_options: {
+        unit_test: true,
+    },
     static_libs: [
         "protologtool-lib",
         "junit",
         "mockito",
+        "objenesis",
     ],
 }
