@@ -32,6 +32,7 @@ import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -121,6 +122,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Test;
@@ -955,16 +957,14 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
         final int newOrientation = getRotatedOrientation(dc);
 
-        final Task stack = new TaskBuilder(mSupervisor)
+        final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(dc).setCreateActivity(true).build();
-        final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
+        final ActivityRecord activity = task.getTopMostTask().getTopNonFinishingActivity();
+        dc.setFocusedApp(activity);
 
         activity.setRequestedOrientation(newOrientation);
 
-        final int expectedOrientation = newOrientation == SCREEN_ORIENTATION_PORTRAIT
-                ? Configuration.ORIENTATION_PORTRAIT
-                : Configuration.ORIENTATION_LANDSCAPE;
-        assertEquals(expectedOrientation, dc.getConfiguration().orientation);
+        assertTrue("The display should be rotated.", dc.getRotation() % 2 == 1);
     }
 
     @Test
@@ -972,17 +972,42 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
+        dc.getDisplayRotation().setUserRotation(
+                WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_180);
         final int newOrientation = getRotatedOrientation(dc);
 
-        final Task stack = new TaskBuilder(mSupervisor)
+        final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(dc).setCreateActivity(true).build();
-        final ActivityRecord activity = stack.getTopMostTask().getTopNonFinishingActivity();
+        final ActivityRecord activity = task.getTopMostTask().getTopNonFinishingActivity();
+        dc.setFocusedApp(activity);
 
         activity.setRequestedOrientation(newOrientation);
 
         verify(dc, never()).updateDisplayOverrideConfigurationLocked(any(), eq(activity),
                 anyBoolean(), same(null));
-        assertEquals(dc.getDisplayRotation().getUserRotation(), dc.getRotation());
+        assertEquals(ROTATION_180, dc.getRotation());
+    }
+
+    @Test
+    public void testFixedToUserRotationChanged() {
+        final DisplayContent dc = createNewDisplay();
+        dc.getDisplayRotation().setFixedToUserRotation(
+                IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
+        dc.getDisplayRotation().setUserRotation(
+                WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_0);
+        final int newOrientation = getRotatedOrientation(dc);
+
+        final Task task = new TaskBuilder(mSupervisor)
+                .setDisplay(dc).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopMostTask().getTopNonFinishingActivity();
+        dc.setFocusedApp(activity);
+
+        activity.setRequestedOrientation(newOrientation);
+
+        dc.getDisplayRotation().setFixedToUserRotation(
+                IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
+
+        assertTrue("The display should be rotated.", dc.getRotation() % 2 == 1);
     }
 
     @Test
