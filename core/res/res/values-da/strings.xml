@@ -687,6 +687,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Giver appen tilladelse til at læse og redigere konfigurationen af Forstyr ikke."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start brugen at tilladelsesvisning"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Tillader, at brugeren kan bruge en tilladelse for en app. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"få adgang til sensordata ved høj samplingfrekvens"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tillader, at appen kan sample sensordata ved en højere frekvens end 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1871,6 +1873,8 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS-anmodningen blev ændret til et videoopkald"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS-anmodningen blev ændret til en USSD-anmodning"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Ændret til en SS-anmodning"</string>
+    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbejdsprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Underrettet"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Udvid"</string>

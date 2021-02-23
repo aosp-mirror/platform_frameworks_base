@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"អនុញ្ញាតឲ្យកម្មវិធីអាន និងសរសេរការកំណត់រចនាសម្ព័ន្ធមុខងារ កុំរំខាន។"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ចាប់ផ្ដើម​មើល​ការប្រើប្រាស់​ការអនុញ្ញាត"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"អនុញ្ញាត​ឱ្យម្ចាស់​ចាប់ផ្ដើម​ការប្រើប្រាស់​ការអនុញ្ញាត​សម្រាប់កម្មវិធី។ មិនគួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ចូលប្រើទិន្នន័យ​ឧបករណ៍ចាប់សញ្ញា​នៅអត្រាសំណាកខ្ពស់"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"អនុញ្ញាតឱ្យកម្មវិធី​ធ្វើសំណាកទិន្នន័យ​ឧបករណ៍ចាប់សញ្ញា​នៅអត្រាលើសពី 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"តាមដាន​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1869,6 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​ការហៅ​ជា​វីដេអូ"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ការជូនដំណឹង​អំពីការ​ដាក់នុយ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ប្រវត្តិរូបការងារ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"បាន​ជូនដំណឹង"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>

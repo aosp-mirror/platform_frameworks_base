@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"საშუალებას აძლევს აპს, წაიკითხოს და დაწეროს კონფიგურაცია „არ შემაწუხოთ“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ნახვის ნებართვის გამოყენების დაწყება"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ნებართვის გამოყენება. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"სენსორის მონაცემებზე წვდომა სემპლინგის მაღალი სიხშირით"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"საშუალებას აძლევს აპს, მიიღოს სენსორის მონაცემების ნიმუშები 200 ჰც-ზე მეტი სიხშირით"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>
@@ -1869,6 +1871,8 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS მოთხოვნა შეიცვალა ვიდეოზარის მოთხოვნით"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS მოთხოვნა შეიცვალა USSD მოთხოვნით"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"შეიცვალა ახალი SS მოთხოვნით"</string>
+    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"სამსახურის პროფილი"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"გაფრთხილებით"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"გაშლა"</string>

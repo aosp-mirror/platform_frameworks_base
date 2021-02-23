@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite que la aplicación lea y modifique la configuración de la función No interrumpir."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que el propietario inicie el uso de permisos para una app. No debería requerirse para apps normales."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Acceder a los datos del sensor a una tasa de muestreo alta"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que la app tome una muestra de los datos del sensor a una tasa superior a 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisa los intentos para desbloquear la pantalla"</string>
@@ -1869,6 +1871,8 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Se cambió la solicitud SS por una videollamada"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Se cambió la solicitud SS por una solicitud USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Se cambió a una nueva solicitud SS"</string>
+    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabajo"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alerta enviada"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expandir"</string>

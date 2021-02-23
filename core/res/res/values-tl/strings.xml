@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Pinapahintulutan ang app na mag-sample ng data ng sensor sa rate na higit sa 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1869,6 +1871,8 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Ginawang video call ang SS na kahilingan"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Ginawang USSD na kahilingan ang SS na kahilingan"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Ginawang bagong SS na kahilingan"</string>
+    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profile sa trabaho"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Naalertuhan"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Palawakin"</string>
