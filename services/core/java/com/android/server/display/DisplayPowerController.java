@@ -121,6 +121,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_SET_TEMPORARY_BRIGHTNESS = 6;
     private static final int MSG_SET_TEMPORARY_AUTO_BRIGHTNESS_ADJUSTMENT = 7;
     private static final int MSG_IGNORE_PROXIMITY = 8;
+    private static final int MSG_STOP = 9;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -351,6 +352,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Nullable
     private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
 
+    @Nullable
     private final ColorDisplayServiceInternal mCdsi;
     private final float[] mNitsRange;
 
@@ -408,6 +410,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private ObjectAnimator mColorFadeOnAnimator;
     private ObjectAnimator mColorFadeOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
+
+    // True if this DisplayPowerController has been stopped and should no longer be running.
+    private boolean mStopped;
 
     /**
      * Creates the display power controller.
@@ -583,14 +588,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         DisplayWhiteBalanceSettings displayWhiteBalanceSettings = null;
         DisplayWhiteBalanceController displayWhiteBalanceController = null;
-        try {
-            displayWhiteBalanceSettings = new DisplayWhiteBalanceSettings(mContext, mHandler);
-            displayWhiteBalanceController = DisplayWhiteBalanceFactory.create(mHandler,
-                    mSensorManager, resources);
-            displayWhiteBalanceSettings.setCallbacks(this);
-            displayWhiteBalanceController.setCallbacks(this);
-        } catch (Exception e) {
-            Slog.e(TAG, "failed to set up display white-balance: " + e);
+        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+            try {
+                displayWhiteBalanceSettings = new DisplayWhiteBalanceSettings(mContext, mHandler);
+                displayWhiteBalanceController = DisplayWhiteBalanceFactory.create(mHandler,
+                        mSensorManager, resources);
+                displayWhiteBalanceSettings.setCallbacks(this);
+                displayWhiteBalanceController.setCallbacks(this);
+            } catch (Exception e) {
+                Slog.e(TAG, "failed to set up display white-balance: " + e);
+            }
         }
         mDisplayWhiteBalanceSettings = displayWhiteBalanceSettings;
         mDisplayWhiteBalanceController = displayWhiteBalanceController;
@@ -602,20 +609,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mNitsRange = BrightnessMappingStrategy.getFloatArray(context.getResources()
                     .obtainTypedArray(com.android.internal.R.array.config_screenBrightnessNits));
         }
-        mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
-        boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
-            @Override
-            public void onReduceBrightColorsActivationChanged(boolean activated) {
-                applyReduceBrightColorsSplineAdjustment();
-            }
+        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+            mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
+            boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
+                @Override
+                public void onReduceBrightColorsActivationChanged(boolean activated) {
+                    applyReduceBrightColorsSplineAdjustment();
+                }
 
-            @Override
-            public void onReduceBrightColorsStrengthChanged(int strength) {
+                @Override
+                public void onReduceBrightColorsStrengthChanged(int strength) {
+                    applyReduceBrightColorsSplineAdjustment();
+                }
+            });
+            if (active) {
                 applyReduceBrightColorsSplineAdjustment();
             }
-        });
-        if (active) {
-            applyReduceBrightColorsSplineAdjustment();
+        } else {
+            mCdsi = null;
         }
     }
 
@@ -713,6 +724,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         synchronized (mLock) {
+            if (mStopped) {
+                return true;
+            }
+
             boolean changed = false;
 
             if (waitForNegativeProximity
@@ -731,11 +746,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             if (changed) {
                 mDisplayReadyLocked = false;
-            }
-
-            if (changed && !mPendingRequestChangedLocked) {
-                mPendingRequestChangedLocked = true;
-                sendUpdatePowerStateLocked();
+                if (!mPendingRequestChangedLocked) {
+                    mPendingRequestChangedLocked = true;
+                    sendUpdatePowerStateLocked();
+                }
             }
 
             return mDisplayReadyLocked;
@@ -758,6 +772,34 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // TODO: b/175821789 - Support high brightness on multiple (folding) displays
     }
 
+    /**
+     * Unregisters all listeners and interrupts all running threads; halting future work.
+     *
+     * This method should be called when the DisplayPowerController is no longer in use; i.e. when
+     * the {@link #mDisplayId display} has been removed.
+     */
+    public void stop() {
+        synchronized (mLock) {
+            mStopped = true;
+            Message msg = mHandler.obtainMessage(MSG_STOP);
+            mHandler.sendMessage(msg);
+
+            if (mDisplayWhiteBalanceController != null) {
+                mDisplayWhiteBalanceController.setEnabled(false);
+            }
+
+            if (mAutomaticBrightnessController != null) {
+                mAutomaticBrightnessController.stop();
+            }
+
+            if (mBrightnessTracker != null) {
+                mBrightnessTracker.stop();
+            }
+
+            mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
+        }
+    }
+
     private void sendUpdatePowerState() {
         synchronized (mLock) {
             sendUpdatePowerStateLocked();
@@ -765,7 +807,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void sendUpdatePowerStateLocked() {
-        if (!mPendingUpdatePowerStateLocked) {
+        if (!mStopped && !mPendingUpdatePowerStateLocked) {
             mPendingUpdatePowerStateLocked = true;
             Message msg = mHandler.obtainMessage(MSG_UPDATE_POWER_STATE);
             mHandler.sendMessage(msg);
@@ -788,7 +830,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mColorFadeOffAnimator.addListener(mAnimatorListener);
         }
 
-        mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
+        mScreenBrightnessRampAnimator = new RampAnimator<>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS_FLOAT);
         mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
@@ -829,12 +871,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     };
 
-    private final RampAnimator.Listener mRampAnimatorListener = new RampAnimator.Listener() {
-        @Override
-        public void onAnimationEnd() {
-            sendUpdatePowerState();
-        }
-    };
+    private final RampAnimator.Listener mRampAnimatorListener = this::sendUpdatePowerState;
+
+    /** Clean up all resources that are accessed via the {@link #mHandler} thread. */
+    private void cleanupHandlerThreadAfterStop() {
+        setProximitySensorEnabled(false);
+        mHandler.removeCallbacksAndMessages(null);
+        mPowerState.stop();
+        mPowerState = null;
+    }
 
     private void updatePowerState() {
         // Update the power state request.
@@ -844,6 +889,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         int brightnessAdjustmentFlags = 0;
         mBrightnessReasonTemp.set(null);
         synchronized (mLock) {
+            if (mStopped) {
+                return;
+            }
             mPendingUpdatePowerStateLocked = false;
             if (mPendingRequestLocked == null) {
                 return; // wait until first actual power request
@@ -2143,6 +2191,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
                 case MSG_IGNORE_PROXIMITY:
                     ignoreProximitySensorUntilChangedInternal();
+                    break;
+
+                case MSG_STOP:
+                    cleanupHandlerThreadAfterStop();
                     break;
             }
         }
