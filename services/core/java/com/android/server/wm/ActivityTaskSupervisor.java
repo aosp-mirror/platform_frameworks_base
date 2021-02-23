@@ -2204,19 +2204,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 task.mTaskId, reason, topActivity.info.applicationInfo.packageName);
     }
 
-    void activityRelaunchedLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-        if (r != null) {
-            r.finishRelaunching();
-            if (r.getRootTask().shouldSleepOrShutDownActivities()) {
-                // Activity is always relaunched to either resumed or paused state. If it was
-                // relaunched while hidden (by keyguard or smth else), it should be stopped.
-                r.getRootTask().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */);
-            }
-        }
-    }
-
     void logRootTaskState() {
         mActivityMetricsLogger.logWindowState();
     }

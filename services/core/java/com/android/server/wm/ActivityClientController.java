@@ -235,7 +235,10 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void activityRelaunched(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
-            mTaskSupervisor.activityRelaunchedLocked(token);
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.finishRelaunching();
+            }
         }
         Binder.restoreCallingIdentity(origId);
     }

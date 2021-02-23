@@ -287,8 +287,7 @@ public class TimeDetectorServiceTest {
     }
 
     private static ExternalTimeSuggestion createExternalTimeSuggestion() {
-        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new ExternalTimeSuggestion(timeValue);
+        return new ExternalTimeSuggestion(100L, 1_000_000L);
     }
 
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {

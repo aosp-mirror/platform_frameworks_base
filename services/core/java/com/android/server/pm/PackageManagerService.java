@@ -316,7 +316,6 @@ import android.util.ExceptionUtils;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LogPrinter;
-import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.MathUtils;
 import android.util.PackageUtils;
@@ -401,6 +400,7 @@ import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedLongSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
 import com.android.server.utils.Watcher;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -1402,10 +1402,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // Currently known shared libraries.
     @Watched
-    final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries =
-            new WatchedArrayMap<>();
+    final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
+            mSharedLibraries = new WatchedArrayMap<>();
     @Watched
-    final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>>
+    final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
             mStaticLibsByDeclaringPackage = new WatchedArrayMap<>();
 
     // Mapping from instrumentation class names to info about them.
@@ -1756,6 +1756,11 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean filterAppAccess(String packageName, int callingUid, int userId) {
             return mPmInternal.filterAppAccess(packageName, callingUid, userId);
         }
+
+        @Override
+        public int[] getAllUserIds() {
+            return mUserManager.getUserIds();
+        }
     }
 
     /**
@@ -1786,8 +1791,8 @@ public class PackageManagerService extends IPackageManager.Stub
         public final Settings settings;
         public final SparseIntArray isolatedOwners;
         public final WatchedArrayMap<String, AndroidPackage> packages;
-        public final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>> sharedLibs;
-        public final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>> staticLibs;
+        public final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibs;
+        public final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> staticLibs;
         public final WatchedArrayMap<ComponentName, ParsedInstrumentation> instrumentation;
         public final WatchedSparseBooleanArray webInstantAppsDisabled;
         public final ComponentName resolveComponentName;
@@ -2005,9 +2010,9 @@ public class PackageManagerService extends IPackageManager.Stub
         private final WatchedArrayMap<String, AndroidPackage> mPackages;
         private final WatchedArrayMap<ComponentName, ParsedInstrumentation>
                 mInstrumentation;
-        private final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>>
+        private final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
                 mStaticLibsByDeclaringPackage;
-        private final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>>
+        private final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
                 mSharedLibraries;
         private final ComponentName mLocalResolveComponentName;
         private final ActivityInfo mResolveActivity;
@@ -3546,7 +3551,7 @@ public class PackageManagerService extends IPackageManager.Stub
             packageName = normalizedPackageName != null ? normalizedPackageName : packageName;
 
             // Is this a static library?
-            LongSparseArray<SharedLibraryInfo> versionedLib =
+            WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
                     mStaticLibsByDeclaringPackage.get(packageName);
             if (versionedLib == null || versionedLib.size() <= 0) {
                 return packageName;
@@ -4701,6 +4706,10 @@ public class PackageManagerService extends IPackageManager.Stub
     // and an image with the flag set false does not use snapshots.
     private static final boolean SNAPSHOT_ENABLED = true;
 
+    // The per-instance snapshot disable/enable flag.  This is generally set to false in
+    // test instances and set to SNAPSHOT_ENABLED in operational instances.
+    private final boolean mSnapshotEnabled;
+
     /**
      * Return the live computer.
      */
@@ -4713,7 +4722,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * The live computer will be returned if snapshots are disabled.
      */
     private Computer snapshotComputer() {
-        if (!SNAPSHOT_ENABLED) {
+        if (!mSnapshotEnabled) {
             return mLiveComputer;
         }
         if (Thread.holdsLock(mLock)) {
@@ -6048,15 +6057,12 @@ public class PackageManagerService extends IPackageManager.Stub
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
 
-        // Create the computer as soon as the state objects have been installed.  The
-        // cached computer is the same as the live computer until the end of the
-        // constructor, at which time the invalidation method updates it.  The cache is
-        // corked initially to ensure a cached computer is not built until the end of the
-        // constructor.
-        sSnapshotCorked = true;
+        // Disable snapshots in this instance of PackageManagerService, which is only used
+        // for testing.  The instance still needs a live computer.  The snapshot computer
+        // is set to null since it must never be used by this instance.
+        mSnapshotEnabled = false;
         mLiveComputer = createLiveComputer();
-        mSnapshotComputer = mLiveComputer;
-        registerObserver();
+        mSnapshotComputer = null;
 
         mPackages.putAll(testParams.packages);
         mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
@@ -6069,7 +6075,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mIncrementalVersion = testParams.incrementalVersion;
 
         invalidatePackageInfoCache();
-        sSnapshotCorked = false;
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest,
@@ -6215,6 +6220,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // constructor, at which time the invalidation method updates it.  The cache is
         // corked initially to ensure a cached computer is not built until the end of the
         // constructor.
+        mSnapshotEnabled = SNAPSHOT_ENABLED;
         sSnapshotCorked = true;
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = mLiveComputer;
@@ -8038,7 +8044,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int[] allUsers = mUserManager.getUserIds();
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
-                final LongSparseArray<SharedLibraryInfo> versionedLib
+                final WatchedLongSparseArray<SharedLibraryInfo> versionedLib
                         = mSharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
@@ -8303,7 +8309,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
-                LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.valueAt(i);
+                WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
+                        mSharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
                 }
@@ -8372,7 +8379,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             int libraryCount = mSharedLibraries.size();
             for (int i = 0; i < libraryCount; i++) {
-                LongSparseArray<SharedLibraryInfo> versionedLibrary = mSharedLibraries.valueAt(i);
+                WatchedLongSparseArray<SharedLibraryInfo> versionedLibrary =
+                        mSharedLibraries.valueAt(i);
                 if (versionedLibrary == null) {
                     continue;
                 }
@@ -8533,7 +8541,8 @@ public class PackageManagerService extends IPackageManager.Stub
             Set<String> libs = null;
             final int libCount = mSharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
-                LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.valueAt(i);
+                WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
+                        mSharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
                 }
@@ -9841,7 +9850,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
-        return liveComputer().queryIntentActivitiesInternal(intent,
+        return snapshotComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
     }
 
@@ -10328,7 +10337,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
-        return liveComputer().queryIntentServicesInternal(intent,
+        return snapshotComputer().queryIntentServicesInternal(intent,
                 resolvedType, flags, userId, callingUid,
                 includeInstantApps);
     }
@@ -12202,10 +12211,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     private static SharedLibraryInfo getSharedLibraryInfo(String name, long version,
-            Map<String, LongSparseArray<SharedLibraryInfo>> existingLibraries,
-            @Nullable Map<String, LongSparseArray<SharedLibraryInfo>> newLibraries) {
+            Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingLibraries,
+            @Nullable Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries) {
         if (newLibraries != null) {
-            final LongSparseArray<SharedLibraryInfo> versionedLib = newLibraries.get(name);
+            final WatchedLongSparseArray<SharedLibraryInfo> versionedLib = newLibraries.get(name);
             SharedLibraryInfo info = null;
             if (versionedLib != null) {
                 info = versionedLib.get(version);
@@ -12214,7 +12223,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return info;
             }
         }
-        final LongSparseArray<SharedLibraryInfo> versionedLib = existingLibraries.get(name);
+        final WatchedLongSparseArray<SharedLibraryInfo> versionedLib = existingLibraries.get(name);
         if (versionedLib == null) {
             return null;
         }
@@ -12222,7 +12231,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private SharedLibraryInfo getLatestSharedLibraVersionLPr(AndroidPackage pkg) {
-        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
+        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
                 pkg.getStaticSharedLibName());
         if (versionedLib == null) {
             return null;
@@ -12527,8 +12536,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(AndroidPackage pkg,
             Map<String, AndroidPackage> availablePackages,
-            @NonNull final Map<String, LongSparseArray<SharedLibraryInfo>> existingLibraries,
-            @Nullable final Map<String, LongSparseArray<SharedLibraryInfo>> newLibraries)
+            @NonNull final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingLibraries,
+            @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries)
             throws PackageManagerException {
         if (pkg == null) {
             return null;
@@ -12625,8 +12634,8 @@ public class PackageManagerService extends IPackageManager.Stub
             @NonNull String packageName, boolean required, int targetSdk,
             @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries,
             @NonNull final Map<String, AndroidPackage> availablePackages,
-            @NonNull final Map<String, LongSparseArray<SharedLibraryInfo>> existingLibraries,
-            @Nullable final Map<String, LongSparseArray<SharedLibraryInfo>> newLibraries)
+            @NonNull final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingLibraries,
+            @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries)
             throws PackageManagerException {
         final int libCount = requestedLibraries.size();
         for (int i = 0; i < libCount; i++) {
@@ -14047,7 +14056,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 long minVersionCode = Long.MIN_VALUE;
                 long maxVersionCode = Long.MAX_VALUE;
 
-                LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
+                WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(
                         pkg.getStaticSharedLibName());
                 if (versionedLib != null) {
                     final int versionCount = versionedLib.size();
@@ -14275,8 +14284,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private static boolean sharedLibExists(final String name, final long version,
-            Map<String, LongSparseArray<SharedLibraryInfo>> librarySource) {
-        LongSparseArray<SharedLibraryInfo> versionedLib = librarySource.get(name);
+            Map<String, WatchedLongSparseArray<SharedLibraryInfo>> librarySource) {
+        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = librarySource.get(name);
         if (versionedLib != null && versionedLib.indexOfKey(version) >= 0) {
             return true;
         }
@@ -14286,9 +14295,9 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private void commitSharedLibraryInfoLocked(SharedLibraryInfo libraryInfo) {
         final String name = libraryInfo.getName();
-        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
+        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
-            versionedLib = new LongSparseArray<>();
+            versionedLib = new WatchedLongSparseArray<>();
             mSharedLibraries.put(name, versionedLib);
         }
         final String declaringPackageName = libraryInfo.getDeclaringPackage().getPackageName();
@@ -14299,7 +14308,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean removeSharedLibraryLPw(String name, long version) {
-        LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
+        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             return false;
         }
@@ -18294,7 +18303,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public final Map<String, ScanResult> scannedPackages;
 
         public final Map<String, AndroidPackage> allPackages;
-        public final Map<String, LongSparseArray<SharedLibraryInfo>> sharedLibrarySource;
+        public final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibrarySource;
         public final Map<String, InstallArgs> installArgs;
         public final Map<String, PackageInstalledInfo> installResults;
         public final Map<String, PrepareResult> preparedPackages;
@@ -18305,7 +18314,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Map<String, InstallArgs> installArgs,
                 Map<String, PackageInstalledInfo> installResults,
                 Map<String, PrepareResult> preparedPackages,
-                Map<String, LongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
+                Map<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
                 Map<String, AndroidPackage> allPackages,
                 Map<String, VersionInfo> versionInfos,
                 Map<String, PackageSetting> lastStaticSharedLibSettings) {
@@ -18320,7 +18329,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         private ReconcileRequest(Map<String, ScanResult> scannedPackages,
-                Map<String, LongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
+                Map<String, WatchedLongSparseArray<SharedLibraryInfo>> sharedLibrarySource,
                 Map<String, AndroidPackage> allPackages,
                 Map<String, VersionInfo> versionInfos,
                 Map<String, PackageSetting> lastStaticSharedLibSettings) {
@@ -18417,7 +18426,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         combinedPackages.putAll(request.allPackages);
 
-        final Map<String, LongSparseArray<SharedLibraryInfo>> incomingSharedLibraries =
+        final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> incomingSharedLibraries =
                 new ArrayMap<>();
 
         for (String installPackageName : scannedPackages.keySet()) {
@@ -18641,7 +18650,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static List<SharedLibraryInfo> getAllowedSharedLibInfos(
             ScanResult scanResult,
-            Map<String, LongSparseArray<SharedLibraryInfo>> existingSharedLibraries) {
+            Map<String, WatchedLongSparseArray<SharedLibraryInfo>> existingSharedLibraries) {
         // Let's used the parsed package as scanResult.pkgSetting may be null
         final ParsedPackage parsedPackage = scanResult.request.parsedPackage;
         if (scanResult.staticSharedLibraryInfo == null
@@ -18711,7 +18720,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * added.
      */
     private static boolean addSharedLibraryToPackageVersionMap(
-            Map<String, LongSparseArray<SharedLibraryInfo>> target,
+            Map<String, WatchedLongSparseArray<SharedLibraryInfo>> target,
             SharedLibraryInfo library) {
         final String name = library.getName();
         if (target.containsKey(name)) {
@@ -18723,7 +18732,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
         } else {
-            target.put(name, new LongSparseArray<>());
+            target.put(name, new WatchedLongSparseArray<>());
         }
         target.get(name).put(library.getLongVersion(), library);
         return true;
@@ -23846,7 +23855,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int numSharedLibraries = mSharedLibraries.size();
                 for (int index = 0; index < numSharedLibraries; index++) {
                     final String libName = mSharedLibraries.keyAt(index);
-                    LongSparseArray<SharedLibraryInfo> versionedLib
+                    WatchedLongSparseArray<SharedLibraryInfo> versionedLib
                             = mSharedLibraries.get(libName);
                     if (versionedLib == null) {
                         continue;
@@ -24195,7 +24204,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int count = mSharedLibraries.size();
         for (int i = 0; i < count; i++) {
             final String libName = mSharedLibraries.keyAt(i);
-            LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
+            WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
             if (versionedLib == null) {
                 continue;
             }

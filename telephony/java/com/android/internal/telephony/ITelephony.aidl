@@ -2340,6 +2340,11 @@ interface ITelephony {
     void sendDeviceToDeviceMessage(int message, int value);
 
     /**
+     * Sets the specified transport active; only for use through shell.
+     */
+    void setActiveDeviceToDeviceTransport(String transport);
+
+    /**
      * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
      */
     boolean getCarrierSingleRegistrationEnabled(int subId);

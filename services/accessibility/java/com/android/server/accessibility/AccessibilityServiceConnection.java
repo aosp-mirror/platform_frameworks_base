@@ -376,7 +376,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (mSecurityPolicy.canPerformGestures(this)) {
                 MotionEventInjector motionEventInjector =
                         mSystemSupport.getMotionEventInjectorForDisplayLocked(displayId);
-                if (mWindowManagerService.isTouchOrFaketouchDevice()) {
+                if (motionEventInjector != null
+                        && mWindowManagerService.isTouchOrFaketouchDevice()) {
                     motionEventInjector.injectEvents(
                             gestureSteps.getList(), mServiceInterface, sequence, displayId);
                 } else {

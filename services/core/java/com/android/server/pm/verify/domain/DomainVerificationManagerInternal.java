@@ -358,5 +358,8 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
 
         @Nullable
         AndroidPackage getPackageLocked(@NonNull String pkgName);
+
+        @UserIdInt
+        int[] getAllUserIds();
     }
 }

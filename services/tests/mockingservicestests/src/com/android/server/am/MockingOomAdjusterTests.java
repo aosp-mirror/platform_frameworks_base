@@ -64,6 +64,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doAnswer;
@@ -73,6 +74,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.content.ComponentName;
@@ -178,11 +181,20 @@ public class MockingOomAdjusterTests {
         setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
         setFieldValue(ActivityManagerService.class, sService, "mProcLock",
                 new ActivityManagerProcLock());
+        setFieldValue(ActivityManagerService.class, sService, "mServices",
+                spy(new ActiveServices(sService)));
+        setFieldValue(ActivityManagerService.class, sService, "mInternal",
+                mock(ActivityManagerService.LocalService.class));
+        setFieldValue(ActivityManagerService.class, sService, "mBatteryStatsService",
+                mock(BatteryStatsService.class));
+        doReturn(mock(AppOpsManager.class)).when(sService).getAppOpsManager();
+        doCallRealMethod().when(sService).enqueueOomAdjTargetLocked(any(ProcessRecord.class));
+        doCallRealMethod().when(sService).updateOomAdjPendingTargetsLocked(any(String.class));
         setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
         doReturn(new ActivityManagerService.ProcessChangeItem()).when(pr)
                 .enqueueProcessChangeItemLocked(anyInt(), anyInt());
         sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList,
-                mock(ActiveUids.class));
+                new ActiveUids(sService, false));
         sService.mOomAdjuster.mAdjSeq = 10000;
         sService.mWakefulness = new AtomicInteger(PowerManagerInternal.WAKEFULNESS_AWAKE);
     }
@@ -1315,6 +1327,115 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_UidIdle_StopService() {
+        final ProcessRecord app1 = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final ProcessRecord client1 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        final ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP4_PID, MOCKAPP3_UID,
+                MOCKAPP4_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        final ProcessRecord app3 = spy(makeDefaultProcessRecord(MOCKAPP5_PID, MOCKAPP5_UID,
+                MOCKAPP5_PROCESSNAME, MOCKAPP5_PACKAGENAME, false));
+        final UidRecord app1UidRecord = new UidRecord(MOCKAPP_UID, sService);
+        final UidRecord app2UidRecord = new UidRecord(MOCKAPP2_UID, sService);
+        final UidRecord app3UidRecord = new UidRecord(MOCKAPP5_UID, sService);
+        final UidRecord clientUidRecord = new UidRecord(MOCKAPP3_UID, sService);
+        app1.setUidRecord(app1UidRecord);
+        app2.setUidRecord(app2UidRecord);
+        app3.setUidRecord(app3UidRecord);
+        client1.setUidRecord(clientUidRecord);
+        client2.setUidRecord(clientUidRecord);
+
+        client1.mServices.setHasForegroundServices(true, 0);
+        client2.mState.setForcingToImportant(new Object());
+        ArrayList<ProcessRecord> lru = sService.mProcessList.getLruProcessesLOSP();
+        lru.clear();
+        lru.add(app1);
+        lru.add(app2);
+        lru.add(app3);
+        lru.add(client1);
+        lru.add(client2);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
+        final ComponentName cn1 = ComponentName.unflattenFromString(
+                MOCKAPP_PACKAGENAME + "/.TestService");
+        final ServiceRecord s1 = bindService(app1, client1, null, 0, mock(IBinder.class));
+        setFieldValue(ServiceRecord.class, s1, "name", cn1);
+        s1.startRequested = true;
+
+        final ComponentName cn2 = ComponentName.unflattenFromString(
+                MOCKAPP2_PACKAGENAME + "/.TestService");
+        final ServiceRecord s2 = bindService(app2, client2, null, 0, mock(IBinder.class));
+        setFieldValue(ServiceRecord.class, s2, "name", cn2);
+        s2.startRequested = true;
+
+        final ComponentName cn3 = ComponentName.unflattenFromString(
+                MOCKAPP5_PACKAGENAME + "/.TestService");
+        final ServiceRecord s3 = bindService(app3, client1, null, 0, mock(IBinder.class));
+        setFieldValue(ServiceRecord.class, s3, "name", cn3);
+        s3.startRequested = true;
+
+        final ComponentName cn4 = ComponentName.unflattenFromString(
+                MOCKAPP3_PACKAGENAME + "/.TestService");
+        final ServiceRecord c2s = makeServiceRecord(client2);
+        setFieldValue(ServiceRecord.class, c2s, "name", cn4);
+        c2s.startRequested = true;
+
+        try {
+            sService.mOomAdjuster.mActiveUids.put(MOCKAPP_UID, app1UidRecord);
+            sService.mOomAdjuster.mActiveUids.put(MOCKAPP2_UID, app2UidRecord);
+            sService.mOomAdjuster.mActiveUids.put(MOCKAPP5_UID, app3UidRecord);
+            sService.mOomAdjuster.mActiveUids.put(MOCKAPP3_UID, clientUidRecord);
+
+            setServiceMap(s1, MOCKAPP_UID, cn1);
+            setServiceMap(s2, MOCKAPP2_UID, cn2);
+            setServiceMap(s3, MOCKAPP5_UID, cn3);
+            setServiceMap(c2s, MOCKAPP3_UID, cn4);
+            app2UidRecord.setIdle(false);
+            sService.mOomAdjuster.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                    SCHED_GROUP_DEFAULT);
+            assertProcStates(app3, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                    SCHED_GROUP_DEFAULT);
+            assertProcStates(client1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                    SCHED_GROUP_DEFAULT);
+            assertEquals(PROCESS_STATE_TRANSIENT_BACKGROUND, app2.mState.getSetProcState());
+            assertEquals(PROCESS_STATE_TRANSIENT_BACKGROUND, client2.mState.getSetProcState());
+
+            client1.mServices.setHasForegroundServices(false, 0);
+            client2.mState.setForcingToImportant(null);
+            app1UidRecord.reset();
+            app2UidRecord.reset();
+            app3UidRecord.reset();
+            clientUidRecord.reset();
+            app1UidRecord.setIdle(true);
+            app2UidRecord.setIdle(true);
+            app3UidRecord.setIdle(true);
+            clientUidRecord.setIdle(true);
+            doReturn(ActivityManager.APP_START_MODE_DELAYED).when(sService)
+                    .getAppStartModeLOSP(anyInt(), any(String.class), anyInt(),
+                    anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
+            doNothing().when(sService.mServices)
+                    .scheduleServiceTimeoutLocked(any(ProcessRecord.class));
+            sService.mOomAdjuster.updateOomAdjLocked(client1, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertEquals(PROCESS_STATE_CACHED_EMPTY, client1.mState.getSetProcState());
+            assertEquals(PROCESS_STATE_SERVICE, app1.mState.getSetProcState());
+            assertEquals(PROCESS_STATE_SERVICE, client2.mState.getSetProcState());
+        } finally {
+            doCallRealMethod().when(sService)
+                    .getAppStartModeLOSP(anyInt(), any(String.class), anyInt(),
+                    anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
+            sService.mServices.mServiceMap.clear();
+            sService.mOomAdjuster.mActiveUids.clear();
+        }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoAll_Unbound() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
@@ -1815,15 +1936,42 @@ public class MockingOomAdjusterTests {
         return app;
     }
 
+    private ServiceRecord makeServiceRecord(ProcessRecord app) {
+        final ServiceRecord record = mock(ServiceRecord.class);
+        record.app = app;
+        setFieldValue(ServiceRecord.class, record, "connections",
+                new ArrayMap<IBinder, ArrayList<ConnectionRecord>>());
+        doCallRealMethod().when(record).getConnections();
+        setFieldValue(ServiceRecord.class, record, "packageName", app.info.packageName);
+        app.mServices.startService(record);
+        record.appInfo = app.info;
+        setFieldValue(ServiceRecord.class, record, "bindings", new ArrayMap<>());
+        setFieldValue(ServiceRecord.class, record, "pendingStarts", new ArrayList<>());
+        return record;
+    }
+
+    private void setServiceMap(ServiceRecord s, int uid, ComponentName cn) {
+        ActiveServices.ServiceMap serviceMap = sService.mServices.mServiceMap.get(
+                UserHandle.getUserId(uid));
+        if (serviceMap == null) {
+            serviceMap = mock(ActiveServices.ServiceMap.class);
+            setFieldValue(ActiveServices.ServiceMap.class, serviceMap, "mServicesByInstanceName",
+                    new ArrayMap<>());
+            setFieldValue(ActiveServices.ServiceMap.class, serviceMap, "mActiveForegroundApps",
+                    new ArrayMap<>());
+            setFieldValue(ActiveServices.ServiceMap.class, serviceMap, "mServicesByIntent",
+                    new ArrayMap<>());
+            setFieldValue(ActiveServices.ServiceMap.class, serviceMap, "mDelayedStartList",
+                    new ArrayList<>());
+            sService.mServices.mServiceMap.put(UserHandle.getUserId(uid), serviceMap);
+        }
+        serviceMap.mServicesByInstanceName.put(cn, s);
+    }
+
     private ServiceRecord bindService(ProcessRecord service, ProcessRecord client,
             ServiceRecord record, int bindFlags, IBinder binder) {
         if (record == null) {
-            record = mock(ServiceRecord.class);
-            record.app = service;
-            setFieldValue(ServiceRecord.class, record, "connections",
-                    new ArrayMap<IBinder, ArrayList<ConnectionRecord>>());
-            service.mServices.startService(record);
-            doCallRealMethod().when(record).getConnections();
+            record = makeServiceRecord(service);
         }
         AppBindRecord binding = new AppBindRecord(record, null, client);
         ConnectionRecord cr = spy(new ConnectionRecord(binding,

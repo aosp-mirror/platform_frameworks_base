@@ -15,7 +15,7 @@
  */
 package com.android.systemui.tuner;
 
-import android.app.ActivityManager;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -23,7 +23,6 @@ import android.content.DialogInterface;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,6 +54,15 @@ public class TunerFragment extends PreferenceFragment {
     };
 
     private static final int MENU_REMOVE = Menu.FIRST + 1;
+
+    private final TunerService mTunerService;
+
+    // We are the only ones who ever call this constructor, so don't worry about the warning
+    @SuppressLint("ValidFragment")
+    public TunerFragment(TunerService tunerService) {
+        super();
+        mTunerService = tunerService;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -124,13 +132,9 @@ public class TunerFragment extends PreferenceFragment {
                 getActivity().finish();
                 return true;
             case MENU_REMOVE:
-                UserHandle user = new UserHandle(ActivityManager.getCurrentUser());
-                TunerService.showResetRequest(getContext(), user, new Runnable() {
-                    @Override
-                    public void run() {
-                        if (getActivity() != null) {
-                            getActivity().finish();
-                        }
+                mTunerService.showResetRequest(() -> {
+                    if (getActivity() != null) {
+                        getActivity().finish();
                     }
                 });
                 return true;

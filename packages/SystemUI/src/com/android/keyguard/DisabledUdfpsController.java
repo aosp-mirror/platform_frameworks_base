@@ -20,6 +20,7 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
 import android.hardware.biometrics.BiometricSourceType;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
@@ -73,19 +74,30 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
 
     @Override
     protected void onViewAttached() {
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
-
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
         mIsKeyguardShowing = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         mIsDozing = mStatusBarStateController.isDozing();
+        mRunningFPS = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
         mAuthenticated = false;
+        updateButtonVisibility();
+
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
     }
 
     @Override
     protected void onViewDetached() {
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+    }
+
+    /**
+     * Call when this controller is no longer needed. This will remove the view from its parent.
+     */
+    public void destroy() {
+        if (mView != null && mView.getParent() != null) {
+            ((ViewGroup) mView.getParent()).removeView(mView);
+        }
     }
 
     private void updateButtonVisibility() {
@@ -143,6 +155,14 @@ public class DisabledUdfpsController extends ViewController<DisabledUdfpsView> i
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
                     mRunningFPS = running && biometricSourceType == FINGERPRINT;
+                    mAuthenticated &= !mRunningFPS;
+                    updateButtonVisibility();
+                }
+
+                @Override
+                public void onBiometricAuthenticated(int userId,
+                        BiometricSourceType biometricSourceType, boolean isStrongBiometric) {
+                    mAuthenticated = true;
                     updateButtonVisibility();
                 }
 

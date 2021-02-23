@@ -22,19 +22,13 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 
 /** Button to restart the size compat activity. */
@@ -42,10 +36,6 @@ public class SizeCompatRestartButton extends FrameLayout implements View.OnClick
         View.OnLongClickListener {
 
     private SizeCompatUILayout mLayout;
-    private ImageButton mRestartButton;
-    @VisibleForTesting
-    PopupWindow mShowingHint;
-    private WindowManager.LayoutParams mWinParams;
 
     public SizeCompatRestartButton(@NonNull Context context) {
         super(context);
@@ -67,24 +57,19 @@ public class SizeCompatRestartButton extends FrameLayout implements View.OnClick
 
     void inject(SizeCompatUILayout layout) {
         mLayout = layout;
-        mWinParams = layout.getWindowLayoutParams();
-    }
-
-    void remove() {
-        dismissHint();
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mRestartButton = findViewById(R.id.size_compat_restart_button);
+        final ImageButton restartButton = findViewById(R.id.size_compat_restart_button);
         final ColorStateList color = ColorStateList.valueOf(Color.LTGRAY);
         final GradientDrawable mask = new GradientDrawable();
         mask.setShape(GradientDrawable.OVAL);
         mask.setColor(color);
-        mRestartButton.setBackground(new RippleDrawable(color, null /* content */, mask));
-        mRestartButton.setOnClickListener(this);
-        mRestartButton.setOnLongClickListener(this);
+        restartButton.setBackground(new RippleDrawable(color, null /* content */, mask));
+        restartButton.setOnClickListener(this);
+        restartButton.setOnLongClickListener(this);
     }
 
     @Override
@@ -94,69 +79,7 @@ public class SizeCompatRestartButton extends FrameLayout implements View.OnClick
 
     @Override
     public boolean onLongClick(View v) {
-        showHint();
+        mLayout.onRestartButtonLongClicked();
         return true;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (mLayout.mShouldShowHint) {
-            mLayout.mShouldShowHint = false;
-            showHint();
-        }
-    }
-
-    @Override
-    public void setVisibility(@Visibility int visibility) {
-        if (visibility == View.GONE && mShowingHint != null) {
-            // Also dismiss the popup.
-            dismissHint();
-        }
-        super.setVisibility(visibility);
-    }
-
-    @Override
-    public void setLayoutDirection(int layoutDirection) {
-        final int gravity = SizeCompatUILayout.getGravity(layoutDirection);
-        if (mWinParams.gravity != gravity) {
-            mWinParams.gravity = gravity;
-            getContext().getSystemService(WindowManager.class).updateViewLayout(this,
-                    mWinParams);
-        }
-        super.setLayoutDirection(layoutDirection);
-    }
-
-    void showHint() {
-        if (mShowingHint != null) {
-            return;
-        }
-
-        // TODO: popup is not attached to the button surface. Need to handle this differently for
-        // non-fullscreen task.
-        final View popupView = LayoutInflater.from(getContext()).inflate(
-                R.layout.size_compat_mode_hint, null);
-        final PopupWindow popupWindow = new PopupWindow(popupView,
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        popupWindow.setWindowLayoutType(mWinParams.type);
-        popupWindow.setElevation(getResources().getDimension(R.dimen.bubble_elevation));
-        popupWindow.setAnimationStyle(android.R.style.Animation_InputMethod);
-        popupWindow.setClippingEnabled(false);
-        popupWindow.setOnDismissListener(() -> mShowingHint = null);
-        mShowingHint = popupWindow;
-
-        final Button gotItButton = popupView.findViewById(R.id.got_it);
-        gotItButton.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.LTGRAY),
-                null /* content */, null /* mask */));
-        gotItButton.setOnClickListener(view -> dismissHint());
-        popupWindow.showAtLocation(mRestartButton, mWinParams.gravity, mLayout.mPopupOffsetX,
-                mLayout.mPopupOffsetY);
-    }
-
-    void dismissHint() {
-        if (mShowingHint != null) {
-            mShowingHint.dismiss();
-            mShowingHint = null;
-        }
     }
 }

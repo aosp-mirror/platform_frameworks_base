@@ -20,33 +20,27 @@
 
 namespace android {
 
-static jboolean KernelCpuTotalBpfMapReader_read(JNIEnv *env, jobject, jobject callback) {
-    jclass callbackClass = env->GetObjectClass(callback);
-    jmethodID callbackMethod = env->GetMethodID(callbackClass, "accept", "(IIJ)V");
-    if (callbackMethod == 0) {
-        return JNI_FALSE;
-    }
-
-    auto freqs = android::bpf::getCpuFreqs();
-    if (!freqs) return JNI_FALSE;
+static jlongArray KernelCpuTotalBpfMapReader_readInternal(JNIEnv *env, jobject) {
     auto freqTimes = android::bpf::getTotalCpuFreqTimes();
     if (!freqTimes) return JNI_FALSE;
 
-    auto freqsClusterSize = (*freqs).size();
-    for (uint32_t clusterIndex = 0; clusterIndex < freqsClusterSize; ++clusterIndex) {
-        auto freqsSize = (*freqs)[clusterIndex].size();
-        for (uint32_t freqIndex = 0; freqIndex < freqsSize; ++freqIndex) {
-            env->CallVoidMethod(callback, callbackMethod, clusterIndex,
-                                (*freqs)[clusterIndex][freqIndex],
-                                (*freqTimes)[clusterIndex][freqIndex] / 1000000);
+    std::vector<uint64_t> allTimes;
+    for (const auto &vec : *freqTimes) {
+        for (const auto &timeNs : vec) {
+            allTimes.push_back(timeNs / 1000000);
         }
     }
-    return JNI_TRUE;
+
+    auto ar = env->NewLongArray(allTimes.size());
+    if (ar != NULL) {
+        env->SetLongArrayRegion(ar, 0, allTimes.size(),
+                                reinterpret_cast<const jlong *>(allTimes.data()));
+    }
+    return ar;
 }
 
 static const JNINativeMethod methods[] = {
-        {"read", "(Lcom/android/internal/os/KernelCpuTotalBpfMapReader$Callback;)Z",
-         (void *)KernelCpuTotalBpfMapReader_read},
+        {"readInternal", "()[J", (void *)KernelCpuTotalBpfMapReader_readInternal},
 };
 
 int register_com_android_internal_os_KernelCpuTotalBpfMapReader(JNIEnv *env) {

@@ -33,17 +33,20 @@ public class ExternalTimeSuggestionTest {
 
     @Test
     public void testEquals() {
-        ExternalTimeSuggestion one = new ExternalTimeSuggestion(ARBITRARY_TIME);
+        ExternalTimeSuggestion one = new ExternalTimeSuggestion(
+                ARBITRARY_TIME.getReferenceTimeMillis(),
+                ARBITRARY_TIME.getValue());
         assertEquals(one, one);
 
-        ExternalTimeSuggestion two = new ExternalTimeSuggestion(ARBITRARY_TIME);
+        ExternalTimeSuggestion two = new ExternalTimeSuggestion(
+                ARBITRARY_TIME.getReferenceTimeMillis(),
+                ARBITRARY_TIME.getValue());
         assertEquals(one, two);
         assertEquals(two, one);
 
-        TimestampedValue<Long> differentTime = new TimestampedValue<>(
+        ExternalTimeSuggestion three = new ExternalTimeSuggestion(
                 ARBITRARY_TIME.getReferenceTimeMillis() + 1,
                 ARBITRARY_TIME.getValue());
-        ExternalTimeSuggestion three = new ExternalTimeSuggestion(differentTime);
         assertNotEquals(one, three);
         assertNotEquals(three, one);
 
@@ -55,7 +58,9 @@ public class ExternalTimeSuggestionTest {
 
     @Test
     public void testParcelable() {
-        ExternalTimeSuggestion suggestion = new ExternalTimeSuggestion(ARBITRARY_TIME);
+        ExternalTimeSuggestion suggestion = new ExternalTimeSuggestion(
+                ARBITRARY_TIME.getReferenceTimeMillis(),
+                ARBITRARY_TIME.getValue());
         assertRoundTripParcelable(suggestion);
 
         // DebugInfo should also be stored (but is not checked by equals())

@@ -549,7 +549,7 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /** Notifies application side to enable or disable the rotation adjustment of display info. */
-    private void notifyFixedRotationTransform(boolean enabled) {
+    void notifyFixedRotationTransform(boolean enabled) {
         FixedRotationAdjustments adjustments = null;
         // A token may contain windows of the same processes or different processes. The list is
         // used to avoid sending the same adjustments to a process multiple times.

@@ -134,4 +134,19 @@ public final class RtpHeaderExtension implements Parcelable {
         result = 31 * result + Arrays.hashCode(mExtensionData);
         return result;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("RtpHeaderExtension{mLocalIdentifier=");
+        sb.append(mLocalIdentifier);
+        sb.append(", mData=");
+        for (byte b : mExtensionData) {
+            sb.append(Integer.toBinaryString(b));
+            sb.append("b_");
+        }
+        sb.append("}");
+
+        return sb.toString();
+    }
 }

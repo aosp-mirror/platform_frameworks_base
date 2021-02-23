@@ -20,6 +20,7 @@ import android.app.WallpaperManager;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
@@ -212,10 +213,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * keep the clock centered.
      */
     void updatePosition(int x, float scale, AnimationProperties props, boolean animate) {
-        x = Math.abs(x);
+        x = getCurrentLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? -x : x;
         if (mNewLockScreenClockFrame != null) {
             PropertyAnimator.setProperty(mNewLockScreenClockFrame, AnimatableProperty.TRANSLATION_X,
-                    -x, props, animate);
+                    x, props, animate);
             PropertyAnimator.setProperty(mNewLockScreenLargeClockFrame, AnimatableProperty.SCALE_X,
                     scale, props, animate);
             PropertyAnimator.setProperty(mNewLockScreenLargeClockFrame, AnimatableProperty.SCALE_Y,
@@ -277,15 +278,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         refreshFormat(mTimeFormat);
     }
 
-    float getClockTextTopPadding() {
-        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1
-                && mNewLockScreenClockViewController != null) {
-            return mNewLockScreenClockViewController.getClockTextTopPadding();
-        }
-
-        return mView.getClockTextTopPadding();
-    }
-
     private void updateAodIcons() {
         NotificationIconContainer nic = (NotificationIconContainer)
                 mView.findViewById(
@@ -336,5 +328,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
             sCacheKey = key;
         }
+    }
+
+    private int getCurrentLayoutDirection() {
+        return TextUtils.getLayoutDirectionFromLocale(Locale.getDefault());
     }
 }

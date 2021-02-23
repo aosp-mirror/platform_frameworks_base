@@ -250,6 +250,10 @@ public class DomainVerificationShell {
             return false;
         }
 
+        if (domains.size() == 1 && domains.contains("all")) {
+            domains = null;
+        }
+
         try {
             mCallback.setDomainVerificationUserSelectionInternal(userId,
                     packageName, enabled, domains);
@@ -446,10 +450,10 @@ public class DomainVerificationShell {
          * @param packageName the package whose state to change, or all packages if non is
          *                    specified
          * @param enabled     whether the domain is now approved by the user
-         * @param domains     the set of domains to change
+         * @param domains     the set of domains to change, or null to affect all domains
          */
         void setDomainVerificationUserSelectionInternal(@UserIdInt int userId,
-                @Nullable String packageName, boolean enabled, @NonNull ArraySet<String> domains)
+                @Nullable String packageName, boolean enabled, @Nullable ArraySet<String> domains)
                 throws PackageManager.NameNotFoundException;
 
         /**

@@ -21,7 +21,6 @@
 #include <gui/DisplayEventReceiver.h>
 #include <input/DisplayViewport.h>
 #include <input/Input.h>
-#include <ui/DisplayInfo.h>
 #include <utils/BitSet.h>
 #include <utils/Looper.h>
 #include <utils/RefBase.h>

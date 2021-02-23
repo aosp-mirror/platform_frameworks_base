@@ -284,12 +284,7 @@ public final class GnssStatus implements Parcelable {
      * Gets the carrier frequency of the signal tracked.
      *
      * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60
-     * MHz, L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
-     * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
-     *
-     * For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two measurements
-     * will be reported for this same satellite, in one all the values related to L1 will be
-     * filled, and in the other all of the values related to L5 will be filled.
+     * MHz, L5 = 1176.45 MHz, varying GLO channels, etc.
      *
      * <p>The value is only available if {@link #hasCarrierFrequencyHz(int satelliteIndex)} is
      * {@code true}.
