@@ -2179,12 +2179,6 @@ public abstract class BatteryStats implements Parcelable {
 
     public abstract void finishIteratingHistoryLocked();
 
-    public abstract boolean startIteratingOldHistoryLocked();
-
-    public abstract boolean getNextOldHistoryLocked(HistoryItem out);
-
-    public abstract void finishIteratingOldHistoryLocked();
-
     /**
      * Return the base time offset for the battery history.
      */
@@ -7059,24 +7053,6 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println();
                 } finally {
                     finishIteratingHistoryLocked();
-                }
-            }
-
-            if (startIteratingOldHistoryLocked()) {
-                try {
-                    final HistoryItem rec = new HistoryItem();
-                    pw.println("Old battery History:");
-                    HistoryPrinter hprinter = new HistoryPrinter();
-                    long baseTime = -1;
-                    while (getNextOldHistoryLocked(rec)) {
-                        if (baseTime < 0) {
-                            baseTime = rec.time;
-                        }
-                        hprinter.printNextItem(pw, rec, baseTime, false, (flags&DUMP_VERBOSE) != 0);
-                    }
-                    pw.println();
-                } finally {
-                    finishIteratingOldHistoryLocked();
                 }
             }
         }
