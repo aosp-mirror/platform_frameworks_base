@@ -122,7 +122,7 @@ class DomainVerificationProxyTest {
             whenever(setDomainVerificationStatusInternal(anyInt(), any(), any(), anyInt()))
         }
         collector = mockThrowOnUnmocked {
-            whenever(collectAutoVerifyDomains(any())) {
+            whenever(collectValidAutoVerifyDomains(any())) {
                 when (val pkgName = (arguments[0] as AndroidPackage).packageName) {
                     TEST_PKG_NAME_TARGET_ONE -> ArraySet(setOf("example1.com", "example2.com"))
                     TEST_PKG_NAME_TARGET_TWO -> ArraySet(setOf("example3.com", "example4.com"))
