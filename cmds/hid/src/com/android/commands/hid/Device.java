@@ -199,8 +199,8 @@ public class Device {
             mHandler.sendMessageAtTime(msg, mTimeToSend);
         }
 
-        // native callback
-        public void onDeviceOutput(byte eventId, byte rtype, byte[] data) {
+        // Send out the report to HID command output
+        private void sendReportOutput(byte eventId, byte rtype, byte[] data) {
             JSONObject json = new JSONObject();
             try {
                 json.put("eventId", eventId);
@@ -221,6 +221,18 @@ public class Device {
                 throw new RuntimeException(e);
             }
 
+        }
+
+        // native callback
+        public void onDeviceSetReport(byte rtype, byte[] data) {
+            // We don't need to reply for the SET_REPORT but just send it to HID output for test
+            // verification.
+            sendReportOutput(UHID_EVENT_TYPE_SET_REPORT, rtype, data);
+        }
+
+        // native callback
+        public void onDeviceOutput(byte rtype, byte[] data) {
+            sendReportOutput(UHID_EVENT_TYPE_UHID_OUTPUT, rtype, data);
             if (mOutputs == null) {
                 Log.e(TAG, "Received OUTPUT request, but 'outputs' section is not found");
                 return;
