@@ -2095,10 +2095,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    /** @return the max ANR delay from all registered {@link AnrController} instances */
-    public long getMaxAnrDelayMillis(ApplicationInfo info) {
+    /**
+     * @return the controller with the max ANR delay from all registered
+     * {@link AnrController} instances
+     */
+    @Nullable
+    public AnrController getAnrController(ApplicationInfo info) {
         if (info == null || info.packageName == null) {
-            return 0;
+            return null;
         }
 
         final ArrayList<AnrController> controllers;
@@ -2107,12 +2111,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final String packageName = info.packageName;
+        final int uid = info.uid;
         long maxDelayMs = 0;
+        AnrController controllerWithMaxDelay = null;
+
         for (AnrController controller : controllers) {
-            maxDelayMs = Math.max(maxDelayMs, controller.getAnrDelayMillis(packageName, info.uid));
+            long delayMs = controller.getAnrDelayMillis(packageName, uid);
+            if (delayMs > 0 && delayMs > maxDelayMs) {
+                controllerWithMaxDelay = controller;
+                maxDelayMs = delayMs;
+            }
         }
-        maxDelayMs = Math.max(maxDelayMs, 0);
-        return maxDelayMs;
+
+        return controllerWithMaxDelay;
     }
 
     @Override
