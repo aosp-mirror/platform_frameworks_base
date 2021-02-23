@@ -40,7 +40,6 @@ import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.lights.LightsManager;
@@ -213,7 +212,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
         private Spline mSystemBrightnessToNits;
         private Spline mNitsToHalBrightness;
-        private DisplayDeviceConfig mDisplayDeviceConfig;
 
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
@@ -222,7 +220,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 SurfaceControl.StaticDisplayInfo staticDisplayInfo,
                 SurfaceControl.DynamicDisplayInfo dynamicInfo,
                 SurfaceControl.DesiredDisplayModeSpecs modeSpecs, boolean isDefaultDisplay) {
-            super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
+            super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId,
+                    getContext());
             mPhysicalDisplayId = physicalDisplayId;
             mIsDefaultDisplay = isDefaultDisplay;
             updateDisplayPropertiesLocked(staticDisplayInfo, dynamicInfo, modeSpecs);
@@ -232,9 +231,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mAllmSupported = SurfaceControl.getAutoLowLatencyModeSupport(displayToken);
             mGameContentTypeSupported = SurfaceControl.getGameContentTypeSupport(displayToken);
             mDisplayDeviceConfig = null;
-            // Defer configuration file loading
-            BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                    LocalDisplayDevice::loadDisplayConfiguration, this));
         }
 
         @Override
@@ -413,6 +409,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         @Override
         public DisplayDeviceConfig getDisplayDeviceConfig() {
+            if (mDisplayDeviceConfig == null) {
+                loadDisplayConfiguration();
+            }
             return mDisplayDeviceConfig;
         }
 
