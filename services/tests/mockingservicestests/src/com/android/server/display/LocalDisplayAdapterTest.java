@@ -437,6 +437,74 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
+    public void testAfterDisplayChange_AllmSupportIsUpdated() throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.dynamicInfo.autoLowLatencyModeSupported = true;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(0)
+                .getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.allmSupported).isTrue();
+
+        // Change the display
+        display.dynamicInfo.autoLowLatencyModeSupported = false;
+        setUpDisplay(display);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertTrue(mListener.traversalRequested);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.allmSupported).isFalse();
+    }
+
+    @Test
+    public void testAfterDisplayChange_GameContentTypeSupportIsUpdated() throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.dynamicInfo.gameContentTypeSupported = true;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(0)
+                .getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.gameContentTypeSupported).isTrue();
+
+        // Change the display
+        display.dynamicInfo.gameContentTypeSupported = false;
+        setUpDisplay(display);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertTrue(mListener.traversalRequested);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.gameContentTypeSupported).isFalse();
+    }
+
+    @Test
     public void testAfterDisplayChange_ColorModesAreUpdated() throws Exception {
         FakeDisplay display = new FakeDisplay(PORT_A);
         final int[] initialColorModes = new int[]{Display.COLOR_MODE_BT709};
