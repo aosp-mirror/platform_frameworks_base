@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.statusbar.FeatureFlags;
 
 import javax.inject.Inject;
@@ -50,6 +51,12 @@ public class PeopleSpaceWidgetEnabler extends SystemUI {
             boolean showPeopleSpace = mFeatureFlags.isPeopleTileEnabled();
             mContext.getPackageManager().setComponentEnabledSetting(
                     new ComponentName(mContext, PeopleSpaceWidgetProvider.class),
+                    showPeopleSpace
+                            ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                            : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
+            mContext.getPackageManager().setComponentEnabledSetting(
+                    new ComponentName(mContext, PeopleSpaceActivity.class),
                     showPeopleSpace
                             ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                             : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
