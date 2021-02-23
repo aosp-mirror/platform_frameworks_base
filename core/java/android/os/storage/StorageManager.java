@@ -2699,6 +2699,80 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Reason to provide if app IO is blocked/resumed because of transcoding
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int APP_IO_BLOCKED_REASON_TRANSCODING = 0;
+
+    /**
+     * Constants for use with
+     * {@link #notifyAppIoBlocked} and {@link notifyAppIoResumed}, to specify the reason an app's
+     * IO is blocked/resumed.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "APP_IO_BLOCKED_REASON_" }, value = {
+            APP_IO_BLOCKED_REASON_TRANSCODING
+    })
+    public @interface AppIoBlockedReason {}
+
+    /**
+     * Notify the system that an app with {@code uid} and {@code tid} is blocked on an IO request on
+     * {@code volumeUuid} for {@code reason}.
+     *
+     * This blocked state can be used to modify the ANR behavior for the app while it's blocked.
+     * For example during transcoding.
+     *
+     * This can only be called by the {@link ExternalStorageService} holding the
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
+     *
+     * @param volumeUuid the UUID of the storage volume that the app IO is blocked on
+     * @param uid the UID of the app blocked on IO
+     * @param tid the tid of the app blocked on IO
+     * @param reason the reason the app is blocked on IO
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyAppIoBlocked(@NonNull String volumeUuid, int uid, int tid,
+            @AppIoBlockedReason int reason) {
+        try {
+            mStorageManager.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify the system that an app with {@code uid} and {@code tid} has resmued a previously
+     * blocked IO request on {@code volumeUuid} for {@code reason}.
+     *
+     * All app IO will be automatically marked as unblocked if {@code volumeUuid} is unmounted.
+     *
+     * This can only be called by the {@link ExternalStorageService} holding the
+     * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
+     *
+     * @param volumeUuid the UUID of the storage volume that the app IO is resumed on
+     * @param uid the UID of the app resuming IO
+     * @param tid the tid of the app resuming IO
+     * @param reason the reason the app is resuming IO
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyAppIoResumed(@NonNull String volumeUuid, int uid, int tid,
+            @AppIoBlockedReason int reason) {
+        try {
+            mStorageManager.notifyAppIoResumed(volumeUuid, uid, tid, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final Object mFuseAppLoopLock = new Object();
 
     @GuardedBy("mFuseAppLoopLock")
