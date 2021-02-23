@@ -26,6 +26,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
@@ -631,10 +632,15 @@ public class RecoverySystem {
     /**
      * Prepare to apply an unattended update by asking the user for their Lock Screen Knowledge
      * Factor (LSKF). If supplied, the {@code intentSender} will be called when the system is setup
-     * and ready to apply the OTA. This API is expected to handle requests from multiple clients
-     * simultaneously, e.g. from ota and mainline.
+     * and ready to apply the OTA. <p>
      *
-     * <p> The behavior of multi-client Resume on Reboot works as follows
+     * <p> If the device doesn't setup a lock screen, i.e. by checking
+     * {@link KeyguardManager#isKeyguardSecure()}, this API call will fail and throw an exception.
+     * Callers are expected to use {@link PowerManager#reboot(String)} directly without going
+     * through the RoR flow. <p>
+     *
+     * <p>  This API is expected to handle requests from multiple clients simultaneously, e.g.
+     * from ota and mainline. The behavior of multi-client Resume on Reboot works as follows
      * <li> Each client should call this function to prepare for Resume on Reboot before calling
      *      {@link #rebootAndApply(Context, String, boolean)} </li>
      * <li> One client cannot clear the Resume on Reboot preparation of another client. </li>
@@ -658,6 +664,13 @@ public class RecoverySystem {
         if (updateToken == null) {
             throw new NullPointerException("updateToken == null");
         }
+
+        KeyguardManager keyguardManager = context.getSystemService(KeyguardManager.class);
+        if (keyguardManager == null || !keyguardManager.isDeviceSecure()) {
+            throw new IOException("Failed to request LSKF because the device doesn't have a"
+                    + " lock screen. ");
+        }
+
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
         if (!rs.requestLskf(context.getPackageName(), intentSender)) {
             throw new IOException("preparation for update failed");
