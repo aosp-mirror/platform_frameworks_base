@@ -15,8 +15,12 @@
  */
 package com.android.systemui.tuner;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -32,13 +36,14 @@ import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.HashSet;
@@ -83,6 +88,7 @@ public class TunerServiceImpl extends TunerService {
     private int mCurrentUser;
     private UserTracker.Callback mCurrentUserTracker;
     private UserTracker mUserTracker;
+    private final ComponentName mTunerComponent;
 
     /**
      */
@@ -92,7 +98,6 @@ public class TunerServiceImpl extends TunerService {
             @Main Handler mainHandler,
             LeakDetector leakDetector,
             DemoModeController demoModeController,
-            BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker) {
         super(context);
         mContext = context;
@@ -100,6 +105,7 @@ public class TunerServiceImpl extends TunerService {
         mLeakDetector = leakDetector;
         mDemoModeController = demoModeController;
         mUserTracker = userTracker;
+        mTunerComponent = new ComponentName(mContext, TunerActivity.class);
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             mCurrentUser = user.getUserHandle().getIdentifier();
@@ -142,7 +148,7 @@ public class TunerServiceImpl extends TunerService {
             }
         }
         if (oldVersion < 2) {
-            setTunerEnabled(mContext, mUserTracker.getUserHandle(), false);
+            setTunerEnabled(false);
         }
         // 3 Removed because of a revert.
         if (oldVersion < 4) {
@@ -267,6 +273,46 @@ public class TunerServiceImpl extends TunerService {
             }
             Settings.Secure.putStringForUser(mContentResolver, key, null, user);
         }
+    }
+
+
+    @Override
+    public void setTunerEnabled(boolean enabled) {
+        mUserTracker.getUserContext().getPackageManager().setComponentEnabledSetting(
+                mTunerComponent,
+                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP
+        );
+    }
+
+    @Override
+    public boolean isTunerEnabled() {
+        return mUserTracker.getUserContext().getPackageManager().getComponentEnabledSetting(
+                mTunerComponent) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+    }
+
+    @Override
+    public void showResetRequest(Runnable onDisabled) {
+        SystemUIDialog dialog = new SystemUIDialog(mContext);
+        dialog.setShowForAllUsers(true);
+        dialog.setMessage(R.string.remove_from_settings_prompt);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, mContext.getString(R.string.cancel),
+                (DialogInterface.OnClickListener) null);
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                mContext.getString(R.string.guest_exit_guest_dialog_remove), (d, which) -> {
+                    // Tell the tuner (in main SysUI process) to clear all its settings.
+                    mContext.sendBroadcast(new Intent(TunerService.ACTION_CLEAR));
+                    // Disable access to tuner.
+                    setTunerEnabled(false);
+                    // Make them sit through the warning dialog again.
+                    Secure.putInt(mContext.getContentResolver(),
+                            TunerFragment.SETTING_SEEN_TUNER_WARNING, 0);
+                    if (onDisabled != null) {
+                        onDisabled.run();
+                    }
+                });
+        dialog.show();
     }
 
     private class Observer extends ContentObserver {

@@ -351,9 +351,9 @@ interface IAudioService {
     oneway void unregisterCommunicationDeviceDispatcher(
             ICommunicationDeviceDispatcher dispatcher);
 
-    boolean areFastScrollSoundEffectsEnabled();
+    boolean areNavigationRepeatSoundEffectsEnabled();
 
-    oneway void setFastScrollSoundEffectsEnabled(boolean enabled);
+    oneway void setNavigationRepeatSoundEffectsEnabled(boolean enabled);
 
     boolean isHomeSoundEffectEnabled();
 

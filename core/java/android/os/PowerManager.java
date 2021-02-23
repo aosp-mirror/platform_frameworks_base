@@ -1881,6 +1881,10 @@ public final class PowerManager {
      * Returns the current battery saver control mode. Values it may return are defined in
      * AutoPowerSaveModeTriggers. Note that this is a global device state, not a per user setting.
      *
+     * <p>Note: Prior to Android version {@link Build.VERSION_CODES#S}, any app calling this method
+     * was required to hold the {@link android.Manifest.permission#POWER_SAVER} permission. Starting
+     * from Android version {@link Build.VERSION_CODES#S}, that permission is no longer required.
+     *
      * @return The current value power saver mode for the system.
      *
      * @see AutoPowerSaveModeTriggers
@@ -1889,7 +1893,6 @@ public final class PowerManager {
      */
     @AutoPowerSaveModeTriggers
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.POWER_SAVER)
     public int getPowerSaveModeTrigger() {
         try {
             return mService.getPowerSaveModeTrigger();

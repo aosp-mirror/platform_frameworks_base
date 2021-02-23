@@ -404,6 +404,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (newView != null) {
             newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
             mSecurityViewFlipperController.show(newView);
+            mView.updateLayoutForSecurityMode(securityMode);
         }
 
         mSecurityCallback.onSecurityModeChanged(

@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -83,6 +84,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -453,6 +455,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationEntry mTopHeadsUpEntry;
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
+    private final FeatureFlags mFeatureFlags;
 
     private final ExpandableView.OnHeightChangedListener mOnChildHeightChangedListener =
             new ExpandableView.OnHeightChangedListener() {
@@ -492,8 +495,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
             SysuiStatusBarStateController statusbarStateController,
-            AmbientState ambientState
-    ) {
+            AmbientState ambientState,
+            FeatureFlags featureFlags) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
         mSectionsManager = notificationSectionsManager;
@@ -530,6 +533,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
         mStatusbarStateController = statusbarStateController;
+        mFeatureFlags = featureFlags;
     }
 
     void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
@@ -622,7 +626,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
                 .getDefaultColor();
         updateBackgroundDimming();
-        mShelf.onUiModeChanged();
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof ActivatableNotificationView) {
+                ((ActivatableNotificationView) child).updateBackgroundColors();
+            }
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
@@ -1156,8 +1165,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (stackStartPosition <= stackEndPosition) {
                     stackHeight = stackEndPosition;
                 } else {
-                    stackHeight = (int) NotificationUtils.interpolate(stackStartPosition,
-                            stackEndPosition, mQsExpansionFraction);
+                    if (shouldUseSplitNotificationShade(mFeatureFlags, getResources())) {
+                        // This prevents notifications from being collapsed when QS is expanded.
+                        stackHeight = (int) height;
+                    } else {
+                        stackHeight = (int) NotificationUtils.interpolate(stackStartPosition,
+                                stackEndPosition, mQsExpansionFraction);
+                    }
                 }
             } else {
                 stackHeight = (int) height;

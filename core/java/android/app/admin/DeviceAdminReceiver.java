@@ -1073,6 +1073,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     private void onOperationSafetyStateChanged(Context context, Intent intent) {
         if (!hasRequiredExtra(intent, EXTRA_OPERATION_SAFETY_REASON)
                 || !hasRequiredExtra(intent, EXTRA_OPERATION_SAFETY_STATE)) {
+            Log.w(TAG, "Igoring intent that's missing required extras");
             return;
         }
 
@@ -1084,7 +1085,6 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         }
         boolean isSafe = intent.getBooleanExtra(EXTRA_OPERATION_SAFETY_STATE,
                 /* defaultValue=*/ false);
-
         onOperationSafetyStateChanged(context, reason, isSafe);
     }
 

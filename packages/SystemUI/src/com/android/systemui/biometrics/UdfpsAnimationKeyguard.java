@@ -23,7 +23,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.util.MathUtils;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,7 +41,6 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
 
     private static final String TAG = "UdfpsAnimationKeyguard";
 
-    @NonNull private final View mParent;
     @NonNull private final Context mContext;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
@@ -52,10 +50,9 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
     private float mBurnInOffsetX;
     private float mBurnInOffsetY;
 
-    UdfpsAnimationKeyguard(@NonNull View parent, @NonNull Context context,
+    UdfpsAnimationKeyguard(@NonNull Context context,
             @NonNull StatusBarStateController statusBarStateController) {
         super(context);
-        mParent = parent;
         mContext = context;
 
         mMaxBurnInOffsetX = context.getResources()
@@ -73,10 +70,10 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
                 mInterpolatedDarkAmount);
         mBurnInOffsetY = MathUtils.lerp(0f,
                 getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
-                        - 0.5f * mMaxBurnInOffsetY,
+                        - mMaxBurnInOffsetY,
                 mInterpolatedDarkAmount);
         updateColor();
-        mParent.postInvalidate();
+        postInvalidateView();
     }
 
     @Override

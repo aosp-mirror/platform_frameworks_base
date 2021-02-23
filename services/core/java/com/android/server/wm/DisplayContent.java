@@ -673,10 +673,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Used in updating override configurations
     private final Configuration mTempConfig = new Configuration();
 
-    // Used in performing layout, to record the insets provided by other windows above the current
-    // window.
-    private InsetsState mTmpAboveInsetsState = new InsetsState();
-
     /**
      * Used to prevent recursions when calling
      * {@link #ensureActivitiesVisible(ActivityRecord, int, boolean, boolean)}
@@ -778,13 +774,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     + " parentHidden=" + w.isParentWindowHidden());
         }
 
-        // Sets mAboveInsets for each window. Windows behind the window providing the insets can
-        // receive the insets.
-        if (!w.mAboveInsetsState.equals(mTmpAboveInsetsState)) {
-            w.mAboveInsetsState.set(mTmpAboveInsetsState);
-            mWinInsetsChanged.add(w);
-        }
-
         // If this view is GONE, then skip it -- keep the current frame, and let the caller know
         // so they can ignore it if they want.  (We do the normal layout for INVISIBLE windows,
         // since that means "perform layout as normal, just don't display").
@@ -818,15 +807,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     + " mContainingFrame=" + w.getContainingFrame()
                     + " mDisplayFrame=" + w.getDisplayFrame());
         }
-        provideInsetsByWindow(w);
     };
-
-    private void provideInsetsByWindow(WindowState w) {
-        for (int i = 0; i < w.mProvidedInsetsSources.size(); i++) {
-            final InsetsSource providedSource = w.mProvidedInsetsSources.valueAt(i);
-            mTmpAboveInsetsState.addSource(providedSource);
-        }
-    }
 
     private final Consumer<WindowState> mPerformLayoutAttached = w -> {
         if (w.mLayoutAttached) {
@@ -1572,12 +1553,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
         if (rotation == ROTATION_UNDEFINED) {
-            // The display rotation won't be changed by current top activity. If there was fixed
-            // rotation activity, its rotated state should be cleared to cancel the adjustments.
-            if (hasTopFixedRotationLaunchingApp()
-                    // Avoid breaking recents animation.
-                    && !mFixedRotationLaunchingApp.getTask().isAnimatingByRecents()) {
-                clearFixedRotationLaunchingApp();
+            // The display rotation won't be changed by current top activity. The client side
+            // adjustments of previous rotated activity should be cleared earlier. Otherwise if
+            // the current top is in the same process, it may get the rotated state. The transform
+            // will be cleared later with transition callback to ensure smooth animation.
+            if (hasTopFixedRotationLaunchingApp()) {
+                mFixedRotationLaunchingApp.notifyFixedRotationTransform(false /* enabled */);
             }
             return false;
         }
@@ -2511,8 +2492,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void onDisplayInfoChanged() {
         final DisplayInfo info = mDisplayInfo;
-        mDisplayFrames.onDisplayInfoUpdated(info, calculateDisplayCutoutForRotation(info.rotation),
-                calculateRoundedCornersForRotation(info.rotation));
+        if (mDisplayFrames.onDisplayInfoUpdated(info,
+                calculateDisplayCutoutForRotation(info.rotation),
+                calculateRoundedCornersForRotation(info.rotation))) {
+            // TODO(b/161810301): Set notifyInsetsChange to true while the server no longer performs
+            //                    layout.
+            mInsetsStateController.onDisplayInfoUpdated(false /* notifyInsetsChange */);
+        }
         mInputMonitor.layoutInputConsumers(info.logicalWidth, info.logicalHeight);
         mDisplayPolicy.onDisplayInfoChanged(info);
     }
@@ -3767,8 +3753,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 2. Assign window layers based on the IME surface parent to make sure it is on top of the
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
-        // 3. Update the IME control target to apply any inset change and animation.
-        // 4. Reparent the IME container surface to either the input target app, or the IME window
+        // 3. The z-order of IME might have been changed. Update the above insets state.
+        mInsetsStateController.updateAboveInsetsState(
+                mInputMethodWindow, true /* notifyInsetsChange */);
+        // 4. Update the IME control target to apply any inset change and animation.
+        // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
         updateImeControlTarget();
     }
@@ -4340,14 +4329,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             Slog.v(TAG, "performLayout: dw=" + mDisplayInfo.logicalWidth
                     + " dh=" + mDisplayInfo.logicalHeight);
         }
-
-        // Used to indicate that we have processed the insets windows. This needs to be after
-        // beginLayoutLw to ensure the raw insets state display related info is initialized.
-        final InsetsState rawInsetsState = getInsetsStateController().getRawInsetsState();
-        mTmpAboveInsetsState = new InsetsState();
-        mTmpAboveInsetsState.setDisplayFrame(rawInsetsState.getDisplayFrame());
-        mTmpAboveInsetsState.setDisplayCutout(rawInsetsState.getDisplayCutout());
-        mTmpAboveInsetsState.mirrorAlwaysVisibleInsetsSources(rawInsetsState);
 
         int seq = mLayoutSeq + 1;
         if (seq < 0) seq = 0;
@@ -5467,9 +5448,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     // apply the correct override config.
                     changes = mAtmService.updateGlobalConfigurationLocked(values,
                             false /* initLocale */, false /* persistent */,
-                            UserHandle.USER_NULL /* userId */, deferResume);
+                            UserHandle.USER_NULL /* userId */);
                 } else {
-                    changes = performDisplayOverrideConfigUpdate(values, deferResume);
+                    changes = performDisplayOverrideConfigUpdate(values);
                 }
             }
 
@@ -5487,7 +5468,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return kept;
     }
 
-    int performDisplayOverrideConfigUpdate(Configuration values, boolean deferResume) {
+    int performDisplayOverrideConfigUpdate(Configuration values) {
         mTempConfig.setTo(getRequestedOverrideConfiguration());
         final int changes = mTempConfig.updateFrom(values);
         if (changes != 0) {

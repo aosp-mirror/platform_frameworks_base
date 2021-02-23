@@ -70,6 +70,7 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     setXferMode(other.xferMode());
     setColorFilter(other.getColorFilter());
     setImageFilter(other.getImageFilter());
+    mStretchEffect = other.mStretchEffect;
     return *this;
 }
 

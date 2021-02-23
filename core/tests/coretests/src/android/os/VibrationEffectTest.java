@@ -220,6 +220,10 @@ public class VibrationEffectTest {
         restored = scaledDown.scale(1.25f);
         // Does not restore to the exact original value because scale up is a bit offset.
         assertEquals(101, restored.getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
+
+        // Does not go below min amplitude while scaling down.
+        VibrationEffect.OneShot minAmplitude = new VibrationEffect.OneShot(TEST_TIMING, 1);
+        assertEquals(1, minAmplitude.scale(0.5f).getAmplitude());
     }
 
     @Test
@@ -245,6 +249,15 @@ public class VibrationEffectTest {
     }
 
     @Test
+    public void testResolveOneshotFailsWhenAmplitudeNonPositive() {
+        try {
+            TEST_ONE_SHOT.resolve(0);
+            fail("Amplitude is set to zero, should throw IllegalArgumentException");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
     public void testScaleWaveform() {
         VibrationEffect.Waveform initial = (VibrationEffect.Waveform) TEST_WAVEFORM;
 
@@ -255,6 +268,10 @@ public class VibrationEffectTest {
         assertEquals(216, scaled.getAmplitudes()[0], AMPLITUDE_SCALE_TOLERANCE);
         assertEquals(0, scaled.getAmplitudes()[1]);
         assertEquals(-1, scaled.getAmplitudes()[2]);
+
+        VibrationEffect.Waveform minAmplitude = new VibrationEffect.Waveform(
+                new long[]{100}, new int[] {1}, -1);
+        assertArrayEquals(new int[]{1}, minAmplitude.scale(0.5f).getAmplitudes());
     }
 
     @Test

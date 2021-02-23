@@ -226,6 +226,9 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     if (!mProperties.getAllowForceDark()) {
         info.disableForceDark++;
     }
+    if (!mProperties.layerProperties().getStretchEffect().isEmpty()) {
+        info.stretchEffectCount++;
+    }
 
     uint32_t animatorDirtyMask = 0;
     if (CC_LIKELY(info.runAnimations)) {
@@ -266,6 +269,9 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
 
     if (!mProperties.getAllowForceDark()) {
         info.disableForceDark--;
+    }
+    if (!mProperties.layerProperties().getStretchEffect().isEmpty()) {
+        info.stretchEffectCount--;
     }
     info.damageAccumulator->popTransform();
 }

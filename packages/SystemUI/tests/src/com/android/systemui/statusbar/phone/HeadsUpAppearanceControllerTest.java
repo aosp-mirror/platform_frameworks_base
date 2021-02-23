@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -197,9 +198,9 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mHeadsUpAppearanceController.destroy();
         verify(mHeadsUpManager).removeListener(any());
         verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
-        verify(mPanelView).removeVerticalTranslationListener(any());
+        verify(mPanelView).setVerticalTranslationListener(isNull());
         verify(mPanelView).removeTrackingHeadsUpListener(any());
-        verify(mPanelView).setHeadsUpAppearanceController(any());
+        verify(mPanelView).setHeadsUpAppearanceController(isNull());
         verify(mStackScrollerController).removeOnExpandedHeightChangedListener(any());
         verify(mStackScrollerController).removeOnLayoutChangeListener(any());
     }

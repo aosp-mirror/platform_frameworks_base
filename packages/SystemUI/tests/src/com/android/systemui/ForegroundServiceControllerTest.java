@@ -309,17 +309,6 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOverlayPredicate() {
-        StatusBarNotification sbn_user1_app1 = makeMockSBN(USERID_ONE, "com.example.app1",
-                5000, "monkeys", Notification.FLAG_AUTO_CANCEL);
-        StatusBarNotification sbn_user1_overlay = makeMockSBN(USERID_ONE, "android",
-                0, "AlertWindowNotification", Notification.FLAG_NO_CLEAR);
-
-        assertTrue(mFsc.isSystemAlertNotification(sbn_user1_overlay));
-        assertFalse(mFsc.isSystemAlertNotification(sbn_user1_app1));
-    }
-
-    @Test
     public void testNoNotifsNorAppOps_noSystemAlertWarningRequired() {
         // no notifications nor app op signals that this package/userId requires system alert
         // warning

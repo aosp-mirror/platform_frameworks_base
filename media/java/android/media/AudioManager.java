@@ -3123,52 +3123,57 @@ public class AudioManager {
 
     /**
      * @hide Home sound
-     * Played by the framework when the home app becomes active if config_enableHomeSound is set to
-     * true. This is currently only used on TV devices.
+     * <p>
+     * To be played by the framework when the home app becomes active if config_enableHomeSound is
+     * set to true. This is currently only used on TV devices.
      * Note that this sound is only available if a sound file is specified in audio_assets.xml.
      * @see #playSoundEffect(int)
      */
     public static final int FX_HOME = 11;
 
     /**
-     * @hide Fast scroll sound 1
-     * To be by the framework when a fast-scrolling is performed and
-     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * @hide Navigation repeat sound 1
+     * <p>
+     * To be played by the framework when a focus navigation is repeatedly triggered
+     * (e.g. due to long-pressing) and {@link #areNavigationRepeatSoundEffectsEnabled()} is true.
      * This is currently only used on TV devices.
      * Note that this sound is only available if a sound file is specified in audio_assets.xml
      * @see #playSoundEffect(int)
      */
-    public static final int FX_FAST_SCROLL_1 = 12;
+    public static final int FX_FOCUS_NAVIGATION_REPEAT_1 = 12;
 
     /**
-     * @hide Fast scroll sound 2
-     * To be by the framework when a fast-scrolling is performed and
-     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * @hide Navigation repeat sound 2
+     * <p>
+     * To be played by the framework when a focus navigation is repeatedly triggered
+     * (e.g. due to long-pressing) and {@link #areNavigationRepeatSoundEffectsEnabled()} is true.
      * This is currently only used on TV devices.
      * Note that this sound is only available if a sound file is specified in audio_assets.xml
      * @see #playSoundEffect(int)
      */
-    public static final int FX_FAST_SCROLL_2 = 13;
+    public static final int FX_FOCUS_NAVIGATION_REPEAT_2 = 13;
 
     /**
-     * @hide Fast scroll sound 3
-     * To be by the framework when a fast-scrolling is performed and
-     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * @hide Navigation repeat sound 3
+     * <p>
+     * To be played by the framework when a focus navigation is repeatedly triggered
+     * (e.g. due to long-pressing) and {@link #areNavigationRepeatSoundEffectsEnabled()} is true.
      * This is currently only used on TV devices.
      * Note that this sound is only available if a sound file is specified in audio_assets.xml
      * @see #playSoundEffect(int)
      */
-    public static final int FX_FAST_SCROLL_3 = 14;
+    public static final int FX_FOCUS_NAVIGATION_REPEAT_3 = 14;
 
     /**
-     * @hide Fast scroll sound 4
-     * To be by the framework when a fast-scrolling is performed and
-     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * @hide Navigation repeat sound 4
+     * <p>
+     * To be played by the framework when a focus navigation is repeatedly triggered
+     * (e.g. due to long-pressing) and {@link #areNavigationRepeatSoundEffectsEnabled()} is true.
      * This is currently only used on TV devices.
      * Note that this sound is only available if a sound file is specified in audio_assets.xml
      * @see #playSoundEffect(int)
      */
-    public static final int FX_FAST_SCROLL_4 = 15;
+    public static final int FX_FOCUS_NAVIGATION_REPEAT_4 = 15;
 
     /**
      * @hide Number of sound effects
@@ -3177,27 +3182,27 @@ public class AudioManager {
     public static final int NUM_SOUND_EFFECTS = 16;
 
     /**
-     * @hide Number of fast scroll sound effects
+     * @hide Number of FX_FOCUS_NAVIGATION_REPEAT_* sound effects
      */
-    public static final int NUM_FAST_SCROLL_SOUND_EFFECTS = 4;
+    public static final int NUM_NAVIGATION_REPEAT_SOUND_EFFECTS = 4;
 
     /**
      * @hide
-     * @param n a value in [0, {@link #NUM_FAST_SCROLL_SOUND_EFFECTS}[
-     * @return The id of a fast scroll sound effect or -1 if out of bounds
+     * @param n a value in [0, {@link #NUM_NAVIGATION_REPEAT_SOUND_EFFECTS}[
+     * @return The id of a navigation repeat sound effect or -1 if out of bounds
      */
-    public static int getNthFastScrollSoundEffectId(int n) {
+    public static int getNthNavigationRepeatSoundEffect(int n) {
         switch (n) {
             case 0:
-                return FX_FAST_SCROLL_1;
+                return FX_FOCUS_NAVIGATION_REPEAT_1;
             case 1:
-                return FX_FAST_SCROLL_2;
+                return FX_FOCUS_NAVIGATION_REPEAT_2;
             case 2:
-                return FX_FAST_SCROLL_3;
+                return FX_FOCUS_NAVIGATION_REPEAT_3;
             case 3:
-                return FX_FAST_SCROLL_4;
+                return FX_FOCUS_NAVIGATION_REPEAT_4;
             default:
-                Log.w(TAG, "Invalid fast-scroll sound effect id: " + n);
+                Log.w(TAG, "Invalid navigation repeat sound effect id: " + n);
                 return -1;
         }
     }
@@ -3205,9 +3210,9 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void setFastScrollSoundEffectsEnabled(boolean enabled) {
+    public void setNavigationRepeatSoundEffectsEnabled(boolean enabled) {
         try {
-            getService().setFastScrollSoundEffectsEnabled(enabled);
+            getService().setNavigationRepeatSoundEffectsEnabled(enabled);
         } catch (RemoteException e) {
 
         }
@@ -3215,11 +3220,11 @@ public class AudioManager {
 
     /**
      * @hide
-     * @return true if the fast scroll sound effects are enabled
+     * @return true if the navigation repeat sound effects are enabled
      */
-    public boolean areFastScrollSoundEffectsEnabled() {
+    public boolean areNavigationRepeatSoundEffectsEnabled() {
         try {
-            return getService().areFastScrollSoundEffectsEnabled();
+            return getService().areNavigationRepeatSoundEffectsEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

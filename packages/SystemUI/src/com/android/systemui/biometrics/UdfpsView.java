@@ -113,6 +113,7 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
 
     void setExtras(@Nullable UdfpsAnimation animation, @Nullable UdfpsEnrollHelper enrollHelper) {
         mAnimationView.setAnimation(animation);
+
         mEnrollHelper = enrollHelper;
 
         if (enrollHelper != null) {

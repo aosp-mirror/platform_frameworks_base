@@ -978,7 +978,8 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
                 "unlinkFrontendToCiCam")) {
-            if (mFrontendCiCamHandle != null && mFrontendCiCamId == ciCamId) {
+            if (mFrontendCiCamHandle != null && mFrontendCiCamId != null
+                    && mFrontendCiCamId == ciCamId) {
                 int result = nativeUnlinkCiCam(ciCamId);
                 if (result == RESULT_SUCCESS) {
                     mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
@@ -1409,6 +1410,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestCiCam(request, ciCamHandle);
         if (granted) {
             mFrontendCiCamHandle = ciCamHandle[0];
+            mFrontendCiCamId = ciCamId;
         }
         return granted;
     }

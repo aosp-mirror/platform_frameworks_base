@@ -21,6 +21,7 @@ import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
@@ -70,25 +71,28 @@ public class DisplayFrames {
      * @param info the updated {@link DisplayInfo}.
      * @param displayCutout the updated {@link DisplayCutout}.
      * @param roundedCorners the updated {@link RoundedCorners}.
+     * @return {@code true} if the insets state has been changed; {@code false} otherwise.
      */
-    public void onDisplayInfoUpdated(DisplayInfo info, WmDisplayCutout displayCutout,
-            RoundedCorners roundedCorners) {
-        mDisplayWidth = info.logicalWidth;
-        mDisplayHeight = info.logicalHeight;
+    public boolean onDisplayInfoUpdated(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
+            @NonNull RoundedCorners roundedCorners) {
         mRotation = info.rotation;
-        final WmDisplayCutout wmDisplayCutout =
-                displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
 
         final InsetsState state = mInsetsState;
-        final Rect unrestricted = mUnrestricted;
         final Rect safe = mDisplayCutoutSafe;
-        final DisplayCutout cutout = wmDisplayCutout.getDisplayCutout();
+        final DisplayCutout cutout = displayCutout.getDisplayCutout();
+        if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
+                && state.getDisplayCutout().equals(cutout)
+                && state.getRoundedCorners().equals(roundedCorners)) {
+            return false;
+        }
+        mDisplayWidth = info.logicalWidth;
+        mDisplayHeight = info.logicalHeight;
+        final Rect unrestricted = mUnrestricted;
         unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
         safe.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
         state.setDisplayFrame(unrestricted);
         state.setDisplayCutout(cutout);
-        state.setRoundedCorners(roundedCorners != null ? roundedCorners
-                : RoundedCorners.NO_ROUNDED_CORNERS);
+        state.setRoundedCorners(roundedCorners);
         if (!cutout.isEmpty()) {
             if (cutout.getSafeInsetLeft() > 0) {
                 safe.left = unrestricted.left + cutout.getSafeInsetLeft();
@@ -116,6 +120,7 @@ public class DisplayFrames {
             state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
             state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
         }
+        return true;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

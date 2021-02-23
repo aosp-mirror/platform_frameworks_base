@@ -20,7 +20,6 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
-import static android.location.GpsStatus.GPS_EVENT_STARTED;
 import static android.location.LocationRequest.createFromDeprecatedCriteria;
 import static android.location.LocationRequest.createFromDeprecatedProvider;
 
@@ -412,7 +411,7 @@ public class LocationManager {
     private static final String CACHE_KEY_LOCATION_ENABLED_PROPERTY =
             "cache_key.location_enabled";
 
-    private static ILocationManager getService() throws RemoteException {
+    static ILocationManager getService() throws RemoteException {
         try {
             return ILocationManager.Stub.asInterface(
                     ServiceManager.getServiceOrThrow(Context.LOCATION_SERVICE));
@@ -439,11 +438,13 @@ public class LocationManager {
                 new GnssNavigationTransportManager();
     }
 
-    private static final ProviderRequestTransportManager sProviderRequestListeners =
-            new ProviderRequestTransportManager();
+    private static class ProviderRequestLazyLoader {
+        static final ProviderRequestTransportManager sProviderRequestListeners =
+                new ProviderRequestTransportManager();
+    }
 
-    private final Context mContext;
-    private final ILocationManager mService;
+    final Context mContext;
+    final ILocationManager mService;
 
     private volatile PropertyInvalidatedCache<Integer, Boolean> mLocationEnabledCache =
             new PropertyInvalidatedCache<Integer, Boolean>(
@@ -2790,7 +2791,7 @@ public class LocationManager {
     public boolean registerProviderRequestListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Listener listener) {
-        sProviderRequestListeners.addListener(listener,
+        ProviderRequestLazyLoader.sProviderRequestListeners.addListener(listener,
                 new ProviderRequestTransport(executor, listener));
         return true;
     }
@@ -2805,7 +2806,7 @@ public class LocationManager {
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public void unregisterProviderRequestListener(
             @NonNull Listener listener) {
-        sProviderRequestListeners.removeListener(listener);
+        ProviderRequestLazyLoader.sProviderRequestListeners.removeListener(listener);
     }
 
     /**
@@ -2917,6 +2918,10 @@ public class LocationManager {
     private static class GnssStatusTransportManager extends
             ListenerTransportManager<GnssStatusTransport> {
 
+        GnssStatusTransportManager() {
+            super(false);
+        }
+
         @Override
         protected void registerTransport(GnssStatusTransport transport)
                             throws RemoteException {
@@ -2933,6 +2938,10 @@ public class LocationManager {
 
     private static class GnssNmeaTransportManager extends
             ListenerTransportManager<GnssNmeaTransport> {
+
+        GnssNmeaTransportManager() {
+            super(false);
+        }
 
         @Override
         protected void registerTransport(GnssNmeaTransport transport)
@@ -2951,6 +2960,10 @@ public class LocationManager {
     private static class GnssMeasurementsTransportManager extends
             ListenerTransportManager<GnssMeasurementsTransport> {
 
+        GnssMeasurementsTransportManager() {
+            super(false);
+        }
+
         @Override
         protected void registerTransport(GnssMeasurementsTransport transport)
                             throws RemoteException {
@@ -2968,6 +2981,10 @@ public class LocationManager {
     private static class GnssAntennaTransportManager extends
             ListenerTransportManager<GnssAntennaInfoTransport> {
 
+        GnssAntennaTransportManager() {
+            super(false);
+        }
+
         @Override
         protected void registerTransport(GnssAntennaInfoTransport transport) {
             transport.getContext().registerReceiver(transport,
@@ -2982,6 +2999,10 @@ public class LocationManager {
 
     private static class GnssNavigationTransportManager extends
             ListenerTransportManager<GnssNavigationTransport> {
+
+        GnssNavigationTransportManager() {
+            super(false);
+        }
 
         @Override
         protected void registerTransport(GnssNavigationTransport transport)
@@ -2999,6 +3020,10 @@ public class LocationManager {
 
     private static class ProviderRequestTransportManager extends
             ListenerTransportManager<ProviderRequestTransport> {
+
+        ProviderRequestTransportManager() {
+            super(false);
+        }
 
         @Override
         protected void registerTransport(ProviderRequestTransport transport)
@@ -3117,6 +3142,8 @@ public class LocationManager {
         }
     }
 
+    /** @deprecated */
+    @Deprecated
     private static class GpsAdapter extends GnssStatus.Callback {
 
         private final GpsStatus.Listener mGpsListener;
@@ -3127,7 +3154,7 @@ public class LocationManager {
 
         @Override
         public void onStarted() {
-            mGpsListener.onGpsStatusChanged(GPS_EVENT_STARTED);
+            mGpsListener.onGpsStatusChanged(GpsStatus.GPS_EVENT_STARTED);
         }
 
         @Override
@@ -3204,6 +3231,8 @@ public class LocationManager {
         }
     }
 
+    /** @deprecated */
+    @Deprecated
     private static class GpsStatusTransport extends GnssStatusTransport {
 
         static volatile int sTtff;
@@ -3442,6 +3471,8 @@ public class LocationManager {
         }
     }
 
+    /** @deprecated */
+    @Deprecated
     private static class BatchedLocationCallbackWrapper implements LocationListener {
 
         private final BatchedLocationCallback mCallback;
@@ -3461,6 +3492,8 @@ public class LocationManager {
         }
     }
 
+    /** @deprecated */
+    @Deprecated
     private static class BatchedLocationCallbackTransport extends LocationListenerTransport {
 
         BatchedLocationCallbackTransport(BatchedLocationCallback callback, Handler handler) {
