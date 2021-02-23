@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.net.LinkProperties;
@@ -231,13 +232,20 @@ public class VcnManager {
         }
     }
 
-    // TODO: make VcnNetworkPolicyListener @SystemApi
     /**
-     * VcnNetworkPolicyListener is the interface through which internal system components can
-     * register to receive updates for VCN-underlying Network policies from the System Server.
+     * VcnNetworkPolicyListener is the interface through which internal system components (e.g.
+     * Network Factories) can register to receive updates for VCN-underlying Network policies from
+     * the System Server.
+     *
+     * <p>Any Network Factory that brings up Networks capable of being VCN-underlying Networks
+     * should register a VcnNetworkPolicyListener. VcnManager will then use this listener to notify
+     * the registrant when VCN Network policies change. Upon receiving this signal, the listener
+     * must check {@link VcnManager} for the current Network policy result for each of its Networks
+     * via {@link #applyVcnNetworkPolicy(NetworkCapabilities, LinkProperties)}.
      *
      * @hide
      */
+    @SystemApi
     public interface VcnNetworkPolicyListener {
         /**
          * Notifies the implementation that the VCN's underlying Network policy has changed.
@@ -252,6 +260,9 @@ public class VcnManager {
     /**
      * Add a listener for VCN-underlying Network policy updates.
      *
+     * <p>A {@link VcnNetworkPolicyListener} is eligible to begin receiving callbacks once it is
+     * registered. No callbacks are guaranteed upon registration.
+     *
      * @param executor the Executor that will be used for invoking all calls to the specified
      *     Listener
      * @param listener the VcnNetworkPolicyListener to be added
@@ -259,6 +270,7 @@ public class VcnManager {
      * @throws IllegalStateException if the specified VcnNetworkPolicyListener is already registered
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public void addVcnNetworkPolicyListener(
             @NonNull Executor executor, @NonNull VcnNetworkPolicyListener listener) {
@@ -287,6 +299,7 @@ public class VcnManager {
      * @param listener the VcnNetworkPolicyListener that will be removed
      * @hide
      */
+    @SystemApi
     public void removeVcnNetworkPolicyListener(@NonNull VcnNetworkPolicyListener listener) {
         requireNonNull(listener, "listener must not be null");
 
@@ -319,6 +332,7 @@ public class VcnManager {
      * @hide
      */
     @NonNull
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public VcnNetworkPolicyResult applyVcnNetworkPolicy(
             @NonNull NetworkCapabilities networkCapabilities,
