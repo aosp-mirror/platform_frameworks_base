@@ -263,7 +263,6 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, boolean);
     method @NonNull public int[] getAdministratorUids();
     method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
@@ -435,11 +434,6 @@ package android.net {
     field public final int tcpSeq;
     field public final int tcpWindow;
     field public final int tcpWindowScale;
-  }
-
-  public interface TransportInfo {
-    method public default boolean hasLocationSensitiveFields();
-    method @NonNull public default android.net.TransportInfo makeCopy(boolean);
   }
 
 }
