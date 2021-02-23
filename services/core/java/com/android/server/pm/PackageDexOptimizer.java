@@ -780,7 +780,8 @@ public class PackageDexOptimizer {
         return getOatDir(codePath).getAbsolutePath();
     }
 
-    static File getOatDir(File codePath) {
+    /** Returns the oat dir for the given code path */
+    public static File getOatDir(File codePath) {
         return new File(codePath, OAT_DIR_NAME);
     }
 
