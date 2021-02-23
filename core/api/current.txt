@@ -12039,6 +12039,7 @@ package android.content.pm {
     method public boolean getSyntheticAppDetailsActivityEnabled(@NonNull String);
     method @NonNull public abstract android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
     method @Nullable public abstract String[] getSystemSharedLibraryNames();
+    method @IntRange(from=0) public int getTargetSdkVersion(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract CharSequence getText(@NonNull String, @StringRes int, @Nullable android.content.pm.ApplicationInfo);
     method @NonNull public abstract android.graphics.drawable.Drawable getUserBadgedDrawableForDensity(@NonNull android.graphics.drawable.Drawable, @NonNull android.os.UserHandle, @Nullable android.graphics.Rect, int);
     method @NonNull public abstract android.graphics.drawable.Drawable getUserBadgedIcon(@NonNull android.graphics.drawable.Drawable, @NonNull android.os.UserHandle);
