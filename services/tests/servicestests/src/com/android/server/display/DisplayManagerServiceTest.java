@@ -993,7 +993,7 @@ public class DisplayManagerServiceTest {
         private DisplayDeviceInfo mDisplayDeviceInfo;
 
         FakeDisplayDevice() {
-            super(null, null, "");
+            super(null, null, "", mContext);
         }
 
         public void setDisplayDeviceInfo(DisplayDeviceInfo displayDeviceInfo) {
