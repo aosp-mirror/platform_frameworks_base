@@ -580,6 +580,7 @@ java_library {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
+        "android.hardware.vibrator-V2-java",
         "android.security.apc-java",
         "android.security.authorization-java",
         "android.security.usermanager-java",
