@@ -310,6 +310,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -319,6 +320,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -6502,7 +6506,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                     DELEGATION_CERT_INSTALL);
         }
-        final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
+        KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
         final String alias = keySpec.getKeystoreAlias();
         if (TextUtils.isEmpty(alias)) {
             throw new IllegalArgumentException("Empty alias provided.");
@@ -6514,9 +6518,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        if (deviceIdAttestationRequired && (keySpec.getAttestationChallenge() == null)) {
-            throw new IllegalArgumentException(
-                    "Requested Device ID attestation but challenge is empty.");
+        if (deviceIdAttestationRequired) {
+            if (keySpec.getAttestationChallenge() == null) {
+                throw new IllegalArgumentException(
+                        "Requested Device ID attestation but challenge is empty.");
+            }
+            KeyGenParameterSpec.Builder specBuilder = new KeyGenParameterSpec.Builder(keySpec);
+            specBuilder.setAttestationIds(attestationUtilsFlags);
+            specBuilder.setDevicePropertiesAttestationIncluded(true);
+            keySpec = specBuilder.build();
         }
 
         final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
@@ -6526,15 +6536,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     KeyChain.bindAsUser(mContext, userHandle)) {
                 IKeyChainService keyChain = keyChainConnection.getService();
 
-                // Copy the provided keySpec, excluding the attestation challenge, which will be
-                // used later for requesting key attestation record.
-                final KeyGenParameterSpec noAttestationSpec =
-                    new KeyGenParameterSpec.Builder(keySpec)
-                        .setAttestationChallenge(null)
-                        .build();
-
                 final int generationResult = keyChain.generateKeyPair(algorithm,
-                    new ParcelableKeyGenParameterSpec(noAttestationSpec));
+                        new ParcelableKeyGenParameterSpec(keySpec));
                 if (generationResult != KeyChain.KEY_GEN_SUCCESS) {
                     Log.e(LOG_TAG, String.format(
                             "KeyChain failed to generate a keypair, error %d.", generationResult));
@@ -6543,6 +6546,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             throw new ServiceSpecificException(
                                     DevicePolicyManager.KEY_GEN_STRONGBOX_UNAVAILABLE,
                                     String.format("KeyChain error: %d", generationResult));
+                        case KeyChain.KEY_ATTESTATION_CANNOT_ATTEST_IDS:
+                            throw new UnsupportedOperationException(
+                                "Device does not support Device ID attestation.");
                         default:
                             return false;
                     }
@@ -6555,22 +6561,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // that UID.
                 keyChain.setGrant(callingUid, alias, true);
 
-                final byte[] attestationChallenge = keySpec.getAttestationChallenge();
-                if (attestationChallenge != null) {
-                    final int attestationResult = keyChain.attestKey(
-                            alias, attestationChallenge, attestationUtilsFlags, attestationChain);
-                    if (attestationResult != KeyChain.KEY_ATTESTATION_SUCCESS) {
-                        Log.e(LOG_TAG, String.format(
-                                "Attestation for %s failed (rc=%d), deleting key.",
-                                alias, attestationResult));
-                        keyChain.removeKeyPair(alias);
-                        if (attestationResult == KeyChain.KEY_ATTESTATION_CANNOT_ATTEST_IDS) {
-                            throw new UnsupportedOperationException(
-                                    "Device does not support Device ID attestation.");
+                try {
+                    final List<byte[]> encodedCerts = new ArrayList();
+                    final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                    final byte[] certChainBytes = keyChain.getCaCertificates(alias);
+                    encodedCerts.add(keyChain.getCertificate(alias));
+                    if (certChainBytes != null) {
+                        final Collection<X509Certificate> certs =
+                                (Collection<X509Certificate>) certFactory.generateCertificates(
+                                    new ByteArrayInputStream(certChainBytes));
+                        for (X509Certificate cert : certs) {
+                            encodedCerts.add(cert.getEncoded());
                         }
-                        return false;
                     }
+
+                    attestationChain.shallowCopyFrom(new KeymasterCertificateChain(encodedCerts));
+                } catch (CertificateException e) {
+                    Log.e(LOG_TAG, "While retrieving certificate chain.", e);
+                    return false;
                 }
+
                 final boolean isDelegate = (who == null);
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.GENERATE_KEY_PAIR)
