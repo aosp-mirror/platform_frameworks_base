@@ -249,6 +249,26 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     /**
+     * API used for prototyping stretch effect parameters in framework sample apps
+     * @hide
+     */
+    public void setEdgeEffectIntensity(float intensity) {
+        mEdgeGlowLeft.setMaxStretchIntensity(intensity);
+        mEdgeGlowRight.setMaxStretchIntensity(intensity);
+        invalidate();
+    }
+
+    /**
+     * API used for prototyping stretch effect parameters in the framework sample apps
+     * @hide
+     */
+    public void setStretchDistance(float distance) {
+        mEdgeGlowLeft.setStretchDistance(distance);
+        mEdgeGlowRight.setStretchDistance(distance);
+        invalidate();
+    }
+
+    /**
      * Sets the right edge effect color.
      *
      * @param color The color for the right edge effect.
