@@ -99,6 +99,7 @@ import android.hardware.input.InputManager;
 import android.hardware.iris.IIrisService;
 import android.hardware.iris.IrisManager;
 import android.hardware.lights.LightsManager;
+import android.hardware.lights.SystemLightsManager;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -1344,7 +1345,7 @@ public final class SystemServiceRegistry {
                 @Override
                 public LightsManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                    return new LightsManager(ctx);
+                    return new SystemLightsManager(ctx);
                 }});
         registerService(Context.INCREMENTAL_SERVICE, IncrementalManager.class,
                 new CachedServiceFetcher<IncrementalManager>() {

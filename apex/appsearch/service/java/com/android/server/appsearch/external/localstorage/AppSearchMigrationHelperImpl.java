@@ -76,7 +76,7 @@ class AppSearchMigrationHelperImpl implements AppSearchMigrationHelper {
         int currentVersion = mCurrentVersionMap.get(schemaType);
         int finalVersion = mFinalVersionMap.get(schemaType);
         try (FileOutputStream outputStream = new FileOutputStream(mFile)) {
-            // TODO(b/177266929) change the output stream so that we can use it in platform
+            // TODO(b/151178558) change the output stream so that we can use it in platform
             CodedOutputStream codedOutputStream = CodedOutputStream.newInstance(outputStream);
             SearchResultPage searchResultPage =
                     mAppSearchImpl.query(

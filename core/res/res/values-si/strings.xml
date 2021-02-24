@@ -1871,6 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS ඉල්ලීම වීඩියෝ ඇමතුමට වෙනස් කරන ලදී"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS ඉල්ලීම USSD ඉල්ලීමට වෙනස් කරන ලදී"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"නව SS ඉල්ලීමට වෙනස් කරන ලදී"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"තතුබෑම් ඇඟවීම"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"කාර්යාල පැතිකඩ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"අනතුරු අඟවන ලදී"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"දිග හරින්න"</string>

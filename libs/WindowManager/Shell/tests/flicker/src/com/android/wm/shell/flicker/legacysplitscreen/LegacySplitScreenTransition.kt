@@ -20,33 +20,33 @@ import android.app.Instrumentation
 import android.os.Bundle
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 
-abstract class LegacySplitScreenTransition(
-    protected val instrumentation: Instrumentation
-) {
-    internal val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
-    internal val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
-    internal val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
-    internal val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
+abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestParameter) {
+    protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    protected val isRotated = testSpec.config.startRotation.isRotated()
+    protected val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
+    protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
+    protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
+    protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
         .launcherStrategy.supportedLauncherPackage
-    internal val LIVE_WALLPAPER_PACKAGE_NAME =
-        "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
-    internal val LETTERBOX_NAME = "Letterbox"
-    internal val TOAST_NAME = "Toast"
-    internal val SPLASH_SCREEN_NAME = "Splash Screen"
 
-    internal open val defaultTransitionSetup: FlickerBuilder.(Bundle) -> Unit
+    protected open val transition: FlickerBuilder.(Bundle) -> Unit
         get() = { configuration ->
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    device.openQuickStepAndClearRecentAppsFromOverview()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     secondaryApp.launchViaIntent(wmHelper)
                     splitScreenApp.launchViaIntent(wmHelper)
                     this.setRotation(configuration.startRotation)
@@ -54,46 +54,46 @@ abstract class LegacySplitScreenTransition(
             }
             teardown {
                 eachRun {
-                    splitScreenApp.exit()
-                    secondaryApp.exit()
+                    secondaryApp.exit(wmHelper)
+                    splitScreenApp.exit(wmHelper)
                     this.setRotation(Surface.ROTATION_0)
                 }
             }
         }
+
+    @FlickerBuilderProvider
+    fun buildFlicker(): FlickerBuilder {
+        return FlickerBuilder(instrumentation).apply {
+            withTestName { testSpec.name }
+            repeat { testSpec.config.repetitions }
+            transition(this, testSpec.config)
+        }
+    }
 
     internal open val cleanSetup: FlickerBuilder.(Bundle) -> Unit
         get() = { configuration ->
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    device.openQuickStepAndClearRecentAppsFromOverview()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     this.setRotation(configuration.startRotation)
                 }
             }
             teardown {
                 eachRun {
-                    nonResizeableApp.exit()
+                    nonResizeableApp.exit(wmHelper)
+                    splitScreenApp.exit(wmHelper)
+                    device.pressHome()
                     this.setRotation(Surface.ROTATION_0)
                 }
             }
         }
 
-    internal open val customRotateSetup: FlickerBuilder.(Bundle) -> Unit
-        get() = { configuration ->
-            setup {
-                eachRun {
-                    device.wakeUpAndGoToHomeScreen()
-                    device.openQuickStepAndClearRecentAppsFromOverview()
-                    secondaryApp.launchViaIntent(wmHelper)
-                    splitScreenApp.launchViaIntent(wmHelper)
-                }
-            }
-            teardown {
-                eachRun {
-                    splitScreenApp.exit()
-                    secondaryApp.exit()
-                    this.setRotation(Surface.ROTATION_0)
-                }
-            }
-        }
+    companion object {
+        internal const val LIVE_WALLPAPER_PACKAGE_NAME =
+            "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
+        internal const val LETTERBOX_NAME = "Letterbox"
+        internal const val TOAST_NAME = "Toast"
+        internal const val SPLASH_SCREEN_NAME = "Splash Screen"
+    }
 }

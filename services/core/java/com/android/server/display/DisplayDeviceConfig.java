@@ -120,7 +120,20 @@ public class DisplayDeviceConfig {
         // If no config can be loaded from any ddc xml at all,
         // prepare a whole config using the global config.xml.
         // Guaranteed not null
-        if (isDefaultDisplay) {
+        return create(context, isDefaultDisplay);
+    }
+
+    /**
+     * Creates an instance using global values since no display device config xml exists.
+     * Uses values from config or PowerManager.
+     *
+     * @param context
+     * @param useConfigXml
+     * @return A configuration instance.
+     */
+    public static DisplayDeviceConfig create(Context context, boolean useConfigXml) {
+        DisplayDeviceConfig config;
+        if (useConfigXml) {
             config = getConfigFromGlobalXml(context);
         } else {
             config = getConfigFromPmValues(context);

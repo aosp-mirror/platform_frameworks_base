@@ -28,7 +28,6 @@ import com.android.wm.shell.bubbles.storage.BubbleEntity
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.bubbles.storage.BubbleVolatileRepository
 import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.common.annotations.ExternalThread
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,8 +35,11 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
-internal class BubbleDataRepository(context: Context, private val launcherApps: LauncherApps,
-        private val mainExecutor : ShellExecutor) {
+internal class BubbleDataRepository(
+    context: Context,
+    private val launcherApps: LauncherApps,
+    private val mainExecutor: ShellExecutor
+) {
     private val volatileRepository = BubbleVolatileRepository(launcherApps)
     private val persistentRepository = BubblePersistentRepository(context)
 
@@ -78,7 +80,8 @@ internal class BubbleDataRepository(context: Context, private val launcherApps: 
                     b.key,
                     b.rawDesiredHeight,
                     b.rawDesiredHeightResId,
-                    b.title
+                    b.title,
+                    b.taskId
             )
         }
     }
@@ -168,6 +171,7 @@ internal class BubbleDataRepository(context: Context, private val launcherApps: 
                             entity.desiredHeight,
                             entity.desiredHeightResId,
                             entity.title,
+                            entity.taskId,
                             mainExecutor
                     ) }
         }

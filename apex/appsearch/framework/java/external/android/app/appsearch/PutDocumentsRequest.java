@@ -28,9 +28,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Encapsulates a request to index a document into an {@link AppSearchSession} database.
+ * Encapsulates a request to index documents into an {@link AppSearchSession} database.
  *
  * <p>@see AppSearchSession#putDocuments
+ *
+ * @see AppSearchSession#put
  */
 public final class PutDocumentsRequest {
     private final List<GenericDocument> mDocuments;
@@ -39,7 +41,7 @@ public final class PutDocumentsRequest {
         mDocuments = documents;
     }
 
-    /** Returns the documents that are part of this request. */
+    /** Returns a list of {@link GenericDocument} objects that are part of this request. */
     @NonNull
     public List<GenericDocument> getGenericDocuments() {
         return Collections.unmodifiableList(mDocuments);
@@ -54,14 +56,22 @@ public final class PutDocumentsRequest {
         private final List<GenericDocument> mDocuments = new ArrayList<>();
         private boolean mBuilt = false;
 
-        /** Adds one or more {@link GenericDocument} objects to the request. */
+        /**
+         * Adds one or more {@link GenericDocument} objects to the request.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public Builder addGenericDocuments(@NonNull GenericDocument... documents) {
             Preconditions.checkNotNull(documents);
             return addGenericDocuments(Arrays.asList(documents));
         }
 
-        /** Adds a collection of {@link GenericDocument} objects to the request. */
+        /**
+         * Adds a collection of {@link GenericDocument} objects to the request.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public Builder addGenericDocuments(
                 @NonNull Collection<? extends GenericDocument> documents) {
@@ -71,7 +81,11 @@ public final class PutDocumentsRequest {
             return this;
         }
 
-        /** Creates a new {@link PutDocumentsRequest} object. */
+        /**
+         * Creates a new {@link PutDocumentsRequest} object.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public PutDocumentsRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

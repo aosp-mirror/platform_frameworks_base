@@ -90,11 +90,11 @@ public interface AppSearchSessionShim extends Closeable {
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
      * efficiently.
      *
-     * <p>By default, documents are visible on platform surfaces. To opt out, call
-     * {@link SetSchemaRequest.Builder#setSchemaTypeVisibilityForSystemUi} with {@code visible} as
-     * false. Any visibility settings apply only to the schemas that are included in the
-     * {@code request}. Visibility settings for a schema type do not persist across
-     * {@link #setSchema} calls.
+     * <p>By default, documents are visible on platform surfaces. To opt out, call {@code
+     * SetSchemaRequest.Builder#setPlatformSurfaceable} with {@code surfaceable} as false. Any
+     * visibility settings apply only to the schemas that are included in the {@code request}.
+     * Visibility settings for a schema type do not apply or persist across {@link
+     * SetSchemaRequest}s.
      *
      * <p>Migration: make non-backwards-compatible changes will delete all stored documents in old
      * schema. You can save your documents by setting {@link
@@ -118,6 +118,8 @@ public interface AppSearchSessionShim extends Closeable {
      * @see android.app.appsearch.AppSearchSchema.Migrator
      * @see android.app.appsearch.AppSearchMigrationHelper.Transformer
      */
+    // TODO(b/169883602): Change @code references to @link when setPlatformSurfaceable APIs are
+    //  exposed.
     @NonNull
     ListenableFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest request);
 
@@ -132,15 +134,17 @@ public interface AppSearchSessionShim extends Closeable {
     ListenableFuture<Set<AppSearchSchema>> getSchema();
 
     /**
-     * Indexes documents into AppSearch.
+     * Indexes documents into the {@link AppSearchSessionShim} database.
      *
-     * <p>Each {@link GenericDocument}'s {@code schemaType} field must be set to the name of a
-     * schema type previously registered via the {@link #setSchema} method.
+     * <p>Each {@link GenericDocument} object must have a {@code schemaType} field set to an {@link
+     * AppSearchSchema} type that has been previously registered by calling the {@link #setSchema}
+     * method.
      *
-     * @param request {@link PutDocumentsRequest} containing documents to be indexed
-     * @return The pending result of performing this operation. The keys of the returned {@link
-     *     AppSearchBatchResult} are the URIs of the input documents. The values are {@code null} if
-     *     they were successfully indexed, or a failed {@link AppSearchResult} otherwise.
+     * @param request containing documents to be indexed.
+     * @return a {@link ListenableFuture} which resolves to an {@link AppSearchBatchResult}. The
+     *     keys of the returned {@link AppSearchBatchResult} are the URIs of the input documents.
+     *     The values are either {@code null} if the corresponding document was successfully
+     *     indexed, or a failed {@link AppSearchResult} otherwise.
      */
     @NonNull
     ListenableFuture<AppSearchBatchResult<String, Void>> put(@NonNull PutDocumentsRequest request);
@@ -213,7 +217,7 @@ public interface AppSearchSessionShim extends Closeable {
      * adding projection, can be set by calling the corresponding {@link SearchSpec.Builder} setter.
      *
      * <p>This method is lightweight. The heavy work will be done in {@link
-     * SearchResultsShim#getNextPage()}.
+     * SearchResultsShim#getNextPage}.
      *
      * @param queryExpression query string to search.
      * @param searchSpec spec for setting document filters, adding projection, setting term match

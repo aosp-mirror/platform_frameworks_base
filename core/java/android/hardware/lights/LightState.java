@@ -32,41 +32,104 @@ import android.os.Parcelable;
  * will be converted to only a brightness value and that will be used for the light's single
  * channel.
  *
- * @hide
  */
-@SystemApi
 public final class LightState implements Parcelable {
     private final int mColor;
+    private final int mPlayerId;
 
     /**
-     * Creates a new LightState with the desired color and intensity.
+     * Creates a new LightState with the desired color and intensity, for a light type
+     * of RBG color or monochrome color.
      *
      * @param color the desired color and intensity in ARGB format.
+     * @deprecated this has been replaced with {@link android.hardware.lights.LightState#forColor }
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     public LightState(@ColorInt int color) {
-        mColor = color;
-    }
-
-    private LightState(@NonNull Parcel in) {
-        mColor = in.readInt();
+        this(color, 0);
     }
 
     /**
-     * Return the color and intensity associated with this LightState.
-     * @return the color and intensity in ARGB format. The A channel is ignored.
+     * Creates a new LightState with the desired color and intensity, and the player Id.
+     * Player Id will only be applied on Light type
+     * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID}
+     *
+     * @param color the desired color and intensity in ARGB format.
+     * @hide
+     */
+    public LightState(@ColorInt int color, int playerId) {
+        mColor = color;
+        mPlayerId = playerId;
+    }
+
+    /**
+     * Creates a new LightState with the desired color and intensity, for a light type
+     * of RBG color or single monochrome color.
+     *
+     * @param color the desired color and intensity in ARGB format.
+     * @return The LightState object contains the color.
+     */
+    @NonNull
+    public static LightState forColor(@ColorInt int color) {
+        return new LightState(color, 0);
+    }
+
+    /**
+     * Creates a new LightState with the desired player id, for a light of type
+     * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID}.
+     *
+     * @param playerId the desired player id.
+     * @return The LightState object contains the player id.
+     */
+    @NonNull
+    public static LightState forPlayerId(int playerId) {
+        return new LightState(0, playerId);
+    }
+
+    /**
+     * Creates a new LightState from a parcel object.
+     */
+    private LightState(@NonNull Parcel in) {
+        mColor = in.readInt();
+        mPlayerId = in.readInt();
+    }
+
+    /**
+     * Returns the color and intensity associated with this LightState.
+     * @return the color and intensity in ARGB format. The A channel is ignored. return 0 when
+     * calling LightsManager.getLightState with LIGHT_TYPE_INPUT_PLAYER_ID.
      */
     public @ColorInt int getColor() {
         return mColor;
     }
 
+    /**
+     * Returns the player ID associated with this LightState for Light type
+     * {@link android.hardware.lights.Light#LIGHT_TYPE_INPUT_PLAYER_ID},
+     * or 0 for other types.
+     * @return the player ID.
+     */
+    public int getPlayerId() {
+        return mPlayerId;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mColor);
+        dest.writeInt(mPlayerId);
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "LightState{Color=0x" + Integer.toHexString(mColor) + ", PlayerId="
+                + mPlayerId + "}";
     }
 
     public static final @NonNull Parcelable.Creator<LightState> CREATOR =

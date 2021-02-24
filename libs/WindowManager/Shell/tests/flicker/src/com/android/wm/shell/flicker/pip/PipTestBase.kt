@@ -16,13 +16,14 @@
 
 package com.android.wm.shell.flicker.pip
 
+import com.android.wm.shell.flicker.FlickerTestBase
 import com.android.wm.shell.flicker.helpers.PipAppHelper
 import org.junit.Before
 
 abstract class PipTestBase(
     rotationName: String,
     rotation: Int
-) : AppTestBase(rotationName, rotation) {
+) : FlickerTestBase(rotationName, rotation) {
     protected val testApp = PipAppHelper(instrumentation)
 
     @Before

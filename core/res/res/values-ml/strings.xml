@@ -1873,6 +1873,8 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS അഭ്യർത്ഥന, വീഡിയോ കോളിലേക്ക് മാറ്റി"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS അഭ്യർത്ഥന, USSD അഭ്യർത്ഥനയിലേക്ക് മാറ്റി"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"പുതിയ SS അഭ്യർത്ഥനയിലേക്ക് മാറ്റി"</string>
+    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"മുന്നറിയിപ്പ് നൽകി"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"വികസിപ്പിക്കുക"</string>
