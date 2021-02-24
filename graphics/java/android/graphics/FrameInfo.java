@@ -69,28 +69,26 @@ public final class FrameInfo {
     // animation & drawing system
     public static final int VSYNC = 3;
 
-    // The time of the oldest input event
-    public static final int OLDEST_INPUT_EVENT = 4;
-
-    // The time of the newest input event
-    public static final int NEWEST_INPUT_EVENT = 5;
+    // The id of the input event that caused the current frame
+    public static final int INPUT_EVENT_ID = 4;
 
     // When input event handling started
-    public static final int HANDLE_INPUT_START = 6;
+    public static final int HANDLE_INPUT_START = 5;
 
     // When animation evaluations started
-    public static final int ANIMATION_START = 7;
+    public static final int ANIMATION_START = 6;
 
     // When ViewRootImpl#performTraversals() started
-    public static final int PERFORM_TRAVERSALS_START = 8;
+    public static final int PERFORM_TRAVERSALS_START = 7;
 
     // When View:draw() started
-    public static final int DRAW_START = 9;
+    public static final int DRAW_START = 8;
 
     // When the frame needs to be ready by
-    public static final int FRAME_DEADLINE = 10;
+    public static final int FRAME_DEADLINE = 9;
 
     // Must be the last one
+    // This value must be in sync with `UI_THREAD_FRAME_INFO_SIZE` in FrameInfo.h
     private static final int FRAME_INFO_SIZE = FRAME_DEADLINE + 1;
 
     /** checkstyle */
