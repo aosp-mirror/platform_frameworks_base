@@ -1392,7 +1392,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case FACE_ACQUIRED_PAN_TOO_EXTREME:
             case FACE_ACQUIRED_TILT_TOO_EXTREME:
             case FACE_ACQUIRED_ROLL_TOO_EXTREME:
-                return context.getString(R.string.face_acquired_not_detected);
+                return context.getString(R.string.face_acquired_poor_gaze);
 
             // Provide more detailed feedback for other soft errors.
             case FACE_ACQUIRED_INSUFFICIENT:
