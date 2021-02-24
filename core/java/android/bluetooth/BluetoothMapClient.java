@@ -18,7 +18,9 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -30,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -37,44 +40,60 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
 public final class BluetoothMapClient implements BluetoothProfile {
 
     private static final String TAG = "BluetoothMapClient";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
+    /** @hide */
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.mapmce.profile.action.CONNECTION_STATE_CHANGED";
+    /** @hide */
     public static final String ACTION_MESSAGE_RECEIVED =
             "android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED";
     /* Actions to be used for pending intents */
+    /** @hide */
     public static final String ACTION_MESSAGE_SENT_SUCCESSFULLY =
             "android.bluetooth.mapmce.profile.action.MESSAGE_SENT_SUCCESSFULLY";
+    /** @hide */
     public static final String ACTION_MESSAGE_DELIVERED_SUCCESSFULLY =
             "android.bluetooth.mapmce.profile.action.MESSAGE_DELIVERED_SUCCESSFULLY";
 
     /**
      * Action to notify read status changed
+     *
+     * @hide
      */
     public static final String ACTION_MESSAGE_READ_STATUS_CHANGED =
             "android.bluetooth.mapmce.profile.action.MESSAGE_READ_STATUS_CHANGED";
 
     /**
      * Action to notify deleted status changed
+     *
+     * @hide
      */
     public static final String ACTION_MESSAGE_DELETED_STATUS_CHANGED =
             "android.bluetooth.mapmce.profile.action.MESSAGE_DELETED_STATUS_CHANGED";
 
-    /* Extras used in ACTION_MESSAGE_RECEIVED intent.
-     * NOTE: HANDLE is only valid for a single session with the device. */
+    /**
+     * Extras used in ACTION_MESSAGE_RECEIVED intent.
+     * NOTE: HANDLE is only valid for a single session with the device.
+     */
+    /** @hide */
     public static final String EXTRA_MESSAGE_HANDLE =
             "android.bluetooth.mapmce.profile.extra.MESSAGE_HANDLE";
+    /** @hide */
     public static final String EXTRA_MESSAGE_TIMESTAMP =
             "android.bluetooth.mapmce.profile.extra.MESSAGE_TIMESTAMP";
+    /** @hide */
     public static final String EXTRA_MESSAGE_READ_STATUS =
             "android.bluetooth.mapmce.profile.extra.MESSAGE_READ_STATUS";
+    /** @hide */
     public static final String EXTRA_SENDER_CONTACT_URI =
             "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_URI";
+    /** @hide */
     public static final String EXTRA_SENDER_CONTACT_NAME =
             "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_NAME";
 
@@ -84,6 +103,8 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Possible values are:
      * true: deleted
      * false: undeleted
+     *
+     * @hide
      */
     public static final String EXTRA_MESSAGE_DELETED_STATUS =
             "android.bluetooth.mapmce.profile.extra.MESSAGE_DELETED_STATUS";
@@ -93,24 +114,42 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Possible values are:
      * 0: failure
      * 1: success
+     *
+     * @hide
      */
     public static final String EXTRA_RESULT_CODE =
             "android.bluetooth.device.extra.RESULT_CODE";
 
-    /** There was an error trying to obtain the state */
+    /**
+     * There was an error trying to obtain the state
+     * @hide
+     */
     public static final int STATE_ERROR = -1;
 
+    /** @hide */
     public static final int RESULT_FAILURE = 0;
+    /** @hide */
     public static final int RESULT_SUCCESS = 1;
-    /** Connection canceled before completion. */
+    /**
+     * Connection canceled before completion.
+     * @hide
+     */
     public static final int RESULT_CANCELED = 2;
-
+    /** @hide */
     private static final int UPLOADING_FEATURE_BITMASK = 0x08;
 
-    /** Parameters in setMessageStatus */
+    /*
+     * UNREAD, READ, UNDELETED, DELETED are passed as parameters
+     * to setMessageStatus to indicate the messages new state.
+     */
+
+    /** @hide */
     public static final int UNREAD = 0;
+    /** @hide */
     public static final int READ = 1;
+    /** @hide */
     public static final int UNDELETED = 2;
+    /** @hide */
     public static final int DELETED = 3;
 
     private BluetoothAdapter mAdapter;
@@ -132,19 +171,12 @@ public final class BluetoothMapClient implements BluetoothProfile {
         mProfileConnector.connect(context, listener);
     }
 
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
-        }
-    }
-
     /**
      * Close the connection to the backing service.
      * Other public functions of BluetoothMap will return default error
      * results once close() has been called. Multiple invocations of close()
      * are ok.
+     * @hide
      */
     public void close() {
         mProfileConnector.disconnect();
@@ -158,6 +190,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Returns true if the specified Bluetooth device is connected.
      * Returns false if not connected, or if this proxy object is not
      * currently connected to the Map service.
+     * @hide
      */
     public boolean isConnected(BluetoothDevice device) {
         if (VDBG) Log.d(TAG, "isConnected(" + device + ")");
@@ -225,6 +258,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Get the list of connected devices. Currently at most one.
      *
      * @return list of connected devices
+     * @hide
      */
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
@@ -246,6 +280,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Get the list of devices matching specified states. Currently at most one.
      *
      * @return list of matching devices
+     * @hide
      */
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
@@ -267,6 +302,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Get connection state of device
      *
      * @return device connection state
+     * @hide
      */
     @Override
     public int getConnectionState(BluetoothDevice device) {
@@ -383,11 +419,44 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * Send an SMS message to either the contacts primary number or the telephone number specified.
      *
      * @param device Bluetooth device
+     * @param contacts Uri Collection of the contacts
+     * @param message Message to be sent
+     * @param sentIntent intent issued when message is sent
+     * @param deliveredIntent intent issued when message is delivered
+     * @return true if the message is enqueued, false on error
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SEND_SMS)
+    public boolean sendMessage(@NonNull BluetoothDevice device, @NonNull Collection<Uri> contacts,
+            @NonNull String message, @Nullable PendingIntent sentIntent,
+            @Nullable PendingIntent deliveredIntent) {
+        if (DBG) Log.d(TAG, "sendMessage(" + device + ", " + contacts + ", " + message);
+        final IBluetoothMapClient service = getService();
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return service.sendMessage(device, contacts.toArray(new Uri[contacts.size()]),
+                        message, sentIntent, deliveredIntent);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        return false;
+    }
+
+     /**
+     * Send a message.
+     *
+     * Send an SMS message to either the contacts primary number or the telephone number specified.
+     *
+     * @param device Bluetooth device
      * @param contacts Uri[] of the contacts
      * @param message Message to be sent
      * @param sentIntent intent issued when message is sent
      * @param deliveredIntent intent issued when message is delivered
      * @return true if the message is enqueued, false on error
+     * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean sendMessage(BluetoothDevice device, Uri[] contacts, String message,
@@ -410,6 +479,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *
      * @param device Bluetooth device
      * @return true if the message is enqueued, false on error
+     * @hide
      */
     public boolean getUnreadMessages(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getUnreadMessages(" + device + ")");
@@ -431,6 +501,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @param device The Bluetooth device to get this value for.
      * @return Returns true if the Uploading bit value in SDP record's
      *         MapSupportedFeatures field is set. False is returned otherwise.
+     * @hide
      */
     public boolean isUploadingSupported(BluetoothDevice device) {
         final IBluetoothMapClient service = getService();
@@ -457,7 +528,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      *            "read", <code>UNDELETED</code> for "undeleted", <code>DELETED</code> for
      *            "deleted", otherwise return error
      * @return <code>true</code> if request has been sent, <code>false</code> on error
-     *
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_SMS)
     public boolean setMessageStatus(BluetoothDevice device, String handle, int status) {

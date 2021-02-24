@@ -17,7 +17,6 @@
 package com.android.server.display;
 
 import android.content.Context;
-import android.os.Process;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
@@ -143,10 +142,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         return null;
     }
 
-    public int[] getDisplayIdsLocked() {
-        return getDisplayIdsLocked(Process.SYSTEM_UID);
-    }
-
     public int[] getDisplayIdsLocked(int callingUid) {
         final int count = mLogicalDisplays.size();
         int[] displayIds = new int[count];
@@ -169,15 +164,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         for (int i = 0; i < count; i++) {
             consumer.accept(mLogicalDisplays.valueAt(i));
         }
-    }
-
-    public int getDisplayGroupIdLocked(int displayId) {
-        final DisplayGroup displayGroup = mDisplayIdToGroupMap.get(displayId);
-        if (displayGroup != null) {
-            return displayGroup.getGroupId();
-        }
-
-        return -1;
     }
 
     public DisplayGroup getDisplayGroupLocked(int groupId) {

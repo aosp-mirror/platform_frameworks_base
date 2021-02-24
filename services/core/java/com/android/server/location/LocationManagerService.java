@@ -70,6 +70,7 @@ import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
@@ -350,6 +351,22 @@ public class LocationManagerService extends ILocationManager.Stub {
     void onSystemReady() {
         mInjector.getSettingsHelper().addOnLocationEnabledChangedListener(
                 this::onLocationModeChanged);
+
+        if (Build.IS_DEBUGGABLE) {
+            // on debug builds, watch for location noteOps while location is off. there are some
+            // scenarios (emergency location) where this is expected, but generally this should
+            // rarely occur, and may indicate bugs. dump occurrences to logs for further evaluation
+            AppOpsManager appOps = Objects.requireNonNull(
+                    mContext.getSystemService(AppOpsManager.class));
+            appOps.startWatchingNoted(
+                    new int[]{AppOpsManager.OP_FINE_LOCATION, AppOpsManager.OP_COARSE_LOCATION},
+                    (code, uid, packageName, attributionTag, flags, result) -> {
+                        if (!isLocationEnabledForUser(UserHandle.getUserId(uid))) {
+                            Log.w(TAG, "location noteOp with location off - "
+                                    + CallerIdentity.forTest(uid, 0, packageName, attributionTag));
+                        }
+                    });
+        }
     }
 
     void onSystemThirdPartyAppsCanStart() {
@@ -479,7 +496,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void startGnssBatch(long periodNanos, ILocationListener listener, String packageName,
-            String attributionTag, String listenerId) {
+            @Nullable String attributionTag, String listenerId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         if (mGnssManagerService == null) {
@@ -616,7 +633,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Nullable
     @Override
     public ICancellationSignal getCurrentLocation(String provider, LocationRequest request,
-            ILocationCallback consumer, String packageName, String attributionTag,
+            ILocationCallback consumer, String packageName, @Nullable String attributionTag,
             String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
@@ -640,7 +657,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public void registerLocationListener(String provider, LocationRequest request,
             ILocationListener listener, String packageName, @Nullable String attributionTag,
-            @Nullable String listenerId) {
+            String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -791,7 +808,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public Location getLastLocation(String provider, LastLocationRequest request,
-            String packageName, String attributionTag) {
+            String packageName, @Nullable String attributionTag) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
@@ -858,9 +875,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
-            String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.registerGnssStatusCallback(listener, packageName, attributionTag);
+            mGnssManagerService.registerGnssStatusCallback(listener, packageName, attributionTag,
+                    listenerId);
         }
     }
 
@@ -873,9 +891,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerGnssNmeaCallback(IGnssNmeaListener listener, String packageName,
-            String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.registerGnssNmeaCallback(listener, packageName, attributionTag);
+            mGnssManagerService.registerGnssNmeaCallback(listener, packageName, attributionTag,
+                    listenerId);
         }
     }
 
@@ -887,11 +906,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void addGnssMeasurementsListener(@Nullable GnssMeasurementRequest request,
-            IGnssMeasurementsListener listener, String packageName, String attributionTag) {
+    public void addGnssMeasurementsListener(GnssMeasurementRequest request,
+            IGnssMeasurementsListener listener, String packageName, @Nullable String attributionTag,
+            String listenerId) {
         if (mGnssManagerService != null) {
             mGnssManagerService.addGnssMeasurementsListener(request, listener, packageName,
-                    attributionTag);
+                    attributionTag, listenerId);
         }
     }
 
@@ -937,10 +957,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
-            String packageName, String attributionTag) {
+            String packageName, @Nullable String attributionTag, String listenerId) {
         if (mGnssManagerService != null) {
             mGnssManagerService.addGnssNavigationMessageListener(listener, packageName,
-                    attributionTag);
+                    attributionTag, listenerId);
         }
     }
 

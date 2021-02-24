@@ -100,7 +100,6 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
      * Returns a {@link Map} of all keys mapped to the {@link AppSearchResult}s they produced.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
-     * @hide
      */
     @NonNull
     public Map<KeyType, AppSearchResult<ValueType>> getAll() {

@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
@@ -38,12 +39,14 @@ abstract class DisplayDevice {
     private final IBinder mDisplayToken;
     private final String mUniqueId;
 
+    protected DisplayDeviceConfig mDisplayDeviceConfig;
     // The display device does not manage these properties itself, they are set by
     // the display manager service.  The display device shouldn't really be looking at these.
     private int mCurrentLayerStack = -1;
     private int mCurrentOrientation = -1;
     private Rect mCurrentLayerStackRect;
     private Rect mCurrentDisplayRect;
+    private final Context mContext;
 
     // The display device owns its surface, but it should only set it
     // within a transaction from performTraversalLocked.
@@ -53,10 +56,13 @@ abstract class DisplayDevice {
     // Do not use for any other purpose.
     DisplayDeviceInfo mDebugLastLoggedDeviceInfo;
 
-    public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId) {
+    public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId,
+            Context context) {
         mDisplayAdapter = displayAdapter;
         mDisplayToken = displayToken;
         mUniqueId = uniqueId;
+        mDisplayDeviceConfig = null;
+        mContext = context;
     }
 
     /**
@@ -74,7 +80,10 @@ abstract class DisplayDevice {
      * @return The DisplayDeviceConfig; {@code null} if not overridden.
      */
     public DisplayDeviceConfig getDisplayDeviceConfig() {
-        return null;
+        if (mDisplayDeviceConfig == null) {
+            mDisplayDeviceConfig = loadDisplayDeviceConfig();
+        }
+        return mDisplayDeviceConfig;
     }
 
     /**
@@ -291,5 +300,9 @@ abstract class DisplayDevice {
         pw.println("mCurrentLayerStackRect=" + mCurrentLayerStackRect);
         pw.println("mCurrentDisplayRect=" + mCurrentDisplayRect);
         pw.println("mCurrentSurface=" + mCurrentSurface);
+    }
+
+    private DisplayDeviceConfig loadDisplayDeviceConfig() {
+        return DisplayDeviceConfig.create(mContext, false);
     }
 }

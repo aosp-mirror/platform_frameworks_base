@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles.storage
 
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
@@ -31,9 +32,10 @@ import org.junit.runner.RunWith
 class BubblePersistentRepositoryTest : ShellTestCase() {
 
     private val bubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428, "title"),
-            BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0)
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0, null, 1),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428, "title", 2),
+            BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0, null,
+                    INVALID_TASK_ID)
     )
     private lateinit var repository: BubblePersistentRepository
 
