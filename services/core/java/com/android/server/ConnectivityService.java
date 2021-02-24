@@ -154,7 +154,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -323,7 +322,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
-    private INetworkManagementService mNMS;
     @VisibleForTesting
     protected IDnsResolver mDnsResolver;
     @VisibleForTesting
@@ -1039,15 +1037,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService) {
-        this(context, netManager, statsService, getDnsResolver(context), new IpConnectivityLog(),
+    public ConnectivityService(Context context, INetworkStatsService statsService) {
+        this(context, statsService, getDnsResolver(context), new IpConnectivityLog(),
                 NetdService.getInstance(), new Dependencies());
     }
 
     @VisibleForTesting
-    protected ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, IDnsResolver dnsresolver, IpConnectivityLog logger,
+    protected ConnectivityService(Context context, INetworkStatsService statsService,
+            IDnsResolver dnsresolver, IpConnectivityLog logger,
             INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
@@ -1094,7 +1091,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: Consider making the timer customizable.
         mNascentDelayMs = DEFAULT_NASCENT_DELAY_MS;
 
-        mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
         mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mPolicyManagerInternal = Objects.requireNonNull(
@@ -8183,7 +8179,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             TestNetworkService.enforceTestNetworkPermissions(mContext);
 
             if (mTNS == null) {
-                mTNS = new TestNetworkService(mContext, mNMS);
+                mTNS = new TestNetworkService(mContext);
             }
 
             return mTNS;
