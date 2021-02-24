@@ -208,24 +208,11 @@ class DomainVerificationEnforcerTest {
                         DomainVerificationManager.STATE_SUCCESS
                     )
                 },
-                service(Type.SELECTOR, "setLinkHandlingAllowed") {
-                    setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true)
-                },
                 service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") {
                     setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true, it.userId)
                 },
-                service(Type.SELECTOR, "getUserSelection") {
-                    getDomainVerificationUserSelection(it.targetPackageName)
-                },
                 service(Type.SELECTOR_USER, "getUserSelectionUserId") {
                     getDomainVerificationUserSelection(it.targetPackageName, it.userId)
-                },
-                service(Type.SELECTOR, "setUserSelection") {
-                    setDomainVerificationUserSelection(
-                        it.targetDomainSetId,
-                        setOf("example.com"),
-                        true
-                    )
                 },
                 service(Type.SELECTOR_USER, "setUserSelectionUserId") {
                     setDomainVerificationUserSelection(
@@ -243,10 +230,6 @@ class DomainVerificationEnforcerTest {
                 },
                 service(Type.LEGACY_QUERENT, "getLegacyUserState") {
                     getLegacyState(it.targetPackageName, it.userId)
-                },
-                service(Type.OWNER_QUERENT, "getOwnersForDomain") {
-                    // Re-use package name, since the result itself isn't relevant
-                    getOwnersForDomain(it.targetPackageName)
                 },
                 service(Type.OWNER_QUERENT_USER, "getOwnersForDomainUserId") {
                     // Re-use package name, since the result itself isn't relevant

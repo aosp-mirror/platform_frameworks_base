@@ -34,6 +34,7 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.content.pm.verify.domain.DomainVerificationUserSelection;
 import android.content.pm.verify.domain.IDomainVerificationManager;
@@ -208,7 +209,6 @@ public class DomainVerificationService extends SystemService
     }
 
     @NonNull
-    @Override
     public List<String> getValidVerificationPackageNames() {
         mEnforcer.assertApprovedVerifier(mConnection.getCallingUid(), mProxy);
         List<String> packageNames = new ArrayList<>();
@@ -272,7 +272,6 @@ public class DomainVerificationService extends SystemService
         }
     }
 
-    @Override
     public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
             int state) throws InvalidDomainSetException, NameNotFoundException {
         if (state < DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED) {
@@ -415,13 +414,6 @@ public class DomainVerificationService extends SystemService
         }
     }
 
-    @Override
-    public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
-            boolean allowed) throws NameNotFoundException {
-        setDomainVerificationLinkHandlingAllowed(packageName, allowed,
-                mConnection.getCallingUserId());
-    }
-
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed, @UserIdInt int userId) throws NameNotFoundException {
         if (!mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
@@ -474,14 +466,6 @@ public class DomainVerificationService extends SystemService
         }
 
         mConnection.scheduleWriteSettings();
-    }
-
-    @Override
-    public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
-            @NonNull Set<String> domains, boolean enabled)
-            throws InvalidDomainSetException, NameNotFoundException {
-        setDomainVerificationUserSelection(domainSetId, domains, enabled,
-                mConnection.getCallingUserId());
     }
 
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
@@ -644,14 +628,6 @@ public class DomainVerificationService extends SystemService
     @Nullable
     @Override
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
-            @NonNull String packageName) throws NameNotFoundException {
-        return getDomainVerificationUserSelection(packageName,
-                mConnection.getCallingUserId());
-    }
-
-    @Nullable
-    @Override
-    public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName, @UserIdInt int userId) throws NameNotFoundException {
         if (!mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
                 mConnection.getCallingUserId(), packageName, userId)) {
@@ -697,12 +673,6 @@ public class DomainVerificationService extends SystemService
             return new DomainVerificationUserSelection(pkgState.getId(), packageName,
                     UserHandle.of(userId), linkHandlingAllowed, domains);
         }
-    }
-
-    @NonNull
-    @Override
-    public List<DomainOwner> getOwnersForDomain(@NonNull String domain) {
-        return getOwnersForDomain(domain, mConnection.getCallingUserId());
     }
 
     public List<DomainOwner> getOwnersForDomain(@NonNull String domain, @UserIdInt int userId) {

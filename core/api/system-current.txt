@@ -2769,7 +2769,7 @@ package android.content.pm.verify.domain {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.domain.DomainVerificationInfo> CREATOR;
   }
 
-  public interface DomainVerificationManager {
+  public final class DomainVerificationManager {
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.DOMAIN_VERIFICATION_AGENT, android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION}) public android.content.pm.verify.domain.DomainVerificationInfo getDomainVerificationInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public android.content.pm.verify.domain.DomainVerificationUserSelection getDomainVerificationUserSelection(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public java.util.List<android.content.pm.verify.domain.DomainOwner> getOwnersForDomain(@NonNull String);

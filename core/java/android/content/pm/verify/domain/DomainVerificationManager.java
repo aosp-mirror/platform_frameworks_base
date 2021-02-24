@@ -25,8 +25,11 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -53,34 +56,35 @@ import java.util.UUID;
  */
 @SystemApi
 @SystemService(Context.DOMAIN_VERIFICATION_SERVICE)
-public interface DomainVerificationManager {
+public final class DomainVerificationManager {
 
     /**
      * Extra field name for a {@link DomainVerificationRequest} for the requested packages.
      * Passed to an the domain verification agent that handles
      * {@link Intent#ACTION_DOMAINS_NEED_VERIFICATION}.
      */
-    String EXTRA_VERIFICATION_REQUEST =
+    public static final String EXTRA_VERIFICATION_REQUEST =
             "android.content.pm.verify.domain.extra.VERIFICATION_REQUEST";
 
     /**
      * No response has been recorded by either the system or any verification agent.
      */
-    int STATE_NO_RESPONSE = DomainVerificationState.STATE_NO_RESPONSE;
+    public static final int STATE_NO_RESPONSE = DomainVerificationState.STATE_NO_RESPONSE;
 
     /** The verification agent has explicitly verified the domain at some point. */
-    int STATE_SUCCESS = DomainVerificationState.STATE_SUCCESS;
+    public static final int STATE_SUCCESS = DomainVerificationState.STATE_SUCCESS;
 
     /**
      * The first available custom response code. This and any greater integer, along with
      * {@link #STATE_SUCCESS} are the only values settable by the verification agent. All values
      * will be treated as if the domain is unverified.
      */
-    int STATE_FIRST_VERIFIER_DEFINED = DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
+    public static final int STATE_FIRST_VERIFIER_DEFINED =
+            DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
 
     /** @hide */
     @NonNull
-    static String stateToDebugString(@DomainVerificationState.State int state) {
+    public static String stateToDebugString(@DomainVerificationState.State int state) {
         switch (state) {
             case DomainVerificationState.STATE_NO_RESPONSE:
                 return "none";
@@ -107,7 +111,7 @@ public interface DomainVerificationManager {
      * Checks if a state considers the corresponding domain to be successfully verified. The
      * domain verification agent may use this to determine whether or not to re-verify a domain.
      */
-    static boolean isStateVerified(@DomainVerificationState.State int state) {
+    public static boolean isStateVerified(@DomainVerificationState.State int state) {
         switch (state) {
             case DomainVerificationState.STATE_SUCCESS:
             case DomainVerificationState.STATE_APPROVED:
@@ -129,7 +133,7 @@ public interface DomainVerificationManager {
      * this method to determine if a state can be changed without having to be aware of what the
      * new state means.
      */
-    static boolean isStateModifiable(@DomainVerificationState.State int state) {
+    public static boolean isStateModifiable(@DomainVerificationState.State int state) {
         switch (state) {
             case DomainVerificationState.STATE_NO_RESPONSE:
             case DomainVerificationState.STATE_SUCCESS:
@@ -151,7 +155,7 @@ public interface DomainVerificationManager {
      * no behavior is made based on the result.
      * @hide
      */
-    static boolean isStateDefault(@DomainVerificationState.State int state) {
+    public static boolean isStateDefault(@DomainVerificationState.State int state) {
         switch (state) {
             case DomainVerificationState.STATE_NO_RESPONSE:
             case DomainVerificationState.STATE_MIGRATED:
@@ -167,6 +171,30 @@ public interface DomainVerificationManager {
         }
     }
 
+    /** @hide */
+    public static final int ERROR_INVALID_DOMAIN_SET = 1;
+    /** @hide */
+    public static final int ERROR_NAME_NOT_FOUND = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "ERROR_" }, value = {
+            ERROR_INVALID_DOMAIN_SET,
+            ERROR_NAME_NOT_FOUND,
+    })
+    private @interface Error {
+    }
+
+    private final Context mContext;
+
+    private final IDomainVerificationManager mDomainVerificationManager;
+
+    /** @hide */
+    public DomainVerificationManager(Context context,
+            IDomainVerificationManager domainVerificationManager) {
+        mContext = context;
+        mDomainVerificationManager = domainVerificationManager;
+    }
+
     /**
      * Used to iterate all {@link DomainVerificationInfo} values to do cleanup or retries. This is
      * usually a heavy workload and should be done infrequently.
@@ -175,7 +203,13 @@ public interface DomainVerificationManager {
      */
     @NonNull
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
-    List<String> getValidVerificationPackageNames();
+    public List<String> getValidVerificationPackageNames() {
+        try {
+            return mDomainVerificationManager.getValidVerificationPackageNames();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Retrieves the domain verification state for a given package.
@@ -189,8 +223,21 @@ public interface DomainVerificationManager {
             android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
             android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
     })
-    DomainVerificationInfo getDomainVerificationInfo(@NonNull String packageName)
-            throws NameNotFoundException;
+    public DomainVerificationInfo getDomainVerificationInfo(@NonNull String packageName)
+            throws NameNotFoundException {
+        try {
+            return mDomainVerificationManager.getDomainVerificationInfo(packageName);
+        } catch (Exception e) {
+            Exception converted = rethrow(e, packageName);
+            if (converted instanceof NameNotFoundException) {
+                throw (NameNotFoundException) converted;
+            } else if (converted instanceof RuntimeException) {
+                throw (RuntimeException) converted;
+            } else {
+                throw new RuntimeException(converted);
+            }
+        }
+    }
 
     /**
      * Change the verification status of the {@param domains} of the package associated with
@@ -213,8 +260,22 @@ public interface DomainVerificationManager {
      *                                  scheduled basis.
      */
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
-    void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
-            @DomainVerificationState.State int state) throws NameNotFoundException;
+    public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
+            @DomainVerificationState.State int state) throws NameNotFoundException {
+        try {
+            mDomainVerificationManager.setDomainVerificationStatus(domainSetId.toString(),
+                    new DomainSet(domains), state);
+        } catch (Exception e) {
+            Exception converted = rethrow(e, domainSetId);
+            if (converted instanceof NameNotFoundException) {
+                throw (NameNotFoundException) converted;
+            } else if (converted instanceof RuntimeException) {
+                throw (RuntimeException) converted;
+            } else {
+                throw new RuntimeException(converted);
+            }
+        }
+    }
 
     /**
      * TODO(b/178525735): This documentation is incorrect in the context of UX changes.
@@ -226,8 +287,22 @@ public interface DomainVerificationManager {
      * By default, all apps are allowed to open verified links. Users must disable them explicitly.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
-    void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName, boolean allowed)
-            throws NameNotFoundException;
+    public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
+            boolean allowed) throws NameNotFoundException {
+        try {
+            mDomainVerificationManager.setDomainVerificationLinkHandlingAllowed(packageName,
+                    allowed, mContext.getUserId());
+        } catch (Exception e) {
+            Exception converted = rethrow(e, packageName);
+            if (converted instanceof NameNotFoundException) {
+                throw (NameNotFoundException) converted;
+            } else if (converted instanceof RuntimeException) {
+                throw (RuntimeException) converted;
+            } else {
+                throw new RuntimeException(converted);
+            }
+        }
+    }
 
     /**
      * Update the recorded user selection for the given {@param domains} for the given {@param
@@ -262,8 +337,22 @@ public interface DomainVerificationManager {
      *                                  scheduled basis.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
-    void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
-            @NonNull Set<String> domains, boolean enabled) throws NameNotFoundException;
+    public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
+            @NonNull Set<String> domains, boolean enabled) throws NameNotFoundException {
+        try {
+            mDomainVerificationManager.setDomainVerificationUserSelection(domainSetId.toString(),
+                    new DomainSet(domains), enabled, mContext.getUserId());
+        } catch (Exception e) {
+            Exception converted = rethrow(e, domainSetId);
+            if (converted instanceof NameNotFoundException) {
+                throw (NameNotFoundException) converted;
+            } else if (converted instanceof RuntimeException) {
+                throw (RuntimeException) converted;
+            } else {
+                throw new RuntimeException(converted);
+            }
+        }
+    }
 
     /**
      * Retrieve the user selection data for the given {@param packageName} and the current user.
@@ -280,8 +369,22 @@ public interface DomainVerificationManager {
      */
     @Nullable
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
-    DomainVerificationUserSelection getDomainVerificationUserSelection(@NonNull String packageName)
-            throws NameNotFoundException;
+    public DomainVerificationUserSelection getDomainVerificationUserSelection(
+            @NonNull String packageName) throws NameNotFoundException {
+        try {
+            return mDomainVerificationManager.getDomainVerificationUserSelection(packageName,
+                    mContext.getUserId());
+        } catch (Exception e) {
+            Exception converted = rethrow(e, packageName);
+            if (converted instanceof NameNotFoundException) {
+                throw (NameNotFoundException) converted;
+            } else if (converted instanceof RuntimeException) {
+                throw (RuntimeException) converted;
+            } else {
+                throw new RuntimeException(converted);
+            }
+        }
+    }
 
     /**
      * For the given domain, return all apps which are approved to open it in a
@@ -294,7 +397,47 @@ public interface DomainVerificationManager {
      */
     @NonNull
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
-    List<DomainOwner> getOwnersForDomain(@NonNull String domain);
+    public List<DomainOwner> getOwnersForDomain(@NonNull String domain) {
+        try {
+            return mDomainVerificationManager.getOwnersForDomain(domain, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private Exception rethrow(Exception exception, @Nullable UUID domainSetId) {
+        return rethrow(exception, domainSetId, null);
+    }
+
+    private Exception rethrow(Exception exception, @Nullable String packageName) {
+        return rethrow(exception, null, packageName);
+    }
+
+    private Exception rethrow(Exception exception, @Nullable UUID domainSetId,
+            @Nullable String packageName) {
+        if (exception instanceof ServiceSpecificException) {
+            int packedErrorCode = ((ServiceSpecificException) exception).errorCode;
+            if (packageName == null) {
+                packageName = exception.getMessage();
+            }
+
+            @Error int managerErrorCode = packedErrorCode & 0xFFFF;
+            switch (managerErrorCode) {
+                case ERROR_INVALID_DOMAIN_SET:
+                    int errorSpecificCode = packedErrorCode >> 16;
+                    return new IllegalArgumentException(InvalidDomainSetException.buildMessage(
+                            domainSetId, packageName, errorSpecificCode));
+                case ERROR_NAME_NOT_FOUND:
+                    return new NameNotFoundException(packageName);
+                default:
+                    return exception;
+            }
+        } else if (exception instanceof RemoteException) {
+            return ((RemoteException) exception).rethrowFromSystemServer();
+        } else {
+            return exception;
+        }
+    }
 
     /**
      * Thrown if a {@link DomainVerificationInfo#getIdentifier()}} or an associated set of domains
@@ -305,7 +448,7 @@ public interface DomainVerificationManager {
      *
      * @hide
      */
-    class InvalidDomainSetException extends IllegalArgumentException {
+    public static class InvalidDomainSetException extends IllegalArgumentException {
 
         public static final int REASON_ID_NULL = 1;
         public static final int REASON_ID_INVALID = 2;

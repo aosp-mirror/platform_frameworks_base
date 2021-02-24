@@ -147,17 +147,11 @@ class DomainVerificationSettingsMutationTest {
                         DomainVerificationManager.STATE_SUCCESS
                     )
                 },
-                service("setLinkHandlingAllowed") {
-                    setDomainVerificationLinkHandlingAllowed(TEST_PKG, true)
-                },
                 service("setLinkHandlingAllowedUserId") {
                     setDomainVerificationLinkHandlingAllowed(TEST_PKG, true, TEST_USER_ID)
                 },
                 service("setLinkHandlingAllowedInternal") {
                     setDomainVerificationLinkHandlingAllowedInternal(TEST_PKG, true, TEST_USER_ID)
-                },
-                service("setUserSelection") {
-                    setDomainVerificationUserSelection(TEST_UUID, setOf("example.com"), true)
                 },
                 service("setUserSelectionUserId") {
                     setDomainVerificationUserSelection(

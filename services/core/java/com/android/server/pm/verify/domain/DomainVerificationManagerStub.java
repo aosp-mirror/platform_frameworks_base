@@ -23,8 +23,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
+import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
-import android.content.pm.verify.domain.DomainVerificationManagerImpl;
 import android.content.pm.verify.domain.DomainVerificationUserSelection;
 import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.os.ServiceSpecificException;
@@ -32,12 +32,12 @@ import android.os.ServiceSpecificException;
 import java.util.List;
 import java.util.UUID;
 
-class DomainVerificationManagerStub extends IDomainVerificationManager.Stub {
+public class DomainVerificationManagerStub extends IDomainVerificationManager.Stub {
 
     @NonNull
-    private DomainVerificationService mService;
+    private final DomainVerificationService mService;
 
-    DomainVerificationManagerStub(DomainVerificationService service) {
+    public DomainVerificationManagerStub(DomainVerificationService service) {
         mService = service;
     }
 
@@ -117,13 +117,13 @@ class DomainVerificationManagerStub extends IDomainVerificationManager.Stub {
 
     private RuntimeException rethrow(Exception exception) throws RuntimeException {
         if (exception instanceof InvalidDomainSetException) {
-            int packedErrorCode = DomainVerificationManagerImpl.ERROR_INVALID_DOMAIN_SET;
+            int packedErrorCode = DomainVerificationManager.ERROR_INVALID_DOMAIN_SET;
             packedErrorCode |= ((InvalidDomainSetException) exception).getReason() << 16;
             return new ServiceSpecificException(packedErrorCode,
                     ((InvalidDomainSetException) exception).getPackageName());
         } else if (exception instanceof NameNotFoundException) {
             return new ServiceSpecificException(
-                    DomainVerificationManagerImpl.ERROR_NAME_NOT_FOUND);
+                    DomainVerificationManager.ERROR_NAME_NOT_FOUND);
         } else if (exception instanceof RuntimeException) {
             return (RuntimeException) exception;
         } else {
