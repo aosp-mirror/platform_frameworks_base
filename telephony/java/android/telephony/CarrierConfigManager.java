@@ -4157,6 +4157,21 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY =
             "allowed_initial_attach_apn_types_string_array";
 
+    /**
+     * Boolean indicating whether the SIM PIN can be stored and verified
+     * seamlessly after an unattended reboot.
+     *
+     * The device configuration value {@code config_allow_pin_storage_for_unattended_reboot}
+     * ultimately controls whether this carrier configuration option is used.  Where
+     * {@code config_allow_pin_storage_for_unattended_reboot} is false, the value of the
+     * {@link #KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL} carrier configuration option is
+     * ignored.
+     *
+     * @hide
+     */
+    public static final String KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL =
+            "store_sim_pin_for_unattended_reboot_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -4710,6 +4725,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putStringArray(KEY_ALLOWED_INITIAL_ATTACH_APN_TYPES_STRING_ARRAY,
                 new String[]{"ia", "default", "ims", "mms", "dun", "emergency"});
+        sDefaults.putBoolean(KEY_STORE_SIM_PIN_FOR_UNATTENDED_REBOOT_BOOL, true);
     }
 
     /**
