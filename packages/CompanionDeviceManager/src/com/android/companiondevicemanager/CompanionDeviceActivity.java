@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.companion.AssociationRequest;
@@ -31,41 +32,52 @@ import android.companion.CompanionDeviceManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.companiondevicemanager.DeviceDiscoveryService.DeviceFilterPair;
+import com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DeviceFilterPair;
 import com.android.internal.util.Preconditions;
 
-public class DeviceChooserActivity extends Activity {
+public class CompanionDeviceActivity extends Activity {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "DeviceChooserActivity";
+    private static final String LOG_TAG = CompanionDeviceActivity.class.getSimpleName();
+
+    static CompanionDeviceActivity sInstance;
 
     View mLoadingIndicator = null;
     ListView mDeviceListView;
     private View mPairButton;
     private View mCancelButton;
 
+    DevicesAdapter mDevicesAdapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (DEBUG) Log.i(LOG_TAG, "Started with intent " + getIntent());
+        Log.i(LOG_TAG, "Starting UI for " + getService().mRequest);
 
         if (getService().mDevicesFound.isEmpty()) {
             Log.e(LOG_TAG, "About to show UI, but no devices to show");
         }
 
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        sInstance = this;
 
         String deviceProfile = getRequest().getDeviceProfile();
         String profilePrivacyDisclaimer = emptyIfNull(getRequest()
@@ -96,17 +108,14 @@ public class DeviceChooserActivity extends Activity {
                     profileName,
                     getCallingAppName()), 0));
             mDeviceListView = findViewById(R.id.device_list);
-            final DeviceDiscoveryService.DevicesAdapter adapter = getService().mDevicesAdapter;
-            mDeviceListView.setAdapter(adapter);
-            mDeviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                    getService().mSelectedDevice =
-                            (DeviceFilterPair) adapterView.getItemAtPosition(pos);
-                    adapter.notifyDataSetChanged();
-                }
+            mDevicesAdapter = new DevicesAdapter();
+            mDeviceListView.setAdapter(mDevicesAdapter);
+            mDeviceListView.setOnItemClickListener((adapterView, view, pos, l) -> {
+                getService().mSelectedDevice =
+                        (DeviceFilterPair) adapterView.getItemAtPosition(pos);
+                mDevicesAdapter.notifyDataSetChanged();
             });
-            adapter.registerDataSetObserver(new DataSetObserver() {
+            mDevicesAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     onSelectionUpdate();
@@ -133,6 +142,12 @@ public class DeviceChooserActivity extends Activity {
         mCancelButton.setOnClickListener(v -> cancel());
     }
 
+    static void notifyDevicesChanged() {
+        if (sInstance != null && !sInstance.isFinishing()) {
+            sInstance.mDevicesAdapter.notifyDataSetChanged();
+        }
+    }
+
     private AssociationRequest getRequest() {
         return getService().mRequest;
     }
@@ -156,6 +171,7 @@ public class DeviceChooserActivity extends Activity {
     }
 
     private void cancel() {
+        Log.i(LOG_TAG, "cancel()");
         getService().onCancel();
         setResult(RESULT_CANCELED);
         finish();
@@ -167,6 +183,14 @@ public class DeviceChooserActivity extends Activity {
         if (!isFinishing() && !isChangingConfigurations()) {
             Log.i(LOG_TAG, "onStop() - cancelling");
             cancel();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (sInstance == this) {
+            sInstance = null;
         }
     }
 
@@ -217,15 +241,91 @@ public class DeviceChooserActivity extends Activity {
         }
     }
 
-    private DeviceDiscoveryService getService() {
-        return DeviceDiscoveryService.sInstance;
+    private CompanionDeviceDiscoveryService getService() {
+        return CompanionDeviceDiscoveryService.sInstance;
     }
 
-   protected void onDeviceConfirmed(DeviceFilterPair selectedDevice) {
+    protected void onDeviceConfirmed(DeviceFilterPair selectedDevice) {
+        Log.i(LOG_TAG, "onDeviceConfirmed(selectedDevice = " + selectedDevice + ")");
         getService().onDeviceSelected(
                 getCallingPackage(), getDeviceMacAddress(selectedDevice.device));
         setResult(RESULT_OK,
                 new Intent().putExtra(CompanionDeviceManager.EXTRA_DEVICE, selectedDevice.device));
         finish();
+    }
+
+    class DevicesAdapter extends BaseAdapter {
+        private final Drawable mBluetoothIcon = icon(android.R.drawable.stat_sys_data_bluetooth);
+        private final Drawable mWifiIcon = icon(com.android.internal.R.drawable.ic_wifi_signal_3);
+
+        private SparseArray<Integer> mColors = new SparseArray();
+
+        private Drawable icon(int drawableRes) {
+            Drawable icon = getResources().getDrawable(drawableRes, null);
+            icon.setTint(Color.DKGRAY);
+            return icon;
+        }
+
+        @Override
+        public View getView(
+                int position,
+                @Nullable View convertView,
+                @NonNull ViewGroup parent) {
+            TextView view = convertView instanceof TextView
+                    ? (TextView) convertView
+                    : newView();
+            bind(view, getItem(position));
+            return view;
+        }
+
+        private void bind(TextView textView, DeviceFilterPair device) {
+            textView.setText(device.getDisplayName());
+            textView.setBackgroundColor(
+                    device.equals(getService().mSelectedDevice)
+                            ? getColor(android.R.attr.colorControlHighlight)
+                            : Color.TRANSPARENT);
+            textView.setCompoundDrawablesWithIntrinsicBounds(
+                    device.device instanceof android.net.wifi.ScanResult
+                            ? mWifiIcon
+                            : mBluetoothIcon,
+                    null, null, null);
+            textView.getCompoundDrawables()[0].setTint(getColor(android.R.attr.colorForeground));
+        }
+
+        private TextView newView() {
+            final TextView textView = new TextView(CompanionDeviceActivity.this);
+            textView.setTextColor(getColor(android.R.attr.colorForeground));
+            final int padding = CompanionDeviceActivity.getPadding(getResources());
+            textView.setPadding(padding, padding, padding, padding);
+            textView.setCompoundDrawablePadding(padding);
+            return textView;
+        }
+
+        private int getColor(int colorAttr) {
+            if (mColors.contains(colorAttr)) {
+                return mColors.get(colorAttr);
+            }
+            TypedValue typedValue = new TypedValue();
+            TypedArray a = obtainStyledAttributes(typedValue.data, new int[] { colorAttr });
+            int result = a.getColor(0, 0);
+            a.recycle();
+            mColors.put(colorAttr, result);
+            return result;
+        }
+
+        @Override
+        public int getCount() {
+            return getService().mDevicesFound.size();
+        }
+
+        @Override
+        public DeviceFilterPair getItem(int position) {
+            return getService().mDevicesFound.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
     }
 }
