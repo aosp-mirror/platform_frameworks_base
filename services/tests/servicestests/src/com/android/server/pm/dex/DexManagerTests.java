@@ -86,6 +86,7 @@ public class DexManagerTests {
     private TestData mBarUser0DelegateLastClassLoader;
 
     private TestData mSystemServerJar;
+    private TestData mSystemServerJarUpdatedContext;
     private TestData mSystemServerJarInvalid;
 
     private int mUser0;
@@ -113,6 +114,8 @@ public class DexManagerTests {
 
         mSystemServerJar = new TestData("android", isa, mUser0, PATH_CLASS_LOADER_NAME);
         mSystemServerJarInvalid = new TestData("android", isa, mUser0, PATH_CLASS_LOADER_NAME);
+        mSystemServerJarUpdatedContext = new TestData("android", isa, mUser0,
+                DELEGATE_LAST_CLASS_LOADER_NAME);
 
         mDexManager = new DexManager(/*Context*/ null, mPM, /*PackageDexOptimizer*/ null,
                 mInstaller, mInstallLock);
@@ -519,6 +522,24 @@ public class DexManagerTests {
                         PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT).toArray(new String[0]);
         assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0,
                 expectedContexts);
+    }
+
+    @Test
+    public void testSystemServerOverwritesContext() {
+        // Record bar secondaries with the default PathClassLoader.
+        List<String> secondaries = mSystemServerJar.getSecondaryDexPaths();
+
+        notifyDexLoad(mSystemServerJar, secondaries, mUser0);
+        PackageUseInfo pui = getPackageUseInfo(mSystemServerJar);
+        assertSecondaryUse(mSystemServerJar, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
+
+        // Record bar secondaries again with a different class loader. This will change the context.
+        notifyDexLoad(mSystemServerJarUpdatedContext, secondaries, mUser0);
+
+        pui = getPackageUseInfo(mSystemServerJar);
+        // We expect that all the contexts to be updated according to the last notify.
+        assertSecondaryUse(mSystemServerJarUpdatedContext, pui, secondaries,
+                /*isUsedByOtherApps*/false, mUser0);
     }
 
     @Test
