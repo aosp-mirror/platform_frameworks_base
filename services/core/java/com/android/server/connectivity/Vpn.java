@@ -1510,7 +1510,7 @@ public class Vpn {
             if (start != -1) ranges.add(new UidRange(start, stop));
         } else if (disallowedApplications != null) {
             // Add all ranges for user skipping UIDs for disallowedApplications.
-            final UidRange userRange = UidRange.createForUser(userId);
+            final UidRange userRange = UidRange.createForUser(UserHandle.of(userId));
             int start = userRange.start;
             for (int uid : getAppsUids(disallowedApplications, userId)) {
                 if (uid == start) {
@@ -1523,7 +1523,7 @@ public class Vpn {
             if (start <= userRange.stop) ranges.add(new UidRange(start, userRange.stop));
         } else {
             // Add all UIDs for the user.
-            ranges.add(UidRange.createForUser(userId));
+            ranges.add(UidRange.createForUser(UserHandle.of(userId)));
         }
     }
 
@@ -1532,7 +1532,7 @@ public class Vpn {
     private static List<UidRange> uidRangesForUser(int userId, Set<UidRange> existingRanges) {
         // UidRange#createForUser returns the entire range of UIDs available to a macro-user.
         // This is something like 0-99999 ; {@see UserHandle#PER_USER_RANGE}
-        final UidRange userRange = UidRange.createForUser(userId);
+        final UidRange userRange = UidRange.createForUser(UserHandle.of(userId));
         final List<UidRange> ranges = new ArrayList<>();
         for (UidRange range : existingRanges) {
             if (userRange.containsRange(range)) {
