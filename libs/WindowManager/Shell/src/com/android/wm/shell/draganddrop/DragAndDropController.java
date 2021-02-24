@@ -85,7 +85,8 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     @Override
     public void onDisplayAdded(int displayId) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Display added: %d", displayId);
-        final Context context = mDisplayController.getDisplayContext(displayId);
+        final Context context = mDisplayController.getDisplayContext(displayId)
+                .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
         final WindowManager wm = context.getSystemService(WindowManager.class);
 
         // TODO(b/169894807): Figure out the right layer for this, needs to be below the task bar
