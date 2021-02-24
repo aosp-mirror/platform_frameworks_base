@@ -51,7 +51,7 @@ import android.content.pm.PackageManager;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
-import android.location.provider.ProviderRequest.Listener;
+import android.location.provider.ProviderRequest.ChangedListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -2779,33 +2779,32 @@ public class LocationManager {
     }
 
     /**
-     * Registers a {@link ProviderRequest.Listener} to all providers.
+     * Adds a {@link ProviderRequest.ChangedListener} for listening to all providers'
+     * {@link ProviderRequest} changed events.
      *
      * @param executor the executor that the callback runs on
      * @param listener the listener to register
-     * @return {@code true} always
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
-    public boolean registerProviderRequestListener(
+    public void addProviderRequestChangedListener(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Listener listener) {
+            @NonNull ChangedListener listener) {
         ProviderRequestLazyLoader.sProviderRequestListeners.addListener(listener,
                 new ProviderRequestTransport(executor, listener));
-        return true;
     }
 
     /**
-     * Unregisters a {@link ProviderRequest.Listener}.
+     * Removes a {@link ProviderRequest.ChangedListener} that has been added.
      *
      * @param listener the listener to remove.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
-    public void unregisterProviderRequestListener(
-            @NonNull Listener listener) {
+    public void removeProviderRequestChangedListener(
+            @NonNull ProviderRequest.ChangedListener listener) {
         ProviderRequestLazyLoader.sProviderRequestListeners.removeListener(listener);
     }
 
@@ -3446,13 +3445,13 @@ public class LocationManager {
     }
 
     private static class ProviderRequestTransport extends IProviderRequestListener.Stub
-            implements ListenerTransport<ProviderRequest.Listener> {
+            implements ListenerTransport<ChangedListener> {
 
         private final Executor mExecutor;
 
-        private volatile @Nullable ProviderRequest.Listener mListener;
+        private volatile @Nullable ProviderRequest.ChangedListener mListener;
 
-        ProviderRequestTransport(Executor executor, ProviderRequest.Listener listener) {
+        ProviderRequestTransport(Executor executor, ChangedListener listener) {
             Preconditions.checkArgument(executor != null, "invalid null executor");
             Preconditions.checkArgument(listener != null, "invalid null callback");
             mExecutor = executor;
@@ -3465,7 +3464,7 @@ public class LocationManager {
         }
 
         @Override
-        public @Nullable ProviderRequest.Listener getListener() {
+        public @Nullable ProviderRequest.ChangedListener getListener() {
             return mListener;
         }
 
