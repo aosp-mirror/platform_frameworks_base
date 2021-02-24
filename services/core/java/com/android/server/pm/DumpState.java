@@ -55,6 +55,9 @@ public final class DumpState {
     private int mOptions;
 
     private boolean mTitlePrinted;
+    private boolean mFullPreferred;
+
+    private String mTargetPackageName;
 
     private SharedUserSetting mSharedUser;
 
@@ -98,5 +101,21 @@ public final class DumpState {
 
     public void setSharedUser(SharedUserSetting user) {
         mSharedUser = user;
+    }
+
+    public String getTargetPackageName() {
+        return mTargetPackageName;
+    }
+
+    public void setTargetPackageName(String packageName) {
+        mTargetPackageName = packageName;
+    }
+
+    public boolean isFullPreferred() {
+        return mFullPreferred;
+    }
+
+    public void setFullPreferred(boolean fullPreferred) {
+        mFullPreferred = fullPreferred;
     }
 }

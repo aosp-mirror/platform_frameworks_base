@@ -596,7 +596,8 @@ public class VpnService extends Service {
                     }
                 }
             }
-            mRoutes.add(new RouteInfo(new IpPrefix(address, prefixLength), null));
+            mRoutes.add(new RouteInfo(new IpPrefix(address, prefixLength), null, null,
+                RouteInfo.RTN_UNICAST));
             mConfig.updateAllowedFamilies(address);
             return this;
         }

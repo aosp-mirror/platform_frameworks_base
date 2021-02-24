@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Предоставя на приложението достъп за четене и запис до конфигурацията на „Не безпокойте“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"стартиране на прегледа на използваните разрешения"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Разрешава на притежателя да стартира прегледа на използваните разрешения за дадено приложение. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"осъществяване на достъп до данните от сензорите при висока скорост на семплиране"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Разрешава на приложението да семплира данните от сензорите със скорост, по-висока от 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролира дължината и разрешените знаци за паролите и ПИН кодовете за заключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Наблюдаване на опитите за отключване на екрана"</string>
@@ -1869,6 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS заявката е променена на видеообаждане"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS заявката е променена на USSD заявка"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Променено на нова SS заявка"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Сигнал за фишинг"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Служебен потребителски профил"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Сигналът е изпратен"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Разгъване"</string>

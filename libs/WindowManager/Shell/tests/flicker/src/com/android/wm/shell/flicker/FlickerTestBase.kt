@@ -16,22 +16,19 @@
 
 package com.android.wm.shell.flicker
 
+import android.app.Instrumentation
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.FEATURE_LEANBACK
 import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
-import android.os.RemoteException
-import android.os.SystemClock
-import android.platform.helpers.IAppHelper
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.android.server.wm.flicker.Flicker
 import org.junit.Assume.assumeFalse
 import org.junit.Before
+import org.junit.runners.Parameterized
 
 /**
  * Base class of all Flicker test that performs common functions for all flicker tests:
- *
  *
  * - Caches transitions so that a transition is run once and the transition results are used by
  * tests multiple times. This is needed for parameterized tests which call the BeforeClass methods
@@ -39,10 +36,13 @@ import org.junit.Before
  * - Keeps track of all test artifacts and deletes ones which do not need to be reviewed.
  * - Fails tests if results are not available for any test due to jank.
  */
-abstract class FlickerTestBase {
-    val instrumentation by lazy { InstrumentationRegistry.getInstrumentation() }
-    val uiDevice by lazy { UiDevice.getInstance(instrumentation) }
-    val packageManager: PackageManager by lazy { instrumentation.context.getPackageManager() }
+abstract class FlickerTestBase(
+    protected val rotationName: String,
+    protected val rotation: Int
+) {
+    val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    val uiDevice = UiDevice.getInstance(instrumentation)
+    val packageManager: PackageManager = instrumentation.context.packageManager
     protected val isTelevision: Boolean by lazy {
         packageManager.run {
             hasSystemFeature(FEATURE_LEANBACK) || hasSystemFeature(FEATURE_LEANBACK_ONLY)
@@ -56,83 +56,12 @@ abstract class FlickerTestBase {
     @Before
     open fun televisionSetUp() = assumeFalse(isTelevision)
 
-    /**
-     * Build a test tag for the test
-     * @param testName Name of the transition(s) being tested
-     * @param app App being launcher
-     * @param rotation Initial screen rotation
-     *
-     * @return test tag with pattern <NAME>__<APP>__<ROTATION>
-    </ROTATION></APP></NAME> */
-    protected fun buildTestTag(testName: String, app: IAppHelper, rotation: Int): String {
-        return buildTestTag(
-                testName, app, rotation, rotation, app2 = null, extraInfo = "")
-    }
-
-    /**
-     * Build a test tag for the test
-     * @param testName Name of the transition(s) being tested
-     * @param app App being launcher
-     * @param beginRotation Initial screen rotation
-     * @param endRotation End screen rotation (if any, otherwise use same as initial)
-     *
-     * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
-    </END_ROTATION></BEGIN_ROTATION></APP></NAME> */
-    protected fun buildTestTag(
-        testName: String,
-        app: IAppHelper,
-        beginRotation: Int,
-        endRotation: Int
-    ): String {
-        return buildTestTag(
-                testName, app, beginRotation, endRotation, app2 = null, extraInfo = "")
-    }
-
-    /**
-     * Build a test tag for the test
-     * @param testName Name of the transition(s) being tested
-     * @param app App being launcher
-     * @param app2 Second app being launched (if any)
-     * @param beginRotation Initial screen rotation
-     * @param endRotation End screen rotation (if any, otherwise use same as initial)
-     * @param extraInfo Additional information to append to the tag
-     *
-     * @return test tag with pattern <NAME>__<APP></APP>(S)>__<ROTATION></ROTATION>(S)>[__<EXTRA>]
-    </EXTRA></NAME> */
-    protected fun buildTestTag(
-        testName: String,
-        app: IAppHelper,
-        beginRotation: Int,
-        endRotation: Int,
-        app2: IAppHelper?,
-        extraInfo: String
-    ): String {
-        var testTag = "${testName}__${app.launcherName}"
-        if (app2 != null) {
-            testTag += "-${app2.launcherName}"
-        }
-        testTag += "__${Surface.rotationToString(beginRotation)}"
-        if (endRotation != beginRotation) {
-            testTag += "-${Surface.rotationToString(endRotation)}"
-        }
-        if (extraInfo.isNotEmpty()) {
-            testTag += "__$extraInfo"
-        }
-        return testTag
-    }
-
-    protected fun Flicker.setRotation(rotation: Int) {
-        try {
-            when (rotation) {
-                Surface.ROTATION_270 -> device.setOrientationLeft()
-                Surface.ROTATION_90 -> device.setOrientationRight()
-                Surface.ROTATION_0 -> device.setOrientationNatural()
-                else -> device.setOrientationNatural()
-            }
-            // Wait for animation to complete
-            SystemClock.sleep(1000)
-        } catch (e: RemoteException) {
-            throw RuntimeException(e)
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<Array<Any>> {
+            val supportedRotations = intArrayOf(Surface.ROTATION_0, Surface.ROTATION_90)
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }

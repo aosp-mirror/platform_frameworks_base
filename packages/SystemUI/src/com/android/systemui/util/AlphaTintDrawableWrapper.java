@@ -16,14 +16,17 @@
 
 package com.android.systemui.util;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableWrapper;
+import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
 
@@ -45,13 +48,18 @@ import java.io.IOException;
  * @attr ref R.styleable#AlphaTintDrawableWrapper_tint
  * @attr ref R.styleable#AlphaTintDrawableWrapper_alpha
  */
-public class AlphaTintDrawableWrapper extends DrawableWrapper {
+public class AlphaTintDrawableWrapper extends InsetDrawable {
     private ColorStateList mTint;
     private int[] mThemeAttrs;
 
     /** No-arg constructor used by drawable inflation. */
     public AlphaTintDrawableWrapper() {
-        super(null);
+        super(null, 0);
+    }
+
+    AlphaTintDrawableWrapper(Drawable drawable, int[] themeAttrs) {
+        super(drawable, 0);
+        mThemeAttrs = themeAttrs;
     }
 
     @Override
@@ -74,7 +82,7 @@ public class AlphaTintDrawableWrapper extends DrawableWrapper {
     public void applyTheme(Theme t) {
         super.applyTheme(t);
 
-        if (mThemeAttrs != null) {
+        if (mThemeAttrs != null && t != null) {
             final TypedArray a = t.resolveAttributes(mThemeAttrs,
                     R.styleable.AlphaTintDrawableWrapper);
             updateStateFromTypedArray(a);
@@ -92,9 +100,6 @@ public class AlphaTintDrawableWrapper extends DrawableWrapper {
     }
 
     private void updateStateFromTypedArray(@NonNull TypedArray a) {
-        if (a.hasValue(R.styleable.AlphaTintDrawableWrapper_android_drawable)) {
-            setDrawable(a.getDrawable(R.styleable.AlphaTintDrawableWrapper_android_drawable));
-        }
         if (a.hasValue(R.styleable.AlphaTintDrawableWrapper_android_tint)) {
             mTint = a.getColorStateList(R.styleable.AlphaTintDrawableWrapper_android_tint);
         }
@@ -107,6 +112,59 @@ public class AlphaTintDrawableWrapper extends DrawableWrapper {
     private void applyTint() {
         if (getDrawable() != null && mTint != null) {
             getDrawable().mutate().setTintList(mTint);
+        }
+    }
+
+    @Nullable
+    @Override
+    public ConstantState getConstantState() {
+        return new AlphaTintState(super.getConstantState(), mThemeAttrs, getAlpha(), mTint);
+    }
+
+    static class AlphaTintState extends Drawable.ConstantState {
+
+        private ConstantState mWrappedState;
+        private int[] mThemeAttrs;
+        private int mAlpha;
+        private ColorStateList mColorStateList;
+
+        AlphaTintState(
+                ConstantState wrappedState,
+                int[] themeAttrs,
+                int alpha,
+                ColorStateList colorStateList
+        ) {
+            mWrappedState = wrappedState;
+            mThemeAttrs = themeAttrs;
+            mAlpha = alpha;
+            mColorStateList = colorStateList;
+        }
+
+        @NonNull
+        @Override
+        public Drawable newDrawable() {
+            return newDrawable(null, null);
+        }
+
+        @NonNull
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            DrawableWrapper wrapper = (DrawableWrapper) mWrappedState.newDrawable(res, theme);
+            AlphaTintDrawableWrapper alphaTintDrawableWrapper =
+                    new AlphaTintDrawableWrapper(wrapper.getDrawable(), mThemeAttrs);
+            alphaTintDrawableWrapper.setTintList(mColorStateList);
+            alphaTintDrawableWrapper.setAlpha(mAlpha);
+            return alphaTintDrawableWrapper;
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return true;
+        }
+
+        @Override
+        public int getChangingConfigurations() {
+            return mWrappedState.getChangingConfigurations();
         }
     }
 }

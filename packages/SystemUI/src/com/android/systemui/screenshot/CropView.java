@@ -97,8 +97,8 @@ public class CropView extends View {
         float bottom = mBottomCrop + mBottomDelta;
         drawShade(canvas, 0, top);
         drawShade(canvas, bottom, 1f);
-        drawHandle(canvas, top);
-        drawHandle(canvas, bottom);
+        drawHandle(canvas, top, /* draw the handle tab down */ false);
+        drawHandle(canvas, bottom, /* draw the handle tab up */ true);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class CropView extends View {
                     } else {  // Bottom
                         mBottomDelta = pixelsToFraction((int) MathUtils.constrain(delta,
                                 topPx + 2 * mCropTouchMargin - bottomPx,
-                                getMeasuredHeight() - bottomPx));
+                                getHeight() - bottomPx));
                     }
                     updateListener(event);
                     invalidate();
@@ -212,21 +212,25 @@ public class CropView extends View {
     }
 
     private void drawShade(Canvas canvas, float fracStart, float fracEnd) {
-        canvas.drawRect(0, fractionToPixels(fracStart), getMeasuredWidth(),
+        canvas.drawRect(0, fractionToPixels(fracStart), getWidth(),
                 fractionToPixels(fracEnd), mShadePaint);
     }
 
-    private void drawHandle(Canvas canvas, float frac) {
+    private void drawHandle(Canvas canvas, float frac, boolean handleTabUp) {
         int y = fractionToPixels(frac);
-        canvas.drawLine(0, y, getMeasuredWidth(), y, mHandlePaint);
+        canvas.drawLine(0, y, getWidth(), y, mHandlePaint);
+        float radius = 15 * getResources().getDisplayMetrics().density;
+        float x = getWidth() * .9f;
+        canvas.drawArc(x - radius, y - radius, x + radius, y + radius, handleTabUp ? 180 : 0, 180,
+                true, mHandlePaint);
     }
 
     private int fractionToPixels(float frac) {
-        return (int) (frac * getMeasuredHeight());
+        return (int) (frac * getHeight());
     }
 
     private float pixelsToFraction(int px) {
-        return px / (float) getMeasuredHeight();
+        return px / (float) getHeight();
     }
 
     private CropBoundary nearestBoundary(MotionEvent event, int topPx, int bottomPx) {

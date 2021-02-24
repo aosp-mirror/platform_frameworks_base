@@ -17,85 +17,75 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
-import com.android.server.wm.flicker.dsl.WmAssertionBuilder
+import com.android.server.wm.flicker.FlickerTestParameter
 
 const val IME_WINDOW_TITLE = "InputMethod"
 
-@JvmOverloads
-fun LayersAssertionBuilder.imeLayerBecomesVisible(bugId: Int = 0) {
-    all("imeLayerBecomesVisible", bugId) {
+fun FlickerTestParameter.imeLayerBecomesVisible() {
+    assertLayers {
         this.hidesLayer(IME_WINDOW_TITLE)
-                .then()
-                .showsLayer(IME_WINDOW_TITLE)
+            .then()
+            .showsLayer(IME_WINDOW_TITLE)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.imeLayerBecomesInvisible(bugId: Int = 0) {
-    all("imeLayerBecomesInvisible", bugId) {
+fun FlickerTestParameter.imeLayerBecomesInvisible() {
+    assertLayers {
         this.showsLayer(IME_WINDOW_TITLE)
-                .then()
-                .hidesLayer(IME_WINDOW_TITLE)
+            .then()
+            .hidesLayer(IME_WINDOW_TITLE)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.imeAppLayerIsAlwaysVisible(testApp: IAppHelper, bugId: Int = 0) {
-    all("imeAppLayerIsAlwaysVisible", bugId) {
+fun FlickerTestParameter.imeAppLayerIsAlwaysVisible(testApp: IAppHelper) {
+    assertLayers {
         this.showsLayer(testApp.getPackage())
     }
 }
 
-@JvmOverloads
-fun WmAssertionBuilder.imeAppWindowIsAlwaysVisible(testApp: IAppHelper, bugId: Int = 0) {
-    all("imeAppWindowIsAlwaysVisible", bugId) {
+fun FlickerTestParameter.imeAppWindowIsAlwaysVisible(testApp: IAppHelper) {
+    assertWm {
         this.showsAppWindowOnTop(testApp.getPackage())
     }
 }
 
-@JvmOverloads
-fun WmAssertionBuilder.imeWindowBecomesVisible(bugId: Int = 0) {
-    all("imeWindowBecomesVisible", bugId) {
+fun FlickerTestParameter.imeWindowBecomesVisible() {
+    assertWm {
         this.hidesNonAppWindow(IME_WINDOW_TITLE)
-                .then()
-                .showsNonAppWindow(IME_WINDOW_TITLE)
+            .then()
+            .showsNonAppWindow(IME_WINDOW_TITLE)
     }
 }
 
-@JvmOverloads
-fun WmAssertionBuilder.imeWindowBecomesInvisible(bugId: Int = 0) {
-    all("imeWindowBecomesInvisible", bugId) {
+fun FlickerTestParameter.imeWindowBecomesInvisible() {
+    assertWm {
         this.showsNonAppWindow(IME_WINDOW_TITLE)
-                .then()
-                .hidesNonAppWindow(IME_WINDOW_TITLE)
+            .then()
+            .hidesNonAppWindow(IME_WINDOW_TITLE)
     }
 }
 
-@JvmOverloads
-fun WmAssertionBuilder.imeAppWindowBecomesVisible(windowName: String, bugId: Int = 0) {
-    all("imeAppWindowBecomesVisible", bugId) {
+fun FlickerTestParameter.imeAppWindowBecomesVisible(windowName: String) {
+    assertWm {
         this.hidesAppWindow(windowName)
-                .then()
-                .showsAppWindow(windowName)
+            .then()
+            .showsAppWindow(windowName)
     }
 }
 
-@JvmOverloads
-fun WmAssertionBuilder.imeAppWindowBecomesInvisible(testApp: IAppHelper, bugId: Int = 0) {
-    all("imeAppWindowBecomesInvisible", bugId) {
+fun FlickerTestParameter.imeAppWindowBecomesInvisible(testApp: IAppHelper) {
+    assertWm {
         this.showsAppWindowOnTop(testApp.getPackage())
-                .then()
-                .appWindowNotOnTop(testApp.getPackage())
+            .then()
+            .appWindowNotOnTop(testApp.getPackage())
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.imeAppLayerBecomesInvisible(testApp: IAppHelper, bugId: Int = 0) {
-    all("imeAppLayerBecomesInvisible", bugId) {
+fun FlickerTestParameter.imeAppLayerBecomesInvisible(testApp: IAppHelper) {
+    assertLayers {
         this.skipUntilFirstAssertion()
-                .showsLayer(testApp.getPackage())
-                .then()
-                .hidesLayer(testApp.getPackage())
+            .showsLayer(testApp.getPackage())
+            .then()
+            .hidesLayer(testApp.getPackage())
     }
 }

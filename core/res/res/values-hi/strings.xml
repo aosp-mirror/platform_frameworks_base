@@ -685,6 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"देखने की अनुमतियां चालू करें"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"इस्तेमाल करने वाले को किसी ऐप्लिकेशन के लिए अनुमतियों का इस्तेमाल शुरू करने देता है. सामान्य ऐप्लिकेशन के लिए इसकी ज़रूरत कभी नहीं पड़ती."</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यह अनुमति मिलने पर ऐप्लिकेशन, 200 हर्ट्ज़ से ज़्यादा की दर पर सेंसर डेटा का नमूना ले पाएगा"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
@@ -1869,6 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"एसएस कोड चलाने के अनुरोध को वीडियो कॉल में बदला गया"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"एसएस कोड चलाने के अनुरोध को यूएसएसडी कोड चलाने के अनुरोध में बदला गया"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"एसएस कोड चलाने के नए अनुरोध में बदला गया"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"फ़िशिंग से जुड़ी चेतावनी"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"वर्क प्रोफ़ाइल"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"अलर्ट किया गया"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"विस्तार करें"</string>
@@ -1886,7 +1889,7 @@
     <string name="call_notification_decline_action" msgid="3700345945214000726">"अस्वीकार करें"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"कॉल काटें"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"आने वाला (इनकमिंग) कॉल"</string>
-    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"जारी कॉल"</string>
+    <string name="call_notification_ongoing_text" msgid="3880832933933020875">"पहले से जारी कॉल"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"इनकमिंग कॉल को स्क्रीन किया जा रहा है"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>

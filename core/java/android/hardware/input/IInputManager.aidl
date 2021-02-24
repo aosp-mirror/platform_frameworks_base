@@ -25,6 +25,8 @@ import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibrationEffect;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.InputSensorInfo;
+import android.hardware.lights.Light;
+import android.hardware.lights.LightState;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
@@ -127,4 +129,14 @@ interface IInputManager {
     void disableSensor(int deviceId, int sensorType);
 
     boolean flushSensor(int deviceId, int sensorType);
+
+    List<Light> getLights(int deviceId);
+
+    LightState getLightState(int deviceId, int lightId);
+
+    void setLightStates(int deviceId, in int[] lightIds, in LightState[] states, in IBinder token);
+
+    void openLightSession(int deviceId, String opPkg, in IBinder token);
+
+    void closeLightSession(int deviceId, in IBinder token);
 }

@@ -170,7 +170,6 @@
 
     <declare-styleable name="AlphaTintDrawableWrapper">
         <attr name="android:tint" />
-        <attr name="android:drawable" />
         <attr name="android:alpha" />
     </declare-styleable>
 
@@ -190,10 +189,6 @@
         <attr name="scrimColor" />
         <attr name="borderThickness" format="dimension" />
         <attr name="borderColor" format="color" />
-    </declare-styleable>
-
-    <declare-styleable name="RoundedCornerProgressDrawable">
-        <attr name="android:drawable" />
     </declare-styleable>
 </resources>
 

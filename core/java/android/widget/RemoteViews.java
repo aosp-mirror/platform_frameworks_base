@@ -224,35 +224,17 @@ public class RemoteViews implements Parcelable, Filter {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MarginType {}
-    /**
-     * The value will apply to the marginLeft.
-     * @hide
-     */
+    /** The value will apply to the marginLeft. */
     public static final int MARGIN_LEFT = 0;
-    /**
-     * The value will apply to the marginTop.
-     * @hide
-     */
+    /** The value will apply to the marginTop. */
     public static final int MARGIN_TOP = 1;
-    /**
-     * The value will apply to the marginRight.
-     * @hide
-     */
+    /** The value will apply to the marginRight. */
     public static final int MARGIN_RIGHT = 2;
-    /**
-     * The value will apply to the marginBottom.
-     * @hide
-     */
+    /** The value will apply to the marginBottom. */
     public static final int MARGIN_BOTTOM = 3;
-    /**
-     * The value will apply to the marginStart.
-     * @hide
-     */
+    /** The value will apply to the marginStart. */
     public static final int MARGIN_START = 4;
-    /**
-     * The value will apply to the marginEnd.
-     * @hide
-     */
+    /** The value will apply to the marginEnd. */
     public static final int MARGIN_END = 5;
 
     /** @hide **/
@@ -4002,7 +3984,6 @@ public class RemoteViews implements Parcelable, Filter {
      * @param viewId The id of the view to change
      * @param type The margin being set e.g. {@link #MARGIN_END}
      * @param dimen a dimension resource to apply to the margin, or 0 to clear the margin.
-     * @hide
      */
     public void setViewLayoutMarginDimen(@IdRes int viewId, @MarginType int type,
             @DimenRes int dimen) {
@@ -4021,7 +4002,6 @@ public class RemoteViews implements Parcelable, Filter {
      * @param type The margin being set e.g. {@link #MARGIN_END}
      * @param value a value for the margin the given units.
      * @param units The unit type of the value e.g. {@link TypedValue#COMPLEX_UNIT_DIP}
-     * @hide
      */
     public void setViewLayoutMargin(@IdRes int viewId, @MarginType int type, float value,
             @ComplexDimensionUnit int units) {
@@ -4039,7 +4019,6 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param width Width of the view in the given units
      * @param units The unit type of the value e.g. {@link TypedValue#COMPLEX_UNIT_DIP}
-     * @hide
      */
     public void setViewLayoutWidth(@IdRes int viewId, float width,
             @ComplexDimensionUnit int units) {
@@ -4051,7 +4030,6 @@ public class RemoteViews implements Parcelable, Filter {
      * the result of {@link Resources#getDimensionPixelSize(int)}.
      *
      * @param widthDimen the dimension resource for the view's width
-     * @hide
      */
     public void setViewLayoutWidthDimen(@IdRes int viewId, @DimenRes int widthDimen) {
         addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, widthDimen));
@@ -4068,7 +4046,6 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param height height of the view in the given units
      * @param units The unit type of the value e.g. {@link TypedValue#COMPLEX_UNIT_DIP}
-     * @hide
      */
     public void setViewLayoutHeight(@IdRes int viewId, float height,
             @ComplexDimensionUnit int units) {
@@ -4080,7 +4057,6 @@ public class RemoteViews implements Parcelable, Filter {
      * the result of {@link Resources#getDimensionPixelSize(int)}.
      *
      * @param heightDimen a dimen resource to read the height from.
-     * @hide
      */
     public void setViewLayoutHeightDimen(@IdRes int viewId, @DimenRes int heightDimen) {
         addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, heightDimen));
@@ -4231,10 +4207,9 @@ public class RemoteViews implements Parcelable, Filter {
      * @param viewId The id of the view on which to call the method.
      * @param methodName The name of the method to call.
      * @param value The value to pass to the method.
-     *
-     * @hide
      */
-    public void setColorStateList(@IdRes int viewId, String methodName, ColorStateList value) {
+    public void setColorStateList(@IdRes int viewId, @NonNull String methodName,
+            @Nullable ColorStateList value) {
         addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.COLOR_STATE_LIST,
                 value));
     }

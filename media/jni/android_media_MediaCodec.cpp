@@ -61,6 +61,7 @@
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/PersistentSurface.h>
+#include <mediadrm/DrmUtils.h>
 #include <mediadrm/ICrypto.h>
 
 #include <private/android/AHardwareBufferHelpers.h>
@@ -312,6 +313,7 @@ status_t JMediaCodec::configure(
     mGraphicOutput = (mime.startsWithIgnoreCase("video/") || mime.startsWithIgnoreCase("image/"))
             && !(flags & CONFIGURE_FLAG_ENCODE);
     mHasCryptoOrDescrambler = (crypto != nullptr) || (descrambler != nullptr);
+    mCrypto = crypto;
 
     return mCodec->configure(
             format, mSurfaceTextureClient, crypto, descrambler, flags);
@@ -1103,6 +1105,8 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
     }
 }
 
+jint MediaErrorToJavaError(status_t err);
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1150,7 +1154,8 @@ static void throwCodecException(JNIEnv *env, status_t err, int32_t actionCode, c
     env->Throw(exception);
 }
 
-static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
+static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
+        const sp<ICrypto> &crypto) {
     ScopedLocalRef<jclass> clazz(
             env, env->FindClass("android/media/MediaCodec$CryptoException"));
     CHECK(clazz.get() != NULL);
@@ -1159,7 +1164,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
         env->GetMethodID(clazz.get(), "<init>", "(ILjava/lang/String;)V");
     CHECK(constructID != NULL);
 
-    const char *defaultMsg = "Unknown Error";
+    std::string defaultMsg = "Unknown Error";
 
     /* translate OS errors to Java API CryptoException errorCodes (which are positive) */
     switch (err) {
@@ -1199,11 +1204,17 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
             err = gCryptoErrorCodes.cryptoErrorLostState;
             defaultMsg = "Session state was lost, open a new session and retry";
             break;
-        default:  /* Other negative DRM error codes go out as is. */
+        default:  /* Other negative DRM error codes go out best-effort. */
+            err = MediaErrorToJavaError(err);
+            defaultMsg = StrCryptoError(err);
             break;
     }
 
-    jstring msgObj = env->NewStringUTF(msg != NULL ? msg : defaultMsg);
+    std::string msgStr(msg != NULL ? msg : defaultMsg.c_str());
+    if (crypto != NULL) {
+        msgStr = DrmUtils::GetExceptionMessage(err, msgStr.c_str(), crypto);
+    }
+    jstring msgObj = env->NewStringUTF(msgStr.c_str());
 
     jthrowable exception =
         (jthrowable)env->NewObject(clazz.get(), constructID, err, msgObj);
@@ -1213,7 +1224,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
 
 static jint throwExceptionAsNecessary(
         JNIEnv *env, status_t err, int32_t actionCode = ACTION_CODE_FATAL,
-        const char *msg = NULL) {
+        const char *msg = NULL, const sp<ICrypto>& crypto = NULL) {
     switch (err) {
         case OK:
             return 0;
@@ -1237,7 +1248,7 @@ static jint throwExceptionAsNecessary(
 
         default:
             if (isCryptoError(err)) {
-                throwCryptoException(env, err, msg);
+                throwCryptoException(env, err, msg, crypto);
                 return 0;
             }
             throwCodecException(env, err, actionCode, msg);
@@ -1899,7 +1910,8 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     subSamples = NULL;
 
     throwExceptionAsNecessary(
-            env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
+            env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str(),
+            codec->getCrypto());
 }
 
 static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jclass, jobject bufferObj) {

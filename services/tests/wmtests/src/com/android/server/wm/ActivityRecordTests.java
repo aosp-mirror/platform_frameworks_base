@@ -2288,7 +2288,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         reset(task);
         activity.reportDescendantOrientationChangeIfNeeded();
-        verify(task).onConfigurationChanged(any(Configuration.class));
+        verify(task, atLeast(1)).onConfigurationChanged(any(Configuration.class));
     }
 
     @Test

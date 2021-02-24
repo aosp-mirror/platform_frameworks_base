@@ -2840,6 +2840,8 @@
     <string name="empty_user_name" translatable="false">Your friend</string>
     <!-- Empty status shown before user has selected a friend [CHAR LIMIT=30] -->
     <string name="empty_status" translatable="false">Their status</string>
+    <!-- Default text for missed call notifications [CHAR LIMIT=30] -->
+    <string name="missed_call" translatable="false">Missed call</string>
 
     <!-- Title to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->

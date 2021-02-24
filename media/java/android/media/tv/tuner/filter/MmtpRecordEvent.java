@@ -17,6 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.BytesLong;
+import android.annotation.IntRange;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.filter.RecordSettings.ScHevcIndex;
 
@@ -69,6 +70,7 @@ public class MmtpRecordEvent extends FilterEvent {
      * {@link android.media.tv.tuner.TunerVersionChecker#getTunerVersion()} to get the version
      * information.
      */
+    @IntRange(from = 0)
     public int getMpuSequenceNumber() {
         return mMpuSequenceNumber;
     }

@@ -5141,7 +5141,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void onCoreSettingsChange() {
         if (updateDebugViewAttributeState()) {
             // request all activities to relaunch for the changes to take place
-            relaunchAllActivities(false /* preserveWindows */);
+            relaunchAllActivities(false /* preserveWindows */, "onCoreSettingsChange");
         }
     }
 
@@ -5160,7 +5160,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         return previousState != View.sDebugViewAttributes;
     }
 
-    private void relaunchAllActivities(boolean preserveWindows) {
+    private void relaunchAllActivities(boolean preserveWindows, String reason) {
+        Log.i(TAG, "Relaunch all activities: " + reason);
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             scheduleRelaunchActivityIfPossible(mActivities.valueAt(i), preserveWindows);
         }
@@ -5535,6 +5536,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     void scheduleRelaunchActivity(IBinder token) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
+            Log.i(TAG, "Schedule relaunch activity: " + r.activityInfo.name);
             scheduleRelaunchActivityIfPossible(r, !r.stopped /* preserveWindow */);
         }
     }
@@ -6079,7 +6081,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         handleConfigurationChanged(newConfig, null);
 
         // Preserve windows to avoid black flickers when overlays change.
-        relaunchAllActivities(true /* preserveWindows */);
+        relaunchAllActivities(true /* preserveWindows */, "handleApplicationInfoChanged");
     }
 
     static void freeTextLayoutCachesIfNeeded(int configDiff) {

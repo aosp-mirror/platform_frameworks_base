@@ -2,6 +2,7 @@
 package android.app.appsearch {
 
   public final class AppSearchBatchResult<KeyType, ValueType> {
+    method @NonNull public java.util.Map<KeyType,android.app.appsearch.AppSearchResult<ValueType>> getAll();
     method @NonNull public java.util.Map<KeyType,android.app.appsearch.AppSearchResult<ValueType>> getFailures();
     method @NonNull public java.util.Map<KeyType,ValueType> getSuccesses();
     method public boolean isSuccess();
@@ -146,7 +147,7 @@ package android.app.appsearch {
     method public void put(@NonNull android.app.appsearch.PutDocumentsRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
     method public void remove(@NonNull android.app.appsearch.RemoveByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
     method public void remove(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
-    method @NonNull public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
+    method public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
     method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
   }
@@ -358,7 +359,6 @@ package android.app.appsearch {
     method @NonNull public java.util.Set<java.lang.String> getIncompatibleTypes();
     method @NonNull public java.util.Set<java.lang.String> getMigratedTypes();
     method @NonNull public java.util.List<android.app.appsearch.SetSchemaResponse.MigrationFailure> getMigrationFailures();
-    method public boolean isSuccess();
   }
 
   public static class SetSchemaResponse.MigrationFailure {

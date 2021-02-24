@@ -18,239 +18,92 @@ package com.android.wm.shell.flicker
 
 import android.graphics.Region
 import android.view.Surface
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilderLegacy
 import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
+import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 
-@JvmOverloads
-fun LayersAssertionBuilder.appPairsDividerIsVisible(bugId: Int = 0) {
-    end("appPairsDividerIsVisible", bugId) {
+fun FlickerTestParameter.appPairsDividerIsVisible() {
+    assertLayersEnd {
         this.isVisible(APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.appPairsDividerIsInvisible(bugId: Int = 0) {
-    end("appPairsDividerIsInVisible", bugId) {
+fun FlickerTestParameter.appPairsDividerIsInvisible() {
+    assertLayersEnd {
         this.notExists(APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.appPairsDividerBecomesVisible(bugId: Int = 0) {
-    all("dividerLayerBecomesVisible", bugId) {
+fun FlickerTestParameter.appPairsDividerBecomesVisible() {
+    assertLayers {
         this.hidesLayer(DOCKED_STACK_DIVIDER)
             .then()
             .showsLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerIsVisible(bugId: Int = 0) {
-    end("dockedStackDividerIsVisible", bugId) {
+fun FlickerTestParameter.dockedStackDividerIsVisible() {
+    assertLayersEnd {
         this.isVisible(DOCKED_STACK_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerBecomesVisible(bugId: Int = 0) {
-    all("dividerLayerBecomesVisible", bugId) {
+fun FlickerTestParameter.dockedStackDividerBecomesVisible() {
+    assertLayers {
         this.hidesLayer(DOCKED_STACK_DIVIDER)
             .then()
             .showsLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerBecomesInvisible(bugId: Int = 0) {
-    all("dividerLayerBecomesInvisible", bugId) {
+fun FlickerTestParameter.dockedStackDividerBecomesInvisible() {
+    assertLayers {
         this.showsLayer(DOCKED_STACK_DIVIDER)
             .then()
             .hidesLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerIsInvisible(bugId: Int = 0) {
-    end("dockedStackDividerIsInvisible", bugId) {
+fun FlickerTestParameter.dockedStackDividerIsInvisible() {
+    assertLayersEnd {
         this.notExists(DOCKED_STACK_DIVIDER)
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.appPairsPrimaryBoundsIsVisible(
-    rotation: Int,
-    primaryLayerName: String,
-    bugId: Int = 0
-) {
-    end("PrimaryAppBounds", bugId) {
+fun FlickerTestParameter.appPairsPrimaryBoundsIsVisible(rotation: Int, primaryLayerName: String) {
+    assertLayersEnd {
         val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.appPairsSecondaryBoundsIsVisible(
+fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisible(
     rotation: Int,
-    secondaryLayerName: String,
-    bugId: Int = 0
+    primaryLayerName: String
 ) {
-    end("SecondaryAppBounds", bugId) {
-        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-        this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilder.dockedStackPrimaryBoundsIsVisible(
-    rotation: Int,
-    primaryLayerName: String,
-    bugId: Int = 0
-) {
-    end("PrimaryAppBounds", bugId) {
+    assertLayersEnd {
         val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
         this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilder.dockedStackSecondaryBoundsIsVisible(
+fun FlickerTestParameter.appPairsSecondaryBoundsIsVisible(
     rotation: Int,
-    secondaryLayerName: String,
-    bugId: Int = 0
+    secondaryLayerName: String
 ) {
-    end("SecondaryAppBounds", bugId) {
-        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
-        this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.appPairsDividerIsVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("appPairsDividerIsVisible", bugId, enabled) {
-        this.isVisible(APP_PAIR_SPLIT_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.appPairsDividerIsInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("appPairsDividerIsInVisible", bugId, enabled) {
-        this.notExists(APP_PAIR_SPLIT_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.appPairsDividerBecomesVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("dividerLayerBecomesVisible", bugId, enabled) {
-        this.hidesLayer(DOCKED_STACK_DIVIDER)
-            .then()
-            .showsLayer(DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.dockedStackDividerIsVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("dockedStackDividerIsVisible", bugId, enabled) {
-        this.isVisible(DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.dockedStackDividerBecomesVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("dividerLayerBecomesVisible", bugId, enabled) {
-        this.hidesLayer(DOCKED_STACK_DIVIDER)
-            .then()
-            .showsLayer(DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.dockedStackDividerBecomesInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("dividerLayerBecomesInvisible", bugId, enabled) {
-        this.showsLayer(DOCKED_STACK_DIVIDER)
-            .then()
-            .hidesLayer(DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.dockedStackDividerIsInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("dockedStackDividerIsInvisible", bugId, enabled) {
-        this.notExists(DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.appPairsPrimaryBoundsIsVisible(
-    rotation: Int,
-    primaryLayerName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("PrimaryAppBounds", bugId, enabled) {
-        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-        this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.appPairsSecondaryBoundsIsVisible(
-    rotation: Int,
-    secondaryLayerName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("SecondaryAppBounds", bugId, enabled) {
+    assertLayersEnd {
         val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
     }
 }
 
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.dockedStackPrimaryBoundsIsVisible(
+fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisible(
     rotation: Int,
-    primaryLayerName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
+    secondaryLayerName: String
 ) {
-    end("PrimaryAppBounds", bugId, enabled) {
-        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
-        this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilderLegacy.dockedStackSecondaryBoundsIsVisible(
-    rotation: Int,
-    secondaryLayerName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("SecondaryAppBounds", bugId, enabled) {
+    assertLayersEnd {
         val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
         this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
     }
@@ -260,10 +113,10 @@ fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
         Region(0, 0, displayBounds.bounds.right,
-                dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset)
+            dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset)
     } else {
         Region(0, 0, dividerRegion.bounds.left,
-                dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset)
+            dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset)
     }
 }
 
@@ -271,12 +124,12 @@ fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
         Region(0,
-                dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
-                displayBounds.bounds.right,
-                displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
+            dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
+            displayBounds.bounds.right,
+            displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
     } else {
         Region(dividerRegion.bounds.right, 0,
-                displayBounds.bounds.right,
-                displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
+            displayBounds.bounds.right,
+            displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
     }
 }

@@ -236,7 +236,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
                 Callback callback, String uniqueId, int uniqueIndex,
                 VirtualDisplayConfig virtualDisplayConfig) {
-            super(VirtualDisplayAdapter.this, displayToken, uniqueId);
+            super(VirtualDisplayAdapter.this, displayToken, uniqueId, getContext());
             mAppToken = appToken;
             mOwnerUid = ownerUid;
             mOwnerPackageName = ownerPackageName;

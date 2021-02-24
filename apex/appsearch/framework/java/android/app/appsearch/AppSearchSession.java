@@ -497,7 +497,6 @@ public final class AppSearchSession implements Closeable {
      * @param callback Callback to receive errors. If the operation succeeds, the callback will be
      *                 invoked with {@code null}.
      */
-    @NonNull
     public void reportUsage(
             @NonNull ReportUsageRequest request,
             @NonNull @CallbackExecutor Executor executor,

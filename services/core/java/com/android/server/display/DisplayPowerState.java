@@ -72,6 +72,8 @@ final class DisplayPowerState {
 
     private Runnable mCleanListener;
 
+    private volatile boolean mStopped;
+
     DisplayPowerState(
             DisplayBlanker blanker, ColorFade colorFade, int displayId, int displayState) {
         mHandler = new Handler(true /*async*/);
@@ -264,9 +266,24 @@ final class DisplayPowerState {
         }
     }
 
+    /**
+     * Interrupts all running threads; halting future work.
+     *
+     * This method should be called when the DisplayPowerState is no longer in use; i.e. when
+     * the {@link #mDisplayId display} has been removed.
+     */
+    public void stop() {
+        mStopped = true;
+        mPhotonicModulator.interrupt();
+        dismissColorFade();
+        mCleanListener = null;
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     public void dump(PrintWriter pw) {
         pw.println();
         pw.println("Display Power State:");
+        pw.println("  mStopped=" + mStopped);
         pw.println("  mScreenState=" + Display.stateToString(mScreenState));
         pw.println("  mScreenBrightness=" + mScreenBrightness);
         pw.println("  mScreenReady=" + mScreenReady);
@@ -428,7 +445,11 @@ final class DisplayPowerState {
                     if (!stateChanged && !backlightChanged) {
                         try {
                             mLock.wait();
-                        } catch (InterruptedException ex) { }
+                        } catch (InterruptedException ex) {
+                            if (mStopped) {
+                                return;
+                            }
+                        }
                         continue;
                     }
                     mActualState = state;

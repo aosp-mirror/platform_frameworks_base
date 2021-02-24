@@ -105,7 +105,7 @@ public interface InputMethod {
      */
     @MainThread
     default void initializeInternal(IBinder token, int displayId,
-            IInputMethodPrivilegedOperations privilegedOperations) {
+            IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
         updateInputMethodDisplay(displayId);
         attachToken(token);
     }

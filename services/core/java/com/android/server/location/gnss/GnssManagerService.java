@@ -60,7 +60,7 @@ public class GnssManagerService {
 
     private static final String ATTRIBUTION_ID = "GnssService";
 
-    private final Context mContext;
+    final Context mContext;
     private final GnssNative mGnssNative;
 
     private final GnssLocationProvider mGnssLocationProvider;
@@ -154,10 +154,11 @@ public class GnssManagerService {
      * Registers listener for GNSS status changes.
      */
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
-            @Nullable String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
         mGnssStatusProvider.addListener(identity, listener);
     }
 
@@ -172,10 +173,11 @@ public class GnssManagerService {
      * Registers listener for GNSS NMEA messages.
      */
     public void registerGnssNmeaCallback(IGnssNmeaListener listener, String packageName,
-            @Nullable String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
         mGnssNmeaProvider.addListener(identity, listener);
     }
 
@@ -191,12 +193,13 @@ public class GnssManagerService {
      */
     public void addGnssMeasurementsListener(GnssMeasurementRequest request,
             IGnssMeasurementsListener listener, String packageName,
-            @Nullable String attributionTag) {
+            @Nullable String attributionTag, String listenerId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
         if (request.isCorrelationVectorOutputsEnabled()) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
         }
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
         mGnssMeasurementsProvider.addListener(request, identity, listener);
     }
 
@@ -223,10 +226,11 @@ public class GnssManagerService {
      * Adds a GNSS navigation message listener.
      */
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
-            String packageName, @Nullable String attributionTag) {
+            String packageName, @Nullable String attributionTag, String listenerId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
         mGnssNavigationMessageProvider.addListener(identity, listener);
     }
 

@@ -218,16 +218,6 @@ public class SurfaceControlViewHost {
     }
 
     /**
-     * @hide
-     */
-    @TestApi
-    public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
-        Objects.requireNonNull(view);
-        view.setLayoutParams(attrs);
-        mViewRoot.setView(view, attrs, null);
-    }
-
-    /**
      * Set the root view of the SurfaceControlViewHost. This view will render in to
      * the SurfaceControl, and receive input based on the SurfaceControls positioning on
      * screen. It will be laid as if it were in a window of the passed in width and height.
@@ -240,8 +230,18 @@ public class SurfaceControlViewHost {
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
-        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         setView(view, lp);
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
+        Objects.requireNonNull(view);
+        attrs.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        view.setLayoutParams(attrs);
+        mViewRoot.setView(view, attrs, null);
     }
 
     /**

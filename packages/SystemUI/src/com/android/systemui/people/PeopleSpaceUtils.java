@@ -16,6 +16,7 @@
 
 package com.android.systemui.people;
 
+import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.Notification.EXTRA_MESSAGES;
 import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
 import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
@@ -189,7 +190,7 @@ public class PeopleSpaceUtils {
             tiles.addAll(recentTiles);
         }
 
-        tiles = augmentTilesFromVisibleNotifications(tiles, notificationEntryManager);
+        tiles = augmentTilesFromVisibleNotifications(context, tiles, notificationEntryManager);
         return tiles;
     }
 
@@ -357,8 +358,8 @@ public class PeopleSpaceUtils {
                 && storedUserId == userId;
     }
 
-    static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(List<PeopleSpaceTile> tiles,
-            NotificationEntryManager notificationEntryManager) {
+    static List<PeopleSpaceTile> augmentTilesFromVisibleNotifications(Context context,
+            List<PeopleSpaceTile> tiles, NotificationEntryManager notificationEntryManager) {
         if (notificationEntryManager == null) {
             Log.w(TAG, "NotificationEntryManager is null");
             return tiles;
@@ -374,12 +375,13 @@ public class PeopleSpaceUtils {
         }
         return tiles
                 .stream()
-                .map(entry -> augmentTileFromVisibleNotifications(entry, visibleNotifications))
+                .map(entry -> augmentTileFromVisibleNotifications(
+                        context, entry, visibleNotifications))
                 .collect(Collectors.toList());
     }
 
-    static PeopleSpaceTile augmentTileFromVisibleNotifications(PeopleSpaceTile tile,
-            Map<String, NotificationEntry> visibleNotifications) {
+    static PeopleSpaceTile augmentTileFromVisibleNotifications(Context context,
+            PeopleSpaceTile tile, Map<String, NotificationEntry> visibleNotifications) {
         String shortcutId = tile.getId();
         String packageName = tile.getPackageName();
         int userId = UserHandle.getUserHandleForUid(tile.getUid()).getIdentifier();
@@ -389,7 +391,7 @@ public class PeopleSpaceUtils {
             return tile;
         }
         if (DEBUG) Log.d(TAG, "Augmenting tile from visible notifications, key:" + key);
-        return augmentTileFromNotification(tile, visibleNotifications.get(key).getSbn());
+        return augmentTileFromNotification(context, tile, visibleNotifications.get(key).getSbn());
     }
 
     /**
@@ -408,7 +410,7 @@ public class PeopleSpaceUtils {
         }
         if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
             if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
-            storedTile = augmentTileFromNotification(storedTile, sbn);
+            storedTile = augmentTileFromNotification(context, storedTile, sbn);
         } else {
             if (DEBUG) {
                 Log.i(TAG, "Removing notification from storage, appWidgetId: " + appWidgetId);
@@ -418,23 +420,40 @@ public class PeopleSpaceUtils {
                     .setNotificationKey(null)
                     .setNotificationContent(null)
                     .setNotificationDataUri(null)
+                    .setNotificationCategory(null)
                     .build();
         }
         updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId, storedTile);
     }
 
-    static PeopleSpaceTile augmentTileFromNotification(PeopleSpaceTile tile,
+    static PeopleSpaceTile augmentTileFromNotification(Context context, PeopleSpaceTile tile,
             StatusBarNotification sbn) {
-        Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(sbn);
-        if (message == null) {
-            if (DEBUG) Log.i(TAG, "Notification doesn't have content, skipping.");
+        Notification notification = sbn.getNotification();
+        if (notification == null) {
+            if (DEBUG) Log.d(TAG, "Notification is null");
             return tile;
         }
+        boolean isMissedCall = Objects.equals(notification.category, CATEGORY_MISSED_CALL);
+        Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(notification);
+
+        if (!isMissedCall && message == null) {
+            if (DEBUG) Log.d(TAG, "Notification has no content");
+            return tile;
+        }
+
+        // If it's a missed call notification and it doesn't include content, use fallback value,
+        // otherwise, use notification content.
+        boolean hasMessageText = message != null && !TextUtils.isEmpty(message.getText());
+        CharSequence content = (isMissedCall && !hasMessageText)
+                ? context.getString(R.string.missed_call) : message.getText();
+        Uri dataUri = message != null ? message.getDataUri() : null;
+
         return tile
                 .toBuilder()
                 .setNotificationKey(sbn.getKey())
-                .setNotificationContent(message.getText())
-                .setNotificationDataUri(message.getDataUri())
+                .setNotificationCategory(notification.category)
+                .setNotificationContent(content)
+                .setNotificationDataUri(dataUri)
                 .build();
     }
 
@@ -462,6 +481,11 @@ public class PeopleSpaceUtils {
      * content, then birthdays, then the most recent status, and finally last interaction.
      */
     private static RemoteViews getViewForTile(Context context, PeopleSpaceTile tile) {
+        if (Objects.equals(tile.getNotificationCategory(), CATEGORY_MISSED_CALL)) {
+            if (DEBUG) Log.d(TAG, "Create missed call view");
+            return createMissedCallRemoteViews(context, tile);
+        }
+
         if (tile.getNotificationKey() != null) {
             if (DEBUG) Log.d(TAG, "Create notification view");
             return createNotificationRemoteViews(context, tile);
@@ -630,6 +654,16 @@ public class PeopleSpaceUtils {
         return views;
     }
 
+    private static RemoteViews createMissedCallRemoteViews(Context context,
+            PeopleSpaceTile tile) {
+        RemoteViews views = new RemoteViews(
+                context.getPackageName(), R.layout.people_space_small_avatar_tile);
+        views.setTextViewText(R.id.status, tile.getNotificationContent());
+        views.setImageViewResource(R.id.status_defined_icon, R.drawable.ic_phone_missed);
+        views.setBoolean(R.id.content_background, "setClipToOutline", true);
+        return views;
+    }
+
     private static RemoteViews createNotificationRemoteViews(Context context,
             PeopleSpaceTile tile) {
         RemoteViews views = new RemoteViews(
@@ -715,8 +749,7 @@ public class PeopleSpaceUtils {
     /** Gets the most recent {@link Notification.MessagingStyle.Message} from the notification. */
     @VisibleForTesting
     public static Notification.MessagingStyle.Message getLastMessagingStyleMessage(
-            StatusBarNotification sbn) {
-        Notification notification = sbn.getNotification();
+            Notification notification) {
         if (notification == null) {
             return null;
         }

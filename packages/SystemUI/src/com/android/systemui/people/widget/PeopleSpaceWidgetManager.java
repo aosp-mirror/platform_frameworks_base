@@ -29,7 +29,6 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -124,8 +123,6 @@ public class PeopleSpaceWidgetManager {
      */
     public void updateWidgetWithNotificationChanged(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction notificationAction) {
-        RemoteViews views = new RemoteViews(
-                mContext.getPackageName(), R.layout.people_space_small_avatar_tile);
         if (DEBUG) Log.d(TAG, "updateWidgetWithNotificationChanged called");
         boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;

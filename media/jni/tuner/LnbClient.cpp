@@ -45,14 +45,15 @@ void LnbClient::setHidlLnb(sp<ILnb> lnb) {
 
 Result LnbClient::setCallback(sp<LnbClientCallback> cb) {
     if (mTunerLnb != NULL) {
-        mAidlCallback = ::ndk::SharedRefBase::make<TunerLnbCallback>(cb);
-        Status s = mTunerLnb->setCallback(mAidlCallback);
+        shared_ptr<TunerLnbCallback> aidlCallback =
+                ::ndk::SharedRefBase::make<TunerLnbCallback>(cb);
+        Status s = mTunerLnb->setCallback(aidlCallback);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
-        mHidlCallback = new HidlLnbCallback(cb);
-        return mLnb->setCallback(mHidlCallback);
+        sp<HidlLnbCallback> hidlCallback = new HidlLnbCallback(cb);
+        return mLnb->setCallback(hidlCallback);
     }
 
     return Result::INVALID_STATE;

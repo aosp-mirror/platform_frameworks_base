@@ -17,382 +17,91 @@
 package com.android.server.wm.flicker
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.EventLogAssertionBuilder
-import com.android.server.wm.flicker.dsl.EventLogAssertionBuilderLegacy
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilderLegacy
-import com.android.server.wm.flicker.dsl.WmAssertionBuilder
-import com.android.server.wm.flicker.dsl.WmAssertionBuilderLegacy
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_LAYER_NAME
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_WINDOW_NAME
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_LAYER_NAME
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_WINDOW_NAME
 
 const val APP_PAIR_SPLIT_DIVIDER = "AppPairSplitDivider"
 const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
 const val WALLPAPER_TITLE = "Wallpaper"
 
-@JvmOverloads
-fun WmAssertionBuilder.statusBarWindowIsAlwaysVisible(bugId: Int = 0) {
-    all("statusBarWindowIsAlwaysVisible", bugId) {
+fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
+    assertWm {
+        this.showsAboveAppWindow(NAV_BAR_LAYER_NAME)
+    }
+}
+
+fun FlickerTestParameter.navBarWindowIsAlwaysVisible() {
+    assertWm {
         this.showsAboveAppWindow(NAV_BAR_LAYER_NAME)
     }
 }
 
 @JvmOverloads
-fun WmAssertionBuilder.navBarWindowIsAlwaysVisible(bugId: Int = 0) {
-    all("navBarWindowIsAlwaysVisible", bugId) {
-        this.showsAboveAppWindow(NAV_BAR_LAYER_NAME)
-    }
-}
-
-fun WmAssertionBuilder.visibleWindowsShownMoreThanOneConsecutiveEntry(
-    ignoreWindows: List<String> = emptyList(),
-    bugId: Int = 0
+fun FlickerTestParameter.visibleWindowsShownMoreThanOneConsecutiveEntry(
+    ignoreWindows: List<String> = emptyList()
 ) {
-    all("visibleWindowsShownMoreThanOneConsecutiveEntry", bugId) {
+    assertWm {
         this.visibleWindowsShownMoreThanOneConsecutiveEntry(ignoreWindows)
     }
 }
 
-fun WmAssertionBuilder.launcherReplacesAppWindowAsTopWindow(testApp: IAppHelper, bugId: Int = 0) {
-    all("launcherReplacesAppWindowAsTopWindow", bugId) {
-        this.showsAppWindowOnTop(testApp.getPackage())
-                .then()
-                .showsAppWindowOnTop("Launcher")
-    }
-}
-
-fun WmAssertionBuilder.wallpaperWindowBecomesVisible(bugId: Int = 0) {
-    all("wallpaperWindowBecomesVisible", bugId) {
-        this.hidesBelowAppWindow(WALLPAPER_TITLE)
-                .then()
-                .showsBelowAppWindow(WALLPAPER_TITLE)
-    }
-}
-
-fun WmAssertionBuilder.wallpaperWindowBecomesInvisible(bugId: Int = 0) {
-    all("wallpaperWindowBecomesInvisible", bugId) {
-        this.showsBelowAppWindow("Wallpaper")
-                .then()
-                .hidesBelowAppWindow("Wallpaper")
-    }
-}
-
-fun WmAssertionBuilder.appWindowAlwaysVisibleOnTop(
-    packageName: String,
-    bugId: Int = 0
-) {
-    all("appWindowAlwaysVisibleOnTop", bugId) {
-        this.showsAppWindowOnTop(packageName)
-    }
-}
-
-fun WmAssertionBuilder.appWindowBecomesVisible(appName: String, bugId: Int = 0) {
-    all("appWindowBecomesVisible", bugId) {
-        this.hidesAppWindow(appName)
-                .then()
-                .showsAppWindow(appName)
-    }
-}
-
-fun WmAssertionBuilder.appWindowBecomesInVisible(appName: String, bugId: Int = 0) {
-    all("appWindowBecomesInVisible", bugId) {
-        this.showsAppWindow(appName)
-            .then()
-            .hidesAppWindow(appName)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilder.noUncoveredRegions(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    allStates: Boolean = true,
-    bugId: Int = 0
-) {
-    val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
-    val endingBounds = WindowUtils.getDisplayBounds(endRotation)
-    if (allStates) {
-        all("noUncoveredRegions", bugId) {
-            if (startingBounds == endingBounds) {
-                this.coversAtLeastRegion(startingBounds)
-            } else {
-                this.coversAtLeastRegion(startingBounds)
-                        .then()
-                        .coversAtLeastRegion(endingBounds)
-            }
-        }
-    } else {
-        start("noUncoveredRegions_StartingPos") {
-            this.coversAtLeastRegion(startingBounds)
-        }
-        end("noUncoveredRegions_EndingPos") {
-            this.coversAtLeastRegion(endingBounds)
-        }
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilder.navBarLayerIsAlwaysVisible(
-    rotatesScreen: Boolean = false,
-    bugId: Int = 0
-) {
-    if (rotatesScreen) {
-        all("navBarLayerIsAlwaysVisible", bugId) {
-            this.showsLayer(NAV_BAR_LAYER_NAME)
-                    .then()
-                    .hidesLayer(NAV_BAR_LAYER_NAME)
-                    .then()
-                    .showsLayer(NAV_BAR_LAYER_NAME)
-        }
-    } else {
-        all("navBarLayerIsAlwaysVisible", bugId) {
-            this.showsLayer(NAV_BAR_LAYER_NAME)
-        }
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilder.statusBarLayerIsAlwaysVisible(
-    rotatesScreen: Boolean = false,
-    bugId: Int = 0
-) {
-    if (rotatesScreen) {
-        all("statusBarLayerIsAlwaysVisible", bugId) {
-            this.showsLayer(STATUS_BAR_WINDOW_NAME)
-                    .then()
-                    hidesLayer(STATUS_BAR_WINDOW_NAME)
-                    .then()
-                    .showsLayer(STATUS_BAR_WINDOW_NAME)
-        }
-    } else {
-        all("statusBarLayerIsAlwaysVisible", bugId) {
-            this.showsLayer(STATUS_BAR_WINDOW_NAME)
-        }
-    }
-}
-
-@JvmOverloads
-fun LayersAssertionBuilder.navBarLayerRotatesAndScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    bugId: Int = 0
-) {
-    val startingPos = WindowUtils.getNavigationBarPosition(beginRotation)
-    val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
-
-    start("navBarLayerRotatesAndScales_StartingPos", bugId) {
-        this.hasVisibleRegion(NAV_BAR_LAYER_NAME, startingPos)
-    }
-    end("navBarLayerRotatesAndScales_EndingPost", bugId) {
-        this.hasVisibleRegion(NAV_BAR_LAYER_NAME, endingPos)
-    }
-
-    /*if (startingPos == endingPos) {
-        all("navBarLayerRotatesAndScales", enabled = false, bugId = 167747321) {
-            this.hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, startingPos)
-        }
-    }*/
-}
-
-@JvmOverloads
-fun LayersAssertionBuilder.statusBarLayerRotatesScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    bugId: Int = 0
-) {
-    val startingPos = WindowUtils.getStatusBarPosition(beginRotation)
-    val endingPos = WindowUtils.getStatusBarPosition(endRotation)
-
-    start("statusBarLayerRotatesScales_StartingPos", bugId) {
-        this.hasVisibleRegion(STATUS_BAR_WINDOW_NAME, startingPos)
-    }
-    end("statusBarLayerRotatesScales_EndingPos", bugId) {
-        this.hasVisibleRegion(STATUS_BAR_WINDOW_NAME, endingPos)
-    }
-}
-
-fun LayersAssertionBuilder.visibleLayersShownMoreThanOneConsecutiveEntry(
-    ignoreLayers: List<String> = emptyList(),
-    bugId: Int = 0
-) {
-    all("visibleLayersShownMoreThanOneConsecutiveEntry", bugId) {
-        this.visibleLayersShownMoreThanOneConsecutiveEntry(ignoreLayers)
-    }
-}
-
-fun LayersAssertionBuilder.appLayerReplacesWallpaperLayer(appName: String, bugId: Int = 0) {
-    all("appLayerReplacesWallpaperLayer", bugId) {
-        this.showsLayer("Wallpaper")
-                .then()
-                .replaceVisibleLayer("Wallpaper", appName)
-    }
-}
-
-fun LayersAssertionBuilder.wallpaperLayerReplacesAppLayer(testApp: IAppHelper, bugId: Int = 0) {
-    all("appLayerReplacesWallpaperLayer", bugId) {
-        this.showsLayer(testApp.getPackage())
-                .then()
-                .replaceVisibleLayer(testApp.getPackage(), WALLPAPER_TITLE)
-    }
-}
-
-fun LayersAssertionBuilder.layerAlwaysVisible(packageName: String, bugId: Int = 0) {
-    all("layerAlwaysVisible", bugId) {
-        this.showsLayer(packageName)
-    }
-}
-
-fun LayersAssertionBuilder.layerBecomesVisible(packageName: String, bugId: Int = 0) {
-    all("layerBecomesVisible", bugId) {
-        this.hidesLayer(packageName)
-                .then()
-                .showsLayer(packageName)
-    }
-}
-
-fun LayersAssertionBuilder.layerBecomesInvisible(packageName: String, bugId: Int = 0) {
-    all("layerBecomesInvisible", bugId) {
-        this.showsLayer(packageName)
-                .then()
-                .hidesLayer(packageName)
-    }
-}
-
-fun EventLogAssertionBuilder.focusChanges(vararg windows: String, bugId: Int = 0) {
-    all("focusChanges", bugId) {
-        this.focusChanges(windows)
-    }
-}
-
-fun EventLogAssertionBuilder.focusDoesNotChange(bugId: Int = 0) {
-    all("focusDoesNotChange", bugId) {
-        this.focusDoesNotChange()
-    }
-}
-
-@JvmOverloads
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.statusBarWindowIsAlwaysVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("statusBarWindowIsAlwaysVisible", bugId, enabled) {
-        this.showsAboveAppWindow(STATUS_BAR_WINDOW_NAME)
-    }
-}
-
-@JvmOverloads
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.navBarWindowIsAlwaysVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("navBarWindowIsAlwaysVisible", bugId, enabled) {
-        this.showsAboveAppWindow(NAV_BAR_WINDOW_NAME)
-    }
-}
-
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.visibleWindowsShownMoreThanOneConsecutiveEntry(
-    ignoreWindows: List<String> = emptyList(),
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("visibleWindowsShownMoreThanOneConsecutiveEntry", bugId, enabled) {
-        this.visibleWindowsShownMoreThanOneConsecutiveEntry(ignoreWindows)
-    }
-}
-
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.launcherReplacesAppWindowAsTopWindow(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("launcherReplacesAppWindowAsTopWindow", bugId, enabled) {
+fun FlickerTestParameter.launcherReplacesAppWindowAsTopWindow(testApp: IAppHelper) {
+    assertWm {
         this.showsAppWindowOnTop(testApp.getPackage())
             .then()
             .showsAppWindowOnTop("Launcher")
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.wallpaperWindowBecomesVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("wallpaperWindowBecomesVisible", bugId, enabled) {
+fun FlickerTestParameter.wallpaperWindowBecomesVisible() {
+    assertWm {
         this.hidesBelowAppWindow(WALLPAPER_TITLE)
             .then()
             .showsBelowAppWindow(WALLPAPER_TITLE)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.wallpaperWindowBecomesInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("wallpaperWindowBecomesInvisible", bugId, enabled) {
+fun FlickerTestParameter.wallpaperWindowBecomesInvisible() {
+    assertWm {
         this.showsBelowAppWindow("Wallpaper")
             .then()
             .hidesBelowAppWindow("Wallpaper")
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.appWindowAlwaysVisibleOnTop(
-    packageName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appWindowAlwaysVisibleOnTop", bugId, enabled) {
+fun FlickerTestParameter.appWindowAlwaysVisibleOnTop(packageName: String) {
+    assertWm {
         this.showsAppWindowOnTop(packageName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.appWindowBecomesVisible(
-    appName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appWindowBecomesVisible", bugId, enabled) {
+fun FlickerTestParameter.appWindowBecomesVisible(appName: String) {
+    assertWm {
         this.hidesAppWindow(appName)
             .then()
             .showsAppWindow(appName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun WmAssertionBuilderLegacy.appWindowBecomesInVisible(
-    appName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appWindowBecomesInVisible", bugId, enabled) {
+fun FlickerTestParameter.appWindowBecomesInVisible(appName: String) {
+    assertWm {
         this.showsAppWindow(appName)
             .then()
             .hidesAppWindow(appName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
 @JvmOverloads
-fun LayersAssertionBuilderLegacy.noUncoveredRegions(
+fun FlickerTestParameter.noUncoveredRegions(
     beginRotation: Int,
     endRotation: Int = beginRotation,
-    allStates: Boolean = true,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
+    allStates: Boolean = true
 ) {
     val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
     val endingBounds = WindowUtils.getDisplayBounds(endRotation)
     if (allStates) {
-        all("noUncoveredRegions", bugId, enabled) {
+        assertLayers {
             if (startingBounds == endingBounds) {
                 this.coversAtLeastRegion(startingBounds)
             } else {
@@ -402,24 +111,19 @@ fun LayersAssertionBuilderLegacy.noUncoveredRegions(
             }
         }
     } else {
-        start("noUncoveredRegions_StartingPos") {
+        assertLayersStart {
             this.coversAtLeastRegion(startingBounds)
         }
-        end("noUncoveredRegions_EndingPos") {
+        assertLayersEnd {
             this.coversAtLeastRegion(endingBounds)
         }
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
 @JvmOverloads
-fun LayersAssertionBuilderLegacy.navBarLayerIsAlwaysVisible(
-    rotatesScreen: Boolean = false,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
+fun FlickerTestParameter.navBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
-        all("navBarLayerIsAlwaysVisible", bugId, enabled) {
+        assertLayers {
             this.showsLayer(NAV_BAR_LAYER_NAME)
                 .then()
                 .hidesLayer(NAV_BAR_LAYER_NAME)
@@ -427,169 +131,116 @@ fun LayersAssertionBuilderLegacy.navBarLayerIsAlwaysVisible(
                 .showsLayer(NAV_BAR_LAYER_NAME)
         }
     } else {
-        all("navBarLayerIsAlwaysVisible", bugId, enabled) {
+        assertLayers {
             this.showsLayer(NAV_BAR_LAYER_NAME)
         }
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
 @JvmOverloads
-fun LayersAssertionBuilderLegacy.statusBarLayerIsAlwaysVisible(
-    rotatesScreen: Boolean = false,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
+fun FlickerTestParameter.statusBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
-        all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
-            this.showsLayer(STATUS_BAR_LAYER_NAME)
+        assertLayers {
+            this.showsLayer(STATUS_BAR_WINDOW_NAME)
                 .then()
-                .hidesLayer(STATUS_BAR_LAYER_NAME)
+            hidesLayer(STATUS_BAR_WINDOW_NAME)
                 .then()
-                .showsLayer(STATUS_BAR_LAYER_NAME)
+                .showsLayer(STATUS_BAR_WINDOW_NAME)
         }
     } else {
-        all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
-            this.showsLayer(STATUS_BAR_LAYER_NAME)
+        assertLayers {
+            this.showsLayer(STATUS_BAR_WINDOW_NAME)
         }
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
 @JvmOverloads
-fun LayersAssertionBuilderLegacy.navBarLayerRotatesAndScales(
+fun FlickerTestParameter.navBarLayerRotatesAndScales(
     beginRotation: Int,
-    endRotation: Int = beginRotation,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
+    endRotation: Int = beginRotation
 ) {
     val startingPos = WindowUtils.getNavigationBarPosition(beginRotation)
     val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
 
-    start("navBarLayerRotatesAndScales_StartingPos", bugId, enabled) {
+    assertLayersStart {
         this.hasVisibleRegion(NAV_BAR_LAYER_NAME, startingPos)
     }
-    end("navBarLayerRotatesAndScales_EndingPost", bugId, enabled) {
+    assertLayersEnd {
         this.hasVisibleRegion(NAV_BAR_LAYER_NAME, endingPos)
-    }
-
-    if (startingPos == endingPos) {
-        all("navBarLayerRotatesAndScales", enabled = false, bugId = 167747321) {
-            this.hasVisibleRegion(NAV_BAR_LAYER_NAME, startingPos)
-        }
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
 @JvmOverloads
-fun LayersAssertionBuilderLegacy.statusBarLayerRotatesScales(
+fun FlickerTestParameter.statusBarLayerRotatesScales(
     beginRotation: Int,
-    endRotation: Int = beginRotation,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
+    endRotation: Int = beginRotation
 ) {
     val startingPos = WindowUtils.getStatusBarPosition(beginRotation)
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
-    start("statusBarLayerRotatesScales_StartingPos", bugId, enabled) {
-        this.hasVisibleRegion(STATUS_BAR_LAYER_NAME, startingPos)
+    assertLayersStart {
+        this.hasVisibleRegion(STATUS_BAR_WINDOW_NAME, startingPos)
     }
-    end("statusBarLayerRotatesScales_EndingPos", bugId, enabled) {
-        this.hasVisibleRegion(STATUS_BAR_LAYER_NAME, endingPos)
+    assertLayersEnd {
+        this.hasVisibleRegion(STATUS_BAR_WINDOW_NAME, endingPos)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun LayersAssertionBuilderLegacy.visibleLayersShownMoreThanOneConsecutiveEntry(
-    ignoreLayers: List<String> = kotlin.collections.emptyList(),
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
+@JvmOverloads
+fun FlickerTestParameter.visibleLayersShownMoreThanOneConsecutiveEntry(
+    ignoreLayers: List<String> = emptyList()
 ) {
-    all("visibleLayersShownMoreThanOneConsecutiveEntry", bugId, enabled) {
+    assertLayers {
         this.visibleLayersShownMoreThanOneConsecutiveEntry(ignoreLayers)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun LayersAssertionBuilderLegacy.appLayerReplacesWallpaperLayer(
-    appName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appLayerReplacesWallpaperLayer", bugId, enabled) {
+fun FlickerTestParameter.appLayerReplacesWallpaperLayer(appName: String) {
+    assertLayers {
         this.showsLayer("Wallpaper")
             .then()
             .replaceVisibleLayer("Wallpaper", appName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun LayersAssertionBuilderLegacy.wallpaperLayerReplacesAppLayer(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appLayerReplacesWallpaperLayer", bugId, enabled) {
+fun FlickerTestParameter.wallpaperLayerReplacesAppLayer(testApp: IAppHelper) {
+    assertLayers {
         this.showsLayer(testApp.getPackage())
             .then()
             .replaceVisibleLayer(testApp.getPackage(), WALLPAPER_TITLE)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun LayersAssertionBuilderLegacy.layerAlwaysVisible(
-    packageName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("layerAlwaysVisible", bugId, enabled) {
+fun FlickerTestParameter.layerAlwaysVisible(packageName: String) {
+    assertLayers {
         this.showsLayer(packageName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun LayersAssertionBuilderLegacy.layerBecomesVisible(
-    packageName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("layerBecomesVisible", bugId, enabled) {
+fun FlickerTestParameter.layerBecomesVisible(packageName: String) {
+    assertLayers {
         this.hidesLayer(packageName)
             .then()
             .showsLayer(packageName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun LayersAssertionBuilderLegacy.layerBecomesInvisible(
-    packageName: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("layerBecomesInvisible", bugId, enabled) {
+fun FlickerTestParameter.layerBecomesInvisible(packageName: String) {
+    assertLayers {
         this.showsLayer(packageName)
             .then()
             .hidesLayer(packageName)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun EventLogAssertionBuilderLegacy.focusChanges(
-    vararg windows: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("focusChanges", bugId, enabled) {
+fun FlickerTestParameter.focusChanges(vararg windows: String) {
+    assertEventLog {
         this.focusChanges(windows)
     }
 }
 
-@Deprecated("Move the assertion into one of the specific blocks (presubmit, postsubmit, flaky)")
-fun EventLogAssertionBuilderLegacy.focusDoesNotChange(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("focusDoesNotChange", bugId, enabled) {
+fun FlickerTestParameter.focusDoesNotChange() {
+    assertEventLog {
         this.focusDoesNotChange()
     }
 }

@@ -528,6 +528,8 @@ package android {
     field public static final int detailSocialSummary = 16843428; // 0x10102a4
     field public static final int detailsElementBackground = 16843598; // 0x101034e
     field public static final int dial = 16843010; // 0x1010102
+    field public static final int dialTint = 16844342; // 0x1010636
+    field public static final int dialTintMode = 16844343; // 0x1010637
     field public static final int dialogCornerRadius = 16844145; // 0x1010571
     field public static final int dialogIcon = 16843252; // 0x10101f4
     field public static final int dialogLayout = 16843255; // 0x10101f7
@@ -725,8 +727,14 @@ package android {
     field public static final int groupIndicator = 16843019; // 0x101010b
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
+    field public static final int hand_hourTint = 16844344; // 0x1010638
+    field public static final int hand_hourTintMode = 16844345; // 0x1010639
     field public static final int hand_minute = 16843012; // 0x1010104
+    field public static final int hand_minuteTint = 16844346; // 0x101063a
+    field public static final int hand_minuteTintMode = 16844347; // 0x101063b
     field public static final int hand_second = 16844323; // 0x1010623
+    field public static final int hand_secondTint = 16844348; // 0x101063c
+    field public static final int hand_secondTintMode = 16844349; // 0x101063d
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -4735,6 +4743,13 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AutomaticZenRule> CREATOR;
   }
 
+  public final class BackgroundServiceStartNotAllowedException extends android.app.ServiceStartNotAllowedException implements android.os.Parcelable {
+    ctor public BackgroundServiceStartNotAllowedException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.BackgroundServiceStartNotAllowedException> CREATOR;
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(@NonNull android.content.Context);
     ctor public DatePickerDialog(@NonNull android.content.Context, @StyleRes int);
@@ -4978,6 +4993,13 @@ package android.app {
     method @Deprecated public void setListAdapter(android.widget.ExpandableListAdapter);
     method @Deprecated public boolean setSelectedChild(int, int, boolean);
     method @Deprecated public void setSelectedGroup(int);
+  }
+
+  public final class ForegroundServiceStartNotAllowedException extends android.app.ServiceStartNotAllowedException implements android.os.Parcelable {
+    ctor public ForegroundServiceStartNotAllowedException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ForegroundServiceStartNotAllowedException> CREATOR;
   }
 
   @Deprecated public class Fragment implements android.content.ComponentCallbacks2 android.view.View.OnCreateContextMenuListener {
@@ -6561,6 +6583,9 @@ package android.app {
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
     field public static final int STOP_FOREGROUND_DETACH = 2; // 0x2
     field public static final int STOP_FOREGROUND_REMOVE = 1; // 0x1
+  }
+
+  public abstract class ServiceStartNotAllowedException extends java.lang.IllegalStateException {
   }
 
   public abstract class SharedElementCallback {
@@ -18655,6 +18680,58 @@ package android.hardware.input {
     method public void onInputDeviceAdded(int);
     method public void onInputDeviceChanged(int);
     method public void onInputDeviceRemoved(int);
+  }
+
+}
+
+package android.hardware.lights {
+
+  public final class Light implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getId();
+    method @NonNull public String getName();
+    method public int getOrdinal();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
+    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10; // 0xa
+    field public static final int LIGHT_TYPE_INPUT_RGB = 11; // 0xb
+    field public static final int LIGHT_TYPE_INPUT_SINGLE = 9; // 0x9
+    field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
+  }
+
+  public final class LightState implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.hardware.lights.LightState forColor(@ColorInt int);
+    method @NonNull public static android.hardware.lights.LightState forPlayerId(int);
+    method @ColorInt public int getColor();
+    method public int getPlayerId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+  }
+
+  public abstract class LightsManager {
+    method @NonNull public abstract android.hardware.lights.LightState getLightState(@NonNull android.hardware.lights.Light);
+    method @NonNull public abstract java.util.List<android.hardware.lights.Light> getLights();
+    method @NonNull public abstract android.hardware.lights.LightsManager.LightsSession openSession();
+  }
+
+  public abstract static class LightsManager.LightsSession implements java.lang.AutoCloseable {
+    ctor public LightsManager.LightsSession();
+    method public abstract void close();
+    method public abstract void requestLights(@NonNull android.hardware.lights.LightsRequest);
+  }
+
+  public final class LightsRequest {
+    method @NonNull public java.util.List<android.hardware.lights.LightState> getLightStates();
+    method @NonNull public java.util.List<java.lang.Integer> getLights();
+  }
+
+  public static final class LightsRequest.Builder {
+    ctor public LightsRequest.Builder();
+    method @NonNull public android.hardware.lights.LightsRequest.Builder addLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
+    method @NonNull public android.hardware.lights.LightsRequest build();
+    method @NonNull public android.hardware.lights.LightsRequest.Builder clearLight(@NonNull android.hardware.lights.Light);
   }
 
 }
@@ -42488,7 +42565,7 @@ package android.telephony {
     method @Deprecated public int getPhoneCount();
     method public int getPhoneType();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public int getPreferredOpportunisticDataSubscription();
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telephony.ServiceState getServiceState();
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_COARSE_LOCATION}) public android.telephony.ServiceState getServiceState();
     method @Nullable public android.telephony.SignalStrength getSignalStrength();
     method public int getSimCarrierId();
     method @Nullable public CharSequence getSimCarrierIdName();
@@ -46907,6 +46984,7 @@ package android.view {
     method public int getId();
     method public android.view.KeyCharacterMap getKeyCharacterMap();
     method public int getKeyboardType();
+    method @NonNull public android.hardware.lights.LightsManager getLightsManager();
     method public android.view.InputDevice.MotionRange getMotionRange(int);
     method public android.view.InputDevice.MotionRange getMotionRange(int, int);
     method public java.util.List<android.view.InputDevice.MotionRange> getMotionRanges();
@@ -51640,6 +51718,7 @@ package android.view.inputmethod {
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method public android.content.ComponentName getComponent();
+    method public int getConfigChanges();
     method public String getId();
     method public int getIsDefaultResourceId();
     method public String getPackageName();
@@ -53652,11 +53731,27 @@ package android.widget {
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
+    method @Deprecated @Nullable public android.graphics.BlendMode getDialTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getDialTintList();
+    method @Deprecated @Nullable public android.graphics.BlendMode getHourHandTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getHourHandTintList();
+    method @Deprecated @Nullable public android.graphics.BlendMode getMinuteHandTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getMinuteHandTintList();
+    method @Deprecated @Nullable public android.graphics.BlendMode getSecondHandTintBlendMode();
+    method @Deprecated @Nullable public android.content.res.ColorStateList getSecondHandTintList();
     method @Deprecated @Nullable public String getTimeZone();
     method @Deprecated public void setDial(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setDialTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setDialTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setHourHand(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setHourHandTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setHourHandTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setMinuteHand(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setMinuteHandTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setMinuteHandTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setSecondHand(@Nullable android.graphics.drawable.Icon);
+    method @Deprecated public void setSecondHandTintBlendMode(@Nullable android.graphics.BlendMode);
+    method @Deprecated public void setSecondHandTintList(@Nullable android.content.res.ColorStateList);
     method @Deprecated public void setTimeZone(@Nullable String);
   }
 
@@ -55080,6 +55175,7 @@ package android.widget {
     method public void setChronometerCountDown(@IdRes int, boolean);
     method public void setColor(@IdRes int, @NonNull String, @ColorRes int);
     method public void setColorInt(@IdRes int, @NonNull String, @ColorInt int, @ColorInt int);
+    method public void setColorStateList(@IdRes int, @NonNull String, @Nullable android.content.res.ColorStateList);
     method public void setColorStateList(@IdRes int, @NonNull String, @Nullable android.content.res.ColorStateList, @Nullable android.content.res.ColorStateList);
     method public void setColorStateList(@IdRes int, @NonNull String, @ColorRes int);
     method public void setCompoundButtonChecked(@IdRes int, boolean);
@@ -55122,6 +55218,12 @@ package android.widget {
     method public void setTextViewText(@IdRes int, CharSequence);
     method public void setTextViewTextSize(@IdRes int, int, float);
     method public void setUri(@IdRes int, String, android.net.Uri);
+    method public void setViewLayoutHeight(@IdRes int, float, int);
+    method public void setViewLayoutHeightDimen(@IdRes int, @DimenRes int);
+    method public void setViewLayoutMargin(@IdRes int, int, float, int);
+    method public void setViewLayoutMarginDimen(@IdRes int, int, @DimenRes int);
+    method public void setViewLayoutWidth(@IdRes int, float, int);
+    method public void setViewLayoutWidthDimen(@IdRes int, @DimenRes int);
     method public void setViewOutlinePreferredRadius(@IdRes int, float, int);
     method public void setViewOutlinePreferredRadiusDimen(@IdRes int, @DimenRes int);
     method public void setViewPadding(@IdRes int, @Px int, @Px int, @Px int, @Px int);
@@ -55132,6 +55234,12 @@ package android.widget {
     field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews> CREATOR;
     field public static final String EXTRA_CHECKED = "android.widget.extra.CHECKED";
     field public static final String EXTRA_SHARED_ELEMENT_BOUNDS = "android.widget.extra.SHARED_ELEMENT_BOUNDS";
+    field public static final int MARGIN_BOTTOM = 3; // 0x3
+    field public static final int MARGIN_END = 5; // 0x5
+    field public static final int MARGIN_LEFT = 0; // 0x0
+    field public static final int MARGIN_RIGHT = 2; // 0x2
+    field public static final int MARGIN_START = 4; // 0x4
+    field public static final int MARGIN_TOP = 1; // 0x1
   }
 
   public static class RemoteViews.ActionException extends java.lang.RuntimeException {

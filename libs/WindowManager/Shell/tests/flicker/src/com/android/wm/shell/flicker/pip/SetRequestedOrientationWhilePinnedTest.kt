@@ -16,21 +16,26 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.os.Bundle
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.pip.PipTransitionBase.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
+import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
 import org.junit.Assert.assertEquals
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -41,75 +46,99 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class SetRequestedOrientationWhilePinnedTest(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : PipTransitionBase(InstrumentationRegistry.getInstrumentation()) {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
-                supportedRotations = listOf(Surface.ROTATION_0),
-                repetitions = 1) { configuration ->
-                setupAndTeardown(this, configuration)
+    testSpec: FlickerTestParameter
+) : PipTransition(testSpec) {
+    private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
+    private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
 
-                setup {
-                    eachRun {
-                        // Launch the PiP activity fixed as landscape
-                        pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
-                            EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString(),
-                            EXTRA_ENTER_PIP to "true"))
-                    }
-                }
-                teardown {
-                    eachRun {
-                        pipApp.exit()
-                    }
-                }
-                transitions {
-                    // Request that the orientation is set to landscape
-                    broadcastActionTrigger.requestOrientationForPip(ORIENTATION_LANDSCAPE)
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = { configuration ->
+            setupAndTeardown(this, configuration)
 
-                    // Launch the activity back into fullscreen and
-                    // ensure that it is now in landscape
-                    pipApp.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(pipApp.component)
-                    wmHelper.waitForRotation(Surface.ROTATION_90)
-                    assertEquals(Surface.ROTATION_90, device.displayRotation)
-                }
-                assertions {
-                    val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
-                    val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
-                    presubmit {
-                        windowManagerTrace {
-                            start("PIP window must remain inside display") {
-                                coversAtMostRegion(pipApp.defaultWindowName, startingBounds)
-                            }
-                            end("pipApp shows on top") {
-                                showsAppWindowOnTop(pipApp.defaultWindowName)
-                            }
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                        }
-                        layersTrace {
-                            start("PIP layer must remain inside display") {
-                                coversAtMostRegion(startingBounds, pipApp.defaultWindowName)
-                            }
-                            end("pipApp layer covers fullscreen") {
-                                hasVisibleRegion(pipApp.defaultWindowName, endingBounds)
-                            }
-                        }
-                    }
-
-                    flaky {
-                        layersTrace {
-                            navBarLayerIsAlwaysVisible(bugId = 140855415)
-                            statusBarLayerIsAlwaysVisible(bugId = 140855415)
-                        }
-                    }
+            setup {
+                eachRun {
+                    // Launch the PiP activity fixed as landscape
+                    pipApp.launchViaIntent(wmHelper, stringExtras = mapOf(
+                        EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString(),
+                        EXTRA_ENTER_PIP to "true"))
                 }
             }
+            teardown {
+                eachRun {
+                    pipApp.exit(wmHelper)
+                }
+            }
+            transitions {
+                // Request that the orientation is set to landscape
+                broadcastActionTrigger.requestOrientationForPip(ORIENTATION_LANDSCAPE)
+
+                // Launch the activity back into fullscreen and
+                // ensure that it is now in landscape
+                pipApp.launchViaIntent(wmHelper)
+                wmHelper.waitForFullScreenApp(pipApp.component)
+                wmHelper.waitForRotation(Surface.ROTATION_90)
+                assertEquals(Surface.ROTATION_90, device.displayRotation)
+            }
+        }
+
+    @Presubmit
+    @Test
+    fun pipWindowInsideDisplay() {
+        testSpec.assertWmStart {
+            coversAtMostRegion(pipApp.defaultWindowName, startingBounds)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun pipAppShowsOnTop() {
+        testSpec.assertWmEnd {
+            showsAppWindowOnTop(pipApp.defaultWindowName)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun pipLayerInsideDisplay() {
+        testSpec.assertLayersStart {
+            coversAtMostRegion(startingBounds, pipApp.defaultWindowName)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun pipAppLayerCoversFullScreen() {
+        testSpec.assertLayersEnd {
+            hasVisibleRegion(pipApp.defaultWindowName, endingBounds)
+        }
+    }
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+
+    @FlakyTest(bugId = 140855415)
+    @Test
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
+                    repetitions = 1)
         }
     }
 }

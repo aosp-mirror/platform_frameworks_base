@@ -354,6 +354,10 @@ class AutomaticBrightnessController {
         }
     }
 
+    public void stop() {
+        setLightSensorEnabled(false);
+    }
+
     public boolean hasUserDataPoints() {
         return mBrightnessMapper.hasUserDataPoints();
     }

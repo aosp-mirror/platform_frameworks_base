@@ -378,9 +378,10 @@ public abstract class CameraDevice implements AutoCloseable {
      * released, continuous repeating requests stopped and any pending
      * multi-frame capture requests flushed.</p>
      *
-     * <p>Note that the CameraExtensionSession currently supports at most two
-     * multi frame capture surface formats: ImageFormat.YUV_420_888 and
-     * ImageFormat.JPEG. Clients must query the multi-frame capture format support using
+     * <p>Note that the CameraExtensionSession currently supports at most wo
+     * multi frame capture surface formats: ImageFormat.JPEG will be supported
+     * by all extensions and ImageFormat.YUV_420_888 may or may not be supported.
+     * Clients must query the multi-frame capture format support using
      * {@link CameraExtensionCharacteristics#getExtensionSupportedSizes(int, int)}.
      * For repeating requests CameraExtensionSession supports only
      * {@link android.graphics.SurfaceTexture} as output. Clients can query the supported resolution

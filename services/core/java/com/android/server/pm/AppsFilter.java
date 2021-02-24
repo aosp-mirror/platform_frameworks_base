@@ -69,6 +69,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 /**
  * The entity responsible for filtering visibility between apps based on declarations in their
@@ -1354,14 +1355,13 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     public void dumpQueries(
-            PrintWriter pw, PackageManagerService pms, @Nullable Integer filteringAppId,
-            DumpState dumpState,
-            int[] users) {
+            PrintWriter pw, @Nullable Integer filteringAppId, DumpState dumpState, int[] users,
+            Function<Integer, String[]> getPackagesForUid) {
         final SparseArray<String> cache = new SparseArray<>();
         ToString<Integer> expandPackages = input -> {
             String cachedValue = cache.get(input);
             if (cachedValue == null) {
-                final String[] packagesForUid = pms.getPackagesForUid(input);
+                final String[] packagesForUid = getPackagesForUid.apply(input);
                 if (packagesForUid == null) {
                     cachedValue = "[unknown app id " + input + "]";
                 } else {

@@ -67,12 +67,6 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isProximitySensorAvailable();
 
     /**
-     * Returns the id of the {@link com.android.server.display.DisplayGroup} to which the provided
-     * display belongs.
-     */
-    public abstract int getDisplayGroupId(int displayId);
-
-    /**
      * Registers a display group listener which will be informed of the addition, removal, or change
      * of display groups.
      *
@@ -469,7 +463,7 @@ public abstract class DisplayManagerInternal {
         void onStateChanged();
         void onProximityPositive();
         void onProximityNegative();
-        void onDisplayStateChange(int state); // one of the Display state constants
+        void onDisplayStateChange(boolean allInactive, boolean allOff);
 
         void acquireSuspendBlocker();
         void releaseSuspendBlocker();

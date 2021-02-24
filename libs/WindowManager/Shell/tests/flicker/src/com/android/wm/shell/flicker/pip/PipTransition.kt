@@ -20,16 +20,26 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.os.Bundle
 import android.view.Surface
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.startRotation
 import com.android.wm.shell.flicker.helpers.PipAppHelper
 import com.android.wm.shell.flicker.removeAllTasksButHome
 import com.android.wm.shell.flicker.testapp.Components
 
-abstract class PipTransitionBase(protected val instrumentation: Instrumentation) {
+abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
+    protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    protected val isRotated = testSpec.config.startRotation.isRotated()
+    protected val pipApp = PipAppHelper(instrumentation)
+    protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
+    protected abstract val transition: FlickerBuilder.(Bundle) -> Unit
+
     // Helper class to process test actions by broadcast.
     protected class BroadcastActionTrigger(private val instrumentation: Instrumentation) {
         private fun createIntentWithAction(broadcastAction: String): Intent {
@@ -59,16 +69,20 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
         }
     }
 
-    protected val pipApp = PipAppHelper(instrumentation)
-    protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
+    @FlickerBuilderProvider
+    fun buildFlicker(): FlickerBuilder {
+        return FlickerBuilder(instrumentation).apply {
+            withTestName { testSpec.name }
+            repeat { testSpec.config.repetitions }
+            transition(this, testSpec.config)
+        }
+    }
 
     /**
      * Gets a configuration that handles basic setup and teardown of pip tests
      */
     protected val setupAndTeardown: FlickerBuilder.(Bundle) -> Unit
-        get() = { configuration ->
-            withTestName { buildTestTag(configuration) }
-            repeat { configuration.repetitions }
+        get() = {
             setup {
                 test {
                     removeAllTasksButHome()
@@ -81,7 +95,7 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
                 }
                 test {
                     removeAllTasksButHome()
-                    pipApp.exit()
+                    pipApp.exit(wmHelper)
                 }
             }
         }
@@ -95,7 +109,7 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
      * @param extraSpec Addicional segment of flicker specification
      */
     @JvmOverloads
-    open fun getTransition(
+    protected open fun buildTransition(
         eachRun: Boolean,
         stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true"),
         extraSpec: FlickerBuilder.(Bundle) -> Unit = {}
@@ -121,12 +135,12 @@ abstract class PipTransitionBase(protected val instrumentation: Instrumentation)
             teardown {
                 eachRun {
                     if (eachRun) {
-                        pipApp.exit()
+                        pipApp.exit(wmHelper)
                     }
                 }
                 test {
                     if (!eachRun) {
-                        pipApp.exit()
+                        pipApp.exit(wmHelper)
                     }
                     removeAllTasksButHome()
                 }

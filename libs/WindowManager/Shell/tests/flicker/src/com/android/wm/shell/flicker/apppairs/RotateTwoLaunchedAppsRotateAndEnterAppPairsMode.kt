@@ -20,18 +20,16 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
@@ -39,7 +37,9 @@ import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -48,67 +48,81 @@ import org.junit.runners.Parameterized
  * Test open apps to app pairs and rotate.
  * To run this test: `atest WMShellFlickerTests:RotateTwoLaunchedAppsRotateAndEnterAppPairsMode`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : RotateTwoLaunchedAppsTransition(
-        InstrumentationRegistry.getInstrumentation()) {
+    testSpec: FlickerTestParameter
+) : RotateTwoLaunchedAppsTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = {
+            super.transition(this, it)
+            transitions {
+                this.setRotation(testSpec.config.endRotation)
+                executeShellCommand(
+                    composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+            }
+        }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0,
+        testSpec.config.endRotation)
+
+    @Presubmit
+    @Test
+    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
+
+    @Presubmit
+    @Test
+    fun navBarLayerRotatesAndScales() {
+        Assume.assumeFalse(isRotated)
+        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
+    }
+
+    @FlakyTest
+    @Test
+    fun navBarLayerRotatesAndScales_Flaky() {
+        Assume.assumeTrue(isRotated)
+        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
+    }
+
+    @Presubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun bothAppWindowsVisible() {
+        testSpec.assertWmEnd {
+            isVisible(primaryApp.defaultWindowName)
+            isVisible(secondaryApp.defaultWindowName)
+        }
+    }
+
+    @FlakyTest(bugId = 172776659)
+    @Test
+    fun appPairsPrimaryBoundsIsVisible() =
+        testSpec.appPairsPrimaryBoundsIsVisible(testSpec.config.endRotation,
+            primaryApp.defaultWindowName)
+
+    @FlakyTest(bugId = 172776659)
+    @Test
+    fun appPairsSecondaryBoundsIsVisible() =
+        testSpec.appPairsSecondaryBoundsIsVisible(testSpec.config.endRotation,
+            secondaryApp.defaultWindowName)
+
+    companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName {
-                    buildTestTag(configuration)
-                }
-                transitions {
-                    this.setRotation(configuration.endRotation)
-                    executeShellCommand(
-                        composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                    SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
-                }
-                assertions {
-                    val isRotated = configuration.startRotation.isRotated()
-                    presubmit {
-                        layersTrace {
-                            statusBarLayerRotatesScales(Surface.ROTATION_0,
-                                configuration.endRotation)
-                            appPairsDividerIsVisible()
-                            if (!isRotated) {
-                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
-                                    configuration.endRotation)
-                            }
-                        }
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            end("bothAppWindowsVisible") {
-                                isVisible(primaryApp.defaultWindowName)
-                                isVisible(secondaryApp.defaultWindowName)
-                            }
-                        }
-                    }
-                    flaky {
-                        layersTrace {
-                            appPairsPrimaryBoundsIsVisible(configuration.endRotation,
-                                primaryApp.defaultWindowName, 172776659)
-                            appPairsSecondaryBoundsIsVisible(configuration.endRotation,
-                                secondaryApp.defaultWindowName, 172776659)
-
-                            if (isRotated) {
-                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
-                                    configuration.endRotation)
-                            }
-                        }
-                    }
-                }
-            }
-
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
-                transition, testSpec,
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 supportedRotations = listOf(Surface.ROTATION_90, Surface.ROTATION_270)
             )

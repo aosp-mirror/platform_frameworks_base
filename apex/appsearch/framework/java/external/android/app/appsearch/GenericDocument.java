@@ -583,9 +583,9 @@ public class GenericDocument {
          * @param schemaType the {@link AppSearchSchema} type of the {@link GenericDocument}. The
          *     provided {@code schemaType} must be defined using {@link AppSearchSession#setSchema}
          *     prior to inserting a document of this {@code schemaType} into the AppSearch index
-         *     using {@link AppSearchSession#put}. Otherwise, the document will
-         *     be rejected by {@link AppSearchSession#put} with result code
-         *     {@link AppSearchResult#RESULT_NOT_FOUND}.
+         *     using {@link AppSearchSession#put}. Otherwise, the document will be rejected by
+         *     {@link AppSearchSession#put} with result code {@link
+         *     AppSearchResult#RESULT_NOT_FOUND}.
          */
         @SuppressWarnings("unchecked")
         public Builder(@NonNull String uri, @NonNull String schemaType) {

@@ -19,15 +19,16 @@ package com.android.wm.shell.flicker.legacysplitscreen
 import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -39,6 +40,7 @@ import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -47,59 +49,76 @@ import org.junit.runners.Parameterized
  * Test open app to split screen.
  * To run this test: `atest WMShellFlickerTests:RotateTwoLaunchedAppInSplitScreenMode`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class RotateTwoLaunchedAppInSplitScreenMode(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : LegacySplitScreenTransition(InstrumentationRegistry.getInstrumentation()) {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName {
-                    buildTestTag("testRotateTwoLaunchedAppInSplitScreenMode", configuration)
-                }
-                repeat { SplitScreenHelper.TEST_REPETITIONS }
-                setup {
-                    eachRun {
-                        device.launchSplitScreen()
-                        splitScreenApp.reopenAppFromOverview()
-                        this.setRotation(configuration.startRotation)
-                    }
-                }
-                transitions {
-                    this.setRotation(configuration.startRotation)
-                }
-                assertions {
-                    layersTrace {
-                        dockedStackDividerIsVisible(bugId = 175687842)
-                        dockedStackPrimaryBoundsIsVisible(
-                            configuration.startRotation,
-                            splitScreenApp.defaultWindowName, bugId = 175687842)
-                        dockedStackSecondaryBoundsIsVisible(
-                            configuration.startRotation,
-                            secondaryApp.defaultWindowName, bugId = 175687842)
-                        navBarLayerRotatesAndScales(
-                            configuration.startRotation,
-                            configuration.endRotation, bugId = 169271943)
-                        statusBarLayerRotatesScales(
-                            configuration.startRotation,
-                            configuration.endRotation, bugId = 169271943)
-                    }
-                    windowManagerTrace {
-                        appWindowBecomesVisible(secondaryApp.defaultWindowName)
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                    }
+    testSpec: FlickerTestParameter
+) : LegacySplitScreenRotateTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
+            setup {
+                eachRun {
+                    device.launchSplitScreen(wmHelper)
+                    device.reopenAppFromOverview(wmHelper)
+                    this.setRotation(testSpec.config.startRotation)
                 }
             }
-            return FlickerTestRunnerFactory.getInstance().buildTest(
-                instrumentation, customRotateSetup, testSpec,
+            transitions {
+                this.setRotation(testSpec.config.startRotation)
+            }
+        }
+
+    @FlakyTest(bugId = 175687842)
+    @Test
+    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
+
+    @FlakyTest(bugId = 175687842)
+    @Test
+    fun dockedStackPrimaryBoundsIsVisible() =
+        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
+            splitScreenApp.defaultWindowName)
+
+    @FlakyTest(bugId = 175687842)
+    @Test
+    fun dockedStackSecondaryBoundsIsVisible() =
+        testSpec.dockedStackSecondaryBoundsIsVisible(testSpec.config.startRotation,
+            secondaryApp.defaultWindowName)
+
+    @FlakyTest(bugId = 169271943)
+    @Test
+    fun navBarLayerRotatesAndScales() =
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
+            testSpec.config.endRotation)
+
+    @FlakyTest(bugId = 169271943)
+    @Test
+    fun statusBarLayerRotatesScales() =
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
+            testSpec.config.endRotation)
+
+    @Presubmit
+    @Test
+    fun appWindowBecomesVisible() =
+        testSpec.appWindowBecomesVisible(secondaryApp.defaultWindowName)
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
-                supportedRotations = listOf(Surface.ROTATION_0 /* bugId = 178685668 */))
+                supportedRotations = listOf(Surface.ROTATION_0)) // b/178685668
         }
     }
 }

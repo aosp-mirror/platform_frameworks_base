@@ -1942,6 +1942,10 @@ package android.bluetooth {
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
   }
 
+  public final class BluetoothMapClient implements android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.SEND_SMS) public boolean sendMessage(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.net.Uri>, @NonNull String, @Nullable android.app.PendingIntent, @Nullable android.app.PendingIntent);
+  }
+
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
@@ -1974,6 +1978,7 @@ package android.bluetooth {
     field public static final int CONNECTION_POLICY_FORBIDDEN = 0; // 0x0
     field public static final int CONNECTION_POLICY_UNKNOWN = -1; // 0xffffffff
     field public static final int HEADSET_CLIENT = 16; // 0x10
+    field public static final int MAP_CLIENT = 18; // 0x12
     field public static final int PAN = 5; // 0x5
     field public static final int PBAP_CLIENT = 17; // 0x11
     field @Deprecated public static final int PRIORITY_OFF = 0; // 0x0
@@ -3398,42 +3403,12 @@ package android.hardware.hdmi {
 
 package android.hardware.lights {
 
-  public final class Light implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getId();
-    method public int getOrdinal();
-    method public int getType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
-  }
-
   public final class LightState implements android.os.Parcelable {
-    ctor public LightState(@ColorInt int);
-    method public int describeContents();
-    method @ColorInt public int getColor();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+    ctor @Deprecated public LightState(@ColorInt int);
   }
 
-  public final class LightsManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public java.util.List<android.hardware.lights.Light> getLights();
-    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public android.hardware.lights.LightsManager.LightsSession openSession();
-    field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
-  }
-
-  public final class LightsManager.LightsSession implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void close();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void requestLights(@NonNull android.hardware.lights.LightsRequest);
-  }
-
-  public final class LightsRequest {
-  }
-
-  public static final class LightsRequest.Builder {
-    ctor public LightsRequest.Builder();
-    method @NonNull public android.hardware.lights.LightsRequest build();
-    method @NonNull public android.hardware.lights.LightsRequest.Builder clearLight(@NonNull android.hardware.lights.Light);
-    method @NonNull public android.hardware.lights.LightsRequest.Builder setLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
+  public abstract class LightsManager {
+    field @Deprecated public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
   }
 
 }
@@ -5704,7 +5679,7 @@ package android.media.tv.tuner {
     method public void updateResourcePriority(int, int);
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
-    field public static final long INVALID_FILTER_ID_64BIT = -1L; // 0xffffffffffffffffL
+    field public static final long INVALID_FILTER_ID_LONG = -1L; // 0xffffffffffffffffL
     field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_ID = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
@@ -5885,7 +5860,7 @@ package android.media.tv.tuner.filter {
     method public int getItemFragmentIndex();
     method public int getItemId();
     method public int getLastItemFragmentIndex();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
   }
 
   public class DownloadSettings extends android.media.tv.tuner.filter.Settings {
@@ -5903,7 +5878,7 @@ package android.media.tv.tuner.filter {
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
     method public int flush();
     method public int getId();
-    method public long getId64Bit();
+    method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int setMonitorEventMask(int);
@@ -5994,7 +5969,7 @@ package android.media.tv.tuner.filter {
     method public long getDataLength();
     method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
     method public long getOffset();
     method public long getPts();
     method public int getStreamId();
@@ -6019,7 +5994,7 @@ package android.media.tv.tuner.filter {
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
     method public int getFirstMacroblockInSlice();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
     method public int getTsIndexMask();
@@ -6027,7 +6002,7 @@ package android.media.tv.tuner.filter {
 
   public class PesEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public int getDataLength();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
     method public int getStreamId();
   }
 
@@ -7941,6 +7916,28 @@ package android.net.util {
 
 }
 
+package android.net.vcn {
+
+  public class VcnManager {
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void addVcnNetworkPolicyListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnNetworkPolicyListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.vcn.VcnNetworkPolicyResult applyVcnNetworkPolicy(@NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties);
+    method public void removeVcnNetworkPolicyListener(@NonNull android.net.vcn.VcnManager.VcnNetworkPolicyListener);
+  }
+
+  public static interface VcnManager.VcnNetworkPolicyListener {
+    method public void onPolicyChanged();
+  }
+
+  public final class VcnNetworkPolicyResult implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method public boolean isTeardownRequested();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnNetworkPolicyResult> CREATOR;
+  }
+
+}
+
 package android.net.wifi {
 
   public final class WifiMigration {
@@ -9221,6 +9218,7 @@ package android.provider {
     field public static final String NAMESPACE_PERMISSIONS = "permissions";
     field public static final String NAMESPACE_PRIVACY = "privacy";
     field public static final String NAMESPACE_PROFCOLLECT_NATIVE_BOOT = "profcollect_native_boot";
+    field public static final String NAMESPACE_REBOOT_READINESS = "reboot_readiness";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
     field public static final String NAMESPACE_RUNTIME = "runtime";
@@ -12905,6 +12903,7 @@ package android.telephony.ims {
     field public static final String EXTRA_EMERGENCY_CALL = "e_call";
     field public static final String EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED = "android.telephony.ims.extra.EXTENDING_TO_CONFERENCE_SUPPORTED";
     field public static final String EXTRA_FORWARDED_NUMBER = "android.telephony.ims.extra.FORWARDED_NUMBER";
+    field public static final String EXTRA_IS_BUSINESS_CALL = "android.telephony.ims.extra.IS_BUSINESS_CALL";
     field public static final String EXTRA_IS_CALL_PULL = "CallPull";
     field public static final String EXTRA_IS_CROSS_SIM_CALL = "android.telephony.ims.extra.IS_CROSS_SIM_CALL";
     field public static final String EXTRA_LOCATION = "android.telephony.ims.extra.LOCATION";

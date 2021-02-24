@@ -46,7 +46,8 @@ public class Device {
 
     // Sync with linux uhid_event_type::UHID_OUTPUT
     private static final byte UHID_EVENT_TYPE_UHID_OUTPUT = 6;
-
+    // Sync with linux uhid_event_type::UHID_SET_REPORT
+    private static final byte UHID_EVENT_TYPE_SET_REPORT = 13;
     private final int mId;
     private final HandlerThread mThread;
     private final DeviceHandler mHandler;
@@ -199,10 +200,10 @@ public class Device {
         }
 
         // native callback
-        public void onDeviceOutput(byte rtype, byte[] data) {
+        public void onDeviceOutput(byte eventId, byte rtype, byte[] data) {
             JSONObject json = new JSONObject();
             try {
-                json.put("eventId", UHID_EVENT_TYPE_UHID_OUTPUT);
+                json.put("eventId", eventId);
                 json.put("deviceId", mId);
                 json.put("reportType", rtype);
                 JSONArray dataArray = new JSONArray();

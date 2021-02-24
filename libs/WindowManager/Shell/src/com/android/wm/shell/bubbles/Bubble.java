@@ -124,6 +124,7 @@ public class Bubble implements BubbleViewProvider {
     private int mDesiredHeight;
     @DimenRes
     private int mDesiredHeightResId;
+    private int mTaskId;
 
     /** for logging **/
     @Nullable
@@ -162,7 +163,7 @@ public class Bubble implements BubbleViewProvider {
      */
     Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
-            Executor mainExecutor) {
+            int taskId, Executor mainExecutor) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mMetadataShortcutId = shortcutInfo.getId();
@@ -178,6 +179,7 @@ public class Bubble implements BubbleViewProvider {
         mTitle = title;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
+        mTaskId = taskId;
     }
 
     @VisibleForTesting(visibility = PRIVATE)
@@ -197,6 +199,7 @@ public class Bubble implements BubbleViewProvider {
             });
         };
         mMainExecutor = mainExecutor;
+        mTaskId = INVALID_TASK_ID;
         setEntry(entry);
     }
 
@@ -520,7 +523,7 @@ public class Bubble implements BubbleViewProvider {
      */
     @Override
     public int getTaskId() {
-        return mExpandedView != null ? mExpandedView.getTaskId() : INVALID_TASK_ID;
+        return mExpandedView != null ? mExpandedView.getTaskId() : mTaskId;
     }
 
     /**

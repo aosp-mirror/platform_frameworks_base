@@ -98,6 +98,8 @@ static struct {
     jfieldID supportedColorModes;
     jfieldID activeColorMode;
     jfieldID hdrCapabilities;
+    jfieldID autoLowLatencyModeSupported;
+    jfieldID gameContentTypeSupported;
 } gDynamicDisplayInfoClassInfo;
 
 static struct {
@@ -1134,6 +1136,11 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jobject to
     env->SetObjectField(object, gDynamicDisplayInfoClassInfo.hdrCapabilities,
                         convertDeviceProductInfoToJavaObject(env, info.hdrCapabilities));
 
+    env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported,
+                         info.autoLowLatencyModeSupported);
+
+    env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.gameContentTypeSupported,
+                         info.gameContentTypeSupported);
     return object;
 }
 
@@ -1456,20 +1463,6 @@ static void nativeReparent(JNIEnv* env, jclass clazz, jlong transactionObj,
     auto newParent = reinterpret_cast<SurfaceControl *>(newParentObject);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     transaction->reparent(ctrl, newParent);
-}
-
-static jboolean nativeGetAutoLowLatencyModeSupport(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
-
-    return SurfaceComposerClient::getAutoLowLatencyModeSupport(token);
-}
-
-static jboolean nativeGetGameContentTypeSupport(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return NULL;
-
-    return SurfaceComposerClient::getGameContentTypeSupport(token);
 }
 
 static void nativeSetAutoLowLatencyMode(JNIEnv* env, jclass clazz, jobject tokenObject, jboolean on) {
@@ -1821,12 +1814,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayNativePrimaries },
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveColorMode},
-    {"nativeGetAutoLowLatencyModeSupport", "(Landroid/os/IBinder;)Z",
-            (void*)nativeGetAutoLowLatencyModeSupport },
     {"nativeSetAutoLowLatencyMode", "(Landroid/os/IBinder;Z)V",
             (void*)nativeSetAutoLowLatencyMode },
-    {"nativeGetGameContentTypeSupport", "(Landroid/os/IBinder;)Z",
-            (void*)nativeGetGameContentTypeSupport },
     {"nativeSetGameContentType", "(Landroid/os/IBinder;Z)V",
             (void*)nativeSetGameContentType },
     {"nativeGetCompositionDataspaces", "()[I",
@@ -1934,6 +1923,10 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDynamicDisplayInfoClassInfo.hdrCapabilities =
             GetFieldIDOrDie(env, dynamicInfoClazz, "hdrCapabilities",
                             "Landroid/view/Display$HdrCapabilities;");
+    gDynamicDisplayInfoClassInfo.autoLowLatencyModeSupported =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "autoLowLatencyModeSupported", "Z");
+    gDynamicDisplayInfoClassInfo.gameContentTypeSupported =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "gameContentTypeSupported", "Z");
 
     jclass modeClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayMode");
     gDisplayModeClassInfo.clazz = MakeGlobalRefOrDie(env, modeClazz);

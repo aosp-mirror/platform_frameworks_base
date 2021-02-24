@@ -369,6 +369,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
+import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -1994,6 +1995,7 @@ public class PackageManagerService extends IPackageManager.Stub
         SigningDetails getSigningDetails(int uid);
         boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId);
         boolean filterAppAccess(String packageName, int callingUid, int userId);
+        void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
     }
 
     /**
@@ -2037,6 +2039,9 @@ public class PackageManagerService extends IPackageManager.Stub
         private final InstantAppResolverConnection mInstantAppResolverConnection;
         private final DefaultAppProvider mDefaultAppProvider;
         private final DomainVerificationManagerInternal mDomainVerificationManager;
+        private final PackageDexOptimizer mPackageDexOptimizer;
+        private final DexManager mDexManager;
+        private final CompilerStats mCompilerStats;
 
         // PackageManagerService attributes that are primitives are referenced through the
         // pms object directly.  Primitives are the only attributes so referenced.
@@ -2083,6 +2088,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mInstantAppResolverConnection = args.service.mInstantAppResolverConnection;
             mDefaultAppProvider = args.service.mDefaultAppProvider;
             mDomainVerificationManager = args.service.mDomainVerificationManager;
+            mPackageDexOptimizer = args.service.mPackageDexOptimizer;
+            mDexManager = args.service.mDexManager;
+            mCompilerStats = args.service.mCompilerStats;
 
             // Used to reference PMS attributes that are primitives and which are not
             // updated under control of the PMS lock.
@@ -4393,6 +4401,143 @@ public class PackageManagerService extends IPackageManager.Stub
                     userId);
         }
 
+        public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
+            final String packageName = dumpState.getTargetPackageName();
+
+            switch (type) {
+                case DumpState.DUMP_VERSION:
+                {
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
+                    pw.println("Database versions:");
+                    mSettings.dumpVersionLPr(new IndentingPrintWriter(pw, "  "));
+                    break;
+                }
+
+                case DumpState.DUMP_PREFERRED_XML:
+                {
+                    pw.flush();
+                    FileOutputStream fout = new FileOutputStream(fd);
+                    BufferedOutputStream str = new BufferedOutputStream(fout);
+                    TypedXmlSerializer serializer = Xml.newFastSerializer();
+                    try {
+                        serializer.setOutput(str, StandardCharsets.UTF_8.name());
+                        serializer.startDocument(null, true);
+                        serializer.setFeature(
+                                "http://xmlpull.org/v1/doc/features.html#indent-output", true);
+                        mSettings.writePreferredActivitiesLPr(serializer, 0,
+                                dumpState.isFullPreferred());
+                        serializer.endDocument();
+                        serializer.flush();
+                    } catch (IllegalArgumentException e) {
+                        pw.println("Failed writing: " + e);
+                    } catch (IllegalStateException e) {
+                        pw.println("Failed writing: " + e);
+                    } catch (IOException e) {
+                        pw.println("Failed writing: " + e);
+                    }
+                    break;
+                }
+
+                case DumpState.DUMP_QUERIES:
+                {
+                    final PackageSetting setting = mSettings.getPackageLPr(packageName);
+                    Integer filteringAppId = setting == null ? null : setting.appId;
+                    mAppsFilter.dumpQueries(
+                            pw, filteringAppId, dumpState, mUserManager.getUserIds(),
+                            this::getPackagesForUid);
+                    break;
+                }
+
+                case DumpState.DUMP_DOMAIN_PREFERRED:
+                {
+                    final android.util.IndentingPrintWriter writer =
+                            new android.util.IndentingPrintWriter(pw);
+                    if (dumpState.onTitlePrinted()) pw.println();
+
+                    writer.println("Domain verification status:");
+                    writer.increaseIndent();
+                    try {
+                        mDomainVerificationManager.printState(writer, packageName,
+                                UserHandle.USER_ALL, mSettings::getPackageLPr);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        pw.println("Failure printing domain verification information");
+                        Slog.e(TAG, "Failure printing domain verification information", e);
+                    }
+                    writer.decreaseIndent();
+                    break;
+                }
+
+                case DumpState.DUMP_DEXOPT:
+                {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    ipw.println();
+                    ipw.println("Dexopt state:");
+                    ipw.increaseIndent();
+                    Collection<PackageSetting> pkgSettings;
+                    if (packageName != null) {
+                        PackageSetting targetPkgSetting = mSettings.getPackageLPr(packageName);
+                        if (targetPkgSetting != null) {
+                            pkgSettings = Collections.singletonList(targetPkgSetting);
+                        } else {
+                            ipw.println("Unable to find package: " + packageName);
+                            return;
+                        }
+                    } else {
+                        pkgSettings = mSettings.getPackagesLocked().values();
+                    }
+
+                    for (PackageSetting pkgSetting : pkgSettings) {
+                        final AndroidPackage pkg = pkgSetting.getPkg();
+                        if (pkg == null) {
+                            continue;
+                        }
+                        ipw.println("[" + pkgSetting.name + "]");
+                        ipw.increaseIndent();
+                        mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
+                                mDexManager.getPackageUseInfoOrDefault(pkg.getPackageName()));
+                        ipw.decreaseIndent();
+                    }
+                    break;
+                }
+
+                case DumpState.DUMP_COMPILER_STATS:
+                {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    ipw.println();
+                    ipw.println("Compiler stats:");
+                    ipw.increaseIndent();
+                    Collection<AndroidPackage> packages;
+                    if (packageName != null) {
+                        AndroidPackage targetPackage = mPackages.get(packageName);
+                        if (targetPackage != null) {
+                            packages = Collections.singletonList(targetPackage);
+                        } else {
+                            ipw.println("Unable to find package: " + packageName);
+                            return;
+                        }
+                    } else {
+                        packages = mPackages.values();
+                    }
+
+                    for (AndroidPackage pkg : packages) {
+                        final String pkgName = pkg.getPackageName();
+                        ipw.println("[" + pkgName + "]");
+                        ipw.increaseIndent();
+
+                        CompilerStats.PackageStats stats = mCompilerStats.getPackageStats(pkgName);
+                        if (stats == null) {
+                            ipw.println("(No recorded stats)");
+                        } else {
+                            stats.dump(ipw);
+                        }
+                        ipw.decreaseIndent();
+                    }
+                    break;
+                }
+            } // switch
+        }
     }
 
     /**
@@ -23554,10 +23699,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         DumpState dumpState = new DumpState();
-        boolean fullPreferred = false;
         boolean checkin = false;
 
-        String packageName = null;
         ArraySet<String> permissionNames = null;
 
         int opti = 0;
@@ -23626,7 +23769,7 @@ public class PackageManagerService extends IPackageManager.Stub
             opti++;
             // Is this a package name?
             if ("android".equals(cmd) || cmd.contains(".")) {
-                packageName = cmd;
+                dumpState.setTargetPackageName(cmd);
                 // When dumping a single package, we always dump all of its
                 // filter information since the amount of data will be reasonable.
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
@@ -23707,7 +23850,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } else if ("preferred-xml".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PREFERRED_XML);
                 if (opti < args.length && "--full".equals(args[opti])) {
-                    fullPreferred = true;
+                    dumpState.setFullPreferred(true);
                     opti++;
                 }
             } else if ("d".equals(cmd) || "domain-preferred-apps".equals(cmd)) {
@@ -23760,257 +23903,208 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        final String packageName = dumpState.getTargetPackageName();
         if (checkin) {
             pw.println("vers,1");
         }
 
         // reader
-        synchronized (mLock) {
-            if (dumpState.isDumping(DumpState.DUMP_VERSION) && packageName == null) {
-                if (!checkin) {
-                    if (dumpState.onTitlePrinted())
-                        pw.println();
-                    pw.println("Database versions:");
-                    mSettings.dumpVersionLPr(new IndentingPrintWriter(pw, "  "));
-                }
+        if (dumpState.isDumping(DumpState.DUMP_VERSION) && packageName == null) {
+            if (!checkin) {
+                dump(DumpState.DUMP_VERSION, fd, pw, dumpState);
             }
+        }
 
-            if (!checkin
-                    && dumpState.isDumping(DumpState.DUMP_KNOWN_PACKAGES)
-                    && packageName == null) {
-                if (dumpState.onTitlePrinted()) {
-                    pw.println();
-                }
-                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
-                ipw.println("Known Packages:");
+        if (!checkin
+                && dumpState.isDumping(DumpState.DUMP_KNOWN_PACKAGES)
+                && packageName == null) {
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
+            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+            ipw.println("Known Packages:");
+            ipw.increaseIndent();
+            for (int i = 0; i <= LAST_KNOWN_PACKAGE; i++) {
+                final String knownPackage = mPmInternal.knownPackageToString(i);
+                ipw.print(knownPackage);
+                ipw.println(":");
+                final String[] pkgNames = mPmInternal.getKnownPackageNames(i,
+                        UserHandle.USER_SYSTEM);
                 ipw.increaseIndent();
-                for (int i = 0; i <= LAST_KNOWN_PACKAGE; i++) {
-                    final String knownPackage = mPmInternal.knownPackageToString(i);
-                    ipw.print(knownPackage);
-                    ipw.println(":");
-                    final String[] pkgNames = mPmInternal.getKnownPackageNames(i,
-                            UserHandle.USER_SYSTEM);
-                    ipw.increaseIndent();
-                    if (ArrayUtils.isEmpty(pkgNames)) {
-                        ipw.println("none");
-                    } else {
-                        for (String name : pkgNames) {
-                            ipw.println(name);
-                        }
+                if (ArrayUtils.isEmpty(pkgNames)) {
+                    ipw.println("none");
+                } else {
+                    for (String name : pkgNames) {
+                        ipw.println(name);
                     }
-                    ipw.decreaseIndent();
                 }
                 ipw.decreaseIndent();
             }
+            ipw.decreaseIndent();
+        }
 
-            if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
+        if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
+            final String requiredVerifierPackage = mRequiredVerifierPackage;
+            if (!checkin) {
+                if (dumpState.onTitlePrinted()) {
+                    pw.println();
+                }
+                pw.println("Verifiers:");
+                pw.print("  Required: ");
+                pw.print(requiredVerifierPackage);
+                pw.print(" (uid=");
+                pw.print(getPackageUid(requiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                        UserHandle.USER_SYSTEM));
+                pw.println(")");
+            } else if (requiredVerifierPackage != null) {
+                pw.print("vrfy,"); pw.print(requiredVerifierPackage);
+                pw.print(",");
+                pw.println(getPackageUid(requiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                        UserHandle.USER_SYSTEM));
+            }
+        }
+
+        if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER) && packageName == null) {
+            final DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
+            final ComponentName verifierComponent = proxy.getComponentName();
+            if (verifierComponent != null) {
+                String verifierPackageName = verifierComponent.getPackageName();
                 if (!checkin) {
                     if (dumpState.onTitlePrinted())
                         pw.println();
-                    pw.println("Verifiers:");
-                    pw.print("  Required: ");
-                    pw.print(mRequiredVerifierPackage);
+                    pw.println("Domain Verifier:");
+                    pw.print("  Using: ");
+                    pw.print(verifierPackageName);
                     pw.print(" (uid=");
-                    pw.print(getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                    pw.print(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
                             UserHandle.USER_SYSTEM));
                     pw.println(")");
-                } else if (mRequiredVerifierPackage != null) {
-                    pw.print("vrfy,"); pw.print(mRequiredVerifierPackage);
+                } else if (verifierPackageName != null) {
+                    pw.print("dv,"); pw.print(verifierPackageName);
                     pw.print(",");
-                    pw.println(getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                    pw.println(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
                             UserHandle.USER_SYSTEM));
                 }
+            } else {
+                pw.println();
+                pw.println("No Domain Verifier available!");
+            }
+        }
+
+        if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
+            // TODO: Move it to ComputerEngine once LongSparseArray<SharedLibraryInfo> is copied
+            //  in snapshot.
+            synchronized (mLock) {
+                dumpSharedLibrariesLPr(pw, dumpState, checkin);
+            }
+        }
+
+        if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
+            if (dumpState.onTitlePrinted()) {
+                pw.println();
+            }
+            if (!checkin) {
+                pw.println("Features:");
             }
 
-            if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER) &&
-                    packageName == null) {
-                DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
-                ComponentName verifierComponent = proxy.getComponentName();
-                if (verifierComponent != null) {
-                    String verifierPackageName = verifierComponent.getPackageName();
-                    if (!checkin) {
-                        if (dumpState.onTitlePrinted())
-                            pw.println();
-                        pw.println("Domain Verifier:");
-                        pw.print("  Using: ");
-                        pw.print(verifierPackageName);
-                        pw.print(" (uid=");
-                        pw.print(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
-                                UserHandle.USER_SYSTEM));
-                        pw.println(")");
-                    } else if (verifierPackageName != null) {
-                        pw.print("dv,"); pw.print(verifierPackageName);
+            synchronized (mAvailableFeatures) {
+                for (FeatureInfo feat : mAvailableFeatures.values()) {
+                    if (checkin) {
+                        pw.print("feat,");
+                        pw.print(feat.name);
                         pw.print(",");
-                        pw.println(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
-                                UserHandle.USER_SYSTEM));
-                    }
-                } else {
-                    pw.println();
-                    pw.println("No Domain Verifier available!");
-                }
-            }
-
-            if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
-                boolean printedHeader = false;
-                final int numSharedLibraries = mSharedLibraries.size();
-                for (int index = 0; index < numSharedLibraries; index++) {
-                    final String libName = mSharedLibraries.keyAt(index);
-                    WatchedLongSparseArray<SharedLibraryInfo> versionedLib
-                            = mSharedLibraries.get(libName);
-                    if (versionedLib == null) {
-                        continue;
-                    }
-                    final int versionCount = versionedLib.size();
-                    for (int i = 0; i < versionCount; i++) {
-                        SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
-                        if (!checkin) {
-                            if (!printedHeader) {
-                                if (dumpState.onTitlePrinted())
-                                    pw.println();
-                                pw.println("Libraries:");
-                                printedHeader = true;
-                            }
-                            pw.print("  ");
-                        } else {
-                            pw.print("lib,");
-                        }
-                        pw.print(libraryInfo.getName());
-                        if (libraryInfo.isStatic()) {
-                            pw.print(" version=" + libraryInfo.getLongVersion());
-                        }
-                        if (!checkin) {
-                            pw.print(" -> ");
-                        }
-                        if (libraryInfo.getPath() != null) {
-                            if (libraryInfo.isNative()) {
-                                pw.print(" (so) ");
-                            } else {
-                                pw.print(" (jar) ");
-                            }
-                            pw.print(libraryInfo.getPath());
-                        } else {
-                            pw.print(" (apk) ");
-                            pw.print(libraryInfo.getPackageName());
+                        pw.println(feat.version);
+                    } else {
+                        pw.print("  ");
+                        pw.print(feat.name);
+                        if (feat.version > 0) {
+                            pw.print(" version=");
+                            pw.print(feat.version);
                         }
                         pw.println();
                     }
                 }
             }
+        }
 
-            if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
-                if (dumpState.onTitlePrinted())
-                    pw.println();
-                if (!checkin) {
-                    pw.println("Features:");
-                }
-
-                synchronized (mAvailableFeatures) {
-                    for (FeatureInfo feat : mAvailableFeatures.values()) {
-                        if (checkin) {
-                            pw.print("feat,");
-                            pw.print(feat.name);
-                            pw.print(",");
-                            pw.println(feat.version);
-                        } else {
-                            pw.print("  ");
-                            pw.print(feat.name);
-                            if (feat.version > 0) {
-                                pw.print(" version=");
-                                pw.print(feat.version);
-                            }
-                            pw.println();
-                        }
-                    }
-                }
-            }
-
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_ACTIVITY_RESOLVERS)) {
+            synchronized (mLock) {
                 mComponentResolver.dumpActivityResolvers(pw, dumpState, packageName);
             }
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
+        }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_RECEIVER_RESOLVERS)) {
+            synchronized (mLock) {
                 mComponentResolver.dumpReceiverResolvers(pw, dumpState, packageName);
             }
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
+        }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_RESOLVERS)) {
+            synchronized (mLock) {
                 mComponentResolver.dumpServiceResolvers(pw, dumpState, packageName);
             }
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
+        }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_CONTENT_RESOLVERS)) {
+            synchronized (mLock) {
                 mComponentResolver.dumpProviderResolvers(pw, dumpState, packageName);
             }
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED)) {
+            // TODO: This cannot be moved to ComputerEngine since some variables with collections
+            //  types in IntentResolver such as mTypeToFilter do not have a copy of `F[]`.
+            synchronized (mLock) {
                 mSettings.dumpPreferred(pw, dumpState, packageName);
             }
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)) {
-                pw.flush();
-                FileOutputStream fout = new FileOutputStream(fd);
-                BufferedOutputStream str = new BufferedOutputStream(fout);
-                TypedXmlSerializer serializer = Xml.newFastSerializer();
-                try {
-                    serializer.setOutput(str, StandardCharsets.UTF_8.name());
-                    serializer.startDocument(null, true);
-                    serializer.setFeature(
-                            "http://xmlpull.org/v1/doc/features.html#indent-output", true);
-                    mSettings.writePreferredActivitiesLPr(serializer, 0, fullPreferred);
-                    serializer.endDocument();
-                    serializer.flush();
-                } catch (IllegalArgumentException e) {
-                    pw.println("Failed writing: " + e);
-                } catch (IllegalStateException e) {
-                    pw.println("Failed writing: " + e);
-                } catch (IOException e) {
-                    pw.println("Failed writing: " + e);
-                }
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PREFERRED_XML)) {
+            dump(DumpState.DUMP_PREFERRED_XML, fd, pw, dumpState);
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
-                android.util.IndentingPrintWriter writer =
-                        new android.util.IndentingPrintWriter(pw);
-                if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+            dump(DumpState.DUMP_DOMAIN_PREFERRED, fd, pw, dumpState);
+        }
 
-                writer.println("Domain verification status:");
-                writer.increaseIndent();
-                try {
-                    mDomainVerificationManager.printState(writer, packageName, UserHandle.USER_ALL,
-                            mSettings::getPackageLPr);
-                } catch (PackageManager.NameNotFoundException e) {
-                    pw.println("Failure printing domain verification information");
-                    Slog.e(TAG, "Failure printing domain verification information", e);
-                }
-                writer.decreaseIndent();
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
+            mSettings.dumpPermissions(pw, packageName, permissionNames, dumpState);
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
-                mSettings.dumpPermissionsLPr(pw, packageName, permissionNames, dumpState);
-            }
-
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
+            synchronized (mLock) {
                 mComponentResolver.dumpContentProviders(pw, dumpState, packageName);
             }
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
+            synchronized (mLock) {
                 mSettings.getKeySetManagerService().dumpLPr(pw, packageName, dumpState);
             }
+        }
 
-            if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
+        if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
+            // This cannot be moved to ComputerEngine since some variables of the collections
+            // in PackageUserState such as suspendParams, disabledComponents and enabledComponents
+            // do not have a copy.
+            synchronized (mLock) {
                 mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
             }
+        }
 
-            if (dumpState.isDumping(DumpState.DUMP_QUERIES)) {
-                final PackageSetting setting = mSettings.getPackageLPr(packageName);
-                Integer filteringAppId = setting == null ? null : setting.appId;
-                mAppsFilter.dumpQueries(
-                        pw, this, filteringAppId, dumpState,
-                        mUserManager.getUserIds());
-            }
+        if (dumpState.isDumping(DumpState.DUMP_QUERIES)) {
+            dump(DumpState.DUMP_QUERIES, fd, pw, dumpState);
+        }
 
-            if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
+        if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
+            // This cannot be moved to ComputerEngine since the set of packages in the
+            // SharedUserSetting do not have a copy.
+            synchronized (mLock) {
                 mSettings.dumpSharedUsersLPr(pw, packageName, permissionNames, dumpState, checkin);
             }
+        }
 
-            if (dumpState.isDumping(DumpState.DUMP_CHANGES)) {
-                if (dumpState.onTitlePrinted()) pw.println();
-                pw.println("Package Changes:");
+        if (dumpState.isDumping(DumpState.DUMP_CHANGES)) {
+            if (dumpState.onTitlePrinted()) pw.println();
+            pw.println("Package Changes:");
+            synchronized (mLock) {
                 pw.print("  Sequence number="); pw.println(mChangedPackagesSequenceNumber);
                 final int K = mChangedPackages.size();
                 for (int i = 0; i < K; i++) {
@@ -24032,16 +24126,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
-                // XXX should handle packageName != null by dumping only install data that
-                // the given package is involved with.
-                if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_FROZEN) && packageName == null) {
+            // XXX should handle packageName != null by dumping only install data that
+            // the given package is involved with.
+            if (dumpState.onTitlePrinted()) pw.println();
 
-                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
-                ipw.println();
-                ipw.println("Frozen packages:");
-                ipw.increaseIndent();
+            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+            ipw.println();
+            ipw.println("Frozen packages:");
+            ipw.increaseIndent();
+            synchronized (mLock) {
                 if (mFrozenPackages.size() == 0) {
                     ipw.println("(none)");
                 } else {
@@ -24049,16 +24145,18 @@ public class PackageManagerService extends IPackageManager.Stub
                         ipw.println(mFrozenPackages.valueAt(i));
                     }
                 }
-                ipw.decreaseIndent();
             }
+            ipw.decreaseIndent();
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_VOLUMES) && packageName == null) {
-                if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_VOLUMES) && packageName == null) {
+            if (dumpState.onTitlePrinted()) pw.println();
 
-                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
-                ipw.println();
-                ipw.println("Loaded volumes:");
-                ipw.increaseIndent();
+            final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+            ipw.println();
+            ipw.println("Loaded volumes:");
+            ipw.increaseIndent();
+            synchronized (mLoadedVolumes) {
                 if (mLoadedVolumes.size() == 0) {
                     ipw.println("(none)");
                 } else {
@@ -24066,36 +24164,39 @@ public class PackageManagerService extends IPackageManager.Stub
                         ipw.println(mLoadedVolumes.valueAt(i));
                     }
                 }
-                ipw.decreaseIndent();
             }
+            ipw.decreaseIndent();
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
-                    && packageName == null) {
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
+                && packageName == null) {
+            synchronized (mLock) {
                 mComponentResolver.dumpServicePermissions(pw, dumpState);
             }
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
-                if (dumpState.onTitlePrinted()) pw.println();
-                dumpDexoptStateLPr(pw, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
+            if (dumpState.onTitlePrinted()) pw.println();
+            dump(DumpState.DUMP_DEXOPT, fd, pw, dumpState);
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
-                if (dumpState.onTitlePrinted()) pw.println();
-                dumpCompilerStatsLPr(pw, packageName);
-            }
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
+            if (dumpState.onTitlePrinted()) pw.println();
+            dump(DumpState.DUMP_COMPILER_STATS, fd, pw, dumpState);
+        }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
-                if (dumpState.onTitlePrinted()) pw.println();
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
+            if (dumpState.onTitlePrinted()) pw.println();
+            synchronized (mLock) {
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
-
-                pw.println();
-                pw.println("Package warning messages:");
-                dumpCriticalInfo(pw, null);
             }
+            pw.println();
+            pw.println("Package warning messages:");
+            dumpCriticalInfo(pw, null);
+        }
 
-            if (checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES)) {
-                dumpCriticalInfo(pw, "msg,");
-            }
+        if (checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES)) {
+            dumpCriticalInfo(pw, "msg,");
         }
 
         // PackageInstaller should be called outside of mPackages lock
@@ -24128,6 +24229,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println(")");
             }
         }
+    }
+
+    /**
+     * Dump package manager states to the file according to a given dumping type of
+     * {@link DumpState}.
+     */
+    private void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
+        snapshotComputer().dump(type, fd, pw, dumpState);
     }
 
     //TODO: b/111402650
@@ -24228,69 +24337,50 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @GuardedBy("mLock")
-    @SuppressWarnings("resource")
-    private void dumpDexoptStateLPr(PrintWriter pw, String packageName) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-        ipw.println();
-        ipw.println("Dexopt state:");
-        ipw.increaseIndent();
-        Collection<PackageSetting> pkgSettings;
-        if (packageName != null) {
-            PackageSetting targetPkgSetting = mSettings.getPackageLPr(packageName);
-            if (targetPkgSetting != null) {
-                pkgSettings = Collections.singletonList(targetPkgSetting);
-            } else {
-                ipw.println("Unable to find package: " + packageName);
-                return;
-            }
-        } else {
-            pkgSettings = mSettings.getPackagesLocked().values();
-        }
-
-        for (PackageSetting pkgSetting : pkgSettings) {
-            if (pkgSetting.pkg == null) {
+    private void dumpSharedLibrariesLPr(PrintWriter pw, DumpState dumpState, boolean checkin) {
+        boolean printedHeader = false;
+        final int numSharedLibraries = mSharedLibraries.size();
+        for (int index = 0; index < numSharedLibraries; index++) {
+            final String libName = mSharedLibraries.keyAt(index);
+            WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
+            if (versionedLib == null) {
                 continue;
             }
-            ipw.println("[" + pkgSetting.name + "]");
-            ipw.increaseIndent();
-            mPackageDexOptimizer.dumpDexoptState(ipw, pkgSetting.pkg, pkgSetting,
-                    mDexManager.getPackageUseInfoOrDefault(pkgSetting.pkg.getPackageName()));
-            ipw.decreaseIndent();
-        }
-    }
-
-    @GuardedBy("mLock")
-    @SuppressWarnings("resource")
-    private void dumpCompilerStatsLPr(PrintWriter pw, String packageName) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-        ipw.println();
-        ipw.println("Compiler stats:");
-        ipw.increaseIndent();
-        Collection<AndroidPackage> packages;
-        if (packageName != null) {
-            AndroidPackage targetPackage = mPackages.get(packageName);
-            if (targetPackage != null) {
-                packages = Collections.singletonList(targetPackage);
-            } else {
-                ipw.println("Unable to find package: " + packageName);
-                return;
+            final int versionCount = versionedLib.size();
+            for (int i = 0; i < versionCount; i++) {
+                SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
+                if (!checkin) {
+                    if (!printedHeader) {
+                        if (dumpState.onTitlePrinted()) {
+                            pw.println();
+                        }
+                        pw.println("Libraries:");
+                        printedHeader = true;
+                    }
+                    pw.print("  ");
+                } else {
+                    pw.print("lib,");
+                }
+                pw.print(libraryInfo.getName());
+                if (libraryInfo.isStatic()) {
+                    pw.print(" version=" + libraryInfo.getLongVersion());
+                }
+                if (!checkin) {
+                    pw.print(" -> ");
+                }
+                if (libraryInfo.getPath() != null) {
+                    if (libraryInfo.isNative()) {
+                        pw.print(" (so) ");
+                    } else {
+                        pw.print(" (jar) ");
+                    }
+                    pw.print(libraryInfo.getPath());
+                } else {
+                    pw.print(" (apk) ");
+                    pw.print(libraryInfo.getPackageName());
+                }
+                pw.println();
             }
-        } else {
-            packages = mPackages.values();
-        }
-
-        for (AndroidPackage pkg : packages) {
-            ipw.println("[" + pkg.getPackageName() + "]");
-            ipw.increaseIndent();
-
-            CompilerStats.PackageStats stats = getCompilerPackageStats(pkg.getPackageName());
-            if (stats == null) {
-                ipw.println("(No recorded stats)");
-            } else {
-                stats.dump(ipw);
-            }
-            ipw.decreaseIndent();
         }
     }
 
@@ -24452,7 +24542,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
         sendResourcesChangedBroadcast(true, false, loaded, null);
-        mLoadedVolumes.add(vol.getId());
+        synchronized (mLoadedVolumes) {
+            mLoadedVolumes.add(vol.getId());
+        }
     }
 
     private void unloadPrivatePackages(final VolumeInfo vol) {
@@ -24500,7 +24592,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
         sendResourcesChangedBroadcast(false, false, unloaded, null);
-        mLoadedVolumes.remove(vol.getId());
+        synchronized (mLoadedVolumes) {
+            mLoadedVolumes.remove(vol.getId());
+        }
 
         // Try very hard to release any references to this path so we don't risk
         // the system server being killed due to open FDs
@@ -27432,43 +27526,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private String getOatDir(AndroidPackage pkg, @NonNull PackageSetting pkgSetting) {
-        if (!AndroidPackageUtils.canHaveOatDir(pkg,
-                pkgSetting.getPkgState().isUpdatedSystemApp())) {
-            return null;
-        }
-        File codePath = new File(pkg.getPath());
-        if (codePath.isDirectory()) {
-            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
-        }
-        return null;
-    }
-
     void deleteOatArtifactsOfPackage(String packageName) {
-        final String[] instructionSets;
-        final List<String> codePaths;
-        final String oatDir;
         final AndroidPackage pkg;
         final PackageSetting pkgSetting;
         synchronized (mLock) {
             pkg = mPackages.get(packageName);
             pkgSetting = mSettings.getPackageLPr(packageName);
         }
-        instructionSets = getAppDexInstructionSets(
-                AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
-                AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
-        codePaths = AndroidPackageUtils.getAllCodePaths(pkg);
-        oatDir = getOatDir(pkg, pkgSetting);
-
-        for (String codePath : codePaths) {
-            for (String isa : instructionSets) {
-                try {
-                    mInstaller.deleteOdex(codePath, isa, oatDir);
-                } catch (InstallerException e) {
-                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
-                }
-            }
-        }
+        mDexManager.deleteOptimizedFiles(ArtUtils.createArtPackageInfo(pkg, pkgSetting));
     }
 
     Set<String> getUnusedPackages(long downgradeTimeThresholdMillis) {

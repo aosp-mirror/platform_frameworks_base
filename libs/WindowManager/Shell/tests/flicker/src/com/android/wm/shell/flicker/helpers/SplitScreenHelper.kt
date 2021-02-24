@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
 import android.content.ComponentName
-import android.os.SystemClock
 import com.android.wm.shell.flicker.testapp.Components
 
 class SplitScreenHelper(
@@ -26,17 +25,6 @@ class SplitScreenHelper(
     activityLabel: String,
     componentsInfo: ComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
-
-    /**
-     * Reopens the first device window from the list of recent apps (overview)
-     */
-    fun reopenAppFromOverview() {
-        val x = uiDevice.displayWidth / 2
-        val y = uiDevice.displayHeight / 2
-        uiDevice.click(x, y)
-        // Wait for animation to complete.
-        SystemClock.sleep(TIMEOUT_MS)
-    }
 
     companion object {
         const val TEST_REPETITIONS = 1

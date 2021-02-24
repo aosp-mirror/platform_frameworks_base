@@ -180,6 +180,7 @@ public class TransitionAnimation {
                 "android", com.android.internal.R.anim.cross_profile_apps_thumbnail_enter);
     }
 
+    /** Load animation by resource Id from specific LayoutParams. */
     @Nullable
     private Animation loadAnimationRes(LayoutParams lp, int resId) {
         Context context = mContext;
@@ -193,6 +194,7 @@ public class TransitionAnimation {
         return null;
     }
 
+    /** Load animation by resource Id from specific package. */
     @Nullable
     private Animation loadAnimationRes(String packageName, int resId) {
         if (ResourceId.isValid(resId)) {
@@ -204,6 +206,13 @@ public class TransitionAnimation {
         return null;
     }
 
+    /** Load animation by resource Id from android package. */
+    @Nullable
+    public Animation loadDefaultAnimationRes(int resId) {
+        return loadAnimationRes("android", resId);
+    }
+
+    /** Load animation by attribute Id from specific LayoutParams */
     @Nullable
     public Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit) {
         int resId = Resources.ID_NULL;
@@ -216,6 +225,25 @@ public class TransitionAnimation {
             }
         }
         resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        if (ResourceId.isValid(resId)) {
+            return loadAnimationSafely(context, resId, mTag);
+        }
+        return null;
+    }
+
+    /** Load animation by attribute Id from android package. */
+    @Nullable
+    public Animation loadDefaultAnimationAttr(int animAttr) {
+        int resId = Resources.ID_NULL;
+        Context context = mContext;
+        if (animAttr >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations("android",
+                    mDefaultWindowAnimationStyleResId);
+            if (ent != null) {
+                context = ent.context;
+                resId = ent.array.getResourceId(animAttr, 0);
+            }
+        }
         if (ResourceId.isValid(resId)) {
             return loadAnimationSafely(context, resId, mTag);
         }

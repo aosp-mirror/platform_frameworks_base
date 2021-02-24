@@ -41,8 +41,10 @@
     </item>
     <item android:id="@android:id/progress"
           android:gravity="center_vertical|fill_horizontal">
-            <com.android.systemui.util.RoundedCornerProgressDrawable
+            <clip
                 android:drawable="@drawable/brightness_progress_full_drawable"
+                android:clipOrientation="horizontal"
+                android:gravity="left"
             />
     </item>
 </layer-list>

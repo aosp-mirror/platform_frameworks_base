@@ -243,7 +243,6 @@ public class BrightnessTracker {
     }
 
     /** Stop listening for events */
-    @VisibleForTesting
     void stop() {
         if (DEBUG) {
             Slog.d(TAG, "Stop");

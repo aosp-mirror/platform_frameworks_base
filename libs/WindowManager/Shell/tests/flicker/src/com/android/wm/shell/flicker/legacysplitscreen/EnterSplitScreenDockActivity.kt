@@ -19,13 +19,13 @@ package com.android.wm.shell.flicker.legacysplitscreen
 import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.WALLPAPER_TITLE
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.startRotation
@@ -36,6 +36,7 @@ import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -47,53 +48,71 @@ import org.junit.runners.Parameterized
 @Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 // @FlakyTest(bugId = 179116910)
 class EnterSplitScreenDockActivity(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : LegacySplitScreenTransition(InstrumentationRegistry.getInstrumentation()) {
+    testSpec: FlickerTestParameter
+) : LegacySplitScreenTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
+            transitions {
+                device.launchSplitScreen(wmHelper)
+            }
+        }
+
+    @FlakyTest(bugId = 169271943)
+    @Test
+    fun dockedStackPrimaryBoundsIsVisible() =
+        testSpec.dockedStackPrimaryBoundsIsVisible(testSpec.config.startRotation,
+            splitScreenApp.defaultWindowName)
+
+    @Presubmit
+    @Test
+    fun dockedStackDividerBecomesVisible() = testSpec.dockedStackDividerBecomesVisible()
+
+    @FlakyTest(bugId = 178531736)
+    @Test
+    // b/178531736
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(
+            listOf(LAUNCHER_PACKAGE_NAME,
+                WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
+                splitScreenApp.defaultWindowName)
+        )
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 178531736)
+    @Test
+    // b/178531736
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(
+            listOf(LAUNCHER_PACKAGE_NAME,
+                WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
+                splitScreenApp.defaultWindowName)
+        )
+
+    @Presubmit
+    @Test
+    fun appWindowIsVisible() {
+        testSpec.assertWmEnd {
+            isVisible(splitScreenApp.defaultWindowName)
+        }
+    }
+
+    companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName {
-                    buildTestTag("testLegacySplitScreenDockActivity", configuration)
-                }
-                repeat { SplitScreenHelper.TEST_REPETITIONS }
-                transitions {
-                    device.launchSplitScreen()
-                }
-                assertions {
-                    layersTrace {
-                        dockedStackPrimaryBoundsIsVisible(
-                            configuration.startRotation,
-                            splitScreenApp.defaultWindowName, bugId = 169271943)
-                        dockedStackDividerBecomesVisible()
-                        visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME,
-                                WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
-                                splitScreenApp.defaultWindowName),
-                            bugId = 178531736
-                        )
-                    }
-                    windowManagerTrace {
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME,
-                                WALLPAPER_TITLE, LIVE_WALLPAPER_PACKAGE_NAME,
-                                splitScreenApp.defaultWindowName),
-                            bugId = 178531736
-                        )
-                        end("appWindowIsVisible") {
-                            isVisible(splitScreenApp.defaultWindowName)
-                        }
-                    }
-                }
-            }
-            return FlickerTestRunnerFactory.getInstance().buildTest(
-                instrumentation, defaultTransitionSetup, testSpec,
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 supportedRotations = listOf(Surface.ROTATION_0) // bugId = 179116910
             )

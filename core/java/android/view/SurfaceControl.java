@@ -191,9 +191,6 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
 
-    private static native boolean nativeGetAutoLowLatencyModeSupport(IBinder displayToken);
-    private static native boolean nativeGetGameContentTypeSupport(IBinder displayToken);
-
     private static native void nativeSetInputWindowInfo(long transactionObj, long nativeObject,
             InputWindowHandle handle);
 
@@ -1750,6 +1747,9 @@ public final class SurfaceControl implements Parcelable {
 
         public Display.HdrCapabilities hdrCapabilities;
 
+        public boolean autoLowLatencyModeSupported;
+        public boolean gameContentTypeSupported;
+
         @Override
         public String toString() {
             return "DynamicDisplayInfo{"
@@ -1757,7 +1757,9 @@ public final class SurfaceControl implements Parcelable {
                     + ", activeDisplayModeId=" + activeDisplayModeId
                     + ", supportedColorModes=" + Arrays.toString(supportedColorModes)
                     + ", activeColorMode=" + activeColorMode
-                    + ", hdrCapabilities=" + hdrCapabilities + "}";
+                    + ", hdrCapabilities=" + hdrCapabilities
+                    + ", autoLowLatencyModeSupported=" + autoLowLatencyModeSupported
+                    + ", gameContentTypeSupported" + gameContentTypeSupported + "}";
         }
 
         @Override
@@ -2199,28 +2201,6 @@ public final class SurfaceControl implements Parcelable {
         synchronized (SurfaceControl.class) {
             sGlobalTransaction.setDisplaySize(displayToken, width, height);
         }
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean getAutoLowLatencyModeSupport(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-
-        return nativeGetAutoLowLatencyModeSupport(displayToken);
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean getGameContentTypeSupport(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-
-        return nativeGetGameContentTypeSupport(displayToken);
     }
 
     /**

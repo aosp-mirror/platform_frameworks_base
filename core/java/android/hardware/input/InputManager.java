@@ -30,6 +30,10 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.SensorManager;
+import android.hardware.lights.Light;
+import android.hardware.lights.LightState;
+import android.hardware.lights.LightsManager;
+import android.hardware.lights.LightsRequest;
 import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.CombinedVibrationEffect;
@@ -1409,7 +1413,7 @@ public final class InputManager {
     }
 
     /**
-     * Gets a vibrator service associated with an input device, always create a new instance.
+     * Gets a vibrator service associated with an input device, always creates a new instance.
      * @return The vibrator, never null.
      * @hide
      */
@@ -1418,7 +1422,7 @@ public final class InputManager {
     }
 
     /**
-     * Gets a vibrator manager service associated with an input device, always create a new
+     * Gets a vibrator manager service associated with an input device, always creates a new
      * instance.
      * @return The vibrator manager, never null.
      * @hide
@@ -1486,10 +1490,8 @@ public final class InputManager {
 
     /**
      * Register input device vibrator state listener
-     *
-     * @hide
      */
-    public boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+    boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
         try {
             return mIm.registerVibratorStateListener(deviceId, listener);
         } catch (RemoteException ex) {
@@ -1499,10 +1501,8 @@ public final class InputManager {
 
     /**
      * Unregister input device vibrator state listener
-     *
-     * @hide
      */
-    public boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+    boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
         try {
             return mIm.unregisterVibratorStateListener(deviceId, listener);
         } catch (RemoteException ex) {
@@ -1511,7 +1511,7 @@ public final class InputManager {
     }
 
     /**
-     * Gets a sensor manager service associated with an input device, always create a new instance.
+     * Gets a sensor manager service associated with an input device, always creates a new instance.
      * @return The sensor manager, never null.
      * @hide
      */
@@ -1530,6 +1530,86 @@ public final class InputManager {
      */
     public InputDeviceBattery getInputDeviceBattery(int deviceId, boolean hasBattery) {
         return new InputDeviceBattery(this, deviceId, hasBattery);
+    }
+
+    /**
+     * Gets a lights manager associated with an input device, always creates a new instance.
+     * @return The lights manager, never null.
+     * @hide
+     */
+    @NonNull
+    public LightsManager getInputDeviceLightsManager(int deviceId) {
+        return new InputDeviceLightsManager(InputManager.this, deviceId);
+    }
+
+    /**
+     * Gets a list of light objects associated with an input device.
+     * @return The list of lights, never null.
+     */
+    @NonNull List<Light> getLights(int deviceId) {
+        try {
+            return mIm.getLights(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the state of an input device light.
+     * @return the light state
+     */
+    @NonNull LightState getLightState(int deviceId, @NonNull Light light) {
+        try {
+            return mIm.getLightState(deviceId, light.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to modify the states of multiple lights.
+     *
+     * @param request the settings for lights that should change
+     */
+    void requestLights(int deviceId, @NonNull LightsRequest request, IBinder token) {
+        try {
+            List<Integer> lightIdList = request.getLights();
+            int[] lightIds = new int[lightIdList.size()];
+            for (int i = 0; i < lightIds.length; i++) {
+                lightIds[i] = lightIdList.get(i);
+            }
+            List<LightState> lightStateList = request.getLightStates();
+            mIm.setLightStates(deviceId, lightIds,
+                    lightStateList.toArray(new LightState[lightStateList.size()]),
+                    token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Open light session for input device manager
+     *
+     * @param token The token for the light session
+     */
+    void openLightSession(int deviceId, String opPkg, @NonNull IBinder token) {
+        try {
+            mIm.openLightSession(deviceId, opPkg, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Close light session
+     *
+     */
+    void closeLightSession(int deviceId, @NonNull IBinder token) {
+        try {
+            mIm.closeLightSession(deviceId, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

@@ -347,6 +347,7 @@ public class ProximitySensor implements ThresholdSensor {
         public void check(long timeoutMs, Consumer<Boolean> callback) {
             if (!mSensor.isLoaded()) {
                 callback.accept(null);
+                return;
             }
             mCallbacks.add(callback);
             if (!mRegistered.getAndSet(true)) {

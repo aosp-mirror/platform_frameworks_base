@@ -78,8 +78,6 @@ namespace android {
 
 FrontendClient::FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int type) {
     mTunerFrontend = tunerFrontend;
-    mAidlCallback = NULL;
-    mHidlCallback = NULL;
     mType = type;
 }
 
@@ -87,22 +85,21 @@ FrontendClient::~FrontendClient() {
     mTunerFrontend = NULL;
     mFrontend = NULL;
     mFrontend_1_1 = NULL;
-    mAidlCallback = NULL;
-    mHidlCallback = NULL;
     mId = -1;
     mType = -1;
 }
 
 Result FrontendClient::setCallback(sp<FrontendClientCallback> frontendClientCallback) {
     if (mTunerFrontend != NULL) {
-        mAidlCallback = ::ndk::SharedRefBase::make<TunerFrontendCallback>(frontendClientCallback);
-        mAidlCallback->setFrontendType(mType);
-        Status s = mTunerFrontend->setCallback(mAidlCallback);
+        shared_ptr<TunerFrontendCallback> aidlCallback =
+                ::ndk::SharedRefBase::make<TunerFrontendCallback>(frontendClientCallback);
+        aidlCallback->setFrontendType(mType);
+        Status s = mTunerFrontend->setCallback(aidlCallback);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
-    mHidlCallback = new HidlFrontendCallback(frontendClientCallback);
-    return mFrontend->setCallback(mHidlCallback);
+    sp<HidlFrontendCallback> hidlCallback = new HidlFrontendCallback(frontendClientCallback);
+    return mFrontend->setCallback(hidlCallback);
 }
 
 void FrontendClient::setHidlFrontend(sp<IFrontend> frontend) {

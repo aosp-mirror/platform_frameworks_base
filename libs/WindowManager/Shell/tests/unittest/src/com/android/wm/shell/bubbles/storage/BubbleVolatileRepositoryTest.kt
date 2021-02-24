@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles.storage
 
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.content.pm.LauncherApps
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
@@ -37,10 +38,12 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
     private val user0 = UserHandle.of(0)
     private val user10 = UserHandle.of(10)
 
-    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0)
+    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0,
+            null, 1)
     private val bubble2 = BubbleEntity(10, "com.example.chat", "alice and bob",
-            "key-2", 0, 16537428, "title")
-    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0)
+            "key-2", 0, 16537428, "title", 2)
+    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0,
+            null, INVALID_TASK_ID)
 
     private val bubbles = listOf(bubble1, bubble2, bubble3)
 
@@ -105,13 +108,13 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
 
     @Test
     fun testAddBubbleMatchesByKey() {
-        val bubble = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0, "title")
+        val bubble = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0, "title", 1)
         repository.addBubbles(listOf(bubble))
         assertEquals(bubble, repository.bubbles.get(0))
 
         // Same key as first bubble but different entry
         val bubbleModified = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0,
-                "different title")
+                "different title", 2)
         repository.addBubbles(listOf(bubbleModified))
         assertEquals(bubbleModified, repository.bubbles.get(0))
     }

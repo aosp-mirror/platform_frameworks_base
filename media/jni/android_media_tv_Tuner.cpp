@@ -217,23 +217,36 @@ namespace android {
 void LnbClientCallbackImpl::onEvent(const LnbEventType lnbEventType) {
     ALOGD("LnbClientCallbackImpl::onEvent, type=%d", lnbEventType);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mLnbObj,
-            gFields.onLnbEventID,
-            (jint)lnbEventType);
+    jobject lnb(env->NewLocalRef(mLnbObj));
+    if (!env->IsSameObject(lnb, nullptr)) {
+        env->CallVoidMethod(
+                lnb,
+                gFields.onLnbEventID,
+                (jint)lnbEventType);
+    } else {
+        ALOGE("LnbClientCallbackImpl::onEvent:"
+                "Lnb object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mLnbObj);
+    }
 }
 
 void LnbClientCallbackImpl::onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage) {
     ALOGD("LnbClientCallbackImpl::onDiseqcMessage");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jbyteArray array = env->NewByteArray(diseqcMessage.size());
-    env->SetByteArrayRegion(
-            array, 0, diseqcMessage.size(), reinterpret_cast<jbyte*>(diseqcMessage[0]));
-
-    env->CallVoidMethod(
-            mLnbObj,
-            gFields.onLnbDiseqcMessageID,
-            array);
+    jobject lnb(env->NewLocalRef(mLnbObj));
+    if (!env->IsSameObject(lnb, nullptr)) {
+        jbyteArray array = env->NewByteArray(diseqcMessage.size());
+        env->SetByteArrayRegion(
+                array, 0, diseqcMessage.size(), reinterpret_cast<jbyte*>(diseqcMessage[0]));
+        env->CallVoidMethod(
+                lnb,
+                gFields.onLnbDiseqcMessageID,
+                array);
+    } else {
+        ALOGE("LnbClientCallbackImpl::onDiseqcMessage:"
+                "Lnb object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mLnbObj);
+    }
 }
 
 void LnbClientCallbackImpl::setLnb(jweak lnbObj) {
@@ -254,19 +267,33 @@ LnbClientCallbackImpl::~LnbClientCallbackImpl() {
 void DvrClientCallbackImpl::onRecordStatus(RecordStatus status) {
     ALOGD("DvrClientCallbackImpl::onRecordStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mDvrObj,
-            gFields.onDvrRecordStatusID,
-            (jint) status);
+    jobject dvr(env->NewLocalRef(mDvrObj));
+    if (!env->IsSameObject(dvr, nullptr)) {
+        env->CallVoidMethod(
+                dvr,
+                gFields.onDvrRecordStatusID,
+                (jint) status);
+    } else {
+        ALOGE("DvrClientCallbackImpl::onRecordStatus:"
+                "Dvr object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mDvrObj);
+    }
 }
 
 void DvrClientCallbackImpl::onPlaybackStatus(PlaybackStatus status) {
     ALOGD("DvrClientCallbackImpl::onPlaybackStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mDvrObj,
-            gFields.onDvrPlaybackStatusID,
-            (jint) status);
+    jobject dvr(env->NewLocalRef(mDvrObj));
+    if (!env->IsSameObject(dvr, nullptr)) {
+        env->CallVoidMethod(
+                dvr,
+                gFields.onDvrPlaybackStatusID,
+                (jint) status);
+    } else {
+        ALOGE("DvrClientCallbackImpl::onPlaybackStatus:"
+                "Dvr object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mDvrObj);
+    }
 }
 
 void DvrClientCallbackImpl::setDvr(jweak dvrObj) {
@@ -810,10 +837,17 @@ void FilterClientCallbackImpl::onFilterEvent_1_1(const DemuxFilterEvent& filterE
             }
         }
     }
-    env->CallVoidMethod(
-            mFilterObj,
-            gFields.onFilterEventID,
-            array);
+    jobject filter(env->NewLocalRef(mFilterObj));
+    if (!env->IsSameObject(filter, nullptr)) {
+        env->CallVoidMethod(
+                filter,
+                gFields.onFilterEventID,
+                array);
+    } else {
+        ALOGE("FilterClientCallbackImpl::onFilterEvent_1_1:"
+                "Filter object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mFilterObj);
+    }
 }
 
 void FilterClientCallbackImpl::onFilterEvent(const DemuxFilterEvent& filterEvent) {
@@ -828,10 +862,17 @@ void FilterClientCallbackImpl::onFilterEvent(const DemuxFilterEvent& filterEvent
 void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
     ALOGD("FilterClientCallbackImpl::onFilterStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mFilterObj,
-            gFields.onFilterStatusID,
-            (jint)status);
+    jobject filter(env->NewLocalRef(mFilterObj));
+    if (!env->IsSameObject(filter, nullptr)) {
+        env->CallVoidMethod(
+                filter,
+                gFields.onFilterStatusID,
+                (jint)status);
+    } else {
+        ALOGE("FilterClientCallbackImpl::onFilterStatus:"
+                "Filter object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mFilterObj);
+    }
 }
 
 void FilterClientCallbackImpl::setFilter(jweak filterObj, sp<FilterClient> filterClient) {
@@ -841,6 +882,15 @@ void FilterClientCallbackImpl::setFilter(jweak filterObj, sp<FilterClient> filte
     mFilterClient = filterClient;
 }
 
+FilterClientCallbackImpl::~FilterClientCallbackImpl() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (mFilterObj != NULL) {
+        env->DeleteWeakGlobalRef(mFilterObj);
+        mFilterObj = NULL;
+    }
+    mFilterClient = NULL;
+}
+
 /////////////// FrontendClientCallbackImpl ///////////////////////
 
 FrontendClientCallbackImpl::FrontendClientCallbackImpl(jweak tunerObj) : mObject(tunerObj) {}
@@ -848,10 +898,17 @@ FrontendClientCallbackImpl::FrontendClientCallbackImpl(jweak tunerObj) : mObject
 void FrontendClientCallbackImpl::onEvent(FrontendEventType frontendEventType) {
     ALOGD("FrontendClientCallbackImpl::onEvent, type=%d", frontendEventType);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(
-            mObject,
-            gFields.onFrontendEventID,
-            (jint)frontendEventType);
+    jobject frontend(env->NewLocalRef(mObject));
+    if (!env->IsSameObject(frontend, nullptr)) {
+        env->CallVoidMethod(
+                frontend,
+                gFields.onFrontendEventID,
+                (jint)frontendEventType);
+    } else {
+        ALOGE("FrontendClientCallbackImpl::onEvent:"
+                "Frontend object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mObject);
+    }
 }
 
 void FrontendClientCallbackImpl::onScanMessage(
@@ -859,11 +916,18 @@ void FrontendClientCallbackImpl::onScanMessage(
     ALOGD("FrontendClientCallbackImpl::onScanMessage, type=%d", type);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
+    jobject frontend(env->NewLocalRef(mObject));
+    if (env->IsSameObject(frontend, nullptr)) {
+        ALOGE("FrontendClientCallbackImpl::onScanMessage:"
+                "Frontend object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mObject);
+        return;
+    }
     switch(type) {
         case FrontendScanMessageType::LOCKED: {
             if (message.isLocked()) {
                 env->CallVoidMethod(
-                        mObject,
+                        frontend,
                         env->GetMethodID(clazz, "onLocked", "()V"));
             }
             break;
@@ -871,14 +935,14 @@ void FrontendClientCallbackImpl::onScanMessage(
         case FrontendScanMessageType::END: {
             if (message.isEnd()) {
                 env->CallVoidMethod(
-                        mObject,
+                        frontend,
                         env->GetMethodID(clazz, "onScanStopped", "()V"));
             }
             break;
         }
         case FrontendScanMessageType::PROGRESS_PERCENT: {
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onProgress", "(I)V"),
                     (jint) message.progressPercent());
             break;
@@ -889,7 +953,7 @@ void FrontendClientCallbackImpl::onScanMessage(
             env->SetIntArrayRegion(freqs, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
 
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onFrequenciesReport", "([I)V"),
                     freqs);
             break;
@@ -900,21 +964,21 @@ void FrontendClientCallbackImpl::onScanMessage(
             env->SetIntArrayRegion(symbolRates, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
 
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onSymbolRates", "([I)V"),
                     symbolRates);
             break;
         }
         case FrontendScanMessageType::HIERARCHY: {
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onHierarchy", "(I)V"),
                     (jint) message.hierarchy());
             break;
         }
         case FrontendScanMessageType::ANALOG_TYPE: {
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onSignalType", "(I)V"),
                     (jint) message.analogType());
             break;
@@ -926,7 +990,7 @@ void FrontendClientCallbackImpl::onScanMessage(
             env->SetIntArrayRegion(plpIds, 0, jintV.size(), &jintV[0]);
 
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onPlpIds", "([I)V"),
                     plpIds);
             break;
@@ -938,7 +1002,7 @@ void FrontendClientCallbackImpl::onScanMessage(
             env->SetIntArrayRegion(groupIds, 0, jintV.size(), &jintV[0]);
 
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onGroupIds", "([I)V"),
                     groupIds);
             break;
@@ -950,7 +1014,7 @@ void FrontendClientCallbackImpl::onScanMessage(
             env->SetIntArrayRegion(streamIds, 0, jintV.size(), &jintV[0]);
 
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onInputStreamIds", "([I)V"),
                     streamIds);
             break;
@@ -961,21 +1025,21 @@ void FrontendClientCallbackImpl::onScanMessage(
             if (std.getDiscriminator() == FrontendScanMessage::Standard::hidl_discriminator::sStd) {
                 standard = (jint) std.sStd();
                 env->CallVoidMethod(
-                        mObject,
+                        frontend,
                         env->GetMethodID(clazz, "onDvbsStandard", "(I)V"),
                         standard);
             } else if (std.getDiscriminator() ==
                     FrontendScanMessage::Standard::hidl_discriminator::tStd) {
                 standard = (jint) std.tStd();
                 env->CallVoidMethod(
-                        mObject,
+                        frontend,
                         env->GetMethodID(clazz, "onDvbtStandard", "(I)V"),
                         standard);
             } else if (std.getDiscriminator() ==
                     FrontendScanMessage::Standard::hidl_discriminator::sifStd) {
                 standard = (jint) std.sifStd();
                 env->CallVoidMethod(
-                        mObject,
+                        frontend,
                         env->GetMethodID(clazz, "onAnalogSifStandard", "(I)V"),
                         standard);
             }
@@ -996,7 +1060,7 @@ void FrontendClientCallbackImpl::onScanMessage(
                 env->SetObjectArrayElement(array, i, obj);
             }
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onAtsc3PlpInfos",
                             "([Landroid/media/tv/tuner/frontend/Atsc3PlpInfo;)V"),
                     array);
@@ -1010,6 +1074,13 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
     ALOGD("FrontendClientCallbackImpl::onScanMessageExt1_1, type=%d", type);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
+    jobject frontend(env->NewLocalRef(mObject));
+    if (env->IsSameObject(frontend, nullptr)) {
+        ALOGE("FrontendClientCallbackImpl::onScanMessageExt1_1:"
+                "Frontend object has been freed. Ignoring callback.");
+        env->DeleteWeakGlobalRef(mObject);
+        return;
+    }
     switch(type) {
         case FrontendScanMessageTypeExt1_1::MODULATION: {
             jint modulation = -1;
@@ -1056,7 +1127,7 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
             }
             if (modulation > 0) {
                 env->CallVoidMethod(
-                        mObject,
+                        frontend,
                         env->GetMethodID(clazz, "onModulationReported", "(I)V"),
                         modulation);
             }
@@ -1065,7 +1136,7 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
         case FrontendScanMessageTypeExt1_1::HIGH_PRIORITY: {
             bool isHighPriority = message.isHighPriority();
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onPriorityReported", "(B)V"),
                     isHighPriority);
             break;
@@ -1073,13 +1144,21 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
         case FrontendScanMessageTypeExt1_1::DVBC_ANNEX: {
             jint dvbcAnnex = (jint) message.annex();
             env->CallVoidMethod(
-                    mObject,
+                    frontend,
                     env->GetMethodID(clazz, "onDvbcAnnexReported", "(I)V"),
                     dvbcAnnex);
             break;
         }
         default:
             break;
+    }
+}
+
+FrontendClientCallbackImpl::~FrontendClientCallbackImpl() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (mObject != NULL) {
+        env->DeleteWeakGlobalRef(mObject);
+        mObject = NULL;
     }
 }
 
@@ -1158,15 +1237,23 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
     if (mDemuxClient != NULL) {
         mDemuxClient->setFrontendDataSource(mFeClient);
     }
-    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject);
-    mFeClient->setCallback(feClientCb);
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jobject tuner(env->NewLocalRef(mObject));
+    if (env->IsSameObject(tuner, nullptr)) {
+        ALOGE("openFrontendByHandle"
+                "Tuner object has been freed. Failed to open frontend.");
+        env->DeleteWeakGlobalRef(mObject);
+        return NULL;
+    }
+
+    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject);
+    mFeClient->setCallback(feClientCb);
     // TODO: add more fields to frontend
     return env->NewObject(
             env->FindClass("android/media/tv/tuner/Tuner$Frontend"),
             gFields.frontendInitID,
-            mObject,
+            tuner,
             (jint) mFeId);
 }
 
@@ -1714,16 +1801,14 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
         dvrObj =
                 env->NewObject(
                         env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"),
-                        gFields.dvrRecorderInitID,
-                        mObject);
+                        gFields.dvrRecorderInitID);
         dvrClient->incStrong(dvrObj);
         env->SetLongField(dvrObj, gFields.dvrRecorderContext, (jlong)dvrClient.get());
     } else {
         dvrObj =
                 env->NewObject(
                         env->FindClass("android/media/tv/tuner/dvr/DvrPlayback"),
-                        gFields.dvrPlaybackInitID,
-                        mObject);
+                        gFields.dvrPlaybackInitID);
         dvrClient->incStrong(dvrObj);
         env->SetLongField(dvrObj, gFields.dvrPlaybackContext, (jlong)dvrClient.get());
     }

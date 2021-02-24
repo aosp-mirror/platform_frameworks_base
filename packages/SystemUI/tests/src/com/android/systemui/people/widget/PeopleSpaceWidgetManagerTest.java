@@ -16,6 +16,7 @@
 
 package com.android.systemui.people.widget;
 
+import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
@@ -167,7 +168,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         int[] widgetIdsArray = {};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
-        StatusBarNotification sbn = createConversationNotification(OTHER_SHORTCUT_ID);
+        StatusBarNotification sbn = createNotification(
+                OTHER_SHORTCUT_ID, /* isMessagingStyle = */ false, /* isMissedCall = */ false);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(sbn)
                 .setId(1));
@@ -207,7 +209,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         StatusBarNotification sbnWithoutPackageName = new SbnBuilder()
-                .setNotification(createMessagingStyleNotification(SHORTCUT_ID))
+                .setNotification(createMessagingStyleNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ false, /* isMissedCall = */ false))
                 .build();
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(sbnWithoutPackageName)
@@ -256,7 +259,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
-        StatusBarNotification sbn = createConversationNotification(OTHER_SHORTCUT_ID);
+        StatusBarNotification sbn = createNotification(
+                OTHER_SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(sbn)
                 .setId(1));
@@ -276,7 +280,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         StatusBarNotification sbnWithDifferentPackageName = new SbnBuilder()
-                .setNotification(createMessagingStyleNotification(SHORTCUT_ID))
+                .setNotification(createMessagingStyleNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ false, /* isMissedCall = */ false))
                 .setPkg(TEST_PACKAGE_B)
                 .build();
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
@@ -295,7 +300,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
-        StatusBarNotification sbn = createConversationNotification(OTHER_SHORTCUT_ID);
+        StatusBarNotification sbn = createNotification(
+                OTHER_SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(sbn)
                 .setId(1));
@@ -315,7 +321,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         StatusBarNotification sbnWithDifferentPackageName = new SbnBuilder()
-                .setNotification(createMessagingStyleNotification(SHORTCUT_ID))
+                .setNotification(createMessagingStyleNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false))
                 .setPkg(TEST_PACKAGE_B)
                 .build();
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
@@ -337,7 +344,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
-                .setSbn(createConversationNotification(SHORTCUT_ID))
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false))
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
@@ -367,7 +375,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
-                .setSbn(createConversationNotification(SHORTCUT_ID))
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false))
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
@@ -400,7 +409,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
         PeopleSpaceUtils.removeStorageForTile(mContext, SECOND_WIDGET_ID_WITH_SHORTCUT);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
-                .setSbn(createConversationNotification(SHORTCUT_ID))
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false))
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
@@ -417,33 +427,52 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDoNotUpdateNotificationPostedWithoutMessagesIfExistingTile()
+    public void testUpdateMissedCallNotificationWithoutContentPostedIfExistingTile()
             throws Exception {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
         setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
 
-        Notification notificationWithoutMessagingStyle = new Notification.Builder(mContext)
-                .setContentTitle("TEST_TITLE")
-                .setContentText("TEST_TEXT")
-                .setShortcutId(SHORTCUT_ID)
-                .build();
-        StatusBarNotification sbn = new SbnBuilder()
-                .setNotification(notificationWithoutMessagingStyle)
-                .setPkg(TEST_PACKAGE_A)
-                .setUid(0)
-                .build();
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
-                .setSbn(sbn)
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ false, /* isMissedCall = */ true))
                 .setId(1));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
         verify(mAppWidgetManager, times(1))
                 .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
                         mBundleArgumentCaptor.capture());
-        Bundle options = requireNonNull(mBundleArgumentCaptor.getValue());
-        assertThat((PeopleSpaceTile) options.getParcelable(OPTIONS_PEOPLE_SPACE_TILE))
-                .isEqualTo(PERSON_TILE);
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tile.getNotificationContent())
+                .isEqualTo(mContext.getString(R.string.missed_call));
+        verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
+                any());
+    }
+
+    @Test
+    public void testUpdateMissedCallNotificationWithContentPostedIfExistingTile()
+            throws Exception {
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+        setStorageForTile(SHORTCUT_ID, TEST_PACKAGE_A, WIDGET_ID_WITH_SHORTCUT);
+
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(createNotification(
+                        SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ true))
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT),
+                        mBundleArgumentCaptor.capture());
+        Bundle bundle = requireNonNull(mBundleArgumentCaptor.getValue());
+
+        PeopleSpaceTile tile = bundle.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        assertThat(tile.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
+        assertThat(tile.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT);
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
                 any());
     }
@@ -453,7 +482,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
-        StatusBarNotification sbn = createConversationNotification(SHORTCUT_ID);
+        StatusBarNotification sbn = createNotification(
+                SHORTCUT_ID, /* isMessagingStyle = */ true, /* isMissedCall = */ false);
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setSbn(sbn)
                 .setId(1));
@@ -483,21 +513,29 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         return convo;
     }
 
-    private Notification createMessagingStyleNotification(String shortcutId) {
-        return new Notification.Builder(mContext)
+    private Notification createMessagingStyleNotification(String shortcutId,
+            boolean isMessagingStyle, boolean isMissedCall) {
+        Notification.Builder builder = new Notification.Builder(mContext)
                 .setContentTitle("TEST_TITLE")
                 .setContentText("TEST_TEXT")
-                .setShortcutId(shortcutId)
-                .setStyle(new Notification.MessagingStyle(PERSON)
-                        .addMessage(
-                                new Notification.MessagingStyle.Message(NOTIFICATION_CONTENT, 10,
-                                        PERSON))
-                )
-                .build();
+                .setShortcutId(shortcutId);
+        if (isMessagingStyle) {
+            builder.setStyle(new Notification.MessagingStyle(PERSON)
+                    .addMessage(
+                            new Notification.MessagingStyle.Message(NOTIFICATION_CONTENT, 10,
+                                    PERSON))
+            );
+        }
+        if (isMissedCall) {
+            builder.setCategory(CATEGORY_MISSED_CALL);
+        }
+        return builder.build();
     }
 
-    private StatusBarNotification createConversationNotification(String shortcutId) {
-        Notification notification = createMessagingStyleNotification(shortcutId);
+    private StatusBarNotification createNotification(String shortcutId,
+            boolean isMessagingStyle, boolean isMissedCall) {
+        Notification notification = createMessagingStyleNotification(
+                shortcutId, isMessagingStyle, isMissedCall);
         return new SbnBuilder()
                 .setNotification(notification)
                 .setPkg(TEST_PACKAGE_A)

@@ -249,30 +249,48 @@ public final class DisplayManagerService extends SystemService {
 
     /** {@link DisplayBlanker} used by all {@link DisplayPowerController}s. */
     private final DisplayBlanker mDisplayBlanker = new DisplayBlanker() {
+        // Synchronized to avoid race conditions when updating multiple display states.
         @Override
-        public void requestDisplayState(int displayId, int state, float brightness) {
-            // TODO (b/168210494): Stop applying default display state to all displays.
-            if (displayId != Display.DEFAULT_DISPLAY) {
-                return;
-            }
-            final int[] displayIds;
+        public synchronized void requestDisplayState(int displayId, int state, float brightness) {
+            boolean allInactive = true;
+            boolean allOff = true;
+            final boolean stateChanged;
             synchronized (mSyncRoot) {
-                displayIds = mLogicalDisplayMapper.getDisplayIdsLocked();
+                final int index = mDisplayStates.indexOfKey(displayId);
+                if (index > -1) {
+                    final int currentState = mDisplayStates.valueAt(index);
+                    stateChanged = state != currentState;
+                    if (stateChanged) {
+                        final int size = mDisplayStates.size();
+                        for (int i = 0; i < size; i++) {
+                            final int displayState = i == index ? state : mDisplayStates.valueAt(i);
+                            if (displayState != Display.STATE_OFF) {
+                                allOff = false;
+                            }
+                            if (Display.isActiveState(displayState)) {
+                                allInactive = false;
+                            }
+                            if (!allOff && !allInactive) {
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    stateChanged = false;
+                }
             }
 
             // The order of operations is important for legacy reasons.
             if (state == Display.STATE_OFF) {
-                for (int id : displayIds) {
-                    requestDisplayStateInternal(id, state, brightness);
-                }
+                requestDisplayStateInternal(displayId, state, brightness);
             }
 
-            mDisplayPowerCallbacks.onDisplayStateChange(state);
+            if (stateChanged) {
+                mDisplayPowerCallbacks.onDisplayStateChange(allInactive, allOff);
+            }
 
             if (state != Display.STATE_OFF) {
-                for (int id : displayIds) {
-                    requestDisplayStateInternal(id, state, brightness);
-                }
+                requestDisplayStateInternal(displayId, state, brightness);
             }
         }
     };
@@ -1160,7 +1178,7 @@ public final class DisplayManagerService extends SystemService {
 
     private void handleLogicalDisplayRemovedLocked(@NonNull LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
-        mDisplayPowerControllers.delete(displayId);
+        mDisplayPowerControllers.removeReturnOld(displayId).stop();
         mDisplayStates.delete(displayId);
         mDisplayBrightnesses.delete(displayId);
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
@@ -2758,8 +2776,22 @@ public final class DisplayManagerService extends SystemService {
         public boolean requestPowerState(int groupId, DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
             synchronized (mSyncRoot) {
-                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
-                        .requestPowerState(request, waitForNegativeProximity);
+                final DisplayGroup displayGroup = mLogicalDisplayMapper.getDisplayGroupLocked(
+                        groupId);
+                if (displayGroup == null) {
+                    return true;
+                }
+
+                final int size = displayGroup.getSizeLocked();
+                boolean ready = true;
+                for (int i = 0; i < size; i++) {
+                    final DisplayPowerController displayPowerController =
+                            mDisplayPowerControllers.get(displayGroup.getIdLocked(i));
+                    ready &= displayPowerController.requestPowerState(request,
+                            waitForNegativeProximity);
+                }
+
+                return ready;
             }
         }
 
@@ -2768,13 +2800,6 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
                         .isProximitySensorAvailable();
-            }
-        }
-
-        @Override
-        public int getDisplayGroupId(int displayId) {
-            synchronized (mSyncRoot) {
-                return mLogicalDisplayMapper.getDisplayGroupIdLocked(displayId);
             }
         }
 

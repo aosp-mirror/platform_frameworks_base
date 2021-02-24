@@ -1308,6 +1308,7 @@ public class ProgressBar extends View {
      * @see #getSecondaryProgressTintList()
      * @see Drawable#setTintList(ColorStateList)
      */
+    @RemotableViewMethod
     public void setSecondaryProgressTintList(@Nullable ColorStateList tint) {
         if (mProgressTintInfo == null) {
             mProgressTintInfo = new ProgressTintInfo();
@@ -1619,6 +1620,7 @@ public class ProgressBar extends View {
      * @param stateDescription The state description.
      */
     @Override
+    @RemotableViewMethod
     public void setStateDescription(@Nullable CharSequence stateDescription) {
         mCustomStateDescription = stateDescription;
         if (stateDescription == null) {

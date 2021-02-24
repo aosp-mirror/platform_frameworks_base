@@ -380,9 +380,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Transitions provideTransitions(ShellTaskOrganizer organizer, TransactionPool pool,
-            @ShellMainThread ShellExecutor mainExecutor,
+            Context context, @ShellMainThread ShellExecutor mainExecutor,
             @ShellAnimationThread ShellExecutor animExecutor) {
-        return new Transitions(organizer, pool, mainExecutor, animExecutor);
+        return new Transitions(organizer, pool, context, mainExecutor, animExecutor);
     }
 
     //

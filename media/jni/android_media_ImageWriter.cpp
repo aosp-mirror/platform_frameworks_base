@@ -364,7 +364,7 @@ static void ImageWriter_classInit(JNIEnv* env, jclass clazz) {
 }
 
 static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobject jsurface,
-        jint maxImages, jint userFormat) {
+        jint maxImages, jint userFormat, jint userWidth, jint userHeight) {
     status_t res;
 
     ALOGV("%s: maxImages:%d", __FUNCTION__, maxImages);
@@ -405,19 +405,37 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
     // Get the dimension and format of the producer.
     sp<ANativeWindow> anw = producer;
     int32_t width, height, surfaceFormat;
-    if ((res = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, &width)) != OK) {
-        ALOGE("%s: Query Surface width failed: %s (%d)", __FUNCTION__, strerror(-res), res);
-        jniThrowRuntimeException(env, "Failed to query Surface width");
-        return 0;
+    if (userWidth < 0) {
+        if ((res = anw->query(anw.get(), NATIVE_WINDOW_WIDTH, &width)) != OK) {
+            ALOGE("%s: Query Surface width failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+            jniThrowRuntimeException(env, "Failed to query Surface width");
+            return 0;
+        }
+    } else {
+        width = userWidth;
     }
+
     ctx->setBufferWidth(width);
 
-    if ((res = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, &height)) != OK) {
-        ALOGE("%s: Query Surface height failed: %s (%d)", __FUNCTION__, strerror(-res), res);
-        jniThrowRuntimeException(env, "Failed to query Surface height");
-        return 0;
+    if (userHeight < 0) {
+        if ((res = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, &height)) != OK) {
+            ALOGE("%s: Query Surface height failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+            jniThrowRuntimeException(env, "Failed to query Surface height");
+            return 0;
+        }
+    } else {
+        height = userHeight;
     }
     ctx->setBufferHeight(height);
+
+    if ((userWidth > 0) && (userHeight > 0)) {
+        res = native_window_set_buffers_user_dimensions(anw.get(), userWidth, userHeight);
+        if (res != OK) {
+            ALOGE("%s: Set buffer dimensions failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+            jniThrowRuntimeException(env, "Set buffer dimensions failed");
+            return 0;
+        }
+    }
 
     // Query surface format if no valid user format is specified, otherwise, override surface format
     // with user format.
@@ -1045,7 +1063,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
 
 static JNINativeMethod gImageWriterMethods[] = {
     {"nativeClassInit",         "()V",                        (void*)ImageWriter_classInit },
-    {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;II)J",
+    {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;IIII)J",
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
     {"nativeAttachAndQueueImage", "(JJIJIIIIII)I",          (void*)ImageWriter_attachAndQueueImage },

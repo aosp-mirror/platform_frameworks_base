@@ -154,7 +154,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private KeyGenParameterSpec mSpec;
 
     private String mEntryAlias;
-    private int mEntryUid;
+    private int mEntryNamespace;
     private @KeyProperties.KeyAlgorithmEnum String mJcaKeyAlgorithm;
     private int mKeymasterAlgorithm = -1;
     private int mKeySizeBits;
@@ -218,7 +218,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             }
 
             mEntryAlias = spec.getKeystoreAlias();
-            mEntryUid = spec.getUid();
+            mEntryNamespace = spec.getNamespace();
             mSpec = spec;
             mKeymasterAlgorithm = keymasterAlgorithm;
             mKeySizeBits = spec.getKeySize();
@@ -439,7 +439,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     private void resetAll() {
         mEntryAlias = null;
-        mEntryUid = KeyProperties.NAMESPACE_APPLICATION;
+        mEntryNamespace = KeyProperties.NAMESPACE_APPLICATION;
         mJcaKeyAlgorithm = null;
         mKeymasterAlgorithm = -1;
         mKeymasterPurposes = null;
@@ -541,10 +541,10 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         KeyDescriptor descriptor = new KeyDescriptor();
         descriptor.alias = mEntryAlias;
-        descriptor.domain = mEntryUid == KeyProperties.NAMESPACE_APPLICATION
+        descriptor.domain = mEntryNamespace == KeyProperties.NAMESPACE_APPLICATION
                 ? Domain.APP
                 : Domain.SELINUX;
-        descriptor.nspace = mEntryUid;
+        descriptor.nspace = mEntryNamespace;
         descriptor.blob = null;
 
         boolean success = false;

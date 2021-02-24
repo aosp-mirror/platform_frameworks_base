@@ -16,18 +16,19 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.exitSplitScreen
-import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
@@ -39,13 +40,13 @@ import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEnt
 import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.dockedStackDividerBecomesInvisible
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -54,81 +55,100 @@ import org.junit.runners.Parameterized
  * Test open app to split screen.
  * To run this test: `atest WMShellFlickerTests:LegacySplitScreenToLauncher`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LegacySplitScreenToLauncher(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
+    testSpec: FlickerTestParameter
+) : LegacySplitScreenTransition(testSpec) {
+    private val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
+        .launcherStrategy.supportedLauncherPackage
+    private val testApp = SimpleAppHelper(instrumentation)
+
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = { configuration ->
+            setup {
+                test {
+                    device.wakeUpAndGoToHomeScreen()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
+                }
+                eachRun {
+                    testApp.launchViaIntent(wmHelper)
+                    this.setRotation(configuration.endRotation)
+                    device.launchSplitScreen(wmHelper)
+                    device.waitForIdle()
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit(wmHelper)
+                }
+            }
+            transitions {
+                device.exitSplitScreen()
+            }
+        }
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.endRotation)
+
+    @Presubmit
+    @Test
+    fun navBarLayerRotatesAndScales() =
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.endRotation)
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales() =
+        testSpec.statusBarLayerRotatesScales(testSpec.config.endRotation)
+
+    @Presubmit
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(launcherPackageName))
+
+    @Presubmit
+    @Test
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun dockedStackDividerBecomesInvisible() = testSpec.dockedStackDividerBecomesInvisible()
+
+    @Presubmit
+    @Test
+    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(testApp.getPackage())
+
+    @FlakyTest(bugId = 151179149)
+    @Test
+    fun focusDoesNotChange() = testSpec.focusDoesNotChange()
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
-                .launcherStrategy.supportedLauncherPackage
-            val testApp = SimpleAppHelper(instrumentation)
-
+        fun getParams(): Collection<FlickerTestParameter> {
             // b/161435597 causes the test not to work on 90 degrees
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
-                supportedRotations = listOf(Surface.ROTATION_0)) { configuration ->
-                withTestName {
-                    buildTestTag("splitScreenToLauncher", configuration)
-                }
-                repeat { configuration.repetitions }
-                setup {
-                    test {
-                        device.wakeUpAndGoToHomeScreen()
-                        device.openQuickStepAndClearRecentAppsFromOverview()
-                    }
-                    eachRun {
-                        testApp.launchViaIntent(wmHelper)
-                        this.setRotation(configuration.endRotation)
-                        device.launchSplitScreen()
-                        device.waitForIdle()
-                    }
-                }
-                teardown {
-                    eachRun {
-                        testApp.exit()
-                    }
-                    test {
-                        if (device.isInSplitScreen()) {
-                            device.exitSplitScreen()
-                        }
-                    }
-                }
-                transitions {
-                    device.exitSplitScreen()
-                }
-                assertions {
-                    windowManagerTrace {
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        visibleWindowsShownMoreThanOneConsecutiveEntry()
-                    }
-
-                    layersTrace {
-                        navBarLayerIsAlwaysVisible()
-                        statusBarLayerIsAlwaysVisible()
-                        noUncoveredRegions(configuration.endRotation)
-                        navBarLayerRotatesAndScales(configuration.endRotation)
-                        statusBarLayerRotatesScales(configuration.endRotation)
-                        visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName))
-
-                        // b/161435597 causes the test not to work on 90 degrees
-                        dockedStackDividerBecomesInvisible()
-
-                        layerBecomesInvisible(testApp.getPackage())
-                    }
-
-                    eventLog {
-                        focusDoesNotChange(bugId = 151179149)
-                    }
-                }
-            }
+            return FlickerTestParameterFactory.getInstance()
+                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0))
         }
     }
 }
