@@ -1284,15 +1284,15 @@
         android:backgroundPermission="android.permission.RECORD_BACKGROUND_AUDIO"
         android:protectionLevel="dangerous|instant" />
 
-    <!-- Allows an application to record audio while in the background.
-         <p>Protection level: dangerous
-    -->
+    <!-- @SystemApi @TestApi Allows an application to record audio while in the background.
+         This permission is not intended to be held by apps.
+         <p>Protection level: internal
+        @hide -->
     <permission android:name="android.permission.RECORD_BACKGROUND_AUDIO"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_recordBackgroundAudio"
         android:description="@string/permdesc_recordBackgroundAudio"
-        android:permissionFlags="hardRestricted|installerExemptIgnored"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="internal" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for activity recognition                        -->
@@ -1368,15 +1368,15 @@
         android:backgroundPermission="android.permission.BACKGROUND_CAMERA"
         android:protectionLevel="dangerous|instant" />
 
-    <!-- Required to be able to access the camera device in the background.
-         <p>Protection level: dangerous
-    -->
+    <!-- @SystemApi @TestApi Required to be able to access the camera device in the background.
+         This permission is not intended to be held by apps.
+         <p>Protection level: internal
+        @hide -->
     <permission android:name="android.permission.BACKGROUND_CAMERA"
             android:permissionGroup="android.permission-group.UNDEFINED"
             android:label="@string/permlab_backgroundCamera"
             android:description="@string/permdesc_backgroundCamera"
-            android:permissionFlags="hardRestricted|installerExemptIgnored"
-            android:protectionLevel="dangerous" />
+            android:protectionLevel="internal" />
 
     <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
            system only camera devices.

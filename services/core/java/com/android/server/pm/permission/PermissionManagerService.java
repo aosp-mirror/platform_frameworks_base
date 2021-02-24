@@ -771,10 +771,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             isRuntimePermission = bp.isRuntime();
 
-            if (bp.isInstallerExemptIgnored()) {
-                flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-            }
-
             final UidPermissionState uidState = getUidStateLocked(pkg, userId);
             if (uidState == null) {
                 Slog.e(TAG, "Missing permissions state for " + packageName + " and user " + userId);
