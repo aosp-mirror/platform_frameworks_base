@@ -12947,6 +12947,27 @@ package android.content.pm {
 
 }
 
+package android.content.pm.verify.domain {
+
+  public final class DomainVerificationManager {
+    method @Nullable public android.content.pm.verify.domain.DomainVerificationUserSelection getDomainVerificationUserSelection(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+  }
+
+  public final class DomainVerificationUserSelection implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getHostToStateMap();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.os.UserHandle getUser();
+    method @NonNull public boolean isLinkHandlingAllowed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.domain.DomainVerificationUserSelection> CREATOR;
+    field public static final int DOMAIN_STATE_NONE = 0; // 0x0
+    field public static final int DOMAIN_STATE_SELECTED = 1; // 0x1
+    field public static final int DOMAIN_STATE_VERIFIED = 2; // 0x2
+  }
+
+}
+
 package android.content.res {
 
   public class AssetFileDescriptor implements java.io.Closeable android.os.Parcelable {

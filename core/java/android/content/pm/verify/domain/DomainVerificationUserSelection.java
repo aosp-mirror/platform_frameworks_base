@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -36,28 +37,26 @@ import java.util.UUID;
  * Contains the user selection state for a package. This means all web HTTP(S) domains declared by a
  * package in its manifest, whether or not they were marked for auto verification.
  * <p>
- * By default, all apps are allowed to automatically open links with domains that they've
- * successfully verified against. This is reflected by {@link #isLinkHandlingAllowed()}. The user
- * can decide to disable this, disallowing the application from opening all links. Note that the
- * toggle affects <b>all</b> links and is not based on the verification state of the domains.
+ * Applications should use {@link #getHostToStateMap()} if necessary to
+ * check if/how they are verified for a domain, which is required starting from platform
+ * {@link android.os.Build.VERSION_CODES#S} in order to open {@link Intent}s which declare
+ * {@link Intent#CATEGORY_BROWSABLE} or no category and also match against
+ * {@link Intent#CATEGORY_DEFAULT} {@link android.content.IntentFilter}s, either through an
+ * explicit declaration of {@link Intent#CATEGORY_DEFAULT} or through the use of
+ * {@link android.content.pm.PackageManager#MATCH_DEFAULT_ONLY}, which is usually added for the
+ * caller when using {@link Context#startActivity(Intent)} and similar.
+ * <p>
+ * By default, all apps are allowed to automatically open links for the above case for domains that
+ * they've successfully verified against. This is reflected by {@link #isLinkHandlingAllowed()}.
+ * The user can decide to disable this, disallowing the application from opening all links. Note
+ * that the toggle affects <b>all</b> links and is not based on the verification state of the
+ * domains.
  * <p>
  * Assuming the toggle is enabled, the user can also select additional unverified domains to grant
  * to the application to open, which is reflected in {@link #getHostToStateMap()}. But only a single
  * application can be approved for a domain unless the applications are both approved. If another
  * application is approved, the user will not be allowed to enable the domain.
- * <p>
- * These values can be changed through the
- * {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String,
- * boolean)} and {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set,
- * boolean)} APIs.
- * <p>
- * Note that because state is per user, if a different user needs to be changed, one will need to
- * use {@link Context#createContextAsUser(UserHandle, int)} and hold the {@link
- * android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
- *
- * @hide
  */
-@SystemApi
 @SuppressWarnings("DefaultAnnotationParam")
 @DataClass(genAidl = true, genHiddenConstructor = true, genParcelable = true, genToString = true,
         genEqualsHashCode = true, genHiddenConstDefs = true)
@@ -70,9 +69,8 @@ public final class DomainVerificationUserSelection implements Parcelable {
     public static final int DOMAIN_STATE_NONE = 0;
 
     /**
-     * The domain has been selected through the
-     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set, boolean)}
-     * API, under the assumption it has not been reset by the system.
+     * The domain has been selected by the user. This may be reset to {@link #DOMAIN_STATE_NONE} if
+     * another application is selected or verified for the same domain.
      */
     public static final int DOMAIN_STATE_SELECTED = 1;
 
@@ -120,6 +118,15 @@ public final class DomainVerificationUserSelection implements Parcelable {
     private Map<String, Integer> unparcelHostToStateMap(Parcel in) {
         return DomainVerificationUtils.readHostMap(in, new ArrayMap<>(),
                 DomainVerificationUserSelection.class.getClassLoader());
+    }
+
+    /**
+     * @see DomainVerificationInfo#getIdentifier
+     * @hide
+     */
+    @SystemApi
+    public @NonNull UUID getIdentifier() {
+        return mIdentifier;
     }
 
 
@@ -198,14 +205,6 @@ public final class DomainVerificationUserSelection implements Parcelable {
                 NonNull.class, null, mHostToStateMap);
 
         // onConstructed(); // You can define this method to get a callback
-    }
-
-    /**
-     * @see DomainVerificationInfo#getIdentifier
-     */
-    @DataClass.Generated.Member
-    public @NonNull UUID getIdentifier() {
-        return mIdentifier;
     }
 
     /**
@@ -368,10 +367,10 @@ public final class DomainVerificationUserSelection implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1613683603297L,
+            time = 1614649708937L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserSelection.java",
-            inputSignatures = "public static final  int DOMAIN_STATE_NONE\npublic static final  int DOMAIN_STATE_SELECTED\npublic static final  int DOMAIN_STATE_VERIFIED\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nprivate  void parcelHostToStateMap(android.os.Parcel,int)\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> unparcelHostToStateMap(android.os.Parcel)\nclass DomainVerificationUserSelection extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final  int DOMAIN_STATE_NONE\npublic static final  int DOMAIN_STATE_SELECTED\npublic static final  int DOMAIN_STATE_VERIFIED\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nprivate  void parcelHostToStateMap(android.os.Parcel,int)\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> unparcelHostToStateMap(android.os.Parcel)\npublic @android.annotation.SystemApi @android.annotation.NonNull java.util.UUID getIdentifier()\nclass DomainVerificationUserSelection extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)")
     @Deprecated
     private void __metadata() {}
 

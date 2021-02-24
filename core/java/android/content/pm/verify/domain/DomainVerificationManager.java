@@ -29,60 +29,66 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * System service to access the domain verification APIs.
+ * System service to access domain verification APIs.
  *
- * Allows the approved domain verification
- * agent on the device (the sole holder of
- * {@link android.Manifest.permission#DOMAIN_VERIFICATION_AGENT}) to update the approval status
- * of domains declared by applications in their AndroidManifest.xml, to allow them to open those
- * links inside the app when selected by the user. This is done through querying
- * {@link #getDomainVerificationInfo(String)} and calling
- * {@link #setDomainVerificationStatus(UUID, Set, int)}.
- *
- * Also allows the domain preference settings (holder of
- * {@link android.Manifest.permission#UPDATE_DOMAIN_VERIFICATION_USER_SELECTION}) to update the
- * preferences of the user, when they have chosen to explicitly allow an application to open links.
- * This is done through querying {@link #getDomainVerificationUserSelection(String)} and calling
- * {@link #setDomainVerificationUserSelection(UUID, Set, boolean)} and
- * {@link #setDomainVerificationLinkHandlingAllowed(String, boolean)}.
- *
- * @hide
+ * Applications should use {@link #getDomainVerificationUserSelection(String)} if necessary to
+ * check if/how they are verified for a domain, which is required starting from platform
+ * {@link android.os.Build.VERSION_CODES#S} in order to open {@link Intent}s which declare
+ * {@link Intent#CATEGORY_BROWSABLE} or no category and also match against
+ * {@link Intent#CATEGORY_DEFAULT} {@link android.content.IntentFilter}s, either through an
+ * explicit declaration of {@link Intent#CATEGORY_DEFAULT} or through the use of
+ * {@link android.content.pm.PackageManager#MATCH_DEFAULT_ONLY}, which is usually added for the
+ * caller when using {@link Context#startActivity(Intent)} and similar.
  */
-@SystemApi
 @SystemService(Context.DOMAIN_VERIFICATION_SERVICE)
 public final class DomainVerificationManager {
 
     /**
-     * Extra field name for a {@link DomainVerificationRequest} for the requested packages.
-     * Passed to an the domain verification agent that handles
+     * Extra field name for a {@link DomainVerificationRequest} for the requested packages. Passed
+     * to an the domain verification agent that handles
      * {@link Intent#ACTION_DOMAINS_NEED_VERIFICATION}.
+     *
+     * @hide
      */
+    @SystemApi
     public static final String EXTRA_VERIFICATION_REQUEST =
             "android.content.pm.verify.domain.extra.VERIFICATION_REQUEST";
 
     /**
      * No response has been recorded by either the system or any verification agent.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int STATE_NO_RESPONSE = DomainVerificationState.STATE_NO_RESPONSE;
 
-    /** The verification agent has explicitly verified the domain at some point. */
+    /**
+     * The verification agent has explicitly verified the domain at some point.
+     *
+     * @hide
+     */
+    @SystemApi
     public static final int STATE_SUCCESS = DomainVerificationState.STATE_SUCCESS;
 
     /**
-     * The first available custom response code. This and any greater integer, along with
-     * {@link #STATE_SUCCESS} are the only values settable by the verification agent. All values
-     * will be treated as if the domain is unverified.
+     * The first available custom response code. This and any greater integer, along with {@link
+     * #STATE_SUCCESS} are the only values settable by the verification agent. All values will be
+     * treated as if the domain is unverified.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int STATE_FIRST_VERIFIER_DEFINED =
             DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
 
-    /** @hide */
+    /**
+     * @hide
+     */
     @NonNull
     public static String stateToDebugString(@DomainVerificationState.State int state) {
         switch (state) {
@@ -108,9 +114,12 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * Checks if a state considers the corresponding domain to be successfully verified. The
-     * domain verification agent may use this to determine whether or not to re-verify a domain.
+     * Checks if a state considers the corresponding domain to be successfully verified. The domain
+     * verification agent may use this to determine whether or not to re-verify a domain.
+     *
+     * @hide
      */
+    @SystemApi
     public static boolean isStateVerified(@DomainVerificationState.State int state) {
         switch (state) {
             case DomainVerificationState.STATE_SUCCESS:
@@ -130,9 +139,12 @@ public final class DomainVerificationManager {
     /**
      * Checks if a state is modifiable by the domain verification agent. This is useful as the
      * platform may add new state codes in newer versions, and older verification agents can use
-     * this method to determine if a state can be changed without having to be aware of what the
-     * new state means.
+     * this method to determine if a state can be changed without having to be aware of what the new
+     * state means.
+     *
+     * @hide
      */
+    @SystemApi
     public static boolean isStateModifiable(@DomainVerificationState.State int state) {
         switch (state) {
             case DomainVerificationState.STATE_NO_RESPONSE:
@@ -151,8 +163,9 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * For determine re-verify policy. This is hidden from the domain verification agent so that
-     * no behavior is made based on the result.
+     * For determine re-verify policy. This is hidden from the domain verification agent so that no
+     * behavior is made based on the result.
+     *
      * @hide
      */
     public static boolean isStateDefault(@DomainVerificationState.State int state) {
@@ -171,13 +184,19 @@ public final class DomainVerificationManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @hide
+     */
     public static final int ERROR_INVALID_DOMAIN_SET = 1;
-    /** @hide */
+    /**
+     * @hide
+     */
     public static final int ERROR_NAME_NOT_FOUND = 2;
 
-    /** @hide */
-    @IntDef(prefix = { "ERROR_" }, value = {
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"ERROR_"}, value = {
             ERROR_INVALID_DOMAIN_SET,
             ERROR_NAME_NOT_FOUND,
     })
@@ -188,7 +207,27 @@ public final class DomainVerificationManager {
 
     private final IDomainVerificationManager mDomainVerificationManager;
 
-    /** @hide */
+
+    /**
+     * System service to access the domain verification APIs.
+     * <p>
+     * Allows the approved domain verification agent on the device (the sole holder of {@link
+     * android.Manifest.permission#DOMAIN_VERIFICATION_AGENT}) to update the approval status of
+     * domains declared by applications in their AndroidManifest.xml, to allow them to open those
+     * links inside the app when selected by the user. This is done through querying {@link
+     * #getDomainVerificationInfo(String)} and calling {@link #setDomainVerificationStatus(UUID,
+     * Set, int)}.
+     * <p>
+     * Also allows the domain preference settings (holder of
+     * {@link android.Manifest.permission#UPDATE_DOMAIN_VERIFICATION_USER_SELECTION})
+     * to update the preferences of the user, when they have chosen to explicitly allow an
+     * application to open links. This is done through querying
+     * {@link #getDomainVerificationUserSelection(String)} and calling
+     * {@link #setDomainVerificationUserSelection(UUID, Set, boolean)} and
+     * {@link #setDomainVerificationLinkHandlingAllowed(String, boolean)}.
+     *
+     * @hide
+     */
     public DomainVerificationManager(Context context,
             IDomainVerificationManager domainVerificationManager) {
         mContext = context;
@@ -200,7 +239,9 @@ public final class DomainVerificationManager {
      * usually a heavy workload and should be done infrequently.
      *
      * @return the current snapshot of package names with valid autoVerify URLs.
+     * @hide
      */
+    @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
     public List<String> queryValidVerificationPackageNames() {
@@ -217,7 +258,9 @@ public final class DomainVerificationManager {
      * @return the data for the package, or null if it does not declare any autoVerify domains
      * @throws NameNotFoundException If the package is unavailable. This is an unrecoverable error
      *                               and should not be re-tried except on a time scheduled basis.
+     * @hide
      */
+    @SystemApi
     @Nullable
     @RequiresPermission(anyOf = {
             android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
@@ -240,25 +283,25 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * Change the verification status of the {@param domains} of the package associated with
-     * {@param domainSetId}.
+     * Change the verification status of the {@param domains} of the package associated with {@param
+     * domainSetId}.
      *
      * @param domainSetId See {@link DomainVerificationInfo#getIdentifier()}.
      * @param domains     List of host names to change the state of.
      * @param state       See {@link DomainVerificationInfo#getHostToStateMap()}.
      * @throws IllegalArgumentException If the ID is invalidated or the {@param domains} are
      *                                  invalid. This usually means the work being processed by the
-     *                                  verification agent is outdated and a new request should
-     *                                  be scheduled, if one has not already been done as part of
-     *                                  the {@link Intent#ACTION_DOMAINS_NEED_VERIFICATION}
-     *                                  broadcast.
+     *                                  verification agent is outdated and a new request should be
+     *                                  scheduled, if one has not already been done as part of the
+     *                                  {@link Intent#ACTION_DOMAINS_NEED_VERIFICATION} broadcast.
      * @throws NameNotFoundException    If the ID is known to be good, but the package is
-     *                                  unavailable. This may be because the package is
-     *                                  installed on a volume that is no longer mounted. This
-     *                                  error is unrecoverable until the package is available
-     *                                  again, and should not be re-tried except on a time
-     *                                  scheduled basis.
+     *                                  unavailable. This may be because the package is installed on
+     *                                  a volume that is no longer mounted. This error is
+     *                                  unrecoverable until the package is available again, and
+     *                                  should not be re-tried except on a time scheduled basis.
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
     public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
             @DomainVerificationState.State int state) throws NameNotFoundException {
@@ -284,7 +327,10 @@ public final class DomainVerificationManager {
      * with this enabled is not guaranteed to be the sole link handler for its domains.
      * <p>
      * By default, all apps are allowed to open links. Users must disable them explicitly.
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed) throws NameNotFoundException {
@@ -307,11 +353,11 @@ public final class DomainVerificationManager {
      * Update the recorded user selection for the given {@param domains} for the given {@param
      * domainSetId}. This state is recorded for the lifetime of a domain for a package on device,
      * and will never be reset by the system short of an app data clear.
-     *
+     * <p>
      * This state is stored per device user. If another user needs to be changed, the appropriate
-     * permissions must be acquired and
-     * {@link Context#createPackageContextAsUser(String, int, UserHandle)} should be used.
-     *
+     * permissions must be acquired and {@link Context#createContextAsUser(UserHandle, int)} should
+     * be used.
+     * <p>
      * Enabling an unverified domain will allow an application to open it, but this can only occur
      * if no other app on the device is approved for a higher approval level. This can queried
      * using {@link #getOwnersForDomain(String)}.
@@ -329,12 +375,13 @@ public final class DomainVerificationManager {
      * @throws IllegalArgumentException If the ID is invalidated or the {@param domains} are
      *                                  invalid.
      * @throws NameNotFoundException    If the ID is known to be good, but the package is
-     *                                  unavailable. This may be because the package is
-     *                                  installed on a volume that is no longer mounted. This
-     *                                  error is unrecoverable until the package is available
-     *                                  again, and should not be re-tried except on a time
-     *                                  scheduled basis.
+     *                                  unavailable. This may be because the package is installed on
+     *                                  a volume that is no longer mounted. This error is
+     *                                  unrecoverable until the package is available again, and
+     *                                  should not be re-tried except on a time scheduled basis.
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled) throws NameNotFoundException {
@@ -355,19 +402,12 @@ public final class DomainVerificationManager {
 
     /**
      * Retrieve the user selection data for the given {@param packageName} and the current user.
-     * It is the responsibility of the caller to ensure that the
-     * {@link DomainVerificationUserSelection#getIdentifier()} matches any prior API calls.
-     *
-     * This state is stored per device user. If another user needs to be accessed, the appropriate
-     * permissions must be acquired and
-     * {@link Context#createPackageContextAsUser(String, int, UserHandle)} should be used.
      *
      * @param packageName The app to query state for.
-     * @return the user selection verification data for the given package for the current user,
-     * or null if the package does not declare any HTTP/HTTPS domains.
+     * @return the user selection verification data for the given package for the current user, or
+     * null if the package does not declare any HTTP/HTTPS domains.
      */
     @Nullable
-    @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName) throws NameNotFoundException {
         try {
@@ -393,7 +433,10 @@ public final class DomainVerificationManager {
      *
      * By default the list will be returned ordered from lowest to highest
      * priority.
+     *
+     * @hide
      */
+    @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public List<DomainOwner> getOwnersForDomain(@NonNull String domain) {
@@ -442,8 +485,9 @@ public final class DomainVerificationManager {
      * Thrown if a {@link DomainVerificationInfo#getIdentifier()}} or an associated set of domains
      * provided by the caller is no longer valid. This may be recoverable, and the caller should
      * re-query the package name associated with the ID using
-     * {@link #getDomainVerificationInfo(String)} in order to check. If that also fails, then the
-     * package is no longer known to the device and thus all pending work for it should be dropped.
+     * {@link #getDomainVerificationInfo(String)}
+     * in order to check. If that also fails, then the package is no longer known to the device and
+     * thus all pending work for it should be dropped.
      *
      * @hide
      */
@@ -455,7 +499,9 @@ public final class DomainVerificationManager {
         public static final int REASON_UNKNOWN_DOMAIN = 4;
         public static final int REASON_UNABLE_TO_APPROVE = 5;
 
-        /** @hide */
+        /**
+         * @hide
+         */
         @IntDef({
                 REASON_ID_NULL,
                 REASON_ID_INVALID,
@@ -494,7 +540,9 @@ public final class DomainVerificationManager {
         @Nullable
         private final String mPackageName;
 
-        /** @hide */
+        /**
+         * @hide
+         */
         public InvalidDomainSetException(@Nullable UUID domainSetId, @Nullable String packageName,
                 @Reason int reason) {
             super(buildMessage(domainSetId, packageName, reason));

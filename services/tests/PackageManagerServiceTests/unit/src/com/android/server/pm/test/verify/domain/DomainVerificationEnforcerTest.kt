@@ -155,6 +155,15 @@ class DomainVerificationEnforcerTest {
                     assertApprovedVerifier(it.callingUid, it.proxy)
                 },
                 enforcer(
+                    Type.SELECTION_QUERENT,
+                    "approvedUserSelectionQuerent"
+                ) {
+                    assertApprovedUserSelectionQuerent(
+                        it.callingUid, it.callingUserId,
+                        it.targetPackageName, it.userId
+                    )
+                },
+                enforcer(
                     Type.SELECTOR,
                     "approvedUserSelector"
                 ) {
@@ -211,7 +220,7 @@ class DomainVerificationEnforcerTest {
                 service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") {
                     setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true, it.userId)
                 },
-                service(Type.SELECTOR_USER, "getUserSelectionUserId") {
+                service(Type.SELECTION_QUERENT, "getUserSelectionUserId") {
                     getDomainVerificationUserSelection(it.targetPackageName, it.userId)
                 },
                 service(Type.SELECTOR_USER, "setUserSelectionUserId") {
@@ -345,6 +354,7 @@ class DomainVerificationEnforcerTest {
             Type.INTERNAL -> internal()
             Type.QUERENT -> approvedQuerent()
             Type.VERIFIER -> approvedVerifier()
+            Type.SELECTION_QUERENT -> approvedUserSelectionQuerent(verifyCrossUser = true)
             Type.SELECTOR -> approvedUserSelector(verifyCrossUser = false)
             Type.SELECTOR_USER -> approvedUserSelector(verifyCrossUser = true)
             Type.LEGACY_QUERENT -> legacyQuerent()
@@ -354,7 +364,7 @@ class DomainVerificationEnforcerTest {
         }.run { /*exhaust*/ }
     }
 
-    fun internal() {
+    private fun internal() {
         val context: Context = mockThrowOnUnmocked()
         val target = params.construct(context)
 
@@ -368,7 +378,7 @@ class DomainVerificationEnforcerTest {
         }
     }
 
-    fun approvedQuerent() {
+    private fun approvedQuerent() {
         val allowUserSelection = AtomicBoolean(false)
         val allowPreferredApps = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
@@ -410,7 +420,7 @@ class DomainVerificationEnforcerTest {
         runMethod(target, NON_VERIFIER_UID)
     }
 
-    fun approvedVerifier() {
+    private fun approvedVerifier() {
         val allowDomainVerificationAgent = AtomicBoolean(false)
         val allowIntentVerificationAgent = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
@@ -452,7 +462,56 @@ class DomainVerificationEnforcerTest {
         assertFails { runMethod(target, NON_VERIFIER_UID) }
     }
 
-    fun approvedUserSelector(verifyCrossUser: Boolean) {
+    private fun approvedUserSelectionQuerent(verifyCrossUser: Boolean) {
+        val allowInteractAcrossUsers = AtomicBoolean(false)
+        val context: Context = mockThrowOnUnmocked {
+            initPermission(
+                allowInteractAcrossUsers,
+                android.Manifest.permission.INTERACT_ACROSS_USERS
+            )
+        }
+        val target = params.construct(context)
+
+        fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
+            // User selector makes no distinction by UID
+            val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
+            if (throws) {
+                allUids.forEach {
+                    assertFails {
+                        runMethod(target, it, visible = true, callingUserId, targetUserId)
+                    }
+                }
+            } else {
+                allUids.forEach {
+                    runMethod(target, it, visible = true, callingUserId, targetUserId)
+                }
+            }
+
+            // User selector doesn't use QUERY_ALL, so the invisible package should always fail
+            allUids.forEach {
+                assertFails {
+                    runMethod(target, it, visible = false, callingUserId, targetUserId)
+                }
+            }
+        }
+
+        val callingUserId = 0
+        val notCallingUserId = 1
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = true)
+        }
+
+        allowInteractAcrossUsers.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = false)
+        }
+    }
+
+    private fun approvedUserSelector(verifyCrossUser: Boolean) {
         val allowUserSelection = AtomicBoolean(false)
         val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
@@ -751,6 +810,9 @@ class DomainVerificationEnforcerTest {
 
         // INTERNAL || domain verification agent
         VERIFIER,
+
+        // No permissions, allows all apps to view domain state for visible packages
+        SELECTION_QUERENT,
 
         // Holding the user setting permission
         SELECTOR,

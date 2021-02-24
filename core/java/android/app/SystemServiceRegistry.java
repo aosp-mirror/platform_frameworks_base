@@ -1421,7 +1421,6 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        // TODO(b/159952358): Only register this service for the domain verification agent?
         registerService(Context.DOMAIN_VERIFICATION_SERVICE, DomainVerificationManager.class,
                 new CachedServiceFetcher<DomainVerificationManager>() {
                     @Override

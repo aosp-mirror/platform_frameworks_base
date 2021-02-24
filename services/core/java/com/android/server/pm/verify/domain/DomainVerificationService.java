@@ -629,7 +629,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName, @UserIdInt int userId) throws NameNotFoundException {
-        if (!mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
+        if (!mEnforcer.assertApprovedUserSelectionQuerent(mConnection.getCallingUid(),
                 mConnection.getCallingUserId(), packageName, userId)) {
             throw DomainVerificationUtils.throwPackageUnavailable(packageName);
         }
