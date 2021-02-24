@@ -1044,15 +1044,19 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationClear(int callingUid, int callingPid,
-                String pkg, String tag, int id, int userId, String key,
+                String pkg, int userId, String key,
                 @NotificationStats.DismissalSurface int dismissalSurface,
                 @NotificationStats.DismissalSentiment int dismissalSentiment,
                 NotificationVisibility nv) {
+            String tag = null;
+            int id = 0;
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.recordDismissalSurface(dismissalSurface);
                     r.recordDismissalSentiment(dismissalSentiment);
+                    tag = r.getSbn().getTag();
+                    id = r.getSbn().getId();
                 }
             }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
