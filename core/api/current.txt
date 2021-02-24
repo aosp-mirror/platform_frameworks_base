@@ -8371,7 +8371,9 @@ package android.appwidget {
     method protected android.view.View getDefaultView();
     method protected android.view.View getErrorView();
     method protected void prepareView(android.view.View);
+    method public void resetColorResources();
     method public void setAppWidget(int, android.appwidget.AppWidgetProviderInfo);
+    method public void setColorResources(@NonNull android.util.SparseIntArray);
     method public void setCurrentSize(@NonNull android.graphics.PointF);
     method public void setExecutor(java.util.concurrent.Executor);
     method public void setOnLightBackground(boolean);
