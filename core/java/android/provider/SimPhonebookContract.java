@@ -44,8 +44,11 @@ import java.util.Objects;
  * The contract between the provider of contact records on the device's SIM cards and applications.
  * Contains definitions of the supported URIs and columns.
  *
- * <p>This content provider does not support any of the QUERY_ARG_SQL* bundle arguments. An
- * IllegalArgumentException will be thrown if these are included.
+ * <h3>Permissions</h3>
+ * <p>
+ * Querying this provider requires {@link android.Manifest.permission#READ_CONTACTS} and writing
+ * to this provider requires {@link android.Manifest.permission#WRITE_CONTACTS}
+ * </p>
  */
 public final class SimPhonebookContract {
 
@@ -85,7 +88,73 @@ public final class SimPhonebookContract {
         }
     }
 
-    /** Constants for the contact records on a SIM card. */
+    /**
+     * Constants for the contact records on a SIM card.
+     *
+     * <h3 id="simrecords-data">Data</h3>
+     * <p>
+     * Data is stored in a specific elementary file on a specific SIM card and these are isolated
+     * from each other. SIM cards are identified by their subscription ID. SIM cards may not support
+     * all or even any of the elementary file types. A SIM will have constraints on
+     * the values of the data that can be stored in each elementary file. The available SIMs,
+     * their supported elementary file types and the constraints on the data can be discovered by
+     * querying {@link ElementaryFiles#CONTENT_URI}. Each elementary file has a fixed capacity
+     * for the number of records that may be stored. This can be determined from the value
+     * of the {@link ElementaryFiles#MAX_RECORDS} column.
+     * </p>
+     * <p>
+     * The {@link SimRecords#PHONE_NUMBER} column can only contain dialable characters and this
+     * applies regardless of the SIM that is being used. See
+     * {@link android.telephony.PhoneNumberUtils#isDialable(char)} for more details. Additionally
+     * the phone number can contain at most {@link ElementaryFiles#PHONE_NUMBER_MAX_LENGTH}
+     * characters. The {@link SimRecords#NAME} column can contain at most
+     * {@link ElementaryFiles#NAME_MAX_LENGTH} bytes when it is encoded for storage on the SIM.
+     * Encoding is done internally and so the name should be provided unencoded but the number of
+     * bytes required to encode it will vary depending on the characters it contains. This length
+     * can be determined by calling
+     * {@link SimRecords#getEncodedNameLength(ContentResolver, String)}.
+     * </p>
+     * <h3>Operations </h3>
+     * <dl>
+     * <dd><b>Insert</b></dd>
+     * <p>
+     * Only {@link ElementaryFiles#EF_ADN} supports inserts. {@link SimRecords#PHONE_NUMBER}
+     * is a required column. If the value provided for this column is missing, null, empty
+     * or violates the requirements discussed in the <a href="#simrecords-data">Data</a>
+     * section above an {@link IllegalArgumentException} will be thrown. The
+     * {@link SimRecords#NAME} column may be omitted but if provided and it violates any of
+     * the requirements discussed in the <a href="#simrecords-data">Data</a> section above
+     * an {@link IllegalArgumentException} will be thrown.
+     * </p>
+     * <p>
+     * If an insert is not possible because the elementary file is full then an
+     * {@link IllegalStateException} will be thrown.
+     * </p>
+     * <dd><b>Update</b></dd>
+     * <p>
+     * Updates can only be performed for individual records on {@link ElementaryFiles#EF_ADN}.
+     * A specific record is referenced via the Uri returned by
+     * {@link SimRecords#getItemUri(int, int, int)}. Updates have the same constraints and
+     * behavior for the {@link SimRecords#PHONE_NUMBER} and {@link SimRecords#NAME} as insert.
+     * However, in the case of update the {@link SimRecords#PHONE_NUMBER} may be omitted as
+     * the existing record will already have a valid value.
+     * </p>
+     * <dd><b>Delete</b></dd>
+     * <p>
+     * Delete may only be performed for individual records on {@link ElementaryFiles#EF_ADN}.
+     * Deleting records will free up space for use by future inserts.
+     * </p>
+     * <dd><b>Query</b></dd>
+     * <p>
+     * All the records stored on a specific elementary file can be read via a Uri returned by
+     * {@link SimRecords#getContentUri(int, int)}. This query always returns all records; there
+     * is no support for filtering via a selection. An individual record can be queried via a Uri
+     * returned by {@link SimRecords#getItemUri(int, int, int)}. Queries will throw an
+     * {@link IllegalArgumentException} when the SIM with the subscription ID or the elementary file
+     * type are invalid or unavailable.
+     * </p>
+     * </dl>
+     */
     public static final class SimRecords {
 
         /**
@@ -197,8 +266,8 @@ public final class SimPhonebookContract {
          * be discovered by querying {@link ElementaryFiles#CONTENT_URI}.
          *
          * <p>If a SIM with the provided subscription ID does not exist or the SIM with the provided
-         * subscription ID doesn't support the specified entity file then queries will return
-         * and empty cursor and inserts will throw an {@link IllegalArgumentException}
+         * subscription ID doesn't support the specified entity file then all operations will
+         * throw an {@link IllegalArgumentException}.
          *
          * @param subscriptionId the subscriptionId of the SIM card that this Uri will reference
          * @param efType         the elementary file on the SIM that this Uri will reference
@@ -233,6 +302,9 @@ public final class SimPhonebookContract {
          *                       must be greater than 0. If there is no record with this record
          *                       number in the specified entity file then it will be treated as a
          *                       non-existent record.
+         * @see ElementaryFiles#SUBSCRIPTION_ID
+         * @see ElementaryFiles#EF_TYPE
+         * @see #RECORD_NUMBER
          */
         @NonNull
         public static Uri getItemUri(
@@ -287,7 +359,28 @@ public final class SimPhonebookContract {
 
     }
 
-    /** Constants for metadata about the elementary files of the SIM cards in the phone. */
+    /**
+     * Constants for metadata about the elementary files of the SIM cards in the phone.
+     *
+     * <h3>Operations </h3>
+     * <dl>
+     * <dd><b>Insert</b></dd>
+     * <p>Insert is not supported for the Uris defined in this class.</p>
+     * <dd><b>Update</b></dd>
+     * <p>Update is not supported for the Uris defined in this class.</p>
+     * <dd><b>Delete</b></dd>
+     * <p>Delete is not supported for the Uris defined in this class.</p>
+     * <dd><b>Query</b></dd>
+     * <p>
+     * The elementary files for all the inserted SIMs can be read via
+     * {@link ElementaryFiles#CONTENT_URI}. Unsupported elementary files are omitted from the
+     * results. This Uri always returns all supported elementary files for all available SIMs; it
+     * does not support filtering via a selection. A specific elementary file can be queried
+     * via a Uri returned by {@link ElementaryFiles#getItemUri(int, int)}. If the elementary file
+     * referenced by this Uri is unsupported by the SIM then the query will return an empty cursor.
+     * </p>
+     * </dl>
+     */
     public static final class ElementaryFiles {
 
         /** {@link SubscriptionInfo#getSimSlotIndex()} of the SIM for this row. */
