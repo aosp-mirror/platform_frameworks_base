@@ -96,7 +96,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
-import android.net.NetworkInfo;
 import android.net.NetworkStack;
 import android.net.NetworkState;
 import android.net.NetworkStats;
@@ -1264,7 +1263,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /**
      * Inspect all current {@link NetworkState} to derive mapping from {@code iface} to {@link
-     * NetworkStatsHistory}. When multiple {@link NetworkInfo} are active on a single {@code iface},
+     * NetworkStatsHistory}. When multiple networks are active on a single {@code iface},
      * they are combined under a single {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
@@ -1294,84 +1293,82 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean combineSubtypeEnabled = mSettings.getCombineSubtypeEnabled();
         final ArraySet<String> mobileIfaces = new ArraySet<>();
         for (NetworkState state : states) {
-            if (state.networkInfo.isConnected()) {
-                final boolean isMobile = isNetworkTypeMobile(state.networkInfo.getType());
-                final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, state.network);
-                final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
-                        : getSubTypeForState(state);
-                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
-                        isDefault, subType);
+            final boolean isMobile = isNetworkTypeMobile(state.legacyNetworkType);
+            final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, state.network);
+            final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
+                    : getSubTypeForState(state);
+            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
+                    isDefault, subType);
 
-                // Traffic occurring on the base interface is always counted for
-                // both total usage and UID details.
-                final String baseIface = state.linkProperties.getInterfaceName();
-                if (baseIface != null) {
-                    findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
-                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
+            // Traffic occurring on the base interface is always counted for
+            // both total usage and UID details.
+            final String baseIface = state.linkProperties.getInterfaceName();
+            if (baseIface != null) {
+                findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
+                findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
 
-                    // Build a separate virtual interface for VT (Video Telephony) data usage.
-                    // Only do this when IMS is not metered, but VT is metered.
-                    // If IMS is metered, then the IMS network usage has already included VT usage.
-                    // VT is considered always metered in framework's layer. If VT is not metered
-                    // per carrier's policy, modem will report 0 usage for VT calls.
-                    if (state.networkCapabilities.hasCapability(
-                            NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
+                // Build a separate virtual interface for VT (Video Telephony) data usage.
+                // Only do this when IMS is not metered, but VT is metered.
+                // If IMS is metered, then the IMS network usage has already included VT usage.
+                // VT is considered always metered in framework's layer. If VT is not metered
+                // per carrier's policy, modem will report 0 usage for VT calls.
+                if (state.networkCapabilities.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_IMS) && !ident.getMetered()) {
 
-                        // Copy the identify from IMS one but mark it as metered.
-                        NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
-                                ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
-                                ident.getRoaming(), true /* metered */,
-                                true /* onDefaultNetwork */);
-                        findOrCreateNetworkIdentitySet(mActiveIfaces, IFACE_VT).add(vtIdent);
-                        findOrCreateNetworkIdentitySet(mActiveUidIfaces, IFACE_VT).add(vtIdent);
-                    }
-
-                    if (isMobile) {
-                        mobileIfaces.add(baseIface);
-                    }
+                    // Copy the identify from IMS one but mark it as metered.
+                    NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
+                            ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
+                            ident.getRoaming(), true /* metered */,
+                            true /* onDefaultNetwork */);
+                    findOrCreateNetworkIdentitySet(mActiveIfaces, IFACE_VT).add(vtIdent);
+                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, IFACE_VT).add(vtIdent);
                 }
 
-                // Traffic occurring on stacked interfaces is usually clatd.
-                //
-                // UID stats are always counted on the stacked interface and never on the base
-                // interface, because the packets on the base interface do not actually match
-                // application sockets (they're not IPv4) and thus the app uid is not known.
-                // For receive this is obvious: packets must be translated from IPv6 to IPv4
-                // before the application socket can be found.
-                // For transmit: either they go through the clat daemon which by virtue of going
-                // through userspace strips the original socket association during the IPv4 to
-                // IPv6 translation process, or they are offloaded by eBPF, which doesn't:
-                // However, on an ebpf device the accounting is done in cgroup ebpf hooks,
-                // which don't trigger again post ebpf translation.
-                // (as such stats accounted to the clat uid are ignored)
-                //
-                // Interface stats are more complicated.
-                //
-                // eBPF offloaded 464xlat'ed packets never hit base interface ip6tables, and thus
-                // *all* statistics are collected by iptables on the stacked v4-* interface.
-                //
-                // Additionally for ingress all packets bound for the clat IPv6 address are dropped
-                // in ip6tables raw prerouting and thus even non-offloaded packets are only
-                // accounted for on the stacked interface.
-                //
-                // For egress, packets subject to eBPF offload never appear on the base interface
-                // and only appear on the stacked interface. Thus to ensure packets increment
-                // interface stats, we must collate data from stacked interfaces. For xt_qtaguid
-                // (or non eBPF offloaded) TX they would appear on both, however egress interface
-                // accounting is explicitly bypassed for traffic from the clat uid.
-                //
-                final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
-                for (LinkProperties stackedLink : stackedLinks) {
-                    final String stackedIface = stackedLink.getInterfaceName();
-                    if (stackedIface != null) {
-                        findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
-                        findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
-                        if (isMobile) {
-                            mobileIfaces.add(stackedIface);
-                        }
+                if (isMobile) {
+                    mobileIfaces.add(baseIface);
+                }
+            }
 
-                        mStatsFactory.noteStackedIface(stackedIface, baseIface);
+            // Traffic occurring on stacked interfaces is usually clatd.
+            //
+            // UID stats are always counted on the stacked interface and never on the base
+            // interface, because the packets on the base interface do not actually match
+            // application sockets (they're not IPv4) and thus the app uid is not known.
+            // For receive this is obvious: packets must be translated from IPv6 to IPv4
+            // before the application socket can be found.
+            // For transmit: either they go through the clat daemon which by virtue of going
+            // through userspace strips the original socket association during the IPv4 to
+            // IPv6 translation process, or they are offloaded by eBPF, which doesn't:
+            // However, on an ebpf device the accounting is done in cgroup ebpf hooks,
+            // which don't trigger again post ebpf translation.
+            // (as such stats accounted to the clat uid are ignored)
+            //
+            // Interface stats are more complicated.
+            //
+            // eBPF offloaded 464xlat'ed packets never hit base interface ip6tables, and thus
+            // *all* statistics are collected by iptables on the stacked v4-* interface.
+            //
+            // Additionally for ingress all packets bound for the clat IPv6 address are dropped
+            // in ip6tables raw prerouting and thus even non-offloaded packets are only
+            // accounted for on the stacked interface.
+            //
+            // For egress, packets subject to eBPF offload never appear on the base interface
+            // and only appear on the stacked interface. Thus to ensure packets increment
+            // interface stats, we must collate data from stacked interfaces. For xt_qtaguid
+            // (or non eBPF offloaded) TX they would appear on both, however egress interface
+            // accounting is explicitly bypassed for traffic from the clat uid.
+            //
+            final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
+            for (LinkProperties stackedLink : stackedLinks) {
+                final String stackedIface = stackedLink.getInterfaceName();
+                if (stackedIface != null) {
+                    findOrCreateNetworkIdentitySet(mActiveIfaces, stackedIface).add(ident);
+                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
+                    if (isMobile) {
+                        mobileIfaces.add(stackedIface);
                     }
+
+                    mStatsFactory.noteStackedIface(stackedIface, baseIface);
                 }
             }
         }

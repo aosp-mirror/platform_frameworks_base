@@ -160,7 +160,7 @@ public final class DhcpResults implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof DhcpResults)) return false;

@@ -18,10 +18,13 @@ package android.net;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
+
+import com.android.net.module.util.NetUtils;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -58,7 +61,7 @@ public final class IpPrefix implements Parcelable {
             throw new IllegalArgumentException(
                     "IpPrefix has " + address.length + " bytes which is neither 4 nor 16");
         }
-        NetworkUtils.maskRawAddress(address, prefixLength);
+        NetUtils.maskRawAddress(address, prefixLength);
     }
 
     /**
@@ -124,7 +127,7 @@ public final class IpPrefix implements Parcelable {
      * @return {@code true} if both objects are equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof IpPrefix)) {
             return false;
         }
@@ -189,7 +192,7 @@ public final class IpPrefix implements Parcelable {
         if (addrBytes == null || addrBytes.length != this.address.length) {
             return false;
         }
-        NetworkUtils.maskRawAddress(addrBytes, prefixLength);
+        NetUtils.maskRawAddress(addrBytes, prefixLength);
         return Arrays.equals(this.address, addrBytes);
     }
 
@@ -203,7 +206,7 @@ public final class IpPrefix implements Parcelable {
     public boolean containsPrefix(@NonNull IpPrefix otherPrefix) {
         if (otherPrefix.getPrefixLength() < prefixLength) return false;
         final byte[] otherAddress = otherPrefix.getRawAddress();
-        NetworkUtils.maskRawAddress(otherAddress, prefixLength);
+        NetUtils.maskRawAddress(otherAddress, prefixLength);
         return Arrays.equals(otherAddress, address);
     }
 

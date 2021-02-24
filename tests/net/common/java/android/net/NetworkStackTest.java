@@ -15,20 +15,8 @@
  */
 package android.net;
 
-import static android.Manifest.permission.NETWORK_STACK;
-import static android.content.pm.PackageManager.PERMISSION_DENIED;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
-import static android.net.NetworkStack.checkNetworkStackPermission;
-import static android.net.NetworkStack.checkNetworkStackPermissionOr;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.Build;
 import android.os.IBinder;
 
@@ -46,42 +34,13 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 public class NetworkStackTest {
-    private static final String [] OTHER_PERMISSION = {"otherpermission1", "otherpermission2"};
-
     @Rule
     public DevSdkIgnoreRule mDevSdkIgnoreRule = new DevSdkIgnoreRule();
 
-    @Mock Context mCtx;
     @Mock private IBinder mConnectorBinder;
 
     @Before public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void testCheckNetworkStackPermission() throws Exception {
-        when(mCtx.checkCallingOrSelfPermission(eq(NETWORK_STACK))).thenReturn(PERMISSION_GRANTED);
-        when(mCtx.checkCallingOrSelfPermission(eq(PERMISSION_MAINLINE_NETWORK_STACK)))
-                .thenReturn(PERMISSION_DENIED);
-        checkNetworkStackPermission(mCtx);
-        checkNetworkStackPermissionOr(mCtx, OTHER_PERMISSION);
-
-        when(mCtx.checkCallingOrSelfPermission(eq(NETWORK_STACK))).thenReturn(PERMISSION_DENIED);
-        when(mCtx.checkCallingOrSelfPermission(eq(PERMISSION_MAINLINE_NETWORK_STACK)))
-                .thenReturn(PERMISSION_GRANTED);
-        checkNetworkStackPermission(mCtx);
-        checkNetworkStackPermissionOr(mCtx, OTHER_PERMISSION);
-
-        when(mCtx.checkCallingOrSelfPermission(any())).thenReturn(PERMISSION_DENIED);
-
-        try {
-            checkNetworkStackPermissionOr(mCtx, OTHER_PERMISSION);
-        } catch (SecurityException e) {
-            // Expect to get a SecurityException
-            return;
-        }
-
-        fail("Expect fail but permission granted.");
     }
 
     @Test @IgnoreUpTo(Build.VERSION_CODES.Q)

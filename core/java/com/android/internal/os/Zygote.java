@@ -597,7 +597,7 @@ public final class Zygote {
     static Runnable forkUsap(LocalServerSocket usapPoolSocket,
                              int[] sessionSocketRawFDs,
                              boolean isPriorityFork) {
-        FileDescriptor[] pipeFDs = null;
+        FileDescriptor[] pipeFDs;
 
         try {
             pipeFDs = Os.pipe2(O_CLOEXEC);
@@ -1103,4 +1103,11 @@ public final class Zygote {
      * fully-feature Memory Tagging, rather than the static Tagged Pointers.
      */
     public static native boolean nativeSupportsTaggedPointers();
+
+    /**
+     * Returns the current native tagging level, as one of the
+     * MEMORY_TAG_LEVEL_* constants. Returns zero if no tagging is present, or
+     * we failed to determine the level.
+     */
+    public static native int nativeCurrentTaggingLevel();
 }

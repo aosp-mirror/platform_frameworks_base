@@ -299,6 +299,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final ArraySet<File> unclaimedStages = newArraySet(
                 stagingDir.listFiles(sStageFilter));
 
+        // We also need to clean up orphaned staging directory for staged sessions
+        final File stagedSessionStagingDir = Environment.getDataStagingDirectory(volumeUuid);
+        unclaimedStages.addAll(newArraySet(stagedSessionStagingDir.listFiles()));
+
         // Ignore stages claimed by active sessions
         for (int i = 0; i < mSessions.size(); i++) {
             final PackageInstallerSession session = mSessions.valueAt(i);

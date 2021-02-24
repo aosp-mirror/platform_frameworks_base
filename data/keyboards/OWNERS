@@ -1,5 +1,3 @@
 set noparent
 
-michaelwr@google.com
-svv@google.com
-lzye@google.com
+include /services/core/java/com/android/server/input/OWNERS

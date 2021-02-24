@@ -44,7 +44,7 @@ public final class AdvertiseData implements Parcelable {
     @Nullable
     private final List<ParcelUuid> mServiceUuids;
 
-    @Nullable
+    @NonNull
     private final List<ParcelUuid> mServiceSolicitationUuids;
 
     private final SparseArray<byte[]> mManufacturerSpecificData;
@@ -77,7 +77,7 @@ public final class AdvertiseData implements Parcelable {
     /**
      * Returns a list of service solicitation UUIDs within the advertisement that we invite to connect.
      */
-    @Nullable
+    @NonNull
     public List<ParcelUuid> getServiceSolicitationUuids() {
         return mServiceSolicitationUuids;
     }
@@ -221,7 +221,7 @@ public final class AdvertiseData implements Parcelable {
     public static final class Builder {
         @Nullable
         private List<ParcelUuid> mServiceUuids = new ArrayList<ParcelUuid>();
-        @Nullable
+        @NonNull
         private List<ParcelUuid> mServiceSolicitationUuids = new ArrayList<ParcelUuid>();
         private SparseArray<byte[]> mManufacturerSpecificData = new SparseArray<byte[]>();
         private Map<ParcelUuid, byte[]> mServiceData = new ArrayMap<ParcelUuid, byte[]>();

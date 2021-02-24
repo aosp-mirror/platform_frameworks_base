@@ -555,7 +555,7 @@ public class HdmiControlService extends SystemService {
     private void bootCompleted() {
         // on boot, if device is interactive, set HDMI CEC state as powered on as well
         if (mPowerManager.isInteractive() && isPowerStandbyOrTransient()) {
-            onWakeUp();
+            mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
         }
     }
 

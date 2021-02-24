@@ -63,6 +63,9 @@ message NetworkRequestProto {
         // higher-scoring network will not go into the background immediately,
         // but will linger and go into the background after the linger timeout.
         TYPE_BACKGROUND_REQUEST = 5;
+        // Like TRACK_DEFAULT, but tracks the system default network, instead of
+        // the default network of the calling application.
+        TYPE_TRACK_SYSTEM_DEFAULT = 6;
     }
     // The type of the request. This is only used by the system and is always
     // NONE elsewhere.

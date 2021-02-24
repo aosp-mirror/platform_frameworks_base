@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.telephony.ims.ImsException;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.util.Log;
@@ -47,7 +48,7 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
      * Receives the request of publishing capabilities from the network and deliver this request
      * to the framework via the registered capability exchange event listener.
      */
-    public void onRequestPublishCapabilities(int publishTriggerType) {
+    public void onRequestPublishCapabilities(int publishTriggerType) throws ImsException {
         ICapabilityExchangeEventListener listener = mListenerBinder;
         if (listener == null) {
             return;
@@ -56,13 +57,15 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
             listener.onRequestPublishCapabilities(publishTriggerType);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "request publish capabilities exception: " + e);
+            throw new ImsException("Remote is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
     /**
      * Receives the unpublish notification and deliver this callback to the framework.
      */
-    public void onUnpublish() {
+    public void onUnpublish() throws ImsException {
         ICapabilityExchangeEventListener listener = mListenerBinder;
         if (listener == null) {
             return;
@@ -71,6 +74,8 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
             listener.onUnpublish();
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Unpublish exception: " + e);
+            throw new ImsException("Remote is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -79,7 +84,8 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
      * request to the framework.
      */
     public void onRemoteCapabilityRequest(@NonNull Uri contactUri,
-            @NonNull List<String> remoteCapabilities, @NonNull OptionsRequestCallback callback) {
+            @NonNull List<String> remoteCapabilities, @NonNull OptionsRequestCallback callback)
+            throws ImsException {
         ICapabilityExchangeEventListener listener = mListenerBinder;
         if (listener == null) {
             return;
@@ -87,10 +93,11 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
 
         IOptionsRequestCallback internalCallback = new IOptionsRequestCallback.Stub() {
             @Override
-            public void respondToCapabilityRequest(RcsContactUceCapability ownCapabilities) {
+            public void respondToCapabilityRequest(RcsContactUceCapability ownCapabilities,
+                    boolean isBlocked) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    callback.onRespondToCapabilityRequest(ownCapabilities);
+                    callback.onRespondToCapabilityRequest(ownCapabilities, isBlocked);
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -110,6 +117,8 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
             listener.onRemoteCapabilityRequest(contactUri, remoteCapabilities, internalCallback);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote capability request exception: " + e);
+            throw new ImsException("Remote is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 }

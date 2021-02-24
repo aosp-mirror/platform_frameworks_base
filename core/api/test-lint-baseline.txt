@@ -483,6 +483,8 @@ GetterSetterNames: android.location.LocationRequest#isLocationSettingsIgnored():
     
 GetterSetterNames: android.location.LocationRequest#isLowPowerMode():
     
+GetterSetterNames: android.net.NetworkPolicyManager#getRestrictBackground():
+    Symmetric method for `setRestrictBackground` must be named `isRestrictBackground`; was `getRestrictBackground`
 GetterSetterNames: android.os.IncidentReportArgs#isAll():
     
 GetterSetterNames: android.service.notification.NotificationStats#setDirectReplied():

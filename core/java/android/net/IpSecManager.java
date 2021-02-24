@@ -782,6 +782,42 @@ public final class IpSecManager {
             }
         }
 
+        /**
+         * Update the underlying network for this IpSecTunnelInterface.
+         *
+         * <p>This new underlying network will be used for all transforms applied AFTER this call is
+         * complete. Before new {@link IpSecTransform}(s) with matching addresses are applied to
+         * this tunnel interface, traffic will still use the old SA, and be routed on the old
+         * underlying network.
+         *
+         * <p>To migrate IPsec tunnel mode traffic, a caller should:
+         *
+         * <ol>
+         *   <li>Update the IpSecTunnelInterface’s underlying network.
+         *   <li>Apply {@link IpSecTransform}(s) with matching addresses to this
+         *       IpSecTunnelInterface.
+         * </ol>
+         *
+         * @param underlyingNetwork the new {@link Network} that will carry traffic for this tunnel.
+         *     This network MUST never be the network exposing this IpSecTunnelInterface, otherwise
+         *     this method will throw an {@link IllegalArgumentException}.
+         */
+        // TODO: b/169171001 Update the documentation when transform migration is supported.
+        // The purpose of making updating network and applying transforms separate is to leave open
+        // the possibility to support lossless migration procedures. To do that, Android platform
+        // will need to support multiple inbound tunnel mode transforms, just like it can support
+        // multiple transport mode transforms.
+        @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
+        public void setUnderlyingNetwork(@NonNull Network underlyingNetwork) throws IOException {
+            try {
+                mService.setNetworkForTunnelInterface(
+                        mResourceId, underlyingNetwork, mOpPackageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         private IpSecTunnelInterface(@NonNull Context ctx, @NonNull IIpSecService service,
                 @NonNull InetAddress localAddress, @NonNull InetAddress remoteAddress,
                 @NonNull Network underlyingNetwork)

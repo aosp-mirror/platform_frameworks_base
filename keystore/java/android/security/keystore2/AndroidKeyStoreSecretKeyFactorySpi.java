@@ -95,6 +95,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         boolean userAuthenticationValidWhileOnBody = false;
         boolean trustedUserPresenceRequired = false;
         boolean trustedUserConfirmationRequired = false;
+        int remainingUsageCount = KeyProperties.UNRESTRICTED_USAGE_COUNT;
         try {
             for (Authorization a : key.getAuthorizations()) {
                 switch (a.keyParameter.tag) {
@@ -195,6 +196,16 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                         trustedUserConfirmationRequired =
                                 KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
                         break;
+                    case KeymasterDefs.KM_TAG_USAGE_COUNT_LIMIT:
+                        long remainingUsageCountUnsigned =
+                                KeyStore2ParameterUtils.getUnsignedInt(a);
+                        if (remainingUsageCountUnsigned > Integer.MAX_VALUE) {
+                            throw new ProviderException(
+                                    "Usage count of limited use key too long: "
+                                     + remainingUsageCountUnsigned);
+                        }
+                        remainingUsageCount = (int) remainingUsageCountUnsigned;
+                        break;
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -247,7 +258,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 trustedUserPresenceRequired,
                 invalidatedByBiometricEnrollment,
                 trustedUserConfirmationRequired,
-                securityLevel);
+                securityLevel,
+                remainingUsageCount);
     }
 
     private static BigInteger getGateKeeperSecureUserId() throws ProviderException {

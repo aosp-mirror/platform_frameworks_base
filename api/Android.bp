@@ -14,6 +14,14 @@
 
 package {
     default_visibility: ["//visibility:private"],
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-MIT
+    //   SPDX-license-identifier-Unicode-DFS
+    default_applicable_licenses: ["frameworks_base_license"],
 }
 
 genrule {
@@ -28,6 +36,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-current.txt",
     srcs: [
+        ":android.net.ipsec.ike{.public.api.txt}",
         ":art.module.public.api{.public.api.txt}",
         ":conscrypt.module.public.api{.public.api.txt}",
         ":framework-media{.public.api.txt}",
@@ -59,8 +68,25 @@ genrule {
 }
 
 genrule {
+    name: "frameworks-base-api-current-compat",
+    srcs: [
+        ":android.api.public.latest",
+        ":android-incompatibilities.api.public.latest",
+        ":frameworks-base-api-current.txt",
+    ],
+    out: ["stdout.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 " +
+        "--check-compatibility:api:released $(location :android.api.public.latest) " +
+        "--baseline:compatibility:released $(location :android-incompatibilities.api.public.latest) " +
+        "$(location :frameworks-base-api-current.txt) " +
+        "> $(genDir)/stdout.txt",
+}
+
+genrule {
     name: "frameworks-base-api-current.srcjar",
     srcs: [
+        ":android.net.ipsec.ike{.public.stubs.source}",
         ":api-stubs-docs-non-updatable",
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
@@ -82,6 +108,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-removed.txt",
     srcs: [
+        ":android.net.ipsec.ike{.public.removed-api.txt}",
         ":art.module.public.api{.public.removed-api.txt}",
         ":conscrypt.module.public.api{.public.removed-api.txt}",
         ":framework-media{.public.removed-api.txt}",
@@ -114,6 +141,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-system-current.txt",
     srcs: [
+        ":android.net.ipsec.ike{.system.api.txt}",
         ":framework-media{.system.api.txt}",
         ":framework-mediaprovider{.system.api.txt}",
         ":framework-permission{.system.api.txt}",
@@ -142,8 +170,27 @@ genrule {
 }
 
 genrule {
+    name: "frameworks-base-api-system-current-compat",
+    srcs: [
+        ":android.api.system.latest",
+        ":android-incompatibilities.api.system.latest",
+        ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-system-current.txt",
+    ],
+    out: ["stdout.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 " +
+        "--check-compatibility:api:released $(location :android.api.system.latest) " +
+        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
+        "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
+        "$(location :frameworks-base-api-system-current.txt) " +
+        "> $(genDir)/stdout.txt",
+}
+
+genrule {
     name: "frameworks-base-api-system-removed.txt",
     srcs: [
+        ":android.net.ipsec.ike{.system.removed-api.txt}",
         ":framework-media{.system.removed-api.txt}",
         ":framework-mediaprovider{.system.removed-api.txt}",
         ":framework-permission{.system.removed-api.txt}",
@@ -174,6 +221,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-module-lib-current.txt",
     srcs: [
+        ":android.net.ipsec.ike{.module-lib.api.txt}",
         ":framework-media{.module-lib.api.txt}",
         ":framework-mediaprovider{.module-lib.api.txt}",
         ":framework-permission{.module-lib.api.txt}",
@@ -201,8 +249,30 @@ genrule {
 }
 
 genrule {
+    name: "frameworks-base-api-module-lib-current-compat",
+    srcs: [
+        ":android.api.module-lib.latest",
+        ":android-incompatibilities.api.module-lib.latest",
+        ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-module-lib-current.txt",
+    ],
+    out: ["stdout.txt"],
+    tools: ["metalava"],
+    cmd: "$(location metalava) --no-banner --format=v2 " +
+        "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
+        // Note: having "public" be the base of module-lib is not perfect -- it should
+        // ideally be a merged public+system), but this will  help when migrating from
+        // MODULE_LIBS -> public.
+        "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
+        "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
+        "$(location :frameworks-base-api-module-lib-current.txt) " +
+        "> $(genDir)/stdout.txt",
+}
+
+genrule {
     name: "frameworks-base-api-module-lib-removed.txt",
     srcs: [
+        ":android.net.ipsec.ike{.module-lib.removed-api.txt}",
         ":framework-media{.module-lib.removed-api.txt}",
         ":framework-mediaprovider{.module-lib.removed-api.txt}",
         ":framework-permission{.module-lib.removed-api.txt}",

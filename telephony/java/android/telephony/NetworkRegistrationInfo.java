@@ -344,6 +344,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
             // TODO: Instead of doing this, we should create a formal way for cloning cell identity.
             // Cell identity is not an immutable object so we have to deep copy it.
             mCellIdentity = CellIdentity.CREATOR.createFromParcel(p);
+            p.recycle();
         }
 
         if (nri.mVoiceSpecificInfo != null) {

@@ -996,7 +996,7 @@ public class KeyStore {
      */
     public int addAuthToken(byte[] authToken) {
         try {
-            new Authorization().addAuthToken(authToken);
+            Authorization.addAuthToken(authToken);
             return mBinder.addAuthToken(authToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);

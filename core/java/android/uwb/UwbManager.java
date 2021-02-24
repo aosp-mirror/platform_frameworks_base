@@ -16,9 +16,11 @@
 
 package android.uwb;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -154,6 +156,7 @@ public final class UwbManager {
      * @param executor an {@link Executor} to execute given callback
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public void registerAdapterStateCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AdapterStateCallback callback) {
         mAdapterStateListener.register(executor, callback);
@@ -168,6 +171,7 @@ public final class UwbManager {
      *
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public void unregisterAdapterStateCallback(@NonNull AdapterStateCallback callback) {
         mAdapterStateListener.unregister(callback);
     }
@@ -181,6 +185,7 @@ public final class UwbManager {
      * @return {@link PersistableBundle} of the device's supported UWB protocols and parameters
      */
     @NonNull
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public PersistableBundle getSpecificationInfo() {
         try {
             return mUwbAdapter.getSpecificationInfo();
@@ -194,6 +199,7 @@ public final class UwbManager {
      *
      * @return true if ranging is supported
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public boolean isRangingSupported() {
         try {
             return mUwbAdapter.isRangingSupported();
@@ -250,6 +256,7 @@ public final class UwbManager {
      * @return angle of arrival type supported
      */
     @AngleOfArrivalSupportType
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public int getAngleOfArrivalSupport() {
         try {
             switch (mUwbAdapter.getAngleOfArrivalSupport()) {
@@ -281,6 +288,7 @@ public final class UwbManager {
      * @return {@link List} of supported channel numbers ordered by preference
      */
     @NonNull
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public List<Integer> getSupportedChannelNumbers() {
         List<Integer> channels = new ArrayList<>();
         try {
@@ -300,6 +308,7 @@ public final class UwbManager {
      * @return {@link List} of supported preamble code indices
      */
     @NonNull
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public Set<Integer> getSupportedPreambleCodeIndices() {
         Set<Integer> preambles = new HashSet<>();
         try {
@@ -320,6 +329,7 @@ public final class UwbManager {
      * @return the timestamp resolution in nanoseconds
      */
     @SuppressLint("MethodNameUnits")
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public long elapsedRealtimeResolutionNanos() {
         try {
             return mUwbAdapter.getTimestampResolutionNanos();
@@ -333,6 +343,7 @@ public final class UwbManager {
      *
      * @return the maximum allowed number of simultaneously open {@link RangingSession} instances.
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public int getMaxSimultaneousSessions() {
         try {
             return mUwbAdapter.getMaxSimultaneousSessions();
@@ -347,6 +358,7 @@ public final class UwbManager {
      *
      * @return the maximum number of remote devices per {@link RangingSession}
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public int getMaxRemoteDevicesPerInitiatorSession() {
         try {
             return mUwbAdapter.getMaxRemoteDevicesPerInitiatorSession();
@@ -361,6 +373,7 @@ public final class UwbManager {
      *
      * @return the maximum number of remote devices per {@link RangingSession}
      */
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public int getMaxRemoteDevicesPerResponderSession() {
         try {
             return mUwbAdapter.getMaxRemoteDevicesPerResponderSession();
@@ -396,6 +409,7 @@ public final class UwbManager {
      *         {@link RangingSession.Callback#onOpened(RangingSession)}.
      */
     @NonNull
+    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
     public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {

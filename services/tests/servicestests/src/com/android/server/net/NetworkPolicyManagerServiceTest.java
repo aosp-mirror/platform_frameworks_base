@@ -19,11 +19,13 @@ package com.android.server.net;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -112,8 +114,6 @@ import android.net.INetworkPolicyListener;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkState;
@@ -1829,11 +1829,11 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
-     * Exhaustively test isUidNetworkingBlocked to output the expected results based on external
+     * Exhaustively test checkUidNetworkingBlocked to output the expected results based on external
      * conditions.
      */
     @Test
-    public void testIsUidNetworkingBlocked() {
+    public void testCheckUidNetworkingBlocked() {
         final ArrayList<Pair<Boolean, Integer>> expectedBlockedStates = new ArrayList<>();
 
         // Metered network. Data saver on.
@@ -1877,17 +1877,16 @@ public class NetworkPolicyManagerServiceTest {
 
     private void verifyNetworkBlockedState(boolean metered, boolean backgroundRestricted,
             ArrayList<Pair<Boolean, Integer>> expectedBlockedStateForRules) {
-        final NetworkPolicyManagerInternal npmi = LocalServices
-                .getService(NetworkPolicyManagerInternal.class);
 
         for (Pair<Boolean, Integer> pair : expectedBlockedStateForRules) {
             final boolean expectedResult = pair.first;
             final int rule = pair.second;
             assertEquals(formatBlockedStateError(UID_A, rule, metered, backgroundRestricted),
-                    expectedResult,
-                    npmi.isUidNetworkingBlocked(UID_A, rule, metered, backgroundRestricted));
+                    expectedResult, mService.checkUidNetworkingBlocked(UID_A, rule,
+                            metered, backgroundRestricted));
             assertFalse(formatBlockedStateError(SYSTEM_UID, rule, metered, backgroundRestricted),
-                    npmi.isUidNetworkingBlocked(SYSTEM_UID, rule, metered, backgroundRestricted));
+                    mService.checkUidNetworkingBlocked(SYSTEM_UID, rule, metered,
+                            backgroundRestricted));
         }
     }
 
@@ -1986,13 +1985,6 @@ public class NetworkPolicyManagerServiceTest {
         return users;
     }
 
-    private NetworkInfo buildNetworkInfo() {
-        final NetworkInfo ni = new NetworkInfo(ConnectivityManager.TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_LTE, null, null);
-        ni.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
-        return ni;
-    }
-
     private LinkProperties buildLinkProperties(String iface) {
         final LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(iface);
@@ -2046,13 +2038,12 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private static NetworkState buildWifi() {
-        final NetworkInfo info = new NetworkInfo(TYPE_WIFI, 0, null, null);
-        info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+        networkCapabilities.addTransportType(TRANSPORT_WIFI);
         networkCapabilities.setSSID(TEST_SSID);
-        return new NetworkState(info, prop, networkCapabilities, null, null, TEST_SSID);
+        return new NetworkState(TYPE_WIFI, prop, networkCapabilities, null, null);
     }
 
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
@@ -2073,10 +2064,10 @@ public class NetworkPolicyManagerServiceTest {
         when(mCarrierConfigManager.getConfigForSubId(eq(TEST_SUB_ID)))
                 .thenReturn(mCarrierConfig);
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
-                new NetworkState(buildNetworkInfo(),
+                new NetworkState(TYPE_MOBILE,
                         buildLinkProperties(TEST_IFACE),
                         buildNetworkCapabilities(TEST_SUB_ID, roaming),
-                        new Network(TEST_NET_ID), TEST_IMSI, null)
+                        new Network(TEST_NET_ID), TEST_IMSI)
         });
     }
 

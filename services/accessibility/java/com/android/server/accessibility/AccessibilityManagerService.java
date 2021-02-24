@@ -766,6 +766,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
+
+            if (Binder.getCallingPid() == OWN_PROCESS_ID) {
+                return new ArrayList<>(getUserStateLocked(resolvedUserId).mInstalledServices);
+            }
             return getUserStateLocked(resolvedUserId).mInstalledServices;
         }
     }

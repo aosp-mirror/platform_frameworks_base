@@ -19,17 +19,13 @@
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="apct-instrumentation" />
 
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
         <option name="remount-system" value="true" />
         <option name="push" value="OverlayDeviceTests.apk->/system/app/OverlayDeviceTests.apk" />
     </target_preparer>
-
-    <!-- Reboot to have the test APK scanned by PM and reboot after to remove the test APK. -->
-    <target_preparer class="com.android.tradefed.targetprep.RebootTargetPreparer">
-      <option name="pre-reboot" value="true" />
-      <option name="post-reboot" value="true" />
-    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RebootTargetPreparer" />
 
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
         <option name="cleanup-apks" value="true" />

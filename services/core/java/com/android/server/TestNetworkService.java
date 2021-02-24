@@ -50,6 +50,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.NetdUtils;
+import com.android.net.module.util.NetworkStackConstants;
 
 import java.io.UncheckedIOException;
 import java.net.Inet4Address;
@@ -280,10 +281,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
         // Add global routes (but as non-default, non-internet providing network)
         if (allowIPv4) {
-            lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.ANY, 0), null, iface));
+            lp.addRoute(new RouteInfo(new IpPrefix(
+                    NetworkStackConstants.IPV4_ADDR_ANY, 0), null, iface));
         }
         if (allowIPv6) {
-            lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null, iface));
+            lp.addRoute(new RouteInfo(new IpPrefix(
+                    NetworkStackConstants.IPV6_ADDR_ANY, 0), null, iface));
         }
 
         final TestNetworkAgent agent = new TestNetworkAgent(context, looper, nc, lp,

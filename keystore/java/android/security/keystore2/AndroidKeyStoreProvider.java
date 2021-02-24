@@ -352,14 +352,17 @@ public class AndroidKeyStoreProvider extends Provider {
         try {
             response = keyStore.getKeyEntry(descriptor);
         } catch (android.security.KeyStoreException e) {
-            if (e.getErrorCode() == ResponseCode.KEY_PERMANENTLY_INVALIDATED) {
-                throw new KeyPermanentlyInvalidatedException(
-                        "User changed or deleted their auth credentials",
-                        e);
-            } else {
-                throw (UnrecoverableKeyException)
-                        new UnrecoverableKeyException("Failed to obtain information about key")
-                                .initCause(e);
+            switch (e.getErrorCode()) {
+                case ResponseCode.KEY_NOT_FOUND:
+                    return null;
+                case ResponseCode.KEY_PERMANENTLY_INVALIDATED:
+                    throw new KeyPermanentlyInvalidatedException(
+                            "User changed or deleted their auth credentials",
+                            e);
+                default:
+                    throw (UnrecoverableKeyException)
+                            new UnrecoverableKeyException("Failed to obtain information about key")
+                                    .initCause(e);
             }
         }
 

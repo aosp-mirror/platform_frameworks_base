@@ -89,6 +89,7 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.AndroidKeyStoreMaintenance;
 import android.security.Authorization;
 import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
@@ -225,7 +226,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
-
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private ManagedProfilePasswordCache mManagedProfilePasswordCache;
 
@@ -280,6 +280,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             super.onBootPhase(phase);
             if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mLockSettingsService.migrateOldDataAfterSystemReady();
+                mLockSettingsService.loadEscrowData();
             }
         }
 
@@ -802,6 +803,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 // Notify keystore that a new user was added.
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                AndroidKeyStoreMaintenance.onUserAdded(userHandle);
                 final KeyStore ks = KeyStore.getInstance();
                 final UserInfo parentInfo = mUserManager.getProfileParent(userHandle);
                 final int parentHandle = parentInfo != null ? parentInfo.id : -1;
@@ -832,9 +834,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.initWeaverService();
         getAuthSecretHal();
         mDeviceProvisionedObserver.onSystemReady();
-        mRebootEscrowManager.loadRebootEscrowDataIfAvailable();
+
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
+    }
+
+    private void loadEscrowData() {
+        mRebootEscrowManager.loadRebootEscrowDataIfAvailable(mHandler);
     }
 
     private void getAuthSecretHal() {
@@ -1265,6 +1271,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void setKeystorePassword(byte[] password, int userHandle) {
+        AndroidKeyStoreMaintenance.onUserPasswordChanged(userHandle, password);
         final KeyStore ks = KeyStore.getInstance();
         // TODO(b/120484642): Update keystore to accept byte[] passwords
         String passwordString = password == null ? null : new String(password);
@@ -1273,7 +1280,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void unlockKeystore(byte[] password, int userHandle) {
         if (DEBUG) Slog.v(TAG, "Unlock keystore for user: " + userHandle);
-        new Authorization().onLockScreenEvent(false, userHandle, password);
+        Authorization.onLockScreenEvent(false, userHandle, password);
         // TODO(b/120484642): Update keystore to accept byte[] passwords
         String passwordString = password == null ? null : new String(password);
         final KeyStore ks = KeyStore.getInstance();
@@ -2296,6 +2303,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.removeUser(userId);
         mStrongAuth.removeUser(userId);
 
+        AndroidKeyStoreMaintenance.onUserRemoved(userId);
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
         mManagedProfilePasswordCache.removePassword(userId);
@@ -2381,10 +2389,17 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         enforceShell();
+        final int origPid = Binder.getCallingPid();
+        final int origUid = Binder.getCallingUid();
+
+        // The original identity is an opaque integer.
         final long origId = Binder.clearCallingIdentity();
+        Slog.e(TAG, "Caller pid " + origPid + " Caller uid " + origUid);
         try {
-            (new LockSettingsShellCommand(new LockPatternUtils(mContext))).exec(
-                    this, in, out, err, args, callback, resultReceiver);
+            final LockSettingsShellCommand command =
+                    new LockSettingsShellCommand(new LockPatternUtils(mContext), mContext, origPid,
+                            origUid);
+            command.exec(this, in, out, err, args, callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

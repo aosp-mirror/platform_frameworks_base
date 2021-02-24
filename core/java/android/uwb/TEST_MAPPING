@@ -2,6 +2,9 @@
   "presubmit": [
     {
       "name": "UwbManagerTests"
+    },
+    {
+      "name": "CtsUwbTestCases"
     }
   ]
 }

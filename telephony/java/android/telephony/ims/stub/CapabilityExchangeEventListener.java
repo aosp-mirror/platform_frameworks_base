@@ -16,32 +16,58 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.net.Uri;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
+import android.util.Log;
+
+import java.util.List;
 
 /**
- * The interface of the capabilities event listener for ImsService to notify the framework of the
- * UCE request and status updated.
+ * The interface that is used by the framework to listen to events from the vendor RCS stack
+ * regarding capabilities exchange using presence server and OPTIONS.
  * @hide
  */
 @SystemApi
 public interface CapabilityExchangeEventListener {
     /**
      * Interface used by the framework to respond to OPTIONS requests.
-     * @hide
      */
     interface OptionsRequestCallback {
         /**
          * Respond to a remote capability request from the contact specified with the
          * capabilities of this device.
          * @param ownCapabilities The capabilities of this device.
+         * @hide
          */
-        void onRespondToCapabilityRequest(@NonNull RcsContactUceCapability ownCapabilities);
+        default void onRespondToCapabilityRequest(
+                @NonNull RcsContactUceCapability ownCapabilities) {}
+
+        /**
+         * Respond to a remote capability request from the contact specified with the
+         * capabilities of this device.
+         * @param ownCapabilities The capabilities of this device.
+         * @param isBlocked Whether or not the user has blocked the number requesting the
+         *         capabilities of this device. If true, the device should respond to the OPTIONS
+         *         request with a 200 OK response and no capabilities.
+         */
+        default void onRespondToCapabilityRequest(@NonNull RcsContactUceCapability ownCapabilities,
+                boolean isBlocked) {
+            Log.w("CapabilityExchangeEventListener", "implement "
+                    + "onRespondToCapabilityRequest(RcsContactUceCapability, boolean) instead!");
+            // Fall back to old implementation
+            if (isBlocked) {
+                onRespondToCapabilityRequestWithError(200, "OK");
+            } else {
+                onRespondToCapabilityRequest(ownCapabilities);
+            }
+        }
 
         /**
          * Respond to a remote capability request from the contact specified with the
@@ -49,7 +75,8 @@ public interface CapabilityExchangeEventListener {
          * @param code The SIP response code to respond with.
          * @param reason A non-null String containing the reason associated with the SIP code.
          */
-        void onRespondToCapabilityRequestWithError(int code, @NonNull String reason);
+        void onRespondToCapabilityRequestWithError(@IntRange(from = 100, to = 699) int code,
+                @NonNull String reason);
     }
 
     /**
@@ -59,8 +86,7 @@ public interface CapabilityExchangeEventListener {
      * This is typically used when trying to generate an initial PUBLISH for a new subscription to
      * the network. The device will cache all presence publications after boot until this method is
      * called the first time.
-     * @param publishTriggerType {@link RcsUceAdapter#StackPublishTriggerType} The reason for the
-     * capability update request.
+     * @param publishTriggerType The reason for the capability update request.
      * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is not currently
      * connected to the framework. This can happen if the {@link RcsFeature} is not
      * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
@@ -81,4 +107,25 @@ public interface CapabilityExchangeEventListener {
      * Telephony stack has crashed.
      */
     void onUnpublish() throws ImsException;
+
+    /**
+     * Inform the framework of an OPTIONS query from a remote device for this device's UCE
+     * capabilities.
+     * <p>
+     * The framework will respond via the
+     * {@link OptionsRequestCallback#onRespondToCapabilityRequest} or
+     * {@link OptionsRequestCallback#onRespondToCapabilityRequestWithError}.
+     * @param contactUri The URI associated with the remote contact that is
+     * requesting capabilities.
+     * @param remoteCapabilities The remote contact's capability information.
+     * @param callback The callback of this request which is sent from the remote user.
+     * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is not
+     * currently connected to the framework. This can happen if the {@link RcsFeature} is not
+     * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
+     * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare
+     * cases when the Telephony stack has crashed.
+     */
+    void onRemoteCapabilityRequest(@NonNull Uri contactUri,
+            @NonNull List<String> remoteCapabilities,
+            @NonNull OptionsRequestCallback callback) throws ImsException;
 }

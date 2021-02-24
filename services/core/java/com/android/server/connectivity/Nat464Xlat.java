@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity;
 
+import static com.android.net.module.util.CollectionUtils.contains;
+
 import android.annotation.NonNull;
 import android.net.ConnectivityManager;
 import android.net.IDnsResolver;
@@ -33,10 +35,9 @@ import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
+import com.android.net.module.util.NetworkStackConstants;
 import com.android.server.net.BaseNetworkObserver;
 
-import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.util.Objects;
 
@@ -117,8 +118,8 @@ public class Nat464Xlat extends BaseNetworkObserver {
     @VisibleForTesting
     protected static boolean requiresClat(NetworkAgentInfo nai) {
         // TODO: migrate to NetworkCapabilities.TRANSPORT_*.
-        final boolean supported = ArrayUtils.contains(NETWORK_TYPES, nai.networkInfo.getType());
-        final boolean connected = ArrayUtils.contains(NETWORK_STATES, nai.networkInfo.getState());
+        final boolean supported = contains(NETWORK_TYPES, nai.networkInfo.getType());
+        final boolean connected = contains(NETWORK_STATES, nai.networkInfo.getState());
 
         // Only run clat on networks that have a global IPv6 address and don't have a native IPv4
         // address.
@@ -433,7 +434,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
         // clat IPv4 address itself (for those apps, it doesn't matter what
         // the IP of the gateway is, only that there is one).
         RouteInfo ipv4Default = new RouteInfo(
-                new LinkAddress(Inet4Address.ANY, 0),
+                new LinkAddress(NetworkStackConstants.IPV4_ADDR_ANY, 0),
                 clatAddress.getAddress(), mIface);
         stacked.addRoute(ipv4Default);
         stacked.addLinkAddress(clatAddress);

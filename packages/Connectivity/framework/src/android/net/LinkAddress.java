@@ -349,7 +349,7 @@ public class LinkAddress implements Parcelable {
      * @return {@code true} if both objects are equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof LinkAddress)) {
             return false;
         }

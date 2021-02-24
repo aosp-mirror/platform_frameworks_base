@@ -20,6 +20,7 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.os.RemoteException;
@@ -101,6 +102,7 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Gets direct child tasks (ordered from top-to-bottom) */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
+    @SuppressLint("NullableCollection")
     public static List<ActivityManager.RunningTaskInfo> getChildTasks(
             @NonNull WindowContainerToken parent, @NonNull int[] activityTypes) {
         try {
@@ -113,6 +115,7 @@ public class TaskOrganizer extends WindowOrganizer {
     /** Gets all root tasks on a display (ordered from top-to-bottom) */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     @Nullable
+    @SuppressLint("NullableCollection")
     public static List<ActivityManager.RunningTaskInfo> getRootTasks(
             int displayId, @NonNull int[] activityTypes) {
         try {

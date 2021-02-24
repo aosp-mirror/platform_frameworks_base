@@ -70,6 +70,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_REJECT_RESTRICTED_MODE;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_UNMETERED;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.net.NetworkPolicyManager.resolveNetworkId;
@@ -231,6 +232,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -239,6 +241,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
+import com.android.net.module.util.NetworkIdentityUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -1252,7 +1255,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // identified carrier, which may want to manage their own notifications. This method
                 // should be called every time the carrier config changes anyways, and there's no
                 // reason to alert if there isn't a carrier.
-                return;
+                continue;
             }
 
             final boolean notifyWarning = getBooleanDefeatingNullable(config,
@@ -1959,14 +1962,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (state.network != null) {
                 mNetIdToSubId.put(state.network.netId, parseSubId(state));
             }
-            if (state.networkInfo != null && state.networkInfo.isConnected()) {
-                // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
-                // in the object created here is never used and its value doesn't matter, so use
-                // NETWORK_TYPE_UNKNOWN.
-                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
-                        true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
-                identified.put(state, ident);
-            }
+
+            // Policies matched by NPMS only match by subscriber ID or by ssid. Thus subtype
+            // in the object created here is never used and its value doesn't matter, so use
+            // NETWORK_TYPE_UNKNOWN.
+            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
+                    true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
+            identified.put(state, ident);
         }
 
         final ArraySet<String> newMeteredIfaces = new ArraySet<>();
@@ -2041,8 +2043,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // One final pass to catch any metered ifaces that don't have explicitly
         // defined policies; typically Wi-Fi networks.
         for (NetworkState state : states) {
-            if (state.networkInfo != null && state.networkInfo.isConnected()
-                    && !state.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+            if (!state.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
                 matchingIfaces.clear();
                 collectIfaces(matchingIfaces, state);
                 for (int j = matchingIfaces.size() - 1; j >= 0; j--) {
@@ -2162,13 +2163,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (template.matches(probeIdent)) {
                 if (LOGD) {
                     Slog.d(TAG, "Found template " + template + " which matches subscriber "
-                            + NetworkIdentity.scrubSubscriberId(subscriberId));
+                            + NetworkIdentityUtils.scrubSubscriberId(subscriberId));
                 }
                 return false;
             }
         }
 
-        Slog.i(TAG, "No policy for subscriber " + NetworkIdentity.scrubSubscriberId(subscriberId)
+        Slog.i(TAG, "No policy for subscriber "
+                + NetworkIdentityUtils.scrubSubscriberId(subscriberId)
                 + "; generating default policy");
         final NetworkPolicy policy = buildDefaultMobilePolicy(subId, subscriberId);
         addNetworkPolicyAL(policy);
@@ -3486,13 +3488,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void setSubscriptionOverride(int subId, int overrideMask, int overrideValue,
-            long timeoutMillis, String callingPackage) {
+            int[] networkTypes, long timeoutMillis, String callingPackage) {
         enforceSubscriptionPlanAccess(subId, Binder.getCallingUid(), callingPackage);
 
-        // We can only override when carrier told us about plans
+        final ArraySet<Integer> allNetworksSet = new ArraySet<>();
+        addAll(allNetworksSet, TelephonyManager.getAllNetworkTypes());
+        final IntArray applicableNetworks = new IntArray();
+
+        // ensure all network types are valid
+        for (int networkType : networkTypes) {
+            if (allNetworksSet.contains(networkType)) {
+                applicableNetworks.add(networkType);
+            } else {
+                Log.d(TAG, "setSubscriptionOverride removing invalid network type: " + networkType);
+            }
+        }
+
+        // We can only override when carrier told us about plans. For the unmetered case,
+        // allow override without having plans defined.
         synchronized (mNetworkPoliciesSecondLock) {
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
-            if (plan == null
+            if (overrideMask != SUBSCRIPTION_OVERRIDE_UNMETERED && plan == null
                     || plan.getDataLimitBehavior() == SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN) {
                 throw new IllegalStateException(
                         "Must provide valid SubscriptionPlan to enable overriding");
@@ -3504,11 +3520,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean overrideEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 NETPOLICY_OVERRIDE_ENABLED, 1) != 0;
         if (overrideEnabled || overrideValue == 0) {
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
-                    overrideMask, overrideValue, subId));
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = subId;
+            args.arg2 = overrideMask;
+            args.arg3 = overrideValue;
+            args.arg4 = applicableNetworks.toArray();
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE, args));
             if (timeoutMillis > 0) {
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
-                        overrideMask, 0, subId), timeoutMillis);
+                args.arg3 = 0;
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE, args),
+                        timeoutMillis);
             }
         }
     }
@@ -3596,14 +3617,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final int subId = mSubIdToSubscriberId.keyAt(i);
                     final String subscriberId = mSubIdToSubscriberId.valueAt(i);
 
-                    fout.println(subId + "=" + NetworkIdentity.scrubSubscriberId(subscriberId));
+                    fout.println(subId + "="
+                            + NetworkIdentityUtils.scrubSubscriberId(subscriberId));
                 }
                 fout.decreaseIndent();
 
                 fout.println();
                 for (String[] mergedSubscribers : mMergedSubscriberIds) {
                     fout.println("Merged subscriptions: " + Arrays.toString(
-                            NetworkIdentity.scrubSubscriberId(mergedSubscribers)));
+                            NetworkIdentityUtils.scrubSubscriberIds(mergedSubscribers)));
                 }
 
                 fout.println();
@@ -4775,10 +4797,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void dispatchSubscriptionOverride(INetworkPolicyListener listener, int subId,
-            int overrideMask, int overrideValue) {
+            int overrideMask, int overrideValue, int[] networkTypes) {
         if (listener != null) {
             try {
-                listener.onSubscriptionOverride(subId, overrideMask, overrideValue);
+                listener.onSubscriptionOverride(subId, overrideMask, overrideValue, networkTypes);
             } catch (RemoteException ignored) {
             }
         }
@@ -4910,13 +4932,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return true;
                 }
                 case MSG_SUBSCRIPTION_OVERRIDE: {
-                    final int overrideMask = msg.arg1;
-                    final int overrideValue = msg.arg2;
-                    final int subId = (int) msg.obj;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final int subId = (int) args.arg1;
+                    final int overrideMask = (int) args.arg2;
+                    final int overrideValue = (int) args.arg3;
+                    final int[] networkTypes = (int[]) args.arg4;
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        dispatchSubscriptionOverride(listener, subId, overrideMask, overrideValue);
+                        dispatchSubscriptionOverride(listener, subId, overrideMask, overrideValue,
+                                networkTypes);
                     }
                     mListeners.finishBroadcast();
                     return true;
@@ -5377,6 +5402,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public boolean checkUidNetworkingBlocked(int uid, int uidRules,
+            boolean isNetworkMetered, boolean isBackgroundRestricted) {
+        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
+        // Log of invoking this function is disabled because it will be called very frequently. And
+        // metrics are unlikely needed on this method because the callers are external and this
+        // method doesn't take any locks or perform expensive operations.
+        return isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
+                isBackgroundRestricted, null);
+    }
+
+    @Override
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
         mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         final int uidRules;
@@ -5385,9 +5421,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             isBackgroundRestricted = mRestrictBackground;
         }
-        //TODO(b/177490332): The logic here might not be correct because it doesn't consider
-        // RULE_REJECT_METERED condition. And it could be replaced by
-        // isUidNetworkingBlockedInternal().
+        // TODO(b/177490332): The logic here might not be correct because it doesn't consider
+        //  RULE_REJECT_METERED condition. And it could be replaced by
+        //  isUidNetworkingBlockedInternal().
         return isBackgroundRestricted
                 && !hasRule(uidRules, RULE_ALLOW_METERED)
                 && !hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED);

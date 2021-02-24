@@ -16,11 +16,17 @@
 
 package com.android.server.vcn;
 
+import static android.net.IpSecManager.IpSecTunnelInterface;
+
+import static com.android.server.vcn.VcnGatewayConnection.DUMMY_ADDR;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+
+import android.net.IpSecManager;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,14 +43,26 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     public void setUp() throws Exception {
         super.setUp();
 
-        mGatewayConnection.transitionTo(mGatewayConnection.mDisconnectedState);
+        final IpSecTunnelInterface tunnelIface =
+                mContext.getSystemService(IpSecManager.class)
+                        .createIpSecTunnelInterface(
+                                DUMMY_ADDR, DUMMY_ADDR, TEST_UNDERLYING_NETWORK_RECORD_1.network);
+        mGatewayConnection.setTunnelInterface(tunnelIface);
+
+        // Don't need to transition to DisconnectedState because it is the starting state
         mTestLooper.dispatchAll();
     }
 
     @Test
     public void testEnterWhileNotRunningTriggersQuit() throws Exception {
         final VcnGatewayConnection vgc =
-                new VcnGatewayConnection(mVcnContext, TEST_SUB_GRP, mConfig, mDeps);
+                new VcnGatewayConnection(
+                        mVcnContext,
+                        TEST_SUB_GRP,
+                        TEST_SUBSCRIPTION_SNAPSHOT,
+                        mConfig,
+                        mGatewayStatusCallback,
+                        mDeps);
 
         vgc.setIsRunning(false);
         vgc.transitionTo(vgc.mDisconnectedState);
@@ -61,6 +79,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mConnectingState, mGatewayConnection.getCurrentState());
+        verifySafeModeTimeoutAlarmAndGetCallback(false /* expectCanceled */);
     }
 
     @Test
@@ -71,6 +90,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
+        verifyDisconnectRequestAlarmAndGetCallback(false /* expectCanceled */);
     }
 
     @Test
@@ -80,5 +100,6 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
 
         assertNull(mGatewayConnection.getCurrentState());
         verify(mIpSecSvc).deleteTunnelInterface(eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), any());
+        verifySafeModeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
     }
 }

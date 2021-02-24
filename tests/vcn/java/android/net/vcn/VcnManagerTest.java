@@ -16,34 +16,48 @@
 
 package android.net.vcn;
 
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
+
 import static androidx.test.InstrumentationRegistry.getContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
+import android.net.vcn.VcnManager.VcnStatusCallback;
+import android.net.vcn.VcnManager.VcnStatusCallbackBinder;
 import android.net.vcn.VcnManager.VcnUnderlyingNetworkPolicyListener;
+import android.os.ParcelUuid;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.net.UnknownHostException;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 public class VcnManagerTest {
+    private static final ParcelUuid SUB_GROUP = new ParcelUuid(new UUID(0, 0));
+    private static final int[] UNDERLYING_NETWORK_CAPABILITIES = {
+        NetworkCapabilities.NET_CAPABILITY_IMS, NetworkCapabilities.NET_CAPABILITY_INTERNET
+    };
     private static final Executor INLINE_EXECUTOR = Runnable::run;
 
     private IVcnManagementService mMockVcnManagementService;
     private VcnUnderlyingNetworkPolicyListener mMockPolicyListener;
+    private VcnStatusCallback mMockStatusCallback;
 
     private Context mContext;
     private VcnManager mVcnManager;
@@ -52,6 +66,7 @@ public class VcnManagerTest {
     public void setUp() {
         mMockVcnManagementService = mock(IVcnManagementService.class);
         mMockPolicyListener = mock(VcnUnderlyingNetworkPolicyListener.class);
+        mMockStatusCallback = mock(VcnStatusCallback.class);
 
         mContext = getContext();
         mVcnManager = new VcnManager(mContext, mMockVcnManagementService);
@@ -65,7 +80,7 @@ public class VcnManagerTest {
                 ArgumentCaptor.forClass(IVcnUnderlyingNetworkPolicyListener.class);
         verify(mMockVcnManagementService).addVcnUnderlyingNetworkPolicyListener(captor.capture());
 
-        assertTrue(VcnManager.REGISTERED_POLICY_LISTENERS.containsKey(mMockPolicyListener));
+        assertTrue(VcnManager.getAllPolicyListeners().containsKey(mMockPolicyListener));
 
         IVcnUnderlyingNetworkPolicyListener listenerWrapper = captor.getValue();
         listenerWrapper.onPolicyChanged();
@@ -78,7 +93,7 @@ public class VcnManagerTest {
 
         mVcnManager.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
-        assertFalse(VcnManager.REGISTERED_POLICY_LISTENERS.containsKey(mMockPolicyListener));
+        assertFalse(VcnManager.getAllPolicyListeners().containsKey(mMockPolicyListener));
         verify(mMockVcnManagementService)
                 .addVcnUnderlyingNetworkPolicyListener(
                         any(IVcnUnderlyingNetworkPolicyListener.class));
@@ -88,7 +103,7 @@ public class VcnManagerTest {
     public void testRemoveVcnUnderlyingNetworkPolicyListenerUnknownListener() throws Exception {
         mVcnManager.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
-        assertFalse(VcnManager.REGISTERED_POLICY_LISTENERS.containsKey(mMockPolicyListener));
+        assertFalse(VcnManager.getAllPolicyListeners().containsKey(mMockPolicyListener));
         verify(mMockVcnManagementService, never())
                 .addVcnUnderlyingNetworkPolicyListener(
                         any(IVcnUnderlyingNetworkPolicyListener.class));
@@ -131,5 +146,78 @@ public class VcnManagerTest {
     @Test(expected = NullPointerException.class)
     public void testGetUnderlyingNetworkPolicyNullLinkProperties() throws Exception {
         mVcnManager.getUnderlyingNetworkPolicy(new NetworkCapabilities(), null);
+    }
+
+    @Test
+    public void testRegisterVcnStatusCallback() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+
+        verify(mMockVcnManagementService)
+                .registerVcnStatusCallback(eq(SUB_GROUP), notNull(), any());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRegisterVcnStatusCallbackAlreadyRegistered() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testRegisterVcnStatusCallbackNullSubscriptionGroup() throws Exception {
+        mVcnManager.registerVcnStatusCallback(null, INLINE_EXECUTOR, mMockStatusCallback);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testRegisterVcnStatusCallbackNullExecutor() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, null, mMockStatusCallback);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testRegisterVcnStatusCallbackNullCallback() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, null);
+    }
+
+    @Test
+    public void testUnregisterVcnStatusCallback() throws Exception {
+        mVcnManager.registerVcnStatusCallback(SUB_GROUP, INLINE_EXECUTOR, mMockStatusCallback);
+
+        mVcnManager.unregisterVcnStatusCallback(mMockStatusCallback);
+
+        verify(mMockVcnManagementService).unregisterVcnStatusCallback(any());
+    }
+
+    @Test
+    public void testUnregisterUnknownVcnStatusCallback() throws Exception {
+        mVcnManager.unregisterVcnStatusCallback(mMockStatusCallback);
+
+        verifyNoMoreInteractions(mMockVcnManagementService);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testUnregisterNullVcnStatusCallback() throws Exception {
+        mVcnManager.unregisterVcnStatusCallback(null);
+    }
+
+    @Test
+    public void testVcnStatusCallbackBinder() throws Exception {
+        IVcnStatusCallback cbBinder =
+                new VcnStatusCallbackBinder(INLINE_EXECUTOR, mMockStatusCallback);
+
+        cbBinder.onEnteredSafeMode();
+        verify(mMockStatusCallback).onEnteredSafeMode();
+
+        cbBinder.onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
+        verify(mMockStatusCallback).onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
+
+        cbBinder.onGatewayConnectionError(
+                UNDERLYING_NETWORK_CAPABILITIES,
+                VcnManager.VCN_ERROR_CODE_NETWORK_ERROR,
+                UnknownHostException.class.getName(),
+                "exception_message");
+        verify(mMockStatusCallback)
+                .onGatewayConnectionError(
+                        eq(UNDERLYING_NETWORK_CAPABILITIES),
+                        eq(VcnManager.VCN_ERROR_CODE_NETWORK_ERROR),
+                        any(UnknownHostException.class));
     }
 }

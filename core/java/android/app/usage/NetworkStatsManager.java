@@ -28,7 +28,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsService;
-import android.net.NetworkIdentity;
 import android.net.NetworkStack;
 import android.net.NetworkTemplate;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
@@ -47,6 +46,7 @@ import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.Objects;
 
@@ -628,7 +628,7 @@ public class NetworkStatsManager {
             default:
                 throw new IllegalArgumentException("Cannot create template for network type "
                         + networkType + ", subscriberId '"
-                        + NetworkIdentity.scrubSubscriberId(subscriberId) + "'.");
+                        + NetworkIdentityUtils.scrubSubscriberId(subscriberId) + "'.");
         }
         return template;
     }

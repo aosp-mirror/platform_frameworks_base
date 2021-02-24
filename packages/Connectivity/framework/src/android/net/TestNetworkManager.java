@@ -41,7 +41,6 @@ public class TestNetworkManager {
 
     /**
      * Prefix for tap interfaces created by this class.
-     * @hide
      */
     public static final String TEST_TAP_PREFIX = "testtap";
 

@@ -26,4 +26,5 @@ import java.util.List;
 oneway interface IPublishResponseCallback {
     void onCommandError(int code);
     void onNetworkResponse(int code, String reason);
+    void onNetworkRespHeader(int code, String reasonPhrase, int reasonHeaderCause, String reasonHeaderText);
 }

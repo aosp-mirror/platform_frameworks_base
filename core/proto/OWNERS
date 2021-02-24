@@ -16,6 +16,7 @@ ogunwale@google.com
 jjaggi@google.com
 roosa@google.com
 per-file usagestatsservice.proto, usagestatsservice_v2.proto = mwachens@google.com
+per-file apphibernationservice.proto = file:/core/java/android/apphibernation/OWNERS
 
 # Biometrics
 kchyn@google.com

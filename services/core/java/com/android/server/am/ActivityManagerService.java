@@ -364,6 +364,7 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
+import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Installer;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
@@ -7144,67 +7145,68 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "getContentProviderImpl: after checkContentProviderPermission");
 
                 final long origId = Binder.clearCallingIdentity();
+                try {
+                    checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
 
-                checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
-
-                // In this case the provider instance already exists, so we can
-                // return it right away.
-                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
-                        stable);
-                if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
-                    if (cpr.proc != null
-                            && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
-                        // If this is a perceptible app accessing the provider,
-                        // make sure to count it as being accessed and thus
-                        // back up on the LRU list.  This is good because
-                        // content providers are often expensive to start.
-                        checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
-                        mProcessList.updateLruProcessLocked(cpr.proc, false, null);
-                        checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
+                    // Return the provider instance right away since it already exists.
+                    conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage,
+                            callingTag, stable);
+                    if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
+                        if (cpr.proc != null
+                                && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                            // If this is a perceptible app accessing the provider,
+                            // make sure to count it as being accessed and thus
+                            // back up on the LRU list.  This is good because
+                            // content providers are often expensive to start.
+                            checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
+                            mProcessList.updateLruProcessLocked(cpr.proc, false, null);
+                            checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
+                        }
                     }
-                }
 
-                checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
-                final int verifiedAdj = cpr.proc.verifiedAdj;
-                boolean success = updateOomAdjLocked(cpr.proc, true,
-                        OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
-                // XXX things have changed so updateOomAdjLocked doesn't actually tell us
-                // if the process has been successfully adjusted.  So to reduce races with
-                // it, we will check whether the process still exists.  Note that this doesn't
-                // completely get rid of races with LMK killing the process, but should make
-                // them much smaller.
-                if (success && verifiedAdj != cpr.proc.setAdj && !isProcessAliveLocked(cpr.proc)) {
-                    success = false;
-                }
-                maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
-                checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
-                if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
-                // NOTE: there is still a race here where a signal could be
-                // pending on the process even though we managed to update its
-                // adj level.  Not sure what to do about this, but at least
-                // the race is now smaller.
-                if (!success) {
-                    // Uh oh...  it looks like the provider's process
-                    // has been killed on us.  We need to wait for a new
-                    // process to be started, and make sure its death
-                    // doesn't kill our process.
-                    Slog.wtf(TAG, "Existing provider " + cpr.name.flattenToShortString()
-                            + " is crashing; detaching " + r);
-                    boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                    if (!lastRef) {
-                        // This wasn't the last ref our process had on
-                        // the provider...  we will be killed during cleaning up, bail.
-                        return null;
+                    checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
+                    final int verifiedAdj = cpr.proc.verifiedAdj;
+                    boolean success = updateOomAdjLocked(cpr.proc, true,
+                            OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                    // XXX things have changed so updateOomAdjLocked doesn't actually tell us
+                    // if the process has been successfully adjusted.  So to reduce races with
+                    // it, we will check whether the process still exists.  Note that this doesn't
+                    // completely get rid of races with LMK killing the process, but should make
+                    // them much smaller.
+                    if (success && verifiedAdj != cpr.proc.setAdj
+                            && !isProcessAliveLocked(cpr.proc)) {
+                        success = false;
                     }
-                    // We'll just start a new process to host the content provider
-                    providerRunning = false;
-                    conn = null;
-                    dyingProc = cpr.proc;
-                } else {
-                    cpr.proc.verifiedAdj = cpr.proc.setAdj;
+                    maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
+                    checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
+                    if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
+                    // NOTE: there is still a race here where a signal could be
+                    // pending on the process even though we managed to update its
+                    // adj level.  Not sure what to do about this, but at least
+                    // the race is now smaller.
+                    if (!success) {
+                        // Uh oh...  it looks like the provider's process
+                        // has been killed on us.  We need to wait for a new
+                        // process to be started, and make sure its death
+                        // doesn't kill our process.
+                        Slog.wtf(TAG, "Existing provider " + cpr.name.flattenToShortString()
+                                + " is crashing; detaching " + r);
+                        boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
+                        if (!lastRef) {
+                            // This wasn't the last ref our process had on
+                            // the provider...  we will be killed during cleaning up, bail.
+                            return null;
+                        }
+                        // We'll just start a new process to host the content provider
+                        providerRunning = false;
+                        conn = null;
+                        dyingProc = cpr.proc;
+                    } else {
+                        cpr.proc.verifiedAdj = cpr.proc.setAdj;
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
                 }
-
-                Binder.restoreCallingIdentity(origId);
             }
 
             if (!providerRunning) {
@@ -10419,6 +10421,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController.handleIncomingUser(callingPid, callingUid, userId, true, ALLOW_NON_FULL,
                 "getHistoricalProcessExitReasons", null);
 
+        NativeTombstoneManager tombstoneService = LocalServices.getService(
+                NativeTombstoneManager.class);
+
         final ArrayList<ApplicationExitInfo> results = new ArrayList<ApplicationExitInfo>();
         if (!TextUtils.isEmpty(packageName)) {
             final int uid = enforceDumpPermissionForPackage(packageName, userId, callingUid,
@@ -10426,11 +10431,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uid != Process.INVALID_UID) {
                 mProcessList.mAppExitInfoTracker.getExitInfo(
                         packageName, uid, pid, maxNum, results);
+                tombstoneService.collectTombstones(results, uid, pid, maxNum);
             }
         } else {
             // If no package name is given, use the caller's uid as the filter uid.
             mProcessList.mAppExitInfoTracker.getExitInfo(
                     packageName, callingUid, pid, maxNum, results);
+            tombstoneService.collectTombstones(results, callingUid, pid, maxNum);
         }
 
         return new ParceledListSlice<ApplicationExitInfo>(results);
@@ -13327,6 +13334,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscSwapPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscRss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
+        long[] memtrackTmp = new long[4];
 
         long oomPss[] = new long[DUMP_MEM_OOM_LABEL.length];
         long oomSwapPss[] = new long[DUMP_MEM_OOM_LABEL.length];
@@ -13339,6 +13347,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         long totalRss = 0;
         long cachedPss = 0;
         long cachedSwapPss = 0;
+        long totalMemtrackGraphics = 0;
+        long totalMemtrackGl = 0;
         boolean hasSwapPss = false;
 
         Debug.MemoryInfo mi = null;
@@ -13361,6 +13371,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int reportType;
                 final long startTime;
                 final long endTime;
+                long memtrackGraphics = 0;
+                long memtrackGl = 0;
                 if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
                     startTime = SystemClock.currentThreadTimeMillis();
@@ -13372,7 +13384,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL;
                     startTime = SystemClock.currentThreadTimeMillis();
-                    long pss = Debug.getPss(pid, tmpLong, null);
+                    long pss = Debug.getPss(pid, tmpLong, memtrackTmp);
                     if (pss == 0) {
                         continue;
                     }
@@ -13380,6 +13392,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     endTime = SystemClock.currentThreadTimeMillis();
                     mi.dalvikPrivateDirty = (int) tmpLong[0];
                     mi.dalvikRss = (int) tmpLong[2];
+                    memtrackGraphics = memtrackTmp[1];
+                    memtrackGl = memtrackTmp[2];
                 }
                 if (!opts.isCheckinRequest && opts.dumpDetails) {
                     pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
@@ -13444,6 +13458,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     totalPss += myTotalPss;
                     totalSwapPss += myTotalSwapPss;
                     totalRss += myTotalRss;
+                    totalMemtrackGraphics += memtrackGraphics;
+                    totalMemtrackGl += memtrackGl;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                             (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
                             myTotalSwapPss, myTotalRss, pid, hasActivities);
@@ -13509,6 +13525,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (int i=0; i<N; i++) {
                     ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
                     if (st.vsize > 0 && procMemsMap.indexOfKey(st.pid) < 0) {
+                        long memtrackGraphics = 0;
+                        long memtrackGl = 0;
                         if (mi == null) {
                             mi = new Debug.MemoryInfo();
                         }
@@ -13517,13 +13535,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 continue;
                             }
                         } else {
-                            long pss = Debug.getPss(st.pid, tmpLong, null);
+                            long pss = Debug.getPss(st.pid, tmpLong, memtrackTmp);
                             if (pss == 0) {
                                 continue;
                             }
                             mi.nativePss = (int) pss;
                             mi.nativePrivateDirty = (int) tmpLong[0];
                             mi.nativeRss = (int) tmpLong[2];
+                            memtrackGraphics = memtrackTmp[1];
+                            memtrackGl = memtrackTmp[2];
                         }
 
                         final long myTotalPss = mi.getTotalPss();
@@ -13533,6 +13553,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         totalSwapPss += myTotalSwapPss;
                         totalRss += myTotalRss;
                         nativeProcTotalPss += myTotalPss;
+                        totalMemtrackGraphics += memtrackGraphics;
+                        totalMemtrackGl += memtrackGl;
 
                         MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
                                 st.name, myTotalPss, mi.getSummaryTotalSwapPss(), myTotalRss,
@@ -13729,13 +13751,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             long kernelUsed = memInfo.getKernelUsedSizeKb();
             final long ionHeap = Debug.getIonHeapsSizeKb();
             final long ionPool = Debug.getIonPoolsSizeKb();
+            final long dmabufMapped = Debug.getDmabufMappedSizeKb();
             if (ionHeap >= 0 && ionPool >= 0) {
-                final long ionMapped = Debug.getIonMappedSizeKb();
-                final long ionUnmapped = ionHeap - ionMapped;
+                final long ionUnmapped = ionHeap - dmabufMapped;
                 pw.print("      ION: ");
                         pw.print(stringifyKBSize(ionHeap + ionPool));
                         pw.print(" (");
-                        pw.print(stringifyKBSize(ionMapped));
+                        pw.print(stringifyKBSize(dmabufMapped));
                         pw.print(" mapped + ");
                         pw.print(stringifyKBSize(ionUnmapped));
                         pw.print(" unmapped + ");
@@ -13744,11 +13766,61 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
                 // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
                 kernelUsed += ionHeap;
+            } else {
+                final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
+                if (totalExportedDmabuf >= 0) {
+                    final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
+                    pw.print("DMA-BUF: ");
+                    pw.print(stringifyKBSize(totalExportedDmabuf));
+                    pw.print(" (");
+                    pw.print(stringifyKBSize(dmabufMapped));
+                    pw.print(" mapped + ");
+                    pw.print(stringifyKBSize(dmabufUnmapped));
+                    pw.println(" unmapped)");
+                    // Account unmapped dmabufs as part of kernel memory allocations
+                    kernelUsed += dmabufUnmapped;
+                    // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                    totalPss -= totalMemtrackGraphics;
+                    totalPss += dmabufMapped;
+                }
+
+                // totalDmabufHeapExported is included in totalExportedDmabuf above and hence do not
+                // need to be added to kernelUsed.
+                final long totalDmabufHeapExported = Debug.getDmabufHeapTotalExportedKb();
+                if (totalDmabufHeapExported >= 0) {
+                    pw.print("DMA-BUF Heaps: ");
+                    pw.println(stringifyKBSize(totalDmabufHeapExported));
+                }
+
+                final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+                if (totalDmabufHeapPool >= 0) {
+                    pw.print("DMA-BUF Heaps pool: ");
+                    pw.println(stringifyKBSize(totalDmabufHeapPool));
+                }
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
-                pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
+                final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
+                if (gpuDmaBufUsage >= 0) {
+                    final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                    pw.print("      GPU: ");
+                    pw.print(stringifyKBSize(gpuUsage));
+                    pw.print(" (");
+                    pw.print(stringifyKBSize(gpuDmaBufUsage));
+                    pw.print(" dmabuf + ");
+                    pw.print(stringifyKBSize(gpuPrivateUsage));
+                    pw.println(" private)");
+                    // Replace memtrack HAL reported GL category with private GPU allocations and
+                    // account it as part of kernel memory allocations
+                    totalPss -= totalMemtrackGl;
+                    kernelUsed += gpuPrivateUsage;
+                } else {
+                    pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
+                }
             }
+
+             // Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+             // memInfo.getCachedSizeKb().
             final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - kernelUsed - memInfo.getZramTotalSizeKb();
@@ -14352,7 +14424,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             infoMap.put(mi.pid, mi);
         }
         updateCpuStatsNow();
-        long[] memtrackTmp = new long[1];
+        long[] memtrackTmp = new long[4];
         long[] swaptrackTmp = new long[2];
         final List<ProcessCpuTracker.Stats> stats;
         // Get a list of Stats that have vsize > 0
@@ -14380,6 +14452,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         long totalPss = 0;
         long totalSwapPss = 0;
         long totalMemtrack = 0;
+        long totalMemtrackGraphics = 0;
+        long totalMemtrackGl = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
@@ -14390,6 +14464,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             totalPss += mi.pss;
             totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
+            totalMemtrackGraphics += memtrackTmp[1];
+            totalMemtrackGl += memtrackTmp[2];
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
             @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
@@ -14548,25 +14624,74 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long ionHeap = Debug.getIonHeapsSizeKb();
         final long ionPool = Debug.getIonPoolsSizeKb();
         if (ionHeap >= 0 && ionPool >= 0) {
-            final long ionMapped = Debug.getIonMappedSizeKb();
-            final long ionUnmapped = ionHeap - ionMapped;
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
             // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
             // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
             kernelUsed += ionHeap;
+        } else {
+            final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
+            if (totalExportedDmabuf >= 0) {
+                final long dmabufMapped = Debug.getDmabufMappedSizeKb();
+                final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
+                memInfoBuilder.append("DMA-BUF: ");
+                memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));
+                memInfoBuilder.append("\n");
+                // Account unmapped dmabufs as part of kernel memory allocations
+                kernelUsed += dmabufUnmapped;
+                // Replace memtrack HAL reported Graphics category with mapped dmabufs
+                totalPss -= totalMemtrackGraphics;
+                totalPss += dmabufMapped;
+            }
+
+            // These are included in the totalExportedDmabuf above and hence do not need to be added
+            // to kernelUsed.
+            final long totalExportedDmabufHeap = Debug.getDmabufHeapTotalExportedKb();
+            if (totalExportedDmabufHeap >= 0) {
+                memInfoBuilder.append("DMA-BUF Heap: ");
+                memInfoBuilder.append(stringifyKBSize(totalExportedDmabufHeap));
+                memInfoBuilder.append("\n");
+            }
+
+            final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+            if (totalDmabufHeapPool >= 0) {
+                memInfoBuilder.append("DMA-BUF Heaps pool: ");
+                memInfoBuilder.append(stringifyKBSize(totalDmabufHeapPool));
+                memInfoBuilder.append("\n");
+            }
         }
+
         final long gpuUsage = Debug.getGpuTotalUsageKb();
         if (gpuUsage >= 0) {
-            memInfoBuilder.append("       GPU: ");
-            memInfoBuilder.append(stringifyKBSize(gpuUsage));
-            memInfoBuilder.append("\n");
+            final long gpuDmaBufUsage = Debug.getGpuDmaBufUsageKb();
+            if (gpuDmaBufUsage >= 0) {
+                final long gpuPrivateUsage = gpuUsage - gpuDmaBufUsage;
+                memInfoBuilder.append("      GPU: ");
+                memInfoBuilder.append(stringifyKBSize(gpuUsage));
+                memInfoBuilder.append(" (");
+                memInfoBuilder.append(stringifyKBSize(gpuDmaBufUsage));
+                memInfoBuilder.append(" dmabuf + ");
+                memInfoBuilder.append(stringifyKBSize(gpuPrivateUsage));
+                memInfoBuilder.append(" private)\n");
+                // Replace memtrack HAL reported GL category with private GPU allocations and
+                // account it as part of kernel memory allocations
+                totalPss -= totalMemtrackGl;
+                kernelUsed += gpuPrivateUsage;
+            } else {
+                memInfoBuilder.append("       GPU: ");
+                memInfoBuilder.append(stringifyKBSize(gpuUsage));
+                memInfoBuilder.append("\n");
+            }
+
         }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
                                   totalPss - cachedPss + kernelUsed));
         memInfoBuilder.append("\n");
+
+        // Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+        // memInfo.getCachedSizeKb().
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
