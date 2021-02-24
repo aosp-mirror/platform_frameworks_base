@@ -26279,6 +26279,7 @@ package android.net {
     field public static final int NET_CAPABILITY_CBS = 5; // 0x5
     field public static final int NET_CAPABILITY_DUN = 2; // 0x2
     field public static final int NET_CAPABILITY_EIMS = 10; // 0xa
+    field public static final int NET_CAPABILITY_ENTERPRISE = 29; // 0x1d
     field public static final int NET_CAPABILITY_FOREGROUND = 19; // 0x13
     field public static final int NET_CAPABILITY_FOTA = 3; // 0x3
     field public static final int NET_CAPABILITY_IA = 7; // 0x7
@@ -41225,6 +41226,7 @@ package android.telephony {
     field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
     field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
     field public static final int ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED = 65; // 0x41
+    field public static final int ALL_MATCHING_RULES_FAILED = 2254; // 0x8ce
     field public static final int APN_DISABLED = 2045; // 0x7fd
     field public static final int APN_DISALLOWED_ON_ROAMING = 2059; // 0x80b
     field public static final int APN_MISMATCH = 2054; // 0x806
@@ -41374,6 +41376,7 @@ package android.telephony {
     field public static final int LTE_NAS_SERVICE_REQUEST_FAILED = 2117; // 0x845
     field public static final int LTE_THROTTLING_NOT_REQUIRED = 2127; // 0x84f
     field public static final int MAC_FAILURE = 2183; // 0x887
+    field public static final int MATCH_ALL_RULE_NOT_ALLOWED = 2253; // 0x8cd
     field public static final int MAXIMIUM_NSAPIS_EXCEEDED = 2157; // 0x86d
     field public static final int MAXINUM_SIZE_OF_L2_MESSAGE_EXCEEDED = 2166; // 0x876
     field public static final int MAX_ACCESS_PROBE = 2079; // 0x81f
