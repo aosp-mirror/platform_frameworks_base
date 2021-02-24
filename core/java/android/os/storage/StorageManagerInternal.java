@@ -52,6 +52,11 @@ public abstract class StorageManagerInternal {
     }
 
     /**
+     * Return true if fuse is mounted.
+     */
+    public abstract boolean isFuseMounted(int userId);
+
+    /**
      * Create storage directories if it does not exist.
      * Return true if the directories were setup correctly, otherwise false.
      */

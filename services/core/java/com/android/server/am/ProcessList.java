@@ -2315,11 +2315,12 @@ public final class ProcessList {
             StorageManagerInternal storageManagerInternal = LocalServices.getService(
                     StorageManagerInternal.class);
             if (needsStorageDataIsolation(storageManagerInternal, app)) {
-                bindMountAppStorageDirs = true;
-                if (pkgDataInfoMap == null ||
-                        !storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
-                        app.processName)) {
-                    // Cannot prepare Android/app and Android/obb directory or inode == 0,
+                // We will run prepareStorageDirs() after we trigger zygote fork, so it won't
+                // slow down app starting speed as those dirs might not be cached.
+                if (pkgDataInfoMap != null && storageManagerInternal.isFuseMounted(userId)) {
+                    bindMountAppStorageDirs = true;
+                } else {
+                    // Fuse is not mounted or inode == 0,
                     // so we won't mount it in zygote, but resume the mount after unlocking device.
                     app.setBindMountPending(true);
                     bindMountAppStorageDirs = false;
@@ -2366,6 +2367,13 @@ public final class ProcessList {
                         isTopApp, app.getDisabledCompatChanges(), pkgDataInfoMap,
                         allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
+            }
+            // This runs after Process.start() as this method may block app process starting time
+            // if dir is not cached. Running this method after Process.start() can make it
+            // cache the dir asynchronously, so zygote can use it without waiting for it.
+            if (bindMountAppStorageDirs) {
+                storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
+                        app.processName);
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;
