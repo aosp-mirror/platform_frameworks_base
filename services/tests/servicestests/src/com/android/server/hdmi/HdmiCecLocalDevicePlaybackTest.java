@@ -87,7 +87,6 @@ public class HdmiCecLocalDevicePlaybackTest {
         mMyLooper = mTestLooper.getLooper();
         PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
                 mIThermalServiceMock, new Handler(mMyLooper));
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
@@ -136,15 +135,11 @@ public class HdmiCecLocalDevicePlaybackTest {
                     protected PowerManager getPowerManager() {
                         return powerManager;
                     }
-
-                    @Override
-                    protected HdmiCecConfig getHdmiCecConfig() {
-                        return hdmiCecConfig;
-                    }
                 };
 
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
         mHdmiCecLocalDevicePlayback.init();
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setIoLooper(mMyLooper);
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(

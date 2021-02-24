@@ -106,8 +106,6 @@ public class DeviceSelectActionTest {
         PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
                 mIThermalServiceMock, new Handler(mMyLooper));
 
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
-
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                     @Override
@@ -133,16 +131,12 @@ public class DeviceSelectActionTest {
                     protected PowerManager getPowerManager() {
                         return powerManager;
                     }
-
-                    @Override
-                    protected HdmiCecConfig getHdmiCecConfig() {
-                        return hdmiCecConfig;
-                    }
                 };
 
         mHdmiCecLocalDeviceTv = new HdmiCecLocalDeviceTv(mHdmiControlService);
         mHdmiCecLocalDeviceTv.init();
         mHdmiControlService.setIoLooper(mMyLooper);
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
