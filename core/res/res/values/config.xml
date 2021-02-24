@@ -4740,4 +4740,97 @@
 
     <!-- Whether to allow the caching of the SIM PIN for verification after unattended reboot -->
     <bool name="config_allow_pin_storage_for_unattended_reboot">true</bool>
+
+    <!-- CEC Configuration -->
+    <bool name="config_cecHdmiCecEnabled_userConfigurable">true</bool>
+    <bool name="config_cecHdmiCecControlEnabled_allowed">true</bool>
+    <bool name="config_cecHdmiCecControlEnabled_default">true</bool>
+    <bool name="config_cecHdmiCecControlDisabled_allowed">true</bool>
+    <bool name="config_cecHdmiCecControlDisabled_default">false</bool>
+
+    <bool name="config_cecHdmiCecVersion_userConfigurable">true</bool>
+    <bool name="config_cecHdmiCecVersion14b_allowed">true</bool>
+    <bool name="config_cecHdmiCecVersion14b_default">true</bool>
+    <bool name="config_cecHdmiCecVersion20_allowed">true</bool>
+    <bool name="config_cecHdmiCecVersion20_default">false</bool>
+
+    <bool name="config_cecSendStandbyOnSleep_userConfigurable">true</bool>
+    <bool name="config_cecPowerControlModeTv_allowed">true</bool>
+    <bool name="config_cecPowerControlModeTv_default">true</bool>
+    <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>
+    <bool name="config_cecPowerControlModeBroadcast_default">false</bool>
+    <bool name="config_cecPowerControlModeNone_allowed">true</bool>
+    <bool name="config_cecPowerControlModeNone_default">false</bool>
+
+    <bool name="config_cecPowerStateChangeOnActiveSourceLost_userConfigurable">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_allowed">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostNone_default">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed">true</bool>
+    <bool name="config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default">false</bool>
+
+    <bool name="config_cecSystemAudioModeMuting_userConfigurable">true</bool>
+    <bool name="config_cecSystemAudioModeMutingEnabled_allowed">true</bool>
+    <bool name="config_cecSystemAudioModeMutingEnabled_default">true</bool>
+    <bool name="config_cecSystemAudioModeMutingDisabled_allowed">true</bool>
+    <bool name="config_cecSystemAudioModeMutingDisabled_default">false</bool>
+
+    <bool name="config_cecVolumeControlMode_userConfigurable">true</bool>
+    <bool name="config_cecVolumeControlModeEnabled_allowed">true</bool>
+    <bool name="config_cecVolumeControlModeEnabled_default">true</bool>
+    <bool name="config_cecVolumeControlModeDisabled_allowed">true</bool>
+    <bool name="config_cecVolumeControlModeDisabled_default">false</bool>
+
+    <bool name="config_cecTvWakeOnOneTouchPlay_userConfigurable">true</bool>
+    <bool name="config_cecTvWakeOnOneTouchPlayEnabled_allowed">true</bool>
+    <bool name="config_cecTvWakeOnOneTouchPlayEnabled_default">true</bool>
+    <bool name="config_cecTvWakeOnOneTouchPlayDisabled_allowed">true</bool>
+    <bool name="config_cecTvWakeOnOneTouchPlayDisabled_default">false</bool>
+
+    <bool name="config_cecTvSendStandbyOnSleep_userConfigurable">true</bool>
+    <bool name="config_cecTvSendStandbyOnSleepEnabled_allowed">true</bool>
+    <bool name="config_cecTvSendStandbyOnSleepEnabled_default">true</bool>
+    <bool name="config_cecTvSendStandbyOnSleepDisabled_allowed">true</bool>
+    <bool name="config_cecTvSendStandbyOnSleepDisabled_default">false</bool>
+
+    <bool name="config_cecRcProfileTv_userConfigurable">true</bool>
+    <bool name="config_cecRcProfileTvNone_allowed">true</bool>
+    <bool name="config_cecRcProfileTvNone_default">true</bool>
+    <bool name="config_cecRcProfileTvOne_allowed">true</bool>
+    <bool name="config_cecRcProfileTvOne_default">false</bool>
+    <bool name="config_cecRcProfileTvTwo_allowed">true</bool>
+    <bool name="config_cecRcProfileTvTwo_default">false</bool>
+    <bool name="config_cecRcProfileTvThree_allowed">true</bool>
+    <bool name="config_cecRcProfileTvThree_default">false</bool>
+    <bool name="config_cecRcProfileTvFour_allowed">true</bool>
+    <bool name="config_cecRcProfileTvFour_default">false</bool>
+
+    <bool name="config_cecRcProfileSourceRootMenu_userConfigurable">true</bool>
+    <bool name="config_cecRcProfileSourceRootMenuHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceRootMenuHandled_default">true</bool>
+    <bool name="config_cecRcProfileSourceRootMenuNotHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceRootMenuNotHandled_default">false</bool>
+
+    <bool name="config_cecRcProfileSourceSetupMenu_userConfigurable">true</bool>
+    <bool name="config_cecRcProfileSourceSetupMenuHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceSetupMenuHandled_default">true</bool>
+    <bool name="config_cecRcProfileSourceSetupMenuNotHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceSetupMenuNotHandled_default">false</bool>
+
+    <bool name="config_cecRcProfileSourceContentsMenu_userConfigurable">true</bool>
+    <bool name="config_cecRcProfileSourceContentsMenuHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceContentsMenuHandled_default">false</bool>
+    <bool name="config_cecRcProfileSourceContentsMenuNotHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceContentsMenuNotHandled_default">true</bool>
+
+    <bool name="config_cecRcProfileSourceTopMenu_userConfigurable">true</bool>
+    <bool name="config_cecRcProfileSourceTopMenuHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceTopMenuHandled_default">false</bool>
+    <bool name="config_cecRcProfileSourceTopMenuNotHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceTopMenuNotHandled_default">true</bool>
+
+    <bool name="config_cecRcProfileSourceMediaContextSensitiveMenu_userConfigurable">true</bool>
+    <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default">false</bool>
+    <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed">true</bool>
+    <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default">true</bool>
 </resources>
