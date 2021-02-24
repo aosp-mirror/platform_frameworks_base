@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
+
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
 
@@ -837,7 +839,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 // Notify all registered StatusCallbacks for this subGroup
                 for (VcnStatusCallbackInfo cbInfo : mRegisteredStatusCallbacks.values()) {
                     if (isCallbackPermissioned(cbInfo)) {
-                        Binder.withCleanCallingIdentity(() -> cbInfo.mCallback.onEnteredSafeMode());
+                        Binder.withCleanCallingIdentity(
+                                () ->
+                                        cbInfo.mCallback.onVcnStatusChanged(
+                                                VCN_STATUS_CODE_SAFE_MODE));
                     }
                 }
             }
