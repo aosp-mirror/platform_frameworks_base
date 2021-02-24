@@ -20,6 +20,9 @@ import android.annotation.NonNull;
 import android.util.Range;
 import android.util.SparseArray;
 
+import com.android.internal.os.BatteryStatsHistory;
+import com.android.internal.os.BatteryStatsHistoryIterator;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +40,16 @@ public final class BatteryUsageStats implements Parcelable {
     private final ArrayList<UidBatteryConsumer> mUidBatteryConsumers;
     private final ArrayList<SystemBatteryConsumer> mSystemBatteryConsumers;
     private final ArrayList<UserBatteryConsumer> mUserBatteryConsumers;
+    private final Parcel mHistoryBuffer;
+    private final List<BatteryStats.HistoryTag> mHistoryTagPool;
 
     private BatteryUsageStats(@NonNull Builder builder) {
         mStatsStartRealtimeMs = builder.mStatsStartRealtimeMs;
         mDischargePercentage = builder.mDischargePercentage;
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
+        mHistoryBuffer = builder.mHistoryBuffer;
+        mHistoryTagPool = builder.mHistoryTagPool;
 
         double totalPower = 0;
 
@@ -125,6 +132,19 @@ public final class BatteryUsageStats implements Parcelable {
         return mUserBatteryConsumers;
     }
 
+    /**
+     * Returns an iterator for {@link android.os.BatteryStats.HistoryItem}'s.
+     */
+    @NonNull
+    public BatteryStatsHistoryIterator iterateBatteryStatsHistory() {
+        if (mHistoryBuffer == null) {
+            throw new IllegalStateException(
+                    "Battery history was not requested in the BatteryUsageStatsQuery");
+        }
+        return new BatteryStatsHistoryIterator(new BatteryStatsHistory(mHistoryBuffer),
+                mHistoryTagPool);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -142,6 +162,29 @@ public final class BatteryUsageStats implements Parcelable {
         source.readParcelableList(mSystemBatteryConsumers, getClass().getClassLoader());
         mUserBatteryConsumers = new ArrayList<>();
         source.readParcelableList(mUserBatteryConsumers, getClass().getClassLoader());
+        if (source.readBoolean()) {
+            mHistoryBuffer = Parcel.obtain();
+            mHistoryBuffer.setDataSize(0);
+            mHistoryBuffer.setDataPosition(0);
+
+            int historyBufferSize = source.readInt();
+            int curPos = source.dataPosition();
+            mHistoryBuffer.appendFrom(source, curPos, historyBufferSize);
+            source.setDataPosition(curPos + historyBufferSize);
+
+            int historyTagCount = source.readInt();
+            mHistoryTagPool = new ArrayList<>(historyTagCount);
+            for (int i = 0; i < historyTagCount; i++) {
+                BatteryStats.HistoryTag tag = new BatteryStats.HistoryTag();
+                tag.string = source.readString();
+                tag.uid = source.readInt();
+                tag.poolIdx = source.readInt();
+                mHistoryTagPool.add(tag);
+            }
+        } else {
+            mHistoryBuffer = null;
+            mHistoryTagPool = null;
+        }
     }
 
     @Override
@@ -154,6 +197,23 @@ public final class BatteryUsageStats implements Parcelable {
         dest.writeParcelableList(mUidBatteryConsumers, flags);
         dest.writeParcelableList(mSystemBatteryConsumers, flags);
         dest.writeParcelableList(mUserBatteryConsumers, flags);
+        if (mHistoryBuffer != null) {
+            dest.writeBoolean(true);
+
+            final int historyBufferSize = mHistoryBuffer.dataSize();
+            dest.writeInt(historyBufferSize);
+            dest.appendFrom(mHistoryBuffer, 0, historyBufferSize);
+
+            dest.writeInt(mHistoryTagPool.size());
+            for (int i = mHistoryTagPool.size() - 1; i >= 0; i--) {
+                final BatteryStats.HistoryTag tag = mHistoryTagPool.get(i);
+                dest.writeString(tag.string);
+                dest.writeInt(tag.uid);
+                dest.writeInt(tag.poolIdx);
+            }
+        } else {
+            dest.writeBoolean(false);
+        }
     }
 
     @NonNull
@@ -183,6 +243,8 @@ public final class BatteryUsageStats implements Parcelable {
                 new SparseArray<>();
         private final SparseArray<UserBatteryConsumer.Builder> mUserBatteryConsumerBuilders =
                 new SparseArray<>();
+        private Parcel mHistoryBuffer;
+        private List<BatteryStats.HistoryTag> mHistoryTagPool;
 
         public Builder(int customPowerComponentCount, int customTimeComponentCount) {
             mCustomPowerComponentCount = customPowerComponentCount;
@@ -223,6 +285,17 @@ public final class BatteryUsageStats implements Parcelable {
                 double dischargedPowerUpperBoundMah) {
             mDischargedPowerLowerBoundMah = dischargedPowerLowerBoundMah;
             mDischargedPowerUpperBoundMah = dischargedPowerUpperBoundMah;
+            return this;
+        }
+
+        /**
+         * Sets the parceled recent history.
+         */
+        @NonNull
+        public Builder setBatteryHistory(Parcel historyBuffer,
+                List<BatteryStats.HistoryTag> historyTagPool) {
+            mHistoryBuffer = historyBuffer;
+            mHistoryTagPool = historyTagPool;
             return this;
         }
 
