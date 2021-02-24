@@ -271,11 +271,8 @@
     <!-- The top margin before the notification progress bar. -->
     <dimen name="notification_progress_margin_top">8dp</dimen>
 
-    <!-- height of the notification header when the notification is alone (minimized / groups) -->
-    <dimen name="notification_header_solo_height">48dp</dimen>
-
-    <!-- height of the notification header when in a "big" layout -->
-    <dimen name="notification_header_big_height">56dp</dimen>
+    <!-- height of the notification header -->
+    <dimen name="notification_header_height">56dp</dimen>
 
     <!-- The height of the background for a notification header on a group -->
     <dimen name="notification_header_background_height">49.5dp</dimen>
@@ -365,7 +362,7 @@
     <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
 
     <!-- The absolute height for the header in a media notification. -->
-    <dimen name="media_notification_header_height">@dimen/notification_header_big_height</dimen>
+    <dimen name="media_notification_header_height">@dimen/notification_header_height</dimen>
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
