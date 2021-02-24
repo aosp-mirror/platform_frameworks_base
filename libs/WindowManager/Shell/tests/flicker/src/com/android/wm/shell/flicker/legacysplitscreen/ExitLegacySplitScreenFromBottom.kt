@@ -19,14 +19,14 @@ package com.android.wm.shell.flicker.legacysplitscreen
 import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.appWindowBecomesInVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.exitSplitScreenFromBottom
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.layerBecomesInvisible
@@ -36,6 +36,7 @@ import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEnt
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -44,51 +45,72 @@ import org.junit.runners.Parameterized
  * Test open resizeable activity split in primary, and drag divider to bottom exit split screen
  * To run this test: `atest WMShellFlickerTests:ExitLegacySplitScreenFromBottom`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ExitLegacySplitScreenFromBottom(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : LegacySplitScreenTransition(InstrumentationRegistry.getInstrumentation()) {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName {
-                    buildTestTag("testExitLegacySplitScreenFromBottom", configuration)
-                }
-                repeat { SplitScreenHelper.TEST_REPETITIONS }
-                transitions {
-                    device.launchSplitScreen()
-                    device.exitSplitScreenFromBottom()
-                }
-                assertions {
-                    layersTrace {
-                        layerBecomesInvisible(DOCKED_STACK_DIVIDER)
-                        visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                secondaryApp.defaultWindowName),
-                            bugId = 178447631
-                        )
-                    }
-                    windowManagerTrace {
-                        appWindowBecomesInVisible(secondaryApp.defaultWindowName)
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                secondaryApp.defaultWindowName),
-                            bugId = 178447631
-                        )
-                    }
+    testSpec: FlickerTestParameter
+) : LegacySplitScreenTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
+            setup {
+                eachRun {
+                    splitScreenApp.launchViaIntent(wmHelper)
+                    device.launchSplitScreen(wmHelper)
                 }
             }
-            return FlickerTestRunnerFactory.getInstance().buildTest(
-                instrumentation, defaultTransitionSetup, testSpec,
+            teardown {
+                eachRun {
+                    splitScreenApp.exit(wmHelper)
+                }
+            }
+            transitions {
+                device.exitSplitScreenFromBottom()
+            }
+        }
+
+    @Presubmit
+    @Test
+    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(DOCKED_STACK_DIVIDER)
+
+    @FlakyTest(bugId = 178447631)
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(
+            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                secondaryApp.defaultWindowName)
+        )
+
+    @Presubmit
+    @Test
+    fun appWindowBecomesInVisible() =
+        testSpec.appWindowBecomesInVisible(secondaryApp.defaultWindowName)
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 178447631)
+    @Test
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(
+            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                secondaryApp.defaultWindowName)
+        )
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
-                supportedRotations = listOf(Surface.ROTATION_0) // bugId = 175687842
+                supportedRotations = listOf(Surface.ROTATION_0) // b/175687842
             )
         }
     }

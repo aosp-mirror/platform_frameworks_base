@@ -173,6 +173,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
+import android.app.PropertyInvalidatedCache;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
@@ -181,6 +182,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.compat.Compatibility;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -305,6 +307,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -9870,6 +9873,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (thread != null) {
                 pw.println("\n\n** Cache info for pid " + pid + " [" + r.processName + "] **");
                 pw.flush();
+                if (pid == MY_PID) {
+                    PropertyInvalidatedCache.dumpCacheInfo(fd, args);
+                    continue;
+                }
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
@@ -13564,6 +13571,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
+
+                enableTestApiAccess(ai.packageName);
             }
 
             final long origId = Binder.clearCallingIdentity();
@@ -13736,6 +13745,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
                     app.userId,
                     "finished inst");
+        }
+
+        disableTestApiAccess(app.info.packageName);
+    }
+
+    private void enableTestApiAccess(String packageName) {
+        if (mPlatformCompat != null) {
+            Compatibility.ChangeConfig config = new Compatibility.ChangeConfig(
+                    Collections.singleton(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */),
+                    Collections.emptySet());
+            CompatibilityChangeConfig override = new CompatibilityChangeConfig(config);
+            mPlatformCompat.setOverridesForTest(override, packageName);
+        }
+    }
+
+    private void disableTestApiAccess(String packageName) {
+        if (mPlatformCompat != null) {
+            mPlatformCompat.clearOverrideForTest(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */,
+                    packageName);
         }
     }
 

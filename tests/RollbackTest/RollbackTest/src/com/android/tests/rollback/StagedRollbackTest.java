@@ -35,7 +35,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
 import com.android.cts.install.lib.TestApp;
-import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
 import com.android.cts.rollback.lib.RollbackUtils;
 import com.android.internal.R;
@@ -89,7 +88,6 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnly_Phase1_Install() throws Exception {
-        Uninstall.packages(TestApp.A);
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
 
         Install.single(TestApp.A1).commit();
@@ -149,7 +147,6 @@ public class StagedRollbackTest {
      */
     @Test
     public void testNativeWatchdogTriggersRollback_Phase1_Install() throws Exception {
-        Uninstall.packages(TestApp.A);
         Install.single(TestApp.A1).commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
 
@@ -183,7 +180,6 @@ public class StagedRollbackTest {
      */
     @Test
     public void testNativeWatchdogTriggersRollbackForAll_Phase1_InstallA() throws Exception {
-        Uninstall.packages(TestApp.A);
         Install.single(TestApp.A1).commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
 
@@ -201,7 +197,6 @@ public class StagedRollbackTest {
                 TestApp.A)).isNotNull();
 
         // Install another package with rollback
-        Uninstall.packages(TestApp.B);
         Install.single(TestApp.B1).commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(1);
 
@@ -238,7 +233,6 @@ public class StagedRollbackTest {
 
     @Test
     public void testPreviouslyAbandonedRollbacks_Phase1_InstallAndAbandon() throws Exception {
-        Uninstall.packages(TestApp.A);
         Install.single(TestApp.A1).commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
 
@@ -265,7 +259,6 @@ public class StagedRollbackTest {
     public void testPreviouslyAbandonedRollbacks_Phase3_VerifyRollback() throws Exception {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         InstallUtils.processUserData(TestApp.A);
-        Uninstall.packages(TestApp.A);
     }
 
     private static String getModuleMetadataPackageName() {
@@ -301,7 +294,6 @@ public class StagedRollbackTest {
 
     @Test
     public void testRollbackDataPolicy_Phase1_Install() throws Exception {
-        Uninstall.packages(TestApp.A, TestApp.B, TestApp.C);
         Install.multi(TestApp.A1, TestApp.B1, TestApp.C1).commit();
         // Write user data version = 1
         InstallUtils.processUserData(TestApp.A);

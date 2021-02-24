@@ -32,6 +32,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserHandle;
 
 import androidx.annotation.Nullable;
@@ -76,6 +77,7 @@ public class PipMediaController {
 
     private final Context mContext;
     private final Handler mMainHandler;
+    private final HandlerExecutor mHandlerExecutor;
 
     private final MediaSessionManager mMediaSessionManager;
     private MediaController mMediaController;
@@ -123,6 +125,7 @@ public class PipMediaController {
     public PipMediaController(Context context, Handler mainHandler) {
         mContext = context;
         mMainHandler = mainHandler;
+        mHandlerExecutor = new HandlerExecutor(mMainHandler);
         IntentFilter mediaControlFilter = new IntentFilter();
         mediaControlFilter.addAction(ACTION_PLAY);
         mediaControlFilter.addAction(ACTION_PAUSE);
@@ -247,8 +250,8 @@ public class PipMediaController {
      */
     public void registerSessionListenerForCurrentUser() {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionsChangedListener);
-        mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionsChangedListener, null,
-                UserHandle.CURRENT, mMainHandler);
+        mMediaSessionManager.addOnActiveSessionsChangedListener(null, UserHandle.CURRENT,
+                mHandlerExecutor, mSessionsChangedListener);
     }
 
     /**

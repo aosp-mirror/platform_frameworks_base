@@ -18,17 +18,19 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.os.Bundle
 import android.os.SystemClock
+import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -39,52 +41,53 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class AppPairsTestPairPrimaryAndSecondaryApps(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : AppPairsTransition(InstrumentationRegistry.getInstrumentation()) {
+    testSpec: FlickerTestParameter
+) : AppPairsTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = {
+            super.transition(this, it)
+            transitions {
+                // TODO pair apps through normal UX flow
+                executeShellCommand(
+                    composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+            }
+        }
+
+    @Presubmit
+    @Test
+    fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
+
+    @Presubmit
+    @Test
+    fun bothAppWindowsVisible() {
+        testSpec.assertWmEnd {
+            isVisible(primaryApp.defaultWindowName)
+            isVisible(secondaryApp.defaultWindowName)
+        }
+    }
+
+    @FlakyTest
+    @Test
+    fun appsEndingBounds() {
+        testSpec.assertLayersEnd {
+            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
+            this.hasVisibleRegion(primaryApp.defaultWindowName,
+                appPairsHelper.getPrimaryBounds(dividerRegion))
+                .hasVisibleRegion(secondaryApp.defaultWindowName,
+                    appPairsHelper.getSecondaryBounds(dividerRegion))
+        }
+    }
+
+    companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<Array<Any>> {
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName {
-                    buildTestTag(configuration)
-                }
-                transitions {
-                    // TODO pair apps through normal UX flow
-                    executeShellCommand(
-                        composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                    SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
-                }
-                assertions {
-                    presubmit {
-                        layersTrace {
-                            appPairsDividerIsVisible()
-                        }
-                        windowManagerTrace {
-                            end("bothAppWindowsVisible") {
-                                isVisible(primaryApp.defaultWindowName)
-                                isVisible(secondaryApp.defaultWindowName)
-                            }
-                        }
-                    }
-
-                    flaky {
-                        layersTrace {
-                            end("appsEndingBounds") {
-                                val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-                                this.hasVisibleRegion(primaryApp.defaultWindowName,
-                                    appPairsHelper.getPrimaryBounds(dividerRegion))
-                                    .hasVisibleRegion(secondaryApp.defaultWindowName,
-                                        appPairsHelper.getSecondaryBounds(dividerRegion))
-                            }
-                        }
-                    }
-                }
-            }
-            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation, transition,
-                testSpec, repetitions = AppPairsHelper.TEST_REPETITIONS)
+        fun getParams(): List<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
+                repetitions = AppPairsHelper.TEST_REPETITIONS)
         }
     }
 }

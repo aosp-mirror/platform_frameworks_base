@@ -485,17 +485,6 @@ public class HdmiControlServiceTest {
     }
 
     @Test
-    public void getCecVersion_default() {
-        // Set the Settings value to "null" to emulate it being empty and force the default value.
-        Settings.Global.putString(mContextSpy.getContentResolver(),
-                Settings.Global.HDMI_CEC_VERSION,
-                null);
-        mHdmiControlService.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
-        assertThat(mHdmiControlService.getCecVersion()).isEqualTo(
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-    }
-
-    @Test
     public void getCecVersion_1_4() {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,

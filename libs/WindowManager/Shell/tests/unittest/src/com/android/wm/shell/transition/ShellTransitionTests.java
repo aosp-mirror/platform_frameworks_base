@@ -41,6 +41,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -58,6 +59,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
@@ -78,6 +80,8 @@ public class ShellTransitionTests {
 
     private final WindowOrganizer mOrganizer = mock(WindowOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);
+    private final Context mContext =
+            InstrumentationRegistry.getInstrumentation().getTargetContext();
     private final TestShellExecutor mMainExecutor = new TestShellExecutor();
     private final ShellExecutor mAnimExecutor = new TestShellExecutor();
     private final TestTransitionHandler mDefaultHandler = new TestTransitionHandler();
@@ -90,8 +94,8 @@ public class ShellTransitionTests {
 
     @Test
     public void testBasicTransitionFlow() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mMainExecutor,
-                mAnimExecutor);
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
+                mMainExecutor, mAnimExecutor);
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         IBinder transitToken = new Binder();
@@ -109,8 +113,8 @@ public class ShellTransitionTests {
 
     @Test
     public void testNonDefaultHandler() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mMainExecutor,
-                mAnimExecutor);
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
+                mMainExecutor, mAnimExecutor);
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
@@ -188,8 +192,8 @@ public class ShellTransitionTests {
 
     @Test
     public void testRequestRemoteTransition() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mMainExecutor,
-                mAnimExecutor);
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
+                mMainExecutor, mAnimExecutor);
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};
@@ -255,8 +259,8 @@ public class ShellTransitionTests {
 
     @Test
     public void testRegisteredRemoteTransition() {
-        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mMainExecutor,
-                mAnimExecutor);
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mContext,
+                mMainExecutor, mAnimExecutor);
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};

@@ -16,17 +16,17 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.app.Instrumentation
 import android.os.Bundle
 import android.view.Surface
+import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 
-open class RotateTwoLaunchedAppsTransition(
-    instrumentation: Instrumentation
-) : AppPairsTransition(instrumentation) {
+abstract class RotateTwoLaunchedAppsTransition(
+    testSpec: FlickerTestParameter
+) : AppPairsTransition(testSpec) {
     override val nonResizeableApp: SplitScreenHelper?
         get() = null
 
@@ -45,8 +45,8 @@ open class RotateTwoLaunchedAppsTransition(
                 eachRun {
                     executeShellCommand(composePairsCommand(
                         primaryTaskId, secondaryTaskId, pair = false))
-                    primaryApp.exit()
-                    secondaryApp.exit()
+                    primaryApp.exit(wmHelper)
+                    secondaryApp.exit(wmHelper)
                 }
             }
         }

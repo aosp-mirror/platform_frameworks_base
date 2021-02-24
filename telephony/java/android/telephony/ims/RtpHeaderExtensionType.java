@@ -133,4 +133,16 @@ public final class RtpHeaderExtensionType implements Parcelable {
     public int hashCode() {
         return Objects.hash(mLocalIdentifier, mUri);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("RtpHeaderExtensionType{mLocalIdentifier=");
+        sb.append(mLocalIdentifier);
+        sb.append(", mUri=");
+        sb.append(mUri);
+        sb.append("}");
+
+        return sb.toString();
+    }
 }

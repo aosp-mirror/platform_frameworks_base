@@ -43,6 +43,7 @@ import java.util.List;
 
 /**
  * Util class to create the view for a splash screen content.
+ *
  * @hide
  */
 public class SplashscreenContentDrawer {
@@ -349,7 +350,7 @@ public class SplashscreenContentDrawer {
 
         // Calculate the difference between two colors based on the HSV dimensions.
         final float normalizeH = minAngle / 180f;
-        final double square =  Math.pow(normalizeH, 2)
+        final double square = Math.pow(normalizeH, 2)
                 + Math.pow(aHsv[1] - bHsv[1], 2)
                 + Math.pow(aHsv[2] - bHsv[2], 2);
         final double mean = square / 3;
@@ -433,8 +434,11 @@ public class SplashscreenContentDrawer {
          */
         private interface ColorTester {
             float nonTransparentRatio();
+
             boolean isComplexColor();
+
             int getDominantColor();
+
             boolean isGrayscale();
         }
 
@@ -511,14 +515,17 @@ public class SplashscreenContentDrawer {
                 // restore to original bounds
                 drawable.setBounds(initialBounds);
 
-                final Palette.Builder builder = new Palette.Builder(bitmap)
-                        .maximumColorCount(5).clearFilters();
+                final Palette.Builder builder;
                 // The Palette API will ignore Alpha, so it cannot handle transparent pixels, but
                 // sometimes we will need this information to know if this Drawable object is
                 // transparent.
                 mFilterTransparent = filterTransparent;
                 if (mFilterTransparent) {
-                    builder.setQuantizer(TRANSPARENT_FILTER_QUANTIZER);
+                    builder = new Palette.Builder(bitmap, TRANSPARENT_FILTER_QUANTIZER)
+                            .maximumColorCount(5);
+                } else {
+                    builder = new Palette.Builder(bitmap, null)
+                            .maximumColorCount(5);
                 }
                 mPalette = builder.generate();
                 bitmap.recycle();
@@ -538,7 +545,7 @@ public class SplashscreenContentDrawer {
             public int getDominantColor() {
                 final Palette.Swatch mainSwatch = mPalette.getDominantSwatch();
                 if (mainSwatch != null) {
-                    return mainSwatch.getRgb();
+                    return mainSwatch.getInt();
                 }
                 return Color.BLACK;
             }
@@ -549,7 +556,7 @@ public class SplashscreenContentDrawer {
                 if (swatches != null) {
                     for (int i = swatches.size() - 1; i >= 0; i--) {
                         Palette.Swatch swatch = swatches.get(i);
-                        if (!isGrayscaleColor(swatch.getRgb())) {
+                        if (!isGrayscaleColor(swatch.getInt())) {
                             return false;
                         }
                     }
@@ -561,9 +568,9 @@ public class SplashscreenContentDrawer {
                 private static final int NON_TRANSPARENT = 0xFF000000;
                 private final Quantizer mInnerQuantizer = new VariationalKMeansQuantizer();
                 private float mNonTransparentRatio;
+
                 @Override
-                public void quantize(final int[] pixels, final int maxColors,
-                        final Palette.Filter[] filters) {
+                public void quantize(final int[] pixels, final int maxColors) {
                     mNonTransparentRatio = 0;
                     int realSize = 0;
                     for (int i = pixels.length - 1; i > 0; i--) {
@@ -575,7 +582,7 @@ public class SplashscreenContentDrawer {
                         if (DEBUG) {
                             Slog.d(TAG, "quantize: this is pure transparent image");
                         }
-                        mInnerQuantizer.quantize(pixels, maxColors, filters);
+                        mInnerQuantizer.quantize(pixels, maxColors);
                         return;
                     }
                     mNonTransparentRatio = (float) realSize / pixels.length;
@@ -587,7 +594,7 @@ public class SplashscreenContentDrawer {
                             rowIndex++;
                         }
                     }
-                    mInnerQuantizer.quantize(samplePixels, maxColors, filters);
+                    mInnerQuantizer.quantize(samplePixels, maxColors);
                 }
 
                 @Override

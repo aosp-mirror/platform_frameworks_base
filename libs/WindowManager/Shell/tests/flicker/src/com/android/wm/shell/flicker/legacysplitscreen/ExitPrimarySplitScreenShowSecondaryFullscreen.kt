@@ -17,15 +17,17 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.os.Bundle
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.appWindowBecomesInVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
@@ -34,6 +36,7 @@ import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEn
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -45,49 +48,71 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ExitPrimarySplitScreenShowSecondaryFullscreen(
-    testSpec: FlickerTestRunnerFactory.TestSpec
-) : FlickerTestRunner(testSpec) {
-    companion object : LegacySplitScreenTransition(InstrumentationRegistry.getInstrumentation()) {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
-                withTestName {
-                    buildTestTag("testExitPrimarySplitScreenShowSecondaryFullscreen", configuration)
-                }
-                repeat { SplitScreenHelper.TEST_REPETITIONS }
-                transitions {
-                    device.launchSplitScreen()
-                    secondaryApp.reopenAppFromOverview()
-                    // TODO(b/175687842) Can not find Split screen divider, use exit() instead
-                    splitScreenApp.exit()
-                }
-                assertions {
-                    layersTrace {
-                        dockedStackDividerIsInvisible(bugId = 175687842)
-                        layerBecomesInvisible(splitScreenApp.defaultWindowName)
-                        visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                secondaryApp.defaultWindowName),
-                            bugId = 178447631
-                        )
-                    }
-                    windowManagerTrace {
-                        appWindowBecomesInVisible(splitScreenApp.defaultWindowName)
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                secondaryApp.defaultWindowName),
-                            bugId = 178447631
-                        )
-                    }
+    testSpec: FlickerTestParameter
+) : LegacySplitScreenTransition(testSpec) {
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
+            teardown {
+                eachRun {
+                    secondaryApp.exit(wmHelper)
                 }
             }
-            return FlickerTestRunnerFactory.getInstance().buildTest(
-                instrumentation, defaultTransitionSetup, testSpec,
+            transitions {
+                splitScreenApp.launchViaIntent(wmHelper)
+                secondaryApp.launchViaIntent(wmHelper)
+                device.launchSplitScreen(wmHelper)
+                device.reopenAppFromOverview(wmHelper)
+                // TODO(b/175687842) Can not find Split screen divider, use exit() instead
+                splitScreenApp.exit(wmHelper)
+            }
+        }
+
+    @FlakyTest(bugId = 175687842)
+    @Test
+    fun dockedStackDividerIsInvisible() = testSpec.dockedStackDividerIsInvisible()
+
+    @Presubmit
+    @Test
+    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(splitScreenApp.defaultWindowName)
+
+    @FlakyTest(bugId = 178447631)
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry(
+            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                secondaryApp.defaultWindowName)
+        )
+
+    @Presubmit
+    @Test
+    fun appWindowBecomesInVisible() =
+        testSpec.appWindowBecomesInVisible(splitScreenApp.defaultWindowName)
+
+    @Presubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 178447631)
+    @Test
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry(
+            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                secondaryApp.defaultWindowName)
+        )
+
+    companion object {
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 supportedRotations = listOf(Surface.ROTATION_0) // bugId = 179116910
             )

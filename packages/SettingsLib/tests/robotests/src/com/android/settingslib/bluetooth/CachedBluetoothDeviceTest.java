@@ -27,12 +27,14 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.media.AudioManager;
 
 import com.android.settingslib.R;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +43,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class CachedBluetoothDeviceTest {
     private static final String DEVICE_NAME = "TestName";
     private static final String DEVICE_ALIAS = "TestAlias";
@@ -72,12 +77,14 @@ public class CachedBluetoothDeviceTest {
     private AudioManager mAudioManager;
     private Context mContext;
     private int mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
+    private ShadowBluetoothAdapter mShadowBluetoothAdapter;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mAudioManager = mContext.getSystemService(AudioManager.class);
+        mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
@@ -936,5 +943,18 @@ public class CachedBluetoothDeviceTest {
 
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
                 mContext.getString(R.string.profile_connect_timeout_subtext));
+    }
+
+    @Test
+    public void onUuidChanged_bluetoothClassIsNull_shouldNotCrash() {
+        mShadowBluetoothAdapter.setUuids(PbapServerProfile.PBAB_CLIENT_UUIDS);
+        when(mDevice.getUuids()).thenReturn(PbapServerProfile.PBAB_CLIENT_UUIDS);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice.getPhonebookAccessPermission()).thenReturn(BluetoothDevice.ACCESS_UNKNOWN);
+        when(mDevice.getBluetoothClass()).thenReturn(null);
+
+        mCachedDevice.onUuidChanged();
+
+        // Should not crash
     }
 }

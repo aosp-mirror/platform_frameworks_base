@@ -1871,6 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"ປ່ຽນການຮ້ອງຂໍ SS ເປັນການໂທວິດີໂອແລ້ວ"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"ປ່ຽນຄຳຂໍ SS ເປັນຄຳຂໍ USSD ແລ້ວ"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ປ່ຽນຄຳຂໍ SS ໃໝ່ແລ້ວ"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ການແຈ້ງເຕືອນການຫຼອກເອົາຂໍ້ມູນ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ເຕືອນແລ້ວ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ຂະຫຍາຍ"</string>

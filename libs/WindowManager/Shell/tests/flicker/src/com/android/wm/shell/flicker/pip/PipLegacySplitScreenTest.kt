@@ -16,21 +16,25 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.os.Bundle
+import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.dsl.runFlicker
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.exitSplitScreen
-import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import com.android.wm.shell.flicker.helpers.PipAppHelper
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.removeAllTasksButHome
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
@@ -46,83 +50,103 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 161435597)
-class PipLegacySplitScreenTest(
-    rotationName: String,
-    rotation: Int
-) : AppTestBase(rotationName, rotation) {
-    private val pipApp = PipAppHelper(instrumentation)
+class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
     private val testApp = FixedAppHelper(instrumentation)
+    private val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
 
-    @Test
-    fun testShowsPipLaunchingToSplitScreen() {
-        runFlicker(instrumentation) {
-            withTestName { "testShowsPipLaunchingToSplitScreen" }
-            repeat { TEST_REPETITIONS }
+    override val transition: FlickerBuilder.(Bundle) -> Unit
+        get() = {
+            withTestName { testSpec.name }
+            repeat { testSpec.config.repetitions }
             setup {
                 test {
                     removeAllTasksButHome()
                     device.wakeUpAndGoToHomeScreen()
-                    pipApp.launchViaIntent(stringExtras = mapOf(EXTRA_ENTER_PIP to "true"))
-                    waitForAnimationComplete()
+                    pipApp.launchViaIntent(stringExtras = mapOf(EXTRA_ENTER_PIP to "true"),
+                        wmHelper = wmHelper)
                 }
             }
             transitions {
-                testApp.launchViaIntent()
-                device.launchSplitScreen()
-                imeApp.launchViaIntent()
-                waitForAnimationComplete()
+                testApp.launchViaIntent(wmHelper)
+                device.launchSplitScreen(wmHelper)
+                imeApp.launchViaIntent(wmHelper)
             }
             teardown {
                 eachRun {
-                    imeApp.exit()
-                    if (device.isInSplitScreen()) {
-                        device.exitSplitScreen()
-                    }
-                    testApp.exit()
+                    imeApp.exit(wmHelper)
+                    testApp.exit(wmHelper)
                 }
                 test {
                     removeAllTasksButHome()
                 }
             }
-            assertions {
-                val displayBounds = WindowUtils.getDisplayBounds(rotation)
-                windowManagerTrace {
-                    all("PIP window must remain inside visible bounds") {
-                        coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
-                    }
-                    end("Both app windows should be visible") {
-                        isVisible(testApp.defaultWindowName)
-                        isVisible(imeApp.defaultWindowName)
-                        noWindowsOverlap(setOf(testApp.defaultWindowName, imeApp.defaultWindowName))
-                    }
-                    navBarWindowIsAlwaysVisible()
-                    statusBarWindowIsAlwaysVisible()
-                }
-                layersTrace {
-                    all("PIP layer must remain inside visible bounds") {
-                        coversAtMostRegion(displayBounds, pipApp.defaultWindowName)
-                    }
-                    end("Both app layers should be visible") {
-                        coversAtMostRegion(displayBounds, testApp.defaultWindowName)
-                        coversAtMostRegion(displayBounds, imeApp.defaultWindowName)
-                    }
-                    navBarLayerIsAlwaysVisible()
-                    statusBarLayerIsAlwaysVisible()
-                }
-            }
+        }
+
+    @Postsubmit
+    @Test
+    fun pipWindowInsideDisplayBounds() {
+        testSpec.assertWm {
+            coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
         }
     }
 
+    @Postsubmit
+    @Test
+    fun bothAppWindowsVisible() {
+        testSpec.assertWmEnd {
+            isVisible(testApp.defaultWindowName)
+            isVisible(imeApp.defaultWindowName)
+            noWindowsOverlap(setOf(testApp.defaultWindowName, imeApp.defaultWindowName))
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+
+    @Postsubmit
+    @Test
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+
+    @Postsubmit
+    @Test
+    fun pipLayerInsideDisplayBounds() {
+        testSpec.assertLayers {
+            coversAtMostRegion(displayBounds, pipApp.defaultWindowName)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun bothAppLayersVisible() {
+        testSpec.assertLayersEnd {
+            coversAtMostRegion(displayBounds, testApp.defaultWindowName)
+            coversAtMostRegion(displayBounds, imeApp.defaultWindowName)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+
+    @Postsubmit
+    @Test
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+
     companion object {
         const val TEST_REPETITIONS = 2
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val supportedRotations = intArrayOf(Surface.ROTATION_0)
-            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
+        fun getParams(): Collection<FlickerTestParameter> {
+            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
+                supportedRotations = listOf(Surface.ROTATION_0),
+                repetitions = TEST_REPETITIONS
+            )
         }
     }
 }

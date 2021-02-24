@@ -79,12 +79,6 @@ public class SetSchemaResponse {
         return mBundle;
     }
 
-    /** TODO(b/177266929): Remove this deprecated method */
-    //@Deprecated
-    public boolean isSuccess() {
-        return true;
-    }
-
     /**
      * Returns a {@link List} of all failed {@link MigrationFailure}.
      *

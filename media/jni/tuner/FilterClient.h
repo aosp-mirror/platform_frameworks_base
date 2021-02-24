@@ -267,9 +267,6 @@ private:
     AidlMQ* mFilterMQ;
     EventFlag* mFilterMQEventFlag;
 
-    sp<FilterClientCallback> mCallback;
-    sp<HidlFilterCallback> mHidlCallback;
-
     native_handle_t* mAvSharedHandle;
     uint64_t mAvSharedMemSize;
     bool mIsMediaFilter;
