@@ -23,6 +23,8 @@ import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.OperationSafetyReason;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Slog;
 
 import com.android.internal.os.IResultReceiver;
@@ -42,10 +44,15 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
 
     private static final String TAG = OneTimeSafetyChecker.class.getSimpleName();
 
+    private static final long SELF_DESTRUCT_TIMEOUT_MS = 10_000;
+
     private final DevicePolicyManagerService mService;
     private final DevicePolicySafetyChecker mRealSafetyChecker;
     private final @DevicePolicyOperation int mOperation;
     private final @OperationSafetyReason int mReason;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private boolean mDone;
 
     OneTimeSafetyChecker(DevicePolicyManagerService service,
             @DevicePolicyOperation int operation, @OperationSafetyReason int reason) {
@@ -53,7 +60,11 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
         mOperation = operation;
         mReason = reason;
         mRealSafetyChecker = service.getDevicePolicySafetyChecker();
-        Slog.i(TAG, "Saving real DevicePolicySafetyChecker as " + mRealSafetyChecker);
+        Slog.i(TAG, "OneTimeSafetyChecker constructor: operation= " + operationToString(operation)
+                + ", reason=" + operationSafetyReasonToString(reason)
+                + ", realChecker=" + mRealSafetyChecker
+                + ", maxDuration=" + SELF_DESTRUCT_TIMEOUT_MS + "ms");
+        mHandler.postDelayed(() -> selfDestruct(), SELF_DESTRUCT_TIMEOUT_MS);
     }
 
     @Override
@@ -99,8 +110,21 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
     }
 
     private void disableSelf() {
+        if (mDone) {
+            Slog.w(TAG, "disableSelf(): already disabled");
+            return;
+        }
         Slog.i(TAG, "restoring DevicePolicySafetyChecker to " + mRealSafetyChecker);
         mService.setDevicePolicySafetyCheckerUnchecked(mRealSafetyChecker);
+        mDone = true;
+    }
+
+    private void selfDestruct() {
+        if (mDone) return;
+
+        // Usually happens when a CTS failed before calling the DPM method that would clear it
+        Slog.e(TAG, "Self destructing " + this + ", as it was not automatically disabled");
+        disableSelf();
     }
 
     @Override
