@@ -166,6 +166,12 @@ public interface BiometricFingerprintConstants {
     public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
 
     /**
+     * Authentication cannot proceed because re-enrollment is required.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_RE_ENROLL = 16;
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
