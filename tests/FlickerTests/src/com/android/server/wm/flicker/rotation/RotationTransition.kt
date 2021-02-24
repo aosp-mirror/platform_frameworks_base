@@ -28,12 +28,10 @@ import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
@@ -48,12 +46,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     protected val endingPos get() = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
 
     protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
-        withTestName { testSpec.name }
-        repeat { testSpec.config.repetitions }
         setup {
-            test {
-                device.wakeUpAndGoToHomeScreen()
-            }
             eachRun {
                 this.setRotation(testSpec.config.startRotation)
             }
