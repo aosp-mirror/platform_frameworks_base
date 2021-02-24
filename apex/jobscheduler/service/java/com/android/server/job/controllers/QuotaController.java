@@ -828,8 +828,8 @@ public final class QuotaController extends StateController {
     }
 
     @NonNull
-    private ShrinkableDebits getEJQuotaLocked(final int userId,
-            @NonNull final String packageName) {
+    @VisibleForTesting
+    ShrinkableDebits getEJDebitsLocked(final int userId, @NonNull final String packageName) {
         ShrinkableDebits debits = mEJStats.get(userId, packageName);
         if (debits == null) {
             debits = new ShrinkableDebits(
@@ -931,7 +931,7 @@ public final class QuotaController extends StateController {
 
     @VisibleForTesting
     long getRemainingEJExecutionTimeLocked(final int userId, @NonNull final String packageName) {
-        ShrinkableDebits quota = getEJQuotaLocked(userId, packageName);
+        ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
         if (quota.getStandbyBucketLocked() == NEVER_INDEX) {
             return 0;
         }
@@ -948,7 +948,7 @@ public final class QuotaController extends StateController {
                 if (ts.endTimeElapsed < windowStartTimeElapsed) {
                     final long duration = ts.endTimeElapsed - ts.startTimeElapsed;
                     remainingMs += duration;
-                    quota.transactOnDebitsLocked(-duration);
+                    quota.transactLocked(-duration);
                     timingSessions.remove(0);
                 } else if (ts.startTimeElapsed < windowStartTimeElapsed) {
                     remainingMs += windowStartTimeElapsed - ts.startTimeElapsed;
@@ -960,15 +960,16 @@ public final class QuotaController extends StateController {
             }
         }
 
+        TopAppTimer topAppTimer = mTopAppTrackers.get(userId, packageName);
+        if (topAppTimer != null && topAppTimer.isActive()) {
+            remainingMs += topAppTimer.getPendingReward(nowElapsed);
+        }
+
         Timer timer = mEJPkgTimers.get(userId, packageName);
         if (timer == null) {
             return remainingMs;
         }
-        // There's a case where the debits tally is 0 but a currently running HPJ still counts
-        // towards quota. If the app gets a reward in this case, the reward is lost and the HPJ
-        // run is still fully counted.
-        // TODO(171305774)/STOPSHIP: make sure getting rewards while HPJ currently executing isn't
-        // treated negatively
+
         return remainingMs - timer.getCurrentDuration(sElapsedRealtimeClock.millis());
     }
 
@@ -1081,7 +1082,7 @@ public final class QuotaController extends StateController {
         }
 
         final long nowElapsed = sElapsedRealtimeClock.millis();
-        ShrinkableDebits quota = getEJQuotaLocked(userId, packageName);
+        ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
         final long limitMs = getEJLimitMsLocked(packageName, quota.getStandbyBucketLocked());
         final long startWindowElapsed = Math.max(0, nowElapsed - mEJLimitWindowSizeMs);
         long remainingDeadSpaceMs = remainingExecutionTimeMs;
@@ -1372,6 +1373,11 @@ public final class QuotaController extends StateController {
     @VisibleForTesting
     void saveTimingSession(final int userId, @NonNull final String packageName,
             @NonNull final TimingSession session, boolean isExpedited) {
+        saveTimingSession(userId, packageName, session, isExpedited, 0);
+    }
+
+    private void saveTimingSession(final int userId, @NonNull final String packageName,
+            @NonNull final TimingSession session, boolean isExpedited, long debitAdjustment) {
         synchronized (mLock) {
             final SparseArrayMap<String, List<TimingSession>> sessionMap =
                     isExpedited ? mEJTimingSessions : mTimingSessions;
@@ -1382,8 +1388,9 @@ public final class QuotaController extends StateController {
             }
             sessions.add(session);
             if (isExpedited) {
-                final ShrinkableDebits quota = getEJQuotaLocked(userId, packageName);
-                quota.transactOnDebitsLocked(session.endTimeElapsed - session.startTimeElapsed);
+                final ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
+                quota.transactLocked(session.endTimeElapsed - session.startTimeElapsed
+                        + debitAdjustment);
             } else {
                 // Adding a new session means that the current stats are now incorrect.
                 invalidateAllExecutionStatsLocked(userId, packageName);
@@ -1396,13 +1403,32 @@ public final class QuotaController extends StateController {
     private void grantRewardForInstantEvent(
             final int userId, @NonNull final String packageName, final long credit) {
         synchronized (mLock) {
-            final ShrinkableDebits quota = getEJQuotaLocked(userId, packageName);
-            quota.transactOnDebitsLocked(-credit);
-            if (maybeUpdateConstraintForPkgLocked(sElapsedRealtimeClock.millis(),
-                    userId, packageName)) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            final ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
+            if (transactQuotaLocked(userId, packageName, nowElapsed, quota, credit)
+                    && maybeUpdateConstraintForPkgLocked(nowElapsed, userId, packageName)) {
                 mStateChangedListener.onControllerStateChanged();
             }
         }
+    }
+
+    private boolean transactQuotaLocked(final int userId, @NonNull final String packageName,
+            final long nowElapsed, @NonNull ShrinkableDebits debits, final long credit) {
+        final long oldTally = debits.getTallyLocked();
+        final long leftover = debits.transactLocked(-credit);
+        if (DEBUG) {
+            Slog.d(TAG, "debits overflowed by " + leftover);
+        }
+        boolean changed = oldTally != debits.getTallyLocked();
+        if (leftover != 0) {
+            // Only adjust timer if its active.
+            final Timer ejTimer = mEJPkgTimers.get(userId, packageName);
+            if (ejTimer != null && ejTimer.isActive()) {
+                ejTimer.updateDebitAdjustment(nowElapsed, leftover);
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     private final class EarliestEndTimeFunctor implements Consumer<List<TimingSession>> {
@@ -1875,7 +1901,8 @@ public final class QuotaController extends StateController {
         }
     }
 
-    private static final class ShrinkableDebits {
+    @VisibleForTesting
+    static final class ShrinkableDebits {
         /** The amount of quota remaining. Can be negative if limit changes. */
         private long mDebitTally;
         private int mStandbyBucket;
@@ -1893,8 +1920,11 @@ public final class QuotaController extends StateController {
          * Negative if the tally should decrease (therefore increasing available quota);
          * or positive if the tally should increase (therefore decreasing available quota).
          */
-        void transactOnDebitsLocked(final long amount) {
+        long transactLocked(final long amount) {
+            final long leftover = amount < 0 && Math.abs(amount) > mDebitTally
+                    ? mDebitTally + amount : 0;
             mDebitTally = Math.max(0, mDebitTally + amount);
+            return leftover;
         }
 
         void setStandbyBucketLocked(int standbyBucket) {
@@ -1927,6 +1957,7 @@ public final class QuotaController extends StateController {
         private final ArraySet<JobStatus> mRunningBgJobs = new ArraySet<>();
         private long mStartTimeElapsed;
         private int mBgJobCount;
+        private long mDebitAdjustment;
 
         Timer(int uid, int userId, String packageName, boolean regularJobTimer) {
             mPkg = new Package(userId, packageName);
@@ -1957,6 +1988,7 @@ public final class QuotaController extends StateController {
                 if (mRunningBgJobs.size() == 1) {
                     // Started tracking the first job.
                     mStartTimeElapsed = sElapsedRealtimeClock.millis();
+                    mDebitAdjustment = 0;
                     if (mRegularJobTimer) {
                         // Starting the timer means that all cached execution stats are now
                         // incorrect.
@@ -1988,6 +2020,11 @@ public final class QuotaController extends StateController {
             }
         }
 
+        void updateDebitAdjustment(long nowElapsed, long debit) {
+            // Make sure we don't have a credit larger than the expected session.
+            mDebitAdjustment = Math.max(mDebitAdjustment + debit, mStartTimeElapsed - nowElapsed);
+        }
+
         /**
          * Stops tracking all jobs and cancels any pending alarms. This should only be called if
          * the Timer is not going to be used anymore.
@@ -2003,7 +2040,8 @@ public final class QuotaController extends StateController {
                 return;
             }
             TimingSession ts = new TimingSession(mStartTimeElapsed, nowElapsed, mBgJobCount);
-            saveTimingSession(mPkg.userId, mPkg.packageName, ts, !mRegularJobTimer);
+            saveTimingSession(mPkg.userId, mPkg.packageName, ts, !mRegularJobTimer,
+                    mDebitAdjustment);
             mBgJobCount = 0;
             // Don't reset the tracked jobs list as we need to keep tracking the current number
             // of jobs.
@@ -2030,7 +2068,7 @@ public final class QuotaController extends StateController {
 
         long getCurrentDuration(long nowElapsed) {
             synchronized (mLock) {
-                return !isActive() ? 0 : nowElapsed - mStartTimeElapsed;
+                return !isActive() ? 0 : nowElapsed - mStartTimeElapsed + mDebitAdjustment;
             }
         }
 
@@ -2059,6 +2097,7 @@ public final class QuotaController extends StateController {
                 // Start timing from unplug.
                 if (mRunningBgJobs.size() > 0) {
                     mStartTimeElapsed = nowElapsed;
+                    mDebitAdjustment = 0;
                     // NOTE: this does have the unfortunate consequence that if the device is
                     // repeatedly plugged in and unplugged, or an app changes foreground state
                     // very frequently, the job count for a package may be artificially high.
@@ -2128,6 +2167,11 @@ public final class QuotaController extends StateController {
             pw.print(", ");
             pw.print(mBgJobCount);
             pw.print(" running bg jobs");
+            if (!mRegularJobTimer) {
+                pw.print(" (debit adj=");
+                pw.print(mDebitAdjustment);
+                pw.print(")");
+            }
             pw.println();
             pw.increaseIndent();
             for (int i = 0; i < mRunningBgJobs.size(); i++) {
@@ -2171,6 +2215,21 @@ public final class QuotaController extends StateController {
             mPkg = new Package(userId, packageName);
         }
 
+        private int calculateTimeChunks(final long nowElapsed) {
+            final long totalTopTimeMs = nowElapsed - mStartTimeElapsed;
+            int numTimeChunks = (int) (totalTopTimeMs / mEJTopAppTimeChunkSizeMs);
+            final long remainderMs = totalTopTimeMs % mEJTopAppTimeChunkSizeMs;
+            if (remainderMs >= SECOND_IN_MILLIS) {
+                // "Round up"
+                numTimeChunks++;
+            }
+            return numTimeChunks;
+        }
+
+        long getPendingReward(final long nowElapsed) {
+            return mEJRewardTopAppMs * calculateTimeChunks(nowElapsed);
+        }
+
         void processEventLocked(@NonNull UsageEvents.Event event) {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             switch (event.getEventType()) {
@@ -2186,21 +2245,16 @@ public final class QuotaController extends StateController {
                     final UsageEvents.Event existingEvent =
                             mActivities.removeReturnOld(event.mInstanceId);
                     if (existingEvent != null && mActivities.size() == 0) {
-                        final long totalTopTimeMs = nowElapsed - mStartTimeElapsed;
-                        int numTimeChunks = (int) (totalTopTimeMs / mEJTopAppTimeChunkSizeMs);
-                        final long remainderMs = totalTopTimeMs % mEJTopAppTimeChunkSizeMs;
-                        if (remainderMs >= SECOND_IN_MILLIS) {
-                            // "Round up"
-                            numTimeChunks++;
-                        }
+                        final long pendingReward = getPendingReward(nowElapsed);
                         if (DEBUG) {
-                            Slog.d(TAG,
-                                    "Crediting " + mPkg + " for " + numTimeChunks + " time chunks");
+                            Slog.d(TAG, "Crediting " + mPkg + " " + pendingReward + "ms"
+                                    + " for " + calculateTimeChunks(nowElapsed) + " time chunks");
                         }
-                        final ShrinkableDebits quota =
-                                getEJQuotaLocked(mPkg.userId, mPkg.packageName);
-                        quota.transactOnDebitsLocked(-mEJRewardTopAppMs * numTimeChunks);
-                        if (maybeUpdateConstraintForPkgLocked(nowElapsed,
+                        final ShrinkableDebits debits =
+                                getEJDebitsLocked(mPkg.userId, mPkg.packageName);
+                        if (transactQuotaLocked(mPkg.userId, mPkg.packageName,
+                                nowElapsed, debits, pendingReward)
+                                && maybeUpdateConstraintForPkgLocked(nowElapsed,
                                 mPkg.userId, mPkg.packageName)) {
                             mStateChangedListener.onControllerStateChanged();
                         }
@@ -2321,7 +2375,7 @@ public final class QuotaController extends StateController {
          */
         @Override
         public void onUsageEvent(int userId, @NonNull UsageEvents.Event event) {
-            mHandler.obtainMessage(MSG_PROCESS_USAGE_EVENT, userId, 0, event);
+            mHandler.obtainMessage(MSG_PROCESS_USAGE_EVENT, userId, 0, event).sendToTarget();
         }
     }
 
@@ -2408,7 +2462,6 @@ public final class QuotaController extends StateController {
     }
 
     private class QcHandler extends Handler {
-        private boolean mIsProcessing;
 
         QcHandler(Looper looper) {
             super(looper);
@@ -2417,8 +2470,6 @@ public final class QuotaController extends StateController {
         @Override
         public void handleMessage(Message msg) {
             synchronized (mLock) {
-                mIsProcessing = true;
-
                 switch (msg.what) {
                     case MSG_REACHED_QUOTA: {
                         Package pkg = (Package) msg.obj;
@@ -2539,6 +2590,10 @@ public final class QuotaController extends StateController {
                         final int userId = msg.arg1;
                         final UsageEvents.Event event = (UsageEvents.Event) msg.obj;
                         final String pkgName = event.getPackageName();
+                        if (DEBUG) {
+                            Slog.d(TAG, "Processing event " + event.getEventType()
+                                    + " for " + string(userId, pkgName));
+                        }
                         switch (event.getEventType()) {
                             case UsageEvents.Event.ACTIVITY_RESUMED:
                             case UsageEvents.Event.ACTIVITY_PAUSED:
@@ -2604,8 +2659,6 @@ public final class QuotaController extends StateController {
                     }
                 }
             }
-
-            mIsProcessing = false;
         }
     }
 
@@ -3881,11 +3934,6 @@ public final class QuotaController extends StateController {
     @NonNull
     QcConstants getQcConstants() {
         return mQcConstants;
-    }
-
-    @VisibleForTesting
-    boolean isActiveBackgroundProcessing() {
-        return mHandler.mIsProcessing;
     }
 
     //////////////////////////// DATA DUMP //////////////////////////////
