@@ -17,6 +17,7 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -29,6 +30,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.res.TypedArrayUtils;
 
 import com.android.settingslib.RestrictedLockUtils;
 
@@ -88,6 +90,17 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         });
 
         setChecked(mSwitch.isChecked());
+
+        if (attrs != null) {
+            final TypedArray a = context.obtainStyledAttributes(attrs,
+                    androidx.preference.R.styleable.Preference, 0 /*defStyleAttr*/,
+                    0 /*defStyleRes*/);
+            final CharSequence title = TypedArrayUtils.getText(a,
+                    androidx.preference.R.styleable.Preference_title,
+                    androidx.preference.R.styleable.Preference_android_title);
+            setTitle(title);
+            a.recycle();
+        }
     }
 
     @Override
@@ -126,7 +139,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     /**
      * Set the title text
      */
-    public void setTitle(String text) {
+    public void setTitle(CharSequence text) {
         if (mTextView != null) {
             mTextView.setText(text);
         }
