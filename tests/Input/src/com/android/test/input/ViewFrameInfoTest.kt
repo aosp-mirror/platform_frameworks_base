@@ -62,15 +62,12 @@ class ViewFrameInfoTest {
     fun testUpdateFrameInfoFromViewFrameInfo() {
         val frameInfo = FrameInfo()
         // By default, all values should be zero
-        assertThat(frameInfo.frameInfo[FrameInfo.OLDEST_INPUT_EVENT]).isEqualTo(0)
-        assertThat(frameInfo.frameInfo[FrameInfo.NEWEST_INPUT_EVENT]).isEqualTo(0)
+        // TODO(b/169866723): Use InputEventAssigner and assert INPUT_EVENT_ID
         assertThat(frameInfo.frameInfo[FrameInfo.FLAGS]).isEqualTo(0)
         assertThat(frameInfo.frameInfo[FrameInfo.DRAW_START]).isEqualTo(0)
 
         // The values inside FrameInfo should match those from ViewFrameInfo after we update them
         mViewFrameInfo.populateFrameInfo(frameInfo)
-        assertThat(frameInfo.frameInfo[FrameInfo.OLDEST_INPUT_EVENT]).isEqualTo(10)
-        assertThat(frameInfo.frameInfo[FrameInfo.NEWEST_INPUT_EVENT]).isEqualTo(20)
         assertThat(frameInfo.frameInfo[FrameInfo.FLAGS]).isEqualTo(
                 FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED)
         assertThat(frameInfo.frameInfo[FrameInfo.DRAW_START]).isGreaterThan(mTimeStarted)
