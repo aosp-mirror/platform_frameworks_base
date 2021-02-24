@@ -14,36 +14,29 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
+<com.android.systemui.car.userswitcher.UserSwitcherContainer
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fullscreen_user_switcher"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/car_user_switcher_background_color">
+    android:background="@color/car_user_switcher_background_color"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <include
+        layout="@layout/car_status_bar_header"
         android:layout_alignParentTop="true"
-        android:orientation="vertical">
-
-        <include
-            layout="@layout/car_status_bar_header"
-            android:layout_alignParentTop="true"
-            android:theme="@android:style/Theme"/>
+        android:theme="@android:style/Theme"/>
 
 
-        <FrameLayout
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.android.systemui.car.userswitcher.UserGridRecyclerView
+            android:id="@+id/user_grid"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <com.android.systemui.car.userswitcher.UserGridRecyclerView
-                android:id="@+id/user_grid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
-        </FrameLayout>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
+    </FrameLayout>
 
-    </LinearLayout>
-</FrameLayout>
+</com.android.systemui.car.userswitcher.UserSwitcherContainer>
