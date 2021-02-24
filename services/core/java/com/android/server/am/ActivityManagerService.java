@@ -8211,11 +8211,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 false /* mountExtStorageFull */, abiOverride, zygotePolicyFlags);
     }
 
-    // TODO: Move to ProcessList?
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, boolean mountExtStorageFull, String abiOverride,
             int zygotePolicyFlags) {
+        return addAppLocked(info, customProcess, isolated, disableHiddenApiChecks,
+                false /* disableTestApiChecks */, mountExtStorageFull, abiOverride,
+                zygotePolicyFlags);
+    }
+
+    // TODO: Move to ProcessList?
+    @GuardedBy("this")
+    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
+            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
+            boolean mountExtStorageFull, String abiOverride, int zygotePolicyFlags) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -8250,7 +8259,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
-                    zygotePolicyFlags, disableHiddenApiChecks, mountExtStorageFull, abiOverride);
+                    zygotePolicyFlags, disableHiddenApiChecks, disableTestApiChecks,
+                    mountExtStorageFull, abiOverride);
         }
 
         return app;
@@ -17056,12 +17066,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
             boolean disableTestApiChecks = disableHiddenApiChecks
                     || (flags & INSTR_FLAG_DISABLE_TEST_API_CHECKS) != 0;
-
             if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
 
-                enableTestApiAccess(ai.packageName);
+                enableTestApiAccess(ii.packageName);
             }
 
             // TODO(b/158750470): remove
@@ -17079,7 +17088,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
-                    mountExtStorageFull, abiOverride, ZYGOTE_POLICY_FLAG_EMPTY);
+                    disableTestApiChecks, mountExtStorageFull, abiOverride,
+                    ZYGOTE_POLICY_FLAG_EMPTY);
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
             activeInstr.mSourceUid = callingUid;
