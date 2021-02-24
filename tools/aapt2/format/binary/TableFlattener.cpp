@@ -570,7 +570,6 @@ class PackageFlattener {
       ResourceEntry* entry = sorted_entries->at(entryIndex);
 
       // Populate the config masks for this entry.
-
       if (entry->visibility.level == Visibility::Level::kPublic) {
         config_masks[entry->id.value()] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
       }
