@@ -1,0 +1,14 @@
+android_library {
+    name: "SettingsLibCollapsingToolbarBaseActivity",
+
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.core_core",
+        "com.google.android.material_material",
+    ],
+    sdk_version: "system_current",
+    min_sdk_version: "21",
+}

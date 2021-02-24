@@ -218,9 +218,23 @@ public class VisibilityStore {
      * @throws AppSearchException AppSearchException on AppSearchImpl error.
      */
     public void initialize() throws AppSearchException {
-        if (!mAppSearchImpl.hasSchemaTypeLocked(PACKAGE_NAME, DATABASE_NAME, VISIBILITY_TYPE)
-                || !mAppSearchImpl.hasSchemaTypeLocked(
-                        PACKAGE_NAME, DATABASE_NAME, PACKAGE_ACCESSIBLE_TYPE)) {
+        List<AppSearchSchema> schemas = mAppSearchImpl.getSchema(PACKAGE_NAME, DATABASE_NAME);
+        boolean hasVisibilityType = false;
+        boolean hasPackageAccessibleType = false;
+        for (int i = 0; i < schemas.size(); i++) {
+            AppSearchSchema schema = schemas.get(i);
+            if (schema.getSchemaType().equals(VISIBILITY_TYPE)) {
+                hasVisibilityType = true;
+            } else if (schema.getSchemaType().equals(PACKAGE_ACCESSIBLE_TYPE)) {
+                hasPackageAccessibleType = true;
+            }
+
+            if (hasVisibilityType && hasPackageAccessibleType) {
+                // Found both our types, can exit early.
+                break;
+            }
+        }
+        if (!hasVisibilityType || !hasPackageAccessibleType) {
             // Schema type doesn't exist yet. Add it.
             mAppSearchImpl.setSchema(
                     PACKAGE_NAME,
@@ -250,10 +264,11 @@ public class VisibilityStore {
                                 /*typePropertyPaths=*/ Collections.emptyMap());
 
                 // Update platform visibility settings
-                String[] schemas =
+                String[] notPlatformSurfaceableSchemas =
                         document.getPropertyStringArray(NOT_PLATFORM_SURFACEABLE_PROPERTY);
-                if (schemas != null) {
-                    mNotPlatformSurfaceableMap.put(prefix, new ArraySet<>(Arrays.asList(schemas)));
+                if (notPlatformSurfaceableSchemas != null) {
+                    mNotPlatformSurfaceableMap.put(
+                            prefix, new ArraySet<>(Arrays.asList(notPlatformSurfaceableSchemas)));
                 }
 
                 // Update 3p package visibility settings
@@ -333,7 +348,7 @@ public class VisibilityStore {
                 schemasPackageAccessible.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 GenericDocument packageAccessibleDocument =
-                        new GenericDocument.Builder(/*uri=*/"", PACKAGE_ACCESSIBLE_TYPE)
+                        new GenericDocument.Builder(/*uri=*/ "", PACKAGE_ACCESSIBLE_TYPE)
                                 .setNamespace(NAMESPACE)
                                 .setPropertyString(
                                         PACKAGE_NAME_PROPERTY,

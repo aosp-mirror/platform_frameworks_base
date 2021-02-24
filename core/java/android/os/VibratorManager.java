@@ -91,10 +91,10 @@ public abstract class VibratorManager {
      *
      * <p>
      * Pass in a {@link CombinedVibrationEffect} representing a combination of {@link
-     * VibrationEffect} to be played on one or more vibrators.
+     * VibrationEffect VibrationEffects} to be played on one or more vibrators.
      * </p>
      *
-     * @param effect an array of longs of times for which to turn the vibrator on or off.
+     * @param effect a combination of effects to be performed by one or more vibrators.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public final void vibrate(@NonNull CombinedVibrationEffect effect) {
@@ -109,7 +109,7 @@ public abstract class VibratorManager {
      * VibrationEffect} to be played on one or more vibrators.
      * </p>
      *
-     * @param effect     an array of longs of times for which to turn the vibrator on or off.
+     * @param effect a combination of effects to be performed by one or more vibrators.
      * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
      *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
      *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with

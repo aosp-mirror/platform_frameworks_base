@@ -817,6 +817,12 @@ final class ColorFade {
                 }
 
                 DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
+                if (displayInfo == null) {
+                    // displayInfo can be null if the associated display has been removed. There
+                    // is a delay between the display being removed and ColorFade being dismissed.
+                    return;
+                }
+
                 switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
                         t.setPosition(mSurfaceControl, 0, 0);

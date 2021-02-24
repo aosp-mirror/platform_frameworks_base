@@ -100,9 +100,9 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
 
     @Override
     public boolean start() {
-        if (mIsCec20) {
-            sendSetStreamPath();
-        }
+      // Wake-up on <Set Stream Path> was not mandatory before CEC 2.0.
+      // The message is re-sent at the end of the action for devices that don't support 2.0.
+      sendSetStreamPath();
         int targetPowerStatus = localDevice().mService.getHdmiCecNetwork()
                 .getCecDeviceInfo(getTargetAddress()).getDevicePowerStatus();
         if (!mIsCec20 || targetPowerStatus == HdmiControlManager.POWER_STATUS_UNKNOWN) {

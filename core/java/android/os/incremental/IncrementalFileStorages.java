@@ -59,7 +59,6 @@ public final class IncrementalFileStorages {
     /**
      * Set up files and directories used in an installation session. Only used by Incremental.
      * All the files will be created in defaultStorage.
-     * TODO(b/133435829): code clean up
      *
      * @throws IllegalStateException the session is not an Incremental installation session.
      * @throws IOException if fails to setup files or directories.
@@ -73,12 +72,10 @@ public final class IncrementalFileStorages {
             @Nullable IStorageHealthListener healthListener,
             @NonNull List<InstallationFileParcel> addedFiles,
             @NonNull PerUidReadTimeouts[] perUidReadTimeouts,
-            IPackageLoadingProgressCallback progressCallback) throws IOException {
-        // TODO(b/136132412): validity check if session should not be incremental
+            @Nullable IPackageLoadingProgressCallback progressCallback) throws IOException {
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
                 Context.INCREMENTAL_SERVICE);
         if (incrementalManager == null) {
-            // TODO(b/146080380): add incremental-specific error code
             throw new IOException("Failed to obtain incrementalManager.");
         }
 
@@ -89,7 +86,6 @@ public final class IncrementalFileStorages {
                 try {
                     result.addApkFile(file);
                 } catch (IOException e) {
-                    // TODO(b/146080380): add incremental-specific error code
                     throw new IOException(
                             "Failed to add file to IncFS: " + file.name + ", reason: ", e);
                 }
@@ -203,7 +199,6 @@ public final class IncrementalFileStorages {
 
     /**
      * Resets the states and unbinds storage instances for an installation session.
-     * TODO(b/136132412): make sure unnecessary binds are removed but useful storages are kept
      */
     public void cleanUp() {
         if (mDefaultStorage == null) {
@@ -211,8 +206,8 @@ public final class IncrementalFileStorages {
         }
 
         try {
+            mIncrementalManager.unregisterLoadingProgressCallbacks(mStageDir.getAbsolutePath());
             mDefaultStorage.unBind(mStageDir.getAbsolutePath());
-            mDefaultStorage.unregisterLoadingProgressListener();
         } catch (IOException ignored) {
         }
         mDefaultStorage = null;

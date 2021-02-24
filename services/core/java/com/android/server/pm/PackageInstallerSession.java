@@ -1010,9 +1010,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException(
                         "DataLoader installation of APEX modules is not allowed.");
             }
+
             if (this.params.dataLoaderParams.getComponentName().getPackageName()
-                    == SYSTEM_DATA_LOADER_PACKAGE) {
-                assertShellOrSystemCalling("System data loaders");
+                    == SYSTEM_DATA_LOADER_PACKAGE && mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.USE_SYSTEM_DATA_LOADERS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("You need the "
+                        + "com.android.permission.USE_SYSTEM_DATA_LOADERS permission "
+                        + "to use system data loaders");
             }
         }
 
@@ -1202,8 +1207,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private void computeProgressLocked(boolean forcePublish) {
-        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
-                + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
+        if (!mCommitted) {
+            mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
+                    + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
+        } else {
+            // For incremental installs, continue publishing the install progress during committing.
+            mProgress = mIncrementalProgress;
+        }
 
         // Only publish when meaningful change
         if (forcePublish || Math.abs(mProgress - mReportedProgress) >= 0.01) {
@@ -1939,9 +1949,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                             "Session destroyed");
                 }
-                // Client staging is fully done at this point
-                mClientProgress = 1f;
-                computeProgressLocked(true);
+                if (!isIncrementalInstallation()) {
+                    // For non-incremental installs, client staging is fully done at this point
+                    mClientProgress = 1f;
+                    computeProgressLocked(true);
+                }
 
                 // This ongoing commit should keep session active, even though client
                 // will probably close their end.
@@ -3799,6 +3811,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             public void onPackageLoadingProgressChanged(float progress) {
                                 synchronized (mLock) {
                                     mIncrementalProgress = progress;
+                                    computeProgressLocked(true);
                                 }
                             }
                         });

@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.bubbles.storage
 
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.util.Xml
 import com.android.internal.util.FastXmlSerializer
 import com.android.internal.util.XmlUtils
@@ -38,6 +39,7 @@ private const val ATTR_KEY = "key"
 private const val ATTR_DESIRED_HEIGHT = "h"
 private const val ATTR_DESIRED_HEIGHT_RES_ID = "hid"
 private const val ATTR_TITLE = "t"
+private const val ATTR_TASK_ID = "tid"
 
 /**
  * Writes the bubbles in xml format into given output stream.
@@ -70,6 +72,7 @@ private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleEntity) {
         serializer.attribute(null, ATTR_DESIRED_HEIGHT, bubble.desiredHeight.toString())
         serializer.attribute(null, ATTR_DESIRED_HEIGHT_RES_ID, bubble.desiredHeightResId.toString())
         bubble.title?.let { serializer.attribute(null, ATTR_TITLE, it) }
+        serializer.attribute(null, ATTR_TASK_ID, bubble.taskId.toString())
         serializer.endTag(null, TAG_BUBBLE)
     } catch (e: IOException) {
         throw RuntimeException(e)
@@ -103,7 +106,8 @@ private fun readXmlEntry(parser: XmlPullParser): BubbleEntity? {
             parser.getAttributeWithName(ATTR_KEY) ?: return null,
             parser.getAttributeWithName(ATTR_DESIRED_HEIGHT)?.toInt() ?: return null,
             parser.getAttributeWithName(ATTR_DESIRED_HEIGHT_RES_ID)?.toInt() ?: return null,
-            parser.getAttributeWithName(ATTR_TITLE)
+            parser.getAttributeWithName(ATTR_TITLE),
+            parser.getAttributeWithName(ATTR_TASK_ID)?.toInt() ?: INVALID_TASK_ID
     )
 }
 

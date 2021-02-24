@@ -16,6 +16,7 @@
 
 package com.android.systemui.people;
 
+import static android.app.Notification.CATEGORY_MISSED_CALL;
 import static android.app.people.ConversationStatus.ACTIVITY_BIRTHDAY;
 import static android.app.people.ConversationStatus.ACTIVITY_GAME;
 import static android.app.people.ConversationStatus.ACTIVITY_NEW_STORY;
@@ -113,6 +114,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     private static final Uri URI = Uri.parse("fake_uri");
     private static final Icon ICON = Icon.createWithResource("package", R.drawable.ic_android);
     private static final String GAME_DESCRIPTION = "Playing a game!";
+    private static final CharSequence MISSED_CALL = "Custom missed call message";
     private static final String NAME = "username";
     private static final Person PERSON = new Person.Builder()
             .setName("name")
@@ -346,7 +348,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 .build();
 
         Notification.MessagingStyle.Message lastMessage =
-                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn);
+                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn.getNotification());
 
         assertThat(lastMessage).isNull();
     }
@@ -447,7 +449,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 .build();
 
         Notification.MessagingStyle.Message lastMessage =
-                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn);
+                PeopleSpaceUtils.getLastMessagingStyleMessage(sbn.getNotification());
 
         assertThat(lastMessage.getText().toString()).isEqualTo(NOTIFICATION_TEXT_2);
     }
@@ -465,7 +467,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setUid(0)
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(tile, sbn);
+                .augmentTileFromNotification(mContext, tile, sbn);
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
     }
@@ -483,9 +485,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setUid(0)
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromNotification(tile, sbn);
+                .augmentTileFromNotification(mContext, tile, sbn);
 
-        assertThat(actual.getNotificationKey()).isEqualTo(null);
         assertThat(actual.getNotificationContent()).isEqualTo(null);
     }
 
@@ -498,7 +499,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setUid(0)
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromVisibleNotifications(tile,
+                .augmentTileFromVisibleNotifications(mContext, tile,
                         Map.of(PeopleSpaceUtils.getKey(mNotificationEntry1), mNotificationEntry1));
 
         assertThat(actual.getNotificationContent().toString()).isEqualTo(NOTIFICATION_TEXT_2);
@@ -513,7 +514,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setUid(0)
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromVisibleNotifications(tile,
+                .augmentTileFromVisibleNotifications(mContext, tile,
                         Map.of(PeopleSpaceUtils.getKey(mNotificationEntry1), mNotificationEntry1));
 
         assertThat(actual.getNotificationContent()).isEqualTo(null);
@@ -528,7 +529,8 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setUid(0)
                         .build();
         List<PeopleSpaceTile> actualList = PeopleSpaceUtils
-                .augmentTilesFromVisibleNotifications(List.of(tile), mNotificationEntryManager);
+                .augmentTilesFromVisibleNotifications(
+                        mContext, List.of(tile), mNotificationEntryManager);
 
         assertThat(actualList.size()).isEqualTo(1);
         assertThat(actualList.get(0).getNotificationContent().toString())
@@ -552,7 +554,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                         .setUid(0)
                         .build();
         List<PeopleSpaceTile> actualList = PeopleSpaceUtils
-                .augmentTilesFromVisibleNotifications(List.of(tile1, tile2),
+                .augmentTilesFromVisibleNotifications(mContext, List.of(tile1, tile2),
                         mNotificationEntryManager);
 
         assertThat(actualList.size()).isEqualTo(2);
@@ -761,6 +763,33 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         TextView statusContent = (TextView) result.findViewById(R.id.status);
         assertEquals(statusContent.getText(), GAME_DESCRIPTION);
     }
+
+    @Test
+    public void testCreateRemoteViewsWithMissedCallNotification() {
+        PeopleSpaceTile tileWithMissedCallNotification = PERSON_TILE.toBuilder()
+                .setNotificationDataUri(null)
+                .setNotificationCategory(CATEGORY_MISSED_CALL)
+                .setNotificationContent(MISSED_CALL)
+                .build();
+        RemoteViews views = PeopleSpaceUtils.createRemoteViews(mContext,
+                tileWithMissedCallNotification, 0);
+        View result = views.apply(mContext, null);
+
+        TextView name = (TextView) result.findViewById(R.id.name);
+        assertEquals(name.getText(), NAME);
+        // Has availability.
+        View availability = result.findViewById(R.id.availability);
+        assertEquals(View.GONE, availability.getVisibility());
+        // Has new story.
+        View personIcon = result.findViewById(R.id.person_icon_only);
+        View personIconWithStory = result.findViewById(R.id.person_icon_with_story);
+        assertEquals(View.VISIBLE, personIcon.getVisibility());
+        assertEquals(View.GONE, personIconWithStory.getVisibility());
+        // Has status.
+        TextView statusContent = (TextView) result.findViewById(R.id.status);
+        assertEquals(statusContent.getText(), MISSED_CALL);
+    }
+
 
     @Test
     public void testCreateRemoteViewsWithNotificationTemplate() {

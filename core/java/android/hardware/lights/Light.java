@@ -16,22 +16,56 @@
 
 package android.hardware.lights;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Represents a logical light on the device.
  *
- * @hide
  */
-@SystemApi
 public final class Light implements Parcelable {
+    // These enum values copy the values from {@link com.android.server.lights.LightsManager}
+    // and the light HAL. Since 0-7 are lights reserved for system use, 8 for microphone light is
+    // defined in {@link android.hardware.lights.LightsManager}, following types are available
+    // through this API.
+    /** Type for lights that indicate microphone usage */
+    public static final int LIGHT_TYPE_MICROPHONE = 8;
+
+    /**
+     * Type for lights that indicate a monochrome color LED light.
+     */
+    public static final int LIGHT_TYPE_INPUT_SINGLE = 9;
+
+    /**
+     * Type for lights that indicate a group of LED lights representing player ID.
+     */
+    public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10;
+
+    /**
+     * Type for lights that indicate a color LED light.
+     */
+    public static final int LIGHT_TYPE_INPUT_RGB = 11;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LIGHT_TYPE_"},
+        value = {
+            LIGHT_TYPE_INPUT_PLAYER_ID,
+            LIGHT_TYPE_INPUT_SINGLE,
+            LIGHT_TYPE_INPUT_RGB,
+        })
+    public @interface LightType {}
+
     private final int mId;
     private final int mOrdinal;
     private final int mType;
+    private final String mName;
 
     /**
      * Creates a new light with the given data.
@@ -39,15 +73,26 @@ public final class Light implements Parcelable {
      * @hide
      */
     public Light(int id, int ordinal, int type) {
+        this(id, ordinal, type, "Light");
+    }
+
+    /**
+     * Creates a new light with the given data.
+     *
+     * @hide
+     */
+    public Light(int id, int ordinal, int type, String name) {
         mId = id;
         mOrdinal = ordinal;
         mType = type;
+        mName = name;
     }
 
     private Light(@NonNull Parcel in) {
         mId = in.readInt();
         mOrdinal = in.readInt();
         mType = in.readInt();
+        mName = in.readString();
     }
 
     /** Implement the Parcelable interface */
@@ -56,6 +101,7 @@ public final class Light implements Parcelable {
         dest.writeInt(mId);
         dest.writeInt(mOrdinal);
         dest.writeInt(mType);
+        dest.writeString(mName);
     }
 
     /** Implement the Parcelable interface */
@@ -97,6 +143,14 @@ public final class Light implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * Returns the name of the light.
+     */
+    @NonNull
+    public String getName() {
+        return mName;
     }
 
     /**

@@ -406,6 +406,8 @@ message WindowStateProto {
     optional int64 finished_seamless_rotation_frame = 40;
     optional WindowFramesProto window_frames = 41;
     optional bool force_seamless_rotation = 42;
+    optional bool in_size_compat_mode = 43;
+    optional float global_scale = 44;
 }
 
 message IdentifierProto {
@@ -516,6 +518,7 @@ message WindowFramesProto {
     optional .android.graphics.RectProto visible_insets = 13 [deprecated=true];
     optional .android.graphics.RectProto stable_insets = 14 [deprecated=true];
     optional .android.graphics.RectProto outsets = 15;
+    optional .android.graphics.RectProto compat_frame = 16;
 }
 
 message InsetsSourceProviderProto {

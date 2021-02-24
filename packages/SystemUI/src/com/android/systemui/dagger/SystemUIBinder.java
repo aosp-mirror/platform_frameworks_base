@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.media.systemsounds.HomeSoundEffectController;
 import com.android.systemui.people.widget.PeopleSpaceWidgetEnabler;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.privacy.television.TvOngoingPrivacyChip;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.shortcut.ShortcutKeyDispatcher;
@@ -154,6 +155,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(TvNotificationPanel.class)
     public abstract SystemUI bindsTvNotificationPanel(TvNotificationPanel sysui);
+
+    /** Inject into TvOngoingPrivacyChip. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvOngoingPrivacyChip.class)
+    public abstract SystemUI bindsTvOngoingPrivacyChip(TvOngoingPrivacyChip sysui);
 
     /** Inject into VolumeUI. */
     @Binds

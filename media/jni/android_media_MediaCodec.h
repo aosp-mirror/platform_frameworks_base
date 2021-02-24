@@ -164,6 +164,8 @@ struct JMediaCodec : public AHandler {
 
     bool hasCryptoOrDescrambler() { return mHasCryptoOrDescrambler; }
 
+    const sp<ICrypto> &getCrypto() { return mCrypto; }
+
 protected:
     virtual ~JMediaCodec();
 
@@ -192,6 +194,8 @@ private:
     sp<AMessage> mOnFrameRenderedNotification;
 
     status_t mInitStatus;
+
+    sp<ICrypto> mCrypto;
 
     template <typename T>
     status_t createByteBufferFromABuffer(

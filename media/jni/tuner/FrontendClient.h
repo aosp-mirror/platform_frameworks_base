@@ -226,9 +226,6 @@ private:
      */
     sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFrontend_1_1;
 
-    shared_ptr<TunerFrontendCallback> mAidlCallback;
-    sp<HidlFrontendCallback> mHidlCallback;
-
     int mId;
     int mType;
 };

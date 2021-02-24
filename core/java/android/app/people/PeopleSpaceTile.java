@@ -53,6 +53,7 @@ public class PeopleSpaceTile implements Parcelable {
     private boolean mIsImportantConversation;
     private String mNotificationKey;
     private CharSequence mNotificationContent;
+    private String mNotificationCategory;
     private Uri mNotificationDataUri;
     private Intent mIntent;
     private long mNotificationTimestamp;
@@ -70,6 +71,7 @@ public class PeopleSpaceTile implements Parcelable {
         mIsImportantConversation = b.mIsImportantConversation;
         mNotificationKey = b.mNotificationKey;
         mNotificationContent = b.mNotificationContent;
+        mNotificationCategory = b.mNotificationCategory;
         mNotificationDataUri = b.mNotificationDataUri;
         mIntent = b.mIntent;
         mNotificationTimestamp = b.mNotificationTimestamp;
@@ -129,6 +131,10 @@ public class PeopleSpaceTile implements Parcelable {
         return mNotificationContent;
     }
 
+    public String getNotificationCategory() {
+        return mNotificationCategory;
+    }
+
     public Uri getNotificationDataUri() {
         return mNotificationDataUri;
     }
@@ -166,6 +172,7 @@ public class PeopleSpaceTile implements Parcelable {
         builder.setIsImportantConversation(mIsImportantConversation);
         builder.setNotificationKey(mNotificationKey);
         builder.setNotificationContent(mNotificationContent);
+        builder.setNotificationCategory(mNotificationCategory);
         builder.setNotificationDataUri(mNotificationDataUri);
         builder.setIntent(mIntent);
         builder.setNotificationTimestamp(mNotificationTimestamp);
@@ -186,6 +193,7 @@ public class PeopleSpaceTile implements Parcelable {
         private boolean mIsImportantConversation;
         private String mNotificationKey;
         private CharSequence mNotificationContent;
+        private String mNotificationCategory;
         private Uri mNotificationDataUri;
         private Intent mIntent;
         private long mNotificationTimestamp;
@@ -299,6 +307,12 @@ public class PeopleSpaceTile implements Parcelable {
             return this;
         }
 
+        /** Sets the associated notification's category. */
+        public Builder setNotificationCategory(String notificationCategory) {
+            mNotificationCategory = notificationCategory;
+            return this;
+        }
+
         /** Sets the associated notification's data URI. */
         public Builder setNotificationDataUri(Uri notificationDataUri) {
             mNotificationDataUri = notificationDataUri;
@@ -342,6 +356,7 @@ public class PeopleSpaceTile implements Parcelable {
         mIsImportantConversation = in.readBoolean();
         mNotificationKey = in.readString();
         mNotificationContent = in.readCharSequence();
+        mNotificationCategory = in.readString();
         mNotificationDataUri = in.readParcelable(Uri.class.getClassLoader());
         mIntent = in.readParcelable(Intent.class.getClassLoader());
         mNotificationTimestamp = in.readLong();
@@ -367,6 +382,7 @@ public class PeopleSpaceTile implements Parcelable {
         dest.writeBoolean(mIsImportantConversation);
         dest.writeString(mNotificationKey);
         dest.writeCharSequence(mNotificationContent);
+        dest.writeString(mNotificationCategory);
         dest.writeParcelable(mNotificationDataUri, flags);
         dest.writeParcelable(mIntent, flags);
         dest.writeLong(mNotificationTimestamp);
