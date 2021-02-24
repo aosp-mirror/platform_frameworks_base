@@ -207,7 +207,7 @@ public class GestureRecorder {
             sb.append(g.toJson());
             count++;
         }
-        mLastSaveLen = count;
+        mLastSaveLen += count;
         sb.append("]");
         return sb.toString();
     }
@@ -249,7 +249,9 @@ public class GestureRecorder {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         save();
         if (mLastSaveLen >= 0) {
-            pw.println(String.valueOf(mLastSaveLen) + " gestures written to " + mLogfile);
+            pw.println(String.valueOf(mLastSaveLen)
+                    + " gestures since last dump written to " + mLogfile);
+            mLastSaveLen = 0;
         } else {
             pw.println("error writing gestures");
         }
