@@ -1760,27 +1760,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void addLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        final LinkAddress la = routeInfo.getDestinationLinkAddress();
-        final String ifName = routeInfo.getInterface();
-        final String dst = la.toString();
-        final String nextHop;
-
-        if (routeInfo.hasGateway()) {
-            nextHop = routeInfo.getGateway().getHostAddress();
-        } else {
-            nextHop = "";
-        }
-        try {
-            mNetdService.networkAddLegacyRoute(netId, ifName, dst, nextHop, uid);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void allowProtect(int uid) {
         NetworkStack.checkNetworkStackPermission(mContext);
 

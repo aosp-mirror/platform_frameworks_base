@@ -295,8 +295,6 @@ interface INetworkManagementService
     void setFirewallUidRules(int chain, in int[] uids, in int[] rules);
     void setFirewallChainEnabled(int chain, boolean enable);
 
-    void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
-
     /**
      * Allow UID to call protect().
      */
