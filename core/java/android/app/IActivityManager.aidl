@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityTaskManager;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
@@ -248,7 +249,7 @@ interface IActivityManager {
             in IBinder token, in String resultWho, int requestCode, in Intent[] intents,
             in String[] resolvedTypes, int flags, in Bundle options, int userId);
     void cancelIntentSender(in IIntentSender sender);
-    String getPackageForIntentSender(in IIntentSender sender);
+    ActivityManager.PendingIntentInfo getInfoForIntentSender(in IIntentSender sender);
     void registerIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
     void unregisterIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
     void enterSafeMode();
@@ -293,7 +294,6 @@ interface IActivityManager {
             int operationType);
     void backupAgentCreated(in String packageName, in IBinder agent, int userId);
     void unbindBackupAgent(in ApplicationInfo appInfo);
-    int getUidForIntentSender(in IIntentSender sender);
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, in String name, in String callerPackage);
     void addPackageDependency(in String packageName);
@@ -345,7 +345,6 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void unregisterProcessObserver(in IProcessObserver observer);
     boolean isIntentSenderTargetedToPackage(in IIntentSender sender);
-    boolean isIntentSenderImmutable(in IIntentSender sender);
     @UnsupportedAppUsage
     void updatePersistentConfiguration(in Configuration values);
     void updatePersistentConfigurationWithAttribution(in Configuration values,
@@ -375,8 +374,6 @@ interface IActivityManager {
     void unstableProviderDied(in IBinder connection);
     @UnsupportedAppUsage
     boolean isIntentSenderAnActivity(in IIntentSender sender);
-    boolean isIntentSenderAForegroundService(in IIntentSender sender);
-    boolean isIntentSenderABroadcast(in IIntentSender sender);
     /** @deprecated Use {@link startActivityAsUserWithFeature} instead */
     @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@code android.content.Context#createContextAsUser(android.os.UserHandle, int)} and {@link android.content.Context#startActivity(android.content.Intent)} instead")
     int startActivityAsUser(in IApplicationThread caller, in String callingPackage,
@@ -710,6 +707,4 @@ interface IActivityManager {
 
     /** Called by PendingIntent.queryIntentComponents() */
     List<ResolveInfo> queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
-
-    boolean isIntentSenderAService(in IIntentSender sender);
 }
