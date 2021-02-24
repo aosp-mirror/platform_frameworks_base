@@ -53373,6 +53373,7 @@ package android.widget {
     method public int getCheckedItemPosition();
     method public android.util.SparseBooleanArray getCheckedItemPositions();
     method public int getChoiceMode();
+    method public int getEdgeEffectType();
     method public int getListPaddingBottom();
     method public int getListPaddingLeft();
     method public int getListPaddingRight();
@@ -53414,6 +53415,7 @@ package android.widget {
     method public void setChoiceMode(int);
     method public void setDrawSelectorOnTop(boolean);
     method public void setEdgeEffectColor(@ColorInt int);
+    method public void setEdgeEffectType(int);
     method public void setFastScrollAlwaysVisible(boolean);
     method public void setFastScrollEnabled(boolean);
     method public void setFastScrollStyle(int);
@@ -54422,6 +54424,7 @@ package android.widget {
     method public boolean executeKeyEvent(android.view.KeyEvent);
     method public void fling(int);
     method public boolean fullScroll(int);
+    method public int getEdgeEffectType();
     method @ColorInt public int getLeftEdgeEffectColor();
     method public int getMaxScrollAmount();
     method @ColorInt public int getRightEdgeEffectColor();
@@ -54429,6 +54432,7 @@ package android.widget {
     method public boolean isSmoothScrollingEnabled();
     method public boolean pageScroll(int);
     method public void setEdgeEffectColor(@ColorInt int);
+    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setLeftEdgeEffectColor(@ColorInt int);
     method public void setRightEdgeEffectColor(@ColorInt int);
@@ -55282,6 +55286,7 @@ package android.widget {
     method public void fling(int);
     method public boolean fullScroll(int);
     method @ColorInt public int getBottomEdgeEffectColor();
+    method public int getEdgeEffectType();
     method public int getMaxScrollAmount();
     method @ColorInt public int getTopEdgeEffectColor();
     method public boolean isFillViewport();
@@ -55290,6 +55295,7 @@ package android.widget {
     method public void scrollToDescendant(@NonNull android.view.View);
     method public void setBottomEdgeEffectColor(@ColorInt int);
     method public void setEdgeEffectColor(@ColorInt int);
+    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setSmoothScrollingEnabled(boolean);
     method public void setTopEdgeEffectColor(@ColorInt int);
