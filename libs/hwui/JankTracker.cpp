@@ -112,7 +112,7 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
     std::lock_guard lock(mDataMutex);
 
     // Fast-path for jank-free frames
-    int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
+    int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::SwapBuffersCompleted);
     if (mDequeueTimeForgiveness && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
         nsecs_t expectedDequeueDuration = mDequeueTimeForgiveness + frame[FrameInfoIndex::Vsync] -
                                           frame[FrameInfoIndex::IssueDrawCommandsStart];
