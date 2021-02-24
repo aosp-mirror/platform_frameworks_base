@@ -55,14 +55,14 @@ class CaptivePortalDataTest {
             .build()
 
     private val dataFromPasspoint = CaptivePortalData.Builder()
-            .setUserPortalUrl(Uri.parse("https://tc.example.com/passpoint"),
-                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
-            .setVenueInfoUrl(Uri.parse("https://venue.example.com/passpoint"),
-                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
             .setCaptive(true)
             .apply {
                 if (SdkLevel.isAtLeastS()) {
                     setVenueFriendlyName("venue friendly name")
+                    setUserPortalUrl(Uri.parse("https://tc.example.com/passpoint"),
+                            CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
+                    setVenueInfoUrl(Uri.parse("https://venue.example.com/passpoint"),
+                            CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
                 }
             }
             .build()
@@ -96,28 +96,28 @@ class CaptivePortalDataTest {
         if (SdkLevel.isAtLeastS()) {
             assertNotEqualsAfterChange { it.setVenueFriendlyName("another friendly name") }
             assertNotEqualsAfterChange { it.setVenueFriendlyName(null) }
-        }
 
-        assertEquals(dataFromPasspoint, CaptivePortalData.Builder(dataFromPasspoint).build())
-        assertNotEqualsAfterChange { it.setUserPortalUrl(
-                Uri.parse("https://tc.example.com/passpoint")) }
-        assertNotEqualsAfterChange { it.setUserPortalUrl(
-                Uri.parse("https://tc.example.com/passpoint"),
-                CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER) }
-        assertNotEqualsAfterChange { it.setUserPortalUrl(
-                Uri.parse("https://tc.example.com/other"),
-                CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT) }
-        assertNotEqualsAfterChange { it.setUserPortalUrl(
-                Uri.parse("https://tc.example.com/passpoint"),
-                CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER) }
-        assertNotEqualsAfterChange { it.setVenueInfoUrl(
-                Uri.parse("https://venue.example.com/passpoint")) }
-        assertNotEqualsAfterChange { it.setVenueInfoUrl(
-                Uri.parse("https://venue.example.com/other"),
-                CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT) }
-        assertNotEqualsAfterChange { it.setVenueInfoUrl(
-                Uri.parse("https://venue.example.com/passpoint"),
-                CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER) }
+            assertEquals(dataFromPasspoint, CaptivePortalData.Builder(dataFromPasspoint).build())
+            assertNotEqualsAfterChange { it.setUserPortalUrl(
+                    Uri.parse("https://tc.example.com/passpoint")) }
+            assertNotEqualsAfterChange { it.setUserPortalUrl(
+                    Uri.parse("https://tc.example.com/passpoint"),
+                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER) }
+            assertNotEqualsAfterChange { it.setUserPortalUrl(
+                    Uri.parse("https://tc.example.com/other"),
+                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT) }
+            assertNotEqualsAfterChange { it.setUserPortalUrl(
+                    Uri.parse("https://tc.example.com/passpoint"),
+                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER) }
+            assertNotEqualsAfterChange { it.setVenueInfoUrl(
+                    Uri.parse("https://venue.example.com/passpoint")) }
+            assertNotEqualsAfterChange { it.setVenueInfoUrl(
+                    Uri.parse("https://venue.example.com/other"),
+                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT) }
+            assertNotEqualsAfterChange { it.setVenueInfoUrl(
+                    Uri.parse("https://venue.example.com/passpoint"),
+                    CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER) }
+        }
     }
 
     @Test
