@@ -36,12 +36,89 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * This class provides access to the centralized AppSearch index maintained by the system.
+ * Provides access to the centralized AppSearch index maintained by the system.
  *
- * <p>Apps can index structured text documents with AppSearch, which can then be retrieved through
- * the query API.
+ * <p>AppSearch is a search library for managing structured data featuring:
+ * <ul>
+ *     <li>A fully offline on-device solution
+ *     <li>A set of APIs for applications to index documents and retrieve them via full-text search
+ *     <li>APIs for applications to allow the System to display their content on system UI surfaces
+ *     <li>Similarly, APIs for applications to allow the System to share their content with other
+ *     specified applications.
+ * </ul>
+ *
+ * <p>Applications create a database by opening an {@link AppSearchSession}.
+ *
+ * <p>Example:
+ * <pre>
+ * AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
+ *
+ * AppSearchManager.SearchContext searchContext = new AppSearchManager.SearchContext.Builder().
+ *    setDatabaseName(dbName).build());
+ * appSearchManager.createSearchSession(searchContext, mExecutor, appSearchSessionResult -&gt; {
+ *      mAppSearchSession = appSearchSessionResult.getResultValue();
+ * });</pre>
+ *
+ * <p>After opening the session, a schema must be set in order to define the organizational
+ * structure of data. The schema is set by calling {@link AppSearchSession#setSchema}. The schema
+ * is composed of a collection of {@link AppSearchSchema} objects, each of which defines a unique
+ * type of data.
+ *
+ * <p>Example:
+ * <pre>
+ * AppSearchSchema emailSchemaType = new AppSearchSchema.Builder("Email")
+ *     .addProperty(new StringPropertyConfig.Builder("subject")
+ *        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+ *        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+ *        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+ *    .build()
+ * ).build();
+ *
+ * SetSchemaRequest request = new SetSchemaRequest.Builder().addSchema(emailSchemaType).build();
+ * mAppSearchSession.set(request, mExecutor, appSearchResult -&gt; {
+ *      if (appSearchResult.isSuccess()) {
+ *           //Schema has been successfully set.
+ *      }
+ * });</pre>
+ *
+ * <p>The basic unit of data in AppSearch is represented as a {@link GenericDocument} object,
+ * containing a URI, namespace, time-to-live, score, and properties. A namespace organizes a
+ * logical group of documents. For example, a namespace can be created to group documents on a
+ * per-account basis. A URI identifies a single document within a namespace. The combination
+ * of URI and namespace uniquely identifies a {@link GenericDocument} in the database.
+ *
+ * <p>Once the schema has been set, {@link GenericDocument} objects can be put into the database
+ * and indexed by calling {@link AppSearchSession#put}.
+ *
+ * <p>Example:
+ * <pre>
+ * // Although for this example we use GenericDocument directly, we recommend extending
+ * // GenericDocument to create specific types (i.e. Email) with specific setters/getters.
+ * GenericDocument email = new GenericDocument.Builder<>(URI, EMAIL_SCHEMA_TYPE)
+ *     .setNamespace(NAMESPACE)
+ *     .setPropertyString(“subject”, EMAIL_SUBJECT)
+ *     .setScore(EMAIL_SCORE)
+ *     .build();
+ *
+ * PutDocumentsRequest request = new PutDocumentsRequest.Builder().addGenericDocuments(email)
+ *     .build();
+ * mAppSearchSession.put(request, mExecutor, appSearchBatchResult -&gt; {
+ *      if (appSearchBatchResult.isSuccess()) {
+ *           //All documents have been successfully indexed.
+ *      }
+ * });</pre>
+ *
+ * <p>Searching within the database is done by calling {@link AppSearchSession#search} and providing
+ * the query string to search for, as well as a {@link SearchSpec}.
+ *
+ * <p>Alternatively, {@link AppSearchSession#getByUri} can be called to retrieve documents by URI
+ * and namespace.
+ *
+ * <p>Document removal is done either by time-to-live expiration, or explicitly calling a remove
+ * operation. Remove operations can be done by URI and namespace via
+ * {@link AppSearchSession#remove(RemoveByUriRequest, Executor, BatchResultCallback)},
+ * or by query via {@link AppSearchSession#remove(String, SearchSpec, Executor, Consumer)}.
  */
-// TODO(b/148046169): This class header needs a detailed example/tutorial.
 @SystemService(Context.APP_SEARCH_SERVICE)
 public class AppSearchManager {
     /**
