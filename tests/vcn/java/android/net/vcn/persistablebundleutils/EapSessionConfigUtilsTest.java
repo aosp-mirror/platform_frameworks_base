@@ -23,13 +23,17 @@ import static org.junit.Assert.assertEquals;
 import android.net.eap.EapSessionConfig;
 import android.os.PersistableBundle;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -83,6 +87,26 @@ public class EapSessionConfigUtilsTest {
                         .setEapAkaPrimeConfig(
                                 SUB_ID, APPTYPE_USIM, NETWORK_NAME, ALLOW_MISMATCHED_NETWORK_NAMES)
                         .build();
+
+        verifyPersistableBundleEncodeDecodeIsLossless(config);
+    }
+
+    @Test
+    public void testSetEapTtlsEncodeDecodeIsLossless() throws Exception {
+        final InputStream inputStream =
+                InstrumentationRegistry.getContext()
+                        .getResources()
+                        .getAssets()
+                        .open("self-signed-ca.pem");
+        final CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        final X509Certificate trustedCa =
+                (X509Certificate) factory.generateCertificate(inputStream);
+
+        final EapSessionConfig innerConfig =
+                new EapSessionConfig.Builder().setEapMsChapV2Config(USERNAME, PASSWORD).build();
+
+        final EapSessionConfig config =
+                new EapSessionConfig.Builder().setEapTtlsConfig(trustedCa, innerConfig).build();
 
         verifyPersistableBundleEncodeDecodeIsLossless(config);
     }

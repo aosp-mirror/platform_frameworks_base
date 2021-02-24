@@ -26,12 +26,15 @@ import android.net.eap.EapSessionConfig.EapAkaPrimeConfig;
 import android.net.eap.EapSessionConfig.EapMethodConfig;
 import android.net.eap.EapSessionConfig.EapMsChapV2Config;
 import android.net.eap.EapSessionConfig.EapSimConfig;
+import android.net.eap.EapSessionConfig.EapTtlsConfig;
 import android.net.eap.EapSessionConfig.EapUiccConfig;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
 
 /**
@@ -43,6 +46,7 @@ import java.util.Objects;
 public final class EapSessionConfigUtils {
     private static final String EAP_ID_KEY = "EAP_ID_KEY";
     private static final String EAP_SIM_CONFIG_KEY = "EAP_SIM_CONFIG_KEY";
+    private static final String EAP_TTLS_CONFIG_KEY = "EAP_TTLS_CONFIG_KEY";
     private static final String EAP_AKA_CONFIG_KEY = "EAP_AKA_CONFIG_KEY";
     private static final String EAP_MSCHAP_V2_CONFIG_KEY = "EAP_MSCHAP_V2_CONFIG_KEY";
     private static final String EAP_AKA_PRIME_CONFIG_KEY = "EAP_AKA_PRIME_CONFIG_KEY";
@@ -59,6 +63,12 @@ public final class EapSessionConfigUtils {
             result.putPersistableBundle(
                     EAP_SIM_CONFIG_KEY,
                     EapSimConfigUtils.toPersistableBundle(config.getEapSimConfig()));
+        }
+
+        if (config.getEapTtlsConfig() != null) {
+            result.putPersistableBundle(
+                    EAP_TTLS_CONFIG_KEY,
+                    EapTtlsConfigUtils.toPersistableBundle(config.getEapTtlsConfig()));
         }
 
         if (config.getEapAkaConfig() != null) {
@@ -79,8 +89,6 @@ public final class EapSessionConfigUtils {
                     EapAkaPrimeConfigUtils.toPersistableBundle(config.getEapAkaPrimeConfig()));
         }
 
-        // TODO: Handle EAP-TTLS.
-
         return result;
     }
 
@@ -100,6 +108,11 @@ public final class EapSessionConfigUtils {
             EapSimConfigUtils.setBuilderByReadingPersistableBundle(simBundle, builder);
         }
 
+        final PersistableBundle ttlsBundle = in.getPersistableBundle(EAP_TTLS_CONFIG_KEY);
+        if (ttlsBundle != null) {
+            EapTtlsConfigUtils.setBuilderByReadingPersistableBundle(ttlsBundle, builder);
+        }
+
         final PersistableBundle akaBundle = in.getPersistableBundle(EAP_AKA_CONFIG_KEY);
         if (akaBundle != null) {
             EapAkaConfigUtils.setBuilderByReadingPersistableBundle(akaBundle, builder);
@@ -115,7 +128,6 @@ public final class EapSessionConfigUtils {
             EapAkaPrimeConfigUtils.setBuilderByReadingPersistableBundle(akaPrimeBundle, builder);
         }
 
-        // TODO: Handle EAP-TTLS.
         return builder.build();
     }
 
@@ -212,6 +224,53 @@ public final class EapSessionConfigUtils {
                 @NonNull PersistableBundle in, @NonNull EapSessionConfig.Builder builder) {
             Objects.requireNonNull(in, "PersistableBundle was null");
             builder.setEapMsChapV2Config(in.getString(USERNAME_KEY), in.getString(PASSWORD_KEY));
+        }
+    }
+
+    private static final class EapTtlsConfigUtils extends EapMethodConfigUtils {
+        private static final String TRUST_CERT_KEY = "TRUST_CERT_KEY";
+        private static final String EAP_SESSION_CONFIG_KEY = "EAP_SESSION_CONFIG_KEY";
+
+        @NonNull
+        public static PersistableBundle toPersistableBundle(@NonNull EapTtlsConfig config) {
+            final PersistableBundle result = EapMethodConfigUtils.toPersistableBundle(config);
+            try {
+                if (config.getServerCaCert() != null) {
+                    final PersistableBundle caBundle =
+                            PersistableBundleUtils.fromByteArray(
+                                    config.getServerCaCert().getEncoded());
+                    result.putPersistableBundle(TRUST_CERT_KEY, caBundle);
+                }
+            } catch (CertificateEncodingException e) {
+                throw new IllegalStateException("Fail to encode the certificate");
+            }
+
+            result.putPersistableBundle(
+                    EAP_SESSION_CONFIG_KEY,
+                    EapSessionConfigUtils.toPersistableBundle(config.getInnerEapSessionConfig()));
+
+            return result;
+        }
+
+        public static void setBuilderByReadingPersistableBundle(
+                @NonNull PersistableBundle in, @NonNull EapSessionConfig.Builder builder) {
+            Objects.requireNonNull(in, "PersistableBundle was null");
+
+            final PersistableBundle caBundle = in.getPersistableBundle(TRUST_CERT_KEY);
+            X509Certificate caCert = null;
+            if (caBundle != null) {
+                caCert =
+                        CertUtils.certificateFromByteArray(
+                                PersistableBundleUtils.toByteArray(caBundle));
+            }
+
+            final PersistableBundle eapSessionConfigBundle =
+                    in.getPersistableBundle(EAP_SESSION_CONFIG_KEY);
+            Objects.requireNonNull(eapSessionConfigBundle, "Inner EAP Session Config was null");
+            final EapSessionConfig eapSessionConfig =
+                    EapSessionConfigUtils.fromPersistableBundle(eapSessionConfigBundle);
+
+            builder.setEapTtlsConfig(caCert, eapSessionConfig);
         }
     }
 }
