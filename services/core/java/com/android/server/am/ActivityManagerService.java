@@ -181,7 +181,6 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
-import android.compat.Compatibility;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -306,7 +305,6 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -6083,10 +6081,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 abiOverride, zygotePolicyFlags);
     }
 
-    // TODO: Move to ProcessList?
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, String abiOverride, int zygotePolicyFlags) {
+        return addAppLocked(info, customProcess, isolated, disableHiddenApiChecks,
+                false /* disableTestApiChecks */, abiOverride, zygotePolicyFlags);
+    }
+
+    // TODO: Move to ProcessList?
+    @GuardedBy("this")
+    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
+            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
+            String abiOverride, int zygotePolicyFlags) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -6121,7 +6127,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
-                    zygotePolicyFlags, disableHiddenApiChecks, abiOverride);
+                    zygotePolicyFlags, disableHiddenApiChecks, disableTestApiChecks,
+                    abiOverride);
         }
 
         return app;
@@ -13557,8 +13564,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
-
-                enableTestApiAccess(ai.packageName);
             }
 
             final long origId = Binder.clearCallingIdentity();
@@ -13576,8 +13581,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mUsageStatsService.reportEvent(ii.targetPackage, userId,
                                 UsageEvents.Event.SYSTEM_INTERACTION);
                     }
-                    app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks, abiOverride,
-                            ZYGOTE_POLICY_FLAG_EMPTY);
+                    app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
+                            disableTestApiChecks, abiOverride, ZYGOTE_POLICY_FLAG_EMPTY);
                 }
 
                 app.setActiveInstrumentation(activeInstr);
@@ -13731,25 +13736,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
                     app.userId,
                     "finished inst");
-        }
-
-        disableTestApiAccess(app.info.packageName);
-    }
-
-    private void enableTestApiAccess(String packageName) {
-        if (mPlatformCompat != null) {
-            Compatibility.ChangeConfig config = new Compatibility.ChangeConfig(
-                    Collections.singleton(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */),
-                    Collections.emptySet());
-            CompatibilityChangeConfig override = new CompatibilityChangeConfig(config);
-            mPlatformCompat.setOverridesForTest(override, packageName);
-        }
-    }
-
-    private void disableTestApiAccess(String packageName) {
-        if (mPlatformCompat != null) {
-            mPlatformCompat.clearOverrideForTest(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */,
-                    packageName);
         }
     }
 
