@@ -28,6 +28,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.image.IDynamicSystemService;
+import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.Slog;
@@ -40,6 +41,7 @@ import java.io.File;
  */
 public class DynamicSystemService extends IDynamicSystemService.Stub {
     private static final String TAG = "DynamicSystemService";
+    private static final long MINIMUM_SD_MB = (30L << 10);
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
     private static final String PATH_DEFAULT = "/data/gsi/";
     private Context mContext;
@@ -93,6 +95,13 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
                     continue;
                 }
                 if (!volume.isMountedWritable()) {
+                    continue;
+                }
+                DiskInfo disk = volume.getDisk();
+                long mega = disk.size >> 20;
+                Slog.i(TAG, volume.getPath() + ": " + mega + " MB");
+                if (mega < MINIMUM_SD_MB) {
+                    Slog.i(TAG, volume.getPath() + ": insufficient storage");
                     continue;
                 }
                 File sd_internal = volume.getInternalPathForUser(userId);
