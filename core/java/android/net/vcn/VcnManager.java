@@ -349,6 +349,56 @@ public class VcnManager {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+        VCN_STATUS_CODE_NOT_CONFIGURED,
+        VCN_STATUS_CODE_INACTIVE,
+        VCN_STATUS_CODE_ACTIVE,
+        VCN_STATUS_CODE_SAFE_MODE
+    })
+    public @interface VcnStatusCode {}
+
+    /**
+     * Value indicating that the VCN for the subscription group is not configured, or that the
+     * callback is not privileged for the subscription group.
+     *
+     * @hide
+     */
+    public static final int VCN_STATUS_CODE_NOT_CONFIGURED = 0;
+
+    /**
+     * Value indicating that the VCN for the subscription group is inactive.
+     *
+     * <p>A VCN is inactive if a {@link VcnConfig} is present for the subscription group, but the
+     * provisioning package is not privileged.
+     *
+     * @hide
+     */
+    public static final int VCN_STATUS_CODE_INACTIVE = 1;
+
+    /**
+     * Value indicating that the VCN for the subscription group is active.
+     *
+     * <p>A VCN is active if a {@link VcnConfig} is present for the subscription, the provisioning
+     * package is privileged, and the VCN is not in Safe Mode. In other words, a VCN is considered
+     * active while it is connecting, fully connected, and disconnecting.
+     *
+     * @hide
+     */
+    public static final int VCN_STATUS_CODE_ACTIVE = 2;
+
+    /**
+     * Value indicating that the VCN for the subscription group is in Safe Mode.
+     *
+     * <p>A VCN will be put into Safe Mode if any of the gateway connections were unable to
+     * establish a connection within a system-determined timeout (while underlying networks were
+     * available).
+     *
+     * @hide
+     */
+    public static final int VCN_STATUS_CODE_SAFE_MODE = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
         VCN_ERROR_CODE_INTERNAL_ERROR,
         VCN_ERROR_CODE_CONFIG_ERROR,
         VCN_ERROR_CODE_NETWORK_ERROR
@@ -403,8 +453,18 @@ public class VcnManager {
          *
          * <p>A VCN-configuring app may opt to exit safe mode by (re)setting the VCN configuration
          * via {@link #setVcnConfig(ParcelUuid, VcnConfig)}.
+         *
+         * @hide
          */
-        public abstract void onEnteredSafeMode();
+        public void onEnteredSafeMode() {}
+
+        /**
+         * Invoked when status of the VCN for this callback's subscription group changes.
+         *
+         * @param statusCode the code for the status change encountered by this {@link
+         *     VcnStatusCallback}'s subscription group.
+         */
+        public abstract void onVcnStatusChanged(@VcnStatusCode int statusCode);
 
         /**
          * Invoked when a VCN Gateway Connection corresponding to this callback's subscription
@@ -435,6 +495,11 @@ public class VcnManager {
      *
      * <p>A {@link VcnStatusCallback} will only be invoked if the registering package has carrier
      * privileges for the specified subscription at the time of invocation.
+     *
+     * <p>{@link VcnStatusCallback#onVcnStatusChanged(int)} will be invoked on registration with the
+     * current status for the specified subscription group's VCN. If the registrant is not
+     * privileged for this subscription group, {@link #VCN_STATUS_CODE_NOT_CONFIGURED} will be
+     * returned.
      *
      * @param subscriptionGroup The subscription group to match for callbacks
      * @param executor The {@link Executor} to be used for invoking callbacks
@@ -537,6 +602,12 @@ public class VcnManager {
         public void onEnteredSafeMode() {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> mCallback.onEnteredSafeMode()));
+        }
+
+        @Override
+        public void onVcnStatusChanged(@VcnStatusCode int statusCode) {
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> mCallback.onVcnStatusChanged(statusCode)));
         }
 
         // TODO(b/180521637): use ServiceSpecificException for safer Exception 'parceling'
