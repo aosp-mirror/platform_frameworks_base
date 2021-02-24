@@ -23,9 +23,12 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION;
 
+import static com.android.server.apphibernation.AppHibernationConstants.KEY_APP_HIBERNATION_ENABLED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.apphibernation.IAppHibernationService;
 import android.content.BroadcastReceiver;
@@ -45,6 +48,8 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -93,6 +98,9 @@ public final class AppHibernationService extends SystemService {
     private final HibernationStateDiskStore<GlobalLevelState> mGlobalLevelHibernationDiskStore;
     private final Injector mInjector;
 
+    @VisibleForTesting
+    boolean mIsServiceEnabled;
+
     /**
      * Initializes the system service.
      * <p>
@@ -139,6 +147,13 @@ public final class AppHibernationService extends SystemService {
                 initializeGlobalHibernationStates(states);
             }
         }
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mIsServiceEnabled = isAppHibernationEnabled();
+            DeviceConfig.addOnPropertiesChangedListener(
+                    NAMESPACE_APP_HIBERNATION,
+                    ActivityThread.currentApplication().getMainExecutor(),
+                    this::onDeviceConfigChanged);
+        }
     }
 
     /**
@@ -149,6 +164,10 @@ public final class AppHibernationService extends SystemService {
      * @return true if package is hibernating for the user
      */
     boolean isHibernatingForUser(String packageName, int userId) {
+        if (!checkHibernationEnabled("isHibernatingForUser")) {
+            return false;
+        }
+
         userId = handleIncomingUser(userId, "isHibernating");
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.e(TAG, "Attempt to get hibernation state of stopped or nonexistent user "
@@ -174,6 +193,9 @@ public final class AppHibernationService extends SystemService {
      * @param packageName package to check
      */
     boolean isHibernatingGlobally(String packageName) {
+        if (!checkHibernationEnabled("isHibernatingGlobally")) {
+            return false;
+        }
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
@@ -192,6 +214,9 @@ public final class AppHibernationService extends SystemService {
      * @param isHibernating new hibernation state
      */
     void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
+        if (!checkHibernationEnabled("setHibernatingForUser")) {
+            return;
+        }
         userId = handleIncomingUser(userId, "setHibernating");
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             Slog.w(TAG, "Attempt to set hibernation state for a stopped or nonexistent user "
@@ -229,6 +254,9 @@ public final class AppHibernationService extends SystemService {
      * @param isHibernating new hibernation state
      */
     void setHibernatingGlobally(String packageName, boolean isHibernating) {
+        if (!checkHibernationEnabled("setHibernatingGlobally")) {
+            return;
+        }
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
             if (state == null) {
@@ -444,6 +472,15 @@ public final class AppHibernationService extends SystemService {
         }
     }
 
+    private void onDeviceConfigChanged(Properties properties) {
+        for (String key : properties.getKeyset()) {
+            if (TextUtils.equals(KEY_APP_HIBERNATION_ENABLED, key)) {
+                mIsServiceEnabled = isAppHibernationEnabled();
+                break;
+            }
+        }
+    }
+
     /**
      * Private helper method to get the real user id and enforce permission checks.
      *
@@ -459,6 +496,13 @@ public final class AppHibernationService extends SystemService {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    private boolean checkHibernationEnabled(String methodName) {
+        if (!mIsServiceEnabled) {
+            Slog.w(TAG, String.format("Attempted to call %s on unsupported device.", methodName));
+        }
+        return mIsServiceEnabled;
     }
 
     private final AppHibernationServiceStub mServiceStub = new AppHibernationServiceStub(this);
@@ -536,7 +580,7 @@ public final class AppHibernationService extends SystemService {
     public static boolean isAppHibernationEnabled() {
         return DeviceConfig.getBoolean(
                 NAMESPACE_APP_HIBERNATION,
-                AppHibernationConstants.KEY_APP_HIBERNATION_ENABLED,
+                KEY_APP_HIBERNATION_ENABLED,
                 false /* defaultValue */);
     }
 
