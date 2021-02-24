@@ -43,9 +43,9 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
 
     @NonNull
     @Override
-    public List<String> getValidVerificationPackageNames() {
+    public List<String> queryValidVerificationPackageNames() {
         try {
-            return mService.getValidVerificationPackageNames();
+            return mService.queryValidVerificationPackageNames();
         } catch (Exception e) {
             throw rethrow(e);
         }

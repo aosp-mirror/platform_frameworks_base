@@ -203,9 +203,9 @@ public final class DomainVerificationManager {
      */
     @NonNull
     @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
-    public List<String> getValidVerificationPackageNames() {
+    public List<String> queryValidVerificationPackageNames() {
         try {
-            return mDomainVerificationManager.getValidVerificationPackageNames();
+            return mDomainVerificationManager.queryValidVerificationPackageNames();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

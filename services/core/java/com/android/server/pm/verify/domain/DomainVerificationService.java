@@ -209,7 +209,7 @@ public class DomainVerificationService extends SystemService
     }
 
     @NonNull
-    public List<String> getValidVerificationPackageNames() {
+    public List<String> queryValidVerificationPackageNames() {
         mEnforcer.assertApprovedVerifier(mConnection.getCallingUid(), mProxy);
         List<String> packageNames = new ArrayList<>();
         synchronized (mLock) {

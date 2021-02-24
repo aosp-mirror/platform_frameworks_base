@@ -187,8 +187,8 @@ class DomainVerificationEnforcerTest {
                 service(Type.INTERNAL, "clearUserSelections") {
                     clearUserSelections(listOf(it.targetPackageName), it.userId)
                 },
-                service(Type.VERIFIER, "getPackageNames") {
-                    validVerificationPackageNames
+                service(Type.VERIFIER, "queryValidPackageNames") {
+                    queryValidVerificationPackageNames()
                 },
                 service(Type.QUERENT, "getInfo") {
                     getDomainVerificationInfo(it.targetPackageName)

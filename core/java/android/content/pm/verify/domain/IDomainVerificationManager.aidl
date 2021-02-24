@@ -28,7 +28,7 @@ import java.util.List;
  */
 interface IDomainVerificationManager {
 
-    List<String> getValidVerificationPackageNames();
+    List<String> queryValidVerificationPackageNames();
 
     @nullable
     DomainVerificationInfo getDomainVerificationInfo(String packageName);
