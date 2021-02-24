@@ -44,7 +44,6 @@ import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENAB
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
@@ -54,7 +53,6 @@ import android.net.InterfaceConfiguration;
 import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.net.Network;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkStack;
 import android.net.NetworkStats;
@@ -968,19 +966,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         NetworkStack.checkNetworkStackPermission(mContext);
         try {
             return mNetdService.tetherInterfaceList();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void setDnsForwarders(Network network, String[] dns) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        int netId = (network != null) ? network.netId : ConnectivityManager.NETID_UNSET;
-
-        try {
-            mNetdService.tetherDnsSet(netId, dns);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }

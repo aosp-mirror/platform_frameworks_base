@@ -182,11 +182,6 @@ interface INetworkManagementService
     String[] listTetheredInterfaces();
 
     /**
-     * Sets the list of DNS forwarders (in order of priority)
-     */
-    void setDnsForwarders(in Network network, in String[] dns);
-
-    /**
      * Returns the list of DNS forwarders (in order of priority)
      */
     String[] getDnsForwarders();
