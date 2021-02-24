@@ -101,7 +101,7 @@ import javax.inject.Inject;
 public class ScreenshotController {
     private static final String TAG = logTag(ScreenshotController.class);
 
-    public static ScrollCaptureClient.Connection sScrollConnection;
+    private static ScrollCaptureClient.Connection sScrollConnection;
 
     /**
      * POD used in the AsyncTask which saves an image in the background.
@@ -221,6 +221,12 @@ public class ScreenshotController {
                     | ActivityInfo.CONFIG_UI_MODE
                     | ActivityInfo.CONFIG_SCREEN_LAYOUT
                     | ActivityInfo.CONFIG_ASSETS_PATHS);
+
+    public static @Nullable ScrollCaptureClient.Connection takeScrollCaptureConnection() {
+        ScrollCaptureClient.Connection connection = sScrollConnection;
+        sScrollConnection = null;
+        return connection;
+    }
 
     @Inject
     ScreenshotController(
