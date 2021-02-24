@@ -34,7 +34,6 @@ import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
@@ -1179,18 +1178,6 @@ public final class Display {
             updateDisplayInfoLocked();
             return mDisplayInfo.presentationDeadlineNanos;
         }
-    }
-
-    /**
-     * Returns the product-specific information about the display or the directly connected
-     * device on the display chain.
-     * For example, if the display is transitively connected, this field may contain product
-     * information about the intermediate device.
-     * Returns {@code null} if product information is not available.
-     */
-    @Nullable
-    public DeviceProductInfo getDeviceProductInfo() {
-        return mDisplayInfo.deviceProductInfo;
     }
 
     /**
