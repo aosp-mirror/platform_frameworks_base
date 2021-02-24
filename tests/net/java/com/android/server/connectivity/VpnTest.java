@@ -182,7 +182,8 @@ public class VpnTest {
             mPackages.put(PKGS[i], PKG_UIDS[i]);
         }
     }
-    private static final UidRange PRI_USER_RANGE = UidRange.createForUser(primaryUser.id);
+    private static final UidRange PRI_USER_RANGE =
+            UidRange.createForUser(UserHandle.of(primaryUser.id));
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private Context mContext;
     @Mock private UserManager mUserManager;
@@ -272,7 +273,7 @@ public class VpnTest {
                 vpn.createUserAndRestrictedProfilesRanges(primaryUser.id, null, null);
 
         assertEquals(new ArraySet<>(Arrays.asList(new UidRange[] {
-                PRI_USER_RANGE, UidRange.createForUser(restrictedProfileA.id)
+                PRI_USER_RANGE, UidRange.createForUser(UserHandle.of(restrictedProfileA.id))
         })), ranges);
     }
 
