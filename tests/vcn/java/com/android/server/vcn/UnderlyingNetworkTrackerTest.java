@@ -42,8 +42,9 @@ import android.net.TelephonyNetworkSpecifier;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
+import android.util.ArraySet;
 
+import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.UnderlyingNetworkTracker.NetworkBringupCallback;
 import com.android.server.vcn.UnderlyingNetworkTracker.RouteSelectionCallback;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
@@ -58,13 +59,19 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class UnderlyingNetworkTrackerTest {
     private static final ParcelUuid SUB_GROUP = new ParcelUuid(new UUID(0, 0));
     private static final int INITIAL_SUB_ID_1 = 1;
     private static final int INITIAL_SUB_ID_2 = 2;
+    private static final int UPDATED_SUB_ID = 3;
+
+    private static final Set<Integer> INITIAL_SUB_IDS =
+            new ArraySet<>(Arrays.asList(INITIAL_SUB_ID_1, INITIAL_SUB_ID_2));
+    private static final Set<Integer> UPDATED_SUB_IDS =
+            new ArraySet<>(Arrays.asList(UPDATED_SUB_ID));
 
     private static final NetworkCapabilities INITIAL_NETWORK_CAPABILITIES =
             new NetworkCapabilities.Builder()
@@ -90,7 +97,7 @@ public class UnderlyingNetworkTrackerTest {
     @Mock private Context mContext;
     @Mock private VcnNetworkProvider mVcnNetworkProvider;
     @Mock private ConnectivityManager mConnectivityManager;
-    @Mock private SubscriptionManager mSubscriptionManager;
+    @Mock private TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     @Mock private UnderlyingNetworkTrackerCallback mNetworkTrackerCb;
     @Mock private Network mNetwork;
 
@@ -113,23 +120,14 @@ public class UnderlyingNetworkTrackerTest {
                 mConnectivityManager,
                 Context.CONNECTIVITY_SERVICE,
                 ConnectivityManager.class);
-        setupSystemService(
-                mContext,
-                mSubscriptionManager,
-                Context.TELEPHONY_SUBSCRIPTION_SERVICE,
-                SubscriptionManager.class);
 
-        List<SubscriptionInfo> initialSubInfos =
-                Arrays.asList(
-                        getSubscriptionInfoForSubId(INITIAL_SUB_ID_1),
-                        getSubscriptionInfoForSubId(INITIAL_SUB_ID_2));
-        when(mSubscriptionManager.getSubscriptionsInGroup(eq(SUB_GROUP)))
-                .thenReturn(initialSubInfos);
+        when(mSubscriptionSnapshot.getAllSubIdsInGroup(eq(SUB_GROUP))).thenReturn(INITIAL_SUB_IDS);
 
         mUnderlyingNetworkTracker =
                 new UnderlyingNetworkTracker(
                         mVcnContext,
                         SUB_GROUP,
+                        mSubscriptionSnapshot,
                         Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                         mNetworkTrackerCb);
     }
@@ -154,23 +152,45 @@ public class UnderlyingNetworkTrackerTest {
                         eq(getWifiRequest()),
                         any(),
                         any(NetworkBringupCallback.class));
-        verify(mConnectivityManager)
-                .requestBackgroundNetwork(
-                        eq(getCellRequestForSubId(INITIAL_SUB_ID_1)),
-                        any(),
-                        any(NetworkBringupCallback.class));
-        verify(mConnectivityManager)
-                .requestBackgroundNetwork(
-                        eq(getCellRequestForSubId(INITIAL_SUB_ID_2)),
-                        any(),
-                        any(NetworkBringupCallback.class));
+        verifyBackgroundCellRequests(mSubscriptionSnapshot, SUB_GROUP, INITIAL_SUB_IDS);
+
         verify(mConnectivityManager)
                 .requestBackgroundNetwork(
                         eq(getRouteSelectionRequest()),
                         any(),
                         any(RouteSelectionCallback.class));
+    }
 
-        verify(mSubscriptionManager).getSubscriptionsInGroup(eq(SUB_GROUP));
+    private void verifyBackgroundCellRequests(
+            TelephonySubscriptionSnapshot snapshot,
+            ParcelUuid subGroup,
+            Set<Integer> expectedSubIds) {
+        verify(snapshot).getAllSubIdsInGroup(eq(subGroup));
+
+        for (final int subId : expectedSubIds) {
+            verify(mConnectivityManager)
+                    .requestBackgroundNetwork(
+                            eq(getCellRequestForSubId(subId)),
+                            any(),
+                            any(NetworkBringupCallback.class));
+        }
+    }
+
+    @Test
+    public void testUpdateSubscriptionSnapshot() {
+        // Verify initial cell background requests filed
+        verifyBackgroundCellRequests(mSubscriptionSnapshot, SUB_GROUP, INITIAL_SUB_IDS);
+
+        TelephonySubscriptionSnapshot subscriptionUpdate =
+                mock(TelephonySubscriptionSnapshot.class);
+        when(subscriptionUpdate.getAllSubIdsInGroup(eq(SUB_GROUP))).thenReturn(UPDATED_SUB_IDS);
+
+        mUnderlyingNetworkTracker.updateSubscriptionSnapshot(subscriptionUpdate);
+
+        // verify that initially-filed bringup requests are unregistered
+        verify(mConnectivityManager, times(INITIAL_SUB_IDS.size()))
+                .unregisterNetworkCallback(any(NetworkBringupCallback.class));
+        verifyBackgroundCellRequests(subscriptionUpdate, SUB_GROUP, UPDATED_SUB_IDS);
     }
 
     private NetworkRequest getWifiRequest() {

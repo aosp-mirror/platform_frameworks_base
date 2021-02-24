@@ -360,7 +360,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof Ikev2VpnProfile)) {
             return false;
         }

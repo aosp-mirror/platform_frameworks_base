@@ -943,12 +943,13 @@ public final class BluetoothA2dp implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setBufferMillis(@BluetoothCodecConfig.SourceCodecType int codec, int value) {
-        if (VDBG) log("setBufferMillis(" + codec + ", " + value + ")");
+    public boolean setBufferLengthMillis(@BluetoothCodecConfig.SourceCodecType int codec,
+            int value) {
+        if (VDBG) log("setBufferLengthMillis(" + codec + ", " + value + ")");
         try {
             final IBluetoothA2dp service = getService();
             if (service != null && isEnabled()) {
-                return service.setBufferMillis(codec, value);
+                return service.setBufferLengthMillis(codec, value);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;

@@ -412,7 +412,7 @@ public final class NetworkStats implements Parcelable {
 
         /** @hide */
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (o instanceof Entry) {
                 final Entry e = (Entry) o;
                 return uid == e.uid && set == e.set && tag == e.tag && metered == e.metered

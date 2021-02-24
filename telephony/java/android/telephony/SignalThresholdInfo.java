@@ -402,29 +402,27 @@ public final class SignalThresholdInfo implements Parcelable {
          * @see #getThresholds() for more details on signal strength thresholds
          */
         public @NonNull Builder setThresholds(@NonNull int[] thresholds) {
-            Objects.requireNonNull(thresholds, "thresholds must not be null");
-            if (thresholds.length < MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
-                    || thresholds.length > MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED) {
-                throw new IllegalArgumentException(
-                        "thresholds length must between " + MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
-                                + " and " + MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED);
-            }
-            mThresholds = thresholds.clone();
-            Arrays.sort(mThresholds);
-            return this;
+            return setThresholds(thresholds, false /*isSystem*/);
         }
 
         /**
-         * Set the signal strength thresholds for the corresponding signal measurement type without
-         * the length limitation.
+         * Set the signal strength thresholds for the corresponding signal measurement type.
          *
          * @param thresholds array of integer as the signal threshold values
+         * @param isSystem true is the caller is system which does not have restrictions on
+         *        the length of thresholds array.
          * @return the builder to facilitate the chaining
          *
          * @hide
          */
-        public @NonNull Builder setThresholdsUnlimited(@NonNull int[] thresholds) {
+        public @NonNull Builder setThresholds(@NonNull int[] thresholds, boolean isSystem) {
             Objects.requireNonNull(thresholds, "thresholds must not be null");
+            if (!isSystem && (thresholds.length < MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
+                    || thresholds.length > MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED)) {
+                throw new IllegalArgumentException(
+                        "thresholds length must between " + MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
+                                + " and " + MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED);
+            }
             mThresholds = thresholds.clone();
             Arrays.sort(mThresholds);
             return this;

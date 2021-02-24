@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -775,7 +776,8 @@ public abstract class NetworkAgent {
      * @param underlyingNetworks the new list of underlying networks.
      * @see {@link VpnService.Builder#setUnderlyingNetworks(Network[])}
      */
-    public final void setUnderlyingNetworks(@Nullable List<Network> underlyingNetworks) {
+    public final void setUnderlyingNetworks(
+            @SuppressLint("NullableCollection") @Nullable List<Network> underlyingNetworks) {
         final ArrayList<Network> underlyingArray = (underlyingNetworks != null)
                 ? new ArrayList<>(underlyingNetworks) : null;
         queueOrSendMessage(reg -> reg.sendUnderlyingNetworks(underlyingArray));

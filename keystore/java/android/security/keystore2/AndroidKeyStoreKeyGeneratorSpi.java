@@ -366,6 +366,13 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             ));
         }
 
+        if (spec.getMaxUsageCount() != KeyProperties.UNRESTRICTED_USAGE_COUNT) {
+            params.add(KeyStore2ParameterUtils.makeInt(
+                    KeymasterDefs.KM_TAG_USAGE_COUNT_LIMIT,
+                    spec.getMaxUsageCount()
+            ));
+        }
+
         byte[] additionalEntropy =
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                         mRng, (mKeySizeBits + 7) / 8);

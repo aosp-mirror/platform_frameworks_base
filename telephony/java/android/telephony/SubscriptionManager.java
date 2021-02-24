@@ -2589,14 +2589,45 @@ public class SubscriptionManager {
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
-     *             outlined above.
+     *            outlined above.
      */
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
             @DurationMillisLong long timeoutMillis) {
+        setSubscriptionOverrideUnmetered(subId, overrideUnmetered,
+                TelephonyManager.getAllNetworkTypes(), timeoutMillis);
+    }
 
+    /**
+     * Temporarily override the billing relationship plan between a carrier and
+     * a specific subscriber to be considered unmetered. This will be reflected
+     * to apps via {@link NetworkCapabilities#NET_CAPABILITY_NOT_METERED}.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this override applies to.
+     * @param overrideUnmetered set if the billing relationship should be
+     *            considered unmetered.
+     * @param networkTypes the network types this override applies to.
+     *            {@see TelephonyManager#getAllNetworkTypes()}
+     * @param timeoutMillis the timeout after which the requested override will
+     *            be automatically cleared, or {@code 0} to leave in the
+     *            requested state until explicitly cleared, or the next reboot,
+     *            whichever happens first.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *            outlined above.
+     */
+    public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
+            @NonNull @Annotation.NetworkType int[] networkTypes,
+            @DurationMillisLong long timeoutMillis) {
         final int overrideValue = overrideUnmetered ? SUBSCRIPTION_OVERRIDE_UNMETERED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_UNMETERED,
-                overrideValue, timeoutMillis, mContext.getOpPackageName());
+                overrideValue, networkTypes, timeoutMillis, mContext.getOpPackageName());
     }
 
     /**
@@ -2621,13 +2652,46 @@ public class SubscriptionManager {
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
      * @throws SecurityException if the caller doesn't meet the requirements
-     *             outlined above.
+     *            outlined above.
      */
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
             @DurationMillisLong long timeoutMillis) {
+        setSubscriptionOverrideCongested(subId, overrideCongested,
+                TelephonyManager.getAllNetworkTypes(), timeoutMillis);
+    }
+
+    /**
+     * Temporarily override the billing relationship plan between a carrier and
+     * a specific subscriber to be considered congested. This will cause the
+     * device to delay certain network requests when possible, such as developer
+     * jobs that are willing to run in a flexible time window.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this override applies to.
+     * @param overrideCongested set if the subscription should be considered
+     *            congested.
+     * @param networkTypes the network types this override applies to.
+     *            {@see TelephonyManager#getAllNetworkTypes()}
+     * @param timeoutMillis the timeout after which the requested override will
+     *            be automatically cleared, or {@code 0} to leave in the
+     *            requested state until explicitly cleared, or the next reboot,
+     *            whichever happens first.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *            outlined above.
+     */
+    public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
+            @NonNull @Annotation.NetworkType int[] networkTypes,
+            @DurationMillisLong long timeoutMillis) {
         final int overrideValue = overrideCongested ? SUBSCRIPTION_OVERRIDE_CONGESTED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_CONGESTED,
-                overrideValue, timeoutMillis, mContext.getOpPackageName());
+                overrideValue, networkTypes, timeoutMillis, mContext.getOpPackageName());
     }
 
     /**

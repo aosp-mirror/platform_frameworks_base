@@ -168,8 +168,8 @@ public abstract class QualifiedNetworksService extends Service {
          *
          * @param statuses the statuses that have changed
          */
-        public void reportApnThrottleStatusChanged(@NonNull List<ApnThrottleStatus> statuses) {
-            Log.d(TAG, "reportApnThrottleStatusChanged: statuses size=" + statuses.size());
+        public void reportThrottleStatusChanged(@NonNull List<ThrottleStatus> statuses) {
+            Log.d(TAG, "reportThrottleStatusChanged: statuses size=" + statuses.size());
         }
 
         /**
@@ -212,8 +212,8 @@ public abstract class QualifiedNetworksService extends Service {
                     break;
                 case QNS_APN_THROTTLE_STATUS_CHANGED:
                     if (provider != null) {
-                        List<ApnThrottleStatus> statuses = (List<ApnThrottleStatus>) message.obj;
-                        provider.reportApnThrottleStatusChanged(statuses);
+                        List<ThrottleStatus> statuses = (List<ThrottleStatus>) message.obj;
+                        provider.reportThrottleStatusChanged(statuses);
                     }
                     break;
 
@@ -307,8 +307,8 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         @Override
-        public void reportApnThrottleStatusChanged(int slotIndex,
-                List<ApnThrottleStatus> statuses) {
+        public void reportThrottleStatusChanged(int slotIndex,
+                List<ThrottleStatus> statuses) {
             mHandler.obtainMessage(QNS_APN_THROTTLE_STATUS_CHANGED, slotIndex, 0, statuses)
                     .sendToTarget();
         }

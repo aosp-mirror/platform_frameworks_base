@@ -48,6 +48,10 @@ public class ImsMultiEndpointImplBase {
         @Override
         public void setListener(IImsExternalCallStateListener listener) throws RemoteException {
             synchronized (mLock) {
+                if (mListener != null && !mListener.asBinder().isBinderAlive()) {
+                    Log.w(TAG, "setListener: discarding dead Binder");
+                    mListener = null;
+                }
                 if (mListener != null && listener != null && Objects.equals(
                         mListener.asBinder(), listener.asBinder())) {
                     return;

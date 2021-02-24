@@ -1142,6 +1142,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
+    field public static final int requireDeviceScreenOn = 16844312; // 0x1010618
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
@@ -9139,7 +9140,7 @@ package android.bluetooth.le {
     method public boolean getIncludeTxPowerLevel();
     method public android.util.SparseArray<byte[]> getManufacturerSpecificData();
     method public java.util.Map<android.os.ParcelUuid,byte[]> getServiceData();
-    method @Nullable public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
+    method @NonNull public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
@@ -11921,6 +11922,7 @@ package android.content.pm {
     method public void setAutoRevokePermissionsMode(boolean);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
+    method public void setInstallScenario(int);
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
@@ -12037,6 +12039,7 @@ package android.content.pm {
     method public boolean getSyntheticAppDetailsActivityEnabled(@NonNull String);
     method @NonNull public abstract android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
     method @Nullable public abstract String[] getSystemSharedLibraryNames();
+    method @IntRange(from=0) public int getTargetSdkVersion(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract CharSequence getText(@NonNull String, @StringRes int, @Nullable android.content.pm.ApplicationInfo);
     method @NonNull public abstract android.graphics.drawable.Drawable getUserBadgedDrawableForDensity(@NonNull android.graphics.drawable.Drawable, @NonNull android.os.UserHandle, @Nullable android.graphics.Rect, int);
     method @NonNull public abstract android.graphics.drawable.Drawable getUserBadgedIcon(@NonNull android.graphics.drawable.Drawable, @NonNull android.os.UserHandle);
@@ -12133,6 +12136,9 @@ package android.content.pm {
     field public static final String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
     field public static final String FEATURE_IRIS = "android.hardware.biometrics.iris";
+    field public static final String FEATURE_KEYSTORE_APP_ATTEST_KEY = "android.hardware.keystore.app_attest_key";
+    field public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY = "android.hardware.keystore.limited_use_key";
+    field public static final String FEATURE_KEYSTORE_SINGLE_USE_KEY = "android.hardware.keystore.single_use_key";
     field public static final String FEATURE_LEANBACK = "android.software.leanback";
     field public static final String FEATURE_LEANBACK_ONLY = "android.software.leanback_only";
     field public static final String FEATURE_LIVE_TV = "android.software.live_tv";
@@ -12233,6 +12239,10 @@ package android.content.pm {
     field public static final int INSTALL_REASON_POLICY = 1; // 0x1
     field public static final int INSTALL_REASON_UNKNOWN = 0; // 0x0
     field public static final int INSTALL_REASON_USER = 4; // 0x4
+    field public static final int INSTALL_SCENARIO_BULK = 2; // 0x2
+    field public static final int INSTALL_SCENARIO_BULK_SECONDARY = 3; // 0x3
+    field public static final int INSTALL_SCENARIO_DEFAULT = 0; // 0x0
+    field public static final int INSTALL_SCENARIO_FAST = 1; // 0x1
     field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_APEX = 1073741824; // 0x40000000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
@@ -26089,6 +26099,55 @@ package android.net.sip {
 
 }
 
+package android.net.vcn {
+
+  public final class VcnConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.net.vcn.VcnGatewayConnectionConfig> getGatewayConnectionConfigs();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnConfig> CREATOR;
+  }
+
+  public static final class VcnConfig.Builder {
+    ctor public VcnConfig.Builder(@NonNull android.content.Context);
+    method @NonNull public android.net.vcn.VcnConfig.Builder addGatewayConnectionConfig(@NonNull android.net.vcn.VcnGatewayConnectionConfig);
+    method @NonNull public android.net.vcn.VcnConfig build();
+  }
+
+  public abstract class VcnControlPlaneConfig {
+  }
+
+  public final class VcnControlPlaneIkeConfig extends android.net.vcn.VcnControlPlaneConfig {
+    ctor public VcnControlPlaneIkeConfig(@NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.TunnelModeChildSessionParams);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams getChildSessionParams();
+    method @NonNull public android.net.ipsec.ike.IkeSessionParams getIkeSessionParams();
+  }
+
+  public final class VcnGatewayConnectionConfig {
+    method @NonNull public int[] getExposedCapabilities();
+    method @IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) public int getMaxMtu();
+    method @NonNull public int[] getRequiredUnderlyingCapabilities();
+    method @NonNull public long[] getRetryInterval();
+  }
+
+  public static final class VcnGatewayConnectionConfig.Builder {
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull android.net.vcn.VcnControlPlaneConfig);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addRequiredUnderlyingCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeRequiredUnderlyingCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=android.net.vcn.VcnGatewayConnectionConfig.MIN_MTU_V6) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryInterval(@NonNull long[]);
+  }
+
+  public class VcnManager {
+    method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
+  }
+
+}
+
 package android.nfc {
 
   public class FormatException extends java.lang.Exception {
@@ -29601,8 +29660,8 @@ package android.os {
   }
 
   public final class BugreportManager {
-    method public void cancelBugreport();
-    method public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+    method @WorkerThread public void cancelBugreport();
+    method @WorkerThread public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
 
   public abstract static class BugreportManager.BugreportCallback {
@@ -34322,6 +34381,43 @@ package android.provider {
     field public static final String PATH_SETTING_INTENT = "intent";
   }
 
+  public final class SimPhonebookContract {
+    field public static final String AUTHORITY = "com.android.simphonebook";
+    field @NonNull public static final android.net.Uri AUTHORITY_URI;
+  }
+
+  public static final class SimPhonebookContract.ElementaryFiles {
+    method @NonNull public static android.net.Uri getItemUri(int, int);
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-elementary-file";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-elementary-file";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final int EF_ADN = 1; // 0x1
+    field public static final int EF_FDN = 2; // 0x2
+    field public static final int EF_SDN = 3; // 0x3
+    field public static final String EF_TYPE = "ef_type";
+    field public static final int EF_UNKNOWN = 0; // 0x0
+    field public static final String MAX_RECORDS = "max_records";
+    field public static final String NAME_MAX_LENGTH = "name_max_length";
+    field public static final String PHONE_NUMBER_MAX_LENGTH = "phone_number_max_length";
+    field public static final String RECORD_COUNT = "record_count";
+    field public static final String SLOT_INDEX = "slot_index";
+    field public static final String SUBSCRIPTION_ID = "subscription_id";
+  }
+
+  public static final class SimPhonebookContract.SimRecords {
+    method @NonNull public static android.net.Uri getContentUri(int, int);
+    method @WorkerThread public static int getEncodedNameLength(@NonNull android.content.ContentResolver, @NonNull String);
+    method @NonNull public static android.net.Uri getItemUri(int, int, int);
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-contact_v2";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-contact_v2";
+    field public static final String ELEMENTARY_FILE_TYPE = "elementary_file_type";
+    field public static final int ERROR_NAME_UNSUPPORTED = -1; // 0xffffffff
+    field public static final String NAME = "name";
+    field public static final String PHONE_NUMBER = "phone_number";
+    field public static final String RECORD_NUMBER = "record_number";
+    field public static final String SUBSCRIPTION_ID = "subscription_id";
+  }
+
   public class SyncStateContract {
     ctor public SyncStateContract();
   }
@@ -35918,6 +36014,19 @@ package android.se.omapi {
 
 package android.security {
 
+  public final class AppUriAuthenticationPolicy implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Map<android.net.Uri,java.lang.String>> getAppAndUriMappings();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.AppUriAuthenticationPolicy> CREATOR;
+  }
+
+  public static final class AppUriAuthenticationPolicy.Builder {
+    ctor public AppUriAuthenticationPolicy.Builder();
+    method @NonNull public android.security.AppUriAuthenticationPolicy.Builder addAppAndUriMapping(@NonNull String, @NonNull android.net.Uri, @NonNull String);
+    method @NonNull public android.security.AppUriAuthenticationPolicy build();
+  }
+
   public final class AttestedKeyPair {
     ctor public AttestedKeyPair(@Nullable java.security.KeyPair, @NonNull java.util.List<java.security.cert.Certificate>);
     method @NonNull public java.util.List<java.security.cert.Certificate> getAttestationRecord();
@@ -35965,6 +36074,7 @@ package android.security {
     method public static void choosePrivateKeyAlias(@NonNull android.app.Activity, @NonNull android.security.KeyChainAliasCallback, @Nullable String[], @Nullable java.security.Principal[], @Nullable String, int, @Nullable String);
     method public static void choosePrivateKeyAlias(@NonNull android.app.Activity, @NonNull android.security.KeyChainAliasCallback, @Nullable String[], @Nullable java.security.Principal[], @Nullable android.net.Uri, @Nullable String);
     method @NonNull public static android.content.Intent createInstallIntent();
+    method @NonNull public static android.content.Intent createManageCredentialsIntent(@NonNull android.security.AppUriAuthenticationPolicy);
     method @Nullable @WorkerThread public static java.security.cert.X509Certificate[] getCertificateChain(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method @Nullable @WorkerThread public static java.security.PrivateKey getPrivateKey(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method @Deprecated public static boolean isBoundKeyAlgorithm(@NonNull String);
@@ -36191,6 +36301,7 @@ package android.security.keystore {
 
   public final class KeyGenParameterSpec implements java.security.spec.AlgorithmParameterSpec {
     method @Nullable public java.security.spec.AlgorithmParameterSpec getAlgorithmParameterSpec();
+    method @Nullable public String getAttestKeyAlias();
     method public byte[] getAttestationChallenge();
     method @NonNull public String[] getBlockModes();
     method @NonNull public java.util.Date getCertificateNotAfter();
@@ -36204,6 +36315,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
     method @NonNull public String getKeystoreAlias();
+    method public int getMaxUsageCount();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36224,6 +36336,7 @@ package android.security.keystore {
     ctor public KeyGenParameterSpec.Builder(@NonNull String, int);
     method @NonNull public android.security.keystore.KeyGenParameterSpec build();
     method public android.security.keystore.KeyGenParameterSpec.Builder setAlgorithmParameterSpec(@NonNull java.security.spec.AlgorithmParameterSpec);
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setAttestKeyAlias(@Nullable String);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setAttestationChallenge(byte[]);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setBlockModes(java.lang.String...);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setCertificateNotAfter(@NonNull java.util.Date);
@@ -36240,6 +36353,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityStart(java.util.Date);
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setMaxUsageCount(int);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUnlockedDeviceRequired(boolean);
@@ -36262,6 +36376,7 @@ package android.security.keystore {
     method public String getKeystoreAlias();
     method public int getOrigin();
     method public int getPurposes();
+    method public int getRemainingUsageCount();
     method public int getSecurityLevel();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36319,6 +36434,7 @@ package android.security.keystore {
     field public static final int ORIGIN_SECURELY_IMPORTED = 8; // 0x8
     field public static final int ORIGIN_UNKNOWN = 4; // 0x4
     field public static final int PURPOSE_AGREE_KEY = 64; // 0x40
+    field public static final int PURPOSE_ATTEST_KEY = 128; // 0x80
     field public static final int PURPOSE_DECRYPT = 2; // 0x2
     field public static final int PURPOSE_ENCRYPT = 1; // 0x1
     field public static final int PURPOSE_SIGN = 4; // 0x4
@@ -36331,6 +36447,7 @@ package android.security.keystore {
     field public static final int SECURITY_LEVEL_UNKNOWN_SECURE = -1; // 0xffffffff
     field public static final String SIGNATURE_PADDING_RSA_PKCS1 = "PKCS1";
     field public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
+    field public static final int UNRESTRICTED_USAGE_COUNT = -1; // 0xffffffff
   }
 
   public final class KeyProtection implements java.security.KeyStore.ProtectionParameter {
@@ -36340,6 +36457,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForConsumptionEnd();
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
+    method public int getMaxUsageCount();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36365,6 +36483,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityStart(java.util.Date);
+    method @NonNull public android.security.keystore.KeyProtection.Builder setMaxUsageCount(int);
     method @NonNull public android.security.keystore.KeyProtection.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyProtection.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyProtection.Builder setUnlockedDeviceRequired(boolean);
@@ -39678,6 +39797,7 @@ package android.telephony {
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
     field public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL = "ims.ims_single_registration_required_bool";
+    field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
@@ -41154,7 +41274,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
+    method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
+    method public void setSubscriptionOverrideUnmetered(int, boolean, @NonNull int[], long);
     method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
     field public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
@@ -41913,7 +42035,11 @@ package android.telephony.ims {
   }
 
   public class ImsRcsManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
     field public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN = "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
   }
 
@@ -42101,6 +42227,15 @@ package android.telephony.ims {
     field public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2; // 0x2
   }
 
+  public final class ImsRegistrationAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAttributeFlags();
+    method @NonNull public java.util.Set<java.lang.String> getFeatureTags();
+    method public int getTransportType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsRegistrationAttributes> CREATOR;
+  }
+
   public class RcsUceAdapter {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
   }
@@ -42117,8 +42252,10 @@ package android.telephony.ims {
 
   public static class RegistrationManager.RegistrationCallback {
     ctor public RegistrationManager.RegistrationCallback();
-    method public void onRegistered(int);
-    method public void onRegistering(int);
+    method @Deprecated public void onRegistered(int);
+    method public void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
+    method @Deprecated public void onRegistering(int);
+    method public void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public void onTechnologyChangeFailed(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo);
   }

@@ -76,11 +76,11 @@ class PlatformCompatCommandNotInstalledTest {
                 Params(enableDisable = null, targetSdk = 29, result = false),
                 Params(enableDisable = null, targetSdk = 30, result = true),
 
-                Params(enableDisable = true, targetSdk = 29, result = true),
+                Params(enableDisable = true, targetSdk = 29, result = false),
                 Params(enableDisable = true, targetSdk = 30, result = true),
 
                 Params(enableDisable = false, targetSdk = 29, result = false),
-                Params(enableDisable = false, targetSdk = 30, result = false)
+                Params(enableDisable = false, targetSdk = 30, result = true)
         )
     }
 

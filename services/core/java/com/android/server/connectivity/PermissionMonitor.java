@@ -28,6 +28,8 @@ import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.net.module.util.CollectionUtils.toIntArray;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -40,23 +42,21 @@ import android.net.UidRange;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.system.OsConstants;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.CollectionUtils;
 import com.android.server.LocalServices;
-import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -80,12 +80,12 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
 
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final SystemConfigManager mSystemConfigManager;
     private final INetd mNetd;
     private final Dependencies mDeps;
 
-    // Values are User IDs.
     @GuardedBy("this")
-    private final Set<Integer> mUsers = new HashSet<>();
+    private final Set<UserHandle> mUsers = new HashSet<>();
 
     // Keys are app uids. Values are true for SYSTEM permission and false for NETWORK permission.
     @GuardedBy("this")
@@ -124,6 +124,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             @NonNull final Dependencies deps) {
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mSystemConfigManager = context.getSystemService(SystemConfigManager.class);
         mNetd = netd;
         mDeps = deps;
     }
@@ -173,25 +174,20 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             netdPermsUids.put(uid, netdPermsUids.get(uid) | otherNetdPerms);
         }
 
-        final List<UserHandle> users = mUserManager.getUserHandles(true /* excludeDying */);
-        for (UserHandle user : users) {
-            mUsers.add(user.getIdentifier());
-        }
+        mUsers.addAll(mUserManager.getUserHandles(true /* excludeDying */));
 
-        final SparseArray<ArraySet<String>> systemPermission =
-                SystemConfig.getInstance().getSystemPermissions();
-        for (int i = 0; i < systemPermission.size(); i++) {
-            ArraySet<String> perms = systemPermission.valueAt(i);
-            int uid = systemPermission.keyAt(i);
-            int netdPermission = 0;
-            // Get the uids of native services that have UPDATE_DEVICE_STATS or INTERNET permission.
-            if (perms != null) {
-                netdPermission |= perms.contains(UPDATE_DEVICE_STATS)
-                        ? INetd.PERMISSION_UPDATE_DEVICE_STATS : 0;
-                netdPermission |= perms.contains(INTERNET)
-                        ? INetd.PERMISSION_INTERNET : 0;
+        final SparseArray<String> netdPermToSystemPerm = new SparseArray<>();
+        netdPermToSystemPerm.put(INetd.PERMISSION_INTERNET, INTERNET);
+        netdPermToSystemPerm.put(INetd.PERMISSION_UPDATE_DEVICE_STATS, UPDATE_DEVICE_STATS);
+        for (int i = 0; i < netdPermToSystemPerm.size(); i++) {
+            final int netdPermission = netdPermToSystemPerm.keyAt(i);
+            final String systemPermission = netdPermToSystemPerm.valueAt(i);
+            final int[] hasPermissionUids =
+                    mSystemConfigManager.getSystemPermissionUids(systemPermission);
+            for (int j = 0; j < hasPermissionUids.length; j++) {
+                final int uid = hasPermissionUids[j];
+                netdPermsUids.put(uid, netdPermsUids.get(uid) | netdPermission);
             }
-            netdPermsUids.put(uid, netdPermsUids.get(uid) | netdPermission);
         }
         log("Users: " + mUsers.size() + ", Apps: " + mApps.size());
         update(mUsers, mApps, true);
@@ -208,7 +204,7 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         if (app.requestedPermissions == null || app.requestedPermissionsFlags == null) {
             return false;
         }
-        final int index = ArrayUtils.indexOf(app.requestedPermissions, permission);
+        final int index = CollectionUtils.indexOf(app.requestedPermissions, permission);
         if (index < 0 || index >= app.requestedPermissionsFlags.length) return false;
         return (app.requestedPermissionsFlags[index] & REQUESTED_PERMISSION_GRANTED) != 0;
     }
@@ -250,21 +246,14 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         return mApps.containsKey(uid);
     }
 
-    private int[] toIntArray(Collection<Integer> list) {
-        int[] array = new int[list.size()];
-        int i = 0;
-        for (Integer item : list) {
-            array[i++] = item;
-        }
-        return array;
-    }
-
-    private void update(Set<Integer> users, Map<Integer, Boolean> apps, boolean add) {
+    private void update(Set<UserHandle> users, Map<Integer, Boolean> apps, boolean add) {
         List<Integer> network = new ArrayList<>();
         List<Integer> system = new ArrayList<>();
         for (Entry<Integer, Boolean> app : apps.entrySet()) {
             List<Integer> list = app.getValue() ? system : network;
-            for (int user : users) {
+            for (UserHandle user : users) {
+                if (user == null) continue;
+
                 list.add(UserHandle.getUid(user, app.getKey()));
             }
         }
@@ -288,14 +277,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
      *
      * @hide
      */
-    public synchronized void onUserAdded(int user) {
-        if (user < 0) {
-            loge("Invalid user in onUserAdded: " + user);
-            return;
-        }
+    public synchronized void onUserAdded(@NonNull UserHandle user) {
         mUsers.add(user);
 
-        Set<Integer> users = new HashSet<>();
+        Set<UserHandle> users = new HashSet<>();
         users.add(user);
         update(users, mApps, true);
     }
@@ -307,14 +292,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
      *
      * @hide
      */
-    public synchronized void onUserRemoved(int user) {
-        if (user < 0) {
-            loge("Invalid user in onUserRemoved: " + user);
-            return;
-        }
+    public synchronized void onUserRemoved(@NonNull UserHandle user) {
         mUsers.remove(user);
 
-        Set<Integer> users = new HashSet<>();
+        Set<UserHandle> users = new HashSet<>();
         users.add(user);
         update(users, mApps, false);
     }
@@ -550,7 +531,10 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
         for (UidRange range : ranges) {
             for (int userId = range.getStartUser(); userId <= range.getEndUser(); userId++) {
                 for (int appId : appIds) {
-                    final int uid = UserHandle.getUid(userId, appId);
+                    final UserHandle handle = UserHandle.of(userId);
+                    if (handle == null) continue;
+
+                    final int uid = UserHandle.getUid(handle, appId);
                     if (range.contains(uid)) {
                         result.add(uid);
                     }
@@ -669,23 +653,23 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             if (allPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(
                         INetd.PERMISSION_INTERNET | INetd.PERMISSION_UPDATE_DEVICE_STATS,
-                        ArrayUtils.convertToIntArray(allPermissionAppIds));
+                        toIntArray(allPermissionAppIds));
             }
             if (internetPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_INTERNET,
-                        ArrayUtils.convertToIntArray(internetPermissionAppIds));
+                        toIntArray(internetPermissionAppIds));
             }
             if (updateStatsPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_UPDATE_DEVICE_STATS,
-                        ArrayUtils.convertToIntArray(updateStatsPermissionAppIds));
+                        toIntArray(updateStatsPermissionAppIds));
             }
             if (noPermissionAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_NONE,
-                        ArrayUtils.convertToIntArray(noPermissionAppIds));
+                        toIntArray(noPermissionAppIds));
             }
             if (uninstalledAppIds.size() != 0) {
                 mNetd.trafficSetNetPermForUids(INetd.PERMISSION_UNINSTALLED,
-                        ArrayUtils.convertToIntArray(uninstalledAppIds));
+                        toIntArray(uninstalledAppIds));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Pass appId list of special permission failed." + e);

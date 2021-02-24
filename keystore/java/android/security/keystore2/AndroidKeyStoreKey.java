@@ -21,7 +21,6 @@ import android.security.KeyStoreSecurityLevel;
 import android.system.keystore2.Authorization;
 import android.system.keystore2.Domain;
 import android.system.keystore2.KeyDescriptor;
-import android.util.Log;
 
 import java.security.Key;
 
@@ -127,15 +126,6 @@ public class AndroidKeyStoreKey implements Key {
             return false;
         }
 
-        // If the key ids are equal and the class matches all the other fields cannot differ
-        // unless we have a bug.
-        if (!mAlgorithm.equals(other.mAlgorithm)
-                || !mAuthorizations.equals(other.mAuthorizations)
-                || !mDescriptor.equals(other.mDescriptor)) {
-            Log.e("AndroidKeyStoreKey", "Bug: key ids are identical, but key metadata"
-                    + "differs.");
-            return false;
-        }
         return true;
     }
 }

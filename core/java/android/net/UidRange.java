@@ -18,8 +18,10 @@ package android.net;
 
 import static android.os.UserHandle.PER_USER_RANGE;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 import java.util.Collection;
 
@@ -40,8 +42,12 @@ public final class UidRange implements Parcelable {
         stop  = stopUid;
     }
 
-    public static UidRange createForUser(int userId) {
-        return new UidRange(userId * PER_USER_RANGE, (userId + 1) * PER_USER_RANGE - 1);
+    /** Creates a UidRange for the specified user. */
+    public static UidRange createForUser(UserHandle user) {
+        final UserHandle nextUser = UserHandle.of(user.getIdentifier() + 1);
+        final int start = UserHandle.getUid(user, 0 /* appId */);
+        final int end = UserHandle.getUid(nextUser, 0) - 1;
+        return new UidRange(start, end);
     }
 
     /** Returns the smallest user Id which is contained in this UidRange */
@@ -81,7 +87,7 @@ public final class UidRange implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

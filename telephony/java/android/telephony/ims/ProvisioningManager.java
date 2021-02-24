@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -1325,7 +1326,7 @@ public class ProvisioningManager {
      * the RCS VoLTE single registration feature. Only default messaging application may receive
      * the intent.
      *
-     * <p>Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to specify the subscription index for which
+     * <p>Contains {@link #EXTRA_SUBSCRIPTION_ID} to specify the subscription index for which
      * the intent is valid. and {@link #EXTRA_STATUS} to specify RCS VoLTE single registration
      * status.
      */
@@ -1371,7 +1372,7 @@ public class ProvisioningManager {
      * provisioning is done using autoconfiguration, then these parameters shall be
      * sent in the HTTP get request to fetch the RCS provisioning. RCS client
      * configuration must be provided by the application before registering for the
-     * provisioning status events {@link #registerRcsProvisioningChangedCallback()}
+     * provisioning status events {@link #registerRcsProvisioningChangedCallback}
      * @param rcc RCS client configuration {@link RcsClientConfiguration}
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -1387,13 +1388,15 @@ public class ProvisioningManager {
     }
 
     /**
-     * Returns a flag to indicate if the device software and the carrier
-     * have the capability to support RCS Volte single IMS registration.
-     * @return true if this single registration is capable, false otherwise
+     * Returns a flag to indicate whether or not the device supports IMS single registration for
+     * MMTEL and RCS features as well as if the carrier has provisioned the feature.
+     * @return true if IMS single registration is capable at this time, or false otherwise
      * @throws ImsException If the remote ImsService is not available for
      * any reason or the subscription associated with this instance is no
      * longer active. See {@link ImsException#getCode()} for more
      * information.
+     * @see PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION for whether or not this
+     * device supports IMS single registration.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isRcsVolteSingleRegistrationCapable() throws ImsException {
@@ -1430,7 +1433,7 @@ public class ProvisioningManager {
      * available. This can happen if the service crashed, for example.
      * It shall also throw this exception when the RCS client parameters for the
      * application are not valid. In that case application must set the client
-     * params (See {@link #setRcsClientConfiguration()}) and re register the
+     * params (See {@link #setRcsClientConfiguration}) and re register the
      * callback.
      * See {@link ImsException#getCode()} for a more detailed reason.
      */
@@ -1458,9 +1461,9 @@ public class ProvisioningManager {
      * will result in a no-op.
      * @param callback The existing {@link RcsProvisioningCallback} to be
      * removed.
-     * @see #registerRcsProvisioningChangedCallback(RcsClientConfiguration,
-     * Executor, RcsProvisioningCallback) @throws IllegalArgumentException
-     * if the subscription associated with this callback is invalid.
+     * @see #registerRcsProvisioningChangedCallback
+     * @throws IllegalArgumentException if the subscription associated with this callback is
+     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterRcsProvisioningChangedCallback(

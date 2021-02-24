@@ -35,6 +35,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
+import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -329,6 +330,9 @@ public class ConnectivityManagerTest {
         mustFail(() -> { manager.registerDefaultNetworkCallback(null, handler); });
         mustFail(() -> { manager.registerDefaultNetworkCallback(callback, null); });
 
+        mustFail(() -> { manager.registerSystemDefaultNetworkCallback(null, handler); });
+        mustFail(() -> { manager.registerSystemDefaultNetworkCallback(callback, null); });
+
         mustFail(() -> { manager.unregisterNetworkCallback(nullCallback); });
         mustFail(() -> { manager.unregisterNetworkCallback(nullIntent); });
         mustFail(() -> { manager.releaseNetworkRequest(nullIntent); });
@@ -345,15 +349,17 @@ public class ConnectivityManagerTest {
     @Test
     public void testRequestType() throws Exception {
         final String testPkgName = "MyPackage";
+        final String testAttributionTag = "MyTag";
         final ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
         when(mCtx.getOpPackageName()).thenReturn(testPkgName);
+        when(mCtx.getAttributionTag()).thenReturn(testAttributionTag);
         final NetworkRequest request = makeRequest(1);
         final NetworkCallback callback = new ConnectivityManager.NetworkCallback();
 
         manager.requestNetwork(request, callback);
         verify(mService).requestNetwork(eq(request.networkCapabilities),
                 eq(REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
-                eq(testPkgName), eq(null));
+                eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
         // Verify that register network callback does not calls requestNetwork at all.
@@ -361,19 +367,26 @@ public class ConnectivityManagerTest {
         verify(mService, never()).requestNetwork(any(), anyInt(), any(), anyInt(), any(),
                 anyInt(), any(), any());
         verify(mService).listenForNetwork(eq(request.networkCapabilities), any(), any(),
-                eq(testPkgName));
+                eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
         manager.registerDefaultNetworkCallback(callback);
         verify(mService).requestNetwork(eq(null),
                 eq(TRACK_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
-                eq(testPkgName), eq(null));
+                eq(testPkgName), eq(testAttributionTag));
         reset(mService);
 
         manager.requestBackgroundNetwork(request, null, callback);
         verify(mService).requestNetwork(eq(request.networkCapabilities),
                 eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
-                eq(testPkgName), eq(null));
+                eq(testPkgName), eq(testAttributionTag));
+        reset(mService);
+
+        Handler handler = new Handler(ConnectivityThread.getInstanceLooper());
+        manager.registerSystemDefaultNetworkCallback(callback, handler);
+        verify(mService).requestNetwork(eq(null),
+                eq(TRACK_SYSTEM_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(testPkgName), eq(testAttributionTag));
         reset(mService);
     }
 

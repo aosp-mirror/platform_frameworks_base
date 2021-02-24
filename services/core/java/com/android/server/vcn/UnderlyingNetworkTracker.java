@@ -28,16 +28,15 @@ import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.ParcelUuid;
-import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -55,19 +54,18 @@ public class UnderlyingNetworkTracker {
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
+    @NonNull private final Set<Integer> mRequiredUnderlyingNetworkCapabilities;
     @NonNull private final UnderlyingNetworkTrackerCallback mCb;
     @NonNull private final Dependencies mDeps;
     @NonNull private final Handler mHandler;
     @NonNull private final ConnectivityManager mConnectivityManager;
-    @NonNull private final SubscriptionManager mSubscriptionManager;
 
-    @NonNull private final SparseArray<NetworkCallback> mCellBringupCallbacks = new SparseArray<>();
+    @NonNull private final Map<Integer, NetworkCallback> mCellBringupCallbacks = new ArrayMap<>();
     @NonNull private final NetworkCallback mWifiBringupCallback = new NetworkBringupCallback();
     @NonNull private final NetworkCallback mRouteSelectionCallback = new RouteSelectionCallback();
 
-    @NonNull private final Set<Integer> mSubIds = new ArraySet<>();
-
-    @NonNull private final Set<Integer> mRequiredUnderlyingNetworkCapabilities;
+    @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
+    private boolean mIsRunning = true;
 
     @Nullable private UnderlyingNetworkRecord mCurrentRecord;
     @Nullable private UnderlyingNetworkRecord.Builder mRecordInProgress;
@@ -75,11 +73,13 @@ public class UnderlyingNetworkTracker {
     public UnderlyingNetworkTracker(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
+            @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull Set<Integer> requiredUnderlyingNetworkCapabilities,
             @NonNull UnderlyingNetworkTrackerCallback cb) {
         this(
                 vcnContext,
                 subscriptionGroup,
+                snapshot,
                 requiredUnderlyingNetworkCapabilities,
                 cb,
                 new Dependencies());
@@ -88,11 +88,13 @@ public class UnderlyingNetworkTracker {
     private UnderlyingNetworkTracker(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
+            @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull Set<Integer> requiredUnderlyingNetworkCapabilities,
             @NonNull UnderlyingNetworkTrackerCallback cb,
             @NonNull Dependencies deps) {
         mVcnContext = Objects.requireNonNull(vcnContext, "Missing vcnContext");
         mSubscriptionGroup = Objects.requireNonNull(subscriptionGroup, "Missing subscriptionGroup");
+        mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
         mRequiredUnderlyingNetworkCapabilities =
                 Objects.requireNonNull(
                         requiredUnderlyingNetworkCapabilities,
@@ -103,7 +105,6 @@ public class UnderlyingNetworkTracker {
         mHandler = new Handler(mVcnContext.getLooper());
 
         mConnectivityManager = mVcnContext.getContext().getSystemService(ConnectivityManager.class);
-        mSubscriptionManager = mVcnContext.getContext().getSystemService(SubscriptionManager.class);
 
         registerNetworkRequests();
     }
@@ -149,34 +150,47 @@ public class UnderlyingNetworkTracker {
     private void updateSubIdsAndCellularRequests() {
         mVcnContext.ensureRunningOnLooperThread();
 
-        Set<Integer> prevSubIds = new ArraySet<>(mSubIds);
-        mSubIds.clear();
-
-        // Ensure NetworkRequests filed for all current subIds in mSubscriptionGroup
-        // STOPSHIP: b/177364490 use TelephonySubscriptionSnapshot to avoid querying Telephony
-        List<SubscriptionInfo> subInfos =
-                mSubscriptionManager.getSubscriptionsInGroup(mSubscriptionGroup);
-
-        for (SubscriptionInfo subInfo : subInfos) {
-            final int subId = subInfo.getSubscriptionId();
-            mSubIds.add(subId);
-
-            if (!mCellBringupCallbacks.contains(subId)) {
-                final NetworkBringupCallback cb = new NetworkBringupCallback();
-                mCellBringupCallbacks.put(subId, cb);
-
-                mConnectivityManager.requestBackgroundNetwork(
-                        getCellNetworkRequestForSubId(subId), mHandler, cb);
-            }
+        // Don't bother re-filing NetworkRequests if this Tracker has been torn down.
+        if (!mIsRunning) {
+            return;
         }
 
-        // unregister all NetworkCallbacks for outdated subIds
-        for (final int subId : prevSubIds) {
-            if (!mSubIds.contains(subId)) {
-                final NetworkCallback cb = mCellBringupCallbacks.removeReturnOld(subId);
-                mConnectivityManager.unregisterNetworkCallback(cb);
-            }
+        final Set<Integer> subIdsInSubGroup = mLastSnapshot.getAllSubIdsInGroup(mSubscriptionGroup);
+
+        // new subIds to track = (updated list of subIds) - (currently tracked subIds)
+        final Set<Integer> subIdsToRegister = new ArraySet<>(subIdsInSubGroup);
+        subIdsToRegister.removeAll(mCellBringupCallbacks.keySet());
+
+        // subIds to stop tracking = (currently tracked subIds) - (updated list of subIds)
+        final Set<Integer> subIdsToUnregister = new ArraySet<>(mCellBringupCallbacks.keySet());
+        subIdsToUnregister.removeAll(subIdsInSubGroup);
+
+        for (final int subId : subIdsToRegister) {
+            final NetworkBringupCallback cb = new NetworkBringupCallback();
+            mCellBringupCallbacks.put(subId, cb);
+
+            mConnectivityManager.requestBackgroundNetwork(
+                    getCellNetworkRequestForSubId(subId), mHandler, cb);
         }
+
+        for (final int subId : subIdsToUnregister) {
+            final NetworkCallback cb = mCellBringupCallbacks.remove(subId);
+            mConnectivityManager.unregisterNetworkCallback(cb);
+        }
+    }
+
+    /**
+     * Update this UnderlyingNetworkTracker's TelephonySubscriptionSnapshot.
+     *
+     * <p>Updating the TelephonySubscriptionSnapshot will cause this UnderlyingNetworkTracker to
+     * reevaluate its NetworkBringupCallbacks. This may result in NetworkRequests being registered
+     * or unregistered if the subIds mapped to the this Tracker's SubscriptionGroup change.
+     */
+    public void updateSubscriptionSnapshot(@NonNull TelephonySubscriptionSnapshot snapshot) {
+        Objects.requireNonNull(snapshot, "Missing snapshot");
+
+        mLastSnapshot = snapshot;
+        updateSubIdsAndCellularRequests();
     }
 
     /** Tears down this Tracker, and releases all underlying network requests. */
@@ -186,11 +200,12 @@ public class UnderlyingNetworkTracker {
         mConnectivityManager.unregisterNetworkCallback(mWifiBringupCallback);
         mConnectivityManager.unregisterNetworkCallback(mRouteSelectionCallback);
 
-        for (final int subId : mSubIds) {
-            final NetworkCallback cb = mCellBringupCallbacks.removeReturnOld(subId);
+        for (final NetworkCallback cb : mCellBringupCallbacks.values()) {
             mConnectivityManager.unregisterNetworkCallback(cb);
         }
-        mSubIds.clear();
+        mCellBringupCallbacks.clear();
+
+        mIsRunning = false;
     }
 
     /** Returns whether the currently selected Network matches the given network. */

@@ -86,17 +86,14 @@ public class NetworkRequest implements Parcelable {
      *       callbacks about the single, highest scoring current network
      *       (if any) that matches the specified NetworkCapabilities, or
      *
-     *     - TRACK_DEFAULT, a hybrid of the two designed such that the
-     *       framework will issue callbacks for the single, highest scoring
-     *       current network (if any) that matches the capabilities of the
-     *       default Internet request (mDefaultRequest), but which cannot cause
-     *       the framework to either create or retain the existence of any
-     *       specific network. Note that from the point of view of the request
-     *       matching code, TRACK_DEFAULT is identical to REQUEST: its special
-     *       behaviour is not due to different semantics, but to the fact that
-     *       the system will only ever create a TRACK_DEFAULT with capabilities
-     *       that are identical to the default request's capabilities, thus
-     *       causing it to share fate in every way with the default request.
+     *     - TRACK_DEFAULT, which causes the framework to issue callbacks for
+     *       the single, highest scoring current network (if any) that will
+     *       be chosen for an app, but which cannot cause the framework to
+     *       either create or retain the existence of any specific network.
+     *
+     *     - TRACK_SYSTEM_DEFAULT, which causes the framework to send callbacks
+     *       for the network (if any) that satisfies the default Internet
+     *       request.
      *
      *     - BACKGROUND_REQUEST, like REQUEST but does not cause any networks
      *       to retain the NET_CAPABILITY_FOREGROUND capability. A network with
@@ -119,6 +116,7 @@ public class NetworkRequest implements Parcelable {
         TRACK_DEFAULT,
         REQUEST,
         BACKGROUND_REQUEST,
+        TRACK_SYSTEM_DEFAULT,
     };
 
     /**
@@ -435,25 +433,7 @@ public class NetworkRequest implements Parcelable {
      * @hide
      */
     public boolean isRequest() {
-        return isForegroundRequest() || isBackgroundRequest();
-    }
-
-    /**
-     * Returns true iff. the contained NetworkRequest is one that:
-     *
-     *     - should be associated with at most one satisfying network
-     *       at a time;
-     *
-     *     - should cause a network to be kept up and in the foreground if
-     *       it is the best network which can satisfy the NetworkRequest.
-     *
-     * For full detail of how isRequest() is used for pairing Networks with
-     * NetworkRequests read rematchNetworkAndRequests().
-     *
-     * @hide
-     */
-    public boolean isForegroundRequest() {
-        return type == Type.TRACK_DEFAULT || type == Type.REQUEST;
+        return type == Type.REQUEST || type == Type.BACKGROUND_REQUEST;
     }
 
     /**
@@ -550,6 +530,8 @@ public class NetworkRequest implements Parcelable {
                 return NetworkRequestProto.TYPE_REQUEST;
             case BACKGROUND_REQUEST:
                 return NetworkRequestProto.TYPE_BACKGROUND_REQUEST;
+            case TRACK_SYSTEM_DEFAULT:
+                return NetworkRequestProto.TYPE_TRACK_SYSTEM_DEFAULT;
             default:
                 return NetworkRequestProto.TYPE_UNKNOWN;
         }
@@ -567,7 +549,7 @@ public class NetworkRequest implements Parcelable {
         proto.end(token);
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
         return (that.legacyType == this.legacyType &&

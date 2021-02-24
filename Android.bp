@@ -25,6 +25,44 @@
 //
 // READ ME: ########################################################
 
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// Added automatically by a large-scale-change that took the approach of
+// 'apply every license found to every target'. While this makes sure we respect
+// every license restriction, it may not be entirely correct.
+//
+// e.g. GPL in an MIT project might only apply to the contrib/ directory.
+//
+// Please consider splitting the single license below into multiple licenses,
+// taking care not to lose any license_kind information, and overriding the
+// default license using the 'licenses: [...]' property on targets as needed.
+//
+// For unused files, consider creating a 'fileGroup' with "//visibility:private"
+// to attach the license to, and including a comment whether the files may be
+// used in the current project.
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+        "SPDX-license-identifier-BSD",
+        "SPDX-license-identifier-CC-BY",
+        "SPDX-license-identifier-CPL-1.0",
+        "SPDX-license-identifier-GPL",
+        "SPDX-license-identifier-GPL-2.0",
+        "SPDX-license-identifier-MIT",
+        "SPDX-license-identifier-Unicode-DFS",
+        "SPDX-license-identifier-W3C",
+        "legacy_unencumbered",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
 filegroup {
     name: "framework-core-sources",
     srcs: [
@@ -363,6 +401,7 @@ filegroup {
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
         ":framework-wifi-updatable-sources",
+        ":ike-srcs",
         ":updatable-media-srcs",
     ],
     visibility: ["//visibility:private"],
@@ -371,6 +410,7 @@ filegroup {
 java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
         "framework-media.stubs.module_lib",
         "framework-mediaprovider.stubs.module_lib",
         "framework-permission.stubs.module_lib",
@@ -387,6 +427,7 @@ java_library {
     name: "framework-all",
     installable: false,
     static_libs: [
+        "android.net.ipsec.ike.impl",
         "framework-minus-apex",
         "framework-mediaprovider.impl",
         "framework-permission.impl",
@@ -484,7 +525,8 @@ java_library {
         "android.hardware.vibrator-V1.3-java",
         "android.security.apc-java",
         "android.security.authorization-java",
-        "android.system.keystore2-java",
+        "android.security.usermanager-java",
+        "android.system.keystore2-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
 
@@ -678,6 +720,7 @@ gensrcs {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],

@@ -21,6 +21,7 @@ import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
+import static android.net.NetworkRequest.Type.TRACK_SYSTEM_DEFAULT;
 import static android.net.QosCallback.QosCallbackRegistrationException;
 
 import android.annotation.CallbackExecutor;
@@ -48,8 +49,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkActivityListener;
-import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -455,7 +454,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_WIFI      = TetheringManager.TETHERING_WIFI;
+    public static final int TETHERING_WIFI      = 0;
 
     /**
      * USB tethering type.
@@ -463,7 +462,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_USB       = TetheringManager.TETHERING_USB;
+    public static final int TETHERING_USB       = 1;
 
     /**
      * Bluetooth tethering type.
@@ -471,7 +470,7 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    public static final int TETHERING_BLUETOOTH = TetheringManager.TETHERING_BLUETOOTH;
+    public static final int TETHERING_BLUETOOTH = 2;
 
     /**
      * Wifi P2p tethering type.
@@ -823,6 +822,7 @@ public class ConnectivityManager {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private final IConnectivityManager mService;
+
     /**
      * A kludge to facilitate static access where a Context pointer isn't available, like in the
      * case of the static set/getProcessDefaultNetwork methods and from the Network class.
@@ -833,7 +833,6 @@ public class ConnectivityManager {
 
     private final Context mContext;
 
-    private INetworkManagementService mNMService;
     private INetworkPolicyManager mNPManager;
     private final TetheringManager mTetheringManager;
 
@@ -1068,109 +1067,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Checks if a VPN app supports always-on mode.
-     *
-     * In order to support the always-on feature, an app has to
-     * <ul>
-     *     <li>target {@link VERSION_CODES#N API 24} or above, and
-     *     <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
-     *         meta-data field.
-     * </ul>
-     *
-     * @param userId The identifier of the user for whom the VPN app is installed.
-     * @param vpnPackage The canonical package name of the VPN app.
-     * @return {@code true} if and only if the VPN app exists and supports always-on mode.
-     * @hide
-     */
-    public boolean isAlwaysOnVpnPackageSupportedForUser(int userId, @Nullable String vpnPackage) {
-        try {
-            return mService.isAlwaysOnVpnPackageSupported(userId, vpnPackage);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Configures an always-on VPN connection through a specific application.
-     * This connection is automatically granted and persisted after a reboot.
-     *
-     * <p>The designated package should declare a {@link VpnService} in its
-     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
-     *    otherwise the call will fail.
-     *
-     * @param userId The identifier of the user to set an always-on VPN for.
-     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
-     *                   to remove an existing always-on VPN configuration.
-     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
-     *        {@code false} otherwise.
-     * @param lockdownAllowlist The list of packages that are allowed to access network directly
-     *         when VPN is in lockdown mode but is not running. Non-existent packages are ignored so
-     *         this method must be called when a package that should be allowed is installed or
-     *         uninstalled.
-     * @return {@code true} if the package is set as always-on VPN controller;
-     *         {@code false} otherwise.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
-    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
-            boolean lockdownEnabled, @Nullable List<String> lockdownAllowlist) {
-        try {
-            return mService.setAlwaysOnVpnPackage(
-                    userId, vpnPackage, lockdownEnabled, lockdownAllowlist);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-   /**
-     * Returns the package name of the currently set always-on VPN application.
-     * If there is no always-on VPN set, or the VPN is provided by the system instead
-     * of by an app, {@code null} will be returned.
-     *
-     * @return Package name of VPN controller responsible for always-on VPN,
-     *         or {@code null} if none is set.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
-    public String getAlwaysOnVpnPackageForUser(int userId) {
-        try {
-            return mService.getAlwaysOnVpnPackage(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @return whether always-on VPN is in lockdown mode.
-     *
-     * @hide
-     **/
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
-    public boolean isVpnLockdownEnabled(int userId) {
-        try {
-            return mService.isVpnLockdownEnabled(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-    }
-
-    /**
-     * @return the list of packages that are allowed to access network when always-on VPN is in
-     * lockdown mode but not connected. Returns {@code null} when VPN lockdown is not active.
-     *
-     * @hide
-     **/
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
-    public List<String> getVpnLockdownWhitelist(int userId) {
-        try {
-            return mService.getVpnLockdownWhitelist(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Adds or removes a requirement for given UID ranges to use the VPN.
      *
      * If set to {@code true}, informs the system that the UIDs in the specified ranges must not
@@ -1214,6 +1110,45 @@ public class ConnectivityManager {
         }
         try {
             mService.setRequireVpnForUids(requireVpn, rangesArray);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Informs ConnectivityService of whether the legacy lockdown VPN, as implemented by
+     * LockdownVpnTracker, is in use. This is deprecated for new devices starting from Android 12
+     * but is still supported for backwards compatibility.
+     * <p>
+     * This type of VPN is assumed always to use the system default network, and must always declare
+     * exactly one underlying network, which is the network that was the default when the VPN
+     * connected.
+     * <p>
+     * Calling this method with {@code true} enables legacy behaviour, specifically:
+     * <ul>
+     *     <li>Any VPN that applies to userId 0 behaves specially with respect to deprecated
+     *     {@link #CONNECTIVITY_ACTION} broadcasts. Any such broadcasts will have the state in the
+     *     {@link #EXTRA_NETWORK_INFO} replaced by state of the VPN network. Also, any time the VPN
+     *     connects, a {@link #CONNECTIVITY_ACTION} broadcast will be sent for the network
+     *     underlying the VPN.</li>
+     *     <li>Deprecated APIs that return {@link NetworkInfo} objects will have their state
+     *     similarly replaced by the VPN network state.</li>
+     *     <li>Information on current network interfaces passed to NetworkStatsService will not
+     *     include any VPN interfaces.</li>
+     * </ul>
+     *
+     * @param enabled whether legacy lockdown VPN is enabled or disabled
+     *
+     * TODO: @SystemApi(client = MODULE_LIBRARIES)
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    public void setLegacyLockdownVpnEnabled(boolean enabled) {
+        try {
+            mService.setLegacyLockdownVpnEnabled(enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1368,7 +1303,7 @@ public class ConnectivityManager {
     public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
         try {
             return mService.getDefaultNetworkCapabilitiesForUser(
-                    userId, mContext.getOpPackageName());
+                    userId, mContext.getOpPackageName(), getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1450,7 +1385,8 @@ public class ConnectivityManager {
     @Nullable
     public NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
         try {
-            return mService.getNetworkCapabilities(network, mContext.getOpPackageName());
+            return mService.getNetworkCapabilities(
+                    network, mContext.getOpPackageName(), getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2142,7 +2078,7 @@ public class ConnectivityManager {
      */
     // TODO: Remove method and replace with direct call once R code is pushed to AOSP
     private @Nullable String getAttributionTag() {
-        return null;
+        return mContext.getAttributionTag();
     }
 
     /**
@@ -2220,17 +2156,6 @@ public class ConnectivityManager {
         void onNetworkActive();
     }
 
-    private INetworkManagementService getNetworkManagementService() {
-        synchronized (this) {
-            if (mNMService != null) {
-                return mNMService;
-            }
-            IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-            mNMService = INetworkManagementService.Stub.asInterface(b);
-            return mNMService;
-        }
-    }
-
     private final ArrayMap<OnNetworkActiveListener, INetworkActivityListener>
             mNetworkActivityListeners = new ArrayMap<>();
 
@@ -2255,7 +2180,7 @@ public class ConnectivityManager {
         };
 
         try {
-            getNetworkManagementService().registerNetworkActivityListener(rl);
+            mService.registerNetworkActivityListener(rl);
             mNetworkActivityListeners.put(l, rl);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2272,7 +2197,7 @@ public class ConnectivityManager {
         INetworkActivityListener rl = mNetworkActivityListeners.get(l);
         Preconditions.checkArgument(rl != null, "Listener was not registered.");
         try {
-            getNetworkManagementService().unregisterNetworkActivityListener(rl);
+            mService.registerNetworkActivityListener(rl);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2288,7 +2213,7 @@ public class ConnectivityManager {
      */
     public boolean isDefaultNetworkActive() {
         try {
-            return getNetworkManagementService().isNetworkActive();
+            return mService.isDefaultNetworkActive();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2808,7 +2733,7 @@ public class ConnectivityManager {
      */
     @SystemApi
     @Deprecated
-    public static final int TETHER_ERROR_NO_ERROR = TetheringManager.TETHER_ERROR_NO_ERROR;
+    public static final int TETHER_ERROR_NO_ERROR = 0;
     /**
      * @deprecated Use {@link TetheringManager#TETHER_ERROR_UNKNOWN_IFACE}.
      * {@hide}
@@ -2884,8 +2809,7 @@ public class ConnectivityManager {
      */
     @SystemApi
     @Deprecated
-    public static final int TETHER_ERROR_PROVISION_FAILED =
-            TetheringManager.TETHER_ERROR_PROVISIONING_FAILED;
+    public static final int TETHER_ERROR_PROVISION_FAILED = 11;
     /**
      * @deprecated Use {@link TetheringManager#TETHER_ERROR_DHCPSERVER_ERROR}.
      * {@hide}
@@ -2899,8 +2823,7 @@ public class ConnectivityManager {
      */
     @SystemApi
     @Deprecated
-    public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN =
-            TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKNOWN;
+    public static final int TETHER_ERROR_ENTITLEMENT_UNKONWN = 13;
 
     /**
      * Get a more detailed error code after a Tethering or Untethering
@@ -3178,23 +3101,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * If the LockdownVpn mechanism is enabled, updates the vpn
-     * with a reload of its profile.
-     *
-     * @return a boolean with {@code} indicating success
-     *
-     * <p>This method can only be called by the system UID
-     * {@hide}
-     */
-    public boolean updateLockdownVpn() {
-        try {
-            return mService.updateLockdownVpn();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Set sign in error notification to visible or invisible
      *
      * @hide
@@ -3226,32 +3132,6 @@ public class ConnectivityManager {
     public void setAirplaneMode(boolean enable) {
         try {
             mService.setAirplaneMode(enable);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} - returns the factory serial number */
-    @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public int registerNetworkFactory(Messenger messenger, String name) {
-        try {
-            return mService.registerNetworkFactory(messenger, name);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public void unregisterNetworkFactory(Messenger messenger) {
-        try {
-            mService.unregisterNetworkFactory(messenger);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3746,7 +3626,8 @@ public class ConnectivityManager {
         printStackTrace();
         checkCallbackNotNull(callback);
         Preconditions.checkArgument(
-                reqType == TRACK_DEFAULT || need != null, "null NetworkCapabilities");
+                reqType == TRACK_DEFAULT || reqType == TRACK_SYSTEM_DEFAULT || need != null,
+                "null NetworkCapabilities");
         final NetworkRequest request;
         final String callingPackageName = mContext.getOpPackageName();
         try {
@@ -3761,7 +3642,8 @@ public class ConnectivityManager {
                 Binder binder = new Binder();
                 if (reqType == LISTEN) {
                     request = mService.listenForNetwork(
-                            need, messenger, binder, callingPackageName);
+                            need, messenger, binder, callingPackageName,
+                            getAttributionTag());
                 } else {
                     request = mService.requestNetwork(
                             need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
@@ -4206,7 +4088,8 @@ public class ConnectivityManager {
         checkPendingIntentNotNull(operation);
         try {
             mService.pendingListenForNetwork(
-                    request.networkCapabilities, operation, mContext.getOpPackageName());
+                    request.networkCapabilities, operation, mContext.getOpPackageName(),
+                    getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -4215,8 +4098,9 @@ public class ConnectivityManager {
     }
 
     /**
-     * Registers to receive notifications about changes in the system default network. The callbacks
-     * will continue to be called until either the application exits or
+     * Registers to receive notifications about changes in the application's default network. This
+     * may be a physical network or a virtual network, such as a VPN that applies to the
+     * application. The callbacks will continue to be called until either the application exits or
      * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
      *
      * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
@@ -4229,7 +4113,7 @@ public class ConnectivityManager {
      * {@link #unregisterNetworkCallback(NetworkCallback)}.
      *
      * @param networkCallback The {@link NetworkCallback} that the system will call as the
-     *                        system default network changes.
+     *                        application's default network changes.
      *                        The callback is invoked on the default internal Handler.
      * @throws RuntimeException if the app already has too many callbacks registered.
      */
@@ -4239,9 +4123,45 @@ public class ConnectivityManager {
     }
 
     /**
+     * Registers to receive notifications about changes in the application's default network. This
+     * may be a physical network or a virtual network, such as a VPN that applies to the
+     * application. The callbacks will continue to be called until either the application exits or
+     * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * all variants of this method, of {@link #requestNetwork} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     * @param networkCallback The {@link NetworkCallback} that the system will call as the
+     *                        application's default network changes.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
+            @NonNull Handler handler) {
+        CallbackHandler cbHandler = new CallbackHandler(handler);
+        sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
+                TRACK_DEFAULT, TYPE_NONE, cbHandler);
+    }
+
+    /**
      * Registers to receive notifications about changes in the system default network. The callbacks
      * will continue to be called until either the application exits or
      * {@link #unregisterNetworkCallback(NetworkCallback)} is called.
+     *
+     * This method should not be used to determine networking state seen by applications, because in
+     * many cases, most or even all application traffic may not use the default network directly,
+     * and traffic from different applications may go on different networks by default. As an
+     * example, if a VPN is connected, traffic from all applications might be sent through the VPN
+     * and not onto the system default network. Applications or system components desiring to do
+     * determine network state as seen by applications should use other methods such as
+     * {@link #registerDefaultNetworkCallback(NetworkCallback, Handler)}.
      *
      * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
      * number of outstanding requests to 100 per app (identified by their UID), shared with
@@ -4256,20 +4176,19 @@ public class ConnectivityManager {
      *                        system default network changes.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      * @throws RuntimeException if the app already has too many callbacks registered.
+     *
+     * @hide
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
-    public void registerDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
+    @SystemApi(client = MODULE_LIBRARIES)
+    @SuppressLint({"ExecutorRegistration", "PairedRegistration"})
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    public void registerSystemDefaultNetworkCallback(@NonNull NetworkCallback networkCallback,
             @NonNull Handler handler) {
-        // This works because if the NetworkCapabilities are null,
-        // ConnectivityService takes them from the default request.
-        //
-        // Since the capabilities are exactly the same as the default request's
-        // capabilities, this request is guaranteed, at all times, to be
-        // satisfied by the same network, if any, that satisfies the default
-        // request, i.e., the system default network.
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
-                TRACK_DEFAULT, TYPE_NONE, cbHandler);
+                TRACK_SYSTEM_DEFAULT, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -4609,7 +4528,7 @@ public class ConnectivityManager {
             // Set HTTP proxy system properties to match network.
             // TODO: Deprecate this static method and replace it with a non-static version.
             try {
-                Proxy.setHttpProxySystemProperty(getInstance().getDefaultProxy());
+                Proxy.setHttpProxyConfiguration(getInstance().getDefaultProxy());
             } catch (SecurityException e) {
                 // The process doesn't have ACCESS_NETWORK_STATE, so we can't fetch the proxy.
                 Log.e(TAG, "Can't set proxy properties", e);
@@ -4836,11 +4755,6 @@ public class ConnectivityManager {
     }
 
     /** @hide */
-    public VpnManager createVpnManager() {
-        return new VpnManager(mContext, mService);
-    }
-
-    /** @hide */
     public ConnectivityDiagnosticsManager createDiagnosticsManager() {
         return new ConnectivityDiagnosticsManager(mContext, mService);
     }
@@ -4869,11 +4783,6 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-    }
-
-    private void setOemNetworkPreference(@NonNull OemNetworkPreferences preference) {
-        Log.d(TAG, "setOemNetworkPreference called with preference: "
-                + preference.toString());
     }
 
     @NonNull
@@ -5076,5 +4985,61 @@ public class ConnectivityManager {
         final NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, 0, BACKGROUND_REQUEST,
                 TYPE_NONE, handler == null ? getDefaultHandler() : new CallbackHandler(handler));
+    }
+
+    /**
+     * Listener for {@link #setOemNetworkPreference(OemNetworkPreferences, Executor,
+     * OnSetOemNetworkPreferenceListener)}.
+     * @hide
+     */
+    @SystemApi
+    public interface OnSetOemNetworkPreferenceListener {
+        /**
+         * Called when setOemNetworkPreference() successfully completes.
+         */
+        void onComplete();
+    }
+
+    /**
+     * Used by automotive devices to set the network preferences used to direct traffic at an
+     * application level as per the given OemNetworkPreferences. An example use-case would be an
+     * automotive OEM wanting to provide connectivity for applications critical to the usage of a
+     * vehicle via a particular network.
+     *
+     * Calling this will overwrite the existing preference.
+     *
+     * @param preference {@link OemNetworkPreferences} The application network preference to be set.
+     * @param executor the executor on which listener will be invoked.
+     * @param listener {@link OnSetOemNetworkPreferenceListener} optional listener used to
+     *                  communicate completion of setOemNetworkPreference(). This will only be
+     *                  called once upon successful completion of setOemNetworkPreference().
+     * @throws IllegalArgumentException if {@code preference} contains invalid preference values.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws UnsupportedOperationException if called on a non-automotive device.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE)
+    public void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference,
+            @Nullable @CallbackExecutor final Executor executor,
+            @Nullable final OnSetOemNetworkPreferenceListener listener) {
+        Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
+        if (null != listener) {
+            Objects.requireNonNull(executor, "Executor must be non-null");
+        }
+        final IOnSetOemNetworkPreferenceListener listenerInternal = listener == null ? null :
+                new IOnSetOemNetworkPreferenceListener.Stub() {
+                    @Override
+                    public void onComplete() {
+                        executor.execute(listener::onComplete);
+                    }
+        };
+
+        try {
+            mService.setOemNetworkPreference(preference, listenerInternal);
+        } catch (RemoteException e) {
+            Log.e(TAG, "setOemNetworkPreference() failed for preference: " + preference.toString());
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

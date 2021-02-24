@@ -122,6 +122,13 @@ import java.util.TreeSet;
 //
 // When ConnectivityService disconnects a network:
 // -----------------------------------------------
+// If a network is just connected, ConnectivityService will think it will be used soon, but might
+// not be used. Thus, a 5s timer will be held to prevent the network being torn down immediately.
+// This "nascent" state is implemented by the "lingering" logic below without relating to any
+// request, and is used in some cases where network requests race with network establishment. The
+// nascent state ends when the 5-second timer fires, or as soon as the network satisfies a
+// request, whichever is earlier. In this state, the network is considered in the background.
+//
 // If a network has no chance of satisfying any requests (even if it were to become validated
 // and enter state #5), ConnectivityService will disconnect the NetworkAgent's AsyncChannel.
 //
@@ -210,23 +217,23 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // network is taken down.  This usually only happens to the default network. Lingering ends with
     // either the linger timeout expiring and the network being taken down, or the network
     // satisfying a request again.
-    public static class LingerTimer implements Comparable<LingerTimer> {
+    public static class InactivityTimer implements Comparable<InactivityTimer> {
         public final int requestId;
         public final long expiryMs;
 
-        public LingerTimer(int requestId, long expiryMs) {
+        public InactivityTimer(int requestId, long expiryMs) {
             this.requestId = requestId;
             this.expiryMs = expiryMs;
         }
         public boolean equals(Object o) {
-            if (!(o instanceof LingerTimer)) return false;
-            LingerTimer other = (LingerTimer) o;
+            if (!(o instanceof InactivityTimer)) return false;
+            InactivityTimer other = (InactivityTimer) o;
             return (requestId == other.requestId) && (expiryMs == other.expiryMs);
         }
         public int hashCode() {
             return Objects.hash(requestId, expiryMs);
         }
-        public int compareTo(LingerTimer other) {
+        public int compareTo(InactivityTimer other) {
             return (expiryMs != other.expiryMs) ?
                     Long.compare(expiryMs, other.expiryMs) :
                     Integer.compare(requestId, other.requestId);
@@ -269,30 +276,32 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      */
     public static final int ARG_AGENT_SUCCESS = 1;
 
-    // All linger timers for this network, sorted by expiry time. A linger timer is added whenever
+    // All inactivity timers for this network, sorted by expiry time. A timer is added whenever
     // a request is moved to a network with a better score, regardless of whether the network is or
-    // was lingering or not.
+    // was lingering or not. An inactivity timer is also added when a network connects
+    // without immediately satisfying any requests.
     // TODO: determine if we can replace this with a smaller or unsorted data structure. (e.g.,
     // SparseLongArray) combined with the timestamp of when the last timer is scheduled to fire.
-    private final SortedSet<LingerTimer> mLingerTimers = new TreeSet<>();
+    private final SortedSet<InactivityTimer> mInactivityTimers = new TreeSet<>();
 
-    // For fast lookups. Indexes into mLingerTimers by request ID.
-    private final SparseArray<LingerTimer> mLingerTimerForRequest = new SparseArray<>();
+    // For fast lookups. Indexes into mInactivityTimers by request ID.
+    private final SparseArray<InactivityTimer> mInactivityTimerForRequest = new SparseArray<>();
 
-    // Linger expiry timer. Armed whenever mLingerTimers is non-empty, regardless of whether the
-    // network is lingering or not. Always set to the expiry of the LingerTimer that expires last.
-    // When the timer fires, all linger state is cleared, and if the network has no requests, it is
-    // torn down.
-    private WakeupMessage mLingerMessage;
+    // Inactivity expiry timer. Armed whenever mInactivityTimers is non-empty, regardless of
+    // whether the network is inactive or not. Always set to the expiry of the mInactivityTimers
+    // that expires last. When the timer fires, all inactivity state is cleared, and if the network
+    // has no requests, it is torn down.
+    private WakeupMessage mInactivityMessage;
 
-    // Linger expiry. Holds the expiry time of the linger timer, or 0 if the timer is not armed.
-    private long mLingerExpiryMs;
+    // Inactivity expiry. Holds the expiry time of the inactivity timer, or 0 if the timer is not
+    // armed.
+    private long mInactivityExpiryMs;
 
-    // Whether the network is lingering or not. Must be maintained separately from the above because
+    // Whether the network is inactive or not. Must be maintained separately from the above because
     // it depends on the state of other networks and requests, which only ConnectivityService knows.
     // (Example: we don't linger a network if it would become the best for a NetworkRequest if it
     // validated).
-    private boolean mLingering;
+    private boolean mInactive;
 
     // This represents the quality of the network with no clear scale.
     private int mScore;
@@ -708,8 +717,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 mNumBackgroundNetworkRequests += delta;
                 break;
 
-            case TRACK_DEFAULT:
             case LISTEN:
+            case TRACK_DEFAULT:
+            case TRACK_SYSTEM_DEFAULT:
                 break;
 
             case NONE:
@@ -889,26 +899,31 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                     ? networkAgentConfig.subscriberId : null;
             return new NetworkState(new NetworkInfo(networkInfo),
                     new LinkProperties(linkProperties),
-                    new NetworkCapabilities(networkCapabilities), network, subscriberId, null);
+                    new NetworkCapabilities(networkCapabilities), network, subscriberId);
         }
     }
 
     /**
      * Sets the specified requestId to linger on this network for the specified time. Called by
-     * ConnectivityService when the request is moved to another network with a higher score.
+     * ConnectivityService when the request is moved to another network with a higher score, or
+     * when a network is newly created.
+     *
+     * @param requestId The requestId of the request that no longer need to be served by this
+     *                  network. Or {@link NetworkRequest.REQUEST_ID_NONE} if this is the
+     *                  {@code LingerTimer} for a newly created network.
      */
     public void lingerRequest(int requestId, long now, long duration) {
-        if (mLingerTimerForRequest.get(requestId) != null) {
+        if (mInactivityTimerForRequest.get(requestId) != null) {
             // Cannot happen. Once a request is lingering on a particular network, we cannot
             // re-linger it unless that network becomes the best for that request again, in which
             // case we should have unlingered it.
             Log.wtf(TAG, toShortString() + ": request " + requestId + " already lingered");
         }
         final long expiryMs = now + duration;
-        LingerTimer timer = new LingerTimer(requestId, expiryMs);
-        if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + toShortString());
-        mLingerTimers.add(timer);
-        mLingerTimerForRequest.put(requestId, timer);
+        InactivityTimer timer = new InactivityTimer(requestId, expiryMs);
+        if (VDBG) Log.d(TAG, "Adding InactivityTimer " + timer + " to " + toShortString());
+        mInactivityTimers.add(timer);
+        mInactivityTimerForRequest.put(requestId, timer);
     }
 
     /**
@@ -916,23 +931,25 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * Returns true if the given requestId was lingering on this network, false otherwise.
      */
     public boolean unlingerRequest(int requestId) {
-        LingerTimer timer = mLingerTimerForRequest.get(requestId);
+        InactivityTimer timer = mInactivityTimerForRequest.get(requestId);
         if (timer != null) {
-            if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + toShortString());
-            mLingerTimers.remove(timer);
-            mLingerTimerForRequest.remove(requestId);
+            if (VDBG) {
+                Log.d(TAG, "Removing InactivityTimer " + timer + " from " + toShortString());
+            }
+            mInactivityTimers.remove(timer);
+            mInactivityTimerForRequest.remove(requestId);
             return true;
         }
         return false;
     }
 
-    public long getLingerExpiry() {
-        return mLingerExpiryMs;
+    public long getInactivityExpiry() {
+        return mInactivityExpiryMs;
     }
 
-    public void updateLingerTimer() {
-        long newExpiry = mLingerTimers.isEmpty() ? 0 : mLingerTimers.last().expiryMs;
-        if (newExpiry == mLingerExpiryMs) return;
+    public void updateInactivityTimer() {
+        long newExpiry = mInactivityTimers.isEmpty() ? 0 : mInactivityTimers.last().expiryMs;
+        if (newExpiry == mInactivityExpiryMs) return;
 
         // Even if we're going to reschedule the timer, cancel it first. This is because the
         // semantics of WakeupMessage guarantee that if cancel is called then the alarm will
@@ -940,49 +957,65 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // WakeupMessage makes no such guarantees about rescheduling a message, so if mLingerMessage
         // has already been dispatched, rescheduling to some time in the future won't stop it
         // from calling its callback immediately.
-        if (mLingerMessage != null) {
-            mLingerMessage.cancel();
-            mLingerMessage = null;
+        if (mInactivityMessage != null) {
+            mInactivityMessage.cancel();
+            mInactivityMessage = null;
         }
 
         if (newExpiry > 0) {
-            mLingerMessage = new WakeupMessage(
+            mInactivityMessage = new WakeupMessage(
                     mContext, mHandler,
                     "NETWORK_LINGER_COMPLETE." + network.getNetId() /* cmdName */,
                     EVENT_NETWORK_LINGER_COMPLETE /* cmd */,
                     0 /* arg1 (unused) */, 0 /* arg2 (unused) */,
                     this /* obj (NetworkAgentInfo) */);
-            mLingerMessage.schedule(newExpiry);
+            mInactivityMessage.schedule(newExpiry);
         }
 
-        mLingerExpiryMs = newExpiry;
+        mInactivityExpiryMs = newExpiry;
     }
 
-    public void linger() {
-        mLingering = true;
+    public void setInactive() {
+        mInactive = true;
     }
 
-    public void unlinger() {
-        mLingering = false;
+    public void unsetInactive() {
+        mInactive = false;
+    }
+
+    public boolean isInactive() {
+        return mInactive;
     }
 
     public boolean isLingering() {
-        return mLingering;
+        return mInactive && !isNascent();
     }
 
-    public void clearLingerState() {
-        if (mLingerMessage != null) {
-            mLingerMessage.cancel();
-            mLingerMessage = null;
+    /**
+     * Return whether the network is just connected and about to be torn down because of not
+     * satisfying any request.
+     */
+    public boolean isNascent() {
+        return mInactive && mInactivityTimers.size() == 1
+                && mInactivityTimers.first().requestId == NetworkRequest.REQUEST_ID_NONE;
+    }
+
+    public void clearInactivityState() {
+        if (mInactivityMessage != null) {
+            mInactivityMessage.cancel();
+            mInactivityMessage = null;
         }
-        mLingerTimers.clear();
-        mLingerTimerForRequest.clear();
-        updateLingerTimer();  // Sets mLingerExpiryMs, cancels and nulls out mLingerMessage.
-        mLingering = false;
+        mInactivityTimers.clear();
+        mInactivityTimerForRequest.clear();
+        // Sets mInactivityExpiryMs, cancels and nulls out mInactivityMessage.
+        updateInactivityTimer();
+        mInactive = false;
     }
 
-    public void dumpLingerTimers(PrintWriter pw) {
-        for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
+    public void dumpInactivityTimers(PrintWriter pw) {
+        for (InactivityTimer timer : mInactivityTimers) {
+            pw.println(timer);
+        }
     }
 
     /**
@@ -1016,7 +1049,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"
                 + networkInfo.toShortString() + "} "
                 + "  Score{" + getCurrentScore() + "} "
-                + (isLingering() ? " lingering" : "")
+                + (isNascent() ? " nascent" : (isLingering() ? " lingering" : ""))
                 + (everValidated ? " everValidated" : "")
                 + (lastValidated ? " lastValidated" : "")
                 + (partialConnectivity ? " partialConnectivity" : "")
