@@ -1129,6 +1129,21 @@ aidl_interface {
     },
 }
 
+// Build Rust bindings for PermissionController. Needed by keystore2.
+aidl_interface {
+    name: "android.os.permissions_aidl",
+    unstable: true,
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/os/IPermissionController.aidl",
+    ],
+    backend: {
+        rust: {
+            enabled: true,
+        },
+    },
+}
+
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
