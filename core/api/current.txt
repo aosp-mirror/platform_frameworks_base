@@ -5610,7 +5610,6 @@ package android.app {
     field public static final int DEFAULT_LIGHTS = 4; // 0x4
     field public static final int DEFAULT_SOUND = 1; // 0x1
     field public static final int DEFAULT_VIBRATE = 2; // 0x2
-    field public static final String EXTRA_ANSWER_COLOR = "android.answerColor";
     field public static final String EXTRA_ANSWER_INTENT = "android.answerIntent";
     field public static final String EXTRA_AUDIO_CONTENTS_URI = "android.audioContents";
     field public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
@@ -5622,7 +5621,6 @@ package android.app {
     field public static final String EXTRA_COLORIZED = "android.colorized";
     field public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
     field public static final String EXTRA_CONVERSATION_TITLE = "android.conversationTitle";
-    field public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
     field public static final String EXTRA_DECLINE_INTENT = "android.declineIntent";
     field public static final String EXTRA_HANG_UP_INTENT = "android.hangUpIntent";
     field public static final String EXTRA_HISTORIC_MESSAGES = "android.messages.historic";
@@ -5910,8 +5908,6 @@ package android.app {
     method @NonNull public static android.app.Notification.CallStyle forIncomingCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent, @NonNull android.app.PendingIntent);
     method @NonNull public static android.app.Notification.CallStyle forOngoingCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent);
     method @NonNull public static android.app.Notification.CallStyle forScreeningCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent, @NonNull android.app.PendingIntent);
-    method @NonNull public android.app.Notification.CallStyle setAnswerButtonColorHint(@ColorInt int);
-    method @NonNull public android.app.Notification.CallStyle setDeclineButtonColorHint(@ColorInt int);
     method @NonNull public android.app.Notification.CallStyle setVerificationIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.CallStyle setVerificationText(@Nullable CharSequence);
   }
