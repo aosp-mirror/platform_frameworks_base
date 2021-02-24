@@ -16,6 +16,8 @@
 
 package com.android.internal.jank;
 
+import static android.content.Intent.FLAG_RECEIVER_REGISTERED_ONLY;
+
 import static com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
@@ -48,9 +50,12 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
+import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.SparseArray;
@@ -59,6 +64,7 @@ import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
+import com.android.internal.jank.FrameTracker.FrameTrackerListener;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 import com.android.internal.jank.FrameTracker.ViewRootWrapper;
 import com.android.internal.util.PerfettoTrigger;
@@ -74,6 +80,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class InteractionJankMonitor {
     private static final String TAG = InteractionJankMonitor.class.getSimpleName();
+    private static final String ACTION_PREFIX = InteractionJankMonitor.class.getCanonicalName();
+
     private static final String DEFAULT_WORKER_NAME = TAG + "-Worker";
     private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L);
     private static final String SETTINGS_ENABLED_KEY = "enabled";
@@ -89,6 +97,14 @@ public class InteractionJankMonitor {
     /** Default to triggering trace if 3 frames are missed OR a frame takes at least 64ms */
     private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
+
+    public static final String ACTION_SESSION_BEGIN = ACTION_PREFIX + ".ACTION_SESSION_BEGIN";
+    public static final String ACTION_SESSION_END = ACTION_PREFIX + ".ACTION_SESSION_END";
+    public static final String ACTION_METRICS_LOGGED = ACTION_PREFIX + ".ACTION_METRICS_LOGGED";
+    public static final String BUNDLE_KEY_CUJ_NAME = ACTION_PREFIX + ".CUJ_NAME";
+    public static final String BUNDLE_KEY_TIMESTAMP = ACTION_PREFIX + ".TIMESTAMP";
+    @VisibleForTesting
+    public static final String PROP_NOTIFY_CUJ_EVENT = "debug.notify_cuj_events";
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
@@ -256,13 +272,26 @@ public class InteractionJankMonitor {
      */
     @VisibleForTesting
     public FrameTracker createFrameTracker(View v, Session session) {
+        final Context c = v.getContext().getApplicationContext();
         synchronized (this) {
+            boolean needListener = SystemProperties.getBoolean(PROP_NOTIFY_CUJ_EVENT, false);
+            FrameTrackerListener eventsListener =
+                    !needListener ? null : (s, act) -> notifyEvents(c, act, s);
+
             return new FrameTracker(session, mWorker.getThreadHandler(),
                     new ThreadedRendererWrapper(v.getThreadedRenderer()),
                     new ViewRootWrapper(v.getViewRootImpl()), new SurfaceControlWrapper(),
                     new ChoreographerWrapper(Choreographer.getInstance()), mMetrics,
-                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis);
+                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis, eventsListener);
         }
+    }
+
+    private void notifyEvents(Context context, String action, Session session) {
+        Intent intent = new Intent(action);
+        intent.putExtra(BUNDLE_KEY_CUJ_NAME, getNameOfCuj(session.getCuj()));
+        intent.putExtra(BUNDLE_KEY_TIMESTAMP, session.getTimeStamp());
+        intent.addFlags(FLAG_RECEIVER_REGISTERED_ONLY);
+        context.sendBroadcast(intent);
     }
 
     /**
@@ -479,6 +508,7 @@ public class InteractionJankMonitor {
     public static class Session {
         @CujType
         private int mCujType;
+        private long mTimeStamp;
 
         public Session(@CujType int cujType) {
             mCujType = cujType;
@@ -504,6 +534,14 @@ public class InteractionJankMonitor {
 
         public String getName() {
             return "J<" + getNameOfCuj(mCujType) + ">";
+        }
+
+        public void setTimeStamp(long timeStamp) {
+            mTimeStamp = timeStamp;
+        }
+
+        public long getTimeStamp() {
+            return mTimeStamp;
         }
     }
 }
