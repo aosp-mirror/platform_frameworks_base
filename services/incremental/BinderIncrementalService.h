@@ -18,6 +18,7 @@
 
 #include <binder/BinderService.h>
 #include <binder/IServiceManager.h>
+#include <binder/PersistableBundle.h>
 #include <jni.h>
 
 #include "IncrementalService.h"
@@ -97,6 +98,8 @@ public:
             const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
             const ::android::sp<IStorageHealthListener>& healthListener, bool* _aidl_return) final;
     binder::Status unregisterStorageHealthListener(int32_t storageId) final;
+    binder::Status getMetrics(int32_t storageId,
+                              android::os::PersistableBundle* _aidl_return) final;
 
 private:
     android::incremental::IncrementalService mImpl;
