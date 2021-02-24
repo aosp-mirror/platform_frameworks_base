@@ -99,7 +99,7 @@ public class InteractionJankMonitor {
     private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
 
     public static final String ACTION_SESSION_BEGIN = ACTION_PREFIX + ".ACTION_SESSION_BEGIN";
-    public static final String ACTION_SESSION_END = ACTION_PREFIX + ".ACTION_SESSION_END";
+    public static final String ACTION_SESSION_CANCEL = ACTION_PREFIX + ".ACTION_SESSION_CANCEL";
     public static final String ACTION_METRICS_LOGGED = ACTION_PREFIX + ".ACTION_METRICS_LOGGED";
     public static final String BUNDLE_KEY_CUJ_NAME = ACTION_PREFIX + ".CUJ_NAME";
     public static final String BUNDLE_KEY_TIMESTAMP = ACTION_PREFIX + ".TIMESTAMP";
