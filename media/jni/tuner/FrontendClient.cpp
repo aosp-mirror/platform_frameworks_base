@@ -588,14 +588,15 @@ vector<FrontendStatusExt1_1> FrontendClient::getHidlStatusExt(
                 break;
             }
             case TunerFrontendStatus::codeRates: {
-                int size = s.get<TunerFrontendStatus::codeRates>().size();
-                status.codeRates().resize(size);
-                for (int i = 0; i < size; i++) {
-                    auto aidlCodeRate = s.get<TunerFrontendStatus::codeRates>()[i];
-                    status.codeRates()[i] =
-                            static_cast<hardware::tv::tuner::V1_1::FrontendInnerFec>(aidlCodeRate);
+                vector<hardware::tv::tuner::V1_1::FrontendInnerFec> codeRates;
+                for (auto aidlCodeRate : s.get<TunerFrontendStatus::codeRates>()) {
+                    codeRates.push_back(
+                            static_cast<hardware::tv::tuner::V1_1::FrontendInnerFec>(aidlCodeRate));
                 }
-                hidlStatus.push_back(status);
+                if (codeRates.size() > 0) {
+                    status.codeRates(codeRates);
+                    hidlStatus.push_back(status);
+                }
                 break;
             }
             case TunerFrontendStatus::bandwidth: {
