@@ -278,13 +278,12 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * TODO(b/178525735): This documentation is incorrect in the context of UX changes.
-     * Change whether the given {@param packageName} is allowed to automatically open verified
-     * HTTP/HTTPS domains. The final state is determined along with the verification status for the
-     * specific domain being opened and other system state. An app with this enabled is not
-     * guaranteed to be the sole link handler for its domains.
-     *
-     * By default, all apps are allowed to open verified links. Users must disable them explicitly.
+     * Change whether the given packageName is allowed to handle BROWSABLE and DEFAULT category web
+     * (HTTP/HTTPS) {@link Intent} Activity open requests. The final state is determined along with
+     * the verification status for the specific domain being opened and other system state. An app
+     * with this enabled is not guaranteed to be the sole link handler for its domains.
+     * <p>
+     * By default, all apps are allowed to open links. Users must disable them explicitly.
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION)
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
