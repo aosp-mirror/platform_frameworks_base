@@ -23,11 +23,7 @@
     android:clipChildren="false"
     >
 
-    <include
-        layout="@layout/notification_template_header"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_header_big_height"
-        />
+    <include layout="@layout/notification_template_header" />
 
     <include layout="@layout/notification_template_right_icon" />
 

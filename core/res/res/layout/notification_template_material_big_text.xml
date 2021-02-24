@@ -23,11 +23,7 @@
     android:tag="bigText"
     >
 
-    <include
-        layout="@layout/notification_template_header"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_header_big_height"
-        />
+    <include layout="@layout/notification_template_header" />
 
     <com.android.internal.widget.RemeasuringLinearLayout
         android:id="@+id/notification_action_list_margin_target"
