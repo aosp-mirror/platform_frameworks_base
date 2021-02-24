@@ -30,8 +30,6 @@ import java.util.List;
 /**
  * Encapsulates a request to index documents into an {@link AppSearchSession} database.
  *
- * <p>@see AppSearchSession#putDocuments
- *
  * @see AppSearchSession#put
  */
 public final class PutDocumentsRequest {

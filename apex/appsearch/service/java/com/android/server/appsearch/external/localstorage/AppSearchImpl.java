@@ -654,6 +654,35 @@ public final class AppSearchImpl implements Closeable {
         }
     }
 
+    /**
+     * Returns a mapping of package names to all the databases owned by that package.
+     *
+     * <p>This method is inefficient to call repeatedly.
+     */
+    @NonNull
+    public Map<String, Set<String>> getPackageToDatabases() {
+        mReadWriteLock.readLock().lock();
+        try {
+            Map<String, Set<String>> packageToDatabases = new ArrayMap<>();
+            for (String prefix : mSchemaMapLocked.keySet()) {
+                String packageName = getPackageName(prefix);
+
+                Set<String> databases = packageToDatabases.get(packageName);
+                if (databases == null) {
+                    databases = new ArraySet<>();
+                    packageToDatabases.put(packageName, databases);
+                }
+
+                String databaseName = getDatabaseName(prefix);
+                databases.add(databaseName);
+            }
+
+            return packageToDatabases;
+        } finally {
+            mReadWriteLock.readLock().unlock();
+        }
+    }
+
     @GuardedBy("mReadWriteLock")
     private SearchResultPage doQueryLocked(
             @NonNull Set<String> prefixes,
@@ -1211,26 +1240,8 @@ public final class AppSearchImpl implements Closeable {
         return schemaProto.getSchema();
     }
 
-    /**
-     * Returns true if the {@code packageName} and {@code databaseName} has the {@code schemaType}
-     */
-    @GuardedBy("mReadWriteLock")
-    boolean hasSchemaTypeLocked(
-            @NonNull String packageName, @NonNull String databaseName, @NonNull String schemaType) {
-        Preconditions.checkNotNull(packageName);
-        Preconditions.checkNotNull(databaseName);
-        Preconditions.checkNotNull(schemaType);
-
-        String prefix = createPrefix(packageName, databaseName);
-        Set<String> schemaTypes = mSchemaMapLocked.get(prefix);
-        if (schemaTypes == null) {
-            return false;
-        }
-
-        return schemaTypes.contains(prefix + schemaType);
-    }
-
     /** Returns a set of all prefixes AppSearchImpl knows about. */
+    // TODO(b/180058203): Remove this method once platform has switched away from using this method.
     @GuardedBy("mReadWriteLock")
     @NonNull
     Set<String> getPrefixesLocked() {
