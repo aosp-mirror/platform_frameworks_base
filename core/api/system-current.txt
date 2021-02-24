@@ -596,7 +596,7 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOps(@NonNull String);
+    method @Nullable public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOps(@Nullable String);
     method @NonNull public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOpsAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getAttributedOpsCount();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
@@ -2217,6 +2217,14 @@ package android.content {
     method @NonNull public java.io.File getDeviceProtectedDataDirForUser(@NonNull android.os.UserHandle);
   }
 
+  public final class AttributionSource implements android.os.Parcelable {
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
+  }
+
+  public static final class AttributionSource.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.AttributionSource.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
+  }
+
   public abstract class BroadcastReceiver {
     method @NonNull public final android.os.UserHandle getSendingUser();
   }
@@ -2291,11 +2299,11 @@ package android.content {
   }
 
   public final class ContextParams {
-    method @Nullable @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public java.util.Set<java.lang.String> getRenouncedPermissions();
   }
 
   public static final class ContextParams.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@Nullable java.util.Set<java.lang.String>);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RENOUNCE_PERMISSIONS) public android.content.ContextParams.Builder setRenouncedPermissions(@NonNull java.util.Set<java.lang.String>);
   }
 
   public class ContextWrapper extends android.content.Context {

@@ -16,11 +16,16 @@
 
 package android.speech;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
+import android.app.AppOpsManager;
 import android.app.Service;
+import android.content.Context;
+import android.content.ContextParams;
 import android.content.Intent;
 import android.content.PermissionChecker;
 import android.os.Binder;
@@ -28,13 +33,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.content.AttributionSource;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /**
  * This class provides a base class for recognition service implementations. This class should be
@@ -86,13 +91,13 @@ public abstract class RecognitionService extends Service {
             switch (msg.what) {
                 case MSG_START_LISTENING:
                     StartListeningArgs args = (StartListeningArgs) msg.obj;
-                    dispatchStartListening(args.mIntent, args.mListener, args.mCallingUid);
+                    dispatchStartListening(args.mIntent, args.mListener, args.mAttributionSource);
                     break;
                 case MSG_STOP_LISTENING:
                     dispatchStopListening((IRecognitionListener) msg.obj);
                     break;
                 case MSG_CANCEL:
-                    dispatchCancel((IRecognitionListener) msg.obj);
+                    dispatchCancel((IRecognitionListener) msg.obj, msg.arg1 == 1);
                     break;
                 case MSG_RESET:
                     dispatchClearCallback();
@@ -102,10 +107,11 @@ public abstract class RecognitionService extends Service {
     };
 
     private void dispatchStartListening(Intent intent, final IRecognitionListener listener,
-            int callingUid) {
+            @NonNull AttributionSource attributionSource) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "created new mCurrentCallback, listener = " + listener.asBinder());
-            mCurrentCallback = new Callback(listener, callingUid);
+            mCurrentCallback = new Callback(listener, attributionSource);
+
             RecognitionService.this.onStartListening(intent, mCurrentCallback);
         } else {
             try {
@@ -133,13 +139,16 @@ public abstract class RecognitionService extends Service {
         }
     }
 
-    private void dispatchCancel(IRecognitionListener listener) {
+    private void dispatchCancel(IRecognitionListener listener, boolean shutDown) {
         if (mCurrentCallback == null) {
             if (DBG) Log.d(TAG, "cancel called with no preceding startListening - ignoring");
         } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
             Log.w(TAG, "cancel called by client who did not call startListening - ignoring");
         } else { // the correct state
             RecognitionService.this.onCancel(mCurrentCallback);
+            if (shutDown) {
+                mCurrentCallback.finishRecordAudioOpAttributionToCallerIfNeeded();
+            }
             mCurrentCallback = null;
             if (DBG) Log.d(TAG, "canceling - setting mCurrentCallback to null");
         }
@@ -153,12 +162,13 @@ public abstract class RecognitionService extends Service {
         public final Intent mIntent;
 
         public final IRecognitionListener mListener;
-        public final int mCallingUid;
+        public final @NonNull AttributionSource mAttributionSource;
 
-        public StartListeningArgs(Intent intent, IRecognitionListener listener, int callingUid) {
+        public StartListeningArgs(Intent intent, IRecognitionListener listener,
+                @NonNull AttributionSource attributionSource) {
             this.mIntent = intent;
             this.mListener = listener;
-            this.mCallingUid = callingUid;
+            this.mAttributionSource = attributionSource;
         }
     }
 
@@ -247,18 +257,19 @@ public abstract class RecognitionService extends Service {
      */
     public class Callback {
         private final IRecognitionListener mListener;
-        private final int mCallingUid;
+        private final @NonNull AttributionSource mCallingAttributionSource;
+        private @Nullable Context mAttributionContext;
 
-        private Callback(IRecognitionListener listener, int callingUid) {
+        private Callback(IRecognitionListener listener,
+                @NonNull AttributionSource attributionSource) {
             mListener = listener;
-            mCallingUid = callingUid;
+            mCallingAttributionSource = attributionSource;
         }
 
         /**
          * The service should call this method when the user has started to speak.
          */
         public void beginningOfSpeech() throws RemoteException {
-            if (DBG) Log.d(TAG, "beginningOfSpeech");
             mListener.onBeginningOfSpeech();
         }
 
@@ -270,6 +281,7 @@ public abstract class RecognitionService extends Service {
          *        single channel audio stream. The sample rate is implementation dependent.
          */
         public void bufferReceived(byte[] buffer) throws RemoteException {
+            startRecordAudioOpAttributionToCallerIfNeeded();
             mListener.onBufferReceived(buffer);
         }
 
@@ -302,6 +314,7 @@ public abstract class RecognitionService extends Service {
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void partialResults(Bundle partialResults) throws RemoteException {
+            startRecordAudioOpAttributionToCallerIfNeeded();
             mListener.onPartialResults(partialResults);
         }
 
@@ -323,6 +336,7 @@ public abstract class RecognitionService extends Service {
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void results(Bundle results) throws RemoteException {
+            startRecordAudioOpAttributionToCallerIfNeeded();
             Message.obtain(mHandler, MSG_RESET).sendToTarget();
             mListener.onResults(results);
         }
@@ -342,7 +356,65 @@ public abstract class RecognitionService extends Service {
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */
         public int getCallingUid() {
-            return mCallingUid;
+            return mCallingAttributionSource.getUid();
+        }
+
+        /**
+         * Gets the permission identity of the calling app. If you want to attribute
+         * the mic access to the calling app you can create an attribution context
+         * via {@link android.content.Context#createContext(android.content.ContextParams)}
+         * and passing this identity to {@link
+         * android.content.ContextParams.Builder#setNextAttributionSource(AttributionSource)}.
+         *
+         *
+         *
+         *
+         * @return The permission identity of the calling app.
+         *
+         * @see android.content.ContextParams.Builder#setNextAttributionSource(
+         * AttributionSource)
+         */
+        @SuppressLint("CallbackMethodName")
+        public @NonNull AttributionSource getCallingAttributionSource() {
+            return mCallingAttributionSource;
+        }
+
+        private void startRecordAudioOpAttributionToCallerIfNeeded() throws RemoteException {
+            if (!isProxyingRecordAudioToCaller()) {
+                final int result = PermissionChecker.checkPermissionAndStartDataDelivery(
+                        RecognitionService.this, Manifest.permission.RECORD_AUDIO,
+                        getAttributionContextForCaller().getAttributionSource(),
+                        /*message*/ null);
+                if (result == PermissionChecker.PERMISSION_GRANTED) {
+                    return;
+                }
+                error(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
+            }
+        }
+
+        private @NonNull Context getAttributionContextForCaller() {
+            if (mAttributionContext == null) {
+                mAttributionContext = createContext(new ContextParams.Builder()
+                        .setNextAttributionSource(mCallingAttributionSource)
+                        .build());
+            }
+            return mAttributionContext;
+        }
+
+        void finishRecordAudioOpAttributionToCallerIfNeeded() {
+            if (isProxyingRecordAudioToCaller()) {
+                final String op = AppOpsManager.permissionToOp(Manifest.permission.RECORD_AUDIO);
+                PermissionChecker.finishDataDelivery(RecognitionService.this,
+                        op, getAttributionContextForCaller().getAttributionSource());
+            }
+        }
+
+        private boolean isProxyingRecordAudioToCaller() {
+            final int op = AppOpsManager.permissionToOpCode(Manifest.permission.RECORD_AUDIO);
+            final AppOpsManager appOpsManager = getSystemService(AppOpsManager.class);
+            return appOpsManager.isProxying(op, getAttributionTag(),
+                    mCallingAttributionSource.getUid(),
+                    mCallingAttributionSource.getPackageName());
         }
     }
 
@@ -356,44 +428,35 @@ public abstract class RecognitionService extends Service {
 
         @Override
         public void startListening(Intent recognizerIntent, IRecognitionListener listener,
-                String packageName, String featureId, int callingUid) {
-            Preconditions.checkNotNull(packageName);
-
+                @NonNull AttributionSource attributionSource) {
+            Objects.requireNonNull(attributionSource);
+            attributionSource.enforceCallingUid();
             if (DBG) Log.d(TAG, "startListening called by:" + listener.asBinder());
             final RecognitionService service = mServiceRef.get();
-            if (service != null && service.checkPermissions(listener, true /*forDataDelivery*/,
-                    packageName, featureId)) {
+            if (service != null) {
                 service.mHandler.sendMessage(Message.obtain(service.mHandler,
                         MSG_START_LISTENING, service.new StartListeningArgs(
-                                recognizerIntent, listener, callingUid)));
+                                recognizerIntent, listener, attributionSource)));
             }
         }
 
         @Override
-        public void stopListening(IRecognitionListener listener, String packageName,
-                String featureId) {
-            Preconditions.checkNotNull(packageName);
-
+        public void stopListening(IRecognitionListener listener) {
             if (DBG) Log.d(TAG, "stopListening called by:" + listener.asBinder());
             final RecognitionService service = mServiceRef.get();
-            if (service != null && service.checkPermissions(listener, false /*forDataDelivery*/,
-                    packageName, featureId)) {
+            if (service != null) {
                 service.mHandler.sendMessage(Message.obtain(service.mHandler,
                         MSG_STOP_LISTENING, listener));
             }
         }
 
         @Override
-        public void cancel(IRecognitionListener listener, String packageName,
-                String featureId, boolean isShutdown) {
-            Preconditions.checkNotNull(packageName);
-
+        public void cancel(IRecognitionListener listener, boolean isShutdown) {
             if (DBG) Log.d(TAG, "cancel called by:" + listener.asBinder());
             final RecognitionService service = mServiceRef.get();
-            if (service != null && service.checkPermissions(listener, false /*forDataDelivery*/,
-                    packageName, featureId)) {
+            if (service != null) {
                 service.mHandler.sendMessage(Message.obtain(service.mHandler,
-                        MSG_CANCEL, listener));
+                        MSG_CANCEL, isShutdown ? 1 : 0, 0, listener));
             }
         }
 
