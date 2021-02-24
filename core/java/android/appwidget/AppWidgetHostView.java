@@ -40,6 +40,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -92,7 +93,10 @@ public class AppWidgetHostView extends FrameLayout {
     int mLayoutId = -1;
     private InteractionHandler mInteractionHandler;
     private boolean mOnLightBackground;
-    PointF mCurrentSize = null;
+    private PointF mCurrentSize = null;
+    private RemoteViews.ColorResources mColorResources = null;
+    // Stores the last remote views last inflated.
+    private RemoteViews mLastInflatedRemoteViews = null;
 
     private Executor mAsyncExecutor;
     private CancellationSignal mLastExecutionSignal;
@@ -358,7 +362,7 @@ public class AppWidgetHostView extends FrameLayout {
         PointF newSize = new PointF(size.x - xPaddingDips, size.y - yPaddingDips);
         if (!newSize.equals(mCurrentSize)) {
             mCurrentSize = newSize;
-            mLayoutId = -1; // Prevents recycling the view.
+            reapplyLastRemoteViews();
         }
     }
 
@@ -368,7 +372,7 @@ public class AppWidgetHostView extends FrameLayout {
     public void clearCurrentSize() {
         if (mCurrentSize != null) {
             mCurrentSize = null;
-            mLayoutId = -1;
+            reapplyLastRemoteViews();
         }
     }
 
@@ -477,7 +481,15 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
+        this.mLastInflatedRemoteViews = remoteViews;
         applyRemoteViews(remoteViews, true);
+    }
+
+    /**
+     * Reapply the last inflated remote views, or the default view is none was inflated.
+     */
+    private void reapplyLastRemoteViews() {
+        applyRemoteViews(mLastInflatedRemoteViews, true);
     }
 
     /**
@@ -518,7 +530,8 @@ public class AppWidgetHostView extends FrameLayout {
             // layout matches, try recycling it
             if (content == null && layoutId == mLayoutId) {
                 try {
-                    remoteViews.reapply(mContext, mView, mInteractionHandler);
+                    remoteViews.reapply(mContext, mView, mInteractionHandler, mCurrentSize,
+                            mColorResources);
                     content = mView;
                     recycled = true;
                     if (LOGD) Log.d(TAG, "was able to recycle existing layout");
@@ -530,7 +543,8 @@ public class AppWidgetHostView extends FrameLayout {
             // Try normal RemoteView inflation
             if (content == null) {
                 try {
-                    content = remoteViews.apply(mContext, this, mInteractionHandler, mCurrentSize);
+                    content = remoteViews.apply(mContext, this, mInteractionHandler,
+                            mCurrentSize, mColorResources);
                     if (LOGD) Log.d(TAG, "had to inflate new layout");
                 } catch (RuntimeException e) {
                     exception = e;
@@ -583,7 +597,8 @@ public class AppWidgetHostView extends FrameLayout {
                         mAsyncExecutor,
                         new ViewApplyListener(remoteViews, layoutId, true),
                         mInteractionHandler,
-                        mCurrentSize);
+                        mCurrentSize,
+                        mColorResources);
             } catch (Exception e) {
                 // Reapply failed. Try apply
             }
@@ -594,7 +609,8 @@ public class AppWidgetHostView extends FrameLayout {
                     mAsyncExecutor,
                     new ViewApplyListener(remoteViews, layoutId, false),
                     mInteractionHandler,
-                    mCurrentSize);
+                    mCurrentSize,
+                    mColorResources);
         }
     }
 
@@ -662,9 +678,13 @@ public class AppWidgetHostView extends FrameLayout {
     protected Context getRemoteContext() {
         try {
             // Return if cloned successfully, otherwise default
-            return mContext.createApplicationContext(
+            Context newContext = mContext.createApplicationContext(
                     mInfo.providerInfo.applicationInfo,
                     Context.CONTEXT_RESTRICTED);
+            if (mColorResources != null) {
+                mColorResources.apply(newContext);
+            }
+            return newContext;
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Package name " +  mInfo.providerInfo.packageName + " not found");
             return mContext;
@@ -818,5 +838,38 @@ public class AppWidgetHostView extends FrameLayout {
                         response.getLaunchOptions(view));
             }
         };
+    }
+
+    /**
+     * Set the dynamically overloaded color resources.
+     *
+     * {@code colorMapping} maps a predefined set of color resources to their ARGB
+     * representation. Any entry not in the predefined set of colors will be ignored.
+     *
+     * Calling this method will trigger a full re-inflation of the App Widget.
+     *
+     * The color resources that can be overloaded are the ones whose name is prefixed with
+     * {@code system_primary_}, {@code system_secondary_} or {@code system_neutral_}, for example
+     * {@link android.R.color#system_primary_500}.
+     */
+    public void setColorResources(@NonNull SparseIntArray colorMapping) {
+        mColorResources = RemoteViews.ColorResources.create(mContext, colorMapping);
+        mLayoutId = -1;
+        reapplyLastRemoteViews();
+    }
+
+    /**
+     * Reset the dynamically overloaded resources, reverting to the default values for
+     * all the colors.
+     *
+     * If colors were defined before, calling this method will trigger a full re-inflation of the
+     * App Widget.
+     */
+    public void resetColorResources() {
+        if (mColorResources != null) {
+            mColorResources = null;
+            mLayoutId = -1;
+            reapplyLastRemoteViews();
+        }
     }
 }
