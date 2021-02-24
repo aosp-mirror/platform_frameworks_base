@@ -278,6 +278,7 @@ public class ScrollCaptureClient {
                 mStarted = true;
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to start", e);
+                mReader.close();
             }
         }
 
@@ -327,6 +328,7 @@ public class ScrollCaptureClient {
             }
             if (mStarted) {
                 mShutdownListener = listener;
+                mReader.close();
                 try {
                     // listener called from onConnectionClosed callback
                     mConnection.endCapture();
