@@ -425,7 +425,7 @@ public final class NativeTombstoneManager {
                                 }
                             }
                             stream.end(token);
-
+                            break;
 
                         case (int) Tombstone.SELINUX_LABEL:
                             selinuxLabel = stream.readString(Tombstone.SELINUX_LABEL);
