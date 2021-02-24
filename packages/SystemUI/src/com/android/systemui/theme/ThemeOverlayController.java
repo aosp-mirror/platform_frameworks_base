@@ -86,7 +86,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
 
     protected static final int PRIMARY = 0;
     protected static final int SECONDARY = 1;
-    protected static final int NEUTRAL = 1;
+    protected static final int NEUTRAL = 2;
 
     // If lock screen wallpaper colors should also be considered when selecting the theme.
     // Doing this has performance impact, given that overlays would need to be swapped when
