@@ -4403,6 +4403,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
             final String packageName = dumpState.getTargetPackageName();
+            final boolean checkin = dumpState.isCheckIn();
 
             switch (type) {
                 case DumpState.DUMP_VERSION:
@@ -4412,6 +4413,56 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     pw.println("Database versions:");
                     mSettings.dumpVersionLPr(new IndentingPrintWriter(pw, "  "));
+                    break;
+                }
+
+                case DumpState.DUMP_LIBS:
+                {
+                    boolean printedHeader = false;
+                    final int numSharedLibraries = mSharedLibraries.size();
+                    for (int index = 0; index < numSharedLibraries; index++) {
+                        final String libName = mSharedLibraries.keyAt(index);
+                        final WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
+                                mSharedLibraries.get(libName);
+                        if (versionedLib == null) {
+                            continue;
+                        }
+                        final int versionCount = versionedLib.size();
+                        for (int i = 0; i < versionCount; i++) {
+                            SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
+                            if (!checkin) {
+                                if (!printedHeader) {
+                                    if (dumpState.onTitlePrinted()) {
+                                        pw.println();
+                                    }
+                                    pw.println("Libraries:");
+                                    printedHeader = true;
+                                }
+                                pw.print("  ");
+                            } else {
+                                pw.print("lib,");
+                            }
+                            pw.print(libraryInfo.getName());
+                            if (libraryInfo.isStatic()) {
+                                pw.print(" version=" + libraryInfo.getLongVersion());
+                            }
+                            if (!checkin) {
+                                pw.print(" -> ");
+                            }
+                            if (libraryInfo.getPath() != null) {
+                                if (libraryInfo.isNative()) {
+                                    pw.print(" (so) ");
+                                } else {
+                                    pw.print(" (jar) ");
+                                }
+                                pw.print(libraryInfo.getPath());
+                            } else {
+                                pw.print(" (apk) ");
+                                pw.print(libraryInfo.getPackageName());
+                            }
+                            pw.println();
+                        }
+                    }
                     break;
                 }
 
@@ -23699,8 +23750,6 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         DumpState dumpState = new DumpState();
-        boolean checkin = false;
-
         ArraySet<String> permissionNames = null;
 
         int opti = 0;
@@ -23750,7 +23799,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
-                checkin = true;
+                dumpState.setCheckIn(true);
             } else if ("--all-components".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_DUMP_ALL_COMPONENTS);
             } else if ("-f".equals(opt)) {
@@ -23904,6 +23953,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final String packageName = dumpState.getTargetPackageName();
+        final boolean checkin = dumpState.isCheckIn();
         if (checkin) {
             pw.println("vers,1");
         }
@@ -23992,11 +24042,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
-            // TODO: Move it to ComputerEngine once LongSparseArray<SharedLibraryInfo> is copied
-            //  in snapshot.
-            synchronized (mLock) {
-                dumpSharedLibrariesLPr(pw, dumpState, checkin);
-            }
+            dump(DumpState.DUMP_LIBS, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
@@ -24333,53 +24379,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             libraryInfo.getPackageName());
                 }
                 proto.end(sharedLibraryToken);
-            }
-        }
-    }
-
-    private void dumpSharedLibrariesLPr(PrintWriter pw, DumpState dumpState, boolean checkin) {
-        boolean printedHeader = false;
-        final int numSharedLibraries = mSharedLibraries.size();
-        for (int index = 0; index < numSharedLibraries; index++) {
-            final String libName = mSharedLibraries.keyAt(index);
-            WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
-            if (versionedLib == null) {
-                continue;
-            }
-            final int versionCount = versionedLib.size();
-            for (int i = 0; i < versionCount; i++) {
-                SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
-                if (!checkin) {
-                    if (!printedHeader) {
-                        if (dumpState.onTitlePrinted()) {
-                            pw.println();
-                        }
-                        pw.println("Libraries:");
-                        printedHeader = true;
-                    }
-                    pw.print("  ");
-                } else {
-                    pw.print("lib,");
-                }
-                pw.print(libraryInfo.getName());
-                if (libraryInfo.isStatic()) {
-                    pw.print(" version=" + libraryInfo.getLongVersion());
-                }
-                if (!checkin) {
-                    pw.print(" -> ");
-                }
-                if (libraryInfo.getPath() != null) {
-                    if (libraryInfo.isNative()) {
-                        pw.print(" (so) ");
-                    } else {
-                        pw.print(" (jar) ");
-                    }
-                    pw.print(libraryInfo.getPath());
-                } else {
-                    pw.print(" (apk) ");
-                    pw.print(libraryInfo.getPackageName());
-                }
-                pw.println();
             }
         }
     }
