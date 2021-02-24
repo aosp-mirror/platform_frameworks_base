@@ -1371,6 +1371,18 @@ public class Notification implements Parcelable
     public static final String EXTRA_HANG_UP_INTENT = "android.hangUpIntent";
 
     /**
+     * {@link #extras} key: the color used as a hint for the Answer action button of a
+     * {@link android.app.Notification.CallStyle} notification. This extra is a {@link ColorInt}.
+     */
+    public static final String EXTRA_ANSWER_COLOR = "android.answerColor";
+
+    /**
+     * {@link #extras} key: the color used as a hint for the Decline or Hang Up action button of a
+     * {@link android.app.Notification.CallStyle} notification. This extra is a {@link ColorInt}.
+     */
+    public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
+
+    /**
      * {@link #extras} key: whether the notification should be colorized as
      * supplied to {@link Builder#setColorized(boolean)}.
      */
@@ -5444,6 +5456,11 @@ public class Notification implements Parcelable
             return p.allowColorization && mN.isColorized();
         }
 
+        private boolean isCallActionColorCustomizable(StandardTemplateParams p) {
+            return isColorized(p) && mContext.getResources().getBoolean(
+                    R.bool.config_callNotificationActionColorsRequireColorized);
+        }
+
         private void bindSmallIcon(RemoteViews contentView, StandardTemplateParams p) {
             if (mN.mSmallIcon == null && mN.icon != 0) {
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
@@ -9066,6 +9083,8 @@ public class Notification implements Parcelable
         private PendingIntent mAnswerIntent;
         private PendingIntent mDeclineIntent;
         private PendingIntent mHangUpIntent;
+        private Integer mAnswerButtonColor;
+        private Integer mDeclineButtonColor;
         private Icon mVerificationIcon;
         private CharSequence mVerificationText;
 
@@ -9176,6 +9195,28 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Optional color to be used as a hint for the Answer action button's color.
+         * The system may change this color to ensure sufficient contrast with the background.
+         * The system may choose to disregard this hint if the notification is not colorized.
+         */
+        @NonNull
+        public CallStyle setAnswerButtonColorHint(@ColorInt int color) {
+            mAnswerButtonColor = color;
+            return this;
+        }
+
+        /**
+         * Optional color to be used as a hint for the Decline or Hang Up action button's color.
+         * The system may change this color to ensure sufficient contrast with the background.
+         * The system may choose to disregard this hint if the notification is not colorized.
+         */
+        @NonNull
+        public CallStyle setDeclineButtonColorHint(@ColorInt int color) {
+            mDeclineButtonColor = color;
+            return this;
+        }
+
+        /**
          * @hide
          */
         public boolean displayCustomViewInline() {
@@ -9234,40 +9275,47 @@ public class Notification implements Parcelable
         }
 
         @NonNull
-        private Action makeNegativeAction() {
+        private Action makeNegativeAction(@NonNull StandardTemplateParams p) {
             if (mDeclineIntent == null) {
-                return makeAction(R.drawable.ic_call_decline,
+                return makeAction(p, R.drawable.ic_call_decline,
                         R.string.call_notification_hang_up_action,
-                        R.color.call_notification_decline_color, mHangUpIntent);
+                        mDeclineButtonColor, R.color.call_notification_decline_color,
+                        mHangUpIntent);
             } else {
-                return makeAction(R.drawable.ic_call_decline,
+                return makeAction(p, R.drawable.ic_call_decline,
                         R.string.call_notification_decline_action,
-                        R.color.call_notification_decline_color, mDeclineIntent);
+                        mDeclineButtonColor, R.color.call_notification_decline_color,
+                        mDeclineIntent);
             }
         }
 
         @Nullable
-        private Action makeAnswerAction() {
-            return mAnswerIntent == null ? null : makeAction(R.drawable.ic_call_answer,
+        private Action makeAnswerAction(@NonNull StandardTemplateParams p) {
+            return mAnswerIntent == null ? null : makeAction(p, R.drawable.ic_call_answer,
                     R.string.call_notification_answer_action,
-                    R.color.call_notification_answer_color, mAnswerIntent);
+                    mAnswerButtonColor, R.color.call_notification_answer_color,
+                    mAnswerIntent);
         }
 
         @NonNull
-        private Action makeAction(@DrawableRes int icon, @StringRes int title,
-                @ColorRes int colorRes, PendingIntent intent) {
+        private Action makeAction(@NonNull StandardTemplateParams p,
+                @DrawableRes int icon, @StringRes int title,
+                @ColorInt Integer colorInt, @ColorRes int defaultColorRes, PendingIntent intent) {
+            if (colorInt == null || !mBuilder.isCallActionColorCustomizable(p)) {
+                colorInt = mBuilder.mContext.getColor(defaultColorRes);
+            }
             Action action = new Action.Builder(Icon.createWithResource("", icon),
                     new SpannableStringBuilder().append(mBuilder.mContext.getString(title),
-                            new ForegroundColorSpan(mBuilder.mContext.getColor(colorRes)),
+                            new ForegroundColorSpan(colorInt),
                             SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE),
                     intent).build();
             action.getExtras().putBoolean(KEY_ACTION_PRIORITY, true);
             return action;
         }
 
-        private ArrayList<Action> makeActionsList() {
-            final Action negativeAction = makeNegativeAction();
-            final Action answerAction = makeAnswerAction();
+        private ArrayList<Action> makeActionsList(@NonNull StandardTemplateParams p) {
+            final Action negativeAction = makeNegativeAction(p);
+            final Action answerAction = makeAnswerAction(p);
 
             ArrayList<Action> actions = new ArrayList<>(MAX_ACTION_BUTTONS);
             final Action lastAction;
@@ -9356,7 +9404,7 @@ public class Notification implements Parcelable
 
             // Create the buttons for the generated actions list.
             int i = 0;
-            for (Action action : makeActionsList()) {
+            for (Action action : makeActionsList(p)) {
                 final RemoteViews button = mBuilder.generateActionButton(action, emphasizedMode, p);
                 if (i > 0) {
                     // Clear start margin from non-first buttons to reduce the gap between buttons.
@@ -9421,6 +9469,12 @@ public class Notification implements Parcelable
             if (mHangUpIntent != null) {
                 extras.putParcelable(EXTRA_HANG_UP_INTENT, mHangUpIntent);
             }
+            if (mAnswerButtonColor != null) {
+                extras.putInt(EXTRA_ANSWER_COLOR, mAnswerButtonColor);
+            }
+            if (mDeclineButtonColor != null) {
+                extras.putInt(EXTRA_DECLINE_COLOR, mDeclineButtonColor);
+            }
             fixTitleAndTextExtras(extras);
         }
 
@@ -9447,6 +9501,10 @@ public class Notification implements Parcelable
             mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT);
             mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT);
             mHangUpIntent = extras.getParcelable(EXTRA_HANG_UP_INTENT);
+            mAnswerButtonColor = extras.containsKey(EXTRA_ANSWER_COLOR)
+                    ? extras.getInt(EXTRA_ANSWER_COLOR) : null;
+            mDeclineButtonColor = extras.containsKey(EXTRA_DECLINE_COLOR)
+                    ? extras.getInt(EXTRA_DECLINE_COLOR) : null;
         }
 
         /**
