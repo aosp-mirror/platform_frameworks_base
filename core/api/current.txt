@@ -12527,7 +12527,6 @@ package android.content.pm {
     field public static final String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
     field public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
     field public static final String FEATURE_WIFI_RTT = "android.hardware.wifi.rtt";
-    field public static final int FLAG_PERMISSION_ALLOWLIST_ROLE = 8; // 0x8
     field public static final int FLAG_PERMISSION_WHITELIST_INSTALLER = 2; // 0x2
     field public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1; // 0x1
     field public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 4; // 0x4
