@@ -118,6 +118,7 @@ struct MediaEvent : public RefBase {
 };
 
 struct FilterClientCallbackImpl : public FilterClientCallback {
+    ~FilterClientCallbackImpl();
     virtual void onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
             const DemuxFilterEventExt& filterEventExt);
     virtual void onFilterEvent(const DemuxFilterEvent& filterEvent);
@@ -155,7 +156,7 @@ private:
 
 struct FrontendClientCallbackImpl : public FrontendClientCallback {
     FrontendClientCallbackImpl(jweak tunerObj);
-
+    ~FrontendClientCallbackImpl();
     virtual void onEvent(FrontendEventType frontendEventType);
     virtual void onScanMessage(
             FrontendScanMessageType type, const FrontendScanMessage& message);
