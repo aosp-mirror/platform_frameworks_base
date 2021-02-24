@@ -103,6 +103,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
@@ -142,6 +143,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1875,8 +1877,8 @@ public class ShortcutService extends IShortcutService.Stub {
     // === APIs ===
 
     @Override
-    public boolean setDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
-            @UserIdInt int userId) {
+    public void setDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
+            @UserIdInt int userId, @NonNull AndroidFuture callback) {
         verifyCaller(packageName, userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
@@ -1903,7 +1905,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Throttling.
             if (!ps.tryApiCall(unlimited)) {
-                return false;
+                callback.complete(false);
             }
 
             // Initialize the implicit ranks for ShortcutPackage.adjustRanks().
@@ -1939,12 +1941,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
         verifyStates();
 
-        return true;
+        callback.complete(true);
     }
 
     @Override
-    public boolean updateShortcuts(String packageName, ParceledListSlice shortcutInfoList,
-            @UserIdInt int userId) {
+    public void updateShortcuts(String packageName, ParceledListSlice shortcutInfoList,
+            @UserIdInt int userId, AndroidFuture callback) {
         verifyCaller(packageName, userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
@@ -1971,7 +1973,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Throttling.
             if (!ps.tryApiCall(unlimited)) {
-                return false;
+                callback.complete(false);
+                return;
             }
 
             // Initialize the implicit ranks for ShortcutPackage.adjustRanks().
@@ -2036,12 +2039,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
         verifyStates();
 
-        return true;
+        callback.complete(true);
     }
 
     @Override
-    public boolean  addDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
-            @UserIdInt int userId) {
+    public void addDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
+            @UserIdInt int userId, AndroidFuture callback) {
         verifyCaller(packageName, userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
@@ -2071,7 +2074,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Throttling.
             if (!ps.tryApiCall(unlimited)) {
-                return false;
+                callback.complete(false);
+                return;
             }
             for (int i = 0; i < size; i++) {
                 final ShortcutInfo newShortcut = newShortcuts.get(i);
@@ -2099,7 +2103,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         verifyStates();
 
-        return true;
+        callback.complete(true);
     }
 
     @Override
@@ -2164,15 +2168,17 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public boolean requestPinShortcut(String packageName, ShortcutInfo shortcut,
-            IntentSender resultIntent, int userId) {
+    public void requestPinShortcut(String packageName, ShortcutInfo shortcut,
+            IntentSender resultIntent, int userId, AndroidFuture callback) {
         Objects.requireNonNull(shortcut);
+        Objects.requireNonNull(callback);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
-        return requestPinItem(packageName, userId, shortcut, null, null, resultIntent);
+        callback.complete(requestPinItem(packageName, userId, shortcut, null, null, resultIntent));
     }
 
     @Override
-    public Intent createShortcutResultIntent(String packageName, ShortcutInfo shortcut, int userId)
+    public void createShortcutResultIntent(String packageName, ShortcutInfo shortcut, int userId,
+            AndroidFuture callback)
             throws RemoteException {
         Objects.requireNonNull(shortcut);
         Preconditions.checkArgument(shortcut.isEnabled(), "Shortcut must be enabled");
@@ -2188,7 +2194,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         verifyStates();
-        return ret;
+        callback.complete(ret);
     }
 
     /**
@@ -2445,8 +2451,9 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public ParceledListSlice<ShortcutInfo> getShortcuts(String packageName,
-            @ShortcutManager.ShortcutMatchFlags int matchFlags, @UserIdInt int userId) {
+    public void getShortcuts(String packageName,
+            @ShortcutManager.ShortcutMatchFlags int matchFlags, @UserIdInt int userId,
+            AndroidFuture<ParceledListSlice<ShortcutInfo>> callback) {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
@@ -2462,16 +2469,16 @@ public class ShortcutService extends IShortcutService.Stub {
                     | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
                     | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
 
-            return getShortcutsWithQueryLocked(
+            callback.complete(getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
                     (ShortcutInfo si) ->
-                            si.isVisibleToPublisher() && (si.getFlags() & shortcutFlags) != 0);
+                            si.isVisibleToPublisher() && (si.getFlags() & shortcutFlags) != 0));
         }
     }
 
     @Override
-    public ParceledListSlice<ShortcutManager.ShareShortcutInfo> getShareTargets(String packageName,
-            IntentFilter filter, @UserIdInt int userId) {
+    public void getShareTargets(String packageName, IntentFilter filter, @UserIdInt int userId,
+            AndroidFuture<ParceledListSlice> callback) {
         Preconditions.checkStringNotEmpty(packageName, "packageName");
         Objects.requireNonNull(filter, "intentFilter");
 
@@ -2487,7 +2494,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutUser user = getUserShortcutsLocked(userId);
             user.forAllPackages(p -> shortcutInfoList.addAll(p.getMatchingShareTargets(filter)));
 
-            return new ParceledListSlice<>(shortcutInfoList);
+            callback.complete(new ParceledListSlice<>(shortcutInfoList));
         }
     }
 
@@ -3071,8 +3078,14 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public List<ShortcutManager.ShareShortcutInfo> getShareTargets(
                 @NonNull String callingPackage, @NonNull IntentFilter intentFilter, int userId) {
-            return ShortcutService.this.getShareTargets(
-                    callingPackage, intentFilter, userId).getList();
+            final AndroidFuture<ParceledListSlice> future = new AndroidFuture<>();
+            ShortcutService.this.getShareTargets(
+                    callingPackage, intentFilter, userId, future);
+            try {
+                return future.get().getList();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override

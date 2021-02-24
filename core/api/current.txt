@@ -12877,18 +12877,18 @@ package android.content.pm {
   }
 
   public class ShortcutManager {
-    method public boolean addDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
-    method public android.content.Intent createShortcutResultIntent(@NonNull android.content.pm.ShortcutInfo);
+    method @WorkerThread public boolean addDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public android.content.Intent createShortcutResultIntent(@NonNull android.content.pm.ShortcutInfo);
     method public void disableShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void disableShortcuts(@NonNull java.util.List<java.lang.String>, CharSequence);
     method public void enableShortcuts(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getDynamicShortcuts();
     method public int getIconMaxHeight();
     method public int getIconMaxWidth();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getManifestShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getManifestShortcuts();
     method public int getMaxShortcutCountPerActivity();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
-    method @NonNull public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(int);
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getPinnedShortcuts();
+    method @NonNull @WorkerThread public java.util.List<android.content.pm.ShortcutInfo> getShortcuts(int);
     method public boolean isRateLimitingActive();
     method public boolean isRequestPinShortcutSupported();
     method public void pushDynamicShortcut(@NonNull android.content.pm.ShortcutInfo);
@@ -12896,10 +12896,10 @@ package android.content.pm {
     method public void removeDynamicShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void removeLongLivedShortcuts(@NonNull java.util.List<java.lang.String>);
     method public void reportShortcutUsed(String);
-    method public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
-    method public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
+    method @WorkerThread public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     method public void updateShortcutVisibility(@NonNull String, @Nullable byte[], boolean);
-    method public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method @WorkerThread public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     field public static final int FLAG_MATCH_CACHED = 8; // 0x8
     field public static final int FLAG_MATCH_DYNAMIC = 2; // 0x2
     field public static final int FLAG_MATCH_MANIFEST = 1; // 0x1
