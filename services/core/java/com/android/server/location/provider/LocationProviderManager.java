@@ -304,6 +304,7 @@ public class LocationProviderManager extends
                 LocationTransport transport, @PermissionLevel int permissionLevel) {
             super(Objects.requireNonNull(request), identity, transport);
 
+            Preconditions.checkArgument(identity.getListenerId() != null);
             Preconditions.checkArgument(permissionLevel > PERMISSION_NONE);
             Preconditions.checkArgument(!request.getWorkSource().isEmpty());
 
