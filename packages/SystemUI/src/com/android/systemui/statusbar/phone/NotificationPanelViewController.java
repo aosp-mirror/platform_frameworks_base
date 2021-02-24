@@ -287,21 +287,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
     };
 
-    final KeyguardUserSwitcherController.KeyguardUserSwitcherListener
-            mKeyguardUserSwitcherListener =
-            new KeyguardUserSwitcherController.KeyguardUserSwitcherListener() {
-                @Override
-                public void onKeyguardUserSwitcherChanged(boolean open) {
-                    if (mKeyguardUserSwitcherController == null) {
-                        updateUserSwitcherVisibility(false);
-                    } else if (!mKeyguardUserSwitcherController.isSimpleUserSwitcher()) {
-                        updateUserSwitcherVisibility(open
-                                && mKeyguardStateController.isShowing()
-                                && !mKeyguardStateController.isKeyguardFadingAway());
-                    }
-                }
-            };
-
     private final LayoutInflater mLayoutInflater;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
@@ -329,7 +314,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
-    private boolean mKeyguardUserSwitcherIsShowing;
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     private KeyguardStatusBarView mKeyguardStatusBar;
     private ViewGroup mBigClockContainer;
@@ -374,6 +358,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
     private int mStatusBarMinHeight;
+    private int mStatusBarHeaderHeightKeyguard;
     private int mNotificationsHeaderCollideDistance;
     private float mEmptyDragAmount;
     private float mDownX;
@@ -772,6 +757,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 .setMaxLengthSeconds(0.4f).build();
         mStatusBarMinHeight = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeaderHeightKeyguard = mResources.getDimensionPixelSize(
+                R.dimen.status_bar_header_height_keyguard);
         mQsPeekHeight = mResources.getDimensionPixelSize(R.dimen.qs_peek_height);
         mNotificationsHeaderCollideDistance = mResources.getDimensionPixelSize(
                 R.dimen.header_notifications_collide_distance);
@@ -808,7 +795,6 @@ public class NotificationPanelViewController extends PanelViewController {
             // Try to close the switcher so that callbacks are triggered if necessary.
             // Otherwise, NPV can get into a state where some of the views are still hidden
             mKeyguardUserSwitcherController.closeSwitcherIfOpenAndNotSimple(false);
-            mKeyguardUserSwitcherController.removeCallback();
         }
 
         mKeyguardQsUserSwitchController = null;
@@ -828,7 +814,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     mKeyguardUserSwitcherComponentFactory.build(keyguardUserSwitcherView);
             mKeyguardUserSwitcherController =
                     userSwitcherComponent.getKeyguardUserSwitcherController();
-            mKeyguardUserSwitcherController.setCallback(mKeyguardUserSwitcherListener);
             mKeyguardUserSwitcherController.init();
             mKeyguardStatusBar.setKeyguardUserSwitcherEnabled(true);
         } else {
@@ -1069,7 +1054,7 @@ public class NotificationPanelViewController extends PanelViewController {
             int totalHeight = mView.getHeight();
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
-            int userSwitcherPreferredY = mStatusBarMinHeight;
+            int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
             final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
                     .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
@@ -1078,7 +1063,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     ? mKeyguardQsUserSwitchController.getUserIconHeight()
                     : (mKeyguardUserSwitcherController != null
                             ? mKeyguardUserSwitcherController.getUserIconHeight() : 0);
-            mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
+            mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
+                    totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
                     getExpandedFraction(),
                     totalHeight,
@@ -3521,34 +3507,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     true /* animate */);
         }
         return false;
-    }
-
-    private void updateUserSwitcherVisibility(boolean open) {
-        // Do not update if previously called with the same state.
-        if (mKeyguardUserSwitcherIsShowing == open) {
-            return;
-        }
-        mKeyguardUserSwitcherIsShowing = open;
-
-        if (open) {
-            animateKeyguardStatusBarOut();
-            mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
-                    mBarState,
-                    true /* keyguardFadingAway */,
-                    true /* goingToFullShade */,
-                    mBarState);
-            setKeyguardBottomAreaVisibility(mBarState, true);
-            mNotificationContainerParent.setVisibility(View.GONE);
-        } else {
-            animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
-                    StatusBarState.KEYGUARD,
-                    false,
-                    false,
-                    StatusBarState.SHADE_LOCKED);
-            setKeyguardBottomAreaVisibility(mBarState, false);
-            mNotificationContainerParent.setVisibility(View.VISIBLE);
-        }
     }
 
     private void updateDisabledUdfpsController() {
