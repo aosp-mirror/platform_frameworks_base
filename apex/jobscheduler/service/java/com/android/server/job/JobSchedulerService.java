@@ -793,6 +793,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                         mDebuggableApps.remove(pkgName);
                     }
                 }
+            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                synchronized (mLock) {
+                    for (int c = 0; c < mControllers.size(); ++c) {
+                        mControllers.get(c).onUserAddedLocked(userId);
+                    }
+                }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (DEBUG) {
@@ -1454,6 +1461,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
             final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
+            userFilter.addAction(Intent.ACTION_USER_ADDED);
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
             try {
