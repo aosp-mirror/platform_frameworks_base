@@ -16,12 +16,17 @@
 
 package android.net.vcn.persistablebundleutils;
 
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.NonNull;
 import android.net.eap.EapSessionConfig;
+import android.net.eap.EapSessionConfig.EapAkaConfig;
+import android.net.eap.EapSessionConfig.EapAkaPrimeConfig;
 import android.net.eap.EapSessionConfig.EapMethodConfig;
 import android.net.eap.EapSessionConfig.EapMsChapV2Config;
+import android.net.eap.EapSessionConfig.EapSimConfig;
+import android.net.eap.EapSessionConfig.EapUiccConfig;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,7 +42,10 @@ import java.util.Objects;
 @VisibleForTesting(visibility = Visibility.PRIVATE)
 public final class EapSessionConfigUtils {
     private static final String EAP_ID_KEY = "EAP_ID_KEY";
+    private static final String EAP_SIM_CONFIG_KEY = "EAP_SIM_CONFIG_KEY";
+    private static final String EAP_AKA_CONFIG_KEY = "EAP_AKA_CONFIG_KEY";
     private static final String EAP_MSCHAP_V2_CONFIG_KEY = "EAP_MSCHAP_V2_CONFIG_KEY";
+    private static final String EAP_AKA_PRIME_CONFIG_KEY = "EAP_AKA_PRIME_CONFIG_KEY";
 
     /** Serializes an EapSessionConfig to a PersistableBundle. */
     @NonNull
@@ -47,13 +55,31 @@ public final class EapSessionConfigUtils {
         result.putPersistableBundle(
                 EAP_ID_KEY, PersistableBundleUtils.fromByteArray(config.getEapIdentity()));
 
+        if (config.getEapSimConfig() != null) {
+            result.putPersistableBundle(
+                    EAP_SIM_CONFIG_KEY,
+                    EapSimConfigUtils.toPersistableBundle(config.getEapSimConfig()));
+        }
+
+        if (config.getEapAkaConfig() != null) {
+            result.putPersistableBundle(
+                    EAP_AKA_CONFIG_KEY,
+                    EapAkaConfigUtils.toPersistableBundle(config.getEapAkaConfig()));
+        }
+
         if (config.getEapMsChapV2Config() != null) {
             result.putPersistableBundle(
                     EAP_MSCHAP_V2_CONFIG_KEY,
                     EapMsChapV2ConfigUtils.toPersistableBundle(config.getEapMsChapV2Config()));
         }
 
-        // TODO: Handle other EAP methods: EAP-SIM, EAP-AKA, EAP-AKA', EAP-TTLS.
+        if (config.getEapAkaPrimeConfig() != null) {
+            result.putPersistableBundle(
+                    EAP_AKA_PRIME_CONFIG_KEY,
+                    EapAkaPrimeConfigUtils.toPersistableBundle(config.getEapAkaPrimeConfig()));
+        }
+
+        // TODO: Handle EAP-TTLS.
 
         return result;
     }
@@ -69,12 +95,27 @@ public final class EapSessionConfigUtils {
         Objects.requireNonNull(eapIdBundle, "EAP ID was null");
         builder.setEapIdentity(PersistableBundleUtils.toByteArray(eapIdBundle));
 
+        final PersistableBundle simBundle = in.getPersistableBundle(EAP_SIM_CONFIG_KEY);
+        if (simBundle != null) {
+            EapSimConfigUtils.setBuilderByReadingPersistableBundle(simBundle, builder);
+        }
+
+        final PersistableBundle akaBundle = in.getPersistableBundle(EAP_AKA_CONFIG_KEY);
+        if (akaBundle != null) {
+            EapAkaConfigUtils.setBuilderByReadingPersistableBundle(akaBundle, builder);
+        }
+
         final PersistableBundle msChapV2Bundle = in.getPersistableBundle(EAP_MSCHAP_V2_CONFIG_KEY);
         if (msChapV2Bundle != null) {
             EapMsChapV2ConfigUtils.setBuilderByReadingPersistableBundle(msChapV2Bundle, builder);
         }
 
-        // TODO: Handle other EAP methods: EAP-SIM, EAP-AKA, EAP-AKA', EAP-TTLS.
+        final PersistableBundle akaPrimeBundle = in.getPersistableBundle(EAP_AKA_PRIME_CONFIG_KEY);
+        if (akaPrimeBundle != null) {
+            EapAkaPrimeConfigUtils.setBuilderByReadingPersistableBundle(akaPrimeBundle, builder);
+        }
+
+        // TODO: Handle EAP-TTLS.
         return builder.build();
     }
 
@@ -87,6 +128,70 @@ public final class EapSessionConfigUtils {
             final PersistableBundle result = new PersistableBundle();
             result.putInt(METHOD_TYPE, config.getMethodType());
             return result;
+        }
+    }
+
+    private static class EapUiccConfigUtils extends EapMethodConfigUtils {
+        static final String SUB_ID_KEY = "SUB_ID_KEY";
+        static final String APP_TYPE_KEY = "APP_TYPE_KEY";
+
+        @NonNull
+        protected static PersistableBundle toPersistableBundle(@NonNull EapUiccConfig config) {
+            final PersistableBundle result = EapMethodConfigUtils.toPersistableBundle(config);
+            result.putInt(SUB_ID_KEY, config.getSubId());
+            result.putInt(APP_TYPE_KEY, config.getAppType());
+
+            return result;
+        }
+    }
+
+    private static final class EapSimConfigUtils extends EapUiccConfigUtils {
+        @NonNull
+        public static PersistableBundle toPersistableBundle(EapSimConfig config) {
+            return EapUiccConfigUtils.toPersistableBundle(config);
+        }
+
+        public static void setBuilderByReadingPersistableBundle(
+                @NonNull PersistableBundle in, @NonNull EapSessionConfig.Builder builder) {
+            Objects.requireNonNull(in, "PersistableBundle was null");
+            builder.setEapSimConfig(in.getInt(SUB_ID_KEY), in.getInt(APP_TYPE_KEY));
+        }
+    }
+
+    private static class EapAkaConfigUtils extends EapUiccConfigUtils {
+        @NonNull
+        public static PersistableBundle toPersistableBundle(@NonNull EapAkaConfig config) {
+            return EapUiccConfigUtils.toPersistableBundle(config);
+        }
+
+        public static void setBuilderByReadingPersistableBundle(
+                @NonNull PersistableBundle in, @NonNull EapSessionConfig.Builder builder) {
+            Objects.requireNonNull(in, "PersistableBundle was null");
+            builder.setEapAkaConfig(in.getInt(SUB_ID_KEY), in.getInt(APP_TYPE_KEY));
+        }
+    }
+
+    private static final class EapAkaPrimeConfigUtils extends EapAkaConfigUtils {
+        private static final String NETWORK_NAME_KEY = "NETWORK_NAME_KEY";
+        private static final String ALL_MISMATCHED_NETWORK_KEY = "ALL_MISMATCHED_NETWORK_KEY";
+
+        @NonNull
+        public static PersistableBundle toPersistableBundle(@NonNull EapAkaPrimeConfig config) {
+            final PersistableBundle result = EapUiccConfigUtils.toPersistableBundle(config);
+            result.putString(NETWORK_NAME_KEY, config.getNetworkName());
+            result.putBoolean(ALL_MISMATCHED_NETWORK_KEY, config.allowsMismatchedNetworkNames());
+
+            return result;
+        }
+
+        public static void setBuilderByReadingPersistableBundle(
+                @NonNull PersistableBundle in, @NonNull EapSessionConfig.Builder builder) {
+            Objects.requireNonNull(in, "PersistableBundle was null");
+            builder.setEapAkaPrimeConfig(
+                    in.getInt(SUB_ID_KEY),
+                    in.getInt(APP_TYPE_KEY),
+                    in.getString(NETWORK_NAME_KEY),
+                    in.getBoolean(ALL_MISMATCHED_NETWORK_KEY));
         }
     }
 
