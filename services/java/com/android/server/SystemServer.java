@@ -1717,14 +1717,9 @@ public final class SystemServer implements Dumpable {
             startTextToSpeechManagerService(context, t);
 
             // System Speech Recognition Service
-            if (deviceHasConfigString(context,
-                    R.string.config_defaultOnDeviceSpeechRecognitionService)) {
-                t.traceBegin("StartSpeechRecognitionManagerService");
-                mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
-                t.traceEnd();
-            } else {
-                Slog.d(TAG, "System speech recognition is not defined by OEM");
-            }
+            t.traceBegin("StartSpeechRecognitionManagerService");
+            mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
 
             // App prediction manager service
             if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
