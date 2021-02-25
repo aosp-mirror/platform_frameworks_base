@@ -161,10 +161,10 @@ public class ThemeOverlayApplier implements Dumpable {
     void applyCurrentUserOverlays(
             Map<String, OverlayIdentifier> categoryToPackage,
             FabricatedOverlay[] pendingCreation,
-            Set<UserHandle> userHandles) {
+            int currentUser,
+            Set<UserHandle> managedProfiles) {
         // Disable all overlays that have not been specified in the user setting.
         final Set<String> overlayCategoriesToDisable = new HashSet<>(THEME_CATEGORIES);
-        overlayCategoriesToDisable.removeAll(categoryToPackage.keySet());
         final Set<String> targetPackagesToQuery = overlayCategoriesToDisable.stream()
                 .map(category -> mCategoryToTargetPackage.get(category))
                 .collect(Collectors.toSet());
@@ -175,6 +175,7 @@ public class ThemeOverlayApplier implements Dumpable {
                 .filter(o ->
                         mTargetPackageToCategories.get(o.targetPackageName).contains(o.category))
                 .filter(o -> overlayCategoriesToDisable.contains(o.category))
+                .filter(o -> !categoryToPackage.containsValue(new OverlayIdentifier(o.packageName)))
                 .filter(o -> o.isEnabled())
                 .map(o -> new Pair<>(o.category, o.packageName))
                 .collect(Collectors.toList());
@@ -186,16 +187,17 @@ public class ThemeOverlayApplier implements Dumpable {
             }
         }
 
-        // Toggle overlays in the order of THEME_CATEGORIES.
+        for (Pair<String, String> packageToDisable : overlaysToDisable) {
+            OverlayIdentifier overlayInfo = new OverlayIdentifier(packageToDisable.second);
+            setEnabled(transaction, overlayInfo, packageToDisable.first, currentUser,
+                    managedProfiles, false);
+        }
+
         for (String category : THEME_CATEGORIES) {
             if (categoryToPackage.containsKey(category)) {
                 OverlayIdentifier overlayInfo = categoryToPackage.get(category);
-                setEnabled(transaction, overlayInfo, category, userHandles, true);
+                setEnabled(transaction, overlayInfo, category, currentUser, managedProfiles, true);
             }
-        }
-        for (Pair<String, String> packageToDisable : overlaysToDisable) {
-            OverlayIdentifier overlayInfo = new OverlayIdentifier(packageToDisable.second);
-            setEnabled(transaction, overlayInfo, packageToDisable.first, userHandles, false);
         }
 
         mExecutor.execute(() -> {
@@ -213,17 +215,29 @@ public class ThemeOverlayApplier implements Dumpable {
     }
 
     private void setEnabled(OverlayManagerTransaction.Builder transaction,
-            OverlayIdentifier identifier, String category, Set<UserHandle> handles,
-            boolean enabled) {
+            OverlayIdentifier identifier, String category, int currentUser,
+            Set<UserHandle> managedProfiles, boolean enabled) {
         if (DEBUG) {
             Log.d(TAG, "setEnabled: " + identifier.getPackageName() + " category: "
                     + category + ": " + enabled);
         }
-        for (UserHandle userHandle : handles) {
-            transaction.setEnabled(identifier, enabled, userHandle.getIdentifier());
-        }
-        if (!handles.contains(UserHandle.SYSTEM) && SYSTEM_USER_CATEGORIES.contains(category)) {
+
+        transaction.setEnabled(identifier, enabled, currentUser);
+        if (currentUser != UserHandle.SYSTEM.getIdentifier()
+                && SYSTEM_USER_CATEGORIES.contains(category)) {
             transaction.setEnabled(identifier, enabled, UserHandle.SYSTEM.getIdentifier());
+        }
+
+        // Do not apply Launcher or Theme picker overlays to managed users. Apps are not
+        // installed in there.
+        OverlayInfo overlayInfo = mOverlayManager.getOverlayInfo(identifier, UserHandle.SYSTEM);
+        if (overlayInfo == null || overlayInfo.targetPackageName.equals(mLauncherPackage)
+                || overlayInfo.targetPackageName.equals(mThemePickerPackage)) {
+            return;
+        }
+
+        for (UserHandle userHandle : managedProfiles) {
+            transaction.setEnabled(identifier, enabled, userHandle.getIdentifier());
         }
     }
 
