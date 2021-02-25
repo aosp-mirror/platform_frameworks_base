@@ -156,6 +156,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.DeviceOwnerType;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.OperationSafetyReason;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
@@ -16749,6 +16750,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         return mPolicyCache.canAdminGrantSensorsPermissionsForUser(userId);
+    }
+
+    @Override
+    public void setDeviceOwnerType(@NonNull ComponentName admin,
+            @DeviceOwnerType int deviceOwnerType) {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        verifyDeviceOwnerTypePreconditions(admin);
+
+        final String packageName = admin.getPackageName();
+        Preconditions.checkState(!mOwners.isDeviceOwnerTypeSetForDeviceOwner(packageName),
+                "The device owner type has already been set for " + packageName);
+
+        synchronized (getLockObject()) {
+            mOwners.setDeviceOwnerType(packageName, deviceOwnerType);
+        }
+    }
+
+    @Override
+    @DeviceOwnerType
+    public int getDeviceOwnerType(@NonNull ComponentName admin) {
+        verifyDeviceOwnerTypePreconditions(admin);
+        synchronized (getLockObject()) {
+            return mOwners.getDeviceOwnerType(admin.getPackageName());
+        }
+    }
+
+    private void verifyDeviceOwnerTypePreconditions(@NonNull ComponentName admin) {
+        Preconditions.checkState(mOwners.hasDeviceOwner(), "there is no device owner");
+        Preconditions.checkState(mOwners.getDeviceOwnerComponent().equals(admin),
+                "admin is not the device owner");
     }
 
     @Override
