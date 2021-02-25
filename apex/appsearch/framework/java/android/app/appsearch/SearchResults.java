@@ -33,12 +33,16 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * SearchResults are a returned object from a query API.
+ * Encapsulates results of a search operation.
  *
- * <p>Each {@link SearchResult} contains a document and may contain other fields like snippets based
- * on request.
+ * <p>Each {@link AppSearchSession#search} operation returns a list of {@link SearchResult} objects,
+ * referred to as a "page", limited by the size configured by {@link
+ * SearchSpec.Builder#setResultCountPerPage}.
  *
- * <p>Should close this object after finish fetching results.
+ * <p>To fetch a page of results, call {@link #getNextPage}.
+ *
+ * <p>All instances of {@link SearchResults} must call {@link SearchResults#close()} after the
+ * results are fetched.
  *
  * <p>This class is not thread safe.
  */
@@ -87,12 +91,12 @@ public class SearchResults implements Closeable {
     }
 
     /**
-     * Gets a whole page of {@link SearchResult}s.
+     * Retrieves the next page of {@link SearchResult} objects.
      *
-     * <p>Re-call this method to get next page of {@link SearchResult}, until it returns an empty
-     * list.
+     * <p>The page size is configured by {@link SearchSpec.Builder#setResultCountPerPage}.
      *
-     * <p>The page size is set by {@link SearchSpec.Builder#setResultCountPerPage}.
+     * <p>Continue calling this method to access results until it returns an empty list, signifying
+     * there are no more results.
      *
      * @param callback Callback to receive the pending result of performing this operation.
      */

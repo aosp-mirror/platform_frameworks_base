@@ -28,6 +28,7 @@ import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -55,6 +56,7 @@ import org.junit.rules.TemporaryFolder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class AppSearchImplTest {
@@ -971,21 +973,46 @@ public class AppSearchImplTest {
     }
 
     @Test
-    public void testHasSchemaType() throws Exception {
-        // Nothing exists yet
-        assertThat(mAppSearchImpl.hasSchemaTypeLocked("package", "database", "Schema")).isFalse();
+    public void testGetPackageToDatabases() throws Exception {
+        Map<String, Set<String>> existingMapping = mAppSearchImpl.getPackageToDatabases();
+        Map<String, Set<String>> expectedMapping = new ArrayMap<>();
+        expectedMapping.putAll(existingMapping);
 
+        // Has database1
+        expectedMapping.put("package1", ImmutableSet.of("database1"));
         mAppSearchImpl.setSchema(
-                "package",
-                "database",
-                Collections.singletonList(new AppSearchSchema.Builder("Schema").build()),
+                "package1",
+                "database1",
+                Collections.singletonList(new AppSearchSchema.Builder("schema").build()),
                 /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
                 /*schemasPackageAccessible=*/ Collections.emptyMap(),
                 /*forceOverride=*/ false);
-        assertThat(mAppSearchImpl.hasSchemaTypeLocked("package", "database", "Schema")).isTrue();
+        assertThat(mAppSearchImpl.getPackageToDatabases())
+                .containsExactlyEntriesIn(expectedMapping);
 
-        assertThat(mAppSearchImpl.hasSchemaTypeLocked("package", "database", "UnknownSchema"))
-                .isFalse();
+        // Has both databases
+        expectedMapping.put("package1", ImmutableSet.of("database1", "database2"));
+        mAppSearchImpl.setSchema(
+                "package1",
+                "database2",
+                Collections.singletonList(new AppSearchSchema.Builder("schema").build()),
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false);
+        assertThat(mAppSearchImpl.getPackageToDatabases())
+                .containsExactlyEntriesIn(expectedMapping);
+
+        // Has both packages
+        expectedMapping.put("package2", ImmutableSet.of("database1"));
+        mAppSearchImpl.setSchema(
+                "package2",
+                "database1",
+                Collections.singletonList(new AppSearchSchema.Builder("schema").build()),
+                /*schemasNotPlatformSurfaceable=*/ Collections.emptyList(),
+                /*schemasPackageAccessible=*/ Collections.emptyMap(),
+                /*forceOverride=*/ false);
+        assertThat(mAppSearchImpl.getPackageToDatabases())
+                .containsExactlyEntriesIn(expectedMapping);
     }
 
     @Test
