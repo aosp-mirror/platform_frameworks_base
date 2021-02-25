@@ -48034,10 +48034,15 @@ package android.view {
   }
 
   public class SoundEffectConstants {
+    method public static int getConstantForFocusDirection(int, boolean);
     method public static int getContantForFocusDirection(int);
     field public static final int CLICK = 0; // 0x0
     field public static final int NAVIGATION_DOWN = 4; // 0x4
     field public static final int NAVIGATION_LEFT = 1; // 0x1
+    field public static final int NAVIGATION_REPEAT_DOWN = 8; // 0x8
+    field public static final int NAVIGATION_REPEAT_LEFT = 5; // 0x5
+    field public static final int NAVIGATION_REPEAT_RIGHT = 7; // 0x7
+    field public static final int NAVIGATION_REPEAT_UP = 6; // 0x6
     field public static final int NAVIGATION_RIGHT = 3; // 0x3
     field public static final int NAVIGATION_UP = 2; // 0x2
   }
