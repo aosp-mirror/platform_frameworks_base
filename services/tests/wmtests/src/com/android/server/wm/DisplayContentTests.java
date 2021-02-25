@@ -1444,7 +1444,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Assume the animation of PipTaskOrganizer is done and then commit fullscreen to task.
         pinnedTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         displayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
-        assertFalse(displayContent.getPinnedStackController().isPipActiveOrWindowingModeChanging());
+        assertFalse(displayContent.getPinnedTaskController().isPipActiveOrWindowingModeChanging());
         assertEquals(pinnedConfigOrientation, displayConfig.orientation);
 
         clearInvocations(mWm);
@@ -1455,7 +1455,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(displayContent.hasTopFixedRotationLaunchingApp());
         verify(mWm, atLeastOnce()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
         assertEquals(homeConfigOrientation, displayConfig.orientation);
-        assertTrue(displayContent.getPinnedStackController().isPipActiveOrWindowingModeChanging());
+        assertTrue(displayContent.getPinnedTaskController().isPipActiveOrWindowingModeChanging());
     }
 
     @Test

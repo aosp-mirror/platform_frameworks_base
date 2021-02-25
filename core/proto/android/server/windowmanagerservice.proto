@@ -174,10 +174,10 @@ message DisplayContentProto {
     // Use root_display_area instead
     optional WindowContainerProto window_container = 1 [deprecated=true];
     optional int32 id = 2;
-    reserved 3; // stacks
-    optional DockedStackDividerControllerProto docked_stack_divider_controller = 4 [deprecated=true];
+    reserved 3; // RootTasks
+    optional DockedTaskDividerControllerProto docked_task_divider_controller = 4 [deprecated=true];
     // Will be removed soon.
-    optional PinnedStackControllerProto pinned_stack_controller = 5 [deprecated=true];
+    optional PinnedTaskControllerProto pinned_task_controller = 5 [deprecated=true];
     /* non app windows */
     repeated WindowTokenProto above_app_windows = 6 [deprecated=true];
     repeated WindowTokenProto below_app_windows = 7 [deprecated=true];
@@ -256,15 +256,15 @@ message DisplayRotationProto {
     optional int32 last_orientation = 5 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
 }
 
-/* represents DockedStackDividerController */
-message DockedStackDividerControllerProto {
+/* represents DockedTaskDividerController */
+message DockedTaskDividerControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional bool minimized_dock = 1 [deprecated=true];
 }
 
-/* represents PinnedStackController */
-message PinnedStackControllerProto {
+/* represents PinnedTaskController */
+message PinnedTaskControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional .android.graphics.RectProto default_bounds = 1 [deprecated=true];
