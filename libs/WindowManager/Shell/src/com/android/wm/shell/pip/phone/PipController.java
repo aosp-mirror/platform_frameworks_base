@@ -65,6 +65,7 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUtils;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -101,9 +102,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
-        if (!mPipTaskOrganizer.isInPip() || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
-            // Skip if we aren't in PIP or haven't actually entered PIP yet. We still need to update
-            // the display layout in the bounds handler in this case.
+        if (!mPipTaskOrganizer.isInPip()
+                || mPipBoundsState.getDisplayLayout().rotation() == toRotation
+                || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
+            // Skip if the same rotation has been set or we aren't in PIP or haven't actually
+            // entered PIP yet. We still need to update the display layout in the bounds handler
+            // in this case.
             onDisplayRotationChangedNotInPip(mContext, toRotation);
             // do not forget to update the movement bounds as well.
             updateMovementBounds(mPipBoundsState.getNormalBounds(), true /* fromRotation */,
@@ -378,6 +382,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void onDisplayChanged(DisplayLayout layout, boolean saveRestoreSnapFraction) {
+        if (Objects.equals(layout, mPipBoundsState.getDisplayLayout())) {
+            return;
+        }
         Runnable updateDisplayLayout = () -> {
             mPipBoundsState.setDisplayLayout(layout);
             updateMovementBounds(null /* toBounds */,
@@ -476,8 +483,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             int launcherRotation, int shelfHeight) {
         setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
-        return mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
+        final Rect entryBounds = mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
                 pictureInPictureParams);
+        // sync mPipBoundsState with the newly calculated bounds.
+        mPipBoundsState.setNormalBounds(entryBounds);
+        return entryBounds;
     }
 
     private void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
