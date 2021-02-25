@@ -91,6 +91,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public long getTotalRam();
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessCapabilities(int);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessState(int);
     method public void holdLock(android.os.IBinder, int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
@@ -106,7 +108,10 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 4; // 0x4
+    field public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
+    field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
+    field public static final int PROCESS_STATE_TOP = 2; // 0x2
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
