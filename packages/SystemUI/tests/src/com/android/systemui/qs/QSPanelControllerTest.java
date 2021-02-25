@@ -121,7 +121,6 @@ public class QSPanelControllerTest extends SysuiTestCase {
                 mQSTileHost, mQSCustomizerController, true, mMediaHost,
                 mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
                 mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory,
-                /* labelsFlag */ false,
                 mFeatureFlags
         );
 
