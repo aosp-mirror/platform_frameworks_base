@@ -75,7 +75,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
     public MockableLocationProvider(Object ownerLock) {
         // using a direct executor is acceptable because all inbound calls are delegated to the
         // actual provider implementations which will use their own executors
-        super(DIRECT_EXECUTOR, null, null);
+        super(DIRECT_EXECUTOR, null, null, null);
         mOwnerLock = ownerLock;
         mRequest = ProviderRequest.EMPTY_REQUEST;
     }
