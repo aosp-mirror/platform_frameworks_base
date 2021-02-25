@@ -7582,8 +7582,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void sendProfileOwnerCommand(String action, Bundle extras, @UserIdInt int userId) {
-        sendActiveAdminCommand(action, extras, userId,
-                mOwners.getProfileOwnerComponent(userId));
+        sendActiveAdminCommand(action, extras, userId, mOwners.getProfileOwnerComponent(userId));
     }
 
     private void sendActiveAdminCommand(String action, Bundle extras,
@@ -12373,8 +12372,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             extras.putInt(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_REASON, reason);
             extras.putBoolean(DeviceAdminReceiver.EXTRA_OPERATION_SAFETY_STATE, isSafe);
 
-            sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
-                    extras);
+            if (mOwners.hasDeviceOwner()) {
+                sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
+                        extras);
+            }
             for (int profileOwnerId : mOwners.getProfileOwnerKeys()) {
                 sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_OPERATION_SAFETY_STATE_CHANGED,
                         extras, profileOwnerId);
