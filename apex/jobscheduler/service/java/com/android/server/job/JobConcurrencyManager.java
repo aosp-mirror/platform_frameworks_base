@@ -753,13 +753,22 @@ class JobConcurrencyManager {
             return null;
         }
 
+        // We're over the minimum guaranteed runtime. Stop the job if we're over config limits,
+        // there are pending jobs that could replace this one, or the device state is not conducive
+        // to long runs.
+
+        if (mPowerManager.isPowerSaveMode()) {
+            return "battery saver";
+        }
+        if (mPowerManager.isDeviceIdleMode()) {
+            return "deep doze";
+        }
+
         // Update config in case memory usage has changed significantly.
         updateCounterConfigLocked();
 
         @WorkType final int workType = context.getRunningJobWorkType();
 
-        // We're over the minimum guaranteed runtime. Stop the job if we're over config limits or
-        // there are pending jobs that could replace this one.
         if (mRunningJobs.size() > mWorkTypeConfig.getMaxTotal()
                 || mWorkCountTracker.isOverTypeLimit(workType)) {
             return "too many jobs running";
@@ -785,13 +794,6 @@ class JobConcurrencyManager {
                 if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0) {
                     return "blocking " + workTypeToString(workType) + " queue";
                 }
-            }
-
-            if (mPowerManager.isPowerSaveMode()) {
-                return "battery saver";
-            }
-            if (mPowerManager.isDeviceIdleMode()) {
-                return "deep doze";
             }
         }
 
