@@ -98,8 +98,7 @@ public class GlobalSearchSession implements Closeable {
      * <p>Document access can also be granted to system UIs by specifying {@link
      * SetSchemaRequest.Builder#setSchemaTypeVisibilityForSystemUi} when building a schema.
      *
-     * <p>See {@link AppSearchSession#search} for a detailed explanation on
-     * forming a query string.
+     * <p>See {@link AppSearchSession#search} for a detailed explanation on forming a query string.
      *
      * <p>This method is lightweight. The heavy work will be done in {@link
      * SearchResults#getNextPage}.

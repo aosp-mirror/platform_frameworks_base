@@ -28,11 +28,19 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Provides access to multiple {@link AppSearchResult}s from a batch operation accepting multiple
- * inputs.
+ * Provides results for AppSearch batch operations which encompass multiple documents.
  *
- * @param <KeyType> The type of the keys for {@link #getSuccesses} and {@link #getFailures}.
- * @param <ValueType> The type of result objects associated with the keys.
+ * <p>Individual results of a batch operation are separated into two maps: one for successes and one
+ * for failures. For successes, {@link #getSuccesses()} will return a map of keys to instances of
+ * the value type. For failures, {@link #getFailures()} will return a map of keys to {@link
+ * AppSearchResult} objects.
+ *
+ * <p>Alternatively, {@link #getAll()} returns a map of keys to {@link AppSearchResult} objects for
+ * both successes and failures.
+ *
+ * @see AppSearchSession#put
+ * @see AppSearchSession#getByUri
+ * @see AppSearchSession#remove
  */
 public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     @NonNull private final Map<KeyType, ValueType> mSuccesses;
@@ -75,8 +83,11 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     }
 
     /**
-     * Returns a {@link Map} of all successful keys mapped to the successful {@link
-     * AppSearchResult}s they produced.
+     * Returns a {@link Map} of keys mapped to instances of the value type for all successful
+     * individual results.
+     *
+     * <p>Example: {@link AppSearchSession#getByUri} returns an {@link AppSearchBatchResult}. Each
+     * key (a URI of {@code String} type) will map to a {@link GenericDocument} object.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
@@ -86,8 +97,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     }
 
     /**
-     * Returns a {@link Map} of all failed keys mapped to the failed {@link AppSearchResult}s they
-     * produced.
+     * Returns a {@link Map} of keys mapped to instances of {@link AppSearchResult} for all failed
+     * individual results.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
@@ -97,7 +108,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     }
 
     /**
-     * Returns a {@link Map} of all keys mapped to the {@link AppSearchResult}s they produced.
+     * Returns a {@link Map} of keys mapped to instances of {@link AppSearchResult} for all
+     * individual results.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
@@ -149,8 +161,8 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
     /**
      * Builder for {@link AppSearchBatchResult} objects.
      *
-     * @param <KeyType> The type of keys.
-     * @param <ValueType> The type of result objects associated with the keys.
+     * <p>Once {@link #build} is called, the instance can no longer be used.
+     *
      * @hide
      */
     public static final class Builder<KeyType, ValueType> {
@@ -160,9 +172,11 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         private boolean mBuilt = false;
 
         /**
-         * Associates the {@code key} with the given successful return value.
+         * Associates the {@code key} with the provided successful return value.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         *
+         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder<KeyType, ValueType> setSuccess(
@@ -173,9 +187,11 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         }
 
         /**
-         * Associates the {@code key} with the given failure code and error message.
+         * Associates the {@code key} with the provided failure code and error message.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         *
+         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder<KeyType, ValueType> setFailure(
@@ -188,9 +204,11 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         }
 
         /**
-         * Associates the {@code key} with the given {@code result}.
+         * Associates the {@code key} with the provided {@code result}.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         *
+         * @throws IllegalStateException if the builder has already been used.
          */
         @NonNull
         public Builder<KeyType, ValueType> setResult(
@@ -209,7 +227,11 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
             return this;
         }
 
-        /** Builds an {@link AppSearchBatchResult} from the contents of this {@link Builder}. */
+        /**
+         * Builds an {@link AppSearchBatchResult} object from the contents of this {@link Builder}.
+         *
+         * @throws IllegalStateException if the builder has already been used.
+         */
         @NonNull
         public AppSearchBatchResult<KeyType, ValueType> build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
