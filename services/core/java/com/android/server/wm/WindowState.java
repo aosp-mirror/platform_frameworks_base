@@ -1224,7 +1224,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // But in docked we want to behave like fullscreen and behave as if the task
                     // were given smaller bounds for the purposes of layout. Skip adjustments for
                     // the root pinned task, they are handled separately in the
-                    // PinnedStackController.
+                    // PinnedTaskController.
                     windowFrames.mContainingFrame.bottom = windowFrames.mParentFrame.bottom;
                 }
             }
