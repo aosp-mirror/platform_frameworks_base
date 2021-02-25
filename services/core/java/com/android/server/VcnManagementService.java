@@ -644,18 +644,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 android.Manifest.permission.NETWORK_FACTORY,
                 "Must have permission NETWORK_FACTORY to register a policy listener");
 
-        PolicyListenerBinderDeath listenerBinderDeath = new PolicyListenerBinderDeath(listener);
+        Binder.withCleanCallingIdentity(() -> {
+            PolicyListenerBinderDeath listenerBinderDeath = new PolicyListenerBinderDeath(listener);
 
-        synchronized (mLock) {
-            mRegisteredPolicyListeners.put(listener.asBinder(), listenerBinderDeath);
+            synchronized (mLock) {
+                mRegisteredPolicyListeners.put(listener.asBinder(), listenerBinderDeath);
 
-            try {
-                listener.asBinder().linkToDeath(listenerBinderDeath, 0 /* flags */);
-            } catch (RemoteException e) {
-                // Remote binder already died - cleanup registered Listener
-                listenerBinderDeath.binderDied();
+                try {
+                    listener.asBinder().linkToDeath(listenerBinderDeath, 0 /* flags */);
+                } catch (RemoteException e) {
+                    // Remote binder already died - cleanup registered Listener
+                    listenerBinderDeath.binderDied();
+                }
             }
-        }
+        });
     }
 
     /** Removes the provided listener from receiving VcnUnderlyingNetworkPolicy updates. */
@@ -665,14 +667,31 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
         requireNonNull(listener, "listener was null");
 
-        synchronized (mLock) {
-            PolicyListenerBinderDeath listenerBinderDeath =
-                    mRegisteredPolicyListeners.remove(listener.asBinder());
+        Binder.withCleanCallingIdentity(() -> {
+            synchronized (mLock) {
+                PolicyListenerBinderDeath listenerBinderDeath =
+                        mRegisteredPolicyListeners.remove(listener.asBinder());
 
-            if (listenerBinderDeath != null) {
-                listener.asBinder().unlinkToDeath(listenerBinderDeath, 0 /* flags */);
+                if (listenerBinderDeath != null) {
+                    listener.asBinder().unlinkToDeath(listenerBinderDeath, 0 /* flags */);
+                }
             }
+        });
+    }
+
+    private int getSubIdForNetworkCapabilities(@NonNull NetworkCapabilities networkCapabilities) {
+        if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                && networkCapabilities.getNetworkSpecifier() instanceof TelephonyNetworkSpecifier) {
+            TelephonyNetworkSpecifier telephonyNetworkSpecifier =
+                    (TelephonyNetworkSpecifier) networkCapabilities.getNetworkSpecifier();
+            return telephonyNetworkSpecifier.getSubscriptionId();
+        } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                && networkCapabilities.getTransportInfo() instanceof WifiInfo) {
+            WifiInfo wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
+            return mDeps.getSubIdForWifiInfo(wifiInfo);
         }
+
+        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 
     /**
@@ -692,51 +711,47 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 "Must have permission NETWORK_FACTORY or be the SystemServer to get underlying"
                         + " Network policies");
 
-        // Defensive copy in case this call is in-process and the given NetworkCapabilities mutates
-        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+        return Binder.withCleanCallingIdentity(() -> {
+            // Defensive copy in case this call is in-process and the given NetworkCapabilities
+            // mutates
+            final NetworkCapabilities ncCopy = new NetworkCapabilities(networkCapabilities);
 
-        int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                && networkCapabilities.getNetworkSpecifier() instanceof TelephonyNetworkSpecifier) {
-            TelephonyNetworkSpecifier telephonyNetworkSpecifier =
-                    (TelephonyNetworkSpecifier) networkCapabilities.getNetworkSpecifier();
-            subId = telephonyNetworkSpecifier.getSubscriptionId();
-        } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                && networkCapabilities.getTransportInfo() instanceof WifiInfo) {
-            WifiInfo wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
-            subId = mDeps.getSubIdForWifiInfo(wifiInfo);
-        }
+            final int subId = getSubIdForNetworkCapabilities(ncCopy);
+            boolean isVcnManagedNetwork = false;
+            boolean isRestrictedCarrierWifi = false;
+            if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                synchronized (mLock) {
+                    ParcelUuid subGroup = mLastSnapshot.getGroupForSubId(subId);
 
-        boolean isVcnManagedNetwork = false;
-        boolean isRestrictedCarrierWifi = false;
-        if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            synchronized (mLock) {
-                ParcelUuid subGroup = mLastSnapshot.getGroupForSubId(subId);
+                    final Vcn vcn = mVcns.get(subGroup);
+                    if (vcn != null) {
+                        if (vcn.isActive()) {
+                            isVcnManagedNetwork = true;
+                        }
 
-                Vcn vcn = mVcns.get(subGroup);
-                if (vcn != null) {
-                    if (vcn.isActive()) {
-                        isVcnManagedNetwork = true;
-                    }
-
-                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                        // Carrier WiFi always restricted if VCN exists (even in safe mode).
-                        isRestrictedCarrierWifi = true;
+                        if (ncCopy.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                            // Carrier WiFi always restricted if VCN exists (even in safe mode).
+                            isRestrictedCarrierWifi = true;
+                        }
                     }
                 }
             }
-        }
 
-        if (isVcnManagedNetwork) {
-            networkCapabilities.removeCapability(
-                    NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
-        }
+            final NetworkCapabilities.Builder ncBuilder = new NetworkCapabilities.Builder(ncCopy);
 
-        if (isRestrictedCarrierWifi) {
-            networkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-        }
+            if (isVcnManagedNetwork) {
+                ncBuilder.removeCapability(
+                        NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+            }
 
-        return new VcnUnderlyingNetworkPolicy(false /* isTearDownRequested */, networkCapabilities);
+            if (isRestrictedCarrierWifi) {
+                ncBuilder.removeCapability(
+                        NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+            }
+
+            return new VcnUnderlyingNetworkPolicy(
+                    false /* isTearDownRequested */, ncBuilder.build());
+        });
     }
 
     /** Binder death recipient used to remove registered VcnStatusCallbacks. */
