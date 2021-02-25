@@ -71,16 +71,16 @@ class RotateTwoLaunchedAppsInAppPairsMode(
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun appPairsDividerIsVisible() = testSpec.appPairsDividerIsVisible()
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0,
         testSpec.config.endRotation)
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0,
         testSpec.config.endRotation)
