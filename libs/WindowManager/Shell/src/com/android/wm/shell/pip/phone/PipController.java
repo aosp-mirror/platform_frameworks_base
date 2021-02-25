@@ -93,8 +93,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     protected PhonePipMenuController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
-    protected PinnedStackListenerForwarder.PinnedStackListener mPinnedStackListener =
-            new PipControllerPinnedStackListener();
+    protected PinnedStackListenerForwarder.PinnedTaskListener mPinnedTaskListener =
+            new PipControllerPinnedTaskListener();
 
     /**
      * Handler for display rotation changes.
@@ -178,8 +178,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /**
      * Handler for messages from the PIP controller.
      */
-    private class PipControllerPinnedStackListener extends
-            PinnedStackListenerForwarder.PinnedStackListener {
+    private class PipControllerPinnedTaskListener extends
+            PinnedStackListenerForwarder.PinnedTaskListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
@@ -310,7 +310,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
 
         try {
-            mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
+            mWindowManagerShellWrapper.addPinnedStackListener(mPinnedTaskListener);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to register pinned stack listener", e);
         }

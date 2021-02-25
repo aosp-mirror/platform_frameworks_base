@@ -105,7 +105,7 @@ class WindowManagerProxy {
             synchronized (mDockedRect) {
                 mTouchableRegion.set(region);
             }
-            WindowManagerGlobal.getWindowManagerService().setDockedStackDividerTouchRegion(
+            WindowManagerGlobal.getWindowManagerService().setDockedTaskDividerTouchRegion(
                     mTouchableRegion);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to set touchable region: " + e);

@@ -251,7 +251,7 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Simulate the window is in split screen primary stack and the current state is
         // minimized and home stack is resizable, so that we should ignore input for the stack.
-        final DockedStackDividerController controller =
+        final DockedTaskDividerController controller =
                 mDisplayContent.getDockedDividerController();
         final Task stack = createTaskStackOnDisplay(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 ACTIVITY_TYPE_STANDARD, mDisplayContent);
