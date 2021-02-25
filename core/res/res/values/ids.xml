@@ -247,4 +247,10 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_IME_ENTER}. -->
   <item type="id" name="accessibilityActionImeEnter" />
+
+  <!-- View tag for remote views to store the index of the next child when adding nested remote views dynamically. -->
+  <item type="id" name="remote_views_next_child" />
+
+  <!-- View tag associating a view with its stable id for potential recycling. -->
+  <item type="id" name = "remote_views_stable_id" />
 </resources>
