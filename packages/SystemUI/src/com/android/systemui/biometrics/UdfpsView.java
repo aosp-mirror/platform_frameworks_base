@@ -136,17 +136,13 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     }
 
     @Override
-    public void onExpandedChanged(boolean isExpanded) {
-        mNotificationShadeExpanded = isExpanded;
-    }
-
-    @Override
     public void onStateChanged(int newState) {
         mStatusBarState = newState;
     }
 
     @Override
     public void onExpansionChanged(float expansion, boolean expanded) {
+        mNotificationShadeExpanded = expanded;
         mAnimationView.onExpansionChanged(expansion, expanded);
     }
 
@@ -190,10 +186,6 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
                 canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
             }
         }
-    }
-
-    RectF getSensorRect() {
-        return new RectF(mSensorRect);
     }
 
     void setDebugMessage(String message) {
