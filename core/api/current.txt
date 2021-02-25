@@ -5610,6 +5610,7 @@ package android.app {
     field public static final int DEFAULT_LIGHTS = 4; // 0x4
     field public static final int DEFAULT_SOUND = 1; // 0x1
     field public static final int DEFAULT_VIBRATE = 2; // 0x2
+    field public static final String EXTRA_ANSWER_COLOR = "android.answerColor";
     field public static final String EXTRA_ANSWER_INTENT = "android.answerIntent";
     field public static final String EXTRA_AUDIO_CONTENTS_URI = "android.audioContents";
     field public static final String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
@@ -5621,6 +5622,7 @@ package android.app {
     field public static final String EXTRA_COLORIZED = "android.colorized";
     field public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
     field public static final String EXTRA_CONVERSATION_TITLE = "android.conversationTitle";
+    field public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
     field public static final String EXTRA_DECLINE_INTENT = "android.declineIntent";
     field public static final String EXTRA_HANG_UP_INTENT = "android.hangUpIntent";
     field public static final String EXTRA_HISTORIC_MESSAGES = "android.messages.historic";
@@ -5908,6 +5910,8 @@ package android.app {
     method @NonNull public static android.app.Notification.CallStyle forIncomingCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent, @NonNull android.app.PendingIntent);
     method @NonNull public static android.app.Notification.CallStyle forOngoingCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent);
     method @NonNull public static android.app.Notification.CallStyle forScreeningCall(@NonNull android.app.Person, @NonNull android.app.PendingIntent, @NonNull android.app.PendingIntent);
+    method @NonNull public android.app.Notification.CallStyle setAnswerButtonColorHint(@ColorInt int);
+    method @NonNull public android.app.Notification.CallStyle setDeclineButtonColorHint(@ColorInt int);
     method @NonNull public android.app.Notification.CallStyle setVerificationIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.app.Notification.CallStyle setVerificationText(@Nullable CharSequence);
   }
@@ -8371,7 +8375,9 @@ package android.appwidget {
     method protected android.view.View getDefaultView();
     method protected android.view.View getErrorView();
     method protected void prepareView(android.view.View);
+    method public void resetColorResources();
     method public void setAppWidget(int, android.appwidget.AppWidgetProviderInfo);
+    method public void setColorResources(@NonNull android.util.SparseIntArray);
     method public void setCurrentSize(@NonNull android.graphics.PointF);
     method public void setExecutor(java.util.concurrent.Executor);
     method public void setOnLightBackground(boolean);
@@ -8452,7 +8458,7 @@ package android.appwidget {
     method public int describeContents();
     method public final android.os.UserHandle getProfile();
     method @NonNull public android.content.pm.ActivityInfo getProviderInfo();
-    method @Nullable public final String loadDescription(@NonNull android.content.Context);
+    method @Nullable public final CharSequence loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
     method public final android.graphics.drawable.Drawable loadPreviewImage(@NonNull android.content.Context, int);
@@ -8470,7 +8476,7 @@ package android.appwidget {
     field public static final int WIDGET_FEATURE_RECONFIGURABLE = 1; // 0x1
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
-    field @IdRes public int descriptionResource;
+    field @IdRes public int descriptionRes;
     field public int icon;
     field public int initialKeyguardLayout;
     field public int initialLayout;
@@ -10238,6 +10244,7 @@ package android.content {
     field public static final String SYNC_EXTRAS_MANUAL = "force";
     field public static final String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
     field public static final String SYNC_EXTRAS_REQUIRE_CHARGING = "require_charging";
+    field public static final String SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB = "schedule_as_expedited_job";
     field public static final String SYNC_EXTRAS_UPLOAD = "upload";
     field public static final int SYNC_OBSERVER_TYPE_ACTIVE = 4; // 0x4
     field public static final int SYNC_OBSERVER_TYPE_PENDING = 2; // 0x2
@@ -11560,6 +11567,7 @@ package android.content {
     method public android.content.SyncRequest.Builder setManual(boolean);
     method public android.content.SyncRequest.Builder setNoRetry(boolean);
     method public android.content.SyncRequest.Builder setRequiresCharging(boolean);
+    method @NonNull public android.content.SyncRequest.Builder setScheduleAsExpeditedJob(boolean);
     method public android.content.SyncRequest.Builder setSyncAdapter(android.accounts.Account, String);
     method public android.content.SyncRequest.Builder syncOnce();
     method public android.content.SyncRequest.Builder syncPeriodic(long, long);
@@ -18559,23 +18567,6 @@ package android.hardware.camera2.params {
 
 package android.hardware.display {
 
-  public final class DeviceProductInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getConnectionToSinkType();
-    method public int getManufactureWeek();
-    method public int getManufactureYear();
-    method @NonNull public String getManufacturerPnpId();
-    method public int getModelYear();
-    method @Nullable public String getName();
-    method @NonNull public String getProductId();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CONNECTION_TO_SINK_BUILT_IN = 1; // 0x1
-    field public static final int CONNECTION_TO_SINK_DIRECT = 2; // 0x2
-    field public static final int CONNECTION_TO_SINK_TRANSITIVE = 3; // 0x3
-    field public static final int CONNECTION_TO_SINK_UNKNOWN = 0; // 0x0
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.DeviceProductInfo> CREATOR;
-  }
-
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int);
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int, @Nullable android.hardware.display.VirtualDisplay.Callback, @Nullable android.os.Handler);
@@ -21110,7 +21101,7 @@ package android.media {
     method @NonNull public String getDiagnosticInfo();
   }
 
-  public final class MediaCodec implements android.media.metrics.PlaybackComponent {
+  public final class MediaCodec {
     method public void configure(@Nullable android.media.MediaFormat, @Nullable android.view.Surface, @Nullable android.media.MediaCrypto, int);
     method public void configure(@Nullable android.media.MediaFormat, @Nullable android.view.Surface, int, @Nullable android.media.MediaDescrambler);
     method @NonNull public static android.media.MediaCodec createByCodecName(@NonNull String) throws java.io.IOException;
@@ -21136,7 +21127,6 @@ package android.media {
     method @NonNull public android.media.MediaFormat getOutputFormat(int);
     method @NonNull public android.media.MediaCodec.OutputFrame getOutputFrame(int);
     method @Nullable public android.media.Image getOutputImage(int);
-    method public String getPlaybackId();
     method @NonNull public android.media.MediaCodec.QueueRequest getQueueRequest(int);
     method @Nullable public static android.media.Image mapHardwareBuffer(@NonNull android.hardware.HardwareBuffer);
     method public void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
@@ -21152,7 +21142,6 @@ package android.media {
     method public void setOnFrameRenderedListener(@Nullable android.media.MediaCodec.OnFrameRenderedListener, @Nullable android.os.Handler);
     method public void setOutputSurface(@NonNull android.view.Surface);
     method public void setParameters(@Nullable android.os.Bundle);
-    method public void setPlaybackId(@NonNull String);
     method public void setVideoScalingMode(int);
     method public void signalEndOfInputStream();
     method public void start();
@@ -26303,6 +26292,7 @@ package android.net {
     field public static final int NET_CAPABILITY_CBS = 5; // 0x5
     field public static final int NET_CAPABILITY_DUN = 2; // 0x2
     field public static final int NET_CAPABILITY_EIMS = 10; // 0xa
+    field public static final int NET_CAPABILITY_ENTERPRISE = 29; // 0x1d
     field public static final int NET_CAPABILITY_FOREGROUND = 19; // 0x13
     field public static final int NET_CAPABILITY_FOTA = 3; // 0x3
     field public static final int NET_CAPABILITY_IA = 7; // 0x7
@@ -30670,8 +30660,8 @@ package android.os {
   }
 
   public final class BugreportManager {
-    method public void cancelBugreport();
-    method public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+    method @WorkerThread public void cancelBugreport();
+    method @WorkerThread public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
 
   public abstract static class BugreportManager.BugreportCallback {
@@ -35133,6 +35123,7 @@ package android.provider {
     field public static final String ACTION_QUICK_ACCESS_WALLET_SETTINGS = "android.settings.QUICK_ACCESS_WALLET_SETTINGS";
     field public static final String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
     field public static final String ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
+    field public static final String ACTION_REQUEST_SCHEDULE_EXACT_ALARM = "android.settings.REQUEST_SCHEDULE_EXACT_ALARM";
     field public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE = "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
     field public static final String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
     field public static final String ACTION_SECURITY_SETTINGS = "android.settings.SECURITY_SETTINGS";
@@ -41249,6 +41240,7 @@ package android.telephony {
     field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
     field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
     field public static final int ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED = 65; // 0x41
+    field public static final int ALL_MATCHING_RULES_FAILED = 2254; // 0x8ce
     field public static final int APN_DISABLED = 2045; // 0x7fd
     field public static final int APN_DISALLOWED_ON_ROAMING = 2059; // 0x80b
     field public static final int APN_MISMATCH = 2054; // 0x806
@@ -41398,6 +41390,7 @@ package android.telephony {
     field public static final int LTE_NAS_SERVICE_REQUEST_FAILED = 2117; // 0x845
     field public static final int LTE_THROTTLING_NOT_REQUIRED = 2127; // 0x84f
     field public static final int MAC_FAILURE = 2183; // 0x887
+    field public static final int MATCH_ALL_RULE_NOT_ALLOWED = 2253; // 0x8cd
     field public static final int MAXIMIUM_NSAPIS_EXCEEDED = 2157; // 0x86d
     field public static final int MAXINUM_SIZE_OF_L2_MESSAGE_EXCEEDED = 2166; // 0x876
     field public static final int MAX_ACCESS_PROBE = 2079; // 0x81f
@@ -46713,7 +46706,6 @@ package android.view {
     method public long getAppVsyncOffsetNanos();
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method @Nullable public android.view.DisplayCutout getCutout();
-    method @Nullable public android.hardware.display.DeviceProductInfo getDeviceProductInfo();
     method public int getDisplayId();
     method public int getFlags();
     method public android.view.Display.HdrCapabilities getHdrCapabilities();
@@ -53400,6 +53392,7 @@ package android.widget {
     method public int getCheckedItemPosition();
     method public android.util.SparseBooleanArray getCheckedItemPositions();
     method public int getChoiceMode();
+    method public int getEdgeEffectType();
     method public int getListPaddingBottom();
     method public int getListPaddingLeft();
     method public int getListPaddingRight();
@@ -53441,6 +53434,7 @@ package android.widget {
     method public void setChoiceMode(int);
     method public void setDrawSelectorOnTop(boolean);
     method public void setEdgeEffectColor(@ColorInt int);
+    method public void setEdgeEffectType(int);
     method public void setFastScrollAlwaysVisible(boolean);
     method public void setFastScrollEnabled(boolean);
     method public void setFastScrollStyle(int);
@@ -54449,6 +54443,7 @@ package android.widget {
     method public boolean executeKeyEvent(android.view.KeyEvent);
     method public void fling(int);
     method public boolean fullScroll(int);
+    method public int getEdgeEffectType();
     method @ColorInt public int getLeftEdgeEffectColor();
     method public int getMaxScrollAmount();
     method @ColorInt public int getRightEdgeEffectColor();
@@ -54456,6 +54451,7 @@ package android.widget {
     method public boolean isSmoothScrollingEnabled();
     method public boolean pageScroll(int);
     method public void setEdgeEffectColor(@ColorInt int);
+    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setLeftEdgeEffectColor(@ColorInt int);
     method public void setRightEdgeEffectColor(@ColorInt int);
@@ -55309,6 +55305,7 @@ package android.widget {
     method public void fling(int);
     method public boolean fullScroll(int);
     method @ColorInt public int getBottomEdgeEffectColor();
+    method public int getEdgeEffectType();
     method public int getMaxScrollAmount();
     method @ColorInt public int getTopEdgeEffectColor();
     method public boolean isFillViewport();
@@ -55317,6 +55314,7 @@ package android.widget {
     method public void scrollToDescendant(@NonNull android.view.View);
     method public void setBottomEdgeEffectColor(@ColorInt int);
     method public void setEdgeEffectColor(@ColorInt int);
+    method public void setEdgeEffectType(int);
     method public void setFillViewport(boolean);
     method public void setSmoothScrollingEnabled(boolean);
     method public void setTopEdgeEffectColor(@ColorInt int);

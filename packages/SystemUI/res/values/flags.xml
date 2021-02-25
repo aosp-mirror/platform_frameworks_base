@@ -42,4 +42,6 @@
     <bool name="flag_lockscreen_animations">false</bool>
 
     <bool name="flag_toast_style">false</bool>
+
+    <bool name="flag_navigation_bar_overlay">false</bool>
 </resources>

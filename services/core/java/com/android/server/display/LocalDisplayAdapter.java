@@ -718,7 +718,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 setDisplayState(Display.STATE_ON);
                                 currentState = Display.STATE_ON;
                             } else {
-                                return; // old state and new state is off
+                                if (oldState == Display.STATE_UNKNOWN) {
+                                    // There's no guarantee about what the initial state is
+                                    // at startup, so we have to set it if previous was UNKNOWN.
+                                    setDisplayState(state);
+                                }
+                                return;
                             }
                         }
 

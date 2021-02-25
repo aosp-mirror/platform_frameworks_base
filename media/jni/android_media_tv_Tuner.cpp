@@ -226,7 +226,6 @@ void LnbClientCallbackImpl::onEvent(const LnbEventType lnbEventType) {
     } else {
         ALOGE("LnbClientCallbackImpl::onEvent:"
                 "Lnb object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mLnbObj);
     }
 }
 
@@ -245,7 +244,6 @@ void LnbClientCallbackImpl::onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessa
     } else {
         ALOGE("LnbClientCallbackImpl::onDiseqcMessage:"
                 "Lnb object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mLnbObj);
     }
 }
 
@@ -276,7 +274,6 @@ void DvrClientCallbackImpl::onRecordStatus(RecordStatus status) {
     } else {
         ALOGE("DvrClientCallbackImpl::onRecordStatus:"
                 "Dvr object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mDvrObj);
     }
 }
 
@@ -292,7 +289,6 @@ void DvrClientCallbackImpl::onPlaybackStatus(PlaybackStatus status) {
     } else {
         ALOGE("DvrClientCallbackImpl::onPlaybackStatus:"
                 "Dvr object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mDvrObj);
     }
 }
 
@@ -846,7 +842,6 @@ void FilterClientCallbackImpl::onFilterEvent_1_1(const DemuxFilterEvent& filterE
     } else {
         ALOGE("FilterClientCallbackImpl::onFilterEvent_1_1:"
                 "Filter object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mFilterObj);
     }
 }
 
@@ -871,7 +866,6 @@ void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
     } else {
         ALOGE("FilterClientCallbackImpl::onFilterStatus:"
                 "Filter object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mFilterObj);
     }
 }
 
@@ -907,7 +901,6 @@ void FrontendClientCallbackImpl::onEvent(FrontendEventType frontendEventType) {
     } else {
         ALOGE("FrontendClientCallbackImpl::onEvent:"
                 "Frontend object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mObject);
     }
 }
 
@@ -920,7 +913,6 @@ void FrontendClientCallbackImpl::onScanMessage(
     if (env->IsSameObject(frontend, nullptr)) {
         ALOGE("FrontendClientCallbackImpl::onScanMessage:"
                 "Frontend object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mObject);
         return;
     }
     switch(type) {
@@ -1078,7 +1070,6 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
     if (env->IsSameObject(frontend, nullptr)) {
         ALOGE("FrontendClientCallbackImpl::onScanMessageExt1_1:"
                 "Frontend object has been freed. Ignoring callback.");
-        env->DeleteWeakGlobalRef(mObject);
         return;
     }
     switch(type) {
@@ -1243,7 +1234,6 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
     if (env->IsSameObject(tuner, nullptr)) {
         ALOGE("openFrontendByHandle"
                 "Tuner object has been freed. Failed to open frontend.");
-        env->DeleteWeakGlobalRef(mObject);
         return NULL;
     }
 
@@ -2211,6 +2201,10 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         intBandwidth = static_cast<jint>(bandwidth.dvbt());
                         break;
                     }
+                    case FrontendBandwidth::hidl_discriminator::dvbc: {
+                        intBandwidth = static_cast<jint>(bandwidth.dvbc());
+                        break;
+                    }
                     case FrontendBandwidth::hidl_discriminator::isdbt: {
                         intBandwidth = static_cast<jint>(bandwidth.isdbt());
                         break;
@@ -2731,12 +2725,10 @@ static FrontendSettings getDvbsFrontendSettings(JNIEnv *env, const jobject& sett
     FrontendDvbsVcmMode vcmMode =
             static_cast<FrontendDvbsVcmMode>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mVcmMode", "I")));
-    FrontendDvbsCodeRate coderate = getDvbsCodeRate(env, settings);
 
     FrontendDvbsSettings frontendDvbsSettings {
             .frequency = freq,
             .modulation = modulation,
-            .coderate = coderate,
             .symbolRate = symbolRate,
             .rolloff = rolloff,
             .pilot = pilot,
@@ -2744,6 +2736,13 @@ static FrontendSettings getDvbsFrontendSettings(JNIEnv *env, const jobject& sett
             .standard = standard,
             .vcmMode = vcmMode,
     };
+
+    jobject jcodeRate = env->GetObjectField(settings, env->GetFieldID(clazz, "mCodeRate",
+            "Landroid/media/tv/tuner/frontend/DvbsCodeRate;"));
+    if (jcodeRate != NULL) {
+        frontendDvbsSettings.coderate = getDvbsCodeRate(env, settings);
+    }
+
     frontendSettings.dvbs(frontendDvbsSettings);
     return frontendSettings;
 }
@@ -2755,7 +2754,7 @@ static void getDvbsFrontendSettingsExt1_1(JNIEnv *env, const jobject& settings,
             static_cast<FrontendDvbsScanType>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mScanType", "I")));
     bool isDiseqcRxMessage = static_cast<bool>(env->GetBooleanField(
-            settings, env->GetFieldID(clazz, "mIsDiseqcRxMessage", "B")));
+            settings, env->GetFieldID(clazz, "mIsDiseqcRxMessage", "Z")));
 
     FrontendDvbsSettingsExt1_1 dvbsExt1_1 {
         .scanType = scanType,
@@ -2994,6 +2993,10 @@ static void getDtmbFrontendSettings(JNIEnv *env, const jobject& settings,
 
 static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject settings) {
     ALOGD("getFrontendSettings %d", type);
+
+    if (type == static_cast<int>(::android::hardware::tv::tuner::V1_1::FrontendType::DTMB)) {
+        return FrontendSettings();
+    }
 
     FrontendType feType = static_cast<FrontendType>(type);
     switch(feType) {

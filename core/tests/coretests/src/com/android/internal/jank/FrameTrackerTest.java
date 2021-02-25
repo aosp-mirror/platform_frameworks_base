@@ -105,7 +105,8 @@ public class FrameTrackerTest {
         mTracker = Mockito.spy(
                 new FrameTracker(session, handler, mRenderer, mViewRootWrapper,
                         mSurfaceControlWrapper, mChoreographer, mWrapper,
-                        /*traceThresholdMissedFrames=*/ 1, /*traceThresholdFrameTimeMillis=*/ -1));
+                        /*traceThresholdMissedFrames=*/ 1, /*traceThresholdFrameTimeMillis=*/ -1,
+                        null));
         doNothing().when(mTracker).triggerPerfetto();
     }
 

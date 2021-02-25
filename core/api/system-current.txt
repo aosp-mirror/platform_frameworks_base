@@ -1826,7 +1826,7 @@ package android.bluetooth {
     method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public android.bluetooth.BufferConstraints getBufferConstraints();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getDynamicBufferSupport();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setBufferMillis(int, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setBufferLengthMillis(int, int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD = 1; // 0x1
     field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2; // 0x2
@@ -2032,7 +2032,7 @@ package android.bluetooth {
   public final class BufferConstraints implements android.os.Parcelable {
     ctor public BufferConstraints(@NonNull java.util.List<android.bluetooth.BufferConstraint>);
     method public int describeContents();
-    method @Nullable public android.bluetooth.BufferConstraint getCodec(int);
+    method @Nullable public android.bluetooth.BufferConstraint forCodec(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int BUFFER_CODEC_MAX_NUM = 32; // 0x20
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BufferConstraints> CREATOR;
@@ -4688,6 +4688,7 @@ package android.location {
   }
 
   public class LocationManager {
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void addProviderRequestChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @Nullable public String getExtraLocationControllerPackage();
@@ -4702,7 +4703,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String, @Nullable String);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.UPDATE_APP_OPS_STATS}) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerProviderRequestListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.Listener);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void removeProviderRequestChangedListener(@NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
@@ -4711,7 +4712,6 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void unregisterProviderRequestListener(@NonNull android.location.provider.ProviderRequest.Listener);
   }
 
   public final class LocationRequest implements android.os.Parcelable {
@@ -4861,7 +4861,7 @@ package android.location.provider {
     method @NonNull public android.location.provider.ProviderRequest.Builder setWorkSource(@NonNull android.os.WorkSource);
   }
 
-  public static interface ProviderRequest.Listener {
+  public static interface ProviderRequest.ChangedListener {
     method public void onProviderRequestChanged(@NonNull String, @NonNull android.location.provider.ProviderRequest);
   }
 
@@ -8285,7 +8285,7 @@ package android.os {
 
   public final class BugreportManager {
     method @RequiresPermission(android.Manifest.permission.DUMP) public void requestBugreport(@NonNull android.os.BugreportParams, @Nullable CharSequence, @Nullable CharSequence);
-    method @RequiresPermission(android.Manifest.permission.DUMP) public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+    method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
 
   public final class BugreportParams {
@@ -10764,7 +10764,7 @@ package android.telecom {
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
-    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(@NonNull android.telecom.Connection.CallFilteringCompletionInfo);
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
@@ -10778,6 +10778,16 @@ package android.telecom {
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
     field public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 64; // 0x40
     field public static final int PROPERTY_REMOTELY_HOSTED = 2048; // 0x800
+  }
+
+  public static final class Connection.CallFilteringCompletionInfo implements android.os.Parcelable {
+    ctor public Connection.CallFilteringCompletionInfo(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, @Nullable android.content.ComponentName);
+    method public int describeContents();
+    method @Nullable public android.telecom.CallScreeningService.CallResponse getCallResponse();
+    method @Nullable public android.content.ComponentName getCallScreeningComponent();
+    method public boolean isBlocked();
+    method public boolean isInContacts();
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.Connection.CallFilteringCompletionInfo> CREATOR;
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
@@ -10941,7 +10951,7 @@ package android.telecom {
   }
 
   public final class RemoteConnection {
-    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean, @Nullable android.telecom.CallScreeningService.CallResponse, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(@NonNull android.telecom.Connection.CallFilteringCompletionInfo);
     method @Deprecated public void setAudioState(android.telecom.AudioState);
   }
 
@@ -12252,6 +12262,7 @@ package android.telephony.data {
     method public long getRetryDurationMillis();
     method @Nullable public android.telephony.data.SliceInfo getSliceInfo();
     method @Deprecated public int getSuggestedRetryTime();
+    method @NonNull public java.util.List<android.telephony.data.TrafficDescriptor> getTrafficDescriptors();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
     field public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 1; // 0x1
@@ -12287,6 +12298,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setTrafficDescriptors(@NonNull java.util.List<android.telephony.data.TrafficDescriptor>);
   }
 
   public final class DataProfile implements android.os.Parcelable {
@@ -12357,7 +12369,7 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
@@ -12454,6 +12466,15 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setTransportType(int);
+  }
+
+  public final class TrafficDescriptor implements android.os.Parcelable {
+    ctor public TrafficDescriptor(@Nullable String, @Nullable String);
+    method public int describeContents();
+    method @Nullable public String getDnn();
+    method @Nullable public String getOsAppId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
   }
 
 }
@@ -14275,21 +14296,10 @@ package android.uwb {
 
   public final class UwbManager {
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public long elapsedRealtimeResolutionNanos();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getAngleOfArrivalSupport();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerInitiatorSession();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerResponderSession();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxSimultaneousSessions();
     method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public android.os.PersistableBundle getSpecificationInfo();
-    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.List<java.lang.Integer> getSupportedChannelNumbers();
-    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.Set<java.lang.Integer> getSupportedPreambleCodeIndices();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public boolean isRangingSupported();
     method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public AutoCloseable openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D = 2; // 0x2
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL = 3; // 0x3
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL = 4; // 0x4
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE = 1; // 0x1
   }
 
   public static interface UwbManager.AdapterStateCallback {

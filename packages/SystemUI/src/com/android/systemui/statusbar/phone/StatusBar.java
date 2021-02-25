@@ -78,6 +78,7 @@ import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -276,7 +277,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     public static final boolean DEBUG = false;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
-    public static final boolean DEBUG_GESTURES = false;
+    public static final boolean DEBUG_GESTURES = Build.IS_DEBUGGABLE; // TODO(b/178277858)
+    public static final boolean DEBUG_GESTURES_VERBOSE = true;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     public static final boolean DEBUG_CAMERA_LIFT = false;
 
@@ -456,9 +458,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DisplayMetrics mDisplayMetrics;
 
     // XXX: gesture research
-    private final GestureRecorder mGestureRec = DEBUG_GESTURES
-        ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
-        : null;
+    private GestureRecorder mGestureRec = null;
 
     private final ScreenPinningRequest mScreenPinningRequest;
 
@@ -856,6 +856,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         DateTimeView.setReceiverHandler(timeTickHandler);
+
+        if (DEBUG_GESTURES) {
+            mGestureRec = new GestureRecorder(mContext.getCacheDir() + "/statusbar_gestures.dat");
+        }
     }
 
     @Override
@@ -2267,7 +2271,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean interceptTouchEvent(MotionEvent event) {
         if (DEBUG_GESTURES) {
-            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+            if (DEBUG_GESTURES_VERBOSE || event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
                         event.getActionMasked(), (int) event.getX(), (int) event.getY(),
                         mDisabled1, mDisabled2);

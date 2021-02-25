@@ -388,9 +388,11 @@ public class PeopleService extends SystemService {
         private Map<AppPredictionSessionId, SessionInfo> mSessions = new ArrayMap<>();
 
         @Override
-        public void onCreatePredictionSession(AppPredictionContext context,
+        public void onCreatePredictionSession(AppPredictionContext appPredictionContext,
                 AppPredictionSessionId sessionId) {
-            mSessions.put(sessionId, new SessionInfo(context, mDataManager, sessionId.getUserId()));
+            mSessions.put(sessionId,
+                    new SessionInfo(appPredictionContext, mDataManager, sessionId.getUserId(),
+                            getContext()));
         }
 
         @Override

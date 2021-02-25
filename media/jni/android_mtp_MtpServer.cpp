@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <utils/threads.h>
 
+#include "core_jni_helpers.h"
 #include "jni.h"
 #include <nativehelper/JNIPlatformHelp.h>
 #include "android_runtime/AndroidRuntime.h"
@@ -33,6 +34,8 @@
 #include "MtpStorage.h"
 
 using namespace android;
+
+static Mutex sMutex;
 
 // MtpServer fields
 static jfieldID field_MtpServer_nativeContext;
@@ -44,7 +47,25 @@ static jfieldID field_MtpStorage_description;
 static jfieldID field_MtpStorage_removable;
 static jfieldID field_MtpStorage_maxFileSize;
 
-static Mutex sMutex;
+// Initializer for the jfieldIDs above. This method must be invoked before accessing MtpServer and
+// MtpStorage fields.
+static void initializeJavaIDs(JNIEnv* env) {
+    static std::once_flag sJniInitialized;
+
+    std::call_once(sJniInitialized, [](JNIEnv *env) {
+        const jclass storage_clazz = FindClassOrDie(env, "android/mtp/MtpStorage");
+        field_MtpStorage_storageId = GetFieldIDOrDie(env, storage_clazz, "mStorageId", "I");
+        field_MtpStorage_path =
+                GetFieldIDOrDie(env, storage_clazz, "mPath", "Ljava/lang/String;");
+        field_MtpStorage_description =
+                GetFieldIDOrDie(env, storage_clazz, "mDescription", "Ljava/lang/String;");
+        field_MtpStorage_removable = GetFieldIDOrDie(env, storage_clazz, "mRemovable", "Z");
+        field_MtpStorage_maxFileSize = GetFieldIDOrDie(env, storage_clazz, "mMaxFileSize", "J");
+
+        const jclass server_clazz = FindClassOrDie(env, "android/mtp/MtpServer");
+        field_MtpServer_nativeContext = GetFieldIDOrDie(env, server_clazz, "mNativeContext", "J");
+    }, env);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -52,6 +73,7 @@ static Mutex sMutex;
 extern IMtpDatabase* getMtpDatabase(JNIEnv *env, jobject database);
 
 static inline MtpServer* getMtpServer(JNIEnv *env, jobject thiz) {
+    initializeJavaIDs(env);
     return (MtpServer*)env->GetLongField(thiz, field_MtpServer_nativeContext);
 }
 
@@ -60,6 +82,8 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, job
         jboolean usePtp, jstring deviceInfoManufacturer, jstring deviceInfoModel,
         jstring deviceInfoDeviceVersion, jstring deviceInfoSerialNumber)
 {
+    initializeJavaIDs(env);
+
     const char *deviceInfoManufacturerStr = env->GetStringUTFChars(deviceInfoManufacturer, NULL);
     const char *deviceInfoModelStr = env->GetStringUTFChars(deviceInfoModel, NULL);
     const char *deviceInfoDeviceVersionStr = env->GetStringUTFChars(deviceInfoDeviceVersion, NULL);
@@ -224,50 +248,6 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_mtp_MtpServer(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/mtp/MtpStorage");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpStorage");
-        return -1;
-    }
-    field_MtpStorage_storageId = env->GetFieldID(clazz, "mStorageId", "I");
-    if (field_MtpStorage_storageId == NULL) {
-        ALOGE("Can't find MtpStorage.mStorageId");
-        return -1;
-    }
-    field_MtpStorage_path = env->GetFieldID(clazz, "mPath", "Ljava/lang/String;");
-    if (field_MtpStorage_path == NULL) {
-        ALOGE("Can't find MtpStorage.mPath");
-        return -1;
-    }
-    field_MtpStorage_description = env->GetFieldID(clazz, "mDescription", "Ljava/lang/String;");
-    if (field_MtpStorage_description == NULL) {
-        ALOGE("Can't find MtpStorage.mDescription");
-        return -1;
-    }
-    field_MtpStorage_removable = env->GetFieldID(clazz, "mRemovable", "Z");
-    if (field_MtpStorage_removable == NULL) {
-        ALOGE("Can't find MtpStorage.mRemovable");
-        return -1;
-    }
-    field_MtpStorage_maxFileSize = env->GetFieldID(clazz, "mMaxFileSize", "J");
-    if (field_MtpStorage_maxFileSize == NULL) {
-        ALOGE("Can't find MtpStorage.mMaxFileSize");
-        return -1;
-    }
-
-    clazz = env->FindClass("android/mtp/MtpServer");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/mtp/MtpServer");
-        return -1;
-    }
-    field_MtpServer_nativeContext = env->GetFieldID(clazz, "mNativeContext", "J");
-    if (field_MtpServer_nativeContext == NULL) {
-        ALOGE("Can't find MtpServer.mNativeContext");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env,
                 "android/mtp/MtpServer", gMethods, NELEM(gMethods));
 }

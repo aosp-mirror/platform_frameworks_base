@@ -56,10 +56,13 @@ public final class ProviderRequest implements Parcelable {
     /**
      * Listener to be invoked when a new request is set to the provider.
      */
-    public interface Listener {
+    public interface ChangedListener {
 
         /**
          * Invoked when a new request is set.
+         *
+         * @param provider the location provider associated with the request
+         * @param request the new {@link ProviderRequest}
          */
         void onProviderRequestChanged(@NonNull String provider, @NonNull ProviderRequest request);
     }

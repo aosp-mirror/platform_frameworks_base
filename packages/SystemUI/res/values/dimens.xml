@@ -651,7 +651,7 @@
     </dimen>
 
     <!-- The height of a notification header -->
-    <dimen name="notification_header_height">53dp</dimen>
+    <dimen name="notification_header_height">@*android:dimen/notification_header_height</dimen>
 
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>

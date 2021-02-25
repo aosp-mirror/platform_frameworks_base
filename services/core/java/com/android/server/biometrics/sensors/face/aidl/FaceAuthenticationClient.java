@@ -41,6 +41,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
@@ -162,6 +163,9 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                     // to starting authentication, do not vibrate.
                     vibrateError();
                 }
+                break;
+            case BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL:
+                ReEnrollNotificationUtils.showReEnrollmentNotification(getContext());
                 break;
             default:
                 break;
