@@ -75,17 +75,21 @@ import android.util.IndentingPrintWriter;
 public interface TimeZoneDetectorStrategy extends Dumpable, Dumpable.Container {
 
     /**
-     * Sets a listener that will be triggered whenever time zone detection configuration is
+     * Adds a listener that will be triggered whenever {@link ConfigurationInternal} may have
      * changed.
      */
     void addConfigChangeListener(@NonNull ConfigurationChangeListener listener);
 
-    /** Returns the user's time zone configuration. */
+    /**
+     * Returns a snapshot of the configuration that controls time zone detector behavior for the
+     * specified user.
+     */
     @NonNull
     ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
 
     /**
-     * Returns the configuration that controls time zone detector behavior for the current user.
+     * Returns a snapshot of the configuration that controls time zone detector behavior for the
+     * current user.
      */
     @NonNull
     ConfigurationInternal getCurrentUserConfigurationInternal();

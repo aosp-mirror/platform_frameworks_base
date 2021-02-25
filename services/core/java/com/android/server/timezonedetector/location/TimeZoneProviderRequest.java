@@ -63,8 +63,6 @@ final class TimeZoneProviderRequest {
         return mSendUpdates;
     }
 
-    // TODO(b/152744911) - once there are a couple of implementations, decide whether this needs to
-    //  be passed to the TimeZoneProviderService and remove if it is not useful.
     /**
      * Returns the maximum time that the provider is allowed to initialize before it is expected to
      * send an event of any sort. Only valid when {@link #sendUpdates()} is {@code true}. Failure to
