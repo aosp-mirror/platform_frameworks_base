@@ -162,22 +162,17 @@ public final class StorageSessionController {
      *
      * @return ANR dialog delay in milliseconds
      */
-    public long getAnrDelayMillis(String packageName, int uid)
+    public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason)
             throws ExternalStorageServiceException {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
         synchronized (mLock) {
-            int size = mConnections.size();
-            for (int i = 0; i < size; i++) {
-                int key = mConnections.keyAt(i);
-                StorageUserConnection connection = mConnections.get(key);
-                if (connection != null) {
-                    long delay = connection.getAnrDelayMillis(packageName, uid);
-                    if (delay > 0) {
-                        return delay;
-                    }
-                }
-            }
+            connection = mConnections.get(userId);
         }
-        return 0;
+
+        if (connection != null) {
+            connection.notifyAnrDelayStarted(packageName, uid, tid, reason);
+        }
     }
 
     /**

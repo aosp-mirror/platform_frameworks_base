@@ -102,14 +102,6 @@ public abstract class ExternalStorageService extends Service {
      */
     public static final String EXTRA_PACKAGE_NAME = "android.service.storage.extra.package_name";
 
-    /**
-     * {@link Bundle} key for a {@link Long} value.
-     *
-     * {@hide}
-     */
-    public static final String EXTRA_ANR_TIMEOUT_MS =
-            "android.service.storage.extra.anr_timeout_ms";
-
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_SESSION_"},
         value = {FLAG_SESSION_TYPE_FUSE, FLAG_SESSION_ATTRIBUTE_INDEXABLE})
@@ -178,12 +170,12 @@ public abstract class ExternalStorageService extends Service {
     }
 
     /**
-     * Called when {@code packageName} is about to ANR
+     * Called when {@code packageName} is about to ANR. The {@link ExternalStorageService} can
+     * show a progress dialog for the {@code reason}.
      *
-     * @return ANR dialog delay in milliseconds
      */
-    public long onGetAnrDelayMillis(@NonNull String packageName, int uid) {
-        throw new UnsupportedOperationException("onGetAnrDelayMillis not implemented");
+    public void onAnrDelayStarted(@NonNull String packageName, int uid, int tid, int reason) {
+        throw new UnsupportedOperationException("onAnrDelayStarted not implemented");
     }
 
     @Override
@@ -247,14 +239,14 @@ public abstract class ExternalStorageService extends Service {
         }
 
         @Override
-        public void getAnrDelayMillis(String packageName, int uid, RemoteCallback callback)
-                throws RemoteException {
+        public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason,
+                RemoteCallback callback) throws RemoteException {
             mHandler.post(() -> {
                 try {
-                    long timeoutMs = onGetAnrDelayMillis(packageName, uid);
-                    sendTimeoutResult(packageName, timeoutMs, null /* throwable */, callback);
+                    onAnrDelayStarted(packageName, uid, tid, reason);
+                    sendResult(packageName, null /* throwable */, callback);
                 } catch (Throwable t) {
-                    sendTimeoutResult(packageName, 0 /* timeoutMs */, t, callback);
+                    sendResult(packageName, t, callback);
                 }
             });
         }
@@ -262,17 +254,6 @@ public abstract class ExternalStorageService extends Service {
         private void sendResult(String sessionId, Throwable throwable, RemoteCallback callback) {
             Bundle bundle = new Bundle();
             bundle.putString(EXTRA_SESSION_ID, sessionId);
-            if (throwable != null) {
-                bundle.putParcelable(EXTRA_ERROR, new ParcelableException(throwable));
-            }
-            callback.sendResult(bundle);
-        }
-
-        private void sendTimeoutResult(String packageName, long timeoutMs, Throwable throwable,
-                RemoteCallback callback) {
-            Bundle bundle = new Bundle();
-            bundle.putString(EXTRA_PACKAGE_NAME, packageName);
-            bundle.putLong(EXTRA_ANR_TIMEOUT_MS, timeoutMs);
             if (throwable != null) {
                 bundle.putParcelable(EXTRA_ERROR, new ParcelableException(throwable));
             }
