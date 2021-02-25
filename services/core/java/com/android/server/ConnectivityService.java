@@ -198,7 +198,6 @@ import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.AutodestructReference;
-import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
 import com.android.server.connectivity.KeepaliveTracker;
@@ -1204,9 +1203,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mSettingsObserver = new SettingsObserver(mContext, mHandler);
         registerSettingsCallbacks();
-
-        final DataConnectionStats dataConnectionStats = new DataConnectionStats(mContext, mHandler);
-        dataConnectionStats.startMonitoring();
 
         mKeepaliveTracker = new KeepaliveTracker(mContext, mHandler);
         mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager);
