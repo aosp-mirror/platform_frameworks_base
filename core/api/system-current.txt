@@ -260,7 +260,6 @@ package android {
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
     field public static final String SOUND_TRIGGER_RUN_IN_BATTERY_SAVER = "android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER";
     field public static final String START_ACTIVITIES_FROM_BACKGROUND = "android.permission.START_ACTIVITIES_FROM_BACKGROUND";
-    field public static final String START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String STATUS_BAR_SERVICE = "android.permission.STATUS_BAR_SERVICE";
     field public static final String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
     field public static final String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
