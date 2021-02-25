@@ -1644,7 +1644,7 @@
     <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->
     <string name="face_acquired_pan_too_extreme">Turn your head a little less.</string>
     <!-- Message shown during acqusition when the user's face is tilted too high or too low [CHAR LIMIT=50] -->
-    <string name="face_acquired_tilt_too_extreme">Turn your head a little less.</string>
+    <string name="face_acquired_tilt_too_extreme">Tilt your head a little less.</string>
     <!-- Message shown during acquisiton when the user's face is tilted too far left or right [CHAR LIMIT=50] -->
     <string name="face_acquired_roll_too_extreme">Turn your head a little less.</string>
     <!-- Message shown during acquisition when the user's face is obscured [CHAR LIMIT=50] -->
