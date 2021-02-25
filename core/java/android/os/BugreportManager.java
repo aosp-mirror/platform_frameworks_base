@@ -68,8 +68,11 @@ public final class BugreportManager {
     /**
      * An interface describing the callback for bugreport progress and status.
      *
-     * <p>In general, callers can expect to receive {@link #onProgress} calls as the bugreport
-     * progresses, followed by a terminal call to either {@link #onFinished} or {@link #onError}.
+     * <p>Callers will receive {@link #onProgress} calls as the bugreport progresses, followed by a
+     * terminal call to either {@link #onFinished} or {@link #onError}.
+     *
+     * <p>If an issue is encountered while starting the bugreport asynchronously, callers will
+     * receive an {@link #onError} call without any {@link #onProgress} callbacks.
      */
     public abstract static class BugreportCallback {
         /**
