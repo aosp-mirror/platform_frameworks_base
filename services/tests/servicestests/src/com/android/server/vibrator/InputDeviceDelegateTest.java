@@ -91,11 +91,30 @@ public class InputDeviceDelegateTest {
 
         mInputDeviceDelegate = new InputDeviceDelegate(
                 mContextSpy, new Handler(mTestLooper.getLooper()));
+        mInputDeviceDelegate.onSystemReady();
     }
 
     @After
     public void tearDown() throws Exception {
         InputManager.clearInstance();
+    }
+
+    @Test
+    public void beforeSystemReady_ignoresAnyUpdate() throws Exception {
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
+        InputDeviceDelegate inputDeviceDelegate = new InputDeviceDelegate(
+                mContextSpy, new Handler(mTestLooper.getLooper()));
+
+        inputDeviceDelegate.updateInputDeviceVibrators(/* vibrateInputDevices= */ true);
+        assertFalse(inputDeviceDelegate.isAvailable());
+
+        inputDeviceDelegate.onInputDeviceAdded(1);
+        assertFalse(inputDeviceDelegate.isAvailable());
+
+        updateInputDevices(new int[]{1});
+        assertFalse(inputDeviceDelegate.isAvailable());
+
+        verify(mIInputManagerMock, never()).getInputDevice(anyInt());
     }
 
     @Test

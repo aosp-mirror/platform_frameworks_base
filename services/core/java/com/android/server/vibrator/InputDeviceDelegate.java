@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.CombinedVibrationEffect;
@@ -33,7 +34,11 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
 
     private final Object mLock = new Object();
     private final Handler mHandler;
-    private final InputManager mInputManager;
+    private final Context mContext;
+
+    @GuardedBy("mLock")
+    @Nullable
+    private InputManager mInputManager;
 
     @GuardedBy("mLock")
     private final SparseArray<VibratorManager> mInputDeviceVibrators = new SparseArray<>();
@@ -47,7 +52,13 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
 
     InputDeviceDelegate(Context context, Handler handler) {
         mHandler = handler;
-        mInputManager = context.getSystemService(InputManager.class);
+        mContext = context;
+    }
+
+    public void onSystemReady() {
+        synchronized (mLock) {
+            mInputManager = mContext.getSystemService(InputManager.class);
+        }
     }
 
     @Override
@@ -116,6 +127,10 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
      */
     public boolean updateInputDeviceVibrators(boolean vibrateInputDevices) {
         synchronized (mLock) {
+            if (mInputManager == null) {
+                // Ignore update, service not loaded yet so change cannot be applied.
+                return false;
+            }
             if (vibrateInputDevices == mShouldVibrateInputDevices) {
                 // No need to update if settings haven't changed.
                 return false;
@@ -150,6 +165,10 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
 
     private void updateInputDevice(int deviceId) {
         synchronized (mLock) {
+            if (mInputManager == null) {
+                // Ignore update, service not loaded yet so change cannot be applied.
+                return;
+            }
             if (!mShouldVibrateInputDevices) {
                 // No need to keep this device vibrator if setting is off.
                 return;
