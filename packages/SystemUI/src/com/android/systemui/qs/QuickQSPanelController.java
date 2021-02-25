@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import com.android.internal.logging.MetricsLogger;
@@ -42,8 +41,6 @@ import javax.inject.Named;
 @QSScope
 public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
 
-    private boolean mUseSideLabels;
-
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             newConfig -> {
                 int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
@@ -58,12 +55,10 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
-            DumpManager dumpManager, @Named(QS_LABELS_FLAG) boolean qsLabelsFlag,
-            FeatureFlags featureFlags
+            DumpManager dumpManager, FeatureFlags featureFlags
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager, featureFlags);
-        mUseSideLabels = qsLabelsFlag;
     }
 
     @Override
@@ -104,19 +99,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
                 break;
             }
         }
-        if (mUseSideLabels) {
-            List<QSTile> newTiles = new ArrayList<>();
-            for (int i = 0; i < tiles.size(); i += 2) {
-                newTiles.add(tiles.get(i));
-            }
-            for (int i = 1; i < tiles.size(); i += 2) {
-                newTiles.add(tiles.get(i));
-            }
-            super.setTiles(newTiles, true);
-
-        } else {
-            super.setTiles(tiles, true);
-        }
+        super.setTiles(tiles, !mQSLabelFlag);
     }
 
     /** */
