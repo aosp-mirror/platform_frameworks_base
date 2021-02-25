@@ -780,6 +780,15 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 }
             }
         }
+
+        if (association.isNotifyOnDeviceNearby()) {
+            ServiceConnector<ICompanionDeviceService> serviceConnector =
+                    mDeviceListenerServiceConnectors.forUser(association.getUserId())
+                            .get(association.getPackageName());
+            if (serviceConnector != null) {
+                serviceConnector.unbind();
+            }
+        }
     }
 
     private void updateSpecialAccessPermissionForAssociatedPackage(Association association) {

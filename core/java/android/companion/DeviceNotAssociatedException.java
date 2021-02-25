@@ -23,7 +23,7 @@ import android.annotation.Nullable;
  * An exception for a case when a given device was not
  * {@link CompanionDeviceManager#associate associated} to the calling app.
  */
-public class DeviceNotAssociatedException extends Exception {
+public class DeviceNotAssociatedException extends RuntimeException {
     /** @hide */
     public DeviceNotAssociatedException(@Nullable String deviceName) {
         super("Device not associated with the current app: " + deviceName);
