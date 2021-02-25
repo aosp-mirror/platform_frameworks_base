@@ -67,7 +67,7 @@ interface IStatusBarService
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
-    void onNotificationClear(String pkg, String tag, int id, int userId, String key,
+    void onNotificationClear(String pkg, int userId, String key,
             int dismissalSurface, int dismissalSentiment, in NotificationVisibility nv);
     void onNotificationVisibilityChanged( in NotificationVisibility[] newlyVisibleKeys,
             in NotificationVisibility[] noLongerVisibleKeys);
