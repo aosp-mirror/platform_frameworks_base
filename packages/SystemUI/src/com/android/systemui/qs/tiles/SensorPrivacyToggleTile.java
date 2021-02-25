@@ -17,7 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
-import android.hardware.SensorPrivacyManager.IndividualSensor;
+import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
@@ -49,7 +49,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     /**
      * @return Id of the sensor that will be toggled
      */
-    public abstract @IndividualSensor int getSensorId();
+    public abstract @Sensor int getSensorId();
 
     /**
      * @return icon for the QS tile
