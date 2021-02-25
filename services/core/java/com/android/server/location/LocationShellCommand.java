@@ -75,8 +75,8 @@ class LocationShellCommand extends BasicShellCommandHandler {
             case "add-test-provider": {
                 String provider = getNextArgRequired();
                 ProviderProperties properties = parseTestProviderProviderProperties();
-                mService.addTestProvider(provider, properties, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                mService.addTestProvider(provider, properties, /*locationTags*/ null,
+                        mContext.getOpPackageName(), mContext.getFeatureId());
                 return 0;
             }
             case "remove-test-provider": {

@@ -63,6 +63,7 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationManagerInternal;
+import android.location.LocationManagerInternal.OnProviderLocationTagsChangeListener;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
@@ -82,6 +83,7 @@ import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.stats.location.LocationStatsEnums;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 
@@ -255,6 +257,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     final CopyOnWriteArrayList<LocationProviderManager> mProviderManagers =
             new CopyOnWriteArrayList<>();
 
+    @GuardedBy("mLock")
+    private @Nullable OnProviderLocationTagsChangeListener mOnProviderLocationTagsChangeListener;
+
     LocationManagerService(Context context, Injector injector, LocationEventLog eventLog) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mInjector = injector;
@@ -319,8 +324,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             Preconditions.checkState(getLocationProviderManager(manager.getName()) == null);
 
             manager.startManager();
+            manager.setOnProviderLocationTagsChangeListener(
+                    mOnProviderLocationTagsChangeListener);
             if (realProvider != null) {
-
                 // custom logic wrapping all non-passive providers
                 if (manager != mPassiveManager) {
                     boolean enableStationaryThrottling = Settings.Global.getInt(
@@ -331,7 +337,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                                 mInjector, realProvider, mEventLog);
                     }
                 }
-
                 manager.setRealProvider(realProvider);
             }
             mProviderManagers.add(manager);
@@ -456,8 +461,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                     .setPowerUsage(Integer.parseInt(fragments[8]))
                     .setAccuracy(Integer.parseInt(fragments[9]))
                     .build();
-            getOrAddLocationProviderManager(name).setMockProvider(
-                    new MockLocationProvider(properties, CallerIdentity.fromContext(mContext)));
+            final LocationProviderManager manager = getOrAddLocationProviderManager(name);
+            manager.setMockProvider(new MockLocationProvider(properties,
+                    CallerIdentity.fromContext(mContext), /*locationTags*/ null));
         }
     }
 
@@ -1147,15 +1153,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addTestProvider(String provider, ProviderProperties properties,
-            String packageName, String attributionTag) {
+            List<String> locationTags, String packageName, String attributionTag) {
         // unsafe is ok because app ops will verify the package name
         CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName, attributionTag);
         if (!mInjector.getAppOpsHelper().noteOp(AppOpsManager.OP_MOCK_LOCATION, identity)) {
             return;
         }
 
-        getOrAddLocationProviderManager(provider).setMockProvider(
-                new MockLocationProvider(properties, identity));
+        final LocationProviderManager manager = getOrAddLocationProviderManager(provider);
+        manager.setMockProvider(new MockLocationProvider(properties, identity,
+                (locationTags != null) ? new ArraySet<>(locationTags) : null));
     }
 
     @Override
@@ -1391,6 +1398,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             return new LocationTime(location.getTime(), location.getElapsedRealtimeNanos());
+        }
+
+        @Override
+        public void setOnProviderLocationTagsChangeListener(
+                @Nullable OnProviderLocationTagsChangeListener listener) {
+            synchronized (mLock) {
+                mOnProviderLocationTagsChangeListener = listener;
+                final int providerCount = mProviderManagers.size();
+                for (int i = 0; i < providerCount; i++) {
+                    final LocationProviderManager manager = mProviderManagers.get(i);
+                    manager.setOnProviderLocationTagsChangeListener(listener);
+                }
+            }
         }
     }
 

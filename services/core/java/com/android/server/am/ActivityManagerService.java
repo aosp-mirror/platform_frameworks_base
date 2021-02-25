@@ -1820,6 +1820,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         ncl.start();
     }
 
+    /**
+     * Sets a policy for handling app ops.
+     *
+     * @param appOpsPolicy The policy.
+     */
+    public void setAppOpsPolicy(@Nullable CheckOpsDelegate appOpsPolicy) {
+        mAppOpsService.setAppOpsPolicy(appOpsPolicy);
+    }
+
     public IAppOpsService getAppOpsService() {
         return mAppOpsService;
     }

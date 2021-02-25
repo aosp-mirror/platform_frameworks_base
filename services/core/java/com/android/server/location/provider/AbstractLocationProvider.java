@@ -29,6 +29,7 @@ import com.android.internal.util.Preconditions;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
@@ -67,7 +68,7 @@ public abstract class AbstractLocationProvider {
          * Default state value for a location provider that is disabled with no properties and an
          * empty provider package list.
          */
-        public static final State EMPTY_STATE = new State(false, null, null);
+        public static final State EMPTY_STATE = new State(false, null, null, null);
 
         /**
          * The provider's allowed state.
@@ -84,10 +85,14 @@ public abstract class AbstractLocationProvider {
          */
         @Nullable public final CallerIdentity identity;
 
-        private State(boolean allowed, ProviderProperties properties, CallerIdentity identity) {
+        @Nullable public final Set<String> locationTags;
+
+        private State(boolean allowed, ProviderProperties properties, CallerIdentity identity,
+                Set<String> locationTags) {
             this.allowed = allowed;
             this.properties = properties;
             this.identity = identity;
+            this.locationTags = locationTags;
         }
 
         /**
@@ -97,7 +102,7 @@ public abstract class AbstractLocationProvider {
             if (allowed == this.allowed) {
                 return this;
             } else {
-                return new State(allowed, properties, identity);
+                return new State(allowed, properties, identity, locationTags);
             }
         }
 
@@ -108,7 +113,7 @@ public abstract class AbstractLocationProvider {
             if (Objects.equals(properties, this.properties)) {
                 return this;
             } else {
-                return new State(allowed, properties, identity);
+                return new State(allowed, properties, identity, locationTags);
             }
         }
 
@@ -119,9 +124,21 @@ public abstract class AbstractLocationProvider {
             if (Objects.equals(identity, this.identity)) {
                 return this;
             } else {
-                return new State(allowed, properties, identity);
+                return new State(allowed, properties, identity, locationTags);
             }
         }
+
+        /**
+         * Returns a state the same as the current but with location tags set as specified.
+         */
+        public State withLocationTags(@Nullable Set<String> locationTags) {
+            if (Objects.equals(locationTags, this.locationTags)) {
+                return this;
+            } else {
+                return new State(allowed, properties, identity, locationTags);
+            }
+        }
+
 
         @Override
         public boolean equals(Object o) {
@@ -133,12 +150,13 @@ public abstract class AbstractLocationProvider {
             }
             State state = (State) o;
             return allowed == state.allowed && properties == state.properties
-                    && Objects.equals(identity, state.identity);
+                    && Objects.equals(identity, state.identity)
+                    && Objects.equals(locationTags, state.locationTags);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(allowed, properties, identity);
+            return Objects.hash(allowed, properties, identity, locationTags);
         }
     }
 
@@ -195,13 +213,14 @@ public abstract class AbstractLocationProvider {
      * An optional identity and properties may be provided to initialize the location provider.
      */
     protected AbstractLocationProvider(Executor executor, @Nullable CallerIdentity identity,
-            @Nullable ProviderProperties properties) {
+            @Nullable ProviderProperties properties, @Nullable Set<String> locationTags) {
         Preconditions.checkArgument(identity == null || identity.getListenerId() == null);
         mExecutor = executor;
         mInternalState = new AtomicReference<>(new InternalState(null,
                 State.EMPTY_STATE
                         .withIdentity(identity)
-                        .withProperties(properties)));
+                        .withProperties(properties).withLocationTags(locationTags))
+        );
         mController = new Controller();
     }
 
@@ -278,6 +297,13 @@ public abstract class AbstractLocationProvider {
     protected void setIdentity(@Nullable CallerIdentity identity) {
         Preconditions.checkArgument(identity == null || identity.getListenerId() == null);
         setState(state -> state.withIdentity(identity));
+    }
+
+    /**
+     * Call this method to report a change in provider location tags.
+     */
+    protected void setLocationTags(@Nullable Set<String> locationTags) {
+        setState(state -> state.withLocationTags(locationTags));
     }
 
     /**
