@@ -46,7 +46,7 @@ import java.util.Set;
     private static final String ATTR_VALUE = "value";
 
     /* package */ static class Config {
-        public long lastModifiedDate;
+        public long lastModifiedMillis;
         public final Set<String> updatedFontDirs = new ArraySet<>();
         public final List<FontConfig.FontFamily> fontFamilies = new ArrayList<>();
     }
@@ -73,7 +73,7 @@ import java.util.Set;
             } else if (depth == 2) {
                 switch (tag) {
                     case TAG_LAST_MODIFIED_DATE:
-                        out.lastModifiedDate = parseLongAttribute(parser, ATTR_VALUE, 0);
+                        out.lastModifiedMillis = parseLongAttribute(parser, ATTR_VALUE, 0);
                         break;
                     case TAG_UPDATED_FONT_DIR:
                         out.updatedFontDirs.add(getAttribute(parser, ATTR_VALUE));
@@ -101,7 +101,7 @@ import java.util.Set;
 
         out.startTag(null, TAG_ROOT);
         out.startTag(null, TAG_LAST_MODIFIED_DATE);
-        out.attribute(null, ATTR_VALUE, Long.toString(config.lastModifiedDate));
+        out.attribute(null, ATTR_VALUE, Long.toString(config.lastModifiedMillis));
         out.endTag(null, TAG_LAST_MODIFIED_DATE);
         for (String dir : config.updatedFontDirs) {
             out.startTag(null, TAG_UPDATED_FONT_DIR);
