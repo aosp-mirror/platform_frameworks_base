@@ -16,17 +16,17 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.hardware.SensorPrivacyManager.IndividualSensor;
+import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 
 public interface IndividualSensorPrivacyController extends
         CallbackController<IndividualSensorPrivacyController.Callback> {
     void init();
 
-    boolean isSensorBlocked(@IndividualSensor int sensor);
+    boolean isSensorBlocked(@Sensor int sensor);
 
-    void setSensorBlocked(@IndividualSensor int sensor, boolean blocked);
+    void setSensorBlocked(@Sensor int sensor, boolean blocked);
 
     interface Callback {
-        void onSensorBlockedChanged(@IndividualSensor int sensor, boolean blocked);
+        void onSensorBlockedChanged(@Sensor int sensor, boolean blocked);
     }
 }
