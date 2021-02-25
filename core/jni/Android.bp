@@ -51,6 +51,7 @@ cc_library_shared {
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
+        ":deviceproductinfoconstants_aidl",
     ],
 
     include_dirs: [
