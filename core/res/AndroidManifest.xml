@@ -5578,6 +5578,10 @@
     <!-- Attribution for Gnss Time Update service. -->
     <attribution android:tag="GnssTimeUpdateService"
                  android:label="@string/gnss_time_update_service"/>
+    <!-- Attribution for MusicRecognitionManagerService.
+         <p>Not for use by third-party applications.</p> -->
+    <attribution android:tag="MusicRecognitionManagerService"
+        android:label="@string/music_recognition_manager_service"/>
 
     <application android:process="system"
                  android:persistent="true"
