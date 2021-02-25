@@ -36,6 +36,8 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMAT
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
@@ -208,18 +210,20 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testZeroAnimations() {
+    public void testZeroAnimations() throws Exception {
         mController.goodToGo(TRANSIT_OLD_NONE);
-        verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
+        verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
+        verify(mMockRunner).onAnimationCancelled();
     }
 
     @Test
-    public void testNotReallyStarted() {
+    public void testNotReallyStarted() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         mController.createRemoteAnimationRecord(win.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-        verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
+        verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
+        verify(mMockRunner).onAnimationCancelled();
     }
 
     @Test
@@ -250,7 +254,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testRemovedBeforeStarted() {
+    public void testRemovedBeforeStarted() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
@@ -258,7 +262,8 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                 mFinishedCallback);
         win.mActivityRecord.removeImmediately();
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
-        verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
+        verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
+        verify(mMockRunner).onAnimationCancelled();
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                 eq(adapter));
     }

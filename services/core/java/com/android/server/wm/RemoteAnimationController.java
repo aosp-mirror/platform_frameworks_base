@@ -104,11 +104,11 @@ class RemoteAnimationController implements DeathRecipient {
      */
     void goodToGo(@WindowManager.TransitionOldType int transit) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "goodToGo()");
-        if (mPendingAnimations.isEmpty() || mCanceled) {
+        if (mCanceled) {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
-                    "goodToGo(): Animation finished already, canceled=%s mPendingAnimations=%d",
-                    mCanceled, mPendingAnimations.size());
+                    "goodToGo(): Animation canceled already");
             onAnimationFinished();
+            invokeAnimationCancelled();
             return;
         }
 
@@ -120,8 +120,11 @@ class RemoteAnimationController implements DeathRecipient {
         // Create the app targets
         final RemoteAnimationTarget[] appTargets = createAppAnimations();
         if (appTargets.length == 0) {
-            ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "goodToGo(): No apps to animate");
+            ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
+                    "goodToGo(): No apps to animate, mPendingAnimations=%d",
+                    mPendingAnimations.size());
             onAnimationFinished();
+            invokeAnimationCancelled();
             return;
         }
 

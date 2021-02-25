@@ -307,6 +307,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1777196134": {
+      "message": "goodToGo(): No apps to animate, mPendingAnimations=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
     "-1770075711": {
       "message": "Adding window client %s that is dead, aborting.",
       "level": "WARN",
@@ -1981,12 +1987,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "194124419": {
-      "message": "goodToGo(): Animation finished already, canceled=%s mPendingAnimations=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
     "200829729": {
       "message": "ScreenRotationAnimation onAnimationEnd",
       "level": "DEBUG",
@@ -2082,6 +2082,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DragState.java"
+    },
+    "269976641": {
+      "message": "goodToGo(): Animation canceled already",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
     "274773837": {
       "message": "applyAnimation: anim=%s nextAppTransition=ANIM_CLIP_REVEAL transit=%s Callers=%s",
