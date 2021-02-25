@@ -18,6 +18,7 @@ package android.text;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -101,7 +102,7 @@ public final class FontConfig implements Parcelable {
      *
      * If there is no update, this return 0.
      */
-    public long getLastModifiedTimeMillis() {
+    public @CurrentTimeMillisLong long getLastModifiedTimeMillis() {
         return mLastModifiedTimeMillis;
     }
 
