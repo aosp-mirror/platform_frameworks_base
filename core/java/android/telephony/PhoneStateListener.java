@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -1573,7 +1572,7 @@ public class PhoneStateListener {
             // default implementation empty
         }
 
-        public void onAllowedNetworkTypesChanged(Map allowedNetworkTypesList) {
+        public void onAllowedNetworkTypesChanged(int reason, long allowedNetworkType) {
             // default implementation empty
         }
     }

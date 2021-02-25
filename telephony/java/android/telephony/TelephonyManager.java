@@ -139,6 +139,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Provides access to information about the telephony services on
@@ -3147,6 +3149,10 @@ public class TelephonyManager {
                 return NETWORK_TYPE_BITMASK_LTE_CA;
             case NETWORK_TYPE_NR:
                 return NETWORK_TYPE_BITMASK_NR;
+            case NETWORK_TYPE_IWLAN:
+                return NETWORK_TYPE_BITMASK_IWLAN;
+            case NETWORK_TYPE_IDEN:
+                return (1 << (NETWORK_TYPE_IDEN - 1));
             default:
                 return NETWORK_TYPE_BITMASK_UNKNOWN;
         }
@@ -8642,8 +8648,8 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
 
     /**
-     * Set the allowed network types of the device and
-     * provide the reason triggering the allowed network change.
+     * Set the allowed network types of the device and provide the reason triggering the allowed
+     * network change.
      * This can be called for following reasons
      * <ol>
      * <li>Allowed network types control by USER {@link #ALLOWED_NETWORK_TYPES_REASON_USER}
@@ -8655,10 +8661,15 @@ public class TelephonyManager {
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
+     *
+     * The functionality of this API with the parameter
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER} is the same as the API
+     * {@link TelephonyManager#setAllowedNetworkTypes}. Use this API instead of
+     * {@link TelephonyManager#setAllowedNetworkTypes}.
      * <p>
      * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
      * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
-     * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
+     * setAllowedNetworkTypesBitmap is used on the radio interface. Otherwise,
      * setPreferredNetworkTypesBitmap is used instead.
      *
      * @param reason the reason the allowed network type change is taking place
@@ -8698,21 +8709,17 @@ public class TelephonyManager {
      * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
      * specific reason.
      *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     *
      * @param reason the reason the allowed network type change is taking place
      * @return the allowed network type bitmask
      * @throws IllegalStateException    if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
             value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
+    @SystemApi
     public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
             @AllowedNetworkTypesReason int reason) {
         if (!isValidAllowedNetworkTypesReason(reason)) {
@@ -8754,6 +8761,25 @@ public class TelephonyManager {
      */
     public static @NetworkTypeBitMask long getAllNetworkTypesBitmask() {
         return NETWORK_STANDARDS_FAMILY_BITMASK_3GPP | NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2;
+    }
+
+    /**
+     * Returns a string representation of the allowed network types{@link NetworkTypeBitMask}.
+     *
+     * @param networkTypeBitmask The bitmask of allowed network types.
+     * @return the name of the allowed network types
+     * @hide
+     */
+    public static String convertNetworkTypeBitmaskToString(
+            @NetworkTypeBitMask long networkTypeBitmask) {
+        String networkTypeName = IntStream.rangeClosed(NETWORK_TYPE_GPRS, NETWORK_TYPE_NR)
+                .filter(x -> {
+                    return (networkTypeBitmask & getBitMaskForNetworkType(x))
+                            == getBitMaskForNetworkType(x);
+                })
+                .mapToObj(x -> getNetworkTypeName(x))
+                .collect(Collectors.joining("|"));
+        return TextUtils.isEmpty(networkTypeName) ? "UNKNOWN" : networkTypeName;
     }
 
     /**
@@ -12579,6 +12605,7 @@ public class TelephonyManager {
                     NETWORK_TYPE_BITMASK_LTE,
                     NETWORK_TYPE_BITMASK_LTE_CA,
                     NETWORK_TYPE_BITMASK_NR,
+                    NETWORK_TYPE_BITMASK_IWLAN
             })
     public @interface NetworkTypeBitMask {}
 
