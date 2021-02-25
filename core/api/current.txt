@@ -507,6 +507,7 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
+    field public static final int dataExtractionRules = 16844350; // 0x101063e
     field public static final int datePickerDialogTheme = 16843948; // 0x10104ac
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
