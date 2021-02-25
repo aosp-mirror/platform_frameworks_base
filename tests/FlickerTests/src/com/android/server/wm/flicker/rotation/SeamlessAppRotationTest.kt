@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -24,6 +23,7 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
@@ -58,9 +58,18 @@ class SeamlessAppRotationTest(
 ) : RotationTransition(testSpec) {
     override val testApp = SeamlessRotationAppHelper(instrumentation)
 
-    override fun getAppLaunchParams(configuration: Bundle): Map<String, String> = mapOf(
-        ActivityOptions.EXTRA_STARVE_UI_THREAD to configuration.starveUiThread.toString()
-    )
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = {
+            super.transition(this, it)
+            setup {
+                test {
+                    testApp.launchViaIntent(wmHelper,
+                        stringExtras = mapOf(
+                            ActivityOptions.EXTRA_STARVE_UI_THREAD to it.starveUiThread.toString())
+                    )
+                }
+            }
+        }
 
     @Presubmit
     @Test
@@ -115,7 +124,7 @@ class SeamlessAppRotationTest(
     @Test
     fun appLayerRotates() {
         testSpec.assertLayers {
-            this.hasVisibleRegion(testApp.`package`, startingPos)
+            this.coversExactly(startingPos, testApp.`package`)
         }
     }
 
@@ -126,12 +135,14 @@ class SeamlessAppRotationTest(
     companion object {
         private val testFactory = FlickerTestParameterFactory.getInstance()
 
-        private val Bundle.starveUiThread
-            get() = this.getBoolean(ActivityOptions.EXTRA_STARVE_UI_THREAD, false)
+        private val Map<String, Any?>.starveUiThread
+            get() = this.getOrDefault(ActivityOptions.EXTRA_STARVE_UI_THREAD, false) as Boolean
 
-        private fun FlickerTestParameter.createConfig(starveUiThread: Boolean): Bundle {
-            val config = this.config.deepCopy()
-            config.putBoolean(ActivityOptions.EXTRA_STARVE_UI_THREAD, starveUiThread)
+        private fun FlickerTestParameter.createConfig(
+            starveUiThread: Boolean
+        ): MutableMap<String, Any?> {
+            val config = this.config.toMutableMap()
+            config[ActivityOptions.EXTRA_STARVE_UI_THREAD] = starveUiThread
             return config
         }
 

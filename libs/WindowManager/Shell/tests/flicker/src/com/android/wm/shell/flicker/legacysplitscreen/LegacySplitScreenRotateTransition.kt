@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.os.Bundle
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -27,7 +26,7 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 abstract class LegacySplitScreenRotateTransition(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             setup {
                 eachRun {

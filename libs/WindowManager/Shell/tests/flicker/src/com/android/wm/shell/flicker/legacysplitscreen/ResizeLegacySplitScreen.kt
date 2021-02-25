@@ -17,13 +17,11 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.graphics.Region
-import android.os.Bundle
 import android.util.Rational
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
-import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -46,6 +44,7 @@ import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEn
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -70,7 +69,7 @@ class ResizeLegacySplitScreen(
     private val testAppTop = SimpleAppHelper(instrumentation)
     private val testAppBottom = ImeAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setup {
                 eachRun {
@@ -151,21 +150,21 @@ class ResizeLegacySplitScreen(
     @Test
     fun topAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.showsLayer(sSimpleActivity)
+            this.isVisible(sSimpleActivity)
         }
     }
 
     @Test
     fun bottomAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.showsLayer(sImeActivity)
+            this.isVisible(sImeActivity)
         }
     }
 
     @Test
     fun dividerLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.showsLayer(DOCKED_STACK_DIVIDER)
+            this.isVisible(DOCKED_STACK_DIVIDER)
         }
     }
 
@@ -183,8 +182,8 @@ class ResizeLegacySplitScreen(
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
-            this.hasVisibleRegion("SimpleActivity", topAppBounds)
-                .hasVisibleRegion("ImeActivity", bottomAppBounds)
+            this.coversExactly(topAppBounds, "SimpleActivity")
+                .coversExactly(bottomAppBounds, "ImeActivity")
         }
     }
 
@@ -203,8 +202,8 @@ class ResizeLegacySplitScreen(
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
 
-            this.hasVisibleRegion(sSimpleActivity, topAppBounds)
-                .hasVisibleRegion(sImeActivity, bottomAppBounds)
+            this.coversExactly(topAppBounds, sSimpleActivity)
+                .coversExactly(bottomAppBounds, sImeActivity)
         }
     }
 

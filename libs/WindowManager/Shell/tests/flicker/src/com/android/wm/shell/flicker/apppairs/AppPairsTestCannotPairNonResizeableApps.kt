@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.Bundle
 import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -48,7 +47,7 @@ class AppPairsTestCannotPairNonResizeableApps(
     testSpec: FlickerTestParameter
 ) : AppPairsTransition(testSpec) {
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             super.transition(this, it)
             transitions {
