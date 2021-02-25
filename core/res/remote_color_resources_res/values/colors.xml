@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Note: the values of the colors doesn't really matter (they will always be overwritten before used), but they help a lot debugging, to find out which color is where in the ARSC file. -->
+  <color name="system_primary_0">#01010101</color>
+  <color name="system_primary_50">#02020202</color>
+  <color name="system_primary_100">#03030303</color>
+  <color name="system_primary_200">#04040404</color>
+  <color name="system_primary_300">#05050505</color>
+  <color name="system_primary_400">#06060606</color>
+  <color name="system_primary_500">#07070707</color>
+  <color name="system_primary_600">#08080808</color>
+  <color name="system_primary_700">#09090909</color>
+  <color name="system_primary_800">#0a0a0a0a</color>
+  <color name="system_primary_900">#0b0b0b0b</color>
+  <color name="system_primary_1000">#0c0c0c0c</color>
+  <color name="system_secondary_0">#10101010</color>
+  <color name="system_secondary_50">#20202020</color>
+  <color name="system_secondary_100">#30303030</color>
+  <color name="system_secondary_200">#40404040</color>
+  <color name="system_secondary_300">#50505050</color>
+  <color name="system_secondary_400">#60606060</color>
+  <color name="system_secondary_500">#70707070</color>
+  <color name="system_secondary_600">#80808080</color>
+  <color name="system_secondary_700">#90909090</color>
+  <color name="system_secondary_800">#a0a0a0a0</color>
+  <color name="system_secondary_900">#b0b0b0b0</color>
+  <color name="system_secondary_1000">#c0c0c0c0</color>
+  <color name="system_neutral_0">#1f1f1f1f</color>
+  <color name="system_neutral_50">#2f2f2f2f</color>
+  <color name="system_neutral_100">#3f3f3f3f</color>
+  <color name="system_neutral_200">#4f4f4f4f</color>
+  <color name="system_neutral_300">#5f5f5f5f</color>
+  <color name="system_neutral_400">#6f6f6f6f</color>
+  <color name="system_neutral_500">#7f7f7f7f</color>
+  <color name="system_neutral_600">#8f8f8f8f</color>
+  <color name="system_neutral_700">#9f9f9f9f</color>
+  <color name="system_neutral_800">#afafafaf</color>
+  <color name="system_neutral_900">#bfbfbfbf</color>
+  <color name="system_neutral_1000">#cfcfcfcf</color>
+</resources>

@@ -254,8 +254,6 @@ public class NotifCollection implements Dumpable {
                 try {
                     mStatusBarService.onNotificationClear(
                             entry.getSbn().getPackageName(),
-                            entry.getSbn().getTag(),
-                            entry.getSbn().getId(),
                             entry.getSbn().getUser().getIdentifier(),
                             entry.getSbn().getKey(),
                             stats.dismissalSurface,

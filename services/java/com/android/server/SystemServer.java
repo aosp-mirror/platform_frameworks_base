@@ -104,7 +104,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
-import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
@@ -1718,14 +1717,9 @@ public final class SystemServer implements Dumpable {
             startTextToSpeechManagerService(context, t);
 
             // System Speech Recognition Service
-            if (deviceHasConfigString(context,
-                    R.string.config_defaultOnDeviceSpeechRecognitionService)) {
-                t.traceBegin("StartSpeechRecognitionManagerService");
-                mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
-                t.traceEnd();
-            } else {
-                Slog.d(TAG, "System speech recognition is not defined by OEM");
-            }
+            t.traceBegin("StartSpeechRecognitionManagerService");
+            mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
 
             // App prediction manager service
             if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
@@ -2150,11 +2144,9 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
             t.traceEnd();
 
-            if (AppHibernationService.isAppHibernationEnabled()) {
-                t.traceBegin("StartAppHibernationService");
-                mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
-                t.traceEnd();
-            }
+            t.traceBegin("StartAppHibernationService");
+            mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
+            t.traceEnd();
 
             if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
                 t.traceBegin("StartGestureLauncher");

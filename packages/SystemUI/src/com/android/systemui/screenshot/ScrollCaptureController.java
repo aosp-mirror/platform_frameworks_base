@@ -53,7 +53,6 @@ public class ScrollCaptureController {
 
     public static final int MAX_HEIGHT = 12000;
 
-    private final Connection mConnection;
     private final Context mContext;
 
     private final Executor mUiExecutor;
@@ -65,10 +64,9 @@ public class ScrollCaptureController {
     private UUID mRequestId;
     private ScrollCaptureCallback mCaptureCallback;
 
-    public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
-            Executor bgExecutor, ImageExporter exporter) {
+    public ScrollCaptureController(Context context, Executor uiExecutor, Executor bgExecutor,
+            ImageExporter exporter) {
         mContext = context;
-        mConnection = connection;
         mUiExecutor = uiExecutor;
         mBgExecutor = bgExecutor;
         mImageExporter = exporter;
@@ -78,16 +76,17 @@ public class ScrollCaptureController {
     /**
      * Run scroll capture!
      *
+     * @param connection connection to the remote window to be used
      * @param callback request callback to report back to the service
      */
-    public void start(ScrollCaptureCallback callback) {
+    public void start(Connection connection, ScrollCaptureCallback callback) {
         mCaptureTime = ZonedDateTime.now();
         mRequestId = UUID.randomUUID();
         mCaptureCallback = callback;
 
         float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
                 SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
-        mConnection.start(this::startCapture, maxPages);
+        connection.start(this::startCapture, maxPages);
     }
 
     /**

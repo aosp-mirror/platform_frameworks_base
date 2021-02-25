@@ -110,6 +110,8 @@ public final class AppHibernationServiceTest {
         UserInfo userInfo = addUser(USER_ID_1);
         mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
         doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_1);
+
+        mAppHibernationService.mIsServiceEnabled = true;
     }
 
     @Test

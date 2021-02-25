@@ -32,7 +32,7 @@ public interface NotificationDelegate {
     void onNotificationActionClick(int callingUid, int callingPid, String key, int actionIndex,
             Notification.Action action, NotificationVisibility nv, boolean generatedByAssistant);
     void onNotificationClear(int callingUid, int callingPid,
-            String pkg, String tag, int id, int userId, String key,
+            String pkg, int userId, String key,
             @NotificationStats.DismissalSurface int dismissalSurface,
             @NotificationStats.DismissalSentiment int dismissalSentiment,
             NotificationVisibility nv);

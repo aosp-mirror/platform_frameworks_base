@@ -240,8 +240,8 @@ static void android_view_ThreadedRenderer_setSdrWhitePoint(JNIEnv* env, jobject 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
     LOG_ALWAYS_FATAL_IF(frameInfoSize != UI_THREAD_FRAME_INFO_SIZE,
-            "Mismatched size expectations, given %d expected %d",
-            frameInfoSize, UI_THREAD_FRAME_INFO_SIZE);
+                        "Mismatched size expectations, given %d expected %zu", frameInfoSize,
+                        UI_THREAD_FRAME_INFO_SIZE);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     env->GetLongArrayRegion(frameInfo, 0, frameInfoSize, proxy->frameInfo());
     return proxy->syncAndDrawFrame();

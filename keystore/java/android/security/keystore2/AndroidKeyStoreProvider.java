@@ -273,10 +273,10 @@ public class AndroidKeyStoreProvider extends Provider {
     /** @hide **/
     @NonNull
     public static KeyPair loadAndroidKeyStoreKeyPairFromKeystore(
-            @NonNull KeyStore2 keyStore, @NonNull String privateKeyAlias, int namespace)
+            @NonNull KeyStore2 keyStore, @NonNull KeyDescriptor descriptor)
             throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
         AndroidKeyStoreKey key =
-                loadAndroidKeyStoreKeyFromKeystore(keyStore, privateKeyAlias, namespace);
+                loadAndroidKeyStoreKeyFromKeystore(keyStore, descriptor);
         if (key instanceof AndroidKeyStorePublicKey) {
             AndroidKeyStorePublicKey publicKey = (AndroidKeyStorePublicKey) key;
             return new KeyPair(publicKey, publicKey.getPrivateKey());
@@ -336,7 +336,7 @@ public class AndroidKeyStoreProvider extends Provider {
     @NonNull
     public static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(
             @NonNull KeyStore2 keyStore, @NonNull String alias, int namespace)
-            throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException  {
+            throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
 
         KeyDescriptor descriptor = new KeyDescriptor();
         if (namespace == KeyProperties.NAMESPACE_APPLICATION) {
@@ -348,6 +348,18 @@ public class AndroidKeyStoreProvider extends Provider {
         }
         descriptor.alias = alias;
         descriptor.blob = null;
+
+        final AndroidKeyStoreKey key = loadAndroidKeyStoreKeyFromKeystore(keyStore, descriptor);
+        if (key instanceof AndroidKeyStorePublicKey) {
+            return ((AndroidKeyStorePublicKey) key).getPrivateKey();
+        } else {
+            return key;
+        }
+    }
+
+    private static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(
+            @NonNull KeyStore2 keyStore, @NonNull KeyDescriptor descriptor)
+            throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
         KeyEntryResponse response = null;
         try {
             response = keyStore.getKeyEntry(descriptor);
@@ -397,7 +409,7 @@ public class AndroidKeyStoreProvider extends Provider {
                 keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_EC) {
             return makeAndroidKeyStorePublicKeyFromKeyEntryResponse(descriptor, response.metadata,
                     new KeyStoreSecurityLevel(response.iSecurityLevel),
-                    keymasterAlgorithm).getPrivateKey();
+                    keymasterAlgorithm);
         } else {
             throw new UnrecoverableKeyException("Key algorithm unknown");
         }

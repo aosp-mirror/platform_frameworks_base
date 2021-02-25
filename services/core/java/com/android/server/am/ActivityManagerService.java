@@ -142,6 +142,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
+import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -182,7 +183,6 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
-import android.compat.Compatibility;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -307,7 +307,6 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -4860,19 +4859,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public String getPackageForIntentSender(IIntentSender pendingResult) {
-        if (!(pendingResult instanceof PendingIntentRecord)) {
-            return null;
-        }
-        try {
-            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
-            return res.key.packageName;
-        } catch (ClassCastException e) {
-        }
-        return null;
-    }
-
-    @Override
     public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
         mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
     }
@@ -4884,15 +4870,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int getUidForIntentSender(IIntentSender sender) {
+    public PendingIntentInfo getInfoForIntentSender(IIntentSender sender) {
         if (sender instanceof PendingIntentRecord) {
-            try {
-                PendingIntentRecord res = (PendingIntentRecord)sender;
-                return res.uid;
-            } catch (ClassCastException e) {
-            }
+            PendingIntentRecord res = (PendingIntentRecord) sender;
+            return new PendingIntentInfo(
+                    res.key.packageName,
+                    res.uid,
+                    (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
+                    res.key.type);
+        } else {
+            throw new IllegalArgumentException();
         }
-        return -1;
     }
 
     @Override
@@ -4918,15 +4906,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean isIntentSenderImmutable(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0;
-        }
-        return false;
-    }
-
-    @Override
     public boolean isIntentSenderAnActivity(IIntentSender pendingResult) {
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return false;
@@ -4938,33 +4917,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return false;
         } catch (ClassCastException e) {
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isIntentSenderAForegroundService(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isIntentSenderAService(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_SERVICE;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isIntentSenderABroadcast(IIntentSender pendingResult) {
-        if (pendingResult instanceof PendingIntentRecord) {
-            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
-            return res.key.type == ActivityManager.INTENT_SENDER_BROADCAST;
         }
         return false;
     }
@@ -13571,8 +13523,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
-
-                enableTestApiAccess(ai.packageName);
             }
 
             final long origId = Binder.clearCallingIdentity();
@@ -13745,25 +13695,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false,
                     app.userId,
                     "finished inst");
-        }
-
-        disableTestApiAccess(app.info.packageName);
-    }
-
-    private void enableTestApiAccess(String packageName) {
-        if (mPlatformCompat != null) {
-            Compatibility.ChangeConfig config = new Compatibility.ChangeConfig(
-                    Collections.singleton(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */),
-                    Collections.emptySet());
-            CompatibilityChangeConfig override = new CompatibilityChangeConfig(config);
-            mPlatformCompat.setOverridesForTest(override, packageName);
-        }
-    }
-
-    private void disableTestApiAccess(String packageName) {
-        if (mPlatformCompat != null) {
-            mPlatformCompat.clearOverrideForTest(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */,
-                    packageName);
         }
     }
 
