@@ -181,6 +181,11 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
         }
     };
 
+    @Override
+    protected void closeDialog() {
+        mHandler.obtainMessage(FORCE_CLOSE).sendToTarget();
+    }
+
     static class Data {
         final ProcessRecord proc;
         final ApplicationInfo aInfo;
