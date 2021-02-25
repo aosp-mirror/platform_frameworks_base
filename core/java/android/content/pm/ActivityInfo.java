@@ -550,9 +550,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 0x1;
 
     /**
+     * Bit in {@link #privateFlags} indicating whether a home sound effect should be played if the
+     * home app moves to front after the activity with this flag set.
+     * Set from the {@link android.R.attr#playHomeTransitionSound} attribute.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_HOME_TRANSITION_SOUND = 0x2;
+
+    /**
      * Options that have been set in the activity declaration in the manifest.
      * These include:
-     * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED}.
+     * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED},
+     * {@link #PRIVATE_FLAG_HOME_TRANSITION_SOUND}.
      * @hide
      */
     public int privateFlags;
