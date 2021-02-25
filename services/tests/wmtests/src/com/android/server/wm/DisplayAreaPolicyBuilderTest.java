@@ -38,6 +38,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION
 
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
+import static com.android.server.wm.DisplayAreaPolicyBuilder.KEY_ROOT_DISPLAY_AREA_ID;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -595,6 +596,17 @@ public class DisplayAreaPolicyBuilderTest {
         assertThat(token.isDescendantOf(mRoot)).isTrue();
         assertThat(token.isDescendantOf(mGroupRoot1)).isFalse();
         assertThat(token.isDescendantOf(mGroupRoot2)).isFalse();
+
+        // When the window has options for target root id, attach it to the target root.
+        final Bundle options = new Bundle();
+        options.putInt(KEY_ROOT_DISPLAY_AREA_ID, mGroupRoot2.mFeatureId);
+        final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, options);
+        policy.addWindow(token2);
+
+        assertThat(token2.isDescendantOf(mGroupRoot2)).isTrue();
     }
 
     @Test
