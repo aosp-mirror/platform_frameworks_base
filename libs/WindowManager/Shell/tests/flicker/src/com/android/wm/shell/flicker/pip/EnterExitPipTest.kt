@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -51,7 +50,7 @@ class EnterExitPipTest(
     private val testApp = FixedAppHelper(instrumentation)
     private val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true) {
             setup {
                 eachRun {
@@ -68,7 +67,7 @@ class EnterExitPipTest(
     @Test
     fun pipAppRemainInsideVisibleBounds() {
         testSpec.assertWm {
-            coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -95,10 +94,10 @@ class EnterExitPipTest(
     @Test
     fun showBothAppLayersThenHidePip() {
         testSpec.assertLayers {
-            showsLayer(testApp.defaultWindowName)
-                .showsLayer(pipApp.defaultWindowName)
+            isVisible(testApp.defaultWindowName)
+                .isVisible(pipApp.defaultWindowName)
                 .then()
-                .hidesLayer(testApp.defaultWindowName)
+                .isInvisible(testApp.defaultWindowName)
         }
     }
 
@@ -106,8 +105,8 @@ class EnterExitPipTest(
     @Test
     fun testAppCoversFullScreenWithPipOnDisplay() {
         testSpec.assertLayersStart {
-            hasVisibleRegion(testApp.defaultWindowName, displayBounds)
-            coversAtMostRegion(displayBounds, pipApp.defaultWindowName)
+            coversExactly(displayBounds, testApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -115,7 +114,7 @@ class EnterExitPipTest(
     @Test
     fun pipAppCoversFullScreen() {
         testSpec.assertLayersEnd {
-            hasVisibleRegion(pipApp.defaultWindowName, displayBounds)
+            coversExactly(displayBounds, pipApp.defaultWindowName)
         }
     }
 

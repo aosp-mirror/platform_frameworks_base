@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -46,7 +45,7 @@ import org.junit.runners.Parameterized
 class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = false) { configuration ->
             setup {
                 test {
@@ -78,7 +77,7 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     fun pipInVisibleBounds() {
         testSpec.assertWm {
             val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-            coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
