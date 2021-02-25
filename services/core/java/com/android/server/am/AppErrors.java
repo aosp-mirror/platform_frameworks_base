@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.content.ActivityNotFoundException;
@@ -1058,7 +1059,26 @@ class AppErrors {
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0,
                     mService.mUserController.getCurrentUserId()) != 0;
             if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
-                errState.getDialogController().showAnrDialogs(data);
+                AnrController anrController = errState.getDialogController().getAnrController();
+                if (anrController == null) {
+                    errState.getDialogController().showAnrDialogs(data);
+                } else {
+                    String packageName = proc.info.packageName;
+                    int uid = proc.info.uid;
+                    boolean showDialog = anrController.onAnrDelayCompleted(packageName, uid);
+
+                    if (showDialog) {
+                        Slog.d(TAG, "ANR delay completed. Showing ANR dialog for package: "
+                                + packageName);
+                        errState.getDialogController().showAnrDialogs(data);
+                    } else {
+                        Slog.d(TAG, "ANR delay completed. Cancelling ANR dialog for package: "
+                                + packageName);
+                        errState.setNotResponding(false);
+                        errState.setNotRespondingReport(null);
+                        errState.getDialogController().clearAnrDialogs();
+                    }
+                }
             } else {
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
                         AppNotRespondingDialog.CANT_SHOW);
