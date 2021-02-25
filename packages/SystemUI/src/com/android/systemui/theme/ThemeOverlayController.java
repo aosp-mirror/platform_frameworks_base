@@ -55,14 +55,13 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import com.google.android.collect.Sets;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -151,7 +150,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
-                updateThemeOverlays();
+                reevaluateSystemTheme(true /* forceReload */);
             }
         }, filter, mBgExecutor, UserHandle.ALL);
         mSecureSettings.registerContentObserverForUser(
@@ -163,7 +162,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                             int userId) {
                         if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
                         if (ActivityManager.getCurrentUser() == userId) {
-                            updateThemeOverlays();
+                            reevaluateSystemTheme(true /* forceReload */);
                         }
                     }
                 },
@@ -185,7 +184,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     mLockColors = lockColors;
                 }
                 mSystemColors = systemColor;
-                reevaluateSystemTheme();
+                reevaluateSystemTheme(false /* forceReload */);
             });
         });
         if (USE_LOCK_SCREEN_WALLPAPER) {
@@ -197,7 +196,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     }
                     // It's possible that the user has a lock screen wallpaper. On this case we'll
                     // end up with different colors after unlocking.
-                    reevaluateSystemTheme();
+                    reevaluateSystemTheme(false /* forceReload */);
                 }
             });
         }
@@ -214,11 +213,11 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     Log.d(TAG, "got new lock colors: " + wallpaperColors + " where: " + which);
                 }
             }
-            reevaluateSystemTheme();
+            reevaluateSystemTheme(false /* forceReload */);
         }, null, UserHandle.USER_ALL);
     }
 
-    private void reevaluateSystemTheme() {
+    private void reevaluateSystemTheme(boolean forceReload) {
         WallpaperColors currentColors =
                 mKeyguardStateController.isShowing() && mLockColors != null
                         ? mLockColors : mSystemColors;
@@ -233,7 +232,8 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             accentCandidate = getAccentColor(currentColors);
         }
 
-        if (mMainWallpaperColor == mainColor && mWallpaperAccentColor == accentCandidate) {
+        if (mMainWallpaperColor == mainColor && mWallpaperAccentColor == accentCandidate
+                && !forceReload) {
             return;
         }
 
@@ -314,6 +314,16 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             } catch (NumberFormatException e) {
                 Log.w(TAG, "Invalid color definition: " + systemPalette.getPackageName());
             }
+        } else if (!mIsMonetEnabled && systemPalette != null) {
+            try {
+                // It's possible that we flipped the flag off and still have a @ColorInt in the
+                // setting. We need to sanitize the input, otherwise the overlay transaction will
+                // fail.
+                Integer.parseInt(systemPalette.getPackageName().toLowerCase(), 16);
+                categoryToPackage.remove(OVERLAY_CATEGORY_SYSTEM_PALETTE);
+            } catch (NumberFormatException e) {
+                // This is a package name. All good, let's continue
+            }
         }
 
         // Same for accent color.
@@ -326,6 +336,13 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                 categoryToPackage.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
             } catch (NumberFormatException e) {
                 Log.w(TAG, "Invalid color definition: " + accentPalette.getPackageName());
+            }
+        } else if (!mIsMonetEnabled && accentPalette != null) {
+            try {
+                Integer.parseInt(accentPalette.getPackageName().toLowerCase(), 16);
+                categoryToPackage.remove(OVERLAY_CATEGORY_ACCENT_COLOR);
+            } catch (NumberFormatException e) {
+                // This is a package name. All good, let's continue
             }
         }
 
@@ -342,10 +359,10 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             categoryToPackage.put(OVERLAY_CATEGORY_ACCENT_COLOR, mSecondaryOverlay.getIdentifier());
         }
 
-        Set<UserHandle> userHandles = Sets.newHashSet(UserHandle.of(currentUser));
+        Set<UserHandle> managedProfiles = new HashSet<>();
         for (UserInfo userInfo : mUserManager.getEnabledProfiles(currentUser)) {
             if (userInfo.isManagedProfile()) {
-                userHandles.add(userInfo.getUserHandle());
+                managedProfiles.add(userInfo.getUserHandle());
             }
         }
         if (DEBUG) {
@@ -357,9 +374,10 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             mNeedsOverlayCreation = false;
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, new FabricatedOverlay[] {
                     mPrimaryOverlay, mSecondaryOverlay, mNeutralOverlay
-            }, userHandles);
+            }, currentUser, managedProfiles);
         } else {
-            mThemeManager.applyCurrentUserOverlays(categoryToPackage, null, userHandles);
+            mThemeManager.applyCurrentUserOverlays(categoryToPackage, null, currentUser,
+                    managedProfiles);
         }
     }
 
