@@ -103,6 +103,11 @@ public class KeyguardIndicationRotateTextViewController extends
      */
     public void updateIndication(@IndicationType int type, KeyguardIndication newIndication,
             boolean showImmediately) {
+        if (type == INDICATION_TYPE_NOW_PLAYING
+                || type == INDICATION_TYPE_REVERSE_CHARGING) {
+            // temporarily don't show here, instead use AmbientContainer b/181049781
+            return;
+        }
         final boolean hasPreviousIndication = mIndicationMessages.get(type) != null;
         final boolean hasNewIndication = newIndication != null;
         if (!hasNewIndication) {
