@@ -401,10 +401,11 @@ struct DrawImageLattice final : Op {
 struct DrawTextBlob final : Op {
     static const auto kType = Type::DrawTextBlob;
     DrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y, const SkPaint& paint)
-            : blob(sk_ref_sp(blob)), x(x), y(y), paint(paint) {}
+        : blob(sk_ref_sp(blob)), x(x), y(y), paint(paint), drawTextBlobMode(gDrawTextBlobMode) {}
     sk_sp<const SkTextBlob> blob;
     SkScalar x, y;
     SkPaint paint;
+    DrawTextBlobMode drawTextBlobMode;
     void draw(SkCanvas* c, const SkMatrix&) const { c->drawTextBlob(blob.get(), x, y, paint); }
 };
 
@@ -789,6 +790,24 @@ constexpr color_transform_fn colorTransformForOp() {
     else {
         return nullptr;
     }
+}
+
+template<>
+constexpr color_transform_fn colorTransformForOp<DrawTextBlob>() {
+    return [](const void *opRaw, ColorTransform transform) {
+        const DrawTextBlob *op = reinterpret_cast<const DrawTextBlob*>(opRaw);
+        switch (op->drawTextBlobMode) {
+        case DrawTextBlobMode::HctOutline:
+            const_cast<SkPaint&>(op->paint).setColor(SK_ColorBLACK);
+            break;
+        case DrawTextBlobMode::HctInner:
+            const_cast<SkPaint&>(op->paint).setColor(SK_ColorWHITE);
+            break;
+        default:
+            transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
+            break;
+        }
+    };
 }
 
 #define X(T) colorTransformForOp<T>(),
