@@ -316,11 +316,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             }
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
-
-                // Only count missed frames if it's not stuffed.
                 if ((info.jankType & PREDICTION_ERROR) != 0
-                        || ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0
-                                && (info.jankType & BUFFER_STUFFING) == 0)) {
+                        || ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0)) {
                     Log.w(TAG, "Missed App frame:" + info.jankType);
                     missedAppFramesCount++;
                 }
