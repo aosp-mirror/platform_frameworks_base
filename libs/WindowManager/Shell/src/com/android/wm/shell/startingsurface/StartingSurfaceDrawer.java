@@ -362,7 +362,6 @@ public class StartingSurfaceDrawer {
         final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
         if (record != null) {
             record.setSplashScreenView(splashScreenView);
-            splashScreenView.startIntroAnimation();
         }
     }
 
