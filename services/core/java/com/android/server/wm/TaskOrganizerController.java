@@ -596,9 +596,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
-                if (wc == null) {
-                    throw new IllegalArgumentException("Can't resolve window from token");
-                }
+                if (wc == null) return false;
                 final Task task = wc.asTask();
                 if (task == null) return false;
                 if (!task.mCreatedByOrganizer) {
