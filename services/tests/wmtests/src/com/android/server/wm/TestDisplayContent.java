@@ -136,6 +136,7 @@ class TestDisplayContent extends DisplayContent {
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     mInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
             final TestDisplayContent newDisplay = createInternal(display);
+
             // disable the normal system decorations
             final DisplayPolicy displayPolicy = newDisplay.getDisplayPolicy();
             spyOn(displayPolicy);

@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
+import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -678,9 +679,9 @@ public final class Display {
     @UnsupportedAppUsage
     public DisplayAdjustments getDisplayAdjustments() {
         if (mResources != null) {
-            final DisplayAdjustments currentAdjustements = mResources.getDisplayAdjustments();
-            if (!mDisplayAdjustments.equals(currentAdjustements)) {
-                mDisplayAdjustments = new DisplayAdjustments(currentAdjustements);
+            final DisplayAdjustments currentAdjustments = mResources.getDisplayAdjustments();
+            if (!mDisplayAdjustments.equals(currentAdjustments)) {
+                mDisplayAdjustments = new DisplayAdjustments(currentAdjustments);
             }
         }
 
@@ -1278,6 +1279,18 @@ public final class Display {
     public void getRealSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
+            if (shouldReportMaxBounds()) {
+                final Rect bounds = mResources.getConfiguration()
+                        .windowConfiguration.getMaxBounds();
+                outSize.x = bounds.width();
+                outSize.y = bounds.height();
+                if (DEBUG) {
+                    Log.d(TAG, "getRealSize determined from max bounds: " + outSize);
+                }
+                // Skip adjusting by fixed rotation, since if it is necessary, the configuration
+                // should already reflect the expected rotation.
+                return;
+            }
             outSize.x = mDisplayInfo.logicalWidth;
             outSize.y = mDisplayInfo.logicalHeight;
             if (mMayAdjustByFixedRotation) {
@@ -1336,12 +1349,41 @@ public final class Display {
     public void getRealMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
+            if (shouldReportMaxBounds()) {
+                mDisplayInfo.getMaxBoundsMetrics(outMetrics,
+                        CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
+                        mResources.getConfiguration());
+                if (DEBUG) {
+                    Log.d(TAG, "getRealMetrics determined from max bounds: " + outMetrics);
+                }
+                // Skip adjusting by fixed rotation, since if it is necessary, the configuration
+                // should already reflect the expected rotation.
+                return;
+            }
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
             if (mMayAdjustByFixedRotation) {
                 getDisplayAdjustments().adjustMetrics(outMetrics, mDisplayInfo.rotation);
             }
         }
+    }
+
+    /**
+     * Determines if {@link WindowConfiguration#getMaxBounds()} should be reported as the
+     * display dimensions. The max bounds field may be smaller than the logical dimensions
+     * when apps need to be sandboxed.
+     *
+     * Depends upon {@link WindowConfiguration#getMaxBounds()} being set in
+     * {@link com.android.server.wm.ConfigurationContainer#providesMaxBounds()}. In most cases, this
+     * value reflects the size of the current DisplayArea.
+     * @return {@code true} when max bounds should be applied.
+     */
+    private boolean shouldReportMaxBounds() {
+        if (mResources == null) {
+            return false;
+        }
+        final Configuration config = mResources.getConfiguration();
+        return config != null && !config.windowConfiguration.getMaxBounds().isEmpty();
     }
 
     /**
