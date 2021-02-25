@@ -38,7 +38,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.timedetector.DeviceConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -204,11 +203,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      */
     public static TimeZoneDetectorStrategyImpl create(
             @NonNull Context context, @NonNull Handler handler,
-            boolean geoDetectionSupported) {
+            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
 
-        DeviceConfig deviceConfig = new DeviceConfig();
-        EnvironmentImpl environment = new EnvironmentImpl(
-                context, handler, deviceConfig, geoDetectionSupported);
+        Environment environment = new EnvironmentImpl(context, handler, serviceConfigAccessor);
         return new TimeZoneDetectorStrategyImpl(environment);
     }
 
