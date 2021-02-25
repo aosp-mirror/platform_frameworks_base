@@ -699,28 +699,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         /**
-         * Notified by the staging manager that pre-reboot verification is about to start. The
-         * return value should be checked to decide whether it is OK to start pre-reboot
-         * verification. In the case of a destroyed session, {@code false} is returned and there is
-         * no need to start pre-reboot verification.
+         * Called when pre-reboot verification is about to start. This shouldn't be called
+         * on a destroyed session.
          */
-        @Override
-        public boolean notifyStartPreRebootVerification() {
+        private void notifyStartPreRebootVerification() {
             synchronized (mLock) {
+                Preconditions.checkState(!mDestroyed);
                 if (mInPreRebootVerification) {
                     throw new IllegalStateException("Pre-reboot verification has started");
                 }
-                if (mDestroyed) {
-                    return false;
-                }
                 mInPreRebootVerification = true;
-                return true;
             }
         }
 
         /**
-         * Notified by the staging manager that pre-reboot verification has ended. Now it is safe to
-         * clean up the session if {@link #abandon()} has been called previously.
+         * Notified by the staging manager or PIS that pre-reboot verification has ended.
+         * Now it is safe to clean up the session if {@link #abandon()} has been called previously.
          */
         @Override
         public void notifyEndPreRebootVerification() {
@@ -744,6 +738,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootOrSystemLocked();
             Preconditions.checkArgument(isCommitted());
             Preconditions.checkArgument(!mSessionApplied && !mSessionFailed);
+            notifyStartPreRebootVerification();
             verify();
         }
 
@@ -2037,9 +2032,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             mStagedSession.setSessionFailed(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
-            // TODO(b/136257624): Remove this once all verification logic has been transferred out
-            //  of StagingManager.
-            mStagingManager.notifyVerificationComplete(mStagedSession);
+            mStagedSession.notifyEndPreRebootVerification();
         } else {
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
@@ -2159,24 +2152,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     .write();
         }
         if (params.isStaged) {
-            mStagingManager.commitSession(mStagedSession);
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
             dispatchSessionFinished(INSTALL_SUCCEEDED, "Session staged", null);
-            return;
-        }
 
-        if (isApexSession()) {
-            destroyInternal();
-            dispatchSessionFinished(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
-                    "APEX packages can only be installed using staged sessions.", null);
-            return;
+            mStagedSession.verifySession();
+        } else {
+            verify();
         }
-        verify();
     }
 
     private void verify() {
         try {
+            //TODO: re-run verify() if reboot happens before staged sessions reach READY
             verifyNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
@@ -2451,15 +2439,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onVerificationComplete() {
-        // Staged sessions will be installed later during boot
+        // APK verification is done. Continue the installation depending on whether it is a
+        // staged session or not. For a staged session, we will hand it over to the staging
+        // manager to complete the installation.
         if (isStaged()) {
-            // TODO(b/136257624): Remove this once all verification logic has been transferred out
-            //  of StagingManager.
-            mStagingManager.notifyPreRebootVerification_Apk_Complete(mStagedSession);
-            // TODO(b/136257624): We also need to destroy internals for verified staged session,
-            //  otherwise file descriptors are never closed for verified staged session until reboot
+            mStagingManager.commitSession(mStagedSession);
             return;
         }
+
+        // APEX sessions should be handled above
+        Preconditions.checkState(!isApexSession());
 
         install();
     }

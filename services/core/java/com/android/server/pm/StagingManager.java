@@ -136,7 +136,6 @@ public class StagingManager {
         boolean hasParentSessionId();
         long getCommittedMillis();
         void abandon();
-        boolean notifyStartPreRebootVerification();
         void notifyEndPreRebootVerification();
         void verifySession();
     }
@@ -1083,20 +1082,6 @@ public class StagingManager {
         return session;
     }
 
-    // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
-    //  verification logic is extracted out of StagingManager into PMS, we can remove
-    //  this.
-    void notifyVerificationComplete(StagedSession session) {
-        mPreRebootVerificationHandler.onPreRebootVerificationComplete(session);
-    }
-
-    // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
-    //  verification logic is extracted out of StagingManager into PMS, we can remove
-    //  this.
-    void notifyPreRebootVerification_Apk_Complete(@NonNull StagedSession session) {
-        mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(session);
-    }
-
     private final class PreRebootVerificationHandler extends Handler {
         // Hold sessions before handler gets ready to do the verification.
         private List<StagedSession> mPendingSessions;
@@ -1114,7 +1099,6 @@ public class StagingManager {
          * <p><ul>
          *     <li>MSG_PRE_REBOOT_VERIFICATION_START</li>
          *     <li>MSG_PRE_REBOOT_VERIFICATION_APEX</li>
-         *     <li>MSG_PRE_REBOOT_VERIFICATION_APK</li>
          *     <li>MSG_PRE_REBOOT_VERIFICATION_END</li>
          * </ul></p>
          *
@@ -1122,8 +1106,7 @@ public class StagingManager {
          */
         private static final int MSG_PRE_REBOOT_VERIFICATION_START = 1;
         private static final int MSG_PRE_REBOOT_VERIFICATION_APEX = 2;
-        private static final int MSG_PRE_REBOOT_VERIFICATION_APK = 3;
-        private static final int MSG_PRE_REBOOT_VERIFICATION_END = 4;
+        private static final int MSG_PRE_REBOOT_VERIFICATION_END = 3;
 
         @Override
         public void handleMessage(Message msg) {
@@ -1142,9 +1125,6 @@ public class StagingManager {
                         break;
                     case MSG_PRE_REBOOT_VERIFICATION_APEX:
                         handlePreRebootVerification_Apex(session, rollbackId);
-                        break;
-                    case MSG_PRE_REBOOT_VERIFICATION_APK:
-                        handlePreRebootVerification_Apk(session);
                         break;
                     case MSG_PRE_REBOOT_VERIFICATION_END:
                         handlePreRebootVerification_End(session);
@@ -1181,12 +1161,10 @@ public class StagingManager {
                 return;
             }
 
-            if (session.notifyStartPreRebootVerification()) {
-                int sessionId = session.sessionId();
-                Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
-                obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
-                        .sendToTarget();
-            }
+            int sessionId = session.sessionId();
+            Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
+                    .sendToTarget();
         }
 
         private void onPreRebootVerificationFailure(StagedSession session,
@@ -1214,12 +1192,6 @@ public class StagingManager {
         }
 
         private void notifyPreRebootVerification_Apex_Complete(
-                @NonNull StagedSession session) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APK, session.sessionId(), -1, session)
-                    .sendToTarget();
-        }
-
-        private void notifyPreRebootVerification_Apk_Complete(
                 @NonNull StagedSession session) {
             obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId(), -1, session)
                     .sendToTarget();
@@ -1305,19 +1277,6 @@ public class StagingManager {
             }
 
             notifyPreRebootVerification_Apex_Complete(session);
-        }
-
-        /**
-         * Pre-reboot verification state for apk files. Session is sent to
-         * {@link PackageManagerService} for verification and it notifies back the result via
-         * {@link #notifyPreRebootVerification_Apk_Complete}
-         */
-        private void handlePreRebootVerification_Apk(@NonNull StagedSession session) {
-            if (!session.containsApkSession()) {
-                notifyPreRebootVerification_Apk_Complete(session);
-                return;
-            }
-            session.verifySession();
         }
 
         /**
