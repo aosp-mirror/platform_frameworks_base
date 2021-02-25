@@ -23,7 +23,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -202,7 +202,7 @@ public class AlarmManager {
      * @hide
      */
     @ChangeId
-    @Disabled // TODO (b/171306433): Enable starting S.
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long REQUIRE_EXACT_ALARM_PERMISSION = 171306433L;
 
     @UnsupportedAppUsage
