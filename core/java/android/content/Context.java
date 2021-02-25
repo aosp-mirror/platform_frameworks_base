@@ -6674,15 +6674,6 @@ public abstract class Context {
     }
 
     /**
-     * Indicates if this context is a visual context such as {@link android.app.Activity} or
-     * a context created from {@link #createWindowContext(int, Bundle)}.
-     * @hide
-     */
-    public boolean isUiContext() {
-        throw new RuntimeException("Not implemented. Must override in a subclass.");
-    }
-
-    /**
      * Returns {@code true} if the context is a UI context which can access UI components such as
      * {@link WindowManager}, {@link android.view.LayoutInflater LayoutInflater} or
      * {@link android.app.WallpaperManager WallpaperManager}. Accessing UI components from non-UI
@@ -6694,12 +6685,16 @@ public abstract class Context {
      * {@link #createWindowContext(int, Bundle)} or
      * {@link android.inputmethodservice.InputMethodService InputMethodService}
      * </p>
+     * <p>
+     * Note that even if it is allowed programmatically, it is not suggested to override this
+     * method to bypass {@link android.os.strictmode.IncorrectContextUseViolation} verification.
+     * </p>
      *
      * @see #getDisplay()
      * @see #getSystemService(String)
      * @see android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
      */
-    public static boolean isUiContext(@NonNull Context context) {
-        return context.isUiContext();
+    public boolean isUiContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 }

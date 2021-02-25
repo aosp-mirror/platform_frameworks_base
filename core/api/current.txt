@@ -10389,7 +10389,7 @@ package android.content {
     method public abstract void grantUriPermission(String, android.net.Uri, int);
     method public abstract boolean isDeviceProtectedStorage();
     method public boolean isRestricted();
-    method public static boolean isUiContext(@NonNull android.content.Context);
+    method public boolean isUiContext();
     method public abstract boolean moveDatabaseFrom(android.content.Context, String);
     method public abstract boolean moveSharedPreferencesFrom(android.content.Context, String);
     method @NonNull public final android.content.res.TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[]);
@@ -18896,6 +18896,7 @@ package android.inputmethodservice {
   public abstract class AbstractInputMethodService extends android.app.Service implements android.view.KeyEvent.Callback {
     ctor public AbstractInputMethodService();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
+    method public final boolean isUiContext();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
