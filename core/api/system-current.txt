@@ -12779,21 +12779,10 @@ package android.uwb {
 
   public final class UwbManager {
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public long elapsedRealtimeResolutionNanos();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getAngleOfArrivalSupport();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerInitiatorSession();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxRemoteDevicesPerResponderSession();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public int getMaxSimultaneousSessions();
     method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public android.os.PersistableBundle getSpecificationInfo();
-    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.List<java.lang.Integer> getSupportedChannelNumbers();
-    method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public java.util.Set<java.lang.Integer> getSupportedPreambleCodeIndices();
-    method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public boolean isRangingSupported();
     method @NonNull @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public AutoCloseable openRangingSession(@NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull android.uwb.RangingSession.Callback);
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void registerAdapterStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.uwb.UwbManager.AdapterStateCallback);
     method @RequiresPermission(android.Manifest.permission.UWB_PRIVILEGED) public void unregisterAdapterStateCallback(@NonNull android.uwb.UwbManager.AdapterStateCallback);
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D = 2; // 0x2
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL = 3; // 0x3
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL = 4; // 0x4
-    field public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE = 1; // 0x1
   }
 
   public static interface UwbManager.AdapterStateCallback {
