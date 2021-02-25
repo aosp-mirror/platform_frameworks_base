@@ -8654,21 +8654,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private class NetdCallback extends BaseNetdUnsolicitedEventListener {
         @Override
-        public void onInterfaceClassActivityChanged(boolean isActive, int timerLabel,
+        public void onInterfaceClassActivityChanged(boolean isActive, int transportType,
                 long timestampNs, int uid) {
-            mNetworkActivityTracker.setAndReportNetworkActive(isActive, timerLabel, timestampNs);
+            mNetworkActivityTracker.setAndReportNetworkActive(isActive, transportType, timestampNs);
         }
 
         @Override
         public void onInterfaceLinkStateChanged(String iface, boolean up) {
-            for (NetworkAgentInfo nai: mNetworkAgentInfos) {
+            for (NetworkAgentInfo nai : mNetworkAgentInfos) {
                 nai.clatd.interfaceLinkStateChanged(iface, up);
             }
         }
 
         @Override
         public void onInterfaceRemoved(String iface) {
-            for (NetworkAgentInfo nai: mNetworkAgentInfos) {
+            for (NetworkAgentInfo nai : mNetworkAgentInfos) {
                 nai.clatd.interfaceRemoved(iface);
             }
         }
