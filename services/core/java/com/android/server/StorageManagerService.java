@@ -51,6 +51,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AnrController;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
@@ -938,14 +939,29 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (transcodeEnabled) {
             LocalServices.getService(ActivityManagerInternal.class)
-                    .registerAnrController((packageName, uid) -> {
-                        try {
-                            return mStorageSessionController.getAnrDelayMillis(packageName, uid);
-                        } catch (ExternalStorageServiceException e) {
-                            Log.e(TAG, "Failed to get ANR delay for " + packageName, e);
-                            return 0;
-                        }
-                    });
+                .registerAnrController(new ExternalStorageServiceAnrController());
+        }
+    }
+
+    // TODO(b/170486601): Check transcoding status based on events pushed from the MediaProvider
+    private class ExternalStorageServiceAnrController implements AnrController {
+        @Override
+        public long getAnrDelayMillis(String packageName, int uid) {
+            int delay = SystemProperties.getInt("sys.fuse.transcode_anr_delay", 0);
+            Log.d(TAG, "getAnrDelayMillis: " + packageName + ". Delaying for " + delay + "ms");
+            return delay;
+        }
+
+        @Override
+        public void onAnrDelayStarted(String packageName, int uid) {
+            Log.d(TAG, "onAnrDelayStarted: " + packageName);
+        }
+
+        @Override
+        public boolean onAnrDelayCompleted(String packageName, int uid) {
+            boolean show = SystemProperties.getBoolean("sys.fuse.transcode_anr_dialog_show", true);
+            Log.d(TAG, "onAnrDelayCompleted: " + packageName + ". Show: " + show);
+            return show;
         }
     }
 

@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import android.annotation.Nullable;
+import android.app.AnrController;
 import android.app.Dialog;
 import android.content.Context;
 
@@ -56,6 +58,13 @@ final class ErrorDialogController {
      */
     @GuardedBy("mProcLock")
     private AppWaitingForDebuggerDialog mWaitDialog;
+
+    /**
+     * ANR dialog controller
+     */
+    @GuardedBy("mProcLock")
+    @Nullable
+    private AnrController mAnrController;
 
     @GuardedBy("mProcLock")
     boolean hasCrashDialogs() {
@@ -118,6 +127,7 @@ final class ErrorDialogController {
         }
         forAllDialogs(mAnrDialogs, Dialog::dismiss);
         mAnrDialogs = null;
+        mAnrController = null;
     }
 
     @GuardedBy("mProcLock")
@@ -218,6 +228,17 @@ final class ErrorDialogController {
                 dialog.show();
             }
         });
+    }
+
+    @GuardedBy("mProcLock")
+    @Nullable
+    AnrController getAnrController() {
+        return mAnrController;
+    }
+
+    @GuardedBy("mProcLock")
+    void setAnrController(AnrController controller) {
+        mAnrController = controller;
     }
 
     /**
