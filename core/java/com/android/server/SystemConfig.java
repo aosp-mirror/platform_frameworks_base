@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.hardware.SensorPrivacyManager;
 import android.os.Build;
 import android.os.CarrierAssociatedAppEntry;
 import android.os.Environment;
@@ -1250,6 +1251,14 @@ public class SystemConfig {
 
         if (SystemProperties.get(BLUR_PROPERTY, "default").equals("1")) {
             addFeature(PackageManager.FEATURE_CROSS_LAYER_BLUR, 0);
+        }
+
+        if (SensorPrivacyManager.USE_MICROPHONE_TOGGLE) {
+            addFeature(PackageManager.FEATURE_MICROPHONE_TOGGLE, 0);
+        }
+
+        if (SensorPrivacyManager.USE_CAMERA_TOGGLE) {
+            addFeature(PackageManager.FEATURE_CAMERA_TOGGLE, 0);
         }
 
         for (String featureName : mUnavailableFeatures) {
