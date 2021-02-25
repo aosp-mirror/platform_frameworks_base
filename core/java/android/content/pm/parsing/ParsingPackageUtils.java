@@ -2168,6 +2168,8 @@ public class ParsingPackageUtils {
                 .setNetworkSecurityConfigRes(resId(R.styleable.AndroidManifestApplication_networkSecurityConfig, sa))
                 .setRoundIconRes(resId(R.styleable.AndroidManifestApplication_roundIcon, sa))
                 .setTheme(resId(R.styleable.AndroidManifestApplication_theme, sa))
+                .setDataExtractionRules(
+                        resId(R.styleable.AndroidManifestApplication_dataExtractionRules, sa))
                 // Strings
                 .setClassLoaderName(string(R.styleable.AndroidManifestApplication_classLoader, sa))
                 .setRequiredAccountType(string(R.styleable.AndroidManifestApplication_requiredAccountType, sa))
