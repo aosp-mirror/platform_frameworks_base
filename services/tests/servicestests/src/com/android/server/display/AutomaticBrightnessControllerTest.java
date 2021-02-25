@@ -64,7 +64,6 @@ public class AutomaticBrightnessControllerTest {
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
     @Mock Handler mNoOpHandler;
-    @Mock DisplayDeviceConfig mDisplayDeviceConfig;
     @Mock DisplayDevice mDisplayDevice;
 
     private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
