@@ -16,6 +16,8 @@
 
 package android.net.vcn;
 
+import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
+
 import static androidx.test.InstrumentationRegistry.getContext;
 
 import static org.junit.Assert.assertEquals;
@@ -204,10 +206,13 @@ public class VcnManagerTest {
         cbBinder.onEnteredSafeMode();
         verify(mMockStatusCallback).onEnteredSafeMode();
 
+        cbBinder.onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
+        verify(mMockStatusCallback).onVcnStatusChanged(VCN_STATUS_CODE_ACTIVE);
+
         cbBinder.onGatewayConnectionError(
                 UNDERLYING_NETWORK_CAPABILITIES,
                 VcnManager.VCN_ERROR_CODE_NETWORK_ERROR,
-                "java.net.UnknownHostException",
+                UnknownHostException.class.getName(),
                 "exception_message");
         verify(mMockStatusCallback)
                 .onGatewayConnectionError(

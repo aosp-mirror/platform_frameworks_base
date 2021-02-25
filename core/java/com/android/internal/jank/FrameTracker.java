@@ -25,6 +25,9 @@ import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_GPU_DEADL
 import static android.view.SurfaceControl.JankData.PREDICTION_ERROR;
 import static android.view.SurfaceControl.JankData.SURFACE_FLINGER_SCHEDULING;
 
+import static com.android.internal.jank.InteractionJankMonitor.ACTION_METRICS_LOGGED;
+import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_BEGIN;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.HardwareRendererObserver;
@@ -72,6 +75,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private long mEndVsyncId = INVALID_ID;
     private boolean mMetricsFinalized;
     private boolean mCancelled = false;
+    private FrameTrackerListener mListener;
 
     private static class JankInfo {
         long frameVsyncId;
@@ -109,7 +113,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             @NonNull SurfaceControlWrapper surfaceControlWrapper,
             @NonNull ChoreographerWrapper choreographer,
             @NonNull FrameMetricsWrapper metrics, int traceThresholdMissedFrames,
-            int traceThresholdFrameTimeMillis) {
+            int traceThresholdFrameTimeMillis, @Nullable FrameTrackerListener listener) {
         mSession = session;
         mRendererWrapper = renderer;
         mMetricsWrapper = metrics;
@@ -120,6 +124,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mObserver = new HardwareRendererObserver(this, mMetricsWrapper.getTiming(), handler);
         mTraceThresholdMissedFrames = traceThresholdMissedFrames;
         mTraceThresholdFrameTimeMillis = traceThresholdFrameTimeMillis;
+        mListener = listener;
 
         // If the surface isn't valid yet, wait until it's created.
         if (viewRootWrapper.getSurfaceControl().isValid()) {
@@ -165,10 +170,14 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
      */
     public synchronized void begin() {
         mBeginVsyncId = mChoreographer.getVsyncId() + 1;
+        mSession.setTimeStamp(System.nanoTime());
         Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
         mRendererWrapper.addObserver(mObserver);
         if (mSurfaceControl != null) {
             mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
+        }
+        if (mListener != null) {
+            mListener.onNotifyCujEvents(mSession, ACTION_SESSION_BEGIN);
         }
     }
 
@@ -224,7 +233,6 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     }
 
     private boolean isInRange(long vsyncId) {
-
         // It's possible that we may miss a callback for the frame with vsyncId == mEndVsyncId.
         // Because of that, we collect all frames even if they happen after the end so we eventually
         // have a frame after the end with both callbacks present.
@@ -371,6 +379,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     missedAppFramesCount + missedSfFramesCounts,
                     maxFrameTimeNanos,
                     missedSfFramesCounts);
+            if (mListener != null) {
+                mListener.onNotifyCujEvents(mSession, ACTION_METRICS_LOGGED);
+            }
         }
         if (DEBUG) {
             Log.i(TAG, "FrameTracker: CUJ=" + mSession.getName()
@@ -494,5 +505,18 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         public long getVsyncId() {
             return mChoreographer.getVsyncId();
         }
+    }
+
+    /**
+     * A listener that notifies cuj events.
+     */
+    public interface FrameTrackerListener {
+        /**
+         * Notify that the CUJ session was created.
+         *
+         * @param session the CUJ session
+         * @param action the specific action
+         */
+        void onNotifyCujEvents(Session session, String action);
     }
 }

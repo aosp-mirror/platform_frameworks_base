@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.face.hidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.NotificationManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.app.UserSwitchObserver;
 import android.content.Context;
@@ -71,6 +70,7 @@ import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.LockoutHalImpl;
+import com.android.server.biometrics.sensors.face.ReEnrollNotificationUtils;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
@@ -96,8 +96,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     private static final String TAG = "Face10";
     private static final int ENROLL_TIMEOUT_SEC = 75;
-    static final String NOTIFICATION_TAG = "FaceService";
-    static final int NOTIFICATION_ID = 1;
 
     private boolean mTestHalEnabled;
 
@@ -109,7 +107,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final LockoutHalImpl mLockoutTracker;
     @NonNull private final UsageStats mUsageStats;
-    @NonNull private final NotificationManager mNotificationManager;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @Nullable private IBiometricsFace mDaemon;
     @NonNull private final HalResultController mHalResultController;
@@ -343,7 +340,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mUsageStats = new UsageStats(context);
         mAuthenticatorIds = new HashMap<>();
         mLazyDaemon = Face10.this::getDaemon;
-        mNotificationManager = mContext.getSystemService(NotificationManager.class);
         mLockoutTracker = new LockoutHalImpl();
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mHalResultController = new HalResultController(sensorId, context, mHandler, mScheduler,
@@ -607,8 +603,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
-            mNotificationManager.cancelAsUser(NOTIFICATION_TAG, NOTIFICATION_ID,
-                    UserHandle.CURRENT);
+            ReEnrollNotificationUtils.cancelNotification(mContext);
 
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,

@@ -831,6 +831,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
                 return context.getString(
                         com.android.internal.R.string.face_error_security_update_required);
+            case BIOMETRIC_ERROR_RE_ENROLL:
+                return context.getString(
+                        com.android.internal.R.string.face_recalibrate_notification_content);
             case FACE_ERROR_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.face_error_vendor);

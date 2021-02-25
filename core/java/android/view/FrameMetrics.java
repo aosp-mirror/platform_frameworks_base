@@ -213,8 +213,7 @@ public final class FrameMetrics {
             Index.FRAME_TIMELINE_VSYNC_ID,
             Index.INTENDED_VSYNC,
             Index.VSYNC,
-            Index.OLDEST_INPUT_EVENT,
-            Index.NEWEST_INPUT_EVENT,
+            Index.INPUT_EVENT_ID,
             Index.HANDLE_INPUT_START,
             Index.ANIMATION_START,
             Index.PERFORM_TRAVERSALS_START,
@@ -225,8 +224,11 @@ public final class FrameMetrics {
             Index.ISSUE_DRAW_COMMANDS_START,
             Index.SWAP_BUFFERS,
             Index.FRAME_COMPLETED,
+            Index.DEQUEUE_BUFFER_DURATION,
+            Index.QUEUE_BUFFER_DURATION,
             Index.GPU_COMPLETED,
-            Index.SWAP_BUFFERS_COMPLETED
+            Index.SWAP_BUFFERS_COMPLETED,
+            Index.DISPLAY_PRESENT_TIME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Index {
@@ -234,20 +236,22 @@ public final class FrameMetrics {
         int FRAME_TIMELINE_VSYNC_ID = 1;
         int INTENDED_VSYNC = 2;
         int VSYNC = 3;
-        int OLDEST_INPUT_EVENT = 4;
-        int NEWEST_INPUT_EVENT = 5;
-        int HANDLE_INPUT_START = 6;
-        int ANIMATION_START = 7;
-        int PERFORM_TRAVERSALS_START = 8;
-        int DRAW_START = 9;
-        int FRAME_DEADLINE = 10;
-        int SYNC_QUEUED = 11;
-        int SYNC_START = 12;
-        int ISSUE_DRAW_COMMANDS_START = 13;
-        int SWAP_BUFFERS = 14;
-        int FRAME_COMPLETED = 15;
-        int GPU_COMPLETED = 18;
-        int SWAP_BUFFERS_COMPLETED = 19;
+        int INPUT_EVENT_ID = 4;
+        int HANDLE_INPUT_START = 5;
+        int ANIMATION_START = 6;
+        int PERFORM_TRAVERSALS_START = 7;
+        int DRAW_START = 8;
+        int FRAME_DEADLINE = 9;
+        int SYNC_QUEUED = 10;
+        int SYNC_START = 11;
+        int ISSUE_DRAW_COMMANDS_START = 12;
+        int SWAP_BUFFERS = 13;
+        int FRAME_COMPLETED = 14;
+        int DEQUEUE_BUFFER_DURATION = 15;
+        int QUEUE_BUFFER_DURATION = 16;
+        int GPU_COMPLETED = 17;
+        int SWAP_BUFFERS_COMPLETED = 18;
+        int DISPLAY_PRESENT_TIME = 19;
 
         int FRAME_STATS_COUNT = 20; // must always be last and in sync with
                                     // FrameInfoIndex::NumIndexes in libs/hwui/FrameInfo.h
