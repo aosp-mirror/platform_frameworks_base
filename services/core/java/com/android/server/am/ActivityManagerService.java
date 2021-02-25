@@ -307,6 +307,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
+import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -3788,10 +3789,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mi.getTotalUss(), mi.getTotalRss(), false,
                                 ProcessStats.ADD_PSS_EXTERNAL_SLOW, duration);
                         proc.getPkgList().forEachPackageProcessStats(holder -> {
+                            final ProcessState state = holder.state;
                             FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                                     proc.info.uid,
-                                    holder.state.getName(),
-                                    holder.state.getPackage(),
+                                    state != null ? state.getName() : proc.processName,
+                                    state != null ? state.getPackage() : proc.info.packageName,
                                     mi.getTotalPss(),
                                     mi.getTotalUss(),
                                     mi.getTotalRss(),
@@ -7223,6 +7225,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long memoryGrowthThreshold =
                     Math.max(totalMemoryInKb / 100, MINIMUM_MEMORY_GROWTH_THRESHOLD);
             mProcessList.forEachLruProcessesLOSP(false, proc -> {
+                if (proc.getThread() == null) {
+                    return;
+                }
                 final ProcessProfileRecord pr = proc.mProfile;
                 final ProcessStateRecord state = proc.mState;
                 final int setProcState = state.getSetProcState();
@@ -13978,6 +13983,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long uptimeSince = curUptime - mLastPowerCheckUptime;
             mLastPowerCheckUptime = curUptime;
             mProcessList.forEachLruProcessesLOSP(false, app -> {
+                if (app.getThread() == null) {
+                    return;
+                }
                 if (app.mState.getSetProcState() >= ActivityManager.PROCESS_STATE_HOME) {
                     int cpuLimit;
                     long checkDur = curUptime - app.mState.getWhenUnimportant();
@@ -14079,11 +14087,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mBatteryStatsService.reportExcessiveCpu(app.info.uid, app.processName,
                         uptimeSince, cputimeUsed);
                 app.getPkgList().forEachPackageProcessStats(holder -> {
+                    final ProcessState state = holder.state;
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
                             app.info.uid,
                             processName,
-                            holder.state.getPackage(),
+                            state != null ? state.getPackage() : app.info.packageName,
                             holder.appVersion);
                 });
                 return true;
