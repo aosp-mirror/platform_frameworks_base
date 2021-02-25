@@ -96,6 +96,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
+import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -127,6 +128,7 @@ import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.ActiveRestoreSession;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
@@ -1860,19 +1862,10 @@ public class UserBackupManagerService {
 
     /**
      * Requests a backup for the inputted {@code packages} with a specified {@link
-     * IBackupManagerMonitor}.
-     */
-    public int requestBackup(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags) {
-        return requestBackup(packages, observer, monitor, flags, OperationType.BACKUP);
-    }
-
-    /**
-     * Requests a backup for the inputted {@code packages} with a specified {@link
      * IBackupManagerMonitor} and {@link OperationType}.
      */
     public int requestBackup(String[] packages, IBackupObserver observer,
-            IBackupManagerMonitor monitor, int flags, @OperationType int operationType) {
+            IBackupManagerMonitor monitor, int flags) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
@@ -1903,13 +1896,16 @@ public class UserBackupManagerService {
 
         final TransportClient transportClient;
         final String transportDirName;
+        int operationType;
         try {
             transportDirName =
                     mTransportManager.getTransportDirName(
                             mTransportManager.getCurrentTransportName());
             transportClient =
                     mTransportManager.getCurrentTransportClientOrThrow("BMS.requestBackup()");
-        } catch (TransportNotRegisteredException e) {
+            operationType = getOperationTypeFromTransport(transportClient);
+        } catch (TransportNotRegisteredException | TransportNotAvailableException
+                | RemoteException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
                     BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
@@ -4024,15 +4020,13 @@ public class UserBackupManagerService {
     }
 
     /** Hand off a restore session. */
-    public IRestoreSession beginRestoreSession(String packageName, String transport,
-            @OperationType int operationType) {
+    public IRestoreSession beginRestoreSession(String packageName, String transport) {
         if (DEBUG) {
             Slog.v(
                     TAG,
                     addUserIdToLogMessage(
                             mUserId,
-                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport
-                                + "operationType=" + operationType));
+                            "beginRestoreSession: pkg=" + packageName + " transport=" + transport));
         }
 
         boolean needPermission = true;
@@ -4071,6 +4065,17 @@ public class UserBackupManagerService {
                                 mUserId,
                                 "restoring self on current transport; no permission needed"));
             }
+        }
+
+        int operationType;
+        try {
+            operationType = getOperationTypeFromTransport(
+                    mTransportManager.getTransportClientOrThrow(transport, /* caller */
+                            "BMS.beginRestoreSession"));
+        } catch (TransportNotAvailableException | TransportNotRegisteredException
+                | RemoteException e) {
+            Slog.w(TAG, "Failed to get operation type from transport: " + e);
+            return null;
         }
 
         synchronized (this) {
@@ -4354,6 +4359,34 @@ public class UserBackupManagerService {
                 pw.println(entry.packageName);
             }
         }
+    }
+
+    @VisibleForTesting
+    @OperationType int getOperationTypeFromTransport(TransportClient transportClient)
+            throws TransportNotAvailableException, RemoteException {
+        if (!shouldUseNewBackupEligibilityRules()) {
+            // Return the default to stick to the legacy behaviour.
+            return OperationType.BACKUP;
+        }
+
+        long oldCallingId = Binder.clearCallingIdentity();
+        try {
+            IBackupTransport transport = transportClient.connectOrThrow(
+                    /* caller */ "BMS.getOperationTypeFromTransport");
+            if ((transport.getTransportFlags() & BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER) != 0) {
+                return OperationType.MIGRATION;
+            } else {
+                return OperationType.BACKUP;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldCallingId);
+        }
+    }
+
+    @VisibleForTesting
+    boolean shouldUseNewBackupEligibilityRules() {
+        return FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES);
     }
 
     private static String addUserIdToLogMessage(int userId, String message) {
