@@ -143,7 +143,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(Map.class);
 
         verify(mThemeOverlayApplier)
-                .applyCurrentUserOverlays(themeOverlays.capture(), any(), any());
+                .applyCurrentUserOverlays(themeOverlays.capture(), any(), anyInt(), any());
 
         // Assert that we received the colors that we were expecting
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
@@ -175,7 +175,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(Map.class);
 
         verify(mThemeOverlayApplier)
-                .applyCurrentUserOverlays(themeOverlays.capture(), any(), any());
+                .applyCurrentUserOverlays(themeOverlays.capture(), any(), anyInt(), any());
 
         // Assert that we received the colors that we were expecting
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
@@ -198,7 +198,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(Map.class);
 
         verify(mThemeOverlayApplier)
-                .applyCurrentUserOverlays(themeOverlays.capture(), any(), any());
+                .applyCurrentUserOverlays(themeOverlays.capture(), any(), anyInt(), any());
 
         // Assert that we received the colors that we were expecting
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
