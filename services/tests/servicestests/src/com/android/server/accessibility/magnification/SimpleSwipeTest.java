@@ -78,7 +78,7 @@ public class SimpleSwipeTest {
 
     @Test
     public void sendSwipeEvent_onGestureCompleted() {
-        final float swipeDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        final float swipeDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
         final MotionEvent downEvent = TouchEventGenerator.downEvent(Display.DEFAULT_DISPLAY,
                 DEFAULT_X, DEFAULT_Y);
         final MotionEvent moveEvent = TouchEventGenerator.moveEvent(Display.DEFAULT_DISPLAY,

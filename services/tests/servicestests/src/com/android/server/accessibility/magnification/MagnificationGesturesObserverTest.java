@@ -69,7 +69,7 @@ public class MagnificationGesturesObserverTest {
         mContext = InstrumentationRegistry.getContext();
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mObserver = new MagnificationGesturesObserver(mCallback, new SimpleSwipe(mContext),
-                new TwoFingersDown(mContext));
+                new TwoFingersDownOrSwipe(mContext));
     }
 
     @Test
@@ -77,9 +77,7 @@ public class MagnificationGesturesObserverTest {
         final MotionEvent moveEvent = TouchEventGenerator.moveEvent(Display.DEFAULT_DISPLAY,
                 DEFAULT_X , DEFAULT_Y);
 
-        mInstrumentation.runOnMainSync(() -> {
-            mObserver.onMotionEvent(moveEvent, moveEvent, 0);
-        });
+        mObserver.onMotionEvent(moveEvent, moveEvent, 0);
 
         verify(mCallback).onGestureCancelled(eq(0L),
                 mEventInfoArgumentCaptor.capture(), argThat(new MotionEventMatcher(moveEvent)));
@@ -92,9 +90,7 @@ public class MagnificationGesturesObserverTest {
         final MotionEvent downEvent = TouchEventGenerator.downEvent(Display.DEFAULT_DISPLAY,
                 DEFAULT_X , DEFAULT_Y);
 
-        mInstrumentation.runOnMainSync(() -> {
-            mObserver.onMotionEvent(downEvent, downEvent, 0);
-        });
+        mObserver.onMotionEvent(downEvent, downEvent, 0);
 
         verify(mCallback).onGestureCancelled(eq(0L),
                 mEventInfoArgumentCaptor.capture(), argThat(new MotionEventMatcher(downEvent)));
@@ -108,9 +104,7 @@ public class MagnificationGesturesObserverTest {
         final int timeoutMillis = MagnificationGestureMatcher.getMagnificationMultiTapTimeout(
                 mContext) + 100;
 
-        mInstrumentation.runOnMainSync(() -> {
-            mObserver.onMotionEvent(downEvent, downEvent, 0);
-        });
+        mObserver.onMotionEvent(downEvent, downEvent, 0);
 
         verify(mCallback, timeout(timeoutMillis)).onGestureCancelled(eq(downEvent.getDownTime()),
                 mEventInfoArgumentCaptor.capture(), argThat(new MotionEventMatcher(downEvent)));
@@ -121,14 +115,12 @@ public class MagnificationGesturesObserverTest {
     public void sendEventsOfSwiping_onGestureCompleted() {
         final MotionEvent downEvent = TouchEventGenerator.downEvent(Display.DEFAULT_DISPLAY,
                 DEFAULT_X, DEFAULT_Y);
-        final float swipeDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        final float swipeDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
         final MotionEvent moveEvent = TouchEventGenerator.moveEvent(Display.DEFAULT_DISPLAY,
                 DEFAULT_X + swipeDistance, DEFAULT_Y + swipeDistance);
 
-        mInstrumentation.runOnMainSync(() -> {
-            mObserver.onMotionEvent(downEvent, downEvent, 0);
-            mObserver.onMotionEvent(moveEvent, moveEvent, 0);
-        });
+        mObserver.onMotionEvent(downEvent, downEvent, 0);
+        mObserver.onMotionEvent(moveEvent, moveEvent, 0);
 
         verify(mCallback).onGestureCompleted(eq(MagnificationGestureMatcher.GESTURE_SWIPE),
                 eq(downEvent.getDownTime()), mEventInfoArgumentCaptor.capture(),

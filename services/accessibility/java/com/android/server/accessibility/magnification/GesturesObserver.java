@@ -98,8 +98,7 @@ public final class GesturesObserver implements GestureMatcher.StateChangeListene
         }
         mProcessMotionEvent = true;
         for (int i = 0; i < mGestureMatchers.size(); i++) {
-            final GestureMatcher matcher =
-                    mGestureMatchers.get(i);
+            final GestureMatcher matcher = mGestureMatchers.get(i);
             matcher.onMotionEvent(event, rawEvent, policyFlags);
             if (matcher.getState() == GestureMatcher.STATE_GESTURE_COMPLETED) {
                 clear();
@@ -128,7 +127,10 @@ public final class GesturesObserver implements GestureMatcher.StateChangeListene
             MotionEvent rawEvent, int policyFlags) {
         if (state == GestureMatcher.STATE_GESTURE_COMPLETED) {
             mListener.onGestureCompleted(gestureId, event, rawEvent, policyFlags);
-            //Clear the states in onMotionEvent().
+            // Ideally we clear the states in onMotionEvent(), this case is for hold gestures.
+            // If we clear before processing up event , then MultiTap matcher cancels the gesture
+            // due to incorrect state. It ends up listener#onGestureCancelled is called even
+            // the gesture is detected.
             if (!mProcessMotionEvent) {
                 clear();
             }
