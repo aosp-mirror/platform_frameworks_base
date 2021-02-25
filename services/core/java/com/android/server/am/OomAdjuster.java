@@ -21,6 +21,7 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL_IMPLICIT;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
@@ -1981,6 +1982,21 @@ public final class OomAdjuster {
                             capability |= cstate.getCurCapability();
                         }
 
+                        // If an app has network capability by default
+                        // (by having procstate <= BFGS), then the apps it binds to will get
+                        // elevated to a high enough procstate anyway to get network unless they
+                        // request otherwise, so don't propagate the network capability by default
+                        // in this case unless they explicitly request it.
+                        if ((cstate.getCurCapability() & PROCESS_CAPABILITY_NETWORK) != 0) {
+                            if (clientProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+                                if ((cr.flags & Context.BIND_ALLOW_NETWORK_ACCESS) != 0) {
+                                    capability |= PROCESS_CAPABILITY_NETWORK;
+                                }
+                            } else {
+                                capability |= PROCESS_CAPABILITY_NETWORK;
+                            }
+                        }
+
                         if (clientProcState >= PROCESS_STATE_CACHED_ACTIVITY) {
                             // If the other app is cached for any reason, for purposes here
                             // we are going to consider it empty.  The specific cached state
@@ -2048,6 +2064,10 @@ public final class OomAdjuster {
                                         && clientAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj >= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                                     newAdj = ProcessList.PERCEPTIBLE_LOW_APP_ADJ;
+                                } else if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0
+                                        && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
+                                        && adj >= ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ) {
+                                    newAdj = ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ;
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
                                         && adj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -2117,13 +2137,13 @@ public final class OomAdjuster {
                                 if (enabled) {
                                     if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                                         // TOP process passes all capabilities to the service.
-                                        capability |= PROCESS_CAPABILITY_ALL;
+                                        capability |= cstate.getCurCapability();
                                     } else {
                                         // TOP process passes no capability to the service.
                                     }
                                 } else {
                                     // TOP process passes all capabilities to the service.
-                                    capability |= PROCESS_CAPABILITY_ALL;
+                                    capability |= cstate.getCurCapability();
                                 }
                             }
                         } else if ((cr.flags & Context.BIND_IMPORTANT_BACKGROUND) == 0) {
@@ -2448,20 +2468,20 @@ public final class OomAdjuster {
             case PROCESS_STATE_TOP:
                 return PROCESS_CAPABILITY_ALL;
             case PROCESS_STATE_BOUND_TOP:
-                return PROCESS_CAPABILITY_NONE;
+                return PROCESS_CAPABILITY_NETWORK;
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 if (psr.hasForegroundServices()) {
                     // Capability from FGS are conditional depending on foreground service type in
                     // manifest file and the mAllowWhileInUsePermissionInFgs flag.
-                    return PROCESS_CAPABILITY_NONE;
+                    return PROCESS_CAPABILITY_NETWORK;
                 } else {
                     // process has no FGS, the PROCESS_STATE_FOREGROUND_SERVICE is from client.
                     // the implicit capability could be removed in the future, client should use
                     // BIND_INCLUDE_CAPABILITY flag.
-                    return PROCESS_CAPABILITY_ALL_IMPLICIT;
+                    return PROCESS_CAPABILITY_ALL_IMPLICIT | PROCESS_CAPABILITY_NETWORK;
                 }
             case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return PROCESS_CAPABILITY_NONE;
+                return PROCESS_CAPABILITY_NETWORK;
             default:
                 return PROCESS_CAPABILITY_NONE;
         }
