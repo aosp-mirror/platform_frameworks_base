@@ -12520,6 +12520,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * @param totalEnergyUJ energy (microjoules) used for this bucket since this was last called.
      * @param uidEnergies map of uid->energy (microjoules) for this bucket since last called.
      *                    Data inside uidEnergies will not be modified (treated immutable).
+     *                    Uids not already known to BatteryStats will be ignored.
      */
     public void updateCustomMeasuredEnergyDataLocked(int customEnergyBucket,
             long totalEnergyUJ, @Nullable SparseLongArray uidEnergies) {
@@ -12540,10 +12541,20 @@ public class BatteryStatsImpl extends BatteryStats {
             final int uidInt = mapUid(uidEnergies.keyAt(i));
             final long uidEnergyUJ = uidEnergies.valueAt(i);
             if (uidEnergyUJ == 0) continue;
-            // TODO(b/180030409): Worry about dead Uids (no longer in BSI) being revived by this,
-            //  or converse problem of not creating a new Uid if its first blame is recorded here.
-            final Uid uidObj = getUidStatsLocked(uidInt);
-            uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket, true);
+            final Uid uidObj = getAvailableUidStatsLocked(uidInt);
+            if (uidObj != null) {
+                uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket, true);
+            } else {
+                // Ignore any uid not already known to BatteryStats, rather than creating a new Uid.
+                // Otherwise we could end up reviving dead Uids. Note that the CPU data is updated
+                // first, so any uid that has used any CPU should already be known to BatteryStats.
+                // Recently removed uids (especially common for isolated uids) can reach this path
+                // and are ignored.
+                if (!Process.isIsolated(uidInt)) {
+                    Slog.w(TAG, "Received measured energy " + totalEnergyUJ + " for custom bucket "
+                        + customEnergyBucket + " for non-existent uid " + uidInt);
+                }
+            }
         }
     }
 
