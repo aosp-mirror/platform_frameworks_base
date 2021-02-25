@@ -16,22 +16,31 @@
 
 package android.net.vcn.persistablebundleutils;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.net.InetAddresses;
 import android.net.eap.EapSessionConfig;
 import android.net.ipsec.ike.IkeSaProposal;
 import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.IkeSessionParams.ConfigRequestIpv4PcscfServer;
+import android.net.ipsec.ike.IkeSessionParams.ConfigRequestIpv6PcscfServer;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthDigitalSignLocalConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthDigitalSignRemoteConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthEapConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthPskConfig;
+import android.net.ipsec.ike.IkeSessionParams.IkeConfigRequest;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
+import java.net.InetAddress;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -53,6 +62,7 @@ public final class IkeSessionParamsUtils {
     private static final String REMOTE_ID_KEY = "REMOTE_ID_KEY";
     private static final String LOCAL_AUTH_KEY = "LOCAL_AUTH_KEY";
     private static final String REMOTE_AUTH_KEY = "REMOTE_AUTH_KEY";
+    private static final String CONFIG_REQUESTS_KEY = "CONFIG_REQUESTS_KEY";
     private static final String RETRANS_TIMEOUTS_KEY = "RETRANS_TIMEOUTS_KEY";
     private static final String HARD_LIFETIME_SEC_KEY = "HARD_LIFETIME_SEC_KEY";
     private static final String SOFT_LIFETIME_SEC_KEY = "SOFT_LIFETIME_SEC_KEY";
@@ -89,13 +99,21 @@ public final class IkeSessionParamsUtils {
         result.putPersistableBundle(
                 REMOTE_AUTH_KEY, AuthConfigUtils.toPersistableBundle(params.getRemoteAuthConfig()));
 
+        final List<ConfigRequest> reqList = new ArrayList<>();
+        for (IkeConfigRequest req : params.getConfigurationRequests()) {
+            reqList.add(new ConfigRequest(req));
+        }
+        final PersistableBundle configReqListBundle =
+                PersistableBundleUtils.fromList(reqList, ConfigRequest::toPersistableBundle);
+        result.putPersistableBundle(CONFIG_REQUESTS_KEY, configReqListBundle);
+
         result.putIntArray(RETRANS_TIMEOUTS_KEY, params.getRetransmissionTimeoutsMillis());
         result.putInt(HARD_LIFETIME_SEC_KEY, params.getHardLifetimeSeconds());
         result.putInt(SOFT_LIFETIME_SEC_KEY, params.getSoftLifetimeSeconds());
         result.putInt(DPD_DELAY_SEC_KEY, params.getDpdDelaySeconds());
         result.putInt(NATT_KEEPALIVE_DELAY_SEC_KEY, params.getNattKeepAliveDelaySeconds());
 
-        // TODO: Handle configuration requests and IKE options.
+        // TODO: Handle IKE options.
 
         return result;
     }
@@ -136,7 +154,33 @@ public final class IkeSessionParamsUtils {
         builder.setDpdDelaySeconds(in.getInt(DPD_DELAY_SEC_KEY));
         builder.setNattKeepAliveDelaySeconds(in.getInt(NATT_KEEPALIVE_DELAY_SEC_KEY));
 
-        // TODO: Handle configuration requests and IKE options.
+        final PersistableBundle configReqListBundle = in.getPersistableBundle(CONFIG_REQUESTS_KEY);
+        Objects.requireNonNull(configReqListBundle, "Config request list was null");
+        final List<ConfigRequest> reqList =
+                PersistableBundleUtils.toList(configReqListBundle, ConfigRequest::new);
+        for (ConfigRequest req : reqList) {
+            switch (req.type) {
+                case ConfigRequest.IPV4_P_CSCF_ADDRESS:
+                    if (req.address == null) {
+                        builder.addPcscfServerRequest(AF_INET);
+                    } else {
+                        builder.addPcscfServerRequest(req.address);
+                    }
+                    break;
+                case ConfigRequest.IPV6_P_CSCF_ADDRESS:
+                    if (req.address == null) {
+                        builder.addPcscfServerRequest(AF_INET6);
+                    } else {
+                        builder.addPcscfServerRequest(req.address);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unrecognized config request type: " + req.type);
+            }
+        }
+
+        // TODO: Handle IKE options.
 
         return builder.build();
     }
@@ -387,6 +431,56 @@ public final class IkeSessionParamsUtils {
                 serverCaCert = CertUtils.certificateFromByteArray(encodedCaCert);
             }
             builder.setAuthEap(serverCaCert, eapConfig);
+        }
+    }
+
+    private static final class ConfigRequest {
+        private static final int IPV4_P_CSCF_ADDRESS = 1;
+        private static final int IPV6_P_CSCF_ADDRESS = 2;
+
+        private static final String TYPE_KEY = "type";
+        private static final String ADDRESS_KEY = "address";
+
+        public final int type;
+
+        // Null when it is an empty request
+        @Nullable public final InetAddress address;
+
+        ConfigRequest(IkeConfigRequest config) {
+            if (config instanceof ConfigRequestIpv4PcscfServer) {
+                type = IPV4_P_CSCF_ADDRESS;
+                address = ((ConfigRequestIpv4PcscfServer) config).getAddress();
+            } else if (config instanceof ConfigRequestIpv6PcscfServer) {
+                type = IPV6_P_CSCF_ADDRESS;
+                address = ((ConfigRequestIpv6PcscfServer) config).getAddress();
+            } else {
+                throw new IllegalStateException("Unknown TunnelModeChildConfigRequest");
+            }
+        }
+
+        ConfigRequest(PersistableBundle in) {
+            Objects.requireNonNull(in, "PersistableBundle was null");
+
+            type = in.getInt(TYPE_KEY);
+
+            String addressStr = in.getString(ADDRESS_KEY);
+            if (addressStr == null) {
+                address = null;
+            } else {
+                address = InetAddresses.parseNumericAddress(addressStr);
+            }
+        }
+
+        @NonNull
+        public PersistableBundle toPersistableBundle() {
+            final PersistableBundle result = new PersistableBundle();
+
+            result.putInt(TYPE_KEY, type);
+            if (address != null) {
+                result.putString(ADDRESS_KEY, address.getHostAddress());
+            }
+
+            return result;
         }
     }
 }

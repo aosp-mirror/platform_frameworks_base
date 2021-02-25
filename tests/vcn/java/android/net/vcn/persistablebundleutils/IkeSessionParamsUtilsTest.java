@@ -16,6 +16,8 @@
 
 package android.net.vcn.persistablebundleutils;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
 import static android.telephony.TelephonyManager.APPTYPE_USIM;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +40,8 @@ import org.junit.runner.RunWith;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
@@ -100,6 +104,23 @@ public class IkeSessionParamsUtilsTest {
                         .setRetransmissionTimeoutsMillis(retransmissionTimeout)
                         .build();
 
+        verifyPersistableBundleEncodeDecodeIsLossless(params);
+    }
+
+    @Test
+    public void testEncodeRecodeParamsWithConfigRequests() throws Exception {
+        final Inet4Address ipv4Address =
+                (Inet4Address) InetAddresses.parseNumericAddress("192.0.2.100");
+        final Inet6Address ipv6Address =
+                (Inet6Address) InetAddresses.parseNumericAddress("2001:db8::1");
+
+        final IkeSessionParams params =
+                createBuilderMinimum()
+                        .addPcscfServerRequest(AF_INET)
+                        .addPcscfServerRequest(AF_INET6)
+                        .addPcscfServerRequest(ipv4Address)
+                        .addPcscfServerRequest(ipv6Address)
+                        .build();
         verifyPersistableBundleEncodeDecodeIsLossless(params);
     }
 
