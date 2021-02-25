@@ -56,6 +56,22 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+namespace {
+class ScopedActiveContext {
+public:
+    ScopedActiveContext(CanvasContext* context) { sActiveContext = context; }
+
+    ~ScopedActiveContext() { sActiveContext = nullptr; }
+
+    static CanvasContext* getActiveContext() { return sActiveContext; }
+
+private:
+    static CanvasContext* sActiveContext;
+};
+
+CanvasContext* ScopedActiveContext::sActiveContext = nullptr;
+} /* namespace */
+
 CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
                                      RenderNode* rootRenderNode, IContextFactory* contextFactory) {
     auto renderType = Properties::getRenderPipelineType();
@@ -473,6 +489,7 @@ void CanvasContext::draw() {
         return;
     }
 
+    ScopedActiveContext activeContext(this);
     mCurrentFrameInfo->set(FrameInfoIndex::FrameInterval) =
             mRenderThread.timeLord().frameIntervalNanos();
 
@@ -878,6 +895,17 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
     }
 
     return windowDirty;
+}
+
+CanvasContext* CanvasContext::getActiveContext() {
+    return ScopedActiveContext::getActiveContext();
+}
+
+bool CanvasContext::mergeTransaction(ASurfaceTransaction* transaction, ASurfaceControl* control) {
+    if (!mASurfaceTransactionCallback) return false;
+    std::invoke(mASurfaceTransactionCallback, reinterpret_cast<int64_t>(transaction),
+                reinterpret_cast<int64_t>(control), getFrameNumber());
+    return true;
 }
 
 } /* namespace renderthread */

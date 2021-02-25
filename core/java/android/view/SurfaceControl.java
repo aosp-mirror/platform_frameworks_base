@@ -2595,6 +2595,16 @@ public final class SurfaceControl implements Parcelable {
                 = sRegistry.registerNativeAllocation(this, mNativeObject);
         }
 
+        /**
+         * Create a transaction object that wraps a native peer.
+         * @hide
+         */
+        Transaction(long nativeObject) {
+            mNativeObject = nativeObject;
+            mFreeNativeResources =
+                sRegistry.registerNativeAllocation(this, mNativeObject);
+        }
+
         private Transaction(Parcel in) {
             readFromParcel(in);
         }

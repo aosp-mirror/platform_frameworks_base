@@ -64,6 +64,10 @@ struct {
 } gHardwareRenderer;
 
 struct {
+    jmethodID onMergeTransaction;
+} gASurfaceTransactionCallback;
+
+struct {
     jmethodID onFrameDraw;
 } gFrameDrawingCallback;
 
@@ -509,6 +513,27 @@ static void android_view_ThreadedRenderer_setPictureCapturedCallbackJNI(JNIEnv* 
     }
 }
 
+static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
+        JNIEnv* env, jobject clazz, jlong proxyPtr, jobject aSurfaceTransactionCallback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!aSurfaceTransactionCallback) {
+        proxy->setASurfaceTransactionCallback(nullptr);
+    } else {
+        JavaVM* vm = nullptr;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(
+                vm, env->NewGlobalRef(aSurfaceTransactionCallback));
+        proxy->setASurfaceTransactionCallback(
+                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) {
+                    JNIEnv* env = getenv(globalCallbackRef->vm());
+                    env->CallVoidMethod(globalCallbackRef->object(),
+                                        gASurfaceTransactionCallback.onMergeTransaction,
+                                        static_cast<jlong>(transObj), static_cast<jlong>(scObj),
+                                        static_cast<jlong>(frameNr));
+                });
+    }
+}
+
 static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jobject frameCallback) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -762,8 +787,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetName", "(JLjava/lang/String;)V", (void*)android_view_ThreadedRenderer_setName},
         {"nSetSurface", "(JLandroid/view/Surface;Z)V",
          (void*)android_view_ThreadedRenderer_setSurface},
-        {"nSetSurfaceControl", "(JJ)V",
-         (void*)android_view_ThreadedRenderer_setSurfaceControl},
+        {"nSetSurfaceControl", "(JJ)V", (void*)android_view_ThreadedRenderer_setSurfaceControl},
         {"nPause", "(J)Z", (void*)android_view_ThreadedRenderer_pause},
         {"nSetStopped", "(JZ)V", (void*)android_view_ThreadedRenderer_setStopped},
         {"nSetLightAlpha", "(JFF)V", (void*)android_view_ThreadedRenderer_setLightAlpha},
@@ -804,6 +828,9 @@ static const JNINativeMethod gMethods[] = {
         {"nSetPictureCaptureCallback",
          "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V",
          (void*)android_view_ThreadedRenderer_setPictureCapturedCallbackJNI},
+        {"nSetASurfaceTransactionCallback",
+         "(JLandroid/graphics/HardwareRenderer$ASurfaceTransactionCallback;)V",
+         (void*)android_view_ThreadedRenderer_setASurfaceTransactionCallback},
         {"nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
          (void*)android_view_ThreadedRenderer_setFrameCallback},
         {"nSetFrameCompleteCallback",
@@ -865,6 +892,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     gHardwareRenderer.closeHintSession =
             GetStaticMethodIDOrDie(env, hardwareRenderer, "closeHintSession",
                                    "(Landroid/os/PerformanceHintManager$Session;)V");
+
+    jclass aSurfaceTransactionCallbackClass =
+            FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
+    gASurfaceTransactionCallback.onMergeTransaction =
+            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)V");
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");
