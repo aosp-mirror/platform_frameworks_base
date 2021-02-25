@@ -61,7 +61,6 @@ import android.widget.Toast;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.UiThread;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -207,7 +206,7 @@ public class ClipboardService extends SystemService {
                                          new ClipData.Item(contents));
                         synchronized(mClipboards) {
                             setPrimaryClipInternal(getClipboard(0), clip,
-                                    android.os.Process.SYSTEM_UID);
+                                    android.os.Process.SYSTEM_UID, null);
                         }
                     }
                 });
@@ -247,6 +246,8 @@ public class ClipboardService extends SystemService {
         ClipData primaryClip;
         /** UID that set {@link #primaryClip}. */
         int primaryClipUid = android.os.Process.NOBODY_UID;
+        /** Application label of the app that set {@link #primaryClip}. */
+        CharSequence mPrimaryClipAppLabel;
 
         final HashSet<String> activePermissionOwners
                 = new HashSet<String>();
@@ -365,7 +366,7 @@ public class ClipboardService extends SystemService {
                     return;
                 }
                 checkDataOwnerLocked(clip, intendingUid);
-                setPrimaryClipInternal(clip, intendingUid);
+                setPrimaryClipInternal(clip, intendingUid, callingPackage);
             }
         }
 
@@ -378,7 +379,7 @@ public class ClipboardService extends SystemService {
                         intendingUid, intendingUserId)) {
                     return;
                 }
-                setPrimaryClipInternal(null, intendingUid);
+                setPrimaryClipInternal(null, intendingUid, callingPackage);
             }
         }
 
@@ -509,6 +510,11 @@ public class ClipboardService extends SystemService {
     }
 
     void setPrimaryClipInternal(@Nullable ClipData clip, int uid) {
+        setPrimaryClipInternal(clip, uid, null);
+    }
+
+    private void setPrimaryClipInternal(
+            @Nullable ClipData clip, int uid, @Nullable String sourcePackage) {
         // Push clipboard to host, if any
         if (mHostClipboardMonitor != null) {
             if (clip == null) {
@@ -522,9 +528,20 @@ public class ClipboardService extends SystemService {
             }
         }
 
+        // Retrieve the app label of the source of the clip data
+        CharSequence sourceAppLabel = null;
+        if (clip != null && sourcePackage != null) {
+            try {
+                sourceAppLabel =
+                        mPm.getApplicationLabel(mPm.getApplicationInfo(sourcePackage, 0));
+            } catch (PackageManager.NameNotFoundException e) {
+                // leave label as null
+            }
+        }
+
         // Update this user
         final int userId = UserHandle.getUserId(uid);
-        setPrimaryClipInternal(getClipboard(userId), clip, uid);
+        setPrimaryClipInternal(getClipboard(userId), clip, uid, sourceAppLabel);
 
         // Update related users
         List<UserInfo> related = getRelatedProfiles(userId);
@@ -558,7 +575,8 @@ public class ClipboardService extends SystemService {
                         final boolean canCopyIntoProfile = !hasRestriction(
                                 UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
                         if (canCopyIntoProfile) {
-                            setPrimaryClipInternal(getClipboard(id), clip, uid);
+                            setPrimaryClipInternal(
+                                    getClipboard(id), clip, uid, sourceAppLabel);
                         }
                     }
                 }
@@ -568,6 +586,11 @@ public class ClipboardService extends SystemService {
 
     void setPrimaryClipInternal(PerUserClipboard clipboard, @Nullable ClipData clip,
             int uid) {
+        setPrimaryClipInternal(clipboard, clip, uid, null);
+    }
+
+    private void setPrimaryClipInternal(PerUserClipboard clipboard, @Nullable ClipData clip,
+            int uid, @Nullable CharSequence sourceAppLabel) {
         revokeUris(clipboard);
         clipboard.activePermissionOwners.clear();
         if (clip == null && clipboard.primaryClip == null) {
@@ -576,8 +599,10 @@ public class ClipboardService extends SystemService {
         clipboard.primaryClip = clip;
         if (clip != null) {
             clipboard.primaryClipUid = uid;
+            clipboard.mPrimaryClipAppLabel = sourceAppLabel;
         } else {
             clipboard.primaryClipUid = android.os.Process.NOBODY_UID;
+            clipboard.mPrimaryClipAppLabel = null;
         }
         if (clip != null) {
             final ClipDescription description = clip.getDescription();
@@ -861,29 +886,23 @@ public class ClipboardService extends SystemService {
                 && mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId)) {
             return;
         }
-        // Load the labels for the calling app and the app that set the clipboard content.
-        final long ident = Binder.clearCallingIdentity();
+
         try {
-            final IPackageManager pm = AppGlobals.getPackageManager();
+            CharSequence callingAppLabel = mPm.getApplicationLabel(
+                    mPm.getApplicationInfo(callingPackage, 0));
             String message;
-            final CharSequence callingLabel = mPm.getApplicationLabel(
-                    pm.getApplicationInfo(callingPackage, 0, userId));
-            final String[] packagesForUid = pm.getPackagesForUid(clipboard.primaryClipUid);
-            if (packagesForUid != null && packagesForUid.length > 0) {
-                final CharSequence clipLabel = mPm.getApplicationLabel(
-                        pm.getApplicationInfo(packagesForUid[0], 0,
-                                UserHandle.getUserId(clipboard.primaryClipUid)));
-                message = callingLabel + " pasted from " + clipLabel;
+            if (clipboard.mPrimaryClipAppLabel != null) {
+                message = callingAppLabel + " pasted from " + clipboard.mPrimaryClipAppLabel;
             } else {
-                message = callingLabel + " pasted from clipboard";
+                message = callingAppLabel + " pasted from clipboard";
             }
             Slog.i(TAG, message);
-            Toast.makeText(getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_SHORT)
-                    .show();
-        } catch (RemoteException e) {
-            /* ignore */
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+            Binder.withCleanCallingIdentity(() ->
+                    Toast.makeText(getContext(), UiThread.get().getLooper(), message,
+                            Toast.LENGTH_SHORT)
+                            .show());
+        } catch (PackageManager.NameNotFoundException e) {
+            // do nothing
         }
     }
 }
