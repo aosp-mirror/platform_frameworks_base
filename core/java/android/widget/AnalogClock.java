@@ -200,6 +200,8 @@ public class AnalogClock extends View {
         mTimeZone = toZoneId(a.getString(com.android.internal.R.styleable.AnalogClock_timeZone));
         createClock();
 
+        a.recycle();
+
         mDialWidth = mDial.getIntrinsicWidth();
         mDialHeight = mDial.getIntrinsicHeight();
     }
