@@ -2649,6 +2649,37 @@ public final class SmsManager {
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
             Bundle configOverrides, PendingIntent sentIntent) {
+        sendMultimediaMessage(context, contentUri, locationUrl, configOverrides, sentIntent,
+                0L /* messageId */);
+    }
+
+    /**
+     * Send an MMS message
+     *
+     * Same as {@link #sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
+     *           Bundle configOverrides, PendingIntent sentIntent)}, but adds an optional messageId.
+     * <p class="note"><strong>Note:</strong> If {@link #getDefault()} is used to instantiate this
+     * manager on a multi-SIM device, this operation may fail sending the MMS message because no
+     * suitable default subscription could be found. In this case, if {@code sentIntent} is
+     * non-null, then the {@link PendingIntent} will be sent with an error code
+     * {@code RESULT_NO_DEFAULT_SMS_APP}. See {@link #getDefault()} for more information on the
+     * conditions where this operation may fail.
+     * </p>
+     *
+     * @param context application context
+     * @param contentUri the content Uri from which the message pdu will be read
+     * @param locationUrl the optional location url where message should be sent to
+     * @param configOverrides the carrier-specific messaging configuration values to override for
+     *  sending the message.
+     * @param sentIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is successfully sent, or failed
+     * @param messageId an id that uniquely identifies the message requested to be sent.
+     * Used for logging and diagnostics purposes. The id may be 0.
+     * @throws IllegalArgumentException if contentUri is empty
+     */
+    public void sendMultimediaMessage(@NonNull Context context, @NonNull Uri contentUri,
+            @Nullable String locationUrl, @Nullable Bundle configOverrides,
+            @Nullable PendingIntent sentIntent, long messageId) {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
         }
@@ -2658,7 +2689,7 @@ public final class SmsManager {
                 @Override
                 public void onSuccess(int subId) {
                     m.sendMultimediaMessage(subId, contentUri, locationUrl, configOverrides,
-                            sentIntent, 0L /* messageId */);
+                            sentIntent, messageId);
                 }
 
                 @Override
@@ -2692,6 +2723,39 @@ public final class SmsManager {
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
             Bundle configOverrides, PendingIntent downloadedIntent) {
+        downloadMultimediaMessage(context, locationUrl, contentUri, configOverrides,
+                downloadedIntent, 0L /* messageId */);
+    }
+
+    /**
+     * Download an MMS message from carrier by a given location URL
+     *
+     * Same as {@link #downloadMultimediaMessage(Context context, String locationUrl,
+     *      Uri contentUri, Bundle configOverrides, PendingIntent downloadedIntent)},
+     *      but adds an optional messageId.
+     * <p class="note"><strong>Note:</strong> If {@link #getDefault()} is used to instantiate this
+     * manager on a multi-SIM device, this operation may fail downloading the MMS message because no
+     * suitable default subscription could be found. In this case, if {@code downloadedIntent} is
+     * non-null, then the {@link PendingIntent} will be sent with an error code
+     * {@code RESULT_NO_DEFAULT_SMS_APP}. See {@link #getDefault()} for more information on the
+     * conditions where this operation may fail.
+     * </p>
+     *
+     * @param context application context
+     * @param locationUrl the location URL of the MMS message to be downloaded, usually obtained
+     *  from the MMS WAP push notification
+     * @param contentUri the content uri to which the downloaded pdu will be written
+     * @param configOverrides the carrier-specific messaging configuration values to override for
+     *  downloading the message.
+     * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is downloaded, or the download is failed
+     * @param messageId an id that uniquely identifies the message requested to be downloaded.
+     * Used for logging and diagnostics purposes. The id may be 0.
+     * @throws IllegalArgumentException if locationUrl or contentUri is empty
+     */
+    public void downloadMultimediaMessage(@NonNull Context context, @NonNull String locationUrl,
+            @NonNull Uri contentUri, @Nullable Bundle configOverrides,
+            @Nullable PendingIntent downloadedIntent, long messageId) {
         if (TextUtils.isEmpty(locationUrl)) {
             throw new IllegalArgumentException("Empty MMS location URL");
         }
@@ -2704,7 +2768,7 @@ public final class SmsManager {
                 @Override
                 public void onSuccess(int subId) {
                     m.downloadMultimediaMessage(subId, locationUrl, contentUri, configOverrides,
-                            downloadedIntent, 0L /* messageId */);
+                            downloadedIntent, messageId);
                 }
 
                 @Override

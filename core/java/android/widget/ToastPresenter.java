@@ -184,7 +184,7 @@ public class ToastPresenter {
         mParams.y = yOffset;
         mParams.horizontalMargin = horizontalMargin;
         mParams.verticalMargin = verticalMargin;
-        addToastView();
+        mView.setLayoutParams(mParams);
     }
 
     /**

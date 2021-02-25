@@ -969,7 +969,7 @@ public class VcnGatewayConnection extends StateMachine {
             mGatewayStatusCallback.onGatewayConnectionError(
                     mConnectionConfig.getRequiredUnderlyingCapabilities(),
                     VCN_ERROR_CODE_INTERNAL_ERROR,
-                    "java.lang.RuntimeException",
+                    RuntimeException.class.getName(),
                     "Received "
                             + exception.getClass().getSimpleName()
                             + " with message: "
@@ -991,11 +991,11 @@ public class VcnGatewayConnection extends StateMachine {
         } else if (exception instanceof IkeInternalException
                 && exception.getCause() instanceof IOException) {
             errorCode = VCN_ERROR_CODE_NETWORK_ERROR;
-            exceptionClass = "java.io.IOException";
+            exceptionClass = IOException.class.getName();
             exceptionMessage = exception.getCause().getMessage();
         } else {
             errorCode = VCN_ERROR_CODE_INTERNAL_ERROR;
-            exceptionClass = "java.lang.RuntimeException";
+            exceptionClass = RuntimeException.class.getName();
             exceptionMessage =
                     "Received "
                             + exception.getClass().getSimpleName()

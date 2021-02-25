@@ -377,8 +377,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN we send the dismissal to system server
         verify(mStatusBarService).onNotificationClear(
                 notif2.sbn.getPackageName(),
-                notif2.sbn.getTag(),
-                88,
                 notif2.sbn.getUser().getIdentifier(),
                 notif2.sbn.getKey(),
                 stats.dismissalSurface,
@@ -528,8 +526,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN we never send the dismissal to system server
         verify(mStatusBarService, never()).onNotificationClear(
                 notif.sbn.getPackageName(),
-                notif.sbn.getTag(),
-                47,
                 notif.sbn.getUser().getIdentifier(),
                 notif.sbn.getKey(),
                 stats.dismissalSurface,
@@ -566,8 +562,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN the notification is never sent to system server to dismiss
         verify(mStatusBarService, never()).onNotificationClear(
                 eq(notif.sbn.getPackageName()),
-                eq(notif.sbn.getTag()),
-                eq(47),
                 eq(notif.sbn.getUser().getIdentifier()),
                 eq(notif.sbn.getKey()),
                 anyInt(),
@@ -596,8 +590,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN we send the dismissal to system server
         verify(mStatusBarService).onNotificationClear(
                 eq(notif.sbn.getPackageName()),
-                eq(notif.sbn.getTag()),
-                eq(47),
                 eq(notif.sbn.getUser().getIdentifier()),
                 eq(notif.sbn.getKey()),
                 anyInt(),
@@ -1125,8 +1117,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN we send the dismissals to system server
         verify(mStatusBarService).onNotificationClear(
                 notif1.sbn.getPackageName(),
-                notif1.sbn.getTag(),
-                47,
                 notif1.sbn.getUser().getIdentifier(),
                 notif1.sbn.getKey(),
                 stats1.dismissalSurface,
@@ -1135,8 +1125,6 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         verify(mStatusBarService).onNotificationClear(
                 notif2.sbn.getPackageName(),
-                notif2.sbn.getTag(),
-                88,
                 notif2.sbn.getUser().getIdentifier(),
                 notif2.sbn.getKey(),
                 stats2.dismissalSurface,

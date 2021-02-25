@@ -37,12 +37,6 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 
-    <ViewStub
-        android:id="@+id/keyguard_user_switcher_stub"
-        android:layout="@layout/keyguard_user_switcher"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
-
     <include
         layout="@layout/keyguard_status_view"
         android:visibility="gone" />
@@ -108,6 +102,12 @@
     <include
         layout="@layout/keyguard_bottom_area"
         android:visibility="gone" />
+
+    <ViewStub
+        android:id="@+id/keyguard_user_switcher_stub"
+        android:layout="@layout/keyguard_user_switcher"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
 
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
 </com.android.systemui.statusbar.phone.NotificationPanelView>

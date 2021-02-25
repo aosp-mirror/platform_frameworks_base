@@ -90,7 +90,7 @@ public final class BufferConstraints implements Parcelable {
      * @hide
      */
     @SystemApi
-    public @Nullable BufferConstraint getCodec(@BluetoothCodecConfig.SourceCodecType int codec) {
+    public @Nullable BufferConstraint forCodec(@BluetoothCodecConfig.SourceCodecType int codec) {
         return mBufferConstraints.get(codec);
     }
 }
