@@ -183,6 +183,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
+import android.app.PropertyInvalidatedCache;
 import android.app.WaitResult;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
@@ -12833,6 +12834,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (r.thread != null) {
                 pw.println("\n\n** Cache info for pid " + r.pid + " [" + r.processName + "] **");
                 pw.flush();
+                if (r.pid == MY_PID) {
+                    PropertyInvalidatedCache.dumpCacheInfo(fd, args);
+                    continue;
+                }
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
