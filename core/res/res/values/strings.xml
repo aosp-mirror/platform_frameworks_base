@@ -5849,4 +5849,8 @@ ul.</string>
     <!--- Label for notification channel for all sensor privacy related notifications. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_notification_channel_label">Sensor Privacy</string>
 
+    <!-- Content description for the icon on the splash screen. [CHAR LIMIT=50] -->
+    <string name="splash_screen_view_icon_description">Application icon</string>
+    <!-- Content description for the branding image on the splash screen. [CHAR LIMIT=50] -->
+    <string name="splash_screen_view_branding_description">Application branding image</string>
 </resources>
