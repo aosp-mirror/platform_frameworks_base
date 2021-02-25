@@ -33,6 +33,7 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -1843,6 +1844,37 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());
         assertNotNull(mDisplayContent.mImeScreenshot);
         verify(t).show(mDisplayContent.mImeScreenshot);
+    }
+
+    @Test
+    public void testRotateBounds_keepSamePhysicalPosition() {
+        final DisplayContent dc =
+                new TestDisplayContent.Builder(mAtm, 1000, 2000).build();
+        final Rect initBounds = new Rect(0, 0, 700, 1500);
+        final Rect rotateBounds = new Rect(initBounds);
+
+        // Rotate from 0 to 0
+        dc.rotateBounds(ROTATION_0, ROTATION_0, rotateBounds);
+
+        assertEquals(new Rect(0, 0, 700, 1500), rotateBounds);
+
+        // Rotate from 0 to 90
+        rotateBounds.set(initBounds);
+        dc.rotateBounds(ROTATION_0, ROTATION_90, rotateBounds);
+
+        assertEquals(new Rect(0, 300, 1500, 1000), rotateBounds);
+
+        // Rotate from 0 to 180
+        rotateBounds.set(initBounds);
+        dc.rotateBounds(ROTATION_0, ROTATION_180, rotateBounds);
+
+        assertEquals(new Rect(300, 500, 1000, 2000), rotateBounds);
+
+        // Rotate from 0 to 270
+        rotateBounds.set(initBounds);
+        dc.rotateBounds(ROTATION_0, ROTATION_270, rotateBounds);
+
+        assertEquals(new Rect(500, 0, 2000, 700), rotateBounds);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

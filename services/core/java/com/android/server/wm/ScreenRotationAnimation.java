@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.util.RotationUtils.deltaRotation;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
@@ -174,7 +175,7 @@ class ScreenRotationAnimation {
         // apply rotation animation because there should be a top app shown as rotated. So the
         // specified original rotation customizes the direction of animation to have better look
         // when restoring the rotated app to the same rotation as current display.
-        final int delta = DisplayContent.deltaRotation(originalRotation, realOriginalRotation);
+        final int delta = deltaRotation(originalRotation, realOriginalRotation);
         final boolean flipped = delta == Surface.ROTATION_90 || delta == Surface.ROTATION_270;
         mOriginalWidth = flipped ? originalHeight : originalWidth;
         mOriginalHeight = flipped ? originalWidth : originalHeight;
@@ -330,7 +331,7 @@ class ScreenRotationAnimation {
         // Compute the transformation matrix that must be applied
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
-        int delta = DisplayContent.deltaRotation(rotation, Surface.ROTATION_0);
+        int delta = deltaRotation(rotation, Surface.ROTATION_0);
         RotationAnimationUtils.createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         setRotationTransform(t, mSnapshotInitialMatrix);
@@ -352,8 +353,7 @@ class ScreenRotationAnimation {
         mStarted = true;
 
         // Figure out how the screen has moved from the original rotation.
-        int delta = DisplayContent.deltaRotation(mCurRotation, mOriginalRotation);
-
+        int delta = deltaRotation(mCurRotation, mOriginalRotation);
 
         final boolean customAnim;
         if (exitAnim != 0 && enterAnim != 0) {
