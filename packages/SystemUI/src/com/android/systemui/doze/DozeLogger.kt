@@ -16,6 +16,7 @@
 
 package com.android.systemui.doze
 
+import android.view.Display
 import com.android.systemui.doze.DozeLog.Reason
 import com.android.systemui.doze.DozeLog.reasonToString
 import com.android.systemui.log.LogBuffer
@@ -161,17 +162,18 @@ class DozeLogger @Inject constructor(
 
     fun logDisplayStateChanged(displayState: Int) {
         buffer.log(TAG, INFO, {
-            int1 = displayState
+            str1 = Display.stateToString(displayState)
         }, {
-            "Display state changed to $int1"
+            "Display state changed to $str1"
         })
     }
 
-    fun logWakeDisplay(isAwake: Boolean) {
+    fun logWakeDisplay(isAwake: Boolean, @Reason reason: Int) {
         buffer.log(TAG, DEBUG, {
             bool1 = isAwake
+            int1 = reason
         }, {
-            "Display wakefulness changed, isAwake=$bool1"
+            "Display wakefulness changed, isAwake=$bool1, reason=${reasonToString(int1)}"
         })
     }
 

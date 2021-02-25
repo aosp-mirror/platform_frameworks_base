@@ -140,11 +140,13 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
+            final boolean quickPickupEnabled = mDozeParameters.isQuickPickupEnabled();
             final boolean isDocked = mDockManager.isDocked();
             mBlankScreen = mDisplayRequiresBlanking;
 
             mFrontTint = Color.BLACK;
-            mFrontAlpha = (alwaysOnEnabled || isDocked) ? mAodFrontScrimAlpha : 1f;
+            mFrontAlpha = (alwaysOnEnabled || isDocked || quickPickupEnabled)
+                    ? mAodFrontScrimAlpha : 1f;
 
             mBehindTint = Color.BLACK;
             mBehindAlpha = ScrimController.TRANSPARENT;

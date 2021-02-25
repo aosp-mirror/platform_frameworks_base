@@ -148,6 +148,11 @@ public class DozeParameters implements TunerService.Tunable,
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
     }
 
+    public int getQuickPickupAodDuration() {
+        return getInt("doze.gesture.quickpickup.duration",
+                R.integer.doze_quick_pickup_aod_duration);
+    }
+
     /**
      * For how long a wallpaper can be visible in AoD before it fades aways.
      * @return duration in millis.
@@ -173,6 +178,10 @@ public class DozeParameters implements TunerService.Tunable,
      */
     public boolean getAlwaysOn() {
         return mDozeAlwaysOn && !mBatteryController.isAodPowerSave();
+    }
+
+    public boolean isQuickPickupEnabled() {
+        return mAmbientDisplayConfiguration.quickPickupSensorEnabled(UserHandle.USER_CURRENT);
     }
 
     /**

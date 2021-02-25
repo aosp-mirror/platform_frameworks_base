@@ -104,7 +104,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers = new DozeTriggers(mContext, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController);
+                mAuthController, mExecutor, mExecutor);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }

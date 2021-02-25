@@ -52,7 +52,8 @@ public class AmbientDisplayConfiguration {
                 || wakeDisplayGestureEnabled(user)
                 || pickupGestureEnabled(user)
                 || tapGestureEnabled(user)
-                || doubleTapGestureEnabled(user);
+                || doubleTapGestureEnabled(user)
+                || quickPickupSensorEnabled(user);
     }
 
     /** {@hide} */
@@ -100,6 +101,13 @@ public class AmbientDisplayConfiguration {
     }
 
     /** {@hide} */
+    public boolean quickPickupSensorEnabled(int user) {
+        return boolSettingDefaultOff(Settings.Secure.DOZE_QUICK_PICKUP_GESTURE, user)
+                && !TextUtils.isEmpty(quickPickupSensorType())
+                && !alwaysOnEnabled(user);
+    }
+
+    /** {@hide} */
     public boolean wakeScreenGestureAvailable() {
         return mContext.getResources()
                 .getBoolean(R.bool.config_dozeWakeLockScreenSensorAvailable);
@@ -140,6 +148,11 @@ public class AmbientDisplayConfiguration {
     /** {@hide} */
     public String udfpsLongPressSensorType() {
         return mContext.getResources().getString(R.string.config_dozeUdfpsLongPressSensorType);
+    }
+
+    /** {@hide} */
+    public String quickPickupSensorType() {
+        return mContext.getResources().getString(R.string.config_quickPickupSensorType);
     }
 
     /** {@hide} */
