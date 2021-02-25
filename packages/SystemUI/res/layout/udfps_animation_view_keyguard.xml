@@ -14,8 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.UdfpsAnimationView
+<com.android.systemui.biometrics.UdfpsAnimationViewKeyguard
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/udfps_animation_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent">
+</com.android.systemui.biometrics.UdfpsAnimationViewKeyguard>

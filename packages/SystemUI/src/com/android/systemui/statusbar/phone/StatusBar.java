@@ -4535,4 +4535,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
         mExpansionChangedListeners.add(listener);
     }
+
+    public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
+        mExpansionChangedListeners.remove(listener);
+    }
 }
