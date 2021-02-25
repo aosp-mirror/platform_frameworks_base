@@ -227,8 +227,8 @@ public class StagingManagerTest {
         assertThat(destroyedNonReadySession.isDestroyed()).isTrue();
 
         mStagingManager.onBootCompletedBroadcastReceived();
-        assertThat(nonReadyApkSession.hasPreRebootVerificationStarted()).isTrue();
-        assertThat(nonReadyApexSession.hasPreRebootVerificationStarted()).isTrue();
+        assertThat(nonReadyApkSession.hasVerificationStarted()).isTrue();
+        assertThat(nonReadyApexSession.hasVerificationStarted()).isTrue();
     }
 
     @Test
@@ -519,7 +519,7 @@ public class StagingManagerTest {
         private int mParentSessionId = -1;
         private String mPackageName;
         private boolean mIsAbandonded = false;
-        private boolean mPreRebootVerificationStarted = false;
+        private boolean mVerificationStarted = false;
         private final List<StagingManager.StagedSession> mChildSessions = new ArrayList<>();
 
         private FakeStagedSession(int sessionId) {
@@ -550,8 +550,8 @@ public class StagingManagerTest {
             return mIsAbandonded;
         }
 
-        private boolean hasPreRebootVerificationStarted() {
-            return mPreRebootVerificationStarted;
+        private boolean hasVerificationStarted() {
+            return mVerificationStarted;
         }
 
         private FakeStagedSession addChildSession(FakeStagedSession session) {
@@ -706,20 +706,13 @@ public class StagingManagerTest {
         }
 
         @Override
-        public boolean notifyStartPreRebootVerification() {
-            mPreRebootVerificationStarted = true;
-            // TODO(ioffe): change to true when tests for pre-reboot verification are added.
-            return false;
-        }
-
-        @Override
         public void notifyEndPreRebootVerification() {
             throw new UnsupportedOperationException();
         }
 
         @Override
         public void verifySession() {
-            throw new UnsupportedOperationException();
+            mVerificationStarted = true;
         }
     }
 }

@@ -80,6 +80,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -111,6 +112,8 @@ public class StagingManager {
 
     @GuardedBy("mSuccessfulStagedSessionIds")
     private final List<Integer> mSuccessfulStagedSessionIds = new ArrayList<>();
+
+    private final CompletableFuture<Void> mBootCompleted = new CompletableFuture<>();
 
     interface StagedSession {
         boolean isMultiPackage();
@@ -861,7 +864,8 @@ public class StagingManager {
             } else if (!session.isSessionReady()) {
                 // The framework got restarted before the pre-reboot verification could complete,
                 // restart the verification.
-                mPreRebootVerificationHandler.startPreRebootVerification(session);
+                Slog.i(TAG, "Restart verification for session=" + session.sessionId());
+                mBootCompleted.thenRun(() -> session.verifySession());
                 StagedSession session2 = sessions.set(j - 1, session);
                 sessions.set(i, session2);
                 j--;
@@ -1041,7 +1045,7 @@ public class StagingManager {
 
     @VisibleForTesting
     void onBootCompletedBroadcastReceived() {
-        mPreRebootVerificationHandler.readyToStart();
+        mBootCompleted.complete(null);
         BackgroundThread.getExecutor().execute(() -> logFailedApexSessionsIfNecessary());
     }
 
@@ -1083,9 +1087,6 @@ public class StagingManager {
     }
 
     private final class PreRebootVerificationHandler extends Handler {
-        // Hold sessions before handler gets ready to do the verification.
-        private List<StagedSession> mPendingSessions;
-        private boolean mIsReady;
 
         PreRebootVerificationHandler(Looper looper) {
             super(looper);
@@ -1138,33 +1139,15 @@ public class StagingManager {
             }
         }
 
-        // Notify the handler that system is ready, and reschedule the pre-reboot verifications.
-        private synchronized void readyToStart() {
-            mIsReady = true;
-            if (mPendingSessions != null) {
-                for (int i = 0; i < mPendingSessions.size(); i++) {
-                    StagedSession session = mPendingSessions.get(i);
-                    startPreRebootVerification(session);
-                }
-                mPendingSessions = null;
-            }
-        }
-
         // Method for starting the pre-reboot verification
         private synchronized void startPreRebootVerification(
                 @NonNull StagedSession session) {
-            if (!mIsReady) {
-                if (mPendingSessions == null) {
-                    mPendingSessions = new ArrayList<>();
-                }
-                mPendingSessions.add(session);
-                return;
-            }
-
-            int sessionId = session.sessionId();
-            Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
-                    .sendToTarget();
+            mBootCompleted.thenRun(() -> {
+                int sessionId = session.sessionId();
+                Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
+                obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
+                        .sendToTarget();
+            });
         }
 
         private void onPreRebootVerificationFailure(StagedSession session,

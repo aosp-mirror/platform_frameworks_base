@@ -2164,7 +2164,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void verify() {
         try {
-            //TODO: re-run verify() if reboot happens before staged sessions reach READY
             verifyNonStaged();
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
