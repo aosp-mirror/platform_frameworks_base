@@ -3601,7 +3601,7 @@ public abstract class PackageManager {
      * 1 - IncFs v1, core features, no PerUid support. Optional in R.
      * 2 - IncFs v2, PerUid support, fs-verity support. Required in S.
      *
-     * @see IncrementalManager#isFeatureEnabled and IncrementalManager#isV2()
+     * @see IncrementalManager#getVersion()
      * @hide
      */
     @SystemApi
