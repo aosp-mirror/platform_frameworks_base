@@ -40,7 +40,7 @@ class DelegateLocationProvider extends AbstractLocationProvider
     private boolean mInitialized = false;
 
     DelegateLocationProvider(Executor executor, AbstractLocationProvider delegate) {
-        super(executor, null, null);
+        super(executor, null, null, null);
 
         mDelegate = delegate;
     }
