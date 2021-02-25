@@ -828,7 +828,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      * {@link DevicePolicyManager#forceRemoveActiveAdmin(ComponentName, int)}
      */
     @Test
-    public void testForceRemoveActiveAdmin() throws Exception {
+    public void testForceRemoveActiveAdmin_nonShellCaller() throws Exception {
         mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
 
         // Add admin.
@@ -842,8 +842,53 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Calling from a non-shell uid should fail with a SecurityException
         mContext.binder.callingUid = 123456;
         assertExpectException(SecurityException.class,
-                /* messageRegex =*/ "Non-shell user attempted to call",
+                /* messageRegex = */ null,
                 () -> dpms.forceRemoveActiveAdmin(admin1, CALLER_USER_HANDLE));
+    }
+
+    /**
+     * Test for:
+     * {@link DevicePolicyManager#forceRemoveActiveAdmin(ComponentName, int)}
+     */
+    @Test
+    public void testForceRemoveActiveAdmin_nonShellCallerWithPermission() throws Exception {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        // Add admin.
+        setupPackageInPackageManager(admin1.getPackageName(),
+                /* userId= */ CALLER_USER_HANDLE,
+                /* appId= */ 10138,
+                /* flags= */ ApplicationInfo.FLAG_TEST_ONLY);
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        assertThat(dpm.isAdminActive(admin1)).isTrue();
+
+        mContext.binder.callingUid = 123456;
+        mContext.callerPermissions.add(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        dpms.forceRemoveActiveAdmin(admin1, CALLER_USER_HANDLE);
+
+        mContext.callerPermissions.add(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        // Verify
+        assertThat(dpm.isAdminActiveAsUser(admin1, CALLER_USER_HANDLE)).isFalse();
+        verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
+                null, CALLER_USER_HANDLE);
+    }
+
+    /**
+     * Test for:
+     * {@link DevicePolicyManager#forceRemoveActiveAdmin(ComponentName, int)}
+     */
+    @Test
+    public void testForceRemoveActiveAdmin_ShellCaller() throws Exception {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        // Add admin.
+        setupPackageInPackageManager(admin1.getPackageName(),
+                /* userId= */ CALLER_USER_HANDLE,
+                /* appId= */ 10138,
+                /* flags= */ ApplicationInfo.FLAG_TEST_ONLY);
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        assertThat(dpm.isAdminActive(admin1)).isTrue();
 
         mContext.binder.callingUid = Process.SHELL_UID;
         dpms.forceRemoveActiveAdmin(admin1, CALLER_USER_HANDLE);
