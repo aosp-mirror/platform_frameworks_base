@@ -52,6 +52,7 @@ import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssNmeaListener;
@@ -926,6 +927,22 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mGnssManagerService != null) {
             mGnssManagerService.removeGnssMeasurementsListener(
                     listener);
+        }
+    }
+
+    @Override
+    public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
+            @Nullable String attributionTag, String listenerId) {
+        if (mGnssManagerService != null) {
+            mGnssManagerService.addGnssAntennaInfoListener(listener, packageName, attributionTag,
+                    listenerId);
+        }
+    }
+
+    @Override
+    public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
+        if (mGnssManagerService != null) {
+            mGnssManagerService.removeGnssAntennaInfoListener(listener);
         }
     }
 
