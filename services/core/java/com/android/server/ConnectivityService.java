@@ -91,7 +91,6 @@ import android.net.IConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkActivityListener;
-import android.net.INetworkManagementEventObserver;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
@@ -194,6 +193,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.net.module.util.BaseNetdUnsolicitedEventListener;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
@@ -214,7 +214,6 @@ import com.android.server.connectivity.NetworkRanker;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
-import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.utils.PriorityDump;
 
@@ -332,6 +331,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private INetworkStatsService mStatsService;
     private NetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
+    private final NetdCallback mNetdCallback;
 
     /**
      * TestNetworkService (lazily) created upon first usage. Locked to prevent creation of multiple
@@ -1203,6 +1203,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 null /* broadcastPermission */, mHandler);
 
         mNetworkActivityTracker = new LegacyNetworkActivityTracker(mContext, mHandler, mNMS, mNetd);
+
+        mNetdCallback = new NetdCallback();
+        try {
+            mNetd.registerUnsolicitedEventListener(mNetdCallback);
+        } catch (RemoteException | ServiceSpecificException e) {
+            loge("Error registering event listener :" + e);
+        }
 
         mSettingsObserver = new SettingsObserver(mContext, mHandler);
         registerSettingsCallbacks();
@@ -8649,6 +8656,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         notifyDataStallSuspected(p, network.getNetId());
     }
 
+    private class NetdCallback extends BaseNetdUnsolicitedEventListener {
+        @Override
+        public void onInterfaceClassActivityChanged(boolean isActive, int timerLabel,
+                long timestampNs, int uid) {
+            mNetworkActivityTracker.setAndReportNetworkActive(isActive, timerLabel, timestampNs);
+        }
+    }
+
     private final LegacyNetworkActivityTracker mNetworkActivityTracker;
 
     /**
@@ -8659,7 +8674,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         private static final int NO_UID = -1;
         private final Context mContext;
         private final INetd mNetd;
-        private final INetworkManagementService mNMS;
         private final RemoteCallbackList<INetworkActivityListener> mNetworkActivityListeners =
                 new RemoteCallbackList<>();
         // Indicate the current system default network activity is active or not.
@@ -8682,41 +8696,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
         LegacyNetworkActivityTracker(@NonNull Context context, @NonNull Handler handler,
                 @NonNull INetworkManagementService nms, @NonNull INetd netd) {
             mContext = context;
-            mNMS = nms;
             mNetd = netd;
             mHandler = handler;
-            try {
-                mNMS.registerObserver(mDataActivityObserver);
-            } catch (RemoteException e) {
-                loge("Error registering observer :" + e);
-            }
         }
 
-        // TODO: Migrate away the dependency with INetworkManagementEventObserver.
-        private final INetworkManagementEventObserver mDataActivityObserver =
-                new BaseNetworkObserver() {
-                    @Override
-                    public void interfaceClassDataActivityChanged(int transportType, boolean active,
-                            long tsNanos, int uid) {
-                        sendDataActivityBroadcast(transportTypeToLegacyType(transportType), active,
-                                tsNanos);
-                        synchronized (mActiveIdleTimers) {
-                            mNetworkActive = active;
-                            // If there are no idle timers, it means that system is not monitoring
-                            // activity, so the system default network for those default network
-                            // unspecified apps is always considered active.
-                            //
-                            // TODO: If the mActiveIdleTimers is empty, netd will actually not send
-                            // any network activity change event. Whenever this event is received,
-                            // the mActiveIdleTimers should be always not empty. The legacy behavior
-                            // is no-op. Remove to refer to mNetworkActive only.
-                            if (mNetworkActive || mActiveIdleTimers.isEmpty()) {
-                                mHandler.sendMessage(
-                                        mHandler.obtainMessage(EVENT_REPORT_NETWORK_ACTIVITY));
-                            }
-                        }
-                    }
-                };
+        public void setAndReportNetworkActive(boolean active, int transportType, long tsNanos) {
+            sendDataActivityBroadcast(transportTypeToLegacyType(transportType), active, tsNanos);
+            synchronized (mActiveIdleTimers) {
+                mNetworkActive = active;
+                // If there are no idle timers, it means that system is not monitoring
+                // activity, so the system default network for those default network
+                // unspecified apps is always considered active.
+                //
+                // TODO: If the mActiveIdleTimers is empty, netd will actually not send
+                // any network activity change event. Whenever this event is received,
+                // the mActiveIdleTimers should be always not empty. The legacy behavior
+                // is no-op. Remove to refer to mNetworkActive only.
+                if (mNetworkActive || mActiveIdleTimers.isEmpty()) {
+                    mHandler.sendMessage(mHandler.obtainMessage(EVENT_REPORT_NETWORK_ACTIVITY));
+                }
+            }
+        }
 
         // The network activity should only be updated from ConnectivityService handler thread
         // when mActiveIdleTimers lock is held.
