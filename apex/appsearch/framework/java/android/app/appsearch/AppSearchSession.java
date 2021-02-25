@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * Represents a connection to an AppSearch storage system where {@link GenericDocument}s can be
  * placed and queried.
  *
- * This class is thread safe.
+ * <p>This class is thread safe.
  */
 public final class AppSearchSession implements Closeable {
     private static final String TAG = "AppSearchSession";
@@ -102,92 +102,23 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Sets the schema that will be used by documents provided to the {@link #put} method.
+     * Sets the schema that represents the organizational structure of data within the AppSearch
+     * database.
      *
-     * <p>The schema provided here is compared to the stored copy of the schema previously supplied
-     * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
-     * types of schema modifications are always safe and are made without deleting any existing
-     * documents:
+     * <p>Upon creating an {@link AppSearchSession}, {@link #setSchema} should be called. If the
+     * schema needs to be updated, or it has not been previously set, then the provided schema will
+     * be saved and persisted to disk. Otherwise, {@link #setSchema} is handled efficiently as a
+     * no-op call.
      *
-     * <ul>
-     *   <li>Addition of new types
-     *   <li>Addition of new {@link AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} or
-     *       {@link AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED} properties to a
-     *       type
-     *   <li>Changing the cardinality of a data type to be less restrictive (e.g. changing an {@link
-     *       AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} property into a {@link
-     *       AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED} property.
-     * </ul>
-     *
-     * <p>The following types of schema changes are not backwards-compatible:
-     *
-     * <ul>
-     *   <li>Removal of an existing type
-     *   <li>Removal of a property from a type
-     *   <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
-     *   <li>For properties of {@code Document} type, changing the schema type of {@code Document}s
-     *       of that property
-     *   <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an {@link
-     *       AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} property into a {@link
-     *       AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED} property).
-     *   <li>Adding a {@link AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED} property.
-     * </ul>
-     *
-     * <p>Supplying a schema with such changes will, by default, result in this call completing its
-     * future with an {@link android.app.appsearch.exceptions.AppSearchException} with a code of
-     * {@link AppSearchResult#RESULT_INVALID_SCHEMA} and a message describing the incompatibility.
-     * In this case the previously set schema will remain active.
-     *
-     * <p>If you need to make non-backwards-compatible changes as described above, you can either:
-     *
-     * <ul>
-     *   <li>Set the {@link SetSchemaRequest.Builder#setForceOverride} method to {@code true}. In
-     *       this case, instead of completing its future with an {@link
-     *       android.app.appsearch.exceptions.AppSearchException} with the {@link
-     *       AppSearchResult#RESULT_INVALID_SCHEMA} error code, all documents which are not
-     *       compatible with the new schema will be deleted and the incompatible schema will be
-     *       applied. Incompatible types and deleted types will be set into {@link
-     *       SetSchemaResponse#getIncompatibleTypes()} and {@link
-     *       SetSchemaResponse#getDeletedTypes()}, respectively.
-     *   <li>Add a {@link android.app.appsearch.AppSearchSchema.Migrator} for each incompatible type
-     *       and make no deletion. The migrator will migrate documents from it's old schema version
-     *       to the new version. Migrated types will be set into both {@link
-     *       SetSchemaResponse#getIncompatibleTypes()} and {@link
-     *       SetSchemaResponse#getMigratedTypes()}. See the migration section below.
-     * </ul>
-     *
-     * <p>It is a no-op to set the same schema as has been previously set; this is handled
-     * efficiently.
-     *
-     * <p>By default, documents are visible on platform surfaces. To opt out, call {@code
-     * SetSchemaRequest.Builder#setPlatformSurfaceable} with {@code surfaceable} as false. Any
-     * visibility settings apply only to the schemas that are included in the {@code request}.
-     * Visibility settings for a schema type do not apply or persist across {@link
-     * SetSchemaRequest}s.
-     *
-     * <p>Migration: make non-backwards-compatible changes will delete all stored documents in old
-     * schema. You can save your documents by setting {@link
-     * android.app.appsearch.AppSearchSchema.Migrator} via the {@link
-     * SetSchemaRequest.Builder#setMigrator} for each type you want to save.
-     *
-     * <p>{@link android.app.appsearch.AppSearchSchema.Migrator#onDowngrade} or {@link
-     * android.app.appsearch.AppSearchSchema.Migrator#onUpgrade} will be triggered if the version
-     * number of the schema stored in AppSearch is different with the version in the request.
-     *
-     * <p>If any error or Exception occurred in the {@link
-     * android.app.appsearch.AppSearchSchema.Migrator#onDowngrade}, {@link
-     * android.app.appsearch.AppSearchSchema.Migrator#onUpgrade} or {@link
-     * android.app.appsearch.AppSearchMigrationHelper.Transformer#transform}, the migration will be
-     * terminated, the setSchema request will be rejected unless the schema changes are
-     * backwards-compatible, and stored documents won't have any observable changes.
-     *
-     * @param request The schema update request.
+     * @param request the schema to set or update the AppSearch database to.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
      * @see android.app.appsearch.AppSearchSchema.Migrator
      * @see android.app.appsearch.AppSearchMigrationHelper.Transformer
      */
+    // TODO(b/169883602): Change @code references to @link when setPlatformSurfaceable APIs are
+    //  exposed.
     public void setSchema(
             @NonNull SetSchemaRequest request,
             @NonNull @CallbackExecutor Executor executor,
@@ -280,12 +211,13 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
-     * Indexes documents into AppSearch.
+     * Indexes documents into the {@link AppSearchSession} database.
      *
-     * <p>Each {@link GenericDocument}'s {@code schemaType} field must be set to the name of a
-     * schema type previously registered via the {@link #setSchema} method.
+     * <p>Each {@link GenericDocument} object must have a {@code schemaType} field set to an {@link
+     * AppSearchSchema} type that has been previously registered by calling the {@link #setSchema}
+     * method.
      *
-     * @param request {@link PutDocumentsRequest} containing documents to be indexed
+     * @param request containing documents to be indexed.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive pending result of performing this operation. The keys
      *                 of the returned {@link AppSearchBatchResult} are the URIs of the input
