@@ -69,7 +69,9 @@ public class NumPadButton extends AlphaOptimizedImageButton {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mAnimator != null) mAnimator.start();
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            if (mAnimator != null) mAnimator.start();
+        }
         return super.onTouchEvent(event);
     }
 
