@@ -7965,16 +7965,14 @@ public class BatteryStatsImpl extends BatteryStats {
 
         /** Adds the given energy to the given standard energy bucket for this uid. */
         private void addEnergyToStandardBucketLocked(long energyDeltaUJ,
-                @StandardEnergyBucket int energyBucket, boolean accumulate) {
+                @StandardEnergyBucket int energyBucket) {
             getOrCreateMeasuredEnergyStatsLocked()
-                    .updateStandardBucket(energyBucket, energyDeltaUJ, accumulate);
+                    .updateStandardBucket(energyBucket, energyDeltaUJ);
         }
 
         /** Adds the given energy to the given custom energy bucket for this uid. */
-        private void addEnergyToCustomBucketLocked(long energyDeltaUJ, int energyBucket,
-                boolean accumulate) {
-            getOrCreateMeasuredEnergyStatsLocked()
-                    .updateCustomBucket(energyBucket, energyDeltaUJ, accumulate);
+        private void addEnergyToCustomBucketLocked(long energyDeltaUJ, int energyBucket) {
+            getOrCreateMeasuredEnergyStatsLocked().updateCustomBucket(energyBucket, energyDeltaUJ);
         }
 
         /**
@@ -12468,7 +12466,7 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        mGlobalMeasuredEnergyStats.updateStandardBucket(energyBucket, energyUJ, true);
+        mGlobalMeasuredEnergyStats.updateStandardBucket(energyBucket, energyUJ);
 
         // Now we blame individual apps, but only if the display was ON.
         if (energyBucket != MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON) {
@@ -12506,7 +12504,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final long appDisplayEnergyMJ =
                     (totalDisplayEnergyMJ * fgTimeMs + (totalFgTimeMs / 2))
                     / totalFgTimeMs;
-            uid.addEnergyToStandardBucketLocked(appDisplayEnergyMJ * 1000, energyBucket, true);
+            uid.addEnergyToStandardBucketLocked(appDisplayEnergyMJ * 1000, energyBucket);
 
             // To mitigate round-off errors, remove this app from numerator & denominator totals
             totalDisplayEnergyMJ -= appDisplayEnergyMJ;
@@ -12533,7 +12531,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mGlobalMeasuredEnergyStats == null) return;
         if (!mOnBatteryInternal || mIgnoreNextExternalStats || totalEnergyUJ <= 0) return;
 
-        mGlobalMeasuredEnergyStats.updateCustomBucket(customEnergyBucket, totalEnergyUJ, true);
+        mGlobalMeasuredEnergyStats.updateCustomBucket(customEnergyBucket, totalEnergyUJ);
 
         if (uidEnergies == null) return;
         final int numUids = uidEnergies.size();
@@ -12543,7 +12541,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (uidEnergyUJ == 0) continue;
             final Uid uidObj = getAvailableUidStatsLocked(uidInt);
             if (uidObj != null) {
-                uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket, true);
+                uidObj.addEnergyToCustomBucketLocked(uidEnergyUJ, customEnergyBucket);
             } else {
                 // Ignore any uid not already known to BatteryStats, rather than creating a new Uid.
                 // Otherwise we could end up reviving dead Uids. Note that the CPU data is updated
