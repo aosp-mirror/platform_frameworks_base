@@ -56,14 +56,12 @@ final class UpdatableFontDir {
 
     private static final String TAG = "UpdatableFontDir";
     private static final String RANDOM_DIR_PREFIX = "~~";
-    // TODO: Support .otf
-    private static final String ALLOWED_EXTENSION = ".ttf";
 
     private static final String CONFIG_XML_FILE = "/data/fonts/config/config.xml";
 
     /** Interface to mock font file access in tests. */
     interface FontFileParser {
-        String getPostScriptName(File file) throws IOException;
+        String getCanonicalFileName(File file) throws IOException;
 
         long getRevision(File file) throws IOException;
     }
@@ -321,20 +319,20 @@ final class UpdatableFontDir {
                         FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
                         "Failed to setup fs-verity.", e);
             }
-            String postScriptName;
+            String canonicalFileName;
             try {
-                postScriptName = mParser.getPostScriptName(tempNewFontFile);
+                canonicalFileName = mParser.getCanonicalFileName(tempNewFontFile);
             } catch (IOException e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_FILE,
                         "Failed to read PostScript name from font file", e);
             }
-            if (postScriptName == null) {
+            if (canonicalFileName == null) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_FONT_NAME,
                         "Failed to read PostScript name from font file");
             }
-            File newFontFile = new File(newDir, postScriptName + ALLOWED_EXTENSION);
+            File newFontFile = new File(newDir, canonicalFileName);
             if (!mFsverityUtil.rename(tempNewFontFile, newFontFile)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
@@ -380,20 +378,38 @@ final class UpdatableFontDir {
         return dir;
     }
 
+    private FontFileInfo lookupFontFileInfo(File file) {
+        String name = file.getName();
+
+        if (!name.endsWith(".ttf") && !name.endsWith(".otf") && !name.endsWith(".ttc")
+                && !name.endsWith(".otc")) {
+            return null;
+        }
+        String key = name.substring(0, name.length() - 4);
+        return mFontFileInfoMap.get(key);
+    }
+
+    private void putFontFileInfo(FontFileInfo info) {
+        String name = info.getFile().getName();
+        // The file name in FontFileInfo is already validated. Thus, just strip last 4 chars.
+        String key = name.substring(0, name.length() - 4);
+        mFontFileInfoMap.put(key, info);
+    }
+
     /**
      * Add the given {@link FontFileInfo} to {@link #mFontFileInfoMap} if its font revision is
      * higher than the currently used font file (either in {@link #mFontFileInfoMap} or {@link
      * #mPreinstalledFontDirs}).
      */
     private boolean addFileToMapIfNewer(FontFileInfo fontFileInfo, boolean deleteOldFile) {
-        String name = fontFileInfo.getFile().getName();
-        FontFileInfo existingInfo = mFontFileInfoMap.get(name);
+        FontFileInfo existingInfo = lookupFontFileInfo(fontFileInfo.getFile());
         final boolean shouldAddToMap;
         if (existingInfo == null) {
             // We got a new updatable font. We need to check if it's newer than preinstalled fonts.
             // Note that getPreinstalledFontRevision() returns -1 if there is no preinstalled font
             // with 'name'.
-            shouldAddToMap = getPreinstalledFontRevision(name) < fontFileInfo.getRevision();
+            long preInstalledRev = getPreinstalledFontRevision(fontFileInfo.getFile().getName());
+            shouldAddToMap = preInstalledRev < fontFileInfo.getRevision();
         } else {
             shouldAddToMap = existingInfo.getRevision() < fontFileInfo.getRevision();
         }
@@ -401,7 +417,7 @@ final class UpdatableFontDir {
             if (deleteOldFile && existingInfo != null) {
                 FileUtils.deleteContentsAndDir(existingInfo.getRandomizedFontDir());
             }
-            mFontFileInfoMap.put(name, fontFileInfo);
+            putFontFileInfo(fontFileInfo);
         } else {
             if (deleteOldFile) {
                 FileUtils.deleteContentsAndDir(fontFileInfo.getRandomizedFontDir());
@@ -464,15 +480,18 @@ final class UpdatableFontDir {
      */
     private boolean validateFontFileName(File file) {
         String fileName = file.getName();
-        String postScriptName = getPostScriptName(file);
-        return (postScriptName + ALLOWED_EXTENSION).equals(fileName);
+        String canonicalFileName = getCanonicalFileName(file);
+        if (canonicalFileName == null) {
+            return false;
+        }
+        return canonicalFileName.equals(fileName);
     }
 
     /** Returns the PostScript name of the given font file, or null. */
     @Nullable
-    private String getPostScriptName(File file) {
+    private String getCanonicalFileName(File file) {
         try {
-            return mParser.getPostScriptName(file);
+            return mParser.getCanonicalFileName(file);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read font file", e);
             return null;
@@ -514,7 +533,7 @@ final class UpdatableFontDir {
         List<FontConfig.Font> fontList = fontFamily.getFontList();
         for (int i = 0; i < fontList.size(); i++) {
             FontConfig.Font font = fontList.get(i);
-            FontFileInfo info = mFontFileInfoMap.get(font.getFile().getName());
+            FontFileInfo info = lookupFontFileInfo(font.getFile());
             if (info == null) {
                 return null;
             }
@@ -537,8 +556,9 @@ final class UpdatableFontDir {
 
     Map<String, File> getFontFileMap() {
         Map<String, File> map = new ArrayMap<>();
-        for (Map.Entry<String, FontFileInfo> entry : mFontFileInfoMap.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().getFile());
+        for (int i = 0; i < mFontFileInfoMap.size(); ++i) {
+            File file = mFontFileInfoMap.valueAt(i).getFile();
+            map.put(file.getName(), file);
         }
         return map;
     }

@@ -183,6 +183,23 @@ public class FontFileUtil {
         return nIsPostScriptType1Font(buffer, index);
     }
 
+    /**
+     * Analyze the file content and returns 1 if the font file is an OpenType collection file, 0 if
+     * the font file is a OpenType font file, -1 otherwise.
+     */
+    public static int isCollectionFont(@NonNull ByteBuffer buffer) {
+        ByteBuffer copied = buffer.slice();
+        copied.order(ByteOrder.BIG_ENDIAN);
+        int magicNumber = copied.getInt(0);
+        if (magicNumber == TTC_TAG) {
+            return 1;
+        } else if (magicNumber == SFNT_VERSION_1 || magicNumber == SFNT_VERSION_OTTO) {
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
     @FastNative
     private static native long nGetFontRevision(@NonNull ByteBuffer buffer,
             @IntRange(from = 0) int index);
