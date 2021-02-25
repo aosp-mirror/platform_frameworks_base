@@ -160,9 +160,8 @@ public class NumPadKey extends ViewGroup {
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             doHapticKeyClick();
+            if (mAnimator != null) mAnimator.start();
         }
-
-        if (mAnimator != null) mAnimator.start();
 
         return super.onTouchEvent(event);
     }
