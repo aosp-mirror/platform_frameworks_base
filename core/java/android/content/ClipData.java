@@ -21,6 +21,7 @@ import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import static android.content.ContentResolver.SCHEME_CONTENT;
 import static android.content.ContentResolver.SCHEME_FILE;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
@@ -38,6 +39,7 @@ import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.textclassifier.TextLinks;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -204,6 +206,7 @@ public class ClipData implements Parcelable {
         Uri mUri;
         // Additional activity info resolved by the system
         ActivityInfo mActivityInfo;
+        private TextLinks mTextLinks;
 
         /** @hide */
         public Item(Item other) {
@@ -329,6 +332,29 @@ public class ClipData implements Parcelable {
          */
         public void setActivityInfo(ActivityInfo info) {
             mActivityInfo = info;
+        }
+
+        /**
+         * Returns the results of text classification run on the raw text contained in this item,
+         * if it was performed, and if any entities were found in the text. Classification is
+         * generally only performed on the first item in clip data, and only if the text is below a
+         * certain length.
+         *
+         * <p>Returns {@code null} if classification was not performed, or if no entities were
+         * found in the text.
+         *
+         * @see ClipDescription#getConfidenceScore(String)
+         */
+        @Nullable
+        public TextLinks getTextLinks() {
+            return mTextLinks;
+        }
+
+        /**
+         * @hide
+         */
+        public void setTextLinks(TextLinks textLinks) {
+            mTextLinks = textLinks;
         }
 
         /**
@@ -1183,6 +1209,7 @@ public class ClipData implements Parcelable {
             dest.writeTypedObject(item.mIntent, flags);
             dest.writeTypedObject(item.mUri, flags);
             dest.writeTypedObject(item.mActivityInfo, flags);
+            dest.writeTypedObject(item.mTextLinks, flags);
         }
     }
 
@@ -1201,8 +1228,10 @@ public class ClipData implements Parcelable {
             Intent intent = in.readTypedObject(Intent.CREATOR);
             Uri uri = in.readTypedObject(Uri.CREATOR);
             ActivityInfo info = in.readTypedObject(ActivityInfo.CREATOR);
+            TextLinks textLinks = in.readTypedObject(TextLinks.CREATOR);
             Item item = new Item(text, htmlText, intent, uri);
             item.setActivityInfo(info);
+            item.setTextLinks(textLinks);
             mItems.add(item);
         }
     }

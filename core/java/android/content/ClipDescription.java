@@ -16,16 +16,25 @@
 
 package android.content;
 
+import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Meta-data describing the contents of a {@link ClipData}.  Provides enough
@@ -115,12 +124,39 @@ public class ClipDescription implements Parcelable {
      */
     public static final String EXTRA_ACTIVITY_OPTIONS = "android.intent.extra.ACTIVITY_OPTIONS";
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value =
+            { CLASSIFICATION_NOT_COMPLETE, CLASSIFICATION_NOT_PERFORMED, CLASSIFICATION_COMPLETE})
+    @interface ClassificationStatus {}
+
+    /**
+     * Value returned by {@link #getConfidenceScore(String)} if text classification has not been
+     * completed on the associated clip. This will be always be the case if the clip has not been
+     * copied to clipboard, or if there is no associated clip.
+     */
+    public static final int CLASSIFICATION_NOT_COMPLETE = 1;
+
+    /**
+     * Value returned by {@link #getConfidenceScore(String)} if text classification was not and will
+     * not be performed on the associated clip. This may be the case if the clip does not contain
+     * text in its first item, or if the text is too long.
+     */
+    public static final int CLASSIFICATION_NOT_PERFORMED = 2;
+
+    /**
+     * Value returned by {@link #getConfidenceScore(String)} if text classification has been
+     * completed.
+     */
+    public static final int CLASSIFICATION_COMPLETE = 3;
 
     final CharSequence mLabel;
     private final ArrayList<String> mMimeTypes;
     private PersistableBundle mExtras;
     private long mTimeStamp;
     private boolean mIsStyledText;
+    private final ArrayMap<String, Float> mEntityConfidence = new ArrayMap<>();
+    private int mClassificationStatus = CLASSIFICATION_NOT_COMPLETE;
 
     /**
      * Create a new clip.
@@ -346,6 +382,61 @@ public class ClipDescription implements Parcelable {
         mIsStyledText = isStyledText;
     }
 
+    /**
+     * Sets the current status of text classification for the associated clip.
+     *
+     * @hide
+     */
+    public void setClassificationStatus(@ClassificationStatus int status) {
+        mClassificationStatus = status;
+    }
+
+    /**
+     * Returns a score indicating confidence that an instance of the given entity is present in the
+     * first item of the clip data, if that item is plain text and text classification has been
+     * performed. The value ranges from 0 (low confidence) to 1 (high confidence). 0 indicates that
+     * the entity was not found in the classified text.
+     *
+     * <p>Entities should be as defined in the {@link TextClassifier} class, such as
+     * {@link TextClassifier#TYPE_ADDRESS}, {@link TextClassifier#TYPE_URL}, or
+     * {@link TextClassifier#TYPE_EMAIL}.
+     *
+     * <p>If the result is positive for any entity, the full classification result as a
+     * {@link TextLinks} object may be obtained using the {@link ClipData.Item#getTextLinks()}
+     * method.
+     *
+     * @throws IllegalStateException if {@link #getClassificationStatus()} is not
+     * {@link #CLASSIFICATION_COMPLETE}
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    public float getConfidenceScore(@NonNull @TextClassifier.EntityType String entity) {
+        if (mClassificationStatus != CLASSIFICATION_COMPLETE) {
+            throw new IllegalStateException("Classification not complete");
+        }
+        return mEntityConfidence.getOrDefault(entity, 0f);
+    }
+
+    /**
+     * Returns {@link #CLASSIFICATION_COMPLETE} if text classification has been performed on the
+     * associated {@link ClipData}. If this is the case then {@link #getConfidenceScore} may be used
+     * to retrieve information about entities within the text. Otherwise, returns
+     * {@link #CLASSIFICATION_NOT_COMPLETE} if classification has not yet returned results, or
+     * {@link #CLASSIFICATION_NOT_PERFORMED} if classification was not attempted (e.g. because the
+     * text was too long).
+     */
+    public @ClassificationStatus int getClassificationStatus() {
+        return mClassificationStatus;
+    }
+
+    /**
+     * @hide
+     */
+    public void setConfidenceScores(Map<String, Float> confidences) {
+        mEntityConfidence.clear();
+        mEntityConfidence.putAll(confidences);
+        mClassificationStatus = CLASSIFICATION_COMPLETE;
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
@@ -451,6 +542,23 @@ public class ClipDescription implements Parcelable {
         dest.writePersistableBundle(mExtras);
         dest.writeLong(mTimeStamp);
         dest.writeBoolean(mIsStyledText);
+        dest.writeInt(mClassificationStatus);
+        dest.writeBundle(confidencesToBundle());
+    }
+
+    private Bundle confidencesToBundle() {
+        Bundle bundle = new Bundle();
+        int size = mEntityConfidence.size();
+        for (int i = 0; i < size; i++) {
+            bundle.putFloat(mEntityConfidence.keyAt(i), mEntityConfidence.valueAt(i));
+        }
+        return bundle;
+    }
+
+    private void readBundleToConfidences(Bundle bundle) {
+        for (String key : bundle.keySet()) {
+            mEntityConfidence.put(key, bundle.getFloat(key));
+        }
     }
 
     ClipDescription(Parcel in) {
@@ -459,6 +567,8 @@ public class ClipDescription implements Parcelable {
         mExtras = in.readPersistableBundle();
         mTimeStamp = in.readLong();
         mIsStyledText = in.readBoolean();
+        mClassificationStatus = in.readInt();
+        readBundleToConfidences(in.readBundle());
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ClipDescription> CREATOR =

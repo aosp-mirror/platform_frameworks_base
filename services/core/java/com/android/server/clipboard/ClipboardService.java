@@ -22,6 +22,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -43,6 +44,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.Parcel;
@@ -55,9 +58,14 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillManagerInternal;
+import android.view.textclassifier.TextClassificationContext;
+import android.view.textclassifier.TextClassificationManager;
+import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -169,6 +177,8 @@ public class ClipboardService extends SystemService {
     // DeviceConfig properties
     private static final String PROPERTY_SHOW_ACCESS_NOTIFICATIONS = "show_access_notifications";
     private static final boolean DEFAULT_SHOW_ACCESS_NOTIFICATIONS = true;
+    private static final String PROPERTY_MAX_CLASSIFICATION_LENGTH = "max_classification_length";
+    private static final int DEFAULT_MAX_CLASSIFICATION_LENGTH = 400;
 
     private final ActivityManagerInternal mAmInternal;
     private final IUriGrantsManager mUgm;
@@ -179,14 +189,19 @@ public class ClipboardService extends SystemService {
     private final AppOpsManager mAppOps;
     private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final AutofillManagerInternal mAutofillInternal;
+    private final TextClassificationManager mTextClassificationManager;
     private final IBinder mPermissionOwner;
     private final HostClipboardMonitor mHostClipboardMonitor;
+    private final Handler mWorkerHandler;
 
     @GuardedBy("mLock")
     private final SparseArray<PerUserClipboard> mClipboards = new SparseArray<>();
 
     @GuardedBy("mLock")
     private boolean mShowAccessNotifications = DEFAULT_SHOW_ACCESS_NOTIFICATIONS;
+
+    @GuardedBy("mLock")
+    private int mMaxClassificationLength = DEFAULT_MAX_CLASSIFICATION_LENGTH;
 
     private final Object mLock = new Object();
 
@@ -205,6 +220,8 @@ public class ClipboardService extends SystemService {
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mContentCaptureInternal = LocalServices.getService(ContentCaptureManagerInternal.class);
         mAutofillInternal = LocalServices.getService(AutofillManagerInternal.class);
+        mTextClassificationManager = (TextClassificationManager)
+                getContext().getSystemService(Context.TEXT_CLASSIFICATION_SERVICE);
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
@@ -231,6 +248,10 @@ public class ClipboardService extends SystemService {
         updateConfig();
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_CLIPBOARD,
                 getContext().getMainExecutor(), properties -> updateConfig());
+
+        HandlerThread workerThread = new HandlerThread(TAG);
+        workerThread.start();
+        mWorkerHandler = workerThread.getThreadHandler();
     }
 
     @Override
@@ -249,6 +270,8 @@ public class ClipboardService extends SystemService {
         synchronized (mLock) {
             mShowAccessNotifications = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
                     PROPERTY_SHOW_ACCESS_NOTIFICATIONS, DEFAULT_SHOW_ACCESS_NOTIFICATIONS);
+            mMaxClassificationLength = DeviceConfig.getInt(DeviceConfig.NAMESPACE_CLIPBOARD,
+                    PROPERTY_MAX_CLASSIFICATION_LENGTH, DEFAULT_MAX_CLASSIFICATION_LENGTH);
         }
     }
 
@@ -588,6 +611,10 @@ public class ClipboardService extends SystemService {
             }
         }
 
+        if (clip != null) {
+            startClassificationLocked(clip);
+        }
+
         // Update this user
         final int userId = UserHandle.getUserId(uid);
         setPrimaryClipInternalLocked(getClipboardLocked(userId), clip, uid, sourcePackage);
@@ -683,6 +710,68 @@ public class ClipboardService extends SystemService {
         } finally {
             clipboard.primaryClipListeners.finishBroadcast();
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void startClassificationLocked(@NonNull ClipData clip) {
+        TextClassifier classifier;
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            classifier = mTextClassificationManager.createTextClassificationSession(
+                    new TextClassificationContext.Builder(
+                            getContext().getPackageName(),
+                            TextClassifier.WIDGET_TYPE_CLIPBOARD
+                    ).build()
+            );
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        if (clip.getItemCount() == 0) {
+            clip.getDescription().setClassificationStatus(
+                    ClipDescription.CLASSIFICATION_NOT_PERFORMED);
+            return;
+        }
+        CharSequence text = clip.getItemAt(0).getText();
+        if (TextUtils.isEmpty(text) || text.length() > mMaxClassificationLength
+                || text.length() > classifier.getMaxGenerateLinksTextLength()) {
+            clip.getDescription().setClassificationStatus(
+                    ClipDescription.CLASSIFICATION_NOT_PERFORMED);
+            return;
+        }
+
+        mWorkerHandler.post(() -> doClassification(text, clip, classifier));
+    }
+
+    @WorkerThread
+    private void doClassification(
+            CharSequence text, ClipData clip, TextClassifier classifier) {
+        TextLinks.Request request = new TextLinks.Request.Builder(text).build();
+        TextLinks links;
+        try {
+            links = classifier.generateLinks(request);
+        } finally {
+            classifier.destroy();
+        }
+
+        // Find the highest confidence for each entity in the text.
+        ArrayMap<String, Float> confidences = new ArrayMap<>();
+        for (TextLinks.TextLink link : links.getLinks()) {
+            for (int i = 0; i < link.getEntityCount(); i++) {
+                String entity = link.getEntity(i);
+                float conf = link.getConfidenceScore(entity);
+                if (conf > confidences.getOrDefault(entity, 0f)) {
+                    confidences.put(entity, conf);
+                }
+            }
+        }
+
+        synchronized (mLock) {
+            clip.getDescription().setConfidenceScores(confidences);
+            if (!links.getLinks().isEmpty()) {
+                clip.getItemAt(0).setTextLinks(links);
+            }
         }
     }
 
