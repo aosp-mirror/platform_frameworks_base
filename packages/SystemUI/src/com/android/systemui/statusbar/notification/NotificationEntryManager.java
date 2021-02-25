@@ -548,8 +548,6 @@ public class NotificationEntryManager implements
         try {
             mStatusBarService.onNotificationClear(
                     notification.getPackageName(),
-                    notification.getTag(),
-                    notification.getId(),
                     notification.getUser().getIdentifier(),
                     notification.getKey(),
                     dismissedByUserStats.dismissalSurface,

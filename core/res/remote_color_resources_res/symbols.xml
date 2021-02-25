@@ -1,0 +1,4 @@
+<resources>
+  <!-- ARSC file used to overlay local colors when rendering a RemoteViews -->
+  <java-symbol type="raw" name="remote_views_color_resources" />
+</resources>

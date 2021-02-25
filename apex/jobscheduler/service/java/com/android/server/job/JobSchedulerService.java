@@ -53,7 +53,6 @@ import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.LimitExceededException;
 import android.os.Looper;
@@ -153,8 +152,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
     /** The number of the most recently completed jobs to keep track of for debugging purposes. */
-    private static final int NUM_COMPLETED_JOB_HISTORY =
-            Build.IS_USERDEBUG || Build.IS_ENG ? 25 : 0;
+    private static final int NUM_COMPLETED_JOB_HISTORY = 20;
 
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();

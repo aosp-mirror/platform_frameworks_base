@@ -46,6 +46,7 @@ public class LongScreenshotActivity extends Activity {
 
     private final UiEventLogger mUiEventLogger;
     private final ScrollCaptureController mScrollCaptureController;
+    private final ScrollCaptureClient.Connection mConnection;
 
     private ImageView mPreview;
     private View mSave;
@@ -69,8 +70,10 @@ public class LongScreenshotActivity extends Activity {
             Context context) {
         mUiEventLogger = uiEventLogger;
 
-        mScrollCaptureController = new ScrollCaptureController(context,
-                ScreenshotController.sScrollConnection, mainExecutor, bgExecutor, imageExporter);
+        mScrollCaptureController = new ScrollCaptureController(context, mainExecutor, bgExecutor,
+                imageExporter);
+
+        mConnection = ScreenshotController.takeScrollCaptureConnection();
     }
 
     @Override
@@ -98,15 +101,20 @@ public class LongScreenshotActivity extends Activity {
     public void onStart() {
         super.onStart();
         if (mPreview.getDrawable() == null) {
+            if (mConnection == null) {
+                Log.e(TAG, "Failed to get scroll capture connection, bailing out");
+                finishAndRemoveTask();
+                return;
+            }
             doCapture();
         }
     }
 
-    private void disableButtons() {
-        mSave.setEnabled(false);
-        mCancel.setEnabled(false);
-        mEdit.setEnabled(false);
-        mShare.setEnabled(false);
+    private void setButtonsEnabled(boolean enabled) {
+        mSave.setEnabled(enabled);
+        mCancel.setEnabled(enabled);
+        mEdit.setEnabled(enabled);
+        mShare.setEnabled(enabled);
     }
 
     private void doEdit(Uri uri) {
@@ -115,8 +123,7 @@ public class LongScreenshotActivity extends Activity {
         if (!TextUtils.isEmpty(editorPackage)) {
             intent.setComponent(ComponentName.unflattenFromString(editorPackage));
         }
-        intent.setType("image/png");
-        intent.setData(uri);
+        intent.setDataAndType(uri, "image/png");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
@@ -127,12 +134,11 @@ public class LongScreenshotActivity extends Activity {
     private void doShare(Uri uri) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("image/png");
-        intent.setData(uri);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         Intent sharingChooserIntent = Intent.createChooser(intent, null)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
     }
@@ -140,7 +146,7 @@ public class LongScreenshotActivity extends Activity {
     private void onClicked(View v) {
         int id = v.getId();
         v.setPressed(true);
-        disableButtons();
+        setButtonsEnabled(false);
         if (id == R.id.save) {
             startExport(PendingAction.SAVE);
         } else if (id == R.id.cancel) {
@@ -160,10 +166,12 @@ public class LongScreenshotActivity extends Activity {
                     @Override
                     public void onError() {
                         Log.e(TAG, "Error exporting image data.");
+                        setButtonsEnabled(true);
                     }
 
                     @Override
                     public void onExportComplete(Uri outputUri) {
+                        setButtonsEnabled(true);
                         switch (action) {
                             case EDIT:
                                 doEdit(outputUri);
@@ -181,7 +189,8 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void doCapture() {
-        mScrollCaptureController.start(new ScrollCaptureController.ScrollCaptureCallback() {
+        mScrollCaptureController.start(mConnection,
+                new ScrollCaptureController.ScrollCaptureCallback() {
             @Override
             public void onError() {
                 Log.e(TAG, "Error!");

@@ -171,6 +171,7 @@ public class NavigationBarView extends FrameLayout implements
     private NotificationPanelViewController mPanelView;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
+    private NavigationBarOverlayController mNavBarOverlayController;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -339,8 +340,11 @@ public class NavigationBarView extends FrameLayout implements
                 isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton,
                 mRotationButtonListener);
 
-        Dependency.get(NavigationBarOverlayController.class).init(
-                mNavbarOverlayVisibilityChangeCallback, mLightIconColor, mDarkIconColor);
+        mNavBarOverlayController = Dependency.get(NavigationBarOverlayController.class);
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.init(
+                    mNavbarOverlayVisibilityChangeCallback, mLightIconColor, mDarkIconColor);
+        }
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -431,8 +435,9 @@ public class NavigationBarView extends FrameLayout implements
 
         // The visibility of the navigation bar buttons is dependent on the transient state of
         // the navigation bar.
-        Dependency.get(NavigationBarOverlayController.class).setButtonState(
-                isTransient, /* force */ false);
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.setButtonState(isTransient, /* force */ false);
+        }
     }
 
     void onBarTransition(int newMode) {
@@ -666,7 +671,9 @@ public class NavigationBarView extends FrameLayout implements
         }
         mImeVisible = visible;
         mRotationButtonController.getRotationButton().setCanShowRotationButton(!mImeVisible);
-        Dependency.get(NavigationBarOverlayController.class).setCanShow(!mImeVisible);
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.setCanShow(!mImeVisible);
+        }
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -999,10 +1006,9 @@ public class NavigationBarView extends FrameLayout implements
         } else {
             updateButtonLocation(getRotateSuggestionButton(), inScreenSpace);
         }
-        final NavigationBarOverlayController navBarButtonsController =
-                Dependency.get(NavigationBarOverlayController.class);
-        if (navBarButtonsController.isVisible()) {
-            updateButtonLocation(navBarButtonsController.getCurrentView(), inScreenSpace);
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()
+                && mNavBarOverlayController.isVisible()) {
+            updateButtonLocation(mNavBarOverlayController.getCurrentView(), inScreenSpace);
         }
         return mTmpRegion;
     }
@@ -1230,7 +1236,9 @@ public class NavigationBarView extends FrameLayout implements
         if (mRotationButtonController != null) {
             mRotationButtonController.registerListeners();
         }
-        Dependency.get(NavigationBarOverlayController.class).registerListeners();
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.registerListeners();
+        }
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
         updateNavButtonIcons();
@@ -1247,7 +1255,10 @@ public class NavigationBarView extends FrameLayout implements
         if (mRotationButtonController != null) {
             mRotationButtonController.unregisterListeners();
         }
-        Dependency.get(NavigationBarOverlayController.class).unregisterListeners();
+
+        if (mNavBarOverlayController.isNavigationBarOverlayEnabled()) {
+            mNavBarOverlayController.unregisterListeners();
+        }
 
         mEdgeBackGestureHandler.onNavBarDetached();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(

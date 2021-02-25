@@ -58,8 +58,8 @@ public class ViewFrameInfo {
     public void populateFrameInfo(FrameInfo frameInfo) {
         frameInfo.frameInfo[FrameInfo.FLAGS] |= flags;
         frameInfo.frameInfo[FrameInfo.DRAW_START] = drawStart;
-        frameInfo.frameInfo[FrameInfo.OLDEST_INPUT_EVENT] = oldestInputEventTime;
-        frameInfo.frameInfo[FrameInfo.NEWEST_INPUT_EVENT] = newestInputEventTime;
+        // TODO(b/169866723): Use InputEventAssigner
+        frameInfo.frameInfo[FrameInfo.INPUT_EVENT_ID] = newestInputEventTime;
     }
 
     /**

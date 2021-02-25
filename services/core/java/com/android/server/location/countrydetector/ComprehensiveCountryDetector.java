@@ -320,13 +320,15 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
                         "(source: " + detectedCountry.getSource()
                         + ", countryISO: " + detectedCountry.getCountryIso() + ")")
                     + " isAirplaneModeOff()=" + isAirplaneModeOff()
+                    + " isWifiOn()=" + isWifiOn()
                     + " mListener=" + mListener
                     + " isGeoCoderImplemnted()=" + isGeoCoderImplemented());
         }
 
         if (startLocationBasedDetection && (detectedCountry == null
                 || detectedCountry.getSource() > Country.COUNTRY_SOURCE_LOCATION)
-                && isAirplaneModeOff() && mListener != null && isGeoCoderImplemented()) {
+                && (isAirplaneModeOff() || isWifiOn()) && mListener != null
+                && isGeoCoderImplemented()) {
             if (DEBUG) Slog.d(TAG, "run startLocationBasedDetector()");
             // Start finding location when the source is less reliable than the
             // location and the airplane mode is off (as geocoder will not
@@ -385,6 +387,11 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     protected boolean isAirplaneModeOff() {
         return Settings.Global.getInt(
                 mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 0;
+    }
+
+    protected boolean isWifiOn() {
+        return Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.WIFI_ON, 0) != 0;
     }
 
     /**

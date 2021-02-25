@@ -32,7 +32,8 @@
     />
     <include layout="@layout/notification_template_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/media_notification_header_height" />
+        android:layout_height="@dimen/media_notification_header_height"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

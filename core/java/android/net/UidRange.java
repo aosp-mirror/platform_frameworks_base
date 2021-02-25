@@ -42,10 +42,6 @@ public final class UidRange implements Parcelable {
         stop  = stopUid;
     }
 
-    public static UidRange createForUser(int userId) {
-        return new UidRange(userId * PER_USER_RANGE, (userId + 1) * PER_USER_RANGE - 1);
-    }
-
     /** Creates a UidRange for the specified user. */
     public static UidRange createForUser(UserHandle user) {
         final UserHandle nextUser = UserHandle.of(user.getIdentifier() + 1);

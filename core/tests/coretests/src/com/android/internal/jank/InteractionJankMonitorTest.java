@@ -96,7 +96,7 @@ public class InteractionJankMonitorTest {
                 new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
                 mock(FrameTracker.ChoreographerWrapper.class),
                 new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
-                /*traceThresholdFrameTimeMillis=*/ -1));
+                /*traceThresholdFrameTimeMillis=*/ -1, null));
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
 
         // Simulate a trace session and see if begin / end are invoked.
@@ -123,21 +123,12 @@ public class InteractionJankMonitorTest {
     @Test
     public void testCheckInitState() {
         InteractionJankMonitor monitor = new InteractionJankMonitor(mWorker);
+        View view = new View(mActivity);
+        assertThat(view.isAttachedToWindow()).isFalse();
 
-        // Should return false if invoking begin / end without init invocation.
-        assertThat(monitor.begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
+        // Should return false if the view passed in is not attached to window yet.
+        assertThat(monitor.begin(view, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
         assertThat(monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
-
-        // Everything should be fine if invoking init first.
-        boolean thrown = false;
-        try {
-            assertThat(monitor.begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
-            assertThat(monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
-        } catch (Exception ex) {
-            thrown = true;
-        } finally {
-            assertThat(thrown).isFalse();
-        }
     }
 
     @Test
@@ -152,7 +143,7 @@ public class InteractionJankMonitorTest {
                 new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
                 mock(FrameTracker.ChoreographerWrapper.class),
                 new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
-                /*traceThresholdFrameTimeMillis=*/ -1));
+                /*traceThresholdFrameTimeMillis=*/ -1, null));
         doReturn(tracker).when(monitor).createFrameTracker(any(), any());
 
         assertThat(monitor.begin(mView, session.getCuj())).isTrue();

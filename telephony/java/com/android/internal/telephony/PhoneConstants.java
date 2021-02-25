@@ -126,6 +126,7 @@ public class PhoneConstants {
      * connections.<br/>
      * APN_TYPE_ALL is a special type to indicate that this APN entry can
      * service all data connections.
+     * TODO: remove these and use the reference to ApnSetting.TYPE_XXX_STRING instead
      */
     public static final String APN_TYPE_ALL = ApnSetting.TYPE_ALL_STRING;
     /** APN type for default data traffic */
@@ -153,20 +154,8 @@ public class PhoneConstants {
     public static final String APN_TYPE_MCX = ApnSetting.TYPE_MCX_STRING;
     /** APN type for XCAP */
     public static final String APN_TYPE_XCAP = ApnSetting.TYPE_XCAP_STRING;
-    /** Array of all APN types */
-    public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
-            APN_TYPE_MMS,
-            APN_TYPE_SUPL,
-            APN_TYPE_DUN,
-            APN_TYPE_HIPRI,
-            APN_TYPE_FOTA,
-            APN_TYPE_IMS,
-            APN_TYPE_CBS,
-            APN_TYPE_IA,
-            APN_TYPE_EMERGENCY,
-            APN_TYPE_MCX,
-            APN_TYPE_XCAP,
-    };
+    // /** APN type for enterprise */
+    // public static final String APN_TYPE_ENTERPRISE = ApnSetting.TYPE_ENTERPRISE_STRING;
 
     public static final int RIL_CARD_MAX_APPS    = 8;
 
