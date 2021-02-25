@@ -590,10 +590,13 @@ public class InputManagerService extends IInputManager.Stub
             for (int i = viewports.size() - 1; i >= 0; --i) {
                 final DisplayViewport v = vArray[i] = viewports.get(i).makeCopy();
                 // deviceWidth/Height are apparently in "rotated" space, so flip them if needed.
-                int dw = (v.orientation % 2) == 0 ? v.deviceWidth : v.deviceHeight;
-                int dh = (v.orientation % 2) == 0 ? v.deviceHeight : v.deviceWidth;
-                v.logicalFrame.set(0, 0, dw, dh);
-                v.physicalFrame.set(0, 0, dw, dh);
+                if (v.orientation % 2 != 0) {
+                    final int dw = v.deviceWidth;
+                    v.deviceWidth = v.deviceHeight;
+                    v.deviceHeight = dw;
+                }
+                v.logicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
+                v.physicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
                 v.orientation = 0;
             }
         } else {
