@@ -16,9 +16,12 @@
 
 package android.net.vcn.persistablebundleutils;
 
+import static android.telephony.TelephonyManager.APPTYPE_USIM;
+
 import static org.junit.Assert.assertEquals;
 
 import android.net.InetAddresses;
+import android.net.eap.EapSessionConfig;
 import android.net.ipsec.ike.IkeFqdnIdentification;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.os.PersistableBundle;
@@ -36,6 +39,7 @@ import org.junit.runner.RunWith;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
@@ -131,6 +135,24 @@ public class IkeSessionParamsUtilsTest {
                 createBuilderMinimum()
                         .setAuthDigitalSignature(serverCaCert, clientEndCert, clientPrivateKey)
                         .build();
+        verifyPersistableBundleEncodeDecodeIsLossless(params);
+    }
+
+    @Test
+    public void testEncodeRecodeParamsWithEapAuth() throws Exception {
+        final X509Certificate serverCaCert = createCertFromPemFile("self-signed-ca.pem");
+
+        final byte[] eapId = "test@android.net".getBytes(StandardCharsets.US_ASCII);
+        final int subId = 1;
+        final EapSessionConfig eapConfig =
+                new EapSessionConfig.Builder()
+                        .setEapIdentity(eapId)
+                        .setEapSimConfig(subId, APPTYPE_USIM)
+                        .setEapAkaConfig(subId, APPTYPE_USIM)
+                        .build();
+
+        final IkeSessionParams params =
+                createBuilderMinimum().setAuthEap(serverCaCert, eapConfig).build();
         verifyPersistableBundleEncodeDecodeIsLossless(params);
     }
 }

@@ -19,11 +19,13 @@ package android.net.vcn.persistablebundleutils;
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.NonNull;
+import android.net.eap.EapSessionConfig;
 import android.net.ipsec.ike.IkeSaProposal;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthDigitalSignLocalConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthDigitalSignRemoteConfig;
+import android.net.ipsec.ike.IkeSessionParams.IkeAuthEapConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthPskConfig;
 import android.os.PersistableBundle;
 
@@ -160,11 +162,13 @@ public final class IkeSessionParamsUtils {
                 IkeAuthDigitalSignRemoteConfig config = (IkeAuthDigitalSignRemoteConfig) authConfig;
                 return IkeAuthDigitalSignConfigUtils.toPersistableBundle(
                         config, createPersistableBundle(IKE_AUTH_METHOD_PUB_KEY_SIGNATURE));
+            } else if (authConfig instanceof IkeAuthEapConfig) {
+                IkeAuthEapConfig config = (IkeAuthEapConfig) authConfig;
+                return IkeAuthEapConfigUtils.toPersistableBundle(
+                        config, createPersistableBundle(IKE_AUTH_METHOD_EAP));
             } else {
                 throw new IllegalStateException("Invalid IkeAuthConfig subclass");
             }
-
-            // TODO: Handle EAP auth and digital signature based auth.
         }
 
         private static PersistableBundle createPersistableBundle(int type) {
@@ -191,7 +195,7 @@ public final class IkeSessionParamsUtils {
                     }
                     IkeAuthPskConfigUtils.setBuilderByReadingPersistableBundle(
                             localAuthBundle, remoteAuthBundle, builder);
-                    break;
+                    return;
                 case IKE_AUTH_METHOD_PUB_KEY_SIGNATURE:
                     if (remoteMethodType != IKE_AUTH_METHOD_PUB_KEY_SIGNATURE) {
                         throw new IllegalArgumentException(
@@ -200,12 +204,21 @@ public final class IkeSessionParamsUtils {
                     }
                     IkeAuthDigitalSignConfigUtils.setBuilderByReadingPersistableBundle(
                             localAuthBundle, remoteAuthBundle, builder);
-                    break;
+                    return;
+                case IKE_AUTH_METHOD_EAP:
+                    if (remoteMethodType != IKE_AUTH_METHOD_PUB_KEY_SIGNATURE) {
+                        throw new IllegalArgumentException(
+                                "When using EAP for local authentication, expect remote auth"
+                                        + " method to be digital signature based, but was "
+                                        + remoteMethodType);
+                    }
+                    IkeAuthEapConfigUtils.setBuilderByReadingPersistableBundle(
+                            localAuthBundle, remoteAuthBundle, builder);
+                    return;
                 default:
                     throw new IllegalArgumentException(
                             "Invalid EAP method type " + localMethodType);
             }
-            // TODO: Handle EAP auth and digital signature based auth.
         }
     }
 
@@ -337,6 +350,43 @@ public final class IkeSessionParamsUtils {
             }
 
             builder.setAuthDigitalSignature(caCert, endCert, certList, privateKey);
+        }
+    }
+
+    private static final class IkeAuthEapConfigUtils {
+        private static final String EAP_CONFIG_KEY = "EAP_CONFIG_KEY";
+
+        @NonNull
+        public static PersistableBundle toPersistableBundle(
+                @NonNull IkeAuthEapConfig config, @NonNull PersistableBundle result) {
+            result.putPersistableBundle(
+                    EAP_CONFIG_KEY,
+                    EapSessionConfigUtils.toPersistableBundle(config.getEapConfig()));
+            return result;
+        }
+
+        public static void setBuilderByReadingPersistableBundle(
+                @NonNull PersistableBundle localAuthBundle,
+                @NonNull PersistableBundle remoteAuthBundle,
+                @NonNull IkeSessionParams.Builder builder) {
+            // Deserialize localAuth
+            final PersistableBundle eapBundle =
+                    localAuthBundle.getPersistableBundle(EAP_CONFIG_KEY);
+            Objects.requireNonNull(eapBundle, "EAP Config was null");
+            final EapSessionConfig eapConfig =
+                    EapSessionConfigUtils.fromPersistableBundle(eapBundle);
+
+            // Deserialize remoteAuth
+            final PersistableBundle trustCertBundle =
+                    remoteAuthBundle.getPersistableBundle(
+                            IkeAuthDigitalSignConfigUtils.TRUST_CERT_KEY);
+
+            X509Certificate serverCaCert = null;
+            if (trustCertBundle != null) {
+                final byte[] encodedCaCert = PersistableBundleUtils.toByteArray(trustCertBundle);
+                serverCaCert = CertUtils.certificateFromByteArray(encodedCaCert);
+            }
+            builder.setAuthEap(serverCaCert, eapConfig);
         }
     }
 }
