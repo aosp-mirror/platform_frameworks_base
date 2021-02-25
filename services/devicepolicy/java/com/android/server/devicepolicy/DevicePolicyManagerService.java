@@ -3404,8 +3404,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Objects.requireNonNull(adminReceiver, "ComponentName is null");
-        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
-                "Non-shell user attempted to call forceRemoveActiveAdmin");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity())
+                        || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS),
+                "Caller must be shell or hold MANAGE_PROFILE_AND_DEVICE_OWNERS to call "
+                        + "forceRemoveActiveAdmin");
         mInjector.binderWithCleanCallingIdentity(() -> {
             synchronized (getLockObject()) {
                 if (!isAdminTestOnlyLocked(adminReceiver, userHandle)) {
@@ -8110,7 +8112,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         if (!callingUserOnly) {
-            Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+            Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                    || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         }
         synchronized (getLockObject()) {
             if (!mOwners.hasDeviceOwner()) {
@@ -12566,8 +12569,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
-        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
-                "Non-shell user attempted to call clearSystemUpdatePolicyFreezePeriodRecord");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity())
+                        || hasCallingOrSelfPermission(permission.CLEAR_FREEZE_PERIOD),
+                "Caller must be shell, or hold CLEAR_FREEZE_PERIOD permission to call "
+                        + "clearSystemUpdatePolicyFreezePeriodRecord");
         synchronized (getLockObject()) {
             // Print out current record to help diagnosed CTS failures
             Slog.i(LOG_TAG, "Clear freeze period record: "
@@ -13510,7 +13515,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         // Only adb or system apps with the right permission can mark a profile owner on
         // organization-owned device.
-        if (!(isAdb(caller) || hasCallingPermission(permission.MARK_DEVICE_ORGANIZATION_OWNED))) {
+        if (!(isAdb(caller) || hasCallingPermission(permission.MARK_DEVICE_ORGANIZATION_OWNED)
+                || hasCallingPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS))) {
             throw new SecurityException(
                     "Only the system can mark a profile owner of organization-owned device.");
         }
@@ -13829,8 +13835,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public long forceSecurityLogs() {
-        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
-                "Non-shell user attempted to call forceSecurityLogs");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity())
+                        || hasCallingOrSelfPermission(permission.FORCE_DEVICE_POLICY_MANAGER_LOGS),
+                "Caller must be shell or hold FORCE_DEVICE_POLICY_MANAGER_LOGS to call "
+                        + "forceSecurityLogs");
         if (!mInjector.securityLogGetLoggingEnabledProperty()) {
             throw new IllegalStateException("logging is not available");
         }
@@ -14350,8 +14358,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public long forceNetworkLogs() {
-        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity()),
-                "Non-shell user attempted to call forceNetworkLogs");
+        Preconditions.checkCallAuthorization(isAdb(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.FORCE_DEVICE_POLICY_MANAGER_LOGS),
+                "Caller must be shell or hold FORCE_DEVICE_POLICY_MANAGER_LOGS to call "
+                        + "forceNetworkLogs");
         synchronized (getLockObject()) {
             if (!isNetworkLoggingEnabledInternalLocked()) {
                 throw new IllegalStateException("logging is not available");
