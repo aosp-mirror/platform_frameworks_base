@@ -561,7 +561,7 @@ jobjectArray FilterClientCallbackImpl::getTsRecordEvent(
                 const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TsRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJ)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJI)V");
 
     for (int i = 0; i < events.size(); i++) {
         auto event = events[i];
@@ -614,7 +614,7 @@ jobjectArray FilterClientCallbackImpl::getMmtpRecordEvent(
                 const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJ)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJII)V");
 
     for (int i = 0; i < events.size(); i++) {
         auto event = events[i];
