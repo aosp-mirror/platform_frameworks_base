@@ -887,16 +887,12 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     @Override
-    public void onUserStarting(@NonNull TargetUser user) {
+    public void onUserUnlocked(@NonNull TargetUser user) {
         synchronized (mLock) {
+            // Note that the user has started after its unlocked instead of when the user
+            // actually starts because the storage won't be decrypted until unlock.
             mStartedUsers = ArrayUtils.appendInt(mStartedUsers, user.getUserIdentifier());
         }
-        // Let's kick any outstanding jobs for this user.
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
-    }
-
-    @Override
-    public void onUserUnlocking(@NonNull TargetUser user) {
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
