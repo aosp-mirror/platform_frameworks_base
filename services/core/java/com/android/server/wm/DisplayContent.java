@@ -36,6 +36,7 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Build.VERSION_CODES.N;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
+import static android.util.RotationUtils.deltaRotation;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.FLAG_PRIVATE;
@@ -47,7 +48,6 @@ import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
@@ -157,10 +157,8 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.HardwareBuffer;
@@ -205,6 +203,7 @@ import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RoundedCorners;
 import android.view.Surface;
+import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
@@ -448,8 +447,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
-    private final RectF mTmpRectF = new RectF();
-    private final Matrix mTmpMatrix = new Matrix();
     private final Region mTmpRegion = new Region();
 
     /** Used for handing back size of display */
@@ -1288,7 +1285,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mInsetsPolicy;
     }
 
-    @Surface.Rotation
+    @Rotation
     int getRotation() {
         return mDisplayRotation.getRotation();
     }
@@ -1478,7 +1475,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Returns a valid rotation if the activity can use different orientation than the display.
      * Otherwise {@link #ROTATION_UNDEFINED}.
      */
-    @Surface.Rotation
+    @Rotation
     int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM) {
             return ROTATION_UNDEFINED;
@@ -1613,7 +1610,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Sets the provided record to {@link #mFixedRotationLaunchingApp} if possible to apply fixed
      * rotation transform to it and indicate that the display may be rotated after it is launched.
      */
-    void setFixedRotationLaunchingApp(@NonNull ActivityRecord r, @Surface.Rotation int rotation) {
+    void setFixedRotationLaunchingApp(@NonNull ActivityRecord r, @Rotation int rotation) {
         final WindowToken prevRotatedLaunchingApp = mFixedRotationLaunchingApp;
         if (prevRotatedLaunchingApp == r
                 && r.getWindowConfiguration().getRotation() == rotation) {
@@ -2950,27 +2947,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         forAllRootTasks(Task::prepareFreezingTaskBounds);
     }
 
-    void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
-        getBounds(mTmpRect, newRotation);
-        rotateBounds(mTmpRect, oldRotation, newRotation, bounds);
-    }
-
-    void rotateBounds(Rect parentBounds, int oldRotation, int newRotation, Rect bounds) {
-        // Compute a transform matrix to undo the coordinate space transformation,
-        // and present the window at the same physical position it previously occupied.
-        final int deltaRotation = deltaRotation(newRotation, oldRotation);
-        createRotationMatrix(
-                deltaRotation, parentBounds.width(), parentBounds.height(), mTmpMatrix);
-
-        mTmpRectF.set(bounds);
-        mTmpMatrix.mapRect(mTmpRectF);
-        mTmpRectF.round(bounds);
-    }
-
-    static int deltaRotation(int oldRotation, int newRotation) {
-        int delta = newRotation - oldRotation;
-        if (delta < 0) delta += 4;
-        return delta;
+    void rotateBounds(@Rotation int oldRotation, @Rotation int newRotation, Rect inOutBounds) {
+        // Get display bounds on oldRotation as parent bounds for the rotation.
+        getBounds(mTmpRect, oldRotation);
+        RotationUtils.rotateBounds(inOutBounds, mTmpRect, oldRotation, newRotation);
     }
 
     public void setRotationAnimation(ScreenRotationAnimation screenRotationAnimation) {
@@ -2982,35 +2962,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     public ScreenRotationAnimation getRotationAnimation() {
         return mScreenRotationAnimation;
-    }
-
-    private static void createRotationMatrix(int rotation, float displayWidth, float displayHeight,
-            Matrix outMatrix) {
-        // For rotations without Z-ordering we don't need the target rectangle's position.
-        createRotationMatrix(rotation, 0 /* rectLeft */, 0 /* rectTop */, displayWidth,
-                displayHeight, outMatrix);
-    }
-
-    static void createRotationMatrix(int rotation, float rectLeft, float rectTop,
-            float displayWidth, float displayHeight, Matrix outMatrix) {
-        switch (rotation) {
-            case ROTATION_0:
-                outMatrix.reset();
-                break;
-            case ROTATION_270:
-                outMatrix.setRotate(270, 0, 0);
-                outMatrix.postTranslate(0, displayHeight);
-                outMatrix.postTranslate(rectTop, 0);
-                break;
-            case ROTATION_180:
-                outMatrix.reset();
-                break;
-            case ROTATION_90:
-                outMatrix.setRotate(90, 0, 0);
-                outMatrix.postTranslate(displayWidth, 0);
-                outMatrix.postTranslate(-rectTop, rectLeft);
-                break;
-        }
     }
 
     @Override
@@ -4287,17 +4238,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         out.set(left, top, left + width, top + height);
     }
 
-    private void getBounds(Rect out, int orientation) {
+    private void getBounds(Rect out, @Rotation int rotation) {
         getBounds(out);
 
         // Rotate the Rect if needed.
         final int currentRotation = mDisplayInfo.rotation;
-        final int rotationDelta = deltaRotation(currentRotation, orientation);
+        final int rotationDelta = deltaRotation(currentRotation, rotation);
         if (rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270) {
-            createRotationMatrix(rotationDelta, mBaseDisplayWidth, mBaseDisplayHeight, mTmpMatrix);
-            mTmpRectF.set(out);
-            mTmpMatrix.mapRect(mTmpRectF);
-            mTmpRectF.round(out);
+            out.set(0, 0, out.height(), out.width());
         }
     }
 
