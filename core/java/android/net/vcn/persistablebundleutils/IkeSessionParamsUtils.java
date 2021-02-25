@@ -36,6 +36,7 @@ import android.net.ipsec.ike.IkeSessionParams.IkeAuthEapConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeAuthPskConfig;
 import android.net.ipsec.ike.IkeSessionParams.IkeConfigRequest;
 import android.os.PersistableBundle;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.vcn.util.PersistableBundleUtils;
@@ -48,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Abstract utility class to convert IkeSessionParams to/from PersistableBundle.
@@ -68,6 +70,15 @@ public final class IkeSessionParamsUtils {
     private static final String SOFT_LIFETIME_SEC_KEY = "SOFT_LIFETIME_SEC_KEY";
     private static final String DPD_DELAY_SEC_KEY = "DPD_DELAY_SEC_KEY";
     private static final String NATT_KEEPALIVE_DELAY_SEC_KEY = "NATT_KEEPALIVE_DELAY_SEC_KEY";
+    private static final String IKE_OPTIONS_KEY = "IKE_OPTIONS_KEY";
+
+    private static final Set<Integer> IKE_OPTIONS = new ArraySet<>();
+
+    static {
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_ACCEPT_ANY_REMOTE_ID);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_EAP_ONLY_AUTH);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_MOBIKE);
+    }
 
     /** Serializes an IkeSessionParams to a PersistableBundle. */
     @NonNull
@@ -113,7 +124,15 @@ public final class IkeSessionParamsUtils {
         result.putInt(DPD_DELAY_SEC_KEY, params.getDpdDelaySeconds());
         result.putInt(NATT_KEEPALIVE_DELAY_SEC_KEY, params.getNattKeepAliveDelaySeconds());
 
-        // TODO: Handle IKE options.
+        final List<Integer> enabledIkeOptions = new ArrayList<>();
+        for (int option : IKE_OPTIONS) {
+            if (params.hasIkeOption(option)) {
+                enabledIkeOptions.add(option);
+            }
+        }
+
+        final int[] optionArray = enabledIkeOptions.stream().mapToInt(i -> i).toArray();
+        result.putIntArray(IKE_OPTIONS_KEY, optionArray);
 
         return result;
     }
@@ -180,7 +199,15 @@ public final class IkeSessionParamsUtils {
             }
         }
 
-        // TODO: Handle IKE options.
+        // Clear IKE Options that are by default enabled
+        for (int option : IKE_OPTIONS) {
+            builder.removeIkeOption(option);
+        }
+
+        final int[] optionArray = in.getIntArray(IKE_OPTIONS_KEY);
+        for (int option : optionArray) {
+            builder.addIkeOption(option);
+        }
 
         return builder.build();
     }

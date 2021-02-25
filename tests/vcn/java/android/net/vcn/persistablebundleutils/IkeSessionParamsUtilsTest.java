@@ -130,6 +130,16 @@ public class IkeSessionParamsUtilsTest {
         verifyPersistableBundleEncodeDecodeIsLossless(params);
     }
 
+    @Test
+    public void testEncodeRecodeParamsWithIkeOptions() throws Exception {
+        final IkeSessionParams params =
+                createBuilderMinimum()
+                        .addIkeOption(IkeSessionParams.IKE_OPTION_ACCEPT_ANY_REMOTE_ID)
+                        .addIkeOption(IkeSessionParams.IKE_OPTION_MOBIKE)
+                        .build();
+        verifyPersistableBundleEncodeDecodeIsLossless(params);
+    }
+
     private static InputStream openAssetsFile(String fileName) throws Exception {
         return InstrumentationRegistry.getContext().getResources().getAssets().open(fileName);
     }
