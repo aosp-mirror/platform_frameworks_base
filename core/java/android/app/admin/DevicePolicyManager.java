@@ -7302,7 +7302,12 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_DEVICE_ADMINS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
+    })
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
         if (mService != null) {
@@ -7479,8 +7484,10 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the package name is null or invalid
      * @throws IllegalStateException If the preconditions mentioned are not met.
      */
-    public boolean setDeviceOwner(ComponentName who, String ownerName, int userId)
-            throws IllegalArgumentException, IllegalStateException {
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean setDeviceOwner(
+            @NonNull ComponentName who, @Nullable String ownerName, @UserIdInt int userId) {
         if (mService != null) {
             try {
                 return mService.setDeviceOwner(who, ownerName, userId);
@@ -7547,7 +7554,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+    })
     public ComponentName getDeviceOwnerComponentOnAnyUser() {
         return getDeviceOwnerComponentInner(/* callingUserOnly =*/ false);
     }
@@ -10503,9 +10513,10 @@ public class DevicePolicyManager {
 
     /**
      * Reset record of previous system update freeze period the device went through.
-     * Only callable by ADB.
      * @hide
      */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CLEAR_FREEZE_PERIOD)
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
         throwIfParentInstance("clearSystemUpdatePolicyFreezePeriodRecord");
         if (mService == null) {
@@ -11233,9 +11244,11 @@ public class DevicePolicyManager {
 
     /**
      * Makes all accumulated network logs available to DPC in a new batch.
-     * Only callable by ADB. If throttled, returns time to wait in milliseconds, otherwise 0.
+     * If throttled, returns time to wait in milliseconds, otherwise 0.
      * @hide
      */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS)
     public long forceNetworkLogs() {
         if (mService == null) {
             return -1;
@@ -11249,9 +11262,11 @@ public class DevicePolicyManager {
 
     /**
      * Forces a batch of security logs to be fetched from logd and makes it available for DPC.
-     * Only callable by ADB. If throttled, returns time to wait in milliseconds, otherwise 0.
+     * If throttled, returns time to wait in milliseconds, otherwise 0.
      * @hide
      */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS)
     public long forceSecurityLogs() {
         if (mService == null) {
             return 0;
@@ -11683,7 +11698,10 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller is not shell / root or the admin package
      *         isn't a test application see {@link ApplicationInfo#FLAG_TEST_APP}.
      */
-    public void forceRemoveActiveAdmin(ComponentName adminReceiver, int userHandle) {
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void forceRemoveActiveAdmin(
+            @NonNull ComponentName adminReceiver, @UserIdInt int userHandle) {
         try {
             mService.forceRemoveActiveAdmin(adminReceiver, userHandle);
         } catch (RemoteException re) {
@@ -12753,8 +12771,11 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @RequiresPermission(value = android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED,
-            conditional = true)
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED,
+            android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
+    }, conditional = true)
     public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who) {
         if (mService == null) {
             return;
