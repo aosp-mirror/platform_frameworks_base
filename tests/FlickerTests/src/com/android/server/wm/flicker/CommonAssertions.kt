@@ -21,8 +21,6 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_LAYER_NAME
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_WINDOW_NAME
 
-const val APP_PAIR_SPLIT_DIVIDER = "AppPairSplitDivider"
-const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
 const val WALLPAPER_TITLE = "Wallpaper"
 
 fun FlickerTestParameter.statusBarWindowIsAlwaysVisible() {
@@ -64,9 +62,9 @@ fun FlickerTestParameter.wallpaperWindowBecomesVisible() {
 
 fun FlickerTestParameter.wallpaperWindowBecomesInvisible() {
     assertWm {
-        this.showsBelowAppWindow("Wallpaper")
+        this.showsBelowAppWindow(WALLPAPER_TITLE)
             .then()
-            .hidesBelowAppWindow("Wallpaper")
+            .hidesBelowAppWindow(WALLPAPER_TITLE)
     }
 }
 
@@ -103,19 +101,19 @@ fun FlickerTestParameter.noUncoveredRegions(
     if (allStates) {
         assertLayers {
             if (startingBounds == endingBounds) {
-                this.coversAtLeastRegion(startingBounds)
+                this.coversAtLeast(startingBounds)
             } else {
-                this.coversAtLeastRegion(startingBounds)
+                this.coversAtLeast(startingBounds)
                     .then()
-                    .coversAtLeastRegion(endingBounds)
+                    .coversAtLeast(endingBounds)
             }
         }
     } else {
         assertLayersStart {
-            this.coversAtLeastRegion(startingBounds)
+            this.coversAtLeast(startingBounds)
         }
         assertLayersEnd {
-            this.coversAtLeastRegion(endingBounds)
+            this.coversAtLeast(endingBounds)
         }
     }
 }
@@ -124,15 +122,15 @@ fun FlickerTestParameter.noUncoveredRegions(
 fun FlickerTestParameter.navBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertLayers {
-            this.showsLayer(NAV_BAR_LAYER_NAME)
+            this.isVisible(NAV_BAR_LAYER_NAME)
                 .then()
-                .hidesLayer(NAV_BAR_LAYER_NAME)
+                .isInvisible(NAV_BAR_LAYER_NAME)
                 .then()
-                .showsLayer(NAV_BAR_LAYER_NAME)
+                .isVisible(NAV_BAR_LAYER_NAME)
         }
     } else {
         assertLayers {
-            this.showsLayer(NAV_BAR_LAYER_NAME)
+            this.isVisible(NAV_BAR_LAYER_NAME)
         }
     }
 }
@@ -141,15 +139,15 @@ fun FlickerTestParameter.navBarLayerIsAlwaysVisible(rotatesScreen: Boolean = fal
 fun FlickerTestParameter.statusBarLayerIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertLayers {
-            this.showsLayer(STATUS_BAR_WINDOW_NAME)
+            this.isVisible(STATUS_BAR_WINDOW_NAME)
                 .then()
-            hidesLayer(STATUS_BAR_WINDOW_NAME)
+                .isInvisible(STATUS_BAR_WINDOW_NAME)
                 .then()
-                .showsLayer(STATUS_BAR_WINDOW_NAME)
+                .isVisible(STATUS_BAR_WINDOW_NAME)
         }
     } else {
         assertLayers {
-            this.showsLayer(STATUS_BAR_WINDOW_NAME)
+            this.isVisible(STATUS_BAR_WINDOW_NAME)
         }
     }
 }
@@ -163,10 +161,10 @@ fun FlickerTestParameter.navBarLayerRotatesAndScales(
     val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
 
     assertLayersStart {
-        this.hasVisibleRegion(NAV_BAR_LAYER_NAME, startingPos)
+        this.coversExactly(startingPos, NAV_BAR_LAYER_NAME)
     }
     assertLayersEnd {
-        this.hasVisibleRegion(NAV_BAR_LAYER_NAME, endingPos)
+        this.coversExactly(endingPos, NAV_BAR_LAYER_NAME)
     }
 }
 
@@ -179,10 +177,10 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
     assertLayersStart {
-        this.hasVisibleRegion(STATUS_BAR_WINDOW_NAME, startingPos)
+        this.coversExactly(startingPos, STATUS_BAR_WINDOW_NAME)
     }
     assertLayersEnd {
-        this.hasVisibleRegion(STATUS_BAR_WINDOW_NAME, endingPos)
+        this.coversExactly(endingPos, STATUS_BAR_WINDOW_NAME)
     }
 }
 
@@ -197,39 +195,41 @@ fun FlickerTestParameter.visibleLayersShownMoreThanOneConsecutiveEntry(
 
 fun FlickerTestParameter.appLayerReplacesWallpaperLayer(appName: String) {
     assertLayers {
-        this.showsLayer("Wallpaper")
+        this.isVisible(WALLPAPER_TITLE)
             .then()
-            .replaceVisibleLayer("Wallpaper", appName)
+            .isInvisible(WALLPAPER_TITLE)
+            .isVisible(appName)
     }
 }
 
 fun FlickerTestParameter.wallpaperLayerReplacesAppLayer(testApp: IAppHelper) {
     assertLayers {
-        this.showsLayer(testApp.getPackage())
+        this.isVisible(testApp.getPackage())
             .then()
-            .replaceVisibleLayer(testApp.getPackage(), WALLPAPER_TITLE)
+            .isInvisible(testApp.getPackage())
+            .isVisible(WALLPAPER_TITLE)
     }
 }
 
 fun FlickerTestParameter.layerAlwaysVisible(packageName: String) {
     assertLayers {
-        this.showsLayer(packageName)
+        this.isVisible(packageName)
     }
 }
 
 fun FlickerTestParameter.layerBecomesVisible(packageName: String) {
     assertLayers {
-        this.hidesLayer(packageName)
+        this.isInvisible(packageName)
             .then()
-            .showsLayer(packageName)
+            .isVisible(packageName)
     }
 }
 
 fun FlickerTestParameter.layerBecomesInvisible(packageName: String) {
     assertLayers {
-        this.showsLayer(packageName)
+        this.isVisible(packageName)
             .then()
-            .hidesLayer(packageName)
+            .isInvisible(packageName)
     }
 }
 

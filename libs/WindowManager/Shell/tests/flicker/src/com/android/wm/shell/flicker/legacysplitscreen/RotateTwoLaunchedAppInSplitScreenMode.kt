@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -56,7 +55,7 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppInSplitScreenMode(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenRotateTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             super.transition(this, configuration)
             setup {

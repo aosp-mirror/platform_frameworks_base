@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -54,7 +53,7 @@ class SetRequestedOrientationWhilePinnedTest(
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setupAndTeardown(this, configuration)
 
@@ -88,7 +87,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipWindowInsideDisplay() {
         testSpec.assertWmStart {
-            coversAtMostRegion(pipApp.defaultWindowName, startingBounds)
+            coversAtMost(startingBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -112,7 +111,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipLayerInsideDisplay() {
         testSpec.assertLayersStart {
-            coversAtMostRegion(startingBounds, pipApp.defaultWindowName)
+            coversAtMost(startingBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -120,7 +119,7 @@ class SetRequestedOrientationWhilePinnedTest(
     @Test
     fun pipAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            hasVisibleRegion(pipApp.defaultWindowName, endingBounds)
+            coversExactly(endingBounds, pipApp.defaultWindowName)
         }
     }
 

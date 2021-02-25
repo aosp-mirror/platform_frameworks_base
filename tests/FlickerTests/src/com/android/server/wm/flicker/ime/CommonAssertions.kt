@@ -23,23 +23,23 @@ const val IME_WINDOW_TITLE = "InputMethod"
 
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
-        this.hidesLayer(IME_WINDOW_TITLE)
+        this.isInvisible(IME_WINDOW_TITLE)
             .then()
-            .showsLayer(IME_WINDOW_TITLE)
+            .isVisible(IME_WINDOW_TITLE)
     }
 }
 
 fun FlickerTestParameter.imeLayerBecomesInvisible() {
     assertLayers {
-        this.showsLayer(IME_WINDOW_TITLE)
+        this.isVisible(IME_WINDOW_TITLE)
             .then()
-            .hidesLayer(IME_WINDOW_TITLE)
+            .isInvisible(IME_WINDOW_TITLE)
     }
 }
 
 fun FlickerTestParameter.imeAppLayerIsAlwaysVisible(testApp: IAppHelper) {
     assertLayers {
-        this.showsLayer(testApp.getPackage())
+        this.isVisible(testApp.getPackage())
     }
 }
 
@@ -83,9 +83,8 @@ fun FlickerTestParameter.imeAppWindowBecomesInvisible(testApp: IAppHelper) {
 
 fun FlickerTestParameter.imeAppLayerBecomesInvisible(testApp: IAppHelper) {
     assertLayers {
-        this.skipUntilFirstAssertion()
-            .showsLayer(testApp.getPackage())
+        this.isVisible(testApp.getPackage())
             .then()
-            .hidesLayer(testApp.getPackage())
+            .isInvisible(testApp.getPackage())
     }
 }
