@@ -323,6 +323,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mForceDisableBLAST;
     private boolean mEnableTripleBuffering;
 
+    private boolean mFastScrollSoundEffectsEnabled;
+
     /**
      * Signals that compatibility booleans have been initialized according to
      * target SDK versions.
@@ -813,6 +815,8 @@ public final class ViewRootImpl implements ViewParent,
 
         loadSystemProperties();
         mImeFocusController = new ImeFocusController(this);
+        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+        mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -6081,8 +6085,10 @@ public final class ViewRootImpl implements ViewParent,
                                     v, mTempRect);
                         }
                         if (v.requestFocus(direction, mTempRect)) {
-                            playSoundEffect(SoundEffectConstants
-                                    .getContantForFocusDirection(direction));
+                            boolean isFastScrolling = event.getRepeatCount() > 0;
+                            playSoundEffect(
+                                    SoundEffectConstants.getConstantForFocusDirection(direction,
+                                            isFastScrolling));
                             return true;
                         }
                     }
@@ -7743,20 +7749,31 @@ public final class ViewRootImpl implements ViewParent,
         try {
             final AudioManager audioManager = getAudioManager();
 
+            if (mFastScrollSoundEffectsEnabled
+                    && SoundEffectConstants.isNavigationRepeat(effectId)) {
+                audioManager.playSoundEffect(
+                        SoundEffectConstants.nextNavigationRepeatSoundEffectId());
+                return;
+            }
+
             switch (effectId) {
                 case SoundEffectConstants.CLICK:
                     audioManager.playSoundEffect(AudioManager.FX_KEY_CLICK);
                     return;
                 case SoundEffectConstants.NAVIGATION_DOWN:
+                case SoundEffectConstants.NAVIGATION_REPEAT_DOWN:
                     audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_DOWN);
                     return;
                 case SoundEffectConstants.NAVIGATION_LEFT:
+                case SoundEffectConstants.NAVIGATION_REPEAT_LEFT:
                     audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_LEFT);
                     return;
                 case SoundEffectConstants.NAVIGATION_RIGHT:
+                case SoundEffectConstants.NAVIGATION_REPEAT_RIGHT:
                     audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_RIGHT);
                     return;
                 case SoundEffectConstants.NAVIGATION_UP:
+                case SoundEffectConstants.NAVIGATION_REPEAT_UP:
                     audioManager.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_UP);
                     return;
                 default:
