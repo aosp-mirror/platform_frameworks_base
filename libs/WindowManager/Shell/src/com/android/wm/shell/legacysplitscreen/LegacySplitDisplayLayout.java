@@ -18,6 +18,7 @@ package com.android.wm.shell.legacysplitscreen;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.util.RotationUtils.rotateBounds;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -244,7 +245,7 @@ public class LegacySplitDisplayLayout {
             DividerSnapAlgorithm snap = initSnapAlgorithmForRotation(context, tmpDL, dividerSize);
 
             tmpRect.set(bounds);
-            DisplayLayout.rotateBounds(tmpRect, displayRect, rotation - dl.rotation());
+            rotateBounds(tmpRect, displayRect, dl.rotation(), rotation);
             rotatedDisplayRect.set(0, 0, tmpDL.width(), tmpDL.height());
             final int dockSide = getPrimarySplitSide(tmpRect, rotatedDisplayRect,
                     tmpDL.getOrientation());
