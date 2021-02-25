@@ -63,6 +63,7 @@ interface IKeyChainService {
     AppUriAuthenticationPolicy getCredentialManagementAppPolicy();
     String getPredefinedAliasForPackageAndUri(String packageName, in Uri uri);
     void removeCredentialManagementApp();
+    boolean isCredentialManagementApp(String packageName);
 
     // APIs used by KeyChainActivity
     void setGrant(int uid, String alias, boolean value);
