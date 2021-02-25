@@ -5058,6 +5058,10 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } else {
             // No longer managed by any organizer.
+            final TaskDisplayArea taskDisplayArea = getDisplayArea();
+            if (taskDisplayArea != null) {
+                taskDisplayArea.removeLaunchRootTask(this);
+            }
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
                 removeImmediately("setTaskOrganizer");
