@@ -2324,16 +2324,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Session not sealed");
         }
 
-        // TODO(b/136257624): Some logic in this if block probably belongs in
-        //  makeInstallParams().
-        if (!isMultiPackage() && !isApexSession()) {
+        if (!isMultiPackage()) {
             Objects.requireNonNull(mPackageName);
             Objects.requireNonNull(mSigningDetails);
             Objects.requireNonNull(mResolvedBaseFile);
 
             // Inherit any packages and native libraries from existing install that
             // haven't been overridden.
-            if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
+            if (!isApexSession() && params.mode == SessionParams.MODE_INHERIT_EXISTING) {
                 try {
                     final List<File> fromFiles = mResolvedInheritedFiles;
                     final File toDir = stageDir;
@@ -2380,18 +2378,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             "Failed to inherit existing install", e);
                 }
             }
-            // For mode inherit existing, it would link/copy existing files to stage dir in the
-            // above block. Therefore, we need to parse the complete package in stage dir here.
-            // Besides, PackageLite may be null for staged sessions that don't complete pre-reboot
-            // verification.
-            mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
 
-            // TODO: surface more granular state from dexopt
-            mInternalProgress = 0.5f;
-            computeProgressLocked(true);
+            if (!isApexSession()) {
+                // For mode inherit existing, it would link/copy existing files to stage dir in the
+                // above block. Therefore, we need to parse the complete package in stage dir here.
+                // Besides, PackageLite may be null for staged sessions that don't complete
+                // pre-reboot verification.
+                mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
 
-            extractNativeLibraries(mPackageLite, stageDir, params.abiOverride,
-                    mayInheritNativeLibs());
+                // TODO: surface more granular state from dexopt
+                mInternalProgress = 0.5f;
+                computeProgressLocked(true);
+
+                extractNativeLibraries(mPackageLite, stageDir, params.abiOverride,
+                        mayInheritNativeLibs());
+            } else {
+                mPackageLite = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
+            }
         }
 
         final IPackageInstallObserver2 localObserver;
@@ -2681,6 +2684,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mPackageName = apk.getPackageName();
             mVersionCode = apk.getLongVersionCode();
         }
+
+        mSigningDetails = apk.getSigningDetails();
     }
 
     /**

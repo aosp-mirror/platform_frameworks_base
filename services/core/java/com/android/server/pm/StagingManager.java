@@ -28,7 +28,6 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -295,15 +294,6 @@ public class StagingManager {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                         "Failed to parse APEX package " + apexInfo.modulePath, e);
             }
-            final PackageInfo activePackage = mApexManager.getPackageInfo(packageInfo.packageName,
-                    ApexManager.MATCH_ACTIVE_PACKAGE);
-            if (activePackage == null) {
-                Slog.w(TAG, "Attempting to install new APEX package " + packageInfo.packageName);
-                throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "It is forbidden to install new APEX packages.");
-            }
-            checkRequiredVersionCode(session, activePackage);
-            checkDowngrade(session, activePackage, packageInfo);
             result.add(packageInfo);
             apexPackageNames.add(packageInfo.packageName);
         }
@@ -324,40 +314,6 @@ public class StagingManager {
         }
         throw new PackageManagerException(
                 "Could not find rollback id for commit session: " + sessionId);
-    }
-
-    private void checkRequiredVersionCode(final StagedSession session,
-            final PackageInfo activePackage) throws PackageManagerException {
-        if (session.sessionParams().requiredInstalledVersionCode
-                == PackageManager.VERSION_CODE_HIGHEST) {
-            return;
-        }
-        final long activeVersion = activePackage.applicationInfo.longVersionCode;
-        if (activeVersion != session.sessionParams().requiredInstalledVersionCode) {
-            throw new PackageManagerException(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Installed version of APEX package " + activePackage.packageName
-                            + " does not match required. Active version: " + activeVersion
-                            + " required: " + session.sessionParams().requiredInstalledVersionCode);
-        }
-    }
-
-    private void checkDowngrade(final StagedSession session,
-            final PackageInfo activePackage, final PackageInfo newPackage)
-            throws PackageManagerException {
-        final long activeVersion = activePackage.applicationInfo.longVersionCode;
-        final long newVersionCode = newPackage.applicationInfo.longVersionCode;
-        final boolean isAppDebuggable = (activePackage.applicationInfo.flags
-                & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
-                session.sessionParams().installFlags, isAppDebuggable);
-        if (activeVersion > newVersionCode && !allowsDowngrade) {
-            throw new PackageManagerException(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Downgrade of APEX package " + newPackage.packageName
-                            + " is not allowed. Active version: " + activeVersion
-                            + " attempted: " + newVersionCode);
-        }
     }
 
     // Reverts apex sessions and user data (if checkpoint is supported). Also reboots the device.
