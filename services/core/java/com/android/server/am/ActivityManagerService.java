@@ -143,6 +143,7 @@ import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
+import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -6586,6 +6587,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public @ProcessCapability int getUidProcessCapabilities(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "getUidProcessState");
+        }
+
+        synchronized (mProcLock) {
+            return mProcessList.getUidProcessCapabilityLOSP(uid);
+        }
+    }
+
+    @Override
     public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {
@@ -10031,6 +10044,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessList.PERSISTENT_SERVICE_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ,
             ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
+            ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
             ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MIN_ADJ
@@ -10038,7 +10052,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
-            "Visible", "Perceptible", "Perceptible Low",
+            "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
             "Heavy Weight", "Backup",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
@@ -10046,7 +10060,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
             "native",
             "sys", "pers", "persvc", "fore",
-            "vis", "percept", "perceptl",
+            "vis", "percept", "perceptl", "perceptm",
             "heavy", "backup",
             "servicea", "home",
             "prev", "serviceb", "cached"
@@ -13904,7 +13918,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void noteUidProcessState(final int uid, final int state,
-                final @ActivityManager.ProcessCapability int capability) {
+                final @ProcessCapability int capability) {
         mBatteryStatsService.noteUidProcessState(uid, state);
         mAppOpsService.updateUidProcState(uid, state, capability);
         if (mTrackingAssociations) {

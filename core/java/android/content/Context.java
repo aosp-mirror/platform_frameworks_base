@@ -370,6 +370,25 @@ public abstract class Context {
     /***********    Hidden flags below this line ***********/
 
     /**
+     * Flag for {@link #bindService}: allow the process hosting the target service to be treated
+     * as if it's as important as a perceptible app to the user and avoid the oom killer killing
+     * this process in low memory situations until there aren't any other processes left but the
+     * ones which are user-perceptible.
+     *
+     * @hide
+     */
+    public static final int BIND_ALMOST_PERCEPTIBLE = 0x000010000;
+
+    /**
+     * Flag for {@link #bindService}: allow the process hosting the target service to gain
+     * {@link ActivityManager#PROCESS_CAPABILITY_NETWORK}, which allows it be able
+     * to access network regardless of any power saving restrictions.
+     *
+     * @hide
+     */
+    public static final int BIND_ALLOW_NETWORK_ACCESS = 0x00020000;
+
+    /**
      * Flag for {@link #bindService}: allow background foreground service starts from the bound
      * service's process.
      * This flag is only respected if the caller is holding
