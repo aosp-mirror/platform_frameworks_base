@@ -50,6 +50,7 @@ import com.android.internal.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Contains information about the layout-properties of a display. This refers to internal layout
@@ -81,6 +82,31 @@ public class DisplayLayout {
     private boolean mHasNavigationBar = false;
     private boolean mHasStatusBar = false;
     private int mNavBarFrameHeight = 0;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DisplayLayout)) return false;
+        final DisplayLayout other = (DisplayLayout) o;
+        return mUiMode == other.mUiMode
+                && mWidth == other.mWidth
+                && mHeight == other.mHeight
+                && Objects.equals(mCutout, other.mCutout)
+                && mRotation == other.mRotation
+                && mDensityDpi == other.mDensityDpi
+                && Objects.equals(mNonDecorInsets, other.mNonDecorInsets)
+                && Objects.equals(mStableInsets, other.mStableInsets)
+                && mHasNavigationBar == other.mHasNavigationBar
+                && mHasStatusBar == other.mHasStatusBar
+                && mNavBarFrameHeight == other.mNavBarFrameHeight;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mUiMode, mWidth, mHeight, mCutout, mRotation, mDensityDpi,
+                mNonDecorInsets, mStableInsets, mHasNavigationBar, mHasStatusBar,
+                mNavBarFrameHeight);
+    }
 
     /**
      * Create empty layout.
