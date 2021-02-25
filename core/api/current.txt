@@ -9734,7 +9734,7 @@ package android.companion {
   public interface DeviceFilter<D extends android.os.Parcelable> extends android.os.Parcelable {
   }
 
-  public class DeviceNotAssociatedException extends java.lang.Exception {
+  public class DeviceNotAssociatedException extends java.lang.RuntimeException {
   }
 
   public final class WifiDeviceFilter implements android.companion.DeviceFilter<android.net.wifi.ScanResult> {
