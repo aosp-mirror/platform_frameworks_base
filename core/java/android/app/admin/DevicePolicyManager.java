@@ -2746,6 +2746,32 @@ public class DevicePolicyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppsSuspensionReason {}
 
+    /**
+     * The default device owner type for a managed device.
+     *
+     * @hide
+     */
+    public static final int DEVICE_OWNER_TYPE_DEFAULT = 0;
+
+    /**
+     * The device owner type for a financed device.
+     *
+     * @hide
+     */
+    public static final int DEVICE_OWNER_TYPE_FINANCED = 1;
+
+    /**
+     * Different device owner types for a managed device.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "DEVICE_OWNER_TYPE_" }, value = {
+            DEVICE_OWNER_TYPE_DEFAULT,
+            DEVICE_OWNER_TYPE_FINANCED
+    })
+    public @interface DeviceOwnerType {}
+
     /** @hide */
     @TestApi
     public static final int OPERATION_LOCK_NOW = 1;
@@ -13457,6 +13483,57 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Sets the device owner type for a managed device (e.g. financed device).
+     *
+     * @param admin The {@link DeviceAdminReceiver} that is the device owner.
+     * @param deviceOwnerType The device owner type is set to. Use
+     * {@link #DEVICE_OWNER_TYPE_DEFAULT} for the default device owner type. Use
+     * {@link #DEVICE_OWNER_TYPE_FINANCED} for the financed device owner type.
+     *
+     * @throws IllegalStateException When admin is not the device owner, or there is no device
+     *     owner, or attempting to set the device owner type again for the same admin.
+     * @throws SecurityException If the caller does not have the permission
+     *     {@link permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     *
+     * @hide
+     */
+    public void setDeviceOwnerType(@NonNull ComponentName admin,
+            @DeviceOwnerType int deviceOwnerType) {
+        throwIfParentInstance("setDeviceOwnerType");
+        if (mService != null) {
+            try {
+                mService.setDeviceOwnerType(admin, deviceOwnerType);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the device owner type for the admin used in
+     * {@link #setDeviceOwnerType(ComponentName, int)}. {@link #DEVICE_OWNER_TYPE_DEFAULT}
+     * would be returned when the device owner type is not set for the device owner admin.
+     *
+     * @param admin The {@link DeviceAdminReceiver} that is the device owner.
+     *
+     * @throws IllegalStateException When admin is not the device owner or there is no device owner.
+     *
+     * @hide
+     */
+    @DeviceOwnerType
+    public int getDeviceOwnerType(@NonNull ComponentName admin) {
+        throwIfParentInstance("getDeviceOwnerType");
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerType(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return DEVICE_OWNER_TYPE_DEFAULT;
     }
 
     /**
