@@ -17,6 +17,8 @@
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
+#include "com_android_internal_os_Zygote.h"
+
 #include <async_safe/log.h>
 
 // sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
@@ -91,19 +93,6 @@
 
 #include "nativebridge/native_bridge.h"
 
-/* Functions in the callchain during the fork shall not be protected with
-   Armv8.3-A Pointer Authentication, otherwise child will not be able to return. */
-#ifdef __ARM_FEATURE_PAC_DEFAULT
-#ifdef __ARM_FEATURE_BTI_DEFAULT
-#define NO_PAC_FUNC __attribute__((target("branch-protection=bti")))
-#else
-#define NO_PAC_FUNC __attribute__((target("branch-protection=none")))
-#endif /* __ARM_FEATURE_BTI_DEFAULT */
-#else /* !__ARM_FEATURE_PAC_DEFAULT */
-#define NO_PAC_FUNC
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
-
-
 namespace {
 
 // TODO (chriswailes): Add a function to initialize native Zygote data.
@@ -118,8 +107,7 @@ using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 using android::base::GetBoolProperty;
 
-#define CREATE_ERROR(...) StringPrintf("%s:%d: ", __FILE__, __LINE__). \
-                              append(StringPrintf(__VA_ARGS__))
+using android::zygote::ZygoteFailure;
 
 // This type is duplicated in fd_utils.h
 typedef const std::function<void(std::string)>& fail_fn_t;
@@ -215,7 +203,7 @@ class UsapTableEntry {
   static constexpr EntryStorage INVALID_ENTRY_VALUE = {-1, -1};
 
   std::atomic<EntryStorage> mStorage;
-  static_assert(decltype(mStorage)::is_always_lock_free);
+  static_assert(decltype(mStorage)::is_always_lock_free);  // Accessed from signal handler.
 
  public:
   constexpr UsapTableEntry() : mStorage(INVALID_ENTRY_VALUE) {}
@@ -942,36 +930,6 @@ void SetThreadName(const std::string& thread_name) {
 }
 
 /**
- * A failure function used to report fatal errors to the managed runtime.  This
- * function is often curried with the process name information and then passed
- * to called functions.
- *
- * @param env  Managed runtime environment
- * @param process_name  A native representation of the process name
- * @param managed_process_name  A managed representation of the process name
- * @param msg  The error message to be reported
- */
-[[noreturn]]
-static void ZygoteFailure(JNIEnv* env,
-                          const char* process_name,
-                          jstring managed_process_name,
-                          const std::string& msg) {
-  std::unique_ptr<ScopedUtfChars> scoped_managed_process_name_ptr = nullptr;
-  if (managed_process_name != nullptr) {
-    scoped_managed_process_name_ptr.reset(new ScopedUtfChars(env, managed_process_name));
-    if (scoped_managed_process_name_ptr->c_str() != nullptr) {
-      process_name = scoped_managed_process_name_ptr->c_str();
-    }
-  }
-
-  const std::string& error_msg =
-      (process_name == nullptr) ? msg : StringPrintf("(%s) %s", process_name, msg.c_str());
-
-  env->FatalError(error_msg.c_str());
-  __builtin_unreachable();
-}
-
-/**
  * A helper method for converting managed strings to native strings.  A fatal
  * error is generated if a problem is encountered in extracting a non-null
  * string.
@@ -1096,86 +1054,6 @@ static void PAuthKeyChange(JNIEnv* env) {
     }
   }
 #endif
-}
-
-// Utility routine to fork a process from the zygote.
-NO_PAC_FUNC
-static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
-                        const std::vector<int>& fds_to_close,
-                        const std::vector<int>& fds_to_ignore,
-                        bool is_priority_fork) {
-  SetSignalHandlers();
-
-  // Curry a failure function.
-  auto fail_fn = std::bind(ZygoteFailure, env, is_system_server ? "system_server" : "zygote",
-                           nullptr, _1);
-
-  // Temporarily block SIGCHLD during forks. The SIGCHLD handler might
-  // log, which would result in the logging FDs we close being reopened.
-  // This would cause failures because the FDs are not allowlisted.
-  //
-  // Note that the zygote process is single threaded at this point.
-  BlockSignal(SIGCHLD, fail_fn);
-
-  // Close any logging related FDs before we start evaluating the list of
-  // file descriptors.
-  __android_log_close();
-  AStatsSocket_close();
-
-  // If this is the first fork for this zygote, create the open FD table.  If
-  // it isn't, we just need to check whether the list of open files has changed
-  // (and it shouldn't in the normal case).
-  if (gOpenFdTable == nullptr) {
-    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, fail_fn);
-  } else {
-    gOpenFdTable->Restat(fds_to_ignore, fail_fn);
-  }
-
-  android_fdsan_error_level fdsan_error_level = android_fdsan_get_error_level();
-
-  // Purge unused native memory in an attempt to reduce the amount of false
-  // sharing with the child process.  By reducing the size of the libc_malloc
-  // region shared with the child process we reduce the number of pages that
-  // transition to the private-dirty state when malloc adjusts the meta-data
-  // on each of the pages it is managing after the fork.
-  mallopt(M_PURGE, 0);
-
-  pid_t pid = fork();
-
-  if (pid == 0) {
-    if (is_priority_fork) {
-      setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MAX);
-    } else {
-      setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MIN);
-    }
-
-    // The child process.
-    PAuthKeyChange(env);
-    PreApplicationInit();
-
-    // Clean up any descriptors which must be closed immediately
-    DetachDescriptors(env, fds_to_close, fail_fn);
-
-    // Invalidate the entries in the USAP table.
-    ClearUsapTable();
-
-    // Re-open all remaining open file descriptors so that they aren't shared
-    // with the zygote across a fork.
-    gOpenFdTable->ReopenOrDetach(fail_fn);
-
-    // Turn fdsan back on.
-    android_fdsan_set_error_level(fdsan_error_level);
-
-    // Reset the fd to the unsolicited zygote socket
-    gSystemServerSocketFd = -1;
-  } else {
-    ALOGD("Forked child process %d", pid);
-  }
-
-  // We blocked SIGCHLD prior to a fork, we unblock it here.
-  UnblockSignal(SIGCHLD, fail_fn);
-
-  return pid;
 }
 
 // Create an app data directory over tmpfs overlayed CE / DE storage, and bind mount it
@@ -1993,9 +1871,10 @@ static void AddUsapTableEntry(pid_t usap_pid, int read_pipe_fd) {
   static int sUsapTableInsertIndex = 0;
 
   int search_index = sUsapTableInsertIndex;
-
   do {
     if (gUsapTable[search_index].SetIfInvalid(usap_pid, read_pipe_fd)) {
+      ++gUsapPoolCount;
+
       // Start our next search right after where we finished this one.
       sUsapTableInsertIndex = (search_index + 1) % gUsapTable.size();
 
@@ -2013,7 +1892,7 @@ static void AddUsapTableEntry(pid_t usap_pid, int read_pipe_fd) {
 /**
  * Invalidates the entry in the USAPTable corresponding to the provided
  * process ID if it is present.  If an entry was removed the USAP pool
- * count is decremented.
+ * count is decremented. May be called from signal handler.
  *
  * @param usap_pid  Process ID of the USAP entry to invalidate
  * @return True if an entry was invalidated; false otherwise
@@ -2089,6 +1968,121 @@ static void UnmountStorageOnInit(JNIEnv* env) {
 
 namespace android {
 
+/**
+ * A failure function used to report fatal errors to the managed runtime.  This
+ * function is often curried with the process name information and then passed
+ * to called functions.
+ *
+ * @param env  Managed runtime environment
+ * @param process_name  A native representation of the process name
+ * @param managed_process_name  A managed representation of the process name
+ * @param msg  The error message to be reported
+ */
+[[noreturn]]
+void zygote::ZygoteFailure(JNIEnv* env,
+                           const char* process_name,
+                           jstring managed_process_name,
+                           const std::string& msg) {
+  std::unique_ptr<ScopedUtfChars> scoped_managed_process_name_ptr = nullptr;
+  if (managed_process_name != nullptr) {
+    scoped_managed_process_name_ptr.reset(new ScopedUtfChars(env, managed_process_name));
+    if (scoped_managed_process_name_ptr->c_str() != nullptr) {
+      process_name = scoped_managed_process_name_ptr->c_str();
+    }
+  }
+
+  const std::string& error_msg =
+      (process_name == nullptr || process_name[0] == '\0') ?
+      msg : StringPrintf("(%s) %s", process_name, msg.c_str());
+
+  env->FatalError(error_msg.c_str());
+  __builtin_unreachable();
+}
+
+// Utility routine to fork a process from the zygote.
+NO_PAC_FUNC
+pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
+                         const std::vector<int>& fds_to_close,
+                         const std::vector<int>& fds_to_ignore,
+                         bool is_priority_fork,
+                         bool purge) {
+  SetSignalHandlers();
+
+  // Curry a failure function.
+  auto fail_fn = std::bind(zygote::ZygoteFailure, env,
+                           is_system_server ? "system_server" : "zygote",
+                           nullptr, _1);
+
+  // Temporarily block SIGCHLD during forks. The SIGCHLD handler might
+  // log, which would result in the logging FDs we close being reopened.
+  // This would cause failures because the FDs are not allowlisted.
+  //
+  // Note that the zygote process is single threaded at this point.
+  BlockSignal(SIGCHLD, fail_fn);
+
+  // Close any logging related FDs before we start evaluating the list of
+  // file descriptors.
+  __android_log_close();
+  AStatsSocket_close();
+
+  // If this is the first fork for this zygote, create the open FD table.  If
+  // it isn't, we just need to check whether the list of open files has changed
+  // (and it shouldn't in the normal case).
+  if (gOpenFdTable == nullptr) {
+    gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, fail_fn);
+  } else {
+    gOpenFdTable->Restat(fds_to_ignore, fail_fn);
+  }
+
+  android_fdsan_error_level fdsan_error_level = android_fdsan_get_error_level();
+
+  if (purge) {
+    // Purge unused native memory in an attempt to reduce the amount of false
+    // sharing with the child process.  By reducing the size of the libc_malloc
+    // region shared with the child process we reduce the number of pages that
+    // transition to the private-dirty state when malloc adjusts the meta-data
+    // on each of the pages it is managing after the fork.
+    mallopt(M_PURGE, 0);
+  }
+
+  pid_t pid = fork();
+
+  if (pid == 0) {
+    if (is_priority_fork) {
+      setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MAX);
+    } else {
+      setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MIN);
+    }
+
+    // The child process.
+    PAuthKeyChange(env);
+    PreApplicationInit();
+
+    // Clean up any descriptors which must be closed immediately
+    DetachDescriptors(env, fds_to_close, fail_fn);
+
+    // Invalidate the entries in the USAP table.
+    ClearUsapTable();
+
+    // Re-open all remaining open file descriptors so that they aren't shared
+    // with the zygote across a fork.
+    gOpenFdTable->ReopenOrDetach(fail_fn);
+
+    // Turn fdsan back on.
+    android_fdsan_set_error_level(fdsan_error_level);
+
+    // Reset the fd to the unsolicited zygote socket
+    gSystemServerSocketFd = -1;
+  } else {
+    ALOGD("Forked child process %d", pid);
+  }
+
+  // We blocked SIGCHLD prior to a fork, we unblock it here.
+  UnblockSignal(SIGCHLD, fail_fn);
+
+  return pid;
+}
+
 static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
   PreApplicationInit();
 }
@@ -2105,7 +2099,8 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     if (UNLIKELY(managed_fds_to_close == nullptr)) {
-      ZygoteFailure(env, "zygote", nice_name, "Zygote received a null fds_to_close vector.");
+      zygote::ZygoteFailure(env, "zygote", nice_name,
+                            "Zygote received a null fds_to_close vector.");
     }
 
     std::vector<int> fds_to_close =
@@ -2131,7 +2126,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         fds_to_ignore.push_back(gSystemServerSocketFd);
     }
 
-    pid_t pid = ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
+    pid_t pid = zygote::ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
 
     if (pid == 0) {
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
@@ -2166,10 +2161,10 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       fds_to_ignore.push_back(gSystemServerSocketFd);
   }
 
-  pid_t pid = ForkCommon(env, true,
-                         fds_to_close,
-                         fds_to_ignore,
-                         true);
+  pid_t pid = zygote::ForkCommon(env, true,
+                                 fds_to_close,
+                                 fds_to_ignore,
+                                 true);
   if (pid == 0) {
       // System server prcoess does not need data isolation so no need to
       // know pkg_data_info_list.
@@ -2209,58 +2204,74 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
  * ensuring proper file descriptor hygiene.
  *
  * @param env  Managed runtime environment
- * @param read_pipe_fd  The read FD for the USAP reporting pipe.  Manually closed by blastlas
- * in managed code.
+ * @param read_pipe_fd  The read FD for the USAP reporting pipe.  Manually closed by the child
+ * in managed code. -1 indicates none.
  * @param write_pipe_fd  The write FD for the USAP reporting pipe.  Manually closed by the
- * zygote in managed code.
+ * zygote in managed code. -1 indicates none.
  * @param managed_session_socket_fds  A list of anonymous session sockets that must be ignored by
  * the FD hygiene code and automatically "closed" in the new USAP.
+ * @param args_known Arguments for specialization are available; no need to read from a socket
  * @param is_priority_fork  Controls the nice level assigned to the newly created process
- * @return
+ * @return child pid in the parent, 0 in the child
  */
 NO_PAC_FUNC
-static jint com_android_internal_os_Zygote_nativeForkUsap(JNIEnv* env,
-                                                          jclass,
-                                                          jint read_pipe_fd,
-                                                          jint write_pipe_fd,
-                                                          jintArray managed_session_socket_fds,
-                                                          jboolean is_priority_fork) {
-  std::vector<int> fds_to_close(MakeUsapPipeReadFDVector()),
-                   fds_to_ignore(fds_to_close);
-
+static jint com_android_internal_os_Zygote_nativeForkApp(JNIEnv* env,
+                                                         jclass,
+                                                         jint read_pipe_fd,
+                                                         jint write_pipe_fd,
+                                                         jintArray managed_session_socket_fds,
+                                                         jboolean args_known,
+                                                         jboolean is_priority_fork) {
   std::vector<int> session_socket_fds =
       ExtractJIntArray(env, "USAP", nullptr, managed_session_socket_fds)
           .value_or(std::vector<int>());
+  return zygote::forkApp(env, read_pipe_fd, write_pipe_fd, session_socket_fds,
+                            args_known == JNI_TRUE, is_priority_fork == JNI_TRUE, true);
+}
 
-  // The USAP Pool Event FD is created during the initialization of the
-  // USAP pool and should always be valid here.
+NO_PAC_FUNC
+int zygote::forkApp(JNIEnv* env,
+                    int read_pipe_fd,
+                    int write_pipe_fd,
+                    const std::vector<int>& session_socket_fds,
+                    bool args_known,
+                    bool is_priority_fork,
+                    bool purge) {
+
+  std::vector<int> fds_to_close(MakeUsapPipeReadFDVector()),
+                   fds_to_ignore(fds_to_close);
 
   fds_to_close.push_back(gZygoteSocketFD);
-  fds_to_close.push_back(gUsapPoolEventFD);
-  fds_to_close.insert(fds_to_close.end(), session_socket_fds.begin(), session_socket_fds.end());
   if (gSystemServerSocketFd != -1) {
       fds_to_close.push_back(gSystemServerSocketFd);
   }
+  if (args_known) {
+      fds_to_close.push_back(gUsapPoolSocketFD);
+  }
+  fds_to_close.insert(fds_to_close.end(), session_socket_fds.begin(), session_socket_fds.end());
 
-  fds_to_ignore.push_back(gZygoteSocketFD);
   fds_to_ignore.push_back(gUsapPoolSocketFD);
-  fds_to_ignore.push_back(gUsapPoolEventFD);
-  fds_to_ignore.push_back(read_pipe_fd);
-  fds_to_ignore.push_back(write_pipe_fd);
+  fds_to_ignore.push_back(gZygoteSocketFD);
+  if (read_pipe_fd != -1) {
+      fds_to_ignore.push_back(read_pipe_fd);
+  }
+  if (write_pipe_fd != -1) {
+      fds_to_ignore.push_back(write_pipe_fd);
+  }
   fds_to_ignore.insert(fds_to_ignore.end(), session_socket_fds.begin(), session_socket_fds.end());
+
+  if (gUsapPoolEventFD != -1) {
+      fds_to_close.push_back(gUsapPoolEventFD);
+      fds_to_ignore.push_back(gUsapPoolEventFD);
+  }
   if (gSystemServerSocketFd != -1) {
+      if (args_known) {
+          fds_to_close.push_back(gSystemServerSocketFd);
+      }
       fds_to_ignore.push_back(gSystemServerSocketFd);
   }
-
-  pid_t usap_pid = ForkCommon(env, /* is_system_server= */ false, fds_to_close, fds_to_ignore,
-                              is_priority_fork == JNI_TRUE);
-
-  if (usap_pid != 0) {
-    ++gUsapPoolCount;
-    AddUsapTableEntry(usap_pid, read_pipe_fd);
-  }
-
-  return usap_pid;
+  return zygote::ForkCommon(env, /* is_system_server= */ false, fds_to_close,
+                            fds_to_ignore, is_priority_fork == JNI_TRUE, purge);
 }
 
 static void com_android_internal_os_Zygote_nativeAllowFileAcrossFork(
@@ -2374,7 +2385,7 @@ static void com_android_internal_os_Zygote_nativeInitNativeState(JNIEnv* env, jc
    */
 
   if (!SetTaskProfiles(0, {})) {
-    ZygoteFailure(env, "zygote", nullptr, "Zygote SetTaskProfiles failed");
+    zygote::ZygoteFailure(env, "zygote", nullptr, "Zygote SetTaskProfiles failed");
   }
 }
 
@@ -2392,15 +2403,21 @@ static jintArray com_android_internal_os_Zygote_nativeGetUsapPipeFDs(JNIEnv* env
   return managed_usap_fds;
 }
 
+/*
+ * Add the given pid and file descriptor to the Usap table. CriticalNative method.
+ */
+static void com_android_internal_os_Zygote_nativeAddUsapTableEntry(jint pid, jint read_pipe_fd) {
+  AddUsapTableEntry(pid, read_pipe_fd);
+}
+
 /**
- * A JNI wrapper around RemoveUsapTableEntry.
+ * A JNI wrapper around RemoveUsapTableEntry. CriticalNative method.
  *
  * @param env  Managed runtime environment
  * @param usap_pid  Process ID of the USAP entry to invalidate
  * @return  True if an entry was invalidated; false otherwise.
  */
-static jboolean com_android_internal_os_Zygote_nativeRemoveUsapTableEntry(JNIEnv* env, jclass,
-                                                                          jint usap_pid) {
+static jboolean com_android_internal_os_Zygote_nativeRemoveUsapTableEntry(jint usap_pid) {
   return RemoveUsapTableEntry(usap_pid);
 }
 
@@ -2415,7 +2432,8 @@ static jboolean com_android_internal_os_Zygote_nativeRemoveUsapTableEntry(JNIEnv
 static jint com_android_internal_os_Zygote_nativeGetUsapPoolEventFD(JNIEnv* env, jclass) {
   if (gUsapPoolEventFD == -1) {
     if ((gUsapPoolEventFD = eventfd(0, 0)) == -1) {
-      ZygoteFailure(env, "zygote", nullptr, StringPrintf("Unable to create eventfd: %s", strerror(errno)));
+      zygote::ZygoteFailure(env, "zygote", nullptr,
+                            StringPrintf("Unable to create eventfd: %s", strerror(errno)));
     }
   }
 
@@ -2458,12 +2476,12 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
 }
 
 static void com_android_internal_os_Zygote_nativeBlockSigTerm(JNIEnv* env, jclass) {
-  auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
+  auto fail_fn = std::bind(zygote::ZygoteFailure, env, "usap", nullptr, _1);
   BlockSignal(SIGTERM, fail_fn);
 }
 
 static void com_android_internal_os_Zygote_nativeUnblockSigTerm(JNIEnv* env, jclass) {
-  auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
+  auto fail_fn = std::bind(zygote::ZygoteFailure, env, "usap", nullptr, _1);
   UnblockSignal(SIGTERM, fail_fn);
 }
 
@@ -2569,7 +2587,10 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_internal_os_Zygote_nativePreApplicationInit},
         {"nativeInstallSeccompUidGidFilter", "(II)V",
          (void*)com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter},
-        {"nativeForkUsap", "(II[IZ)I", (void*)com_android_internal_os_Zygote_nativeForkUsap},
+        {"nativeForkApp", "(II[IZZ)I", (void*)com_android_internal_os_Zygote_nativeForkApp},
+        // @CriticalNative
+        {"nativeAddUsapTableEntry", "(II)V",
+         (void*)com_android_internal_os_Zygote_nativeAddUsapTableEntry},
         {"nativeSpecializeAppProcess",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/"
          "String;Z[Ljava/lang/String;[Ljava/lang/String;ZZ)V",
@@ -2578,6 +2599,10 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_internal_os_Zygote_nativeInitNativeState},
         {"nativeGetUsapPipeFDs", "()[I",
          (void*)com_android_internal_os_Zygote_nativeGetUsapPipeFDs},
+        // @CriticalNative
+        {"nativeAddUsapTableEntry", "(II)V",
+         (void*)com_android_internal_os_Zygote_nativeAddUsapTableEntry},
+        // @CriticalNative
         {"nativeRemoveUsapTableEntry", "(I)Z",
          (void*)com_android_internal_os_Zygote_nativeRemoveUsapTableEntry},
         {"nativeGetUsapPoolEventFD", "()I",
