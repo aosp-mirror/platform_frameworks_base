@@ -19,15 +19,22 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Person;
+import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.PackageIdentifier;
+import android.app.appsearch.SetSchemaRequest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.LocusId;
+import android.content.pm.AppSearchPerson;
+import android.content.pm.AppSearchShortcutInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
+import android.os.Binder;
 import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -39,9 +46,11 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.ShortcutService.DumpFilter;
@@ -64,8 +73,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -154,6 +167,16 @@ class ShortcutPackage extends ShortcutPackageItem {
     private final int mPackageUid;
 
     private long mLastKnownForegroundElapsedTime;
+
+    private final Object mLock = new Object();
+
+    /**
+     * All external packages that have gained access to the shortcuts from this package
+     */
+    private final Map<String, PackageIdentifier> mPackageIdentifiers = new ArrayMap<>(0);
+
+    @GuardedBy("mLock")
+    private AppSearchSession mAppSearchSession;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
             int packageUserId, String packageName, ShortcutPackageInfo spi) {
@@ -2140,6 +2163,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
+    void updateVisibility(String packageName, byte[] certificate, boolean visible) {
+        if (visible) {
+            mPackageIdentifiers.put(packageName, new PackageIdentifier(packageName, certificate));
+        } else {
+            mPackageIdentifiers.remove(packageName);
+        }
+        resetAppSearch(null);
+    }
+
     private boolean verifyRanksSequential(List<ShortcutInfo> list) {
         boolean failed = false;
 
@@ -2152,5 +2184,129 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         }
         return failed;
+    }
+
+    private void runInAppSearch(
+            Function<SearchSessionObservable, Consumer<AppSearchSession>>... observers) {
+        if (mShortcutUser == null) {
+            Slog.w(TAG, "shortcut user is null");
+            return;
+        }
+        synchronized (mLock) {
+            if (mAppSearchSession != null) {
+                final CountDownLatch latch = new CountDownLatch(1);
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    final SearchSessionObservable upstream =
+                            new SearchSessionObservable(mAppSearchSession, latch);
+                    for (Function<SearchSessionObservable, Consumer<AppSearchSession>> observer
+                            : observers) {
+                        upstream.map(observer);
+                    }
+                    upstream.next();
+                } finally {
+                    Binder.restoreCallingIdentity(callingIdentity);
+                }
+                ConcurrentUtils.waitForCountDownNoInterrupt(latch, 500,
+                        "timeout accessing shortcut");
+            } else {
+                resetAppSearch(observers);
+            }
+        }
+    }
+
+    private void resetAppSearch(
+            Function<SearchSessionObservable, Consumer<AppSearchSession>>... observers) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AppSearchManager.SearchContext searchContext =
+                new AppSearchManager.SearchContext.Builder()
+                        .setDatabaseName(getPackageName()).build();
+        mShortcutUser.runInAppSearch(searchContext, result -> {
+            if (!result.isSuccess()) {
+                Slog.e(TAG, "error getting search session during lazy init, "
+                        + result.getErrorMessage());
+                latch.countDown();
+                return;
+            }
+            // TODO: Flatten callback chain with proper async framework
+            final SearchSessionObservable upstream =
+                    new SearchSessionObservable(result.getResultValue(), latch)
+                            .map(this::setupSchema);
+            if (observers != null) {
+                for (Function<SearchSessionObservable, Consumer<AppSearchSession>> observer
+                        : observers) {
+                    upstream.map(observer);
+                }
+            }
+            upstream.map(observable -> session -> {
+                mAppSearchSession = session;
+                observable.next();
+            });
+            upstream.next();
+        });
+        ConcurrentUtils.waitForCountDownNoInterrupt(latch, 1500,
+                "timeout accessing shortcut during lazy initialization");
+    }
+
+    /**
+     * creates the schema for shortcut in the database
+     */
+    private Consumer<AppSearchSession> setupSchema(SearchSessionObservable observable) {
+        return session -> {
+            SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
+                            .addSchemas(AppSearchPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA);
+            for (PackageIdentifier pi : mPackageIdentifiers.values()) {
+                schemaBuilder = schemaBuilder
+                        .setSchemaTypeVisibilityForPackage(
+                                AppSearchPerson.SCHEMA_TYPE, true, pi)
+                        .setSchemaTypeVisibilityForPackage(
+                                AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
+            }
+            session.setSchema(schemaBuilder.build(), mShortcutUser.mExecutor, result -> {
+                if (!result.isSuccess()) {
+                    observable.error("failed to instantiate app search schema: "
+                            + result.getErrorMessage());
+                    return;
+                }
+                observable.next();
+            });
+        };
+    }
+
+    /**
+     * TODO: Replace this temporary implementation with proper async framework
+     */
+    private class SearchSessionObservable {
+
+        final AppSearchSession mSession;
+        final CountDownLatch mLatch;
+        final ArrayList<Consumer<AppSearchSession>> mObservers = new ArrayList<>(1);
+
+        SearchSessionObservable(@NonNull final AppSearchSession session,
+                @NonNull final CountDownLatch latch) {
+            mSession = session;
+            mLatch = latch;
+        }
+
+        SearchSessionObservable map(
+                Function<SearchSessionObservable, Consumer<AppSearchSession>> observer) {
+            mObservers.add(observer.apply(this));
+            return this;
+        }
+
+        void next() {
+            if (mObservers.isEmpty()) {
+                mLatch.countDown();
+                return;
+            }
+            mObservers.remove(0).accept(mSession);
+        }
+
+        void error(@Nullable final String errorMessage) {
+            if (errorMessage != null) {
+                Slog.e(TAG, errorMessage);
+            }
+            mLatch.countDown();
+        }
     }
 }
