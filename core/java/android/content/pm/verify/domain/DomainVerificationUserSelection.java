@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
@@ -46,13 +48,12 @@ import java.util.UUID;
  * <p>
  * These values can be changed through the
  * {@link DomainVerificationManager#setDomainVerificationLinkHandlingAllowed(String,
- * boolean)} and
- * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set,
+ * boolean)} and {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set,
  * boolean)} APIs.
  * <p>
- * Note that because state is per user, if a different user needs to be changed, one will
- * need to use {@link Context#createContextAsUser(UserHandle, int)} and hold the
- * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+ * Note that because state is per user, if a different user needs to be changed, one will need to
+ * use {@link Context#createContextAsUser(UserHandle, int)} and hold the {@link
+ * android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
  *
  * @hide
  */
@@ -88,15 +89,23 @@ public final class DomainVerificationUserSelection implements Parcelable {
     private final boolean mLinkHandlingAllowed;
 
     /**
-     * Retrieve the existing user selection state for the matching
-     * {@link #getPackageName()}, as was previously set by
-     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set,
-     * boolean)}.
+     * Retrieve the existing user selection state for the matching {@link #getPackageName()}, as was
+     * previously set by {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
+     * Set, boolean)}.
      *
      * @return Map of hosts to enabled state for the given package and user.
      */
     @NonNull
     private final Map<String, Boolean> mHostToUserSelectionMap;
+
+    private void parcelHostToUserSelectionMap(Parcel dest, @SuppressWarnings("unused") int flags) {
+        DomainVerificationUtils.writeHostMap(dest, mHostToUserSelectionMap);
+    }
+
+    private Map<String, Boolean> unparcelHostToUserSelectionMap(Parcel in) {
+        return DomainVerificationUtils.readHostMap(in, new ArrayMap<>(),
+                DomainVerificationUserSelection.class.getClassLoader());
+    }
 
 
 
@@ -124,10 +133,9 @@ public final class DomainVerificationUserSelection implements Parcelable {
      * @param linkHandlingAllowed
      *   Whether or not this package is allowed to open links.
      * @param hostToUserSelectionMap
-     *   Retrieve the existing user selection state for the matching
-     *   {@link #getPackageName()}, as was previously set by
-     *   {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set,
-     *   boolean)}.
+     *   Retrieve the existing user selection state for the matching {@link #getPackageName()}, as was
+     *   previously set by {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
+     *   Set, boolean)}.
      * @hide
      */
     @DataClass.Generated.Member
@@ -189,10 +197,9 @@ public final class DomainVerificationUserSelection implements Parcelable {
     }
 
     /**
-     * Retrieve the existing user selection state for the matching
-     * {@link #getPackageName()}, as was previously set by
-     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set,
-     * boolean)}.
+     * Retrieve the existing user selection state for the matching {@link #getPackageName()}, as was
+     * previously set by {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID,
+     * Set, boolean)}.
      *
      * @return Map of hosts to enabled state for the given package and user.
      */
@@ -264,7 +271,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
@@ -274,7 +281,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
         sParcellingForIdentifier.parcel(mIdentifier, dest, flags);
         dest.writeString(mPackageName);
         dest.writeTypedObject(mUser, flags);
-        dest.writeMap(mHostToUserSelectionMap);
+        parcelHostToUserSelectionMap(dest, flags);
     }
 
     @Override
@@ -284,7 +291,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ DomainVerificationUserSelection(@NonNull android.os.Parcel in) {
+    /* package-private */ DomainVerificationUserSelection(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
@@ -293,8 +300,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
         UUID identifier = sParcellingForIdentifier.unparcel(in);
         String packageName = in.readString();
         UserHandle user = (UserHandle) in.readTypedObject(UserHandle.CREATOR);
-        Map<String,Boolean> hostToUserSelectionMap = new java.util.LinkedHashMap<>();
-        in.readMap(hostToUserSelectionMap, Boolean.class.getClassLoader());
+        Map<String,Boolean> hostToUserSelectionMap = unparcelHostToUserSelectionMap(in);
 
         this.mIdentifier = identifier;
         com.android.internal.util.AnnotationValidations.validate(
@@ -324,16 +330,16 @@ public final class DomainVerificationUserSelection implements Parcelable {
         }
 
         @Override
-        public DomainVerificationUserSelection createFromParcel(@NonNull android.os.Parcel in) {
+        public DomainVerificationUserSelection createFromParcel(@NonNull Parcel in) {
             return new DomainVerificationUserSelection(in);
         }
     };
 
     @DataClass.Generated(
-            time = 1612829797220L,
+            time = 1613002353615L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserSelection.java",
-            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Boolean> mHostToUserSelectionMap\nclass DomainVerificationUserSelection extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true)")
+            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Boolean> mHostToUserSelectionMap\nprivate  void parcelHostToUserSelectionMap(android.os.Parcel,int)\nprivate  java.util.Map<java.lang.String,java.lang.Boolean> unparcelHostToUserSelectionMap(android.os.Parcel)\nclass DomainVerificationUserSelection extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

@@ -89,7 +89,7 @@ public class DomainVerificationManagerImpl implements DomainVerificationManager 
             int state) throws IllegalArgumentException, NameNotFoundException {
         try {
             mDomainVerificationManager.setDomainVerificationStatus(domainSetId.toString(),
-                    new ArrayList<>(domains), state);
+                    new DomainSet(domains), state);
         } catch (Exception e) {
             Exception converted = rethrow(e, domainSetId);
             if (converted instanceof NameNotFoundException) {
@@ -126,7 +126,7 @@ public class DomainVerificationManagerImpl implements DomainVerificationManager 
             throws IllegalArgumentException, NameNotFoundException {
         try {
             mDomainVerificationManager.setDomainVerificationUserSelection(domainSetId.toString(),
-                    new ArrayList<>(domains), enabled, mContext.getUserId());
+                    new DomainSet(domains), enabled, mContext.getUserId());
         } catch (Exception e) {
             Exception converted = rethrow(e, domainSetId);
             if (converted instanceof NameNotFoundException) {
