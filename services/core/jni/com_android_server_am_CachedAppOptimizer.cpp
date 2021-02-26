@@ -135,7 +135,7 @@ static int getAnyPageAdvice(const Vma& vma) {
 static int compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     ProcMemInfo meminfo(pid);
     std::vector<Vma> pageoutVmas, coldVmas;
-    auto vmaCollectorCb = [&](Vma vma) {
+    auto vmaCollectorCb = [&coldVmas,&pageoutVmas,&vmaToAdviseFunc](const Vma& vma) {
         int advice = vmaToAdviseFunc(vma);
         switch (advice) {
             case MADV_COLD:
@@ -146,7 +146,7 @@ static int compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
                 break;
         }
     };
-    meminfo.ForEachVma(vmaCollectorCb);
+    meminfo.ForEachVmaFromMaps(vmaCollectorCb);
 
     int err = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
     if (!err) {
