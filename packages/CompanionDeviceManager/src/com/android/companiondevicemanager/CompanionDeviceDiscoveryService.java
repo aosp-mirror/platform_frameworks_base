@@ -50,9 +50,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,12 +57,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.SparseArray;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ArrayUtils;
@@ -76,14 +67,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DeviceDiscoveryService extends Service {
+public class CompanionDeviceDiscoveryService extends Service {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "DeviceDiscoveryService";
+    private static final String LOG_TAG = CompanionDeviceDiscoveryService.class.getSimpleName();
 
     private static final long SCAN_TIMEOUT = 20000;
 
-    static DeviceDiscoveryService sInstance;
+    static CompanionDeviceDiscoveryService sInstance;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -102,12 +93,12 @@ public class DeviceDiscoveryService extends Service {
     AssociationRequest mRequest;
     List<DeviceFilterPair> mDevicesFound;
     DeviceFilterPair mSelectedDevice;
-    DevicesAdapter mDevicesAdapter;
     IFindDeviceCallback mFindCallback;
 
     AndroidFuture<Association> mServiceCallback;
     boolean mIsScanning = false;
-    @Nullable DeviceChooserActivity mActivity = null;
+    @Nullable
+    CompanionDeviceActivity mActivity = null;
 
     private final ICompanionDeviceDiscoveryService mBinder =
             new ICompanionDeviceDiscoveryService.Stub() {
@@ -125,7 +116,8 @@ public class DeviceDiscoveryService extends Service {
             mFindCallback = findCallback;
             mServiceCallback = serviceCallback;
             Handler.getMain().sendMessage(obtainMessage(
-                    DeviceDiscoveryService::startDiscovery, DeviceDiscoveryService.this, request));
+                    CompanionDeviceDiscoveryService::startDiscovery,
+                    CompanionDeviceDiscoveryService.this, request));
         }
     };
 
@@ -151,7 +143,6 @@ public class DeviceDiscoveryService extends Service {
         mWifiManager = getSystemService(WifiManager.class);
 
         mDevicesFound = new ArrayList<>();
-        mDevicesAdapter = new DevicesAdapter();
 
         sInstance = this;
     }
@@ -165,7 +156,8 @@ public class DeviceDiscoveryService extends Service {
             mWifiFilters = CollectionUtils.filter(mFilters, WifiDeviceFilter.class);
             mBluetoothFilters = CollectionUtils.filter(mFilters, BluetoothDeviceFilter.class);
             mBLEFilters = CollectionUtils.filter(mFilters, BluetoothLeDeviceFilter.class);
-            mBLEScanFilters = CollectionUtils.map(mBLEFilters, BluetoothLeDeviceFilter::getScanFilter);
+            mBLEScanFilters
+                    = CollectionUtils.map(mBLEFilters, BluetoothLeDeviceFilter::getScanFilter);
 
             reset();
         } else if (DEBUG) Log.i(LOG_TAG, "startDiscovery: duplicate request: " + request);
@@ -223,7 +215,7 @@ public class DeviceDiscoveryService extends Service {
         }
         mIsScanning = true;
         Handler.getMain().sendMessageDelayed(
-                obtainMessage(DeviceDiscoveryService::stopScan, this),
+                obtainMessage(CompanionDeviceDiscoveryService::stopScan, this),
                 SCAN_TIMEOUT);
     }
 
@@ -237,7 +229,7 @@ public class DeviceDiscoveryService extends Service {
         stopScan();
         mDevicesFound.clear();
         mSelectedDevice = null;
-        mDevicesAdapter.notifyDataSetChanged();
+        CompanionDeviceActivity.notifyDevicesChanged();
     }
 
     @Override
@@ -252,7 +244,7 @@ public class DeviceDiscoveryService extends Service {
         if (!mIsScanning) return;
         mIsScanning = false;
 
-        DeviceChooserActivity activity = mActivity;
+        CompanionDeviceActivity activity = mActivity;
         if (activity != null) {
             if (activity.mDeviceListView != null) {
                 activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
@@ -276,7 +268,7 @@ public class DeviceDiscoveryService extends Service {
         if (device == null) return;
 
         Handler.getMain().sendMessage(obtainMessage(
-                DeviceDiscoveryService::onDeviceFoundMainThread, this, device));
+                CompanionDeviceDiscoveryService::onDeviceFoundMainThread, this, device));
     }
 
     @MainThread
@@ -292,7 +284,7 @@ public class DeviceDiscoveryService extends Service {
             onReadyToShowUI();
         }
         mDevicesFound.add(device);
-        mDevicesAdapter.notifyDataSetChanged();
+        CompanionDeviceActivity.notifyDevicesChanged();
     }
 
     //TODO also, on timeout -> call onFailure
@@ -300,7 +292,7 @@ public class DeviceDiscoveryService extends Service {
         try {
             mFindCallback.onSuccess(PendingIntent.getActivity(
                     this, 0,
-                    new Intent(this, DeviceChooserActivity.class),
+                    new Intent(this, CompanionDeviceActivity.class),
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT
                             | PendingIntent.FLAG_IMMUTABLE));
         } catch (RemoteException e) {
@@ -311,13 +303,13 @@ public class DeviceDiscoveryService extends Service {
     private void onDeviceLost(@Nullable DeviceFilterPair device) {
         Log.i(LOG_TAG, "Lost device " + device.getDisplayName());
         Handler.getMain().sendMessage(obtainMessage(
-                DeviceDiscoveryService::onDeviceLostMainThread, this, device));
+                CompanionDeviceDiscoveryService::onDeviceLostMainThread, this, device));
     }
 
     @MainThread
     void onDeviceLostMainThread(@Nullable DeviceFilterPair device) {
         mDevicesFound.remove(device);
-        mDevicesAdapter.notifyDataSetChanged();
+        CompanionDeviceActivity.notifyDevicesChanged();
     }
 
     void onDeviceSelected(String callingPackage, String deviceAddress) {
@@ -329,81 +321,6 @@ public class DeviceDiscoveryService extends Service {
     void onCancel() {
         if (DEBUG) Log.i(LOG_TAG, "onCancel()");
         mServiceCallback.cancel(true);
-    }
-
-    class DevicesAdapter extends BaseAdapter {
-        private Drawable BLUETOOTH_ICON = icon(android.R.drawable.stat_sys_data_bluetooth);
-        private Drawable WIFI_ICON = icon(com.android.internal.R.drawable.ic_wifi_signal_3);
-
-        private SparseArray<Integer> mColors = new SparseArray();
-
-        private Drawable icon(int drawableRes) {
-            Drawable icon = getResources().getDrawable(drawableRes, null);
-            icon.setTint(Color.DKGRAY);
-            return icon;
-        }
-
-        @Override
-        public View getView(
-                int position,
-                @Nullable View convertView,
-                @NonNull ViewGroup parent) {
-            TextView view = convertView instanceof TextView
-                    ? (TextView) convertView
-                    : newView();
-            bind(view, getItem(position));
-            return view;
-        }
-
-        private void bind(TextView textView, DeviceFilterPair device) {
-            textView.setText(device.getDisplayName());
-            textView.setBackgroundColor(
-                    device.equals(mSelectedDevice)
-                            ? getColor(android.R.attr.colorControlHighlight)
-                            : Color.TRANSPARENT);
-            textView.setCompoundDrawablesWithIntrinsicBounds(
-                    device.device instanceof android.net.wifi.ScanResult
-                        ? WIFI_ICON
-                        : BLUETOOTH_ICON,
-                    null, null, null);
-            textView.getCompoundDrawables()[0].setTint(getColor(android.R.attr.colorForeground));
-        }
-
-        private TextView newView() {
-            final TextView textView = new TextView(DeviceDiscoveryService.this);
-            textView.setTextColor(getColor(android.R.attr.colorForeground));
-            final int padding = DeviceChooserActivity.getPadding(getResources());
-            textView.setPadding(padding, padding, padding, padding);
-            textView.setCompoundDrawablePadding(padding);
-            return textView;
-        }
-
-        private int getColor(int colorAttr) {
-            if (mColors.contains(colorAttr)) {
-                return mColors.get(colorAttr);
-            }
-            TypedValue typedValue = new TypedValue();
-            TypedArray a = obtainStyledAttributes(typedValue.data, new int[] { colorAttr });
-            int result = a.getColor(0, 0);
-            a.recycle();
-            mColors.put(colorAttr, result);
-            return result;
-        }
-
-        @Override
-        public int getCount() {
-            return mDevicesFound.size();
-        }
-
-        @Override
-        public DeviceFilterPair getItem(int position) {
-            return mDevicesFound.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
     }
 
     /**

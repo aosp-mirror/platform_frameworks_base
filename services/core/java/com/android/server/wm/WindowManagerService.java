@@ -230,7 +230,7 @@ import android.view.IDisplayWindowListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
-import android.view.IPinnedStackListener;
+import android.view.IPinnedTaskListener;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
 import android.view.IScrollCaptureCallbacks;
@@ -2393,15 +2393,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            // We may be deferring layout passes at the moment, but since the client is interested
-            // in the new out values right now we need to force a layout.
-            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
-
+            // Create surfaceControl before surface placement otherwise layout will be skipped
+            // (because WS.isGoneForLayout() is true when there is no surface.
             if (shouldRelayout) {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
-
-                result = win.relayoutVisibleWindow(result);
-
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
                 } catch (Exception e) {
@@ -2413,6 +2407,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.restoreCallingIdentity(origId);
                     return 0;
                 }
+            }
+
+            // We may be deferring layout passes at the moment, but since the client is interested
+            // in the new out values right now we need to force a layout.
+            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
+
+            if (shouldRelayout) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
+
+                result = win.relayoutVisibleWindow(result);
+
                 if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                     focusMayChange = true;
                 }
@@ -2981,7 +2986,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean isValidPictureInPictureAspectRatio(DisplayContent displayContent, float aspectRatio) {
-        return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
+        return displayContent.getPinnedTaskController().isValidPictureInPictureAspectRatio(
                 aspectRatio);
     }
 
@@ -6880,7 +6885,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setDockedStackDividerTouchRegion(Rect touchRegion) {
+    public void setDockedTaskDividerTouchRegion(Rect touchRegion) {
         synchronized (mGlobalLock) {
             final DisplayContent dc = getDefaultDisplayContentLocked();
             dc.getDockedDividerController().setTouchRegion(touchRegion);
@@ -6905,10 +6910,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
     }
 
-    @Override
-    public void registerPinnedStackListener(int displayId, IPinnedStackListener listener) {
+    public void registerPinnedTaskListener(int displayId, IPinnedTaskListener listener) {
         if (!checkCallingPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
-                "registerPinnedStackListener()")) {
+                "registerPinnedTaskListener()")) {
             return;
         }
         if (!mAtmService.mSupportsPictureInPicture) {
@@ -6916,7 +6920,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            displayContent.getPinnedStackController().registerPinnedStackListener(listener);
+            displayContent.getPinnedTaskController().registerPinnedTaskListener(listener);
         }
     }
 

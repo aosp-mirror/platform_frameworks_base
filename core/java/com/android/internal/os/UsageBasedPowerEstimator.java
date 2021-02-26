@@ -32,6 +32,10 @@ public class UsageBasedPowerEstimator {
         mAveragePowerMahPerMs = averagePowerMilliAmp / MILLIS_IN_HOUR;
     }
 
+    public boolean isSupported() {
+        return mAveragePowerMahPerMs != 0;
+    }
+
     /**
      * Given a {@link BatteryStats.Timer}, returns the accumulated duration.
      */

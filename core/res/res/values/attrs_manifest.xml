@@ -1893,6 +1893,11 @@
             <!-- User data will remain unchanged during rollback. -->
             <enum name="retain" value="2" />
         </attr>
+
+        <!-- Applications can set this attribute to an xml resource within their app where they
+         specified the rules determining which files and directories can be copied from the device
+         as part of backup or transfer operations. -->
+        <attr name="dataExtractionRules" format="reference"/>
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.

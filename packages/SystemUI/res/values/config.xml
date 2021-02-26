@@ -91,6 +91,9 @@
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
 
+    <!-- The number of columns in the Quick Settings customizer -->
+    <integer name="quick_settings_edit_num_columns">@integer/quick_settings_num_columns</integer>
+
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">3</integer>
 
@@ -420,6 +423,9 @@
     <!-- Should we vibrate on an icon animation of the shelf. This should only be active if the
      vibrator is capable of subtle vibrations -->
     <bool name="config_vibrateOnIconAnimation">false</bool>
+
+    <!-- Adjust the theme on fully custom and decorated custom view notifications -->
+    <bool name="config_adjustThemeOnNotificationCustomViews">false</bool>
 
     <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
          does not work well, particularly with noisy touchscreens. Note that disabling it may

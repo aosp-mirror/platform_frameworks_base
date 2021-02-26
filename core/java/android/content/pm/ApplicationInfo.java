@@ -136,6 +136,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int fullBackupContent = 0;
 
     /**
+     * Applications can set this attribute to an xml resource within their app where they specified
+     * the rules determining which files and directories can be copied from the device as part of
+     * backup or transfer operations.
+     *<p>
+     * Set from the {@link android.R.styleable#AndroidManifestApplication_dataExtractionRules}
+     * attribute in the manifest.
+     *
+     * @hide
+     */
+    public int dataExtractionRulesRes = 0;
+
+    /**
      * <code>true</code> if the package is capable of presenting a unified interface representing
      * multiple profiles.
      * @hide
@@ -1520,6 +1532,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "fullBackupContent="
                         + (fullBackupContent < 0 ? "false" : "true"));
             }
+            if (dataExtractionRulesRes != 0) {
+                pw.println(prefix + "dataExtractionRules=@xml/" + dataExtractionRulesRes);
+            }
             pw.println(prefix + "crossProfile=" + (crossProfile ? "true" : "false"));
             if (networkSecurityConfigRes != 0) {
                 pw.println(prefix + "networkSecurityConfigRes=0x"
@@ -1749,6 +1764,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uiOptions = orig.uiOptions;
         backupAgentName = orig.backupAgentName;
         fullBackupContent = orig.fullBackupContent;
+        dataExtractionRulesRes = orig.dataExtractionRulesRes;
         crossProfile = orig.crossProfile;
         networkSecurityConfigRes = orig.networkSecurityConfigRes;
         category = orig.category;
@@ -1836,6 +1852,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
         dest.writeInt(fullBackupContent);
+        dest.writeInt(dataExtractionRulesRes);
         dest.writeBoolean(crossProfile);
         dest.writeInt(networkSecurityConfigRes);
         dest.writeInt(category);
@@ -1920,6 +1937,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
         fullBackupContent = source.readInt();
+        dataExtractionRulesRes = source.readInt();
         crossProfile = source.readBoolean();
         networkSecurityConfigRes = source.readInt();
         category = source.readInt();

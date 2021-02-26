@@ -1141,23 +1141,20 @@ public class AppOpsManager {
      *
      * @hide
      */
-    // TODO: Add as AppProtoEnums
-    public static final int OP_PHONE_CALL_MICROPHONE = 100;
+    public static final int OP_PHONE_CALL_MICROPHONE = AppProtoEnums.APP_OP_PHONE_CALL_MICROPHONE;
     /**
      * Phone call is using camera
      *
      * @hide
      */
-    // TODO: Add as AppProtoEnums
-    public static final int OP_PHONE_CALL_CAMERA = 101;
+    public static final int OP_PHONE_CALL_CAMERA = AppProtoEnums.APP_OP_PHONE_CALL_CAMERA;
 
     /**
      * Audio is being recorded for hotword detection.
      *
      * @hide
      */
-    // TODO: Add as AppProtoEnums
-    public static final int OP_RECORD_AUDIO_HOTWORD = 102;
+    public static final int OP_RECORD_AUDIO_HOTWORD = AppProtoEnums.APP_OP_RECORD_AUDIO_HOTWORD;
 
     /**
      * Manage credentials in the system KeyChain.
@@ -1184,10 +1181,29 @@ public class AppOpsManager {
      */
     public static final int OP_SCHEDULE_EXACT_ALARM = AppProtoEnums.APP_OP_SCHEDULE_EXACT_ALARM;
 
+    /**
+     * Fine location being accessed by a location source, which is
+     * a component that already has location data since it is the one
+     * that produces location, which is it is a data source for
+     * location data.
+     *
+     * @hide
+     */
+    public static final int OP_FINE_LOCATION_SOURCE = AppProtoEnums.APP_OP_FINE_LOCATION_SOURCE;
+
+    /**
+     * Coarse location being accessed by a location source, which is
+     * a component that already has location data since it is the one
+     * that produces location, which is it is a data source for
+     * location data.
+     *
+     * @hide
+     */
+    public static final int OP_COARSE_LOCATION_SOURCE = AppProtoEnums.APP_OP_COARSE_LOCATION_SOURCE;
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 108;
+    public static final int _NUM_OP = 110;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1567,6 +1583,24 @@ public class AppOpsManager {
      */
     public static final String OPSTR_SCHEDULE_EXACT_ALARM = "android:schedule_exact_alarm";
 
+    /**
+     * Fine location being accessed by a location source, which is
+     * a component that already has location since it is the one that
+     * produces location.
+     *
+     * @hide
+     */
+    public static final String OPSTR_FINE_LOCATION_SOURCE = "android:fine_location_source";
+
+    /**
+     * Coarse location being accessed by a location source, which is
+     * a component that already has location since it is the one that
+     * produces location.
+     *
+     * @hide
+     */
+    public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1767,6 +1801,8 @@ public class AppOpsManager {
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             OP_RECORD_AUDIO_OUTPUT,             // RECORD_AUDIO_OUTPUT
             OP_SCHEDULE_EXACT_ALARM,            // SCHEDULE_EXACT_ALARM
+            OP_FINE_LOCATION,                   // OP_FINE_LOCATION_SOURCE
+            OP_COARSE_LOCATION,                 // OP_COARSE_LOCATION_SOURCE
     };
 
     /**
@@ -1881,6 +1917,8 @@ public class AppOpsManager {
             OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OPSTR_RECORD_AUDIO_OUTPUT,
             OPSTR_SCHEDULE_EXACT_ALARM,
+            OPSTR_FINE_LOCATION_SOURCE,
+            OPSTR_COARSE_LOCATION_SOURCE,
     };
 
     /**
@@ -1996,6 +2034,8 @@ public class AppOpsManager {
             "USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER",
             "RECORD_AUDIO_OUTPUT",
             "SCHEDULE_EXACT_ALARM",
+            "FINE_LOCATION_SOURCE",
+            "COARSE_LOCATION_SOURCE",
     };
 
     /**
@@ -2112,6 +2152,8 @@ public class AppOpsManager {
             Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             null, // no permission for OP_RECORD_AUDIO_OUTPUT
             Manifest.permission.SCHEDULE_EXACT_ALARM,
+            null, // no permission for OP_ACCESS_FINE_LOCATION_SOURCE,
+            null, // no permission for OP_ACCESS_COARSE_LOCATION_SOURCE,
     };
 
     /**
@@ -2228,6 +2270,8 @@ public class AppOpsManager {
             null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             null, // RECORD_AUDIO_OUTPUT
             null, // SCHEDULE_EXACT_ALARM
+            null, // ACCESS_FINE_LOCATION_SOURCE
+            null, // ACCESS_COARSE_LOCATION_SOURCE
     };
 
     /**
@@ -2343,6 +2387,8 @@ public class AppOpsManager {
             null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             null, // RECORD_AUDIO_OUTPUT
             null, // SCHEDULE_EXACT_ALARM
+            null, // ACCESS_FINE_LOCATION_SOURCE
+            null, // ACCESS_COARSE_LOCATION_SOURCE
     };
 
     /**
@@ -2457,6 +2503,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO_OUTPUT
             AppOpsManager.MODE_DEFAULT, // SCHEDULE_EXACT_ALARM
+            AppOpsManager.MODE_ALLOWED, // ACCESS_FINE_LOCATION_SOURCE
+            AppOpsManager.MODE_ALLOWED, // ACCESS_COARSE_LOCATION_SOURCE
     };
 
     /**
@@ -2575,6 +2623,8 @@ public class AppOpsManager {
             true, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
             false, // RECORD_AUDIO_OUTPUT
             false, // SCHEDULE_EXACT_ALARM
+            false, // ACCESS_FINE_LOCATION_SOURCE
+            false, // ACCESS_COARSE_LOCATION_SOURCE
     };
 
     /**

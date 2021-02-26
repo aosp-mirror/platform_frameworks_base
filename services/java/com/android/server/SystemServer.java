@@ -162,6 +162,7 @@ import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.pm.verify.domain.DomainVerificationService;
+import com.android.server.policy.AppOpsPolicy;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.policy.role.RoleServicePlatformHelperImpl;
@@ -2653,6 +2654,14 @@ public final class SystemServer implements Dumpable {
                 mActivityManagerService.startObservingNativeCrashes();
             } catch (Throwable e) {
                 reportWtf("observing native crashes", e);
+            }
+            t.traceEnd();
+
+            t.traceBegin("RegisterAppOpsPolicy");
+            try {
+                mActivityManagerService.setAppOpsPolicy(new AppOpsPolicy());
+            } catch (Throwable e) {
+                reportWtf("registering app ops policy", e);
             }
             t.traceEnd();
 

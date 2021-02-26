@@ -1645,7 +1645,7 @@ public final class PowerManagerService extends SystemService
     }
 
     // Called from native code.
-    private void userActivityFromNative(long eventTime, int event, int flags) {
+    private void userActivityFromNative(long eventTime, int event, int displayId, int flags) {
         userActivityInternal(eventTime, event, flags, Process.SYSTEM_UID);
     }
 

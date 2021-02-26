@@ -20,7 +20,7 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
-import android.view.IPinnedStackListener;
+import android.view.IPinnedTaskListener;
 import android.view.WindowManagerGlobal;
 
 import androidx.annotation.BinderThread;
@@ -32,66 +32,66 @@ import java.util.ArrayList;
 /**
  * PinnedStackListener that simply forwards all calls to each listener added via
  * {@link #addListener}. This is necessary since calling
- * {@link com.android.server.wm.WindowManagerService#registerPinnedStackListener} replaces any
+ * {@link com.android.server.wm.WindowManagerService#registerPinnedTaskListener} replaces any
  * previously set listener.
  */
 public class PinnedStackListenerForwarder {
 
-    private final IPinnedStackListener mListenerImpl = new PinnedStackListenerImpl();
+    private final IPinnedTaskListener mListenerImpl = new PinnedTaskListenerImpl();
     private final ShellExecutor mMainExecutor;
-    private final ArrayList<PinnedStackListener> mListeners = new ArrayList<>();
+    private final ArrayList<PinnedTaskListener> mListeners = new ArrayList<>();
 
     public PinnedStackListenerForwarder(ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
     }
 
     /** Adds a listener to receive updates from the WindowManagerService. */
-    public void addListener(PinnedStackListener listener) {
+    public void addListener(PinnedTaskListener listener) {
         mListeners.add(listener);
     }
 
     /** Removes a listener so it will no longer receive updates from the WindowManagerService. */
-    public void removeListener(PinnedStackListener listener) {
+    public void removeListener(PinnedTaskListener listener) {
         mListeners.remove(listener);
     }
 
     public void register(int displayId) throws RemoteException {
-        WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
+        WindowManagerGlobal.getWindowManagerService().registerPinnedTaskListener(
                 displayId, mListenerImpl);
     }
 
     private void onMovementBoundsChanged(boolean fromImeAdjustment) {
-        for (PinnedStackListener listener : mListeners) {
+        for (PinnedTaskListener listener : mListeners) {
             listener.onMovementBoundsChanged(fromImeAdjustment);
         }
     }
 
     private void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-        for (PinnedStackListener listener : mListeners) {
+        for (PinnedTaskListener listener : mListeners) {
             listener.onImeVisibilityChanged(imeVisible, imeHeight);
         }
     }
 
     private void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
-        for (PinnedStackListener listener : mListeners) {
+        for (PinnedTaskListener listener : mListeners) {
             listener.onActionsChanged(actions);
         }
     }
 
     private void onActivityHidden(ComponentName componentName) {
-        for (PinnedStackListener listener : mListeners) {
+        for (PinnedTaskListener listener : mListeners) {
             listener.onActivityHidden(componentName);
         }
     }
 
     private void onAspectRatioChanged(float aspectRatio) {
-        for (PinnedStackListener listener : mListeners) {
+        for (PinnedTaskListener listener : mListeners) {
             listener.onAspectRatioChanged(aspectRatio);
         }
     }
 
     @BinderThread
-    private class PinnedStackListenerImpl extends IPinnedStackListener.Stub {
+    private class PinnedTaskListenerImpl extends IPinnedTaskListener.Stub {
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mMainExecutor.execute(() -> {
@@ -129,10 +129,10 @@ public class PinnedStackListenerForwarder {
     }
 
     /**
-     * A counterpart of {@link IPinnedStackListener} with empty implementations.
+     * A counterpart of {@link IPinnedTaskListener} with empty implementations.
      * Subclasses can ignore those methods they do not intend to take action upon.
      */
-    public static class PinnedStackListener {
+    public static class PinnedTaskListener {
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {}
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}

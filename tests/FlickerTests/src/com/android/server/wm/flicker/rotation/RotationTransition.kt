@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
-import android.os.Bundle
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -31,36 +30,37 @@ import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 
 abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
+    protected abstract val testApp: StandardAppHelper
+
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected val startingPos get() = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
     protected val endingPos get() = WindowUtils.getDisplayBounds(testSpec.config.endRotation)
 
-    protected abstract val testApp: StandardAppHelper
-    protected abstract fun getAppLaunchParams(configuration: Bundle): Map<String, String>
+    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit = {
+        withTestName { testSpec.name }
+        repeat { testSpec.config.repetitions }
+        setup {
+            test {
+                device.wakeUpAndGoToHomeScreen()
+            }
+            eachRun {
+                this.setRotation(testSpec.config.startRotation)
+            }
+        }
+        teardown {
+            test {
+                testApp.exit()
+            }
+        }
+        transitions {
+            this.setRotation(testSpec.config.endRotation)
+        }
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
-            setup {
-                test {
-                    device.wakeUpAndGoToHomeScreen()
-                    val extras = getAppLaunchParams(testSpec.config)
-                    testApp.launchViaIntent(wmHelper, stringExtras = extras)
-                }
-                eachRun {
-                    this.setRotation(testSpec.config.startRotation)
-                }
-            }
-            teardown {
-                test {
-                    testApp.exit()
-                }
-            }
-            transitions {
-                this.setRotation(testSpec.config.endRotation)
-            }
+            transition(testSpec.config)
         }
     }
 }

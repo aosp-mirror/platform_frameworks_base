@@ -117,7 +117,8 @@ interface ILocationManager
     boolean isLocationEnabledForUser(int userId);
     void setLocationEnabledForUser(boolean enabled, int userId);
 
-    void addTestProvider(String name, in ProviderProperties properties, String packageName, @nullable String attributionTag);
+    void addTestProvider(String name, in ProviderProperties properties,
+        in List<String> locationTags, String packageName, @nullable String attributionTag);
     void removeTestProvider(String provider, String packageName, @nullable String attributionTag);
     void setTestProviderLocation(String provider, in Location location, String packageName, @nullable String attributionTag);
     void setTestProviderEnabled(String provider, boolean enabled, String packageName, @nullable String attributionTag);

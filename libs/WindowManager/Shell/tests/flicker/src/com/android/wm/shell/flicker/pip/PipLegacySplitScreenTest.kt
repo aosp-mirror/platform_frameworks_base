@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Postsubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -58,7 +57,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     private val testApp = FixedAppHelper(instrumentation)
     private val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             withTestName { testSpec.name }
             repeat { testSpec.config.repetitions }
@@ -90,7 +89,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun pipWindowInsideDisplayBounds() {
         testSpec.assertWm {
-            coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -100,7 +99,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         testSpec.assertWmEnd {
             isVisible(testApp.defaultWindowName)
             isVisible(imeApp.defaultWindowName)
-            noWindowsOverlap(setOf(testApp.defaultWindowName, imeApp.defaultWindowName))
+            noWindowsOverlap(testApp.defaultWindowName, imeApp.defaultWindowName)
         }
     }
 
@@ -116,7 +115,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun pipLayerInsideDisplayBounds() {
         testSpec.assertLayers {
-            coversAtMostRegion(displayBounds, pipApp.defaultWindowName)
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -124,8 +123,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
-            coversAtMostRegion(displayBounds, testApp.defaultWindowName)
-            coversAtMostRegion(displayBounds, imeApp.defaultWindowName)
+            coversAtMost(displayBounds, testApp.defaultWindowName)
+            coversAtMost(displayBounds, imeApp.defaultWindowName)
         }
     }
 

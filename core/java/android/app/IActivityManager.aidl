@@ -707,4 +707,6 @@ interface IActivityManager {
 
     /** Called by PendingIntent.queryIntentComponents() */
     List<ResolveInfo> queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
+
+    int getUidProcessCapabilities(int uid, in String callingPackage);
 }

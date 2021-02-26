@@ -61,6 +61,7 @@ import com.android.internal.os.IResultReceiver;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A description of an Intent and target action to perform with it.  Instances
@@ -464,8 +465,7 @@ public final class PendingIntent implements Parcelable {
     public static PendingIntent getActivityAsUser(Context context, int requestCode,
             @NonNull Intent intent, int flags, Bundle options, UserHandle user) {
         String packageName = context.getPackageName();
-        String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
-                context.getContentResolver()) : null;
+        String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
         checkFlags(flags, packageName);
         try {
             intent.migrateExtraStreamToClipData(context);
@@ -639,7 +639,7 @@ public final class PendingIntent implements Parcelable {
      */
     @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
     public static PendingIntent getBroadcast(Context context, int requestCode,
-            Intent intent, @Flags int flags) {
+            @NonNull Intent intent, @Flags int flags) {
         return getBroadcastAsUser(context, requestCode, intent, flags, context.getUser());
     }
 
@@ -652,8 +652,7 @@ public final class PendingIntent implements Parcelable {
     public static PendingIntent getBroadcastAsUser(Context context, int requestCode,
             Intent intent, int flags, UserHandle userHandle) {
         String packageName = context.getPackageName();
-        String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
-                context.getContentResolver()) : null;
+        String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
         checkFlags(flags, packageName);
         try {
             intent.prepareToLeaveProcess(context);
@@ -732,8 +731,7 @@ public final class PendingIntent implements Parcelable {
     private static PendingIntent buildServicePendingIntent(Context context, int requestCode,
             Intent intent, int flags, int serviceKind) {
         String packageName = context.getPackageName();
-        String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
-                context.getContentResolver()) : null;
+        String resolvedType = intent.resolveTypeIfNeeded(context.getContentResolver());
         checkFlags(flags, packageName);
         try {
             intent.prepareToLeaveProcess(context);
@@ -755,6 +753,7 @@ public final class PendingIntent implements Parcelable {
      * @return Returns a IntentSender object that wraps the sender of PendingIntent
      *
      */
+    @NonNull
     public IntentSender getIntentSender() {
         return new IntentSender(mTarget, mWhitelistToken);
     }
@@ -767,6 +766,7 @@ public final class PendingIntent implements Parcelable {
         try {
             ActivityManager.getService().cancelIntentSender(mTarget);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1009,6 +1009,7 @@ public final class PendingIntent implements Parcelable {
      * @deprecated Renamed to {@link #getCreatorPackage()}.
      */
     @Deprecated
+    @NonNull
     public String getTargetPackage() {
         return getCreatorPackage();
     }
@@ -1028,10 +1029,9 @@ public final class PendingIntent implements Parcelable {
      * only use this information to identify who you expect to be interacting with
      * through a {@link #send} call, not who gave you the PendingIntent.</p>
      *
-     * @return The package name of the PendingIntent, or null if there is
-     * none associated with it.
+     * @return The package name of the PendingIntent.
      */
-    @Nullable
+    @NonNull
     public String getCreatorPackage() {
         return getCachedInfo().getCreatorPackage();
     }
@@ -1143,13 +1143,12 @@ public final class PendingIntent implements Parcelable {
      * only use this information to identify who you expect to be interacting with
      * through a {@link #send} call, not who gave you the PendingIntent.</p>
      *
-     * @return The user handle of the PendingIntent, or null if there is
-     * none associated with it.
+     * @return The user handle of the PendingIntent
      */
-    @Nullable
+    @NonNull
     public UserHandle getCreatorUserHandle() {
         int uid = getCachedInfo().getCreatorUid();
-        return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
+        return UserHandle.getUserHandleForUid(uid);
     }
 
     /**
@@ -1282,7 +1281,7 @@ public final class PendingIntent implements Parcelable {
         sb.append("PendingIntent{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(": ");
-        sb.append(mTarget != null ? mTarget.asBinder() : null);
+        sb.append(mTarget.asBinder());
         sb.append('}');
         return sb.toString();
     }
@@ -1290,9 +1289,7 @@ public final class PendingIntent implements Parcelable {
     /** @hide */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        if (mTarget != null) {
-            proto.write(PendingIntentProto.TARGET, mTarget.asBinder().toString());
-        }
+        proto.write(PendingIntentProto.TARGET, mTarget.asBinder().toString());
         proto.end(token);
     }
 
@@ -1309,8 +1306,7 @@ public final class PendingIntent implements Parcelable {
 
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<PendingIntent> CREATOR
-            = new Parcelable.Creator<PendingIntent>() {
+    public static final @NonNull Creator<PendingIntent> CREATOR = new Creator<PendingIntent>() {
         public PendingIntent createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();
             return target != null
@@ -1364,11 +1360,11 @@ public final class PendingIntent implements Parcelable {
      * @hide
      */
     public PendingIntent(IIntentSender target) {
-        mTarget = target;
+        mTarget = Objects.requireNonNull(target);
     }
 
     /*package*/ PendingIntent(IBinder target, Object cookie) {
-        mTarget = IIntentSender.Stub.asInterface(target);
+        mTarget = Objects.requireNonNull(IIntentSender.Stub.asInterface(target));
         if (cookie != null) {
             mWhitelistToken = (IBinder)cookie;
         }

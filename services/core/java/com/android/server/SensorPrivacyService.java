@@ -25,9 +25,9 @@ import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
+import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
+import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
-import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
 import android.annotation.NonNull;
@@ -406,12 +406,12 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public void setSensorPrivacy(boolean enable) {
+            enforceManageSensorPrivacyPermission();
             // Keep the state consistent between all users to make it a single global state
             forAllUsers(userId -> setSensorPrivacy(userId, enable));
         }
 
         private void setSensorPrivacy(@UserIdInt int userId, boolean enable) {
-            enforceSensorPrivacyPermission();
             synchronized (mLock) {
                 mEnabled.put(userId, enable);
                 persistSensorPrivacyStateLocked();
@@ -421,7 +421,7 @@ public final class SensorPrivacyService extends SystemService {
 
         @Override
         public void setIndividualSensorPrivacy(@UserIdInt int userId, int sensor, boolean enable) {
-            enforceSensorPrivacyPermission();
+            enforceManageSensorPrivacyPermission();
             synchronized (mLock) {
                 SparseBooleanArray userIndividualEnabled = mIndividualEnabled.get(userId,
                         new SparseBooleanArray());
@@ -448,6 +448,7 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void setIndividualSensorPrivacyForProfileGroup(@UserIdInt int userId, int sensor,
                 boolean enable) {
+            enforceManageSensorPrivacyPermission();
             int parentId = mUserManagerInternal.getProfileParentId(userId);
             forAllUsers(userId2 -> {
                 if (parentId == mUserManagerInternal.getProfileParentId(userId2)) {
@@ -460,14 +461,27 @@ public final class SensorPrivacyService extends SystemService {
          * Enforces the caller contains the necessary permission to change the state of sensor
          * privacy.
          */
-        private void enforceSensorPrivacyPermission() {
-            if (mContext.checkCallingOrSelfPermission(
-                    MANAGE_SENSOR_PRIVACY) == PERMISSION_GRANTED) {
-                return;
-            }
-            throw new SecurityException(
+        private void enforceManageSensorPrivacyPermission() {
+            enforcePermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY,
                     "Changing sensor privacy requires the following permission: "
                             + MANAGE_SENSOR_PRIVACY);
+        }
+
+        /**
+         * Enforces the caller contains the necessary permission to observe changes to the sate of
+         * sensor privacy.
+         */
+        private void enforceObserveSensorPrivacyPermission() {
+            enforcePermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY,
+                    "Observing sensor privacy changes requires the following permission: "
+                            + android.Manifest.permission.OBSERVE_SENSOR_PRIVACY);
+        }
+
+        private void enforcePermission(String permission, String message) {
+            if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+                return;
+            }
+            throw new SecurityException(message);
         }
 
         /**
@@ -475,6 +489,7 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public boolean isSensorPrivacyEnabled() {
+            enforceObserveSensorPrivacyPermission();
             return isSensorPrivacyEnabled(USER_SYSTEM);
         }
 
@@ -486,6 +501,7 @@ public final class SensorPrivacyService extends SystemService {
 
         @Override
         public boolean isIndividualSensorPrivacyEnabled(@UserIdInt int userId, int sensor) {
+            enforceObserveSensorPrivacyPermission();
             synchronized (mLock) {
                 SparseBooleanArray states = mIndividualEnabled.get(userId);
                 if (states == null) {
@@ -703,6 +719,7 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public void addSensorPrivacyListener(ISensorPrivacyListener listener) {
+            enforceObserveSensorPrivacyPermission();
             if (listener == null) {
                 throw new NullPointerException("listener cannot be null");
             }
@@ -715,6 +732,7 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void addIndividualSensorPrivacyListener(int userId, int sensor,
                 ISensorPrivacyListener listener) {
+            enforceObserveSensorPrivacyPermission();
             if (listener == null) {
                 throw new NullPointerException("listener cannot be null");
             }
@@ -726,6 +744,7 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public void removeSensorPrivacyListener(ISensorPrivacyListener listener) {
+            enforceObserveSensorPrivacyPermission();
             if (listener == null) {
                 throw new NullPointerException("listener cannot be null");
             }
@@ -735,6 +754,7 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void suppressIndividualSensorPrivacyReminders(int userId, String packageName,
                 IBinder token, boolean suppress) {
+            enforceManageSensorPrivacyPermission();
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(token);
 
@@ -886,13 +906,13 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         /**
-         * Convert a string into a {@link SensorPrivacyManager.IndividualSensor id}.
+         * Convert a string into a {@link SensorPrivacyManager.Sensors.Sensor id}.
          *
          * @param sensor The name to convert
          *
          * @return The id corresponding to the name
          */
-        private @SensorPrivacyManager.IndividualSensor int sensorStrToId(@Nullable String sensor) {
+        private @SensorPrivacyManager.Sensors.Sensor int sensorStrToId(@Nullable String sensor) {
             if (sensor == null) {
                 return UNKNOWN;
             }
@@ -950,7 +970,7 @@ public final class SensorPrivacyService extends SystemService {
                                 return -1;
                             }
 
-                            enforceSensorPrivacyPermission();
+                            enforceManageSensorPrivacyPermission();
 
                             synchronized (mLock) {
                                 SparseBooleanArray individualEnabled =

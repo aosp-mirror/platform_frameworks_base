@@ -16,6 +16,8 @@
 
 package com.android.server.powerstats;
 
+import static java.lang.System.currentTimeMillis;
+
 import android.content.Context;
 import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
@@ -26,10 +28,13 @@ import android.hardware.power.stats.StateResidencyResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
@@ -61,6 +66,8 @@ public final class PowerStatsLogger extends Handler {
     protected static final int MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY = 1;
     protected static final int MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY = 2;
 
+    // TODO(b/181240441): Add a listener to update the Wall clock baseline when changed
+    private final long mStartWallTime;
     private final PowerStatsDataStorage mPowerStatsMeterStorage;
     private final PowerStatsDataStorage mPowerStatsModelStorage;
     private final PowerStatsDataStorage mPowerStatsResidencyStorage;
@@ -79,6 +86,8 @@ public final class PowerStatsLogger extends Handler {
                 // Log power meter data.
                 EnergyMeasurement[] energyMeasurements =
                     mPowerStatsHALWrapper.readEnergyMeter(new int[0]);
+                EnergyMeasurementUtils.adjustTimeSinceBootToEpoch(energyMeasurements,
+                        mStartWallTime);
                 mPowerStatsMeterStorage.write(
                         EnergyMeasurementUtils.getProtoBytes(energyMeasurements));
                 if (DEBUG) EnergyMeasurementUtils.print(energyMeasurements);
@@ -86,6 +95,8 @@ public final class PowerStatsLogger extends Handler {
                 // Log power model data without attribution data.
                 EnergyConsumerResult[] ecrNoAttribution =
                     mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
+                EnergyConsumerResultUtils.adjustTimeSinceBootToEpoch(ecrNoAttribution,
+                        mStartWallTime);
                 mPowerStatsModelStorage.write(
                         EnergyConsumerResultUtils.getProtoBytes(ecrNoAttribution, false));
                 if (DEBUG) EnergyConsumerResultUtils.print(ecrNoAttribution);
@@ -97,6 +108,8 @@ public final class PowerStatsLogger extends Handler {
                 // Log power model data with attribution data.
                 EnergyConsumerResult[] ecrAttribution =
                     mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
+                EnergyConsumerResultUtils.adjustTimeSinceBootToEpoch(ecrAttribution,
+                        mStartWallTime);
                 mPowerStatsModelStorage.write(
                         EnergyConsumerResultUtils.getProtoBytes(ecrAttribution, true));
                 if (DEBUG) EnergyConsumerResultUtils.print(ecrAttribution);
@@ -108,6 +121,8 @@ public final class PowerStatsLogger extends Handler {
                 // Log state residency data.
                 StateResidencyResult[] stateResidencyResults =
                     mPowerStatsHALWrapper.getStateResidency(new int[0]);
+                StateResidencyResultUtils.adjustTimeSinceBootToEpoch(stateResidencyResults,
+                        mStartWallTime);
                 mPowerStatsResidencyStorage.write(
                         StateResidencyResultUtils.getProtoBytes(stateResidencyResults));
                 if (DEBUG) StateResidencyResultUtils.print(stateResidencyResults);
@@ -293,12 +308,19 @@ public final class PowerStatsLogger extends Handler {
         return mDeleteResidencyDataOnBoot;
     }
 
+    @VisibleForTesting
+    public long getStartWallTime() {
+        return mStartWallTime;
+    }
+
     public PowerStatsLogger(Context context, File dataStoragePath,
             String meterFilename, String meterCacheFilename,
             String modelFilename, String modelCacheFilename,
             String residencyFilename, String residencyCacheFilename,
             IPowerStatsHALWrapper powerStatsHALWrapper) {
         super(Looper.getMainLooper());
+        mStartWallTime = currentTimeMillis() - SystemClock.elapsedRealtime();
+        if (DEBUG) Slog.d(TAG, "mStartWallTime: " + mStartWallTime);
         mPowerStatsHALWrapper = powerStatsHALWrapper;
         mDataStoragePath = dataStoragePath;
 

@@ -29,18 +29,18 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.view.DisplayInfo;
-import android.view.IPinnedStackListener;
+import android.view.IPinnedTaskListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds the common state of the pinned stack between the system and SystemUI. If SystemUI ever
+ * Holds the common state of the pinned task between the system and SystemUI. If SystemUI ever
  * needs to be restarted, it will be notified with the last known state.
  *
- * Changes to the pinned stack also flow through this controller, and generally, the system only
- * changes the pinned stack bounds through this controller in two ways:
+ * Changes to the pinned task also flow through this controller, and generally, the system only
+ * changes the pinned task bounds through this controller in two ways:
  *
  * 1) When first entering PiP: the controller returns the valid bounds given, taking aspect ratio
  *    and IME state into account.
@@ -49,18 +49,18 @@ import java.util.List;
  *    SystemUI adjustments (ie. expanded for menu, interaction, etc).
  *
  * Other changes in the system, including adjustment of IME, configuration change, and more are
- * handled by SystemUI (similar to the docked stack divider).
+ * handled by SystemUI (similar to the docked task divider).
  */
-class PinnedStackController {
+class PinnedTaskController {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "PinnedStackController" : TAG_WM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "PinnedTaskController" : TAG_WM;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
 
-    private IPinnedStackListener mPinnedStackListener;
-    private final PinnedStackListenerDeathHandler mPinnedStackListenerDeathHandler =
-            new PinnedStackListenerDeathHandler();
+    private IPinnedTaskListener mPinnedTaskListener;
+    private final PinnedTaskListenerDeathHandler mPinnedTaskListenerDeathHandler =
+            new PinnedTaskListenerDeathHandler();
 
     /** Whether the PiP is entering or leaving. */
     private boolean mIsPipWindowingModeChanging;
@@ -72,7 +72,7 @@ class PinnedStackController {
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
     private float mAspectRatio = -1f;
 
-    // Used to calculate stack bounds across rotations
+    // Used to calculate task bounds across rotations
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
 
     // The aspect ratio bounds of the PIP.
@@ -85,19 +85,19 @@ class PinnedStackController {
     /**
      * Handler for the case where the listener dies.
      */
-    private class PinnedStackListenerDeathHandler implements IBinder.DeathRecipient {
+    private class PinnedTaskListenerDeathHandler implements IBinder.DeathRecipient {
 
         @Override
         public void binderDied() {
             // Clean up the state if the listener dies
-            if (mPinnedStackListener != null) {
-                mPinnedStackListener.asBinder().unlinkToDeath(mPinnedStackListenerDeathHandler, 0);
+            if (mPinnedTaskListener != null) {
+                mPinnedTaskListener.asBinder().unlinkToDeath(mPinnedTaskListenerDeathHandler, 0);
             }
-            mPinnedStackListener = null;
+            mPinnedTaskListener = null;
         }
     }
 
-    PinnedStackController(WindowManagerService service, DisplayContent displayContent) {
+    PinnedTaskController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
         mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
@@ -121,17 +121,17 @@ class PinnedStackController {
     }
 
     /**
-     * Registers a pinned stack listener.
+     * Registers a pinned task listener.
      */
-    void registerPinnedStackListener(IPinnedStackListener listener) {
+    void registerPinnedTaskListener(IPinnedTaskListener listener) {
         try {
-            listener.asBinder().linkToDeath(mPinnedStackListenerDeathHandler, 0);
-            mPinnedStackListener = listener;
+            listener.asBinder().linkToDeath(mPinnedTaskListenerDeathHandler, 0);
+            mPinnedTaskListener = listener;
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
             notifyMovementBoundsChanged(false /* fromImeAdjustment */);
             notifyActionsChanged(mActions);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to register pinned stack listener", e);
+            Log.e(TAG, "Failed to register pinned task listener", e);
         }
     }
 
@@ -139,8 +139,8 @@ class PinnedStackController {
      * @return whether the given {@param aspectRatio} is valid.
      */
     public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
-        return Float.compare(mMinAspectRatio, aspectRatio) <= 0 &&
-                Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
+        return Float.compare(mMinAspectRatio, aspectRatio) <= 0
+                && Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
     }
 
     /** Returns {@code true} if the PiP is on screen or is changing windowing mode. */
@@ -152,7 +152,7 @@ class PinnedStackController {
         return pinnedTask != null && pinnedTask.hasChild();
     }
 
-    /** Sets whether a visible stack is changing from or to pinned mode. */
+    /** Sets whether a visible task is changing from or to pinned mode. */
     void setPipWindowingModeChanging(boolean isPipWindowingModeChanging) {
         mIsPipWindowingModeChanging = isPipWindowingModeChanging;
     }
@@ -162,9 +162,9 @@ class PinnedStackController {
      * so that the default bounds will be returned for the next session.
      */
     void onActivityHidden(ComponentName componentName) {
-        if (mPinnedStackListener == null) return;
+        if (mPinnedTaskListener == null) return;
         try {
-            mPinnedStackListener.onActivityHidden(componentName);
+            mPinnedTaskListener.onActivityHidden(componentName);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering reset reentry fraction event.", e);
         }
@@ -223,9 +223,9 @@ class PinnedStackController {
      * Notifies listeners that the PIP needs to be adjusted for the IME.
      */
     private void notifyImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-        if (mPinnedStackListener != null) {
+        if (mPinnedTaskListener != null) {
             try {
-                mPinnedStackListener.onImeVisibilityChanged(imeVisible, imeHeight);
+                mPinnedTaskListener.onImeVisibilityChanged(imeVisible, imeHeight);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
             }
@@ -233,9 +233,9 @@ class PinnedStackController {
     }
 
     private void notifyAspectRatioChanged(float aspectRatio) {
-        if (mPinnedStackListener == null) return;
+        if (mPinnedTaskListener == null) return;
         try {
-            mPinnedStackListener.onAspectRatioChanged(aspectRatio);
+            mPinnedTaskListener.onAspectRatioChanged(aspectRatio);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering aspect ratio changed event.", e);
         }
@@ -245,9 +245,9 @@ class PinnedStackController {
      * Notifies listeners that the PIP actions have changed.
      */
     private void notifyActionsChanged(List<RemoteAction> actions) {
-        if (mPinnedStackListener != null) {
+        if (mPinnedTaskListener != null) {
             try {
-                mPinnedStackListener.onActionsChanged(new ParceledListSlice(actions));
+                mPinnedTaskListener.onActionsChanged(new ParceledListSlice(actions));
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
@@ -259,11 +259,11 @@ class PinnedStackController {
      */
     private void notifyMovementBoundsChanged(boolean fromImeAdjustment) {
         synchronized (mService.mGlobalLock) {
-            if (mPinnedStackListener == null) {
+            if (mPinnedTaskListener == null) {
                 return;
             }
             try {
-                mPinnedStackListener.onMovementBoundsChanged(fromImeAdjustment);
+                mPinnedTaskListener.onMovementBoundsChanged(fromImeAdjustment);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
@@ -271,7 +271,7 @@ class PinnedStackController {
     }
 
     void dump(String prefix, PrintWriter pw) {
-        pw.println(prefix + "PinnedStackController");
+        pw.println(prefix + "PinnedTaskController");
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
         pw.println(prefix + "  mAspectRatio=" + mAspectRatio);

@@ -72,8 +72,6 @@ public class BrightnessController implements ToggleSlider.Listener {
     private static final Uri BRIGHTNESS_FOR_VR_FLOAT_URI =
             Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT);
 
-    private final float mMinimumBacklight;
-    private final float mMaximumBacklight;
     private final float mDefaultBacklight;
     private final float mMinimumBacklightForVr;
     private final float mMaximumBacklightForVr;
@@ -314,10 +312,6 @@ public class BrightnessController implements ToggleSlider.Listener {
 
         mDisplayId = mContext.getDisplayId();
         PowerManager pm = context.getSystemService(PowerManager.class);
-        mMinimumBacklight = pm.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-        mMaximumBacklight = pm.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
         mDefaultBacklight = mContext.getDisplay().getBrightnessDefault();
         mMinimumBacklightForVr = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR);
@@ -375,8 +369,8 @@ public class BrightnessController implements ToggleSlider.Listener {
             metric = mAutomatic
                     ? MetricsEvent.ACTION_BRIGHTNESS_AUTO
                     : MetricsEvent.ACTION_BRIGHTNESS;
-            minBacklight = mMinimumBacklight;
-            maxBacklight = mMaximumBacklight;
+            minBacklight = PowerManager.BRIGHTNESS_MIN;
+            maxBacklight = PowerManager.BRIGHTNESS_MAX;
             settingToChange = Settings.System.SCREEN_BRIGHTNESS_FLOAT;
         }
         final float valFloat = MathUtils.min(convertGammaToLinearFloat(value,
@@ -439,8 +433,8 @@ public class BrightnessController implements ToggleSlider.Listener {
             min = mMinimumBacklightForVr;
             max = mMaximumBacklightForVr;
         } else {
-            min = mMinimumBacklight;
-            max = mMaximumBacklight;
+            min = PowerManager.BRIGHTNESS_MIN;
+            max = PowerManager.BRIGHTNESS_MAX;
         }
         // convertGammaToLinearFloat returns 0-1
         if (BrightnessSynchronizer.floatEquals(brightnessValue,

@@ -82,6 +82,11 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
                 DISMISS_TIMEOUT);
     }
 
+    @Override
+    protected void closeDialog() {
+        mHandler.obtainMessage(ACTION_OK).sendToTarget();
+    }
+
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             synchronized (mService.mProcLock) {

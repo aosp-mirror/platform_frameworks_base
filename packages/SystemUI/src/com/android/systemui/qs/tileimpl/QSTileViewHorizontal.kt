@@ -24,8 +24,8 @@ import android.graphics.drawable.PaintDrawable
 import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
-import android.view.View
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import com.android.systemui.R
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
@@ -37,7 +37,6 @@ class QSTileViewHorizontal(
 ) : QSTileView(context, icon, false) {
 
     private var paintDrawable: PaintDrawable? = null
-    private var divider: View? = null
 
     init {
         orientation = HORIZONTAL
@@ -49,7 +48,12 @@ class QSTileViewHorizontal(
 
     override fun createLabel() {
         super.createLabel()
-        findViewById<LinearLayout>(R.id.label_group)?.gravity = Gravity.START
+        findViewById<LinearLayout>(R.id.label_group)?.apply {
+            gravity = Gravity.START
+            (layoutParams as? RelativeLayout.LayoutParams)?.apply {
+                removeRule(RelativeLayout.ALIGN_PARENT_TOP)
+            }
+        }
         mLabel.gravity = Gravity.START
         mLabel.textDirection = TEXT_DIRECTION_LOCALE
         mSecondLine.gravity = Gravity.START
@@ -57,7 +61,7 @@ class QSTileViewHorizontal(
         val padding = context.resources.getDimensionPixelSize(R.dimen.qs_tile_side_label_padding)
         mLabelContainer.setPaddingRelative(0, padding, padding, padding)
         (mLabelContainer.layoutParams as LayoutParams).gravity =
-                Gravity.CENTER_VERTICAL or Gravity.START
+            Gravity.CENTER_VERTICAL or Gravity.START
     }
 
     override fun updateRippleSize() {
@@ -93,7 +97,6 @@ class QSTileViewHorizontal(
         paintDrawable?.setTint(getCircleColor(state.state))
         mSecondLine.setTextColor(mLabel.textColors)
         mLabelContainer.background = null
-        divider?.backgroundTintList = mLabel.textColors
     }
 
     override fun handleExpand(dualTarget: Boolean) {}

@@ -21,6 +21,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.location.util.identity.CallerIdentity;
 
+import com.android.internal.annotations.Immutable;
+
+import java.util.Set;
+
 /**
  * Location manager local system service interface.
  *
@@ -36,6 +40,21 @@ public abstract class LocationManagerInternal {
          * Called when the provider enabled state changes for a particular user.
          */
         void onProviderEnabledChanged(String provider, int userId, boolean enabled);
+    }
+
+    /**
+     * Interface for getting callbacks when a location provider's location tags change.
+     *
+     * @see LocationTagInfo
+     */
+    public interface OnProviderLocationTagsChangeListener {
+
+        /**
+         * Called when the location tags for a provider change.
+         *
+         * @param providerLocationTagInfo The tag info for a provider.
+         */
+        void onLocationTagsChanged(@NonNull LocationTagInfo providerLocationTagInfo);
     }
 
     /**
@@ -88,4 +107,60 @@ public abstract class LocationManagerInternal {
      * provider, and the elapsed nanos since boot the current time was computed at.
      */
     public abstract @Nullable LocationTime getGnssTimeMillis();
+
+    /**
+     * Sets a listener for changes in the location providers' tags. Passing
+     * {@code null} clears the current listener.
+     *
+     * @param listener The listener.
+     */
+    public abstract void setOnProviderLocationTagsChangeListener(
+            @Nullable OnProviderLocationTagsChangeListener listener);
+
+    /**
+     * This class represents the location permission tags used by the location provider
+     * packages in a given UID. These tags are strictly used for accessing state guarded
+     * by the location permission(s) by a location provider which are required for the
+     * provider to fulfill its function as being a location provider.
+     */
+    @Immutable
+    public static class LocationTagInfo {
+        private final int mUid;
+
+        @NonNull
+        private final String mPackageName;
+
+        @Nullable
+        private final Set<String> mLocationTags;
+
+        public LocationTagInfo(int uid, @NonNull String packageName,
+                @Nullable Set<String> locationTags) {
+            mUid = uid;
+            mPackageName = packageName;
+            mLocationTags = locationTags;
+        }
+
+        /**
+         * @return The UID for which tags are related.
+         */
+        public int getUid() {
+            return mUid;
+        }
+
+        /**
+         * @return The package for which tags are related.
+         */
+        @NonNull
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        /**
+         * @return The tags for the package used for location related accesses.
+         */
+        @Nullable
+        public Set<String> getTags() {
+            return mLocationTags;
+        }
+    }
 }
