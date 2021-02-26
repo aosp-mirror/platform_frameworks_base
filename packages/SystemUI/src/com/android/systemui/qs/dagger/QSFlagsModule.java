@@ -21,6 +21,7 @@ import android.hardware.display.ColorDisplayManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Named;
 
@@ -31,6 +32,8 @@ import dagger.Provides;
 public interface QSFlagsModule {
     String QS_LABELS_FLAG = "qs_labels_flag";
     String RBC_AVAILABLE = "rbc_available";
+    String PM_LITE_ENABLED = "pm_lite";
+    String PM_LITE_SETTING = "sysui_pm_lite";
 
     @Provides
     @SysUISingleton
@@ -45,5 +48,12 @@ public interface QSFlagsModule {
     @Named(RBC_AVAILABLE)
     static boolean isReduceBrightColorsAvailable(Context context) {
         return ColorDisplayManager.isReduceBrightColorsAvailable(context);
+    }
+
+    @Provides
+    @SysUISingleton
+    @Named(PM_LITE_ENABLED)
+    static boolean isPMLiteEnabled(FeatureFlags featureFlags, GlobalSettings globalSettings) {
+        return featureFlags.isPMLiteEnabled() && globalSettings.getInt(PM_LITE_SETTING, 0) != 0;
     }
 }
