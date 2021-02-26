@@ -275,6 +275,12 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     private AudioAttributes mAudioAttributes;
     private boolean mIsSubmixFullVolume = false;
 
+    /**
+     * The log session id used for metrics.
+     * A null or empty string here means it is not set.
+     */
+    private String mLogSessionId;
+
     //---------------------------------------------------------
     // Constructor, Finalize
     //--------------------
@@ -1913,6 +1919,25 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         return native_set_preferred_microphone_field_dimension(zoom) == AudioSystem.SUCCESS;
     }
 
+    /**
+     * Sets a string handle to this AudioRecord for metrics collection.
+     *
+     * @param logSessionId a string which is used to identify this object
+     *        to the metrics service.  Proper generated Ids must be obtained
+     *        from the Java metrics service and should be considered opaque.
+     *        Use null to remove the logSessionId association.
+     * @throws IllegalStateException if AudioRecord not initialized.
+     *
+     * @hide
+     */
+    public void setLogSessionId(@Nullable String logSessionId) {
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("AudioRecord not initialized");
+        }
+        native_setLogSessionId(logSessionId);
+        mLogSessionId = logSessionId;
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -2071,6 +2096,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
     private native int native_set_preferred_microphone_direction(int direction);
     private native int native_set_preferred_microphone_field_dimension(float zoom);
+
+    private native void native_setLogSessionId(@Nullable String logSessionId);
 
     //---------------------------------------------------------
     // Utility methods

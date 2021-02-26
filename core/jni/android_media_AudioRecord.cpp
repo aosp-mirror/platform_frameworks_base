@@ -861,6 +861,23 @@ static int android_media_AudioRecord_set_preferred_microphone_field_dimension(
     return jStatus;
 }
 
+static void android_media_AudioRecord_setLogSessionId(JNIEnv *env, jobject thiz,
+                                                      jstring jlogSessionId) {
+    sp<AudioRecord> record = getAudioRecord(env, thiz);
+    if (record == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Unable to retrieve AudioRecord pointer for setLogSessionId()");
+    }
+    if (jlogSessionId == nullptr) {
+        ALOGV("%s: logSessionId nullptr", __func__);
+        record->setLogSessionId(nullptr);
+        return;
+    }
+    ScopedUtfChars logSessionId(env, jlogSessionId);
+    ALOGV("%s: logSessionId '%s'", __func__, logSessionId.c_str());
+    record->setLogSessionId(logSessionId.c_str());
+}
+
 // ----------------------------------------------------------------------------
 static jint android_media_AudioRecord_get_port_id(JNIEnv *env,  jobject thiz) {
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
@@ -876,50 +893,48 @@ static jint android_media_AudioRecord_get_port_id(JNIEnv *env,  jobject thiz) {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
-    // name,               signature,  funcPtr
-    {"native_start",         "(II)I",    (void *)android_media_AudioRecord_start},
-    {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILjava/lang/String;J)I",
-                                      (void *)android_media_AudioRecord_setup},
-    {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
-    {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
-    {"native_read_in_byte_array",
-                             "([BIIZ)I",
-                                     (void *)android_media_AudioRecord_readInArray<jbyteArray>},
-    {"native_read_in_short_array",
-                             "([SIIZ)I",
-                                     (void *)android_media_AudioRecord_readInArray<jshortArray>},
-    {"native_read_in_float_array",
-                             "([FIIZ)I",
-                                     (void *)android_media_AudioRecord_readInArray<jfloatArray>},
-    {"native_read_in_direct_buffer","(Ljava/lang/Object;IZ)I",
-                                       (void *)android_media_AudioRecord_readInDirectBuffer},
-    {"native_get_buffer_size_in_frames",
-                             "()I", (void *)android_media_AudioRecord_get_buffer_size_in_frames},
-    {"native_set_marker_pos","(I)I",   (void *)android_media_AudioRecord_set_marker_pos},
-    {"native_get_marker_pos","()I",    (void *)android_media_AudioRecord_get_marker_pos},
-    {"native_set_pos_update_period",
-                             "(I)I",   (void *)android_media_AudioRecord_set_pos_update_period},
-    {"native_get_pos_update_period",
-                             "()I",    (void *)android_media_AudioRecord_get_pos_update_period},
-    {"native_get_min_buff_size",
-                             "(III)I",   (void *)android_media_AudioRecord_get_min_buff_size},
-    {"native_getMetrics",    "()Landroid/os/PersistableBundle;",
-                                         (void *)android_media_AudioRecord_native_getMetrics},
-    {"native_setInputDevice", "(I)Z", (void *)android_media_AudioRecord_setInputDevice},
-    {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioRecord_getRoutedDeviceId},
-    {"native_enableDeviceCallback", "()V", (void *)android_media_AudioRecord_enableDeviceCallback},
-    {"native_disableDeviceCallback", "()V",
-                                        (void *)android_media_AudioRecord_disableDeviceCallback},
-    {"native_get_timestamp", "(Landroid/media/AudioTimestamp;I)I",
-                                       (void *)android_media_AudioRecord_get_timestamp},
-    {"native_get_active_microphones", "(Ljava/util/ArrayList;)I",
-                                        (void *)android_media_AudioRecord_get_active_microphones},
-    {"native_getPortId", "()I", (void *)android_media_AudioRecord_get_port_id},
-    {"native_set_preferred_microphone_direction", "(I)I",
-                        (void *)android_media_AudioRecord_set_preferred_microphone_direction},
-    {"native_set_preferred_microphone_field_dimension", "(F)I",
-                        (void *)android_media_AudioRecord_set_preferred_microphone_field_dimension},
+        {"native_start", "(II)I", (void *)android_media_AudioRecord_start},
+        {"native_stop", "()V", (void *)android_media_AudioRecord_stop},
+        {"native_setup", "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILjava/lang/String;J)I",
+         (void *)android_media_AudioRecord_setup},
+        {"native_finalize", "()V", (void *)android_media_AudioRecord_finalize},
+        {"native_release", "()V", (void *)android_media_AudioRecord_release},
+        {"native_read_in_byte_array", "([BIIZ)I",
+         (void *)android_media_AudioRecord_readInArray<jbyteArray>},
+        {"native_read_in_short_array", "([SIIZ)I",
+         (void *)android_media_AudioRecord_readInArray<jshortArray>},
+        {"native_read_in_float_array", "([FIIZ)I",
+         (void *)android_media_AudioRecord_readInArray<jfloatArray>},
+        {"native_read_in_direct_buffer", "(Ljava/lang/Object;IZ)I",
+         (void *)android_media_AudioRecord_readInDirectBuffer},
+        {"native_get_buffer_size_in_frames", "()I",
+         (void *)android_media_AudioRecord_get_buffer_size_in_frames},
+        {"native_set_marker_pos", "(I)I", (void *)android_media_AudioRecord_set_marker_pos},
+        {"native_get_marker_pos", "()I", (void *)android_media_AudioRecord_get_marker_pos},
+        {"native_set_pos_update_period", "(I)I",
+         (void *)android_media_AudioRecord_set_pos_update_period},
+        {"native_get_pos_update_period", "()I",
+         (void *)android_media_AudioRecord_get_pos_update_period},
+        {"native_get_min_buff_size", "(III)I", (void *)android_media_AudioRecord_get_min_buff_size},
+        {"native_getMetrics", "()Landroid/os/PersistableBundle;",
+         (void *)android_media_AudioRecord_native_getMetrics},
+        {"native_setInputDevice", "(I)Z", (void *)android_media_AudioRecord_setInputDevice},
+        {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioRecord_getRoutedDeviceId},
+        {"native_enableDeviceCallback", "()V",
+         (void *)android_media_AudioRecord_enableDeviceCallback},
+        {"native_disableDeviceCallback", "()V",
+         (void *)android_media_AudioRecord_disableDeviceCallback},
+        {"native_get_timestamp", "(Landroid/media/AudioTimestamp;I)I",
+         (void *)android_media_AudioRecord_get_timestamp},
+        {"native_get_active_microphones", "(Ljava/util/ArrayList;)I",
+         (void *)android_media_AudioRecord_get_active_microphones},
+        {"native_getPortId", "()I", (void *)android_media_AudioRecord_get_port_id},
+        {"native_set_preferred_microphone_direction", "(I)I",
+         (void *)android_media_AudioRecord_set_preferred_microphone_direction},
+        {"native_set_preferred_microphone_field_dimension", "(F)I",
+         (void *)android_media_AudioRecord_set_preferred_microphone_field_dimension},
+        {"native_setLogSessionId", "(Ljava/lang/String;)V",
+         (void *)android_media_AudioRecord_setLogSessionId},
 };
 
 // field names found in android/media/AudioRecord.java
