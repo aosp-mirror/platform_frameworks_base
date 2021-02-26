@@ -148,7 +148,7 @@ package android.app.appsearch {
     method public void remove(@NonNull android.app.appsearch.RemoveByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
     method public void remove(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
-    method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec);
     method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
   }
 
@@ -217,7 +217,7 @@ package android.app.appsearch {
 
   public class GlobalSearchSession implements java.io.Closeable {
     method public void close();
-    method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec);
   }
 
   public class PackageIdentifier {
@@ -287,7 +287,7 @@ package android.app.appsearch {
 
   public class SearchResults implements java.io.Closeable {
     method public void close();
-    method public void getNextPage(@NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.util.List<android.app.appsearch.SearchResult>>>);
+    method public void getNextPage(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.util.List<android.app.appsearch.SearchResult>>>);
   }
 
   public final class SearchSpec {
