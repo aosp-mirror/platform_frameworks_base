@@ -638,11 +638,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
                 mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
                 mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
-                if (mDisplayDeviceConfig != null) {
-                    mInfo.brightnessDefault = mDisplayDeviceConfig.getBrightnessDefault();
-                } else {
-                    mInfo.brightnessDefault = 0.5f;
-                }
+                mInfo.brightnessDefault = getDisplayDeviceConfig().getBrightnessDefault();
             }
             return mInfo;
         }
