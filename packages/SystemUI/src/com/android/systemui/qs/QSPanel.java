@@ -847,8 +847,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         default void setExpansion(float expansion) {}
 
         int getNumVisibleTiles();
-
-        default void setShowLabels(boolean show) {}
     }
 
     interface OnConfigurationChangedListener {
