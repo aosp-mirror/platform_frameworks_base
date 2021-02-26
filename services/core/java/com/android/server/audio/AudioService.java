@@ -6958,7 +6958,10 @@ public class AudioService extends IAudioService.Stub
     private void onSetVolumeIndexOnDevice(@NonNull DeviceVolumeUpdate update) {
         final VolumeStreamState streamState = mStreamStates[update.mStreamType];
         if (update.hasVolumeIndex()) {
-            final int index = update.getVolumeIndex();
+            int index = update.getVolumeIndex();
+            if (!checkSafeMediaVolume(update.mStreamType, index, update.mDevice)) {
+                index = safeMediaVolumeIndex(update.mDevice);
+            }
             streamState.setIndex(index, update.mDevice, update.mCaller,
                     // trusted as index is always validated before message is posted
                     true /*hasModifyAudioSettings*/);
