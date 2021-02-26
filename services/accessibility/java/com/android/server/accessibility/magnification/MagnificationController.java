@@ -52,6 +52,9 @@ import com.android.server.accessibility.AccessibilityManagerService;
  *   <li> 4. {@link #onTripleTapped} updates magnification switch UI depending on magnification
  *   capabilities and magnification active state when triple-tap gesture is detected. </li>
  * </ol>
+ *
+ *  <b>Note</b>  Updates magnification switch UI when magnification mode transition
+ *  is done {@link DisableMagnificationCallback#onResult}.
  */
 public class MagnificationController implements WindowMagnificationManager.Callback,
         MagnificationGestureHandler.Callback,
@@ -401,6 +404,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     adjustCurrentCenterIfNeededLocked();
                     applyMagnificationModeLocked(mTargetMode);
                 }
+                updateMagnificationButton(mDisplayId, mTargetMode);
                 mTransitionCallBack.onResult(success);
             }
         }
@@ -425,6 +429,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 }
                 setExpiredAndRemoveFromListLocked();
                 applyMagnificationModeLocked(mCurrentMode);
+                updateMagnificationButton(mDisplayId, mCurrentMode);
                 mTransitionCallBack.onResult(true);
             }
         }
