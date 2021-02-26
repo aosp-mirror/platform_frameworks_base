@@ -2431,7 +2431,7 @@ public class BubbleStackView extends FrameLayout
 
             if (mFlyout.getVisibility() == View.VISIBLE) {
                 mFlyout.animateUpdate(bubble.getFlyoutMessage(), getWidth(),
-                        mStackAnimationController.getStackPosition().y);
+                        mStackAnimationController.getStackPosition());
             } else {
                 mFlyout.setVisibility(INVISIBLE);
                 mFlyout.setupFlyoutStartingAsDot(bubble.getFlyoutMessage(),

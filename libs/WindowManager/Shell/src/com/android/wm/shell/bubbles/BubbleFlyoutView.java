@@ -227,24 +227,29 @@ public class BubbleFlyoutView extends FrameLayout {
     /*
      * Fade animation for consecutive flyouts.
      */
-    void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, float stackY) {
+    void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, PointF stackPos) {
         final Runnable afterFadeOut = () -> {
             updateFlyoutMessage(flyoutMessage, parentWidth);
             // Wait for TextViews to layout with updated height.
             post(() -> {
-                mFlyoutY = stackY + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
-                fade(true /* in */, () -> {} /* after */);
+                fade(true /* in */, stackPos, () -> {} /* after */);
             } /* after */ );
         };
-        fade(false /* in */, afterFadeOut);
+        fade(false /* in */, stackPos, afterFadeOut);
     }
 
     /*
      * Fade-out above or fade-in from below.
      */
-    private void fade(boolean in, Runnable afterFade) {
+    private void fade(boolean in, PointF stackPos, Runnable afterFade) {
+        mFlyoutY = stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
+
         setAlpha(in ? 0f : 1f);
         setTranslationY(in ? mFlyoutY + FLYOUT_FADE_Y : mFlyoutY);
+        mRestingTranslationX = mArrowPointingLeft
+                ? stackPos.x + mBubbleSize + mFlyoutSpaceFromBubble
+                : stackPos.x - getWidth() - mFlyoutSpaceFromBubble;
+        setTranslationX(mRestingTranslationX);
         animate()
                 .alpha(in ? 1f : 0f)
                 .setDuration(in ? FLYOUT_FADE_IN_DURATION : FLYOUT_FADE_OUT_DURATION)
