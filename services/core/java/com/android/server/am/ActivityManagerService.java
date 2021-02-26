@@ -13384,6 +13384,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     endTime = SystemClock.currentThreadTimeMillis();
                     hasSwapPss = mi.hasSwappedOutPss;
+                    memtrackGraphics = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
+                    memtrackGl = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                 } else {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL;
                     startTime = SystemClock.currentThreadTimeMillis();
@@ -13537,6 +13539,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (!Debug.getMemoryInfo(st.pid, mi)) {
                                 continue;
                             }
+                            memtrackGraphics = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
+                            memtrackGl = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                         } else {
                             long pss = Debug.getPss(st.pid, tmpLong, memtrackTmp);
                             if (pss == 0) {
@@ -14437,6 +14441,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             });
         }
         final int statsCount = stats.size();
+        long totalMemtrackGraphics = 0;
+        long totalMemtrackGl = 0;
         for (int i = 0; i < statsCount; i++) {
             ProcessCpuTracker.Stats st = stats.get(i);
             long pss = Debug.getPss(st.pid, swaptrackTmp, memtrackTmp);
@@ -14447,6 +14453,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mi.pss = pss;
                     mi.swapPss = swaptrackTmp[1];
                     mi.memtrack = memtrackTmp[0];
+                    totalMemtrackGraphics += memtrackTmp[1];
+                    totalMemtrackGl += memtrackTmp[2];
                     memInfos.add(mi);
                 }
             }
@@ -14455,20 +14463,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         long totalPss = 0;
         long totalSwapPss = 0;
         long totalMemtrack = 0;
-        long totalMemtrackGraphics = 0;
-        long totalMemtrackGl = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
                 mi.pss = Debug.getPss(mi.pid, swaptrackTmp, memtrackTmp);
                 mi.swapPss = swaptrackTmp[1];
                 mi.memtrack = memtrackTmp[0];
+                totalMemtrackGraphics += memtrackTmp[1];
+                totalMemtrackGl += memtrackTmp[2];
             }
             totalPss += mi.pss;
             totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
-            totalMemtrackGraphics += memtrackTmp[1];
-            totalMemtrackGl += memtrackTmp[2];
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
             @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
