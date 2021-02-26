@@ -30,6 +30,7 @@ import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
@@ -102,12 +103,19 @@ public abstract class ActivityManagerInternal {
      * Sets how long a {@link PendingIntent} can be temporarily allowlisted to bypass restrictions
      * such as Power Save mode.
      * @param target
-     * @param whitelistToken
+     * @param allowlistToken
      * @param duration temp allowlist duration in milliseconds.
      * @param type temp allowlist type defined at {@link TempAllowListType}
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason A human-readable reason for logging purposes.
      */
+    public abstract void setPendingIntentAllowlistDuration(IIntentSender target,
+            IBinder allowlistToken, long duration, @TempAllowListType int type,
+            @ReasonCode int reasonCode, @Nullable String reason);
+
+    @Deprecated
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
-            IBinder whitelistToken, long duration, int type);
+            IBinder allowlistToken, long duration, @TempAllowListType int type);
 
     /**
      * Returns the flags set for a {@link PendingIntent}.
@@ -127,20 +135,26 @@ public abstract class ActivityManagerInternal {
             IBinder allowlistToken);
 
     /**
-     * Allow DeviceIdleController to tell us about what apps are whitelisted.
+     * Allow DeviceIdleController to tell us about what apps are allowlisted.
      */
-    public abstract void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids);
+    public abstract void setDeviceIdleAllowlist(int[] allAppids, int[] exceptIdleAppids);
 
     /**
-     * Update information about which app IDs are on the temp whitelist.
+     * Update information about which app IDs are on the temp allowlist.
      * @param appids the updated list of appIds in temp allowlist.
      * @param changingUid uid to add or remove to temp allowlist.
      * @param adding true to add to temp allowlist, false to remove from temp allowlist.
      * @param durationMs when adding is true, the duration to be in temp allowlist.
      * @param type temp allowlist type defined at {@link TempAllowListType}.
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason A human-readable reason for logging purposes.
+     * @param callingUid the callingUid that setup this temp allowlist, only valid when param adding
+     *                   is true.
      */
-    public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingUid,
-            boolean adding, long durationMs, @TempAllowListType int type);
+    public abstract void updateDeviceIdleTempAllowlist(int[] appids, int changingUid,
+            boolean adding, long durationMs, @TempAllowListType int type,
+            @ReasonCode int reasonCode,
+            @Nullable String reason, int callingUid);
 
     /**
      * Get the procstate for the UID.  The return value will be between
@@ -335,10 +349,11 @@ public abstract class ActivityManagerInternal {
      * @param targetUid the UID that is been temp allowlisted.
      * @param duration temp allowlist duration in milliseconds.
      * @param type temp allowlist type defined at {@link TempAllowListType}
-     * @param tag
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason
      */
-    public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-            long duration, int type, String tag);
+    public abstract void tempAllowlistForPendingIntent(int callerPid, int callerUid, int targetUid,
+            long duration, int type, @ReasonCode int reasonCode, String reason);
 
     public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
@@ -495,9 +510,9 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Sends a broadcast, assuming the caller to be the system and allowing the inclusion of an
-     * approved whitelist of app Ids >= {@link android.os.Process#FIRST_APPLICATION_UID} that the
+     * approved allowlist of app Ids >= {@link android.os.Process#FIRST_APPLICATION_UID} that the
      * broadcast my be sent to; any app Ids < {@link android.os.Process#FIRST_APPLICATION_UID} are
-     * automatically whitelisted.
+     * automatically allowlisted.
      *
      * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
      *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,

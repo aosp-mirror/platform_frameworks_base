@@ -16,12 +16,17 @@
 
 package com.android.server;
 
+import static android.os.PowerWhitelistManager.REASON_SHELL;
+import static android.os.PowerWhitelistManager.REASON_UNKNOWN;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.Process.INVALID_UID;
+
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
-import android.app.BroadcastOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -56,6 +61,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteException;
@@ -1838,31 +1844,34 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override
-        public long whitelistAppTemporarily(String packageName, int userId, String reason)
-                throws RemoteException {
+        public long whitelistAppTemporarily(String packageName, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
             // At least 10 seconds.
             long durationMs = Math.max(10_000L, mConstants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS / 2);
-            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reason);
+            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reasonCode,
+                    reason);
             return durationMs;
         }
 
         @Override
-        public void addPowerSaveTempWhitelistApp(String packageName, long duration,
-                int userId, String reason) throws RemoteException {
-            addPowerSaveTempAllowlistAppChecked(packageName, duration, userId, reason);
+        public void addPowerSaveTempWhitelistApp(String packageName, long duration, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
+            addPowerSaveTempAllowlistAppChecked(packageName, duration, userId, reasonCode, reason);
         }
 
-        @Override public long addPowerSaveTempWhitelistAppForMms(String packageName,
-                int userId, String reason) throws RemoteException {
+        @Override public long addPowerSaveTempWhitelistAppForMms(String packageName, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
             long durationMs = mConstants.MMS_TEMP_APP_ALLOWLIST_DURATION_MS;
-            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reason);
+            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reasonCode,
+                    reason);
             return durationMs;
         }
 
-        @Override public long addPowerSaveTempWhitelistAppForSms(String packageName,
-                int userId, String reason) throws RemoteException {
+        @Override public long addPowerSaveTempWhitelistAppForSms(String packageName, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
             long durationMs = mConstants.SMS_TEMP_APP_ALLOWLIST_DURATION_MS;
-            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reason);
+            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reasonCode,
+                    reason);
             return durationMs;
         }
 
@@ -1934,18 +1943,29 @@ public class DeviceIdleController extends SystemService
         }
 
         // duration in milliseconds
+        @Deprecated
         @Override
         public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-                long duration, int userId, boolean sync, String reason) {
+                long duration, int userId, boolean sync, @Nullable String reason) {
             addPowerSaveTempAllowlistAppInternal(callingUid, packageName, duration,
-                    userId, sync, reason);
+                    userId, sync, REASON_UNKNOWN, reason);
+        }
+
+        @Override
+        public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+                long duration, int userId, boolean sync, @ReasonCode int reasonCode,
+                @Nullable String reason) {
+            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, duration,
+                    userId, sync, reasonCode, reason);
         }
 
         // duration in milliseconds
         @Override
         public void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
-                @TempAllowListType int type, boolean sync, String reason) {
-            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, type, sync, reason);
+                @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
+                @Nullable String reason) {
+            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, type, sync,
+                    reasonCode, reason);
         }
 
         // duration in milliseconds
@@ -2293,7 +2313,7 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 getContext().registerReceiver(mInteractivityReceiver, filter);
 
-                mLocalActivityManager.setDeviceIdleWhitelist(
+                mLocalActivityManager.setDeviceIdleAllowlist(
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
@@ -2671,7 +2691,8 @@ public class DeviceIdleController extends SystemService
     }
 
     void addPowerSaveTempAllowlistAppChecked(String packageName, long duration,
-            int userId, String reason) throws RemoteException {
+            int userId, @ReasonCode int reasonCode, @Nullable String reason)
+            throws RemoteException {
         getContext().enforceCallingPermission(
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
@@ -2686,7 +2707,7 @@ public class DeviceIdleController extends SystemService
         final long token = Binder.clearCallingIdentity();
         try {
             addPowerSaveTempAllowlistAppInternal(callingUid,
-                    packageName, duration, userId, true, reason);
+                    packageName, duration, userId, true, reasonCode, reason);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2718,12 +2739,12 @@ public class DeviceIdleController extends SystemService
      * app an exemption to access network and acquire wakelocks.
      */
     void addPowerSaveTempAllowlistAppInternal(int callingUid, String packageName,
-            long duration, int userId, boolean sync, String reason) {
+            long duration, int userId, boolean sync, @ReasonCode int reasonCode,
+            @Nullable String reason) {
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
             addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration,
-                    BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED, sync,
-                    reason);
+                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED, sync, reasonCode, reason);
         } catch (NameNotFoundException e) {
         }
     }
@@ -2733,7 +2754,8 @@ public class DeviceIdleController extends SystemService
      * app an exemption to access network and acquire wakelocks.
      */
     void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int uid,
-            long duration, @TempAllowListType int type, boolean sync, String reason) {
+            long duration, @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
+            @Nullable String reason) {
         final long timeNow = SystemClock.elapsedRealtime();
         boolean informWhitelistChanged = false;
         int appId = UserHandle.getAppId(uid);
@@ -2765,7 +2787,8 @@ public class DeviceIdleController extends SystemService
                 } catch (RemoteException e) {
                 }
                 postTempActiveTimeoutMessage(uid, duration);
-                updateTempWhitelistAppIdsLocked(uid, true, duration, type);
+                updateTempWhitelistAppIdsLocked(uid, true, duration, type, reasonCode,
+                        reason, callingUid);
                 if (sync) {
                     informWhitelistChanged = true;
                 } else {
@@ -2844,12 +2867,13 @@ public class DeviceIdleController extends SystemService
     }
 
     @GuardedBy("this")
-    private void onAppRemovedFromTempWhitelistLocked(int uid, String reason) {
+    private void onAppRemovedFromTempWhitelistLocked(int uid, @Nullable String reason) {
         if (DEBUG) {
             Slog.d(TAG, "Removing uid " + uid + " from temp whitelist");
         }
         final int appId = UserHandle.getAppId(uid);
-        updateTempWhitelistAppIdsLocked(uid, false, 0, 0);
+        updateTempWhitelistAppIdsLocked(uid, false, 0, 0, REASON_UNKNOWN,
+                reason, INVALID_UID);
         mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED_TO_NPMS, appId, 0)
                 .sendToTarget();
         reportTempWhitelistChangedLocked(uid, false);
@@ -3860,7 +3884,7 @@ public class DeviceIdleController extends SystemService
         mPowerSaveWhitelistUserAppIdArray = buildAppIdArray(null,
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistUserAppIds);
         if (mLocalActivityManager != null) {
-            mLocalActivityManager.setDeviceIdleWhitelist(
+            mLocalActivityManager.setDeviceIdleAllowlist(
                     mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
         }
         if (mLocalPowerManager != null) {
@@ -3880,9 +3904,14 @@ public class DeviceIdleController extends SystemService
      * @param durationMs duration in milliseconds to add to temp allowlist, only valid when
      *                   param adding is true.
      * @param type temp allowlist type defined at {@link TempAllowListType}
+     * @prama reasonCode one of {@Link ReasonCode}
+     * @param reason A human-readable reason for logging purposes.
+     * @param callingUid the callingUid that setup this temp-allowlist, only valid when param adding
+     *                   is true.
      */
     private void updateTempWhitelistAppIdsLocked(int uid, boolean adding, long durationMs,
-            @TempAllowListType int type) {
+            @TempAllowListType int type, @ReasonCode int reasonCode, @Nullable String reason,
+            int callingUid) {
         final int size = mTempWhitelistAppIdEndTimes.size();
         if (mTempWhitelistAppIdArray.length != size) {
             mTempWhitelistAppIdArray = new int[size];
@@ -3895,8 +3924,8 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting activity manager temp whitelist to "
                         + Arrays.toString(mTempWhitelistAppIdArray));
             }
-            mLocalActivityManager.updateDeviceIdleTempWhitelist(mTempWhitelistAppIdArray, uid,
-                    adding, durationMs, type);
+            mLocalActivityManager.updateDeviceIdleTempAllowlist(mTempWhitelistAppIdArray, uid,
+                    adding, durationMs, type, reasonCode, reason, callingUid);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
@@ -4428,7 +4457,8 @@ public class DeviceIdleController extends SystemService
                     if (removePkg) {
                         removePowerSaveTempAllowlistAppChecked(arg, shell.userId);
                     } else {
-                        addPowerSaveTempAllowlistAppChecked(arg, duration, shell.userId, "shell");
+                        addPowerSaveTempAllowlistAppChecked(arg, duration, shell.userId,
+                                REASON_SHELL, "shell");
                     }
                 } catch (Exception e) {
                     pw.println("Failed: " + e);

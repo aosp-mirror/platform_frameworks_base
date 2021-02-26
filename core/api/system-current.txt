@@ -643,8 +643,9 @@ package android.app {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method public void setDontSendToRestrictedApps(boolean);
-    method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
-    method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(int, long);
+    method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(int, long);
     method public android.os.Bundle toBundle();
   }
 
@@ -8627,11 +8628,18 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToWhitelist(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToWhitelist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void removeFromWhitelist(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long, int, @Nullable String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, int, @Nullable String);
     field public static final int EVENT_MMS = 2; // 0x2
     field public static final int EVENT_SMS = 1; // 0x1
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
+    field public static final int REASON_ACTIVITY_RECOGNITION = 102; // 0x66
+    field public static final int REASON_GEOFENCING = 100; // 0x64
+    field public static final int REASON_OTHER = 1; // 0x1
+    field public static final int REASON_PUSH_MESSAGING = 101; // 0x65
+    field public static final int REASON_UNKNOWN = 0; // 0x0
     field public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0; // 0x0
     field public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1; // 0x1
   }
