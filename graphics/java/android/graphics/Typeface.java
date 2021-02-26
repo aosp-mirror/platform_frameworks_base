@@ -172,7 +172,7 @@ public class Typeface {
      * @hide
      */
     @UnsupportedAppUsage
-    public long native_instance;
+    public final long native_instance;
 
     private Runnable mCleaner;
 
@@ -207,6 +207,7 @@ public class Typeface {
     private static final int STYLE_NORMAL = 0;
     private static final int STYLE_ITALIC = 1;
 
+    @GuardedBy("this")
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 

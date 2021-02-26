@@ -112,7 +112,7 @@ final class UpdatableFontDir {
     private final File mConfigFile;
     private final File mTmpConfigFile;
 
-    private long mLastModifiedDate;
+    private long mLastModifiedMillis;
     private int mConfigVersion = 1;
 
     /**
@@ -147,7 +147,7 @@ final class UpdatableFontDir {
     /* package */ void loadFontFileMap() {
         mFontFileInfoMap.clear();
         mFontFamilyMap.clear();
-        mLastModifiedDate = 0;
+        mLastModifiedMillis = 0;
         boolean success = false;
         try {
             PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
@@ -157,7 +157,7 @@ final class UpdatableFontDir {
                 Slog.e(TAG, "Failed to load config xml file", e);
                 return;
             }
-            mLastModifiedDate = config.lastModifiedDate;
+            mLastModifiedMillis = config.lastModifiedMillis;
 
             File[] dirs = mFilesDir.listFiles();
             if (dirs == null) return;
@@ -200,7 +200,7 @@ final class UpdatableFontDir {
             if (!success) {
                 mFontFileInfoMap.clear();
                 mFontFamilyMap.clear();
-                mLastModifiedDate = 0;
+                mLastModifiedMillis = 0;
                 FileUtils.deleteContents(mFilesDir);
             }
         }
@@ -211,7 +211,7 @@ final class UpdatableFontDir {
         FileUtils.deleteContents(mFilesDir);
         mFontFamilyMap.clear();
 
-        mLastModifiedDate = Instant.now().getEpochSecond();
+        mLastModifiedMillis = System.currentTimeMillis();
         try (FileOutputStream fos = new FileOutputStream(mConfigFile)) {
             PersistentSystemFontConfig.writeToXml(fos, createPersistentConfig());
         } catch (Exception e) {
@@ -231,7 +231,7 @@ final class UpdatableFontDir {
         // Backup the mapping for rollback.
         ArrayMap<String, FontFileInfo> backupMap = new ArrayMap<>(mFontFileInfoMap);
         ArrayMap<String, FontConfig.FontFamily> backupFamilies = new ArrayMap<>(mFontFamilyMap);
-        long backupLastModifiedDate = mLastModifiedDate;
+        long backupLastModifiedDate = mLastModifiedMillis;
         boolean success = false;
         try {
             for (FontUpdateRequest request : requests) {
@@ -247,7 +247,7 @@ final class UpdatableFontDir {
             }
 
             // Write config file.
-            mLastModifiedDate = Instant.now().getEpochSecond();
+            mLastModifiedMillis = Instant.now().getEpochSecond();
             try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
                 PersistentSystemFontConfig.writeToXml(fos, createPersistentConfig());
             } catch (Exception e) {
@@ -269,7 +269,7 @@ final class UpdatableFontDir {
                 mFontFileInfoMap.putAll(backupMap);
                 mFontFamilyMap.clear();
                 mFontFamilyMap.putAll(backupFamilies);
-                mLastModifiedDate = backupLastModifiedDate;
+                mLastModifiedMillis = backupLastModifiedDate;
             }
         }
     }
@@ -527,7 +527,7 @@ final class UpdatableFontDir {
 
     private PersistentSystemFontConfig.Config createPersistentConfig() {
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
-        config.lastModifiedDate = mLastModifiedDate;
+        config.lastModifiedMillis = mLastModifiedMillis;
         for (FontFileInfo info : mFontFileInfoMap.values()) {
             config.updatedFontDirs.add(info.getRandomizedFontDir().getName());
         }
@@ -560,7 +560,7 @@ final class UpdatableFontDir {
         // which will be used as a fallback font without being overridden.
         mergedFamilies.addAll(mFontFamilyMap.values());
         return new FontConfig(
-                mergedFamilies, config.getAliases(), mLastModifiedDate, mConfigVersion);
+                mergedFamilies, config.getAliases(), mLastModifiedMillis, mConfigVersion);
     }
 
     /* package */ int getConfigVersion() {
