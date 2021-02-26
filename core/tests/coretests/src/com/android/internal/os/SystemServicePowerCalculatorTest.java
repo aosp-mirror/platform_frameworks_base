@@ -78,6 +78,7 @@ public class SystemServicePowerCalculatorTest {
     }
 
     @Test
+    @SkipPresubmit("b/180015146")
     public void testPowerProfileBasedModel() {
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
