@@ -11634,9 +11634,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
                 healthCheckParams.unhealthyMonitoringMs =
                         INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+                // Continue monitoring health and loading progress of active incremental packages
                 mIncrementalManager.registerHealthListener(parsedPackage.getPath(),
                         healthCheckParams,
                         new IncrementalHealthListener(parsedPackage.getPackageName()));
+                final IncrementalStatesCallback incrementalStatesCallback =
+                        new IncrementalStatesCallback(parsedPackage.getPackageName(),
+                                UserHandle.getUid(UserHandle.ALL, pkgSetting.appId),
+                                getInstalledUsers(pkgSetting, UserHandle.USER_ALL));
+                pkgSetting.setIncrementalStatesCallback(incrementalStatesCallback);
+                mIncrementalManager.registerLoadingProgressCallback(parsedPackage.getPath(),
+                        new IncrementalProgressListener(parsedPackage.getPackageName()));
             }
         }
         return scanResult.pkgSetting.pkg;
@@ -19420,6 +19428,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mIncrementalManager.unregisterLoadingProgressCallbacks(codePath);
             // Unregister health listener as it will always be healthy from now
             mIncrementalManager.unregisterHealthListener(codePath);
+            // Make sure the information is preserved
+            scheduleWriteSettingsLocked();
         }
 
         @Override
@@ -19482,11 +19492,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting ps;
             synchronized (mLock) {
                 ps = mSettings.getPackageLPr(mPackageName);
+                if (ps == null) {
+                    return;
+                }
+                ps.setLoadingProgress(progress);
             }
-            if (ps == null) {
-                return;
-            }
-            ps.setLoadingProgress(progress);
         }
     }
 
