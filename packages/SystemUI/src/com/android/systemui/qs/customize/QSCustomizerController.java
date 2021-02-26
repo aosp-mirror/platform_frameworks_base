@@ -17,9 +17,7 @@
 package com.android.systemui.qs.customize;
 
 import static com.android.systemui.qs.customize.QSCustomizer.EXTRA_QS_CUSTOMIZING;
-import static com.android.systemui.qs.customize.QSCustomizer.MENU_REMOVE_LABELS;
 import static com.android.systemui.qs.customize.QSCustomizer.MENU_RESET;
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -38,7 +36,6 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSFragment;
-import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -46,14 +43,12 @@ import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /** {@link ViewController} for {@link QSCustomizer}. */
 @QSScope
@@ -67,8 +62,6 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     private final ConfigurationController mConfigurationController;
     private final UiEventLogger mUiEventLogger;
     private final Toolbar mToolbar;
-    private final TunerService mTunerService;
-    private final boolean mQsLabelsFlag;
 
     private final OnMenuItemClickListener mOnMenuItemClickListener = new OnMenuItemClickListener() {
         @Override
@@ -76,11 +69,6 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
             if (item.getItemId() == MENU_RESET) {
                 mUiEventLogger.log(QSEditEvent.QS_EDIT_RESET);
                 reset();
-            } else if (item.getItemId() == MENU_REMOVE_LABELS) {
-                item.setChecked(!item.isChecked());
-                mTunerService.setValue(
-                        QSPanelController.QS_REMOVE_LABELS, item.isChecked() ? "1" : "0");
-                return false;
             }
             return false;
         }
@@ -111,20 +99,11 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         }
     };
 
-    private final TunerService.Tunable mTunable = new TunerService.Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            mToolbar.getMenu().findItem(MENU_REMOVE_LABELS)
-                    .setChecked(newValue != null && !("0".equals(newValue)));
-        }
-    };
-
     @Inject
     protected QSCustomizerController(QSCustomizer view, TileQueryHelper tileQueryHelper,
             QSTileHost qsTileHost, TileAdapter tileAdapter, ScreenLifecycle screenLifecycle,
             KeyguardStateController keyguardStateController, LightBarController lightBarController,
-            ConfigurationController configurationController, UiEventLogger uiEventLogger,
-            TunerService tunerService, @Named(QS_LABELS_FLAG) boolean qsLabelsFlag) {
+            ConfigurationController configurationController, UiEventLogger uiEventLogger) {
         super(view);
         mTileQueryHelper = tileQueryHelper;
         mQsTileHost = qsTileHost;
@@ -136,21 +115,12 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         mUiEventLogger = uiEventLogger;
 
         mToolbar = mView.findViewById(com.android.internal.R.id.action_bar);
-        mQsLabelsFlag = qsLabelsFlag;
-
-        mTunerService = tunerService;
     }
 
-    @Override
-    protected void onInit() {
-        super.onInit();
-        mView.getRemoveItem().setVisible(mQsLabelsFlag);
-    }
 
     @Override
     protected void onViewAttached() {
         mView.updateNavBackDrop(getResources().getConfiguration(), mLightBarController);
-        mTunerService.addTunable(mTunable, QSPanelController.QS_REMOVE_LABELS);
 
         mConfigurationController.addCallback(mConfigurationListener);
 
@@ -181,7 +151,6 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     @Override
     protected void onViewDetached() {
-        mTunerService.removeTunable(mTunable);
         mTileQueryHelper.setListener(null);
         mToolbar.setOnMenuItemClickListener(null);
         mConfigurationController.removeCallback(mConfigurationListener);
