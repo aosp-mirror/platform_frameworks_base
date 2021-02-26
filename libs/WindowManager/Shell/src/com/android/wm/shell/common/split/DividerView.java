@@ -36,11 +36,13 @@ import androidx.annotation.Nullable;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.DisplayImeController;
 
 /**
- * Stack divider for app pair.
+ * Divider for multi window splits.
  */
-public class DividerView extends FrameLayout implements View.OnTouchListener {
+public class DividerView extends FrameLayout implements View.OnTouchListener,
+        DisplayImeController.ImePositionProcessor {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
@@ -56,6 +58,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private boolean mMoving;
     private int mStartPos;
     private GestureDetector mDoubleTapDetector;
+    private boolean mInteractive;
 
     public DividerView(@NonNull Context context) {
         super(context);
@@ -91,12 +94,19 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
+        mInteractive = true;
         setOnTouchListener(this);
     }
 
     @Override
+    public void onImeVisibilityChanged(int displayId, boolean isShowing) {
+        if (displayId != getDisplay().getDisplayId()) return;
+        setInteractive(!isShowing);
+    }
+
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (mSplitLayout == null) {
+        if (mSplitLayout == null || !mInteractive) {
             return false;
         }
 
@@ -200,6 +210,13 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             lp.flags &= ~FLAG_SLIPPERY;
         }
         mViewHost.relayout(lp);
+    }
+
+    private void setInteractive(boolean interactive) {
+        if (interactive == mInteractive) return;
+        mInteractive = interactive;
+        releaseTouching();
+        mHandle.setVisibility(mInteractive ? View.VISIBLE : View.INVISIBLE);
     }
 
     private boolean isLandscape() {

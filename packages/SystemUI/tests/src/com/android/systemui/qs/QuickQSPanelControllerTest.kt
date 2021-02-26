@@ -87,7 +87,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 qsLogger,
                 dumpManager,
-                false,
                 featureFlags
         )
 

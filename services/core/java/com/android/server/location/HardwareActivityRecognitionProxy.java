@@ -17,7 +17,6 @@
 package com.android.server.location;
 
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.location.ActivityRecognitionHardware;
 import android.hardware.location.IActivityRecognitionHardwareClient;
@@ -27,6 +26,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.server.ServiceWatcher;
+import com.android.server.ServiceWatcher.BoundService;
 
 /**
  * Proxy class to bind GmsCore to the ActivityRecognitionHardware.
@@ -82,7 +82,7 @@ public class HardwareActivityRecognitionProxy {
         return resolves;
     }
 
-    private void onBind(IBinder binder, ComponentName service) throws RemoteException {
+    private void onBind(IBinder binder, BoundService service) throws RemoteException {
         String descriptor = binder.getInterfaceDescriptor();
 
         if (IActivityRecognitionHardwareWatcher.class.getCanonicalName().equals(descriptor)) {

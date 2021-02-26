@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.app.Instrumentation
-import android.os.Bundle
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
@@ -41,7 +40,7 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
     protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
         .launcherStrategy.supportedLauncherPackage
 
-    protected open val transition: FlickerBuilder.(Bundle) -> Unit
+    protected open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setup {
                 eachRun {
@@ -70,7 +69,7 @@ abstract class LegacySplitScreenTransition(protected val testSpec: FlickerTestPa
         }
     }
 
-    internal open val cleanSetup: FlickerBuilder.(Bundle) -> Unit
+    internal open val cleanSetup: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setup {
                 eachRun {

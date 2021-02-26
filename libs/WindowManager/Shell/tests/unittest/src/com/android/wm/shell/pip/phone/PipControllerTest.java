@@ -124,7 +124,7 @@ public class PipControllerTest extends ShellTestCase {
         final ComponentName component1 = new ComponentName(mContext, "component1");
         when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
 
-        mPipController.mPinnedStackListener.onActivityHidden(component1);
+        mPipController.mPinnedTaskListener.onActivityHidden(component1);
 
         verify(mMockPipBoundsState).setLastPipComponentName(null);
     }
@@ -135,7 +135,7 @@ public class PipControllerTest extends ShellTestCase {
         final ComponentName component2 = new ComponentName(mContext, "component2");
         when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
 
-        mPipController.mPinnedStackListener.onActivityHidden(component2);
+        mPipController.mPinnedTaskListener.onActivityHidden(component2);
 
         verify(mMockPipBoundsState, never()).setLastPipComponentName(null);
     }

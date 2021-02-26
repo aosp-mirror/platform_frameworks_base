@@ -23,17 +23,16 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import java.io.PrintWriter;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class manages app-pairs multitasking mode and implements the main interface {@link AppPairs}.
@@ -50,12 +49,15 @@ public class AppPairsController {
     // Active app-pairs mapped by root task id key.
     private final SparseArray<AppPair> mActiveAppPairs = new SparseArray<>();
     private final DisplayController mDisplayController;
+    private final DisplayImeController mDisplayImeController;
 
     public AppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
-                DisplayController displayController, ShellExecutor mainExecutor) {
+            DisplayController displayController, ShellExecutor mainExecutor,
+            DisplayImeController displayImeController) {
         mTaskOrganizer = organizer;
         mSyncQueue = syncQueue;
         mDisplayController = displayController;
+        mDisplayImeController = displayImeController;
         mMainExecutor = mainExecutor;
     }
 
@@ -130,16 +132,20 @@ public class AppPairsController {
         }
     }
 
-    public ShellTaskOrganizer getTaskOrganizer() {
+    ShellTaskOrganizer getTaskOrganizer() {
         return mTaskOrganizer;
     }
 
-    public SyncTransactionQueue getSyncTransactionQueue() {
+    SyncTransactionQueue getSyncTransactionQueue() {
         return mSyncQueue;
     }
 
-    public DisplayController getDisplayController() {
+    DisplayController getDisplayController() {
         return mDisplayController;
+    }
+
+    DisplayImeController getDisplayImeController() {
+        return mDisplayImeController;
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {

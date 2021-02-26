@@ -423,6 +423,15 @@ public final class KeyChain {
      * credentials. This is limited to unmanaged devices. The authentication policy must be
      * provided to be able to make this request successfully.
      *
+     * <p> This intent should be started using {@link Activity#startActivityForResult(Intent, int)}
+     * to verify whether the request was successful and whether the user accepted or denied the
+     * request. If the user successfully receives and accepts the request, the result code will be
+     * {@link Activity#RESULT_OK}, otherwise the result code will be
+     * {@link Activity#RESULT_CANCELED}.
+     *
+     * <p> {@link KeyChain#isCredentialManagementApp(Context)} should be used to determine whether
+     * an app is already the credential management app.
+     *
      * @param policy The authentication policy determines which alias for a private key and
      *               certificate pair should be used for authentication.
      */
@@ -588,6 +597,55 @@ public final class KeyChain {
         intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(),
                 PendingIntent.FLAG_IMMUTABLE));
         activity.startActivity(intent);
+    }
+
+    /**
+     * Check whether the caller is the credential management app {@link CredentialManagementApp}.
+     * The credential management app has the ability to manage the user's KeyChain credentials
+     * on unmanaged devices.
+     *
+     * <p> {@link KeyChain#createManageCredentialsIntent} should be used by an app to request to
+     * become the credential management app. The user must approve this request before the app can
+     * manage the user's credentials. There can only be one credential management on the device.
+     *
+     * @return {@code true} if the caller is the credential management app.
+     */
+    public static boolean isCredentialManagementApp(@NonNull Context context) {
+        boolean isCredentialManagementApp = false;
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            isCredentialManagementApp = keyChainConnection.getService()
+                    .isCredentialManagementApp(context.getPackageName());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while checking whether the caller is the "
+                    + "credential management app.", e);
+        } catch (SecurityException e) {
+            isCredentialManagementApp = false;
+        }
+        return isCredentialManagementApp;
+    }
+
+    /**
+     * Called by the credential management app to get the authentication policy
+     * {@link AppUriAuthenticationPolicy}.
+     *
+     * @return the credential management app's authentication policy.
+     * @throws SecurityException if the caller is not the credential management app.
+     */
+    @NonNull
+    public static AppUriAuthenticationPolicy getCredentialManagementAppPolicy(
+            @NonNull Context context) throws SecurityException {
+        AppUriAuthenticationPolicy policy = null;
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            policy = keyChainConnection.getService().getCredentialManagementAppPolicy();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(
+                    "Interrupted while getting credential management app policy.", e);
+        }
+        return policy;
     }
 
     /**

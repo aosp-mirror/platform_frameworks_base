@@ -41,6 +41,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import org.junit.Before;
@@ -58,13 +59,14 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock private RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     @Mock private MainStage mMainStage;
     @Mock private SideStage mSideStage;
+    @Mock private DisplayImeController mDisplayImeController;
     private StageCoordinator mStageCoordinator;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mStageCoordinator = new TestStageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage);
+                mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage, mDisplayImeController);
     }
 
     @Test
@@ -94,9 +96,9 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         TestStageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTDAOrganizer, ShellTaskOrganizer taskOrganizer,
-                MainStage mainStage, SideStage sideStage) {
+                MainStage mainStage, SideStage sideStage, DisplayImeController imeController) {
             super(context, displayId, syncQueue, rootTDAOrganizer, taskOrganizer, mainStage,
-                    sideStage);
+                    sideStage, imeController);
 
             // Prepare default TaskDisplayArea for testing.
             mDisplayAreaInfo = new DisplayAreaInfo(

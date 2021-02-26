@@ -2267,7 +2267,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (pipChanging) {
-            mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
+            mDisplayContent.getPinnedTaskController().setPipWindowingModeChanging(true);
             // If the top activity is using fixed rotation, it should be changing from PiP to
             // fullscreen with display orientation change. Do not notify fullscreen task organizer
             // because the restoration of task surface and the transformation of activity surface
@@ -2297,7 +2297,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } finally {
             if (pipChanging) {
-                mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(false);
+                mDisplayContent.getPinnedTaskController().setPipWindowingModeChanging(false);
             }
         }
 
@@ -2361,9 +2361,7 @@ class Task extends WindowContainer<WindowContainer> {
             final int newRotation = getWindowConfiguration().getRotation();
             final boolean rotationChanged = prevRotation != newRotation;
             if (rotationChanged) {
-                mDisplayContent.rotateBounds(
-                        newParentConfig.windowConfiguration.getBounds(), prevRotation, newRotation,
-                        newBounds);
+                mDisplayContent.rotateBounds(prevRotation, newRotation, newBounds);
                 setBounds(newBounds);
             }
         }
@@ -7792,18 +7790,18 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        final PinnedStackController pinnedStackController =
-                getDisplayContent().getPinnedStackController();
+        final PinnedTaskController pinnedTaskController =
+                getDisplayContent().getPinnedTaskController();
 
-        if (Float.compare(aspectRatio, pinnedStackController.getAspectRatio()) == 0) {
+        if (Float.compare(aspectRatio, pinnedTaskController.getAspectRatio()) == 0) {
             return;
         }
 
         // Notify the pinned stack controller about aspect ratio change.
         // This would result a callback delivered from SystemUI to WM to start animation,
         // if the bounds are ought to be altered due to aspect ratio change.
-        pinnedStackController.setAspectRatio(
-                pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
+        pinnedTaskController.setAspectRatio(
+                pinnedTaskController.isValidPictureInPictureAspectRatio(aspectRatio)
                         ? aspectRatio : -1f);
     }
 
@@ -7819,7 +7817,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        getDisplayContent().getPinnedStackController().setActions(actions);
+        getDisplayContent().getPinnedTaskController().setActions(actions);
     }
 
     /** Returns true if a removal action is still being deferred. */

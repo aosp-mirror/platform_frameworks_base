@@ -36,8 +36,4 @@
         </vector>
     </item>
 
-    <item>
-        <ripple android:color="@color/GM2_grey_600"></ripple>
-    </item>
-
 </layer-list>

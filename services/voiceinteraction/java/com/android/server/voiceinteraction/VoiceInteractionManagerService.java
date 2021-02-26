@@ -76,6 +76,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
@@ -643,6 +644,10 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         ComponentName findAvailRecognizer(String prefPackage, int userHandle) {
+            if (prefPackage == null) {
+                prefPackage = getDefaultRecognizer();
+            }
+
             List<ResolveInfo> available =
                     mContext.getPackageManager().queryIntentServicesAsUser(
                             new Intent(RecognitionService.SERVICE_INTERFACE),
@@ -668,6 +673,12 @@ public class VoiceInteractionManagerService extends SystemService {
                 ServiceInfo serviceInfo = available.get(0).serviceInfo;
                 return new ComponentName(serviceInfo.packageName, serviceInfo.name);
             }
+        }
+
+        @Nullable
+        public String getDefaultRecognizer() {
+            String recognizer = mContext.getString(R.string.config_systemSpeechRecognizer);
+            return TextUtils.isEmpty(recognizer) ? null : recognizer;
         }
 
         ComponentName getCurRecognizer(int userHandle) {

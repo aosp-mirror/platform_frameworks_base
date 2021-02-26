@@ -371,7 +371,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     public GnssLocationProvider(Context context, Injector injector, GnssNative gnssNative,
             GnssMetrics gnssMetrics) {
-        super(FgThread.getExecutor(), CallerIdentity.fromContext(context), PROPERTIES);
+        super(FgThread.getExecutor(), CallerIdentity.fromContext(context), PROPERTIES,
+                /*locationTags*/ null);
 
         mContext = context;
         mGnssNative = gnssNative;

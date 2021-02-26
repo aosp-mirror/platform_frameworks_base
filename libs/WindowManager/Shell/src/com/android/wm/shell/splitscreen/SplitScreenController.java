@@ -42,6 +42,7 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
@@ -62,18 +63,20 @@ public class SplitScreenController implements DragAndDropPolicy.Starter {
     private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     private final ShellExecutor mMainExecutor;
     private final SplitScreenImpl mImpl = new SplitScreenImpl();
+    private final DisplayImeController mDisplayImeController;
 
     private StageCoordinator mStageCoordinator;
 
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor, DisplayImeController displayImeController) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
         mRootTDAOrganizer = rootTDAOrganizer;
         mMainExecutor = mainExecutor;
+        mDisplayImeController = displayImeController;
     }
 
     public SplitScreen asSplitScreen() {
@@ -84,7 +87,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter {
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mRootTDAOrganizer, mTaskOrganizer);
+                    mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController);
         }
     }
 

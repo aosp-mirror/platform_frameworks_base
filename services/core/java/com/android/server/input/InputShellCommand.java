@@ -29,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -199,6 +200,8 @@ public class InputShellCommand extends ShellCommand {
                 runRoll(inputSource, displayId);
             }  else if ("motionevent".equals(arg)) {
                 runMotionEvent(inputSource, displayId);
+            } else if ("keycombination".equals(arg)) {
+                runKeyCombination(inputSource, displayId);
             } else {
                 handleDefaultCommands(arg);
             }
@@ -224,7 +227,7 @@ public class InputShellCommand extends ShellCommand {
             out.println();
             out.println("The commands and default sources are:");
             out.println("      text <string> (Default: touchscreen)");
-            out.println("      keyevent [--longpress] <key code number or name> ..."
+            out.println("      keyevent [--longpress|--doubletap] <key code number or name> ..."
                     + " (Default: keyboard)");
             out.println("      tap <x> <y> (Default: touchscreen)");
             out.println("      swipe <x1> <y1> <x2> <y2> [duration(ms)]"
@@ -234,6 +237,8 @@ public class InputShellCommand extends ShellCommand {
             out.println("      press (Default: trackball)");
             out.println("      roll <dx> <dy> (Default: trackball)");
             out.println("      motionevent <DOWN|UP|MOVE|CANCEL> <x> <y> (Default: touchscreen)");
+            out.println("      keycombination <key code 1> <key code 2> ..."
+                    + " (Default: keyboard)");
         }
     }
 
@@ -282,6 +287,14 @@ public class InputShellCommand extends ShellCommand {
         final boolean longpress = "--longpress".equals(arg);
         if (longpress) {
             arg = getNextArgRequired();
+        } else {
+            final boolean doubleTap = "--doubletap".equals(arg);
+            if (doubleTap) {
+                arg = getNextArgRequired();
+                final int keycode = KeyEvent.keyCodeFromString(arg);
+                sendKeyDoubleTap(inputSource, keycode, displayId);
+                return;
+            }
         }
 
         do {
@@ -292,20 +305,30 @@ public class InputShellCommand extends ShellCommand {
 
     private void sendKeyEvent(int inputSource, int keyCode, boolean longpress, int displayId) {
         final long now = SystemClock.uptimeMillis();
-        int repeatCount = 0;
 
-        KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, repeatCount,
+        KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0 /* repeatCount */,
                 0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                 inputSource);
         event.setDisplayId(displayId);
 
         injectKeyEvent(event);
         if (longpress) {
-            repeatCount++;
-            injectKeyEvent(KeyEvent.changeTimeRepeat(event, now, repeatCount,
+            // Some long press behavior would check the event time, we set a new event time here.
+            final long nextEventTime = now + ViewConfiguration.getGlobalActionKeyTimeout();
+            injectKeyEvent(KeyEvent.changeTimeRepeat(event, nextEventTime, 1 /* repeatCount */,
                     KeyEvent.FLAG_LONG_PRESS));
         }
         injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
+    }
+
+    private void sendKeyDoubleTap(int inputSource, int keyCode, int displayId) {
+        sendKeyEvent(inputSource, keyCode, false, displayId);
+        try {
+            Thread.sleep(ViewConfiguration.getDoubleTapMinTime());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        sendKeyEvent(inputSource, keyCode, false, displayId);
     }
 
     private void runTap(int inputSource, int displayId) {
@@ -439,5 +462,60 @@ public class InputShellCommand extends ShellCommand {
 
         final long now = SystemClock.uptimeMillis();
         injectMotionEvent(inputSource, action, now, now, x, y, pressure, displayId);
+    }
+
+    private void runKeyCombination(int inputSource, int displayId) {
+        String arg = getNextArgRequired();
+        ArrayList<Integer> keyCodes = new ArrayList<>();
+
+        while (arg != null) {
+            final int keyCode = KeyEvent.keyCodeFromString(arg);
+            if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
+                throw new IllegalArgumentException("Unknown keycode: " + arg);
+            }
+            keyCodes.add(keyCode);
+            arg = getNextArg();
+        }
+
+        // At least 2 keys.
+        if (keyCodes.size() < 2) {
+            throw new IllegalArgumentException("keycombination requires at least 2 keycodes");
+        }
+
+        sendKeyCombination(inputSource, keyCodes, displayId);
+    }
+
+    private void injectKeyEventAsync(KeyEvent event) {
+        InputManager.getInstance().injectInputEvent(event,
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    private void sendKeyCombination(int inputSource, ArrayList<Integer> keyCodes, int displayId) {
+        final long now = SystemClock.uptimeMillis();
+        final int count = keyCodes.size();
+        final KeyEvent[] events = new KeyEvent[count];
+        for (int i = 0; i < count; i++) {
+            final KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCodes.get(i), 0,
+                    0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
+                    inputSource);
+            event.setDisplayId(displayId);
+            events[i] = event;
+        }
+
+        for (KeyEvent event: events) {
+            // Use async inject so interceptKeyBeforeQueueing or interceptKeyBeforeDispatching could
+            // handle keys.
+            injectKeyEventAsync(event);
+        }
+
+        try {
+            Thread.sleep(ViewConfiguration.getTapTimeout());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (KeyEvent event: events) {
+            injectKeyEventAsync(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
+        }
     }
 }

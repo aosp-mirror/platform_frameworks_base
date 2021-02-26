@@ -46,6 +46,9 @@ public class FeatureFlagUtils {
             "settings_do_not_restore_preserved";
     /** @hide */
     public static final String SETTINGS_PROVIDER_MODEL = "settings_provider_model";
+    /** @hide */
+    public static final String SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES
+            = "settings_use_new_backup_eligibility_rules";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -68,6 +71,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_silky_home", "false");
         DEFAULT_FLAGS.put("settings_contextual_home", "false");
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "false");
+        DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

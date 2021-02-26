@@ -27,9 +27,11 @@ public class LocalTransportParameters extends KeyValueSettingObserver {
     private static final String SETTING = Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS;
     private static final String KEY_FAKE_ENCRYPTION_FLAG = "fake_encryption_flag";
     private static final String KEY_NON_INCREMENTAL_ONLY = "non_incremental_only";
+    private static final String KEY_IS_DEVICE_TRANSFER = "is_device_transfer";
 
     private boolean mFakeEncryptionFlag;
     private boolean mIsNonIncrementalOnly;
+    private boolean mIsDeviceTransfer;
 
     public LocalTransportParameters(Handler handler, ContentResolver resolver) {
         super(handler, resolver, Settings.Secure.getUriFor(SETTING));
@@ -43,6 +45,10 @@ public class LocalTransportParameters extends KeyValueSettingObserver {
         return mIsNonIncrementalOnly;
     }
 
+    boolean isDeviceTransfer() {
+        return mIsDeviceTransfer;
+    }
+
     public String getSettingValue(ContentResolver resolver) {
         return Settings.Secure.getString(resolver, SETTING);
     }
@@ -50,5 +56,6 @@ public class LocalTransportParameters extends KeyValueSettingObserver {
     public void update(KeyValueListParser parser) {
         mFakeEncryptionFlag = parser.getBoolean(KEY_FAKE_ENCRYPTION_FLAG, false);
         mIsNonIncrementalOnly = parser.getBoolean(KEY_NON_INCREMENTAL_ONLY, false);
+        mIsDeviceTransfer = parser.getBoolean(KEY_IS_DEVICE_TRANSFER, false);
     }
 }

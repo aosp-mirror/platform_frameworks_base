@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -30,6 +31,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import com.android.internal.backup.IBackupTransport;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -56,6 +58,7 @@ public class UserBackupManagerServiceTest {
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
     @Mock TransportClient mTransportClient;
+    @Mock IBackupTransport mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
 
 
@@ -132,6 +135,33 @@ public class UserBackupManagerServiceTest {
         assertThat(params.mBackupEligibilityRules).isEqualTo(mBackupEligibilityRules);
     }
 
+    @Test
+    public void testGetOperationTypeFromTransport_returnsBackupByDefault()
+            throws Exception {
+        when(mTransportClient.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mBackupTransport.getTransportFlags()).thenReturn(0);
+
+        int operationType = mService.getOperationTypeFromTransport(mTransportClient);
+
+        assertThat(operationType).isEqualTo(OperationType.BACKUP);
+    }
+
+    @Test
+    public void testGetOperationTypeFromTransport_returnsMigrationForMigrationTransport()
+            throws Exception {
+        // This is a temporary flag to control the new behaviour until it's ready to be fully
+        // rolled out.
+        mService.shouldUseNewBackupEligibilityRules = true;
+
+        when(mTransportClient.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mBackupTransport.getTransportFlags()).thenReturn(
+                BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER);
+
+        int operationType = mService.getOperationTypeFromTransport(mTransportClient);
+
+        assertThat(operationType).isEqualTo(OperationType.MIGRATION);
+    }
+
     private static PackageInfo getPackageInfo(String packageName) {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -141,6 +171,7 @@ public class UserBackupManagerServiceTest {
 
     private static class TestBackupService extends UserBackupManagerService {
         boolean isEnabledStatePersisted = false;
+        boolean shouldUseNewBackupEligibilityRules = false;
 
         TestBackupService(Context context, PackageManager packageManager) {
             super(context, packageManager);
@@ -158,5 +189,10 @@ public class UserBackupManagerServiceTest {
 
         @Override
         void updateStateOnBackupEnabled(boolean wasEnabled, boolean enable) {}
+
+        @Override
+        boolean shouldUseNewBackupEligibilityRules() {
+            return shouldUseNewBackupEligibilityRules;
+        }
     }
 }

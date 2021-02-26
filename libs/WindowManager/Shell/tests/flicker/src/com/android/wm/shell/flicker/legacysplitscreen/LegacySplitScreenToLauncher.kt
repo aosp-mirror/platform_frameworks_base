@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
@@ -66,7 +65,7 @@ class LegacySplitScreenToLauncher(
         .launcherStrategy.supportedLauncherPackage
     private val testApp = SimpleAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setup {
                 test {

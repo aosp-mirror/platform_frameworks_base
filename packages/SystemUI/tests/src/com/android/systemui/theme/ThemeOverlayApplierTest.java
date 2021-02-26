@@ -32,7 +32,6 @@ import static com.android.systemui.theme.ThemeOverlayApplier.SYSUI_PACKAGE;
 import static com.android.systemui.theme.ThemeOverlayApplier.THEME_CATEGORIES;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -88,7 +87,9 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     private static final String THEMEPICKER_PACKAGE = "com.android.wallpaper";
     private static final String LAUNCHER_PACKAGE = "com.android.launcher3";
     private static final UserHandle TEST_USER = UserHandle.of(5);
-    private static final Set<UserHandle> TEST_USER_HANDLES = Sets.newHashSet(TEST_USER);
+    private static final UserHandle TEST_USER_MANAGED_PROFILE = UserHandle.of(6);
+    private static final Set<UserHandle> TEST_USER_HANDLES =
+            Sets.newHashSet(TEST_USER_MANAGED_PROFILE);
 
     @Mock
     OverlayManager mOverlayManager;
@@ -159,13 +160,19 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
                                 THEMEPICKER_PACKAGE, OVERLAY_CATEGORY_ICON_THEME_PICKER, false),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_THEME_PICKER,
                                 THEMEPICKER_PACKAGE, OVERLAY_CATEGORY_ICON_THEME_PICKER, true)));
+
+        OverlayInfo launcherTargetInfo = new OverlayInfo("packageName", LAUNCHER_PACKAGE,
+                null, null, "/", 0, 0, 0, false);
+        when(mOverlayManager.getOverlayInfo(any(OverlayIdentifier.class), any()))
+                .thenReturn(launcherTargetInfo);
         clearInvocations(mOverlayManager);
         verify(mDumpManager).registerDumpable(any(), any());
     }
 
     @Test
     public void allCategoriesSpecified_allEnabledExclusively() {
-        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER_HANDLES);
+        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER.getIdentifier(),
+                TEST_USER_HANDLES);
         verify(mOverlayManager).commit(any());
 
         for (OverlayIdentifier overlayPackage : ALL_CATEGORIES_MAP.values()) {
@@ -176,7 +183,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
 
     @Test
     public void allCategoriesSpecified_sysuiCategoriesAlsoAppliedToSysuiUser() {
-        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER_HANDLES);
+        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER.getIdentifier(),
+                TEST_USER_HANDLES);
 
         for (Map.Entry<String, OverlayIdentifier> entry : ALL_CATEGORIES_MAP.entrySet()) {
             if (SYSTEM_USER_CATEGORIES.contains(entry.getKey())) {
@@ -192,39 +200,29 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
     @Test
     public void allCategoriesSpecified_enabledForAllUserHandles() {
         Set<UserHandle> userHandles = Sets.newHashSet(TEST_USER_HANDLES);
-        UserHandle newUserHandle = UserHandle.of(10);
-        userHandles.add(newUserHandle);
-        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, userHandles);
+        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER.getIdentifier(),
+                userHandles);
 
         for (OverlayIdentifier overlayPackage : ALL_CATEGORIES_MAP.values()) {
             verify(mTransactionBuilder).setEnabled(eq(overlayPackage), eq(true),
                     eq(TEST_USER.getIdentifier()));
-            verify(mTransactionBuilder).setEnabled(eq(overlayPackage), eq(true),
-                    eq(newUserHandle.getIdentifier()));
+            // Not enabled for work profile because the target package is LAUNCHER_PACKAGE
+            verify(mTransactionBuilder, never()).setEnabled(eq(overlayPackage), eq(true),
+                    eq(TEST_USER_MANAGED_PROFILE.getIdentifier()));
         }
     }
 
     @Test
     public void applyCurrentUserOverlays_createsPendingOverlays() {
-        Set<UserHandle> userHandles = Sets.newHashSet(TEST_USER_HANDLES);
-        UserHandle newUserHandle = UserHandle.of(10);
-        userHandles.add(newUserHandle);
-        FabricatedOverlay[] pendingCreation = new FabricatedOverlay[] {
+        FabricatedOverlay[] pendingCreation = new FabricatedOverlay[]{
                 mock(FabricatedOverlay.class)
         };
-        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, pendingCreation, userHandles);
+        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, pendingCreation,
+                TEST_USER.getIdentifier(), TEST_USER_HANDLES);
 
         for (FabricatedOverlay overlay : pendingCreation) {
             verify(mTransactionBuilder).registerFabricatedOverlay(eq(overlay));
         }
-    }
-
-    @Test
-    public void allCategoriesSpecified_overlayManagerNotQueried() {
-        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, null, TEST_USER_HANDLES);
-
-        verify(mOverlayManager, never())
-                .getOverlayInfosForTarget(anyString(), any(UserHandle.class));
     }
 
     @Test
@@ -233,7 +231,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         categoryToPackage.remove(OVERLAY_CATEGORY_ICON_SETTINGS);
         categoryToPackage.remove(OVERLAY_CATEGORY_ICON_ANDROID);
 
-        mManager.applyCurrentUserOverlays(categoryToPackage, null, TEST_USER_HANDLES);
+        mManager.applyCurrentUserOverlays(categoryToPackage, null, TEST_USER.getIdentifier(),
+                TEST_USER_HANDLES);
 
         for (OverlayIdentifier overlayPackage : categoryToPackage.values()) {
             verify(mTransactionBuilder).setEnabled(eq(overlayPackage), eq(true),
@@ -249,7 +248,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
 
     @Test
     public void zeroCategoriesSpecified_allDisabled() {
-        mManager.applyCurrentUserOverlays(Maps.newArrayMap(), null, TEST_USER_HANDLES);
+        mManager.applyCurrentUserOverlays(Maps.newArrayMap(), null, TEST_USER.getIdentifier(),
+                TEST_USER_HANDLES);
 
         for (String category : THEME_CATEGORIES) {
             verify(mTransactionBuilder).setEnabled(
@@ -263,7 +263,8 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         Map<String, OverlayIdentifier> categoryToPackage = new HashMap<>(ALL_CATEGORIES_MAP);
         categoryToPackage.put("blah.category", new OverlayIdentifier("com.example.blah.category"));
 
-        mManager.applyCurrentUserOverlays(categoryToPackage, null, TEST_USER_HANDLES);
+        mManager.applyCurrentUserOverlays(categoryToPackage, null, TEST_USER.getIdentifier(),
+                TEST_USER_HANDLES);
 
         verify(mTransactionBuilder, never()).setEnabled(
                 eq(new OverlayIdentifier("com.example.blah.category")), eq(false),
@@ -271,23 +272,6 @@ public class ThemeOverlayApplierTest extends SysuiTestCase {
         verify(mTransactionBuilder, never()).setEnabled(
                 eq(new OverlayIdentifier("com.example.blah.category")), eq(true),
                 eq(TEST_USER.getIdentifier()));
-    }
-
-    @Test
-    public void overlayManagerOnlyQueriedForUnspecifiedPackages() {
-        Map<String, OverlayIdentifier> categoryToPackage = new HashMap<>(ALL_CATEGORIES_MAP);
-        categoryToPackage.remove(OVERLAY_CATEGORY_ICON_SETTINGS);
-
-        mManager.applyCurrentUserOverlays(categoryToPackage, null, TEST_USER_HANDLES);
-
-        verify(mOverlayManager).getOverlayInfosForTarget(SETTINGS_PACKAGE, UserHandle.SYSTEM);
-        verify(mOverlayManager, never()).getOverlayInfosForTarget(ANDROID_PACKAGE,
-                UserHandle.SYSTEM);
-        verify(mOverlayManager, never()).getOverlayInfosForTarget(SYSUI_PACKAGE, UserHandle.SYSTEM);
-        verify(mOverlayManager, never()).getOverlayInfosForTarget(LAUNCHER_PACKAGE,
-                UserHandle.SYSTEM);
-        verify(mOverlayManager, never()).getOverlayInfosForTarget(THEMEPICKER_PACKAGE,
-                UserHandle.SYSTEM);
     }
 
     private static OverlayInfo createOverlayInfo(String packageName, String targetPackageName,

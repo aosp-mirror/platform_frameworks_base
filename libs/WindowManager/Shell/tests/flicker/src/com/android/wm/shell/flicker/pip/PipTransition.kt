@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.app.Instrumentation
 import android.content.Intent
-import android.os.Bundle
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -38,7 +37,7 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     protected val isRotated = testSpec.config.startRotation.isRotated()
     protected val pipApp = PipAppHelper(instrumentation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
-    protected abstract val transition: FlickerBuilder.(Bundle) -> Unit
+    protected abstract val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
 
     // Helper class to process test actions by broadcast.
     protected class BroadcastActionTrigger(private val instrumentation: Instrumentation) {
@@ -81,7 +80,7 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     /**
      * Gets a configuration that handles basic setup and teardown of pip tests
      */
-    protected val setupAndTeardown: FlickerBuilder.(Bundle) -> Unit
+    protected val setupAndTeardown: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             setup {
                 test {
@@ -112,8 +111,8 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     protected open fun buildTransition(
         eachRun: Boolean,
         stringExtras: Map<String, String> = mapOf(Components.PipActivity.EXTRA_ENTER_PIP to "true"),
-        extraSpec: FlickerBuilder.(Bundle) -> Unit = {}
-    ): FlickerBuilder.(Bundle) -> Unit {
+        extraSpec: FlickerBuilder.(Map<String, Any?>) -> Unit = {}
+    ): FlickerBuilder.(Map<String, Any?>) -> Unit {
         return { configuration ->
             setupAndTeardown(this, configuration)
 

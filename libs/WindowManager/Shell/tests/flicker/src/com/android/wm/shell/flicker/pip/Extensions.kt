@@ -48,7 +48,7 @@ fun WindowManagerStateSubject.isInPipMode(
     activity: ComponentName
 ): WindowManagerStateSubject = apply {
     val windowName = activity.toWindowName()
-    hasWindow(windowName)
+    contains(windowName)
     val pinnedWindows = wmState.pinnedWindows
         .map { it.title }
     Truth.assertWithMessage("Window not in PIP mode")

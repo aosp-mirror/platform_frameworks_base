@@ -1213,7 +1213,7 @@ public class BubbleController {
 
     /** PinnedStackListener that dispatches IME visibility updates to the stack. */
     //TODO(b/170442945): Better way to do this / insets listener?
-    private class BubblesImeListener extends PinnedStackListenerForwarder.PinnedStackListener {
+    private class BubblesImeListener extends PinnedStackListenerForwarder.PinnedTaskListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             if (mStackView != null) {
