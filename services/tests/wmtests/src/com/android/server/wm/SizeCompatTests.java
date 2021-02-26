@@ -605,13 +605,13 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldUseSizeCompatModeOnResizableTask() {
+    public void testShouldCreateCompatDisplayInsetsOnResizeableTask() {
         setUpDisplaySizeWithApp(1000, 2500);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
 
-        // Create a size compat activity on the same task.
+        // Create an activity on the same task.
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setTask(mTask)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
@@ -636,23 +636,147 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
-    public void testNoSizeCompatWhenPerAppOverrideSet() {
+    public void testShouldCreateCompatDisplayInsetsWhenUnresizeableAndSupportsSizeChangesTrue() {
         setUpDisplaySizeWithApp(1000, 2500);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
 
-        // Create a size compat activity on the same task.
+        // Create an activity on the same task.
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setTask(mTask)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setSupportsSizeChanges(true)
                 .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .setComponent(ComponentName.createRelative(mContext,
                         SizeCompatTests.class.getName()))
                 .setUid(android.os.Process.myUid())
                 .build();
         assertFalse(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    public void testShouldCreateCompatDisplayInsetsWhenUnresizeableAndSupportsSizeChangesFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setSupportsSizeChanges(false)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        assertTrue(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    public void testShouldCreateCompatDisplayInsetsWhenResizeableAndSupportsSizeChangesFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_RESIZEABLE)
+                .setSupportsSizeChanges(false)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    public void
+            testShouldCreateCompatDisplayInsetsWhenUnfixedOrientationSupportsSizeChangesFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setSupportsSizeChanges(false)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
+    public void testShouldCreateCompatDisplayInsetsWhenForceResizeAppOverrideSet() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setSupportsSizeChanges(false)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testShouldCreateCompatDisplayInsetsWhenForceNonResizeOverrideSet() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_RESIZEABLE)
+                .setSupportsSizeChanges(true)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        assertTrue(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testShouldCreateCompatDisplayInsetsWhenForceNonResizeSetAndUnfixedOrientation() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_RESIZEABLE)
+                .setSupportsSizeChanges(true)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+        assertTrue(activity.shouldCreateCompatDisplayInsets());
     }
 
     @Test
