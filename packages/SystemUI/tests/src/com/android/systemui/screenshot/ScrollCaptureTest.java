@@ -19,15 +19,14 @@ package com.android.systemui.screenshot;
 import static org.junit.Assert.fail;
 
 import android.content.Intent;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.util.Log;
 import android.view.Display;
 import android.view.IScrollCaptureCallbacks;
-import android.view.IScrollCaptureConnection;
 import android.view.IWindowManager;
+import android.view.ScrollCaptureResponse;
 import android.view.WindowManagerGlobal;
 
 import androidx.test.filters.SmallTest;
@@ -67,18 +66,10 @@ public class ScrollCaptureTest extends SysuiTestCase {
             wms.requestScrollCapture(Display.DEFAULT_DISPLAY, null, -1,
                     new IScrollCaptureCallbacks.Stub() {
                         @Override
-                        public void onConnected(
-                                IScrollCaptureConnection connection, Rect scrollBounds,
-                                Point positionInWindow) {
-                            Log.d(TAG,
-                                    "client connected: " + connection + "[scrollBounds= "
-                                            + scrollBounds + ", "
-                                            + "positionInWindow=" + positionInWindow + "]");
+                        public void onScrollCaptureResponse(ScrollCaptureResponse response)
+                                throws RemoteException {
+                            Log.d(TAG, "onScrollCaptureResponse: " + response);
                             latch.countDown();
-                        }
-
-                        @Override
-                        public void onUnavailable() {
                         }
 
                         @Override
@@ -86,12 +77,16 @@ public class ScrollCaptureTest extends SysuiTestCase {
                         }
 
                         @Override
-                        public void onCaptureBufferSent(long frameNumber, Rect capturedArea) {
+                        public void onImageRequestCompleted(int i, Rect rect)
+                                throws RemoteException {
+
                         }
 
                         @Override
-                        public void onConnectionClosed() {
+                        public void onCaptureEnded() throws RemoteException {
+
                         }
+
                     });
         } catch (RemoteException e) {
             Log.e(TAG, "request failed", e);

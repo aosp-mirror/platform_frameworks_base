@@ -47579,6 +47579,32 @@ package android.view {
     method public void onScaleEnd(android.view.ScaleGestureDetector);
   }
 
+  @UiThread public interface ScrollCaptureCallback {
+    method public void onScrollCaptureEnd(@NonNull Runnable);
+    method public void onScrollCaptureImageRequest(@NonNull android.view.ScrollCaptureSession, @NonNull android.os.CancellationSignal, @NonNull android.graphics.Rect, @NonNull java.util.function.Consumer<android.graphics.Rect>);
+    method public void onScrollCaptureSearch(@NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.graphics.Rect>);
+    method public void onScrollCaptureStart(@NonNull android.view.ScrollCaptureSession, @NonNull android.os.CancellationSignal, @NonNull Runnable);
+  }
+
+  public class ScrollCaptureSession {
+    ctor public ScrollCaptureSession(@NonNull android.view.Surface, @NonNull android.graphics.Rect, @NonNull android.graphics.Point);
+    method @NonNull public android.graphics.Point getPositionInWindow();
+    method @NonNull public android.graphics.Rect getScrollBounds();
+    method @NonNull public android.view.Surface getSurface();
+  }
+
+  public final class ScrollCaptureTarget {
+    ctor public ScrollCaptureTarget(@NonNull android.view.View, @NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull android.view.ScrollCaptureCallback);
+    method @NonNull public android.view.ScrollCaptureCallback getCallback();
+    method @NonNull public android.view.View getContainingView();
+    method public int getHint();
+    method @NonNull public android.graphics.Rect getLocalVisibleRect();
+    method @NonNull public android.graphics.Point getPositionInWindow();
+    method @Nullable public android.graphics.Rect getScrollBounds();
+    method public void setScrollBounds(@Nullable android.graphics.Rect);
+    method @UiThread public void updatePositionInWindow();
+  }
+
   public class SearchEvent {
     ctor public SearchEvent(android.view.InputDevice);
     method public android.view.InputDevice getInputDevice();
@@ -47905,6 +47931,7 @@ package android.view {
     method public void dispatchProvideStructure(android.view.ViewStructure);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
+    method public void dispatchScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
     method protected void dispatchSetActivated(boolean);
     method protected void dispatchSetPressed(boolean);
     method protected void dispatchSetSelected(boolean);
@@ -48064,6 +48091,7 @@ package android.view {
     method public int getScrollBarFadeDuration();
     method public int getScrollBarSize();
     method public int getScrollBarStyle();
+    method public int getScrollCaptureHint();
     method public int getScrollIndicators();
     method public final int getScrollX();
     method public final int getScrollY();
@@ -48232,6 +48260,7 @@ package android.view {
     method public void onRtlPropertiesChanged(int);
     method @CallSuper @Nullable protected android.os.Parcelable onSaveInstanceState();
     method public void onScreenStateChanged(int);
+    method public void onScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
     method protected void onScrollChanged(int, int, int, int);
     method protected boolean onSetAlpha(int);
     method protected void onSizeChanged(int, int, int, int);
@@ -48414,6 +48443,8 @@ package android.view {
     method public void setScrollBarFadeDuration(int);
     method public void setScrollBarSize(int);
     method public void setScrollBarStyle(int);
+    method public final void setScrollCaptureCallback(@Nullable android.view.ScrollCaptureCallback);
+    method public void setScrollCaptureHint(int);
     method public void setScrollContainer(boolean);
     method public void setScrollIndicators(int);
     method public void setScrollIndicators(int, int);
@@ -48592,6 +48623,10 @@ package android.view {
     field public static final int SCROLL_AXIS_HORIZONTAL = 1; // 0x1
     field public static final int SCROLL_AXIS_NONE = 0; // 0x0
     field public static final int SCROLL_AXIS_VERTICAL = 2; // 0x2
+    field public static final int SCROLL_CAPTURE_HINT_AUTO = 0; // 0x0
+    field public static final int SCROLL_CAPTURE_HINT_EXCLUDE = 1; // 0x1
+    field public static final int SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS = 4; // 0x4
+    field public static final int SCROLL_CAPTURE_HINT_INCLUDE = 2; // 0x2
     field public static final int SCROLL_INDICATOR_BOTTOM = 2; // 0x2
     field public static final int SCROLL_INDICATOR_END = 32; // 0x20
     field public static final int SCROLL_INDICATOR_LEFT = 4; // 0x4
@@ -49376,6 +49411,7 @@ package android.view {
     method public abstract boolean performContextMenuIdentifierAction(int, int);
     method public abstract boolean performPanelIdentifierAction(int, int, int);
     method public abstract boolean performPanelShortcut(int, int, android.view.KeyEvent, int);
+    method public void registerScrollCaptureCallback(@NonNull android.view.ScrollCaptureCallback);
     method public final void removeOnFrameMetricsAvailableListener(android.view.Window.OnFrameMetricsAvailableListener);
     method public boolean requestFeature(int);
     method @NonNull public final <T extends android.view.View> T requireViewById(@IdRes int);
@@ -49455,6 +49491,7 @@ package android.view {
     method public abstract void takeKeyEvents(boolean);
     method public abstract void takeSurface(android.view.SurfaceHolder.Callback2);
     method public abstract void togglePanel(int, android.view.KeyEvent);
+    method public void unregisterScrollCaptureCallback(@NonNull android.view.ScrollCaptureCallback);
     field public static final int DECOR_CAPTION_SHADE_AUTO = 0; // 0x0
     field public static final int DECOR_CAPTION_SHADE_DARK = 2; // 0x2
     field public static final int DECOR_CAPTION_SHADE_LIGHT = 1; // 0x1
