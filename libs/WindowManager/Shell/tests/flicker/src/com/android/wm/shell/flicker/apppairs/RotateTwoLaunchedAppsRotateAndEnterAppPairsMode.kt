@@ -76,17 +76,8 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(isRotated)
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerRotatesAndScales_Flaky() {
-        Assume.assumeTrue(isRotated)
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales(
+        Surface.ROTATION_0, testSpec.config.endRotation)
 
     @Presubmit
     @Test
