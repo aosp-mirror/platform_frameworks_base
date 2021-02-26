@@ -207,7 +207,7 @@ public class ViewRootImplTest {
         final CountDownLatch latch = new CountDownLatch(1);
         mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureCallbacks.Default() {
             @Override
-            public void onUnavailable() {
+            public void onScrollCaptureResponse(ScrollCaptureResponse response) {
                 latch.countDown();
             }
         });
@@ -217,6 +217,37 @@ public class ViewRootImplTest {
             }
         } catch (InterruptedException e) { /* ignore */ }
         fail("requestScrollCapture did not respond");
+    }
+
+    /**
+     * Ensure scroll capture request handles a ViewRootImpl with no view tree.
+     */
+    @Test
+    public void requestScrollCapture_timeout() {
+        final View view = new View(mContext);
+        view.setScrollCaptureCallback(new TestScrollCaptureCallback()); // Does nothing
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowManager.LayoutParams wmlp =
+                    new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+            // Set a fake token to bypass 'is your activity running' check
+            wmlp.token = new Binder();
+            view.setLayoutParams(wmlp);
+            mViewRootImpl.setView(view, wmlp, null);
+        });
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        mViewRootImpl.setScrollCaptureRequestTimeout(100);
+        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureCallbacks.Default() {
+            @Override
+            public void onScrollCaptureResponse(ScrollCaptureResponse response) {
+                latch.countDown();
+            }
+        });
+        try {
+            if (!latch.await(2500, TimeUnit.MILLISECONDS)) {
+                fail("requestScrollCapture timeout did not occur");
+            }
+        } catch (InterruptedException e) { /* ignore */ }
     }
 
     /**
