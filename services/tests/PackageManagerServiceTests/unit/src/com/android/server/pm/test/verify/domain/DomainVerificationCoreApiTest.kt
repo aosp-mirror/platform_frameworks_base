@@ -16,8 +16,9 @@
 
 package com.android.server.pm.test.verify.domain
 
-import android.content.pm.verify.domain.DomainVerificationRequest
+import android.content.pm.verify.domain.DomainSet
 import android.content.pm.verify.domain.DomainVerificationInfo
+import android.content.pm.verify.domain.DomainVerificationRequest
 import android.content.pm.verify.domain.DomainVerificationUserSelection
 import android.os.Parcel
 import android.os.Parcelable
@@ -27,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.util.UUID
+import kotlin.random.Random
 
 @RunWith(Parameterized::class)
 class DomainVerificationCoreApiTest {
@@ -40,18 +42,25 @@ class DomainVerificationCoreApiTest {
             assertThat(value).containsExactlyEntriesIn(other)
         }
 
+        private val massiveSet by lazy {
+            val fragmentOf21 = ".com.example.test.app"
+            val list = mutableListOf("prefix$fragmentOf21")
+            var totalSize = 0
+            // Slightly overshoot a size of 1MB
+            while (totalSize < (1024 * 512)) {
+                val nextValue = "${list.last()}$fragmentOf21"
+                totalSize += nextValue.length
+                list += nextValue
+            }
+            list.toSet()
+        }
+
         @JvmStatic
-        @Parameterized.Parameters
+        @Parameterized.Parameters(name = "{0}")
         fun parameters() = arrayOf(
             Parameter(
-                initial = {
-                    DomainVerificationRequest(
-                        setOf(
-                            "com.test.pkg.one",
-                            "com.test.pkg.two"
-                        )
-                    )
-                },
+                testName = "DomainVerificationRequest",
+                initial = { DomainVerificationRequest(massiveSet) },
                 unparcel = { DomainVerificationRequest.CREATOR.createFromParcel(it) },
                 assertion = { first, second ->
                     assertAll<DomainVerificationRequest, Set<String>>(first, second,
@@ -61,15 +70,12 @@ class DomainVerificationCoreApiTest {
                 }
             ),
             Parameter(
+                testName = "DomainVerificationInfo",
                 initial = {
                     DomainVerificationInfo(
                         UUID.fromString("703f6d34-6241-4cfd-8176-2e1d23355811"),
                         "com.test.pkg",
-                        mapOf(
-                            "example.com" to 0,
-                            "example.org" to 1,
-                            "example.new" to 1000
-                        )
+                        massiveSet.withIndex().associate { it.value to it.index }
                     )
                 },
                 unparcel = { DomainVerificationInfo.CREATOR.createFromParcel(it) },
@@ -86,17 +92,15 @@ class DomainVerificationCoreApiTest {
                 }
             ),
             Parameter(
+                testName = "DomainVerificationUserSelection",
                 initial = {
                     DomainVerificationUserSelection(
                         UUID.fromString("703f6d34-6241-4cfd-8176-2e1d23355811"),
                         "com.test.pkg",
                         UserHandle.of(10),
                         true,
-                        mapOf(
-                            "example.com" to true,
-                            "example.org" to false,
-                            "example.new" to true
-                        )
+                        massiveSet.withIndex()
+                            .associate { it.value to (it.index % 2 == 0) }
                     )
                 },
                 unparcel = { DomainVerificationUserSelection.CREATOR.createFromParcel(it) },
@@ -119,16 +123,30 @@ class DomainVerificationCoreApiTest {
                         { it.component5() }, IS_MAP_EQUAL_TO
                     )
                 }
+            ),
+            Parameter(
+                testName = "DomainSet",
+                initial = { DomainSet(massiveSet) },
+                unparcel = { DomainSet.CREATOR.createFromParcel(it) },
+                assertion = { first, second ->
+                    assertAll<DomainSet, Set<String>>(
+                        first, second,
+                        { it.domains }, assertion = IS_EQUAL_TO
+                    )
+                }
             )
         )
 
         class Parameter<T : Parcelable>(
+            val testName: String,
             val initial: () -> T,
             val unparcel: (Parcel) -> T,
             private val assertion: (first: T, second: T) -> Unit
         ) {
             @Suppress("UNCHECKED_CAST")
             fun assert(first: Any, second: Any) = assertion(first as T, second as T)
+
+            override fun toString() = testName
         }
 
         private fun <T> assertAll(vararg values: T, block: (value: T, other: T) -> Unit) {
@@ -141,11 +159,17 @@ class DomainVerificationCoreApiTest {
             first: T,
             second: T,
             fieldValue: (T) -> V,
-            componentValue: (T) -> V,
+            componentValue: ((T) -> V)? = null,
             assertion: (value: V, other: V) -> Unit
         ) {
-            val values = arrayOf<Any>(fieldValue(first), fieldValue(second),
-                    componentValue(first), componentValue(second))
+            val values = mutableListOf<Any>(fieldValue(first), fieldValue(second))
+                .apply {
+                    componentValue?.let {
+                        add(it(first))
+                        add(it(second))
+                    }
+                }
+                .toTypedArray()
             values.indices.drop(1).forEach {
                 @Suppress("UNCHECKED_CAST")
                 assertion(values[0] as V, values[it] as V)
