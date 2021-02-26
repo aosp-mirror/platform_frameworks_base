@@ -113,10 +113,6 @@ public abstract class ActivityManagerInternal {
             IBinder allowlistToken, long duration, @TempAllowListType int type,
             @ReasonCode int reasonCode, @Nullable String reason);
 
-    @Deprecated
-    public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
-            IBinder allowlistToken, long duration, @TempAllowListType int type);
-
     /**
      * Returns the flags set for a {@link PendingIntent}.
      */
