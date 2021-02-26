@@ -150,7 +150,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void dozeTimeTick() {
+    public void dozeTimeTick() throws RemoteException {
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD);
+        mFgExecutor.runAllReady();
         mUdfpsController.dozeTimeTick();
         verify(mUdfpsView).dozeTimeTick();
     }
@@ -240,7 +243,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void registersViewForCallbacks() throws RemoteException {
-        verify(mStatusBarStateController).addCallback(mUdfpsView);
-        verify(mStatusBar).addExpansionChangedListener(mUdfpsView);
+        verify(mStatusBarStateController).addCallback(mUdfpsController.mStatusBarStateListener);
+        verify(mStatusBar).addExpansionChangedListener(
+                mUdfpsController.mStatusBarExpansionListener);
     }
 }
