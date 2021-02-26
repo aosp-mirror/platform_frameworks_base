@@ -174,9 +174,4 @@ public class QSTileView extends QSTileBaseView {
         mLabelContainer.setClickable(false);
         mLabelContainer.setLongClickable(false);
     }
-
-    @Override
-    public void setShowLabels(boolean show) {
-        mHandler.post(() -> mLabelContainer.setVisibility(show ? VISIBLE : GONE));
-    }
 }
