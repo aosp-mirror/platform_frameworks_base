@@ -21,6 +21,7 @@ import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -173,8 +174,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
-        when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
-                new NetworkCapabilities[] { mNetCapabilities });
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
         doAnswer(invocation -> {
             int rssi = invocation.getArgument(0);
@@ -257,8 +256,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mMockCm, atLeastOnce())
             .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
-        mDefaultCallbackInWifiTracker = callbackArg.getAllValues().get(0);
-        mDefaultCallbackInNetworkController = callbackArg.getAllValues().get(1);
+        int captureSize = callbackArg.getAllValues().size();
+        assertTrue(captureSize > 1);
+        assertEquals(captureSize % 2, 0);
+        mDefaultCallbackInWifiTracker = callbackArg.getAllValues().get(captureSize - 2);
+        mDefaultCallbackInNetworkController = callbackArg.getAllValues().get(captureSize - 1);
         assertNotNull(mDefaultCallbackInWifiTracker);
         assertNotNull(mDefaultCallbackInNetworkController);
         verify(mMockCm, atLeastOnce()).registerNetworkCallback(
@@ -307,14 +309,18 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setLevel(DEFAULT_LEVEL);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_UMTS);
+        setConnectivityViaCallbackInNetworkController(
+                NetworkCapabilities.TRANSPORT_CELLULAR, true, true, null);
         setConnectivityViaBroadcast(
-            NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
+                NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
     public void setConnectivityViaBroadcastForVcn(
             int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
         mNetCapabilities.setTransportInfo(info);
         setConnectivityCommon(networkType, validated, isConnected);
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
         mNetworkController.onReceive(mContext, i);
     }
@@ -322,6 +328,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
         mNetworkController.onReceive(mContext, i);
     }
