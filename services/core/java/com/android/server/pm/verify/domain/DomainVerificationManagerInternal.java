@@ -310,7 +310,7 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     @ApprovalLevel
     int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
-            @UserIdInt int userId);
+            @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId);
 
     /**
      * @return the domain verification set ID for the given package, or null if the ID is
