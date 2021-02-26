@@ -39,6 +39,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -771,4 +772,20 @@ public class ShortcutManager {
         }
     }
 
+    /**
+     * Granting another app the access to the shortcuts you own. You must provide the package name
+     * and their SHA256 certificate digest in order to granting the access.
+     *
+     * Once granted, the other app can retain a copy of all the shortcuts you own when calling
+     * {@link LauncherApps#getShortcuts(LauncherApps.ShortcutQuery, UserHandle)}.
+     */
+    public void updateShortcutVisibility(@NonNull final String packageName,
+            @Nullable final byte[] certificate, final boolean visible) {
+        try {
+            mService.updateShortcutVisibility(mContext.getPackageName(), packageName, certificate,
+                    visible, injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
