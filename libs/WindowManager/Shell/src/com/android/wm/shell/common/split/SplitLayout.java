@@ -119,17 +119,17 @@ public final class SplitLayout {
 
     /** Gets bounds of the primary split. */
     public Rect getBounds1() {
-        return mBounds1;
+        return new Rect(mBounds1);
     }
 
     /** Gets bounds of the secondary split. */
     public Rect getBounds2() {
-        return mBounds2;
+        return new Rect(mBounds2);
     }
 
     /** Gets bounds of divider window. */
     public Rect getDividerBounds() {
-        return mDividerBounds;
+        return new Rect(mDividerBounds);
     }
 
     /** Returns leash of the current divider bar. */
@@ -308,18 +308,21 @@ public final class SplitLayout {
     /** Apply recorded surface layout to the {@link SurfaceControl.Transaction}. */
     public void applySurfaceChanges(SurfaceControl.Transaction t, SurfaceControl leash1,
             SurfaceControl leash2, SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
+        final Rect dividerBounds = mImePositionProcessor.adjustForIme(mDividerBounds);
+        final Rect bounds1 = mImePositionProcessor.adjustForIme(mBounds1);
+        final Rect bounds2 = mImePositionProcessor.adjustForIme(mBounds2);
         final SurfaceControl dividerLeash = getDividerLeash();
         if (dividerLeash != null) {
-            t.setPosition(dividerLeash, mDividerBounds.left, mDividerBounds.top)
+            t.setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
                     // Resets layer of divider bar to make sure it is always on top.
                     .setLayer(dividerLeash, Integer.MAX_VALUE);
         }
 
-        t.setPosition(leash1, mBounds1.left, mBounds1.top)
-                .setWindowCrop(leash1, mBounds1.width(), mBounds1.height());
+        t.setPosition(leash1, bounds1.left, bounds1.top)
+                .setWindowCrop(leash1, bounds1.width(), bounds1.height());
 
-        t.setPosition(leash2, mBounds2.left, mBounds2.top)
-                .setWindowCrop(leash2, mBounds2.width(), mBounds2.height());
+        t.setPosition(leash2, bounds2.left, bounds2.top)
+                .setWindowCrop(leash2, bounds2.width(), bounds2.height());
 
         mImePositionProcessor.applySurfaceDimValues(t, dimLayer1, dimLayer2);
     }
@@ -327,8 +330,8 @@ public final class SplitLayout {
     /** Apply recorded task layout to the {@link WindowContainerTransaction}. */
     public void applyTaskChanges(WindowContainerTransaction wct,
             ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2) {
-        wct.setBounds(task1.token, mBounds1)
-                .setBounds(task2.token, mBounds2);
+        wct.setBounds(task1.token, mImePositionProcessor.adjustForIme(mBounds1))
+                .setBounds(task2.token, mImePositionProcessor.adjustForIme(mBounds2));
     }
 
     /** Handles layout change event. */
@@ -363,12 +366,15 @@ public final class SplitLayout {
 
         private final int mDisplayId;
 
+        private int mYOffsetForIme;
         private float mDimValue1;
         private float mDimValue2;
 
         private int mStartImeTop;
         private int mEndImeTop;
 
+        private int mTargetYOffset;
+        private int mLastYOffset;
         private float mTargetDim1;
         private float mTargetDim2;
         private float mLastDim1;
@@ -395,6 +401,12 @@ public final class SplitLayout {
             mTargetDim2 = imeTargetPosition == SPLIT_POSITION_TOP_OR_LEFT && showing
                     ? ADJUSTED_NONFOCUS_DIM : 0.0f;
 
+            // Calculate target bounds offset for IME
+            mLastYOffset = mYOffsetForIme;
+            final boolean needOffset = imeTargetPosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                    && !isFloating && !isLandscape(mRootBounds) && showing;
+            mTargetYOffset = needOffset ? getTargetYOffset() : 0;
+
             // Make {@link DividerView} non-interactive while IME showing in split mode. Listen to
             // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
             // because DividerView won't receive onImeVisibilityChanged callback after it being
@@ -420,6 +432,13 @@ public final class SplitLayout {
             mSplitLayoutHandler.onBoundsChanging(SplitLayout.this);
         }
 
+        private int getTargetYOffset() {
+            final int desireOffset = Math.abs(mEndImeTop - mStartImeTop);
+            // Make sure to keep at least 30% visible for the top split.
+            final int maxOffset = (int) (mBounds1.height() * ADJUSTED_SPLIT_FRACTION_MAX);
+            return -Math.min(desireOffset, maxOffset);
+        }
+
         @SplitPosition
         private int getImeTargetPosition() {
             final WindowContainerToken token = mTaskOrganizer.getImeTarget(mDisplayId);
@@ -433,6 +452,8 @@ public final class SplitLayout {
         private void onProgress(float progress) {
             mDimValue1 = getProgressValue(mLastDim1, mTargetDim1, progress);
             mDimValue2 = getProgressValue(mLastDim2, mTargetDim2, progress);
+            mYOffsetForIme =
+                    (int) getProgressValue((float) mLastYOffset, (float) mTargetYOffset, progress);
         }
 
         private float getProgressValue(float start, float end, float progress) {
@@ -440,7 +461,15 @@ public final class SplitLayout {
         }
 
         private void reset() {
+            mYOffsetForIme = 0;
             mDimValue1 = mDimValue2 = 0.0f;
+        }
+
+        /* Adjust bounds with IME offset. */
+        private Rect adjustForIme(Rect bounds) {
+            final Rect temp = new Rect(bounds);
+            if (mYOffsetForIme != 0) temp.offset(0, mYOffsetForIme);
+            return temp;
         }
 
         private void applySurfaceDimValues(SurfaceControl.Transaction t, SurfaceControl dimLayer1,
