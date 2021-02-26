@@ -29,6 +29,7 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class PeopleSpaceTile implements Parcelable {
     private String mId;
     private CharSequence mUserName;
     private Icon mUserIcon;
-    private int mUid;
+    private UserHandle mUserHandle;
     private Uri mContactUri;
     private String mPackageName;
     private String mBirthdayText;
@@ -64,7 +65,7 @@ public class PeopleSpaceTile implements Parcelable {
         mUserName = b.mUserName;
         mUserIcon = b.mUserIcon;
         mContactUri = b.mContactUri;
-        mUid = b.mUid;
+        mUserHandle = b.mUserHandle;
         mPackageName = b.mPackageName;
         mBirthdayText = b.mBirthdayText;
         mLastInteractionTimestamp = b.mLastInteractionTimestamp;
@@ -95,8 +96,8 @@ public class PeopleSpaceTile implements Parcelable {
         return mContactUri;
     }
 
-    public int getUid() {
-        return mUid;
+    public UserHandle getUserHandle() {
+        return mUserHandle;
     }
 
     public String getPackageName() {
@@ -165,7 +166,7 @@ public class PeopleSpaceTile implements Parcelable {
         Builder builder =
                 new Builder(mId, mUserName.toString(), mUserIcon, mIntent);
         builder.setContactUri(mContactUri);
-        builder.setUid(mUid);
+        builder.setUserHandle(mUserHandle);
         builder.setPackageName(mPackageName);
         builder.setBirthdayText(mBirthdayText);
         builder.setLastInteractionTimestamp(mLastInteractionTimestamp);
@@ -186,7 +187,7 @@ public class PeopleSpaceTile implements Parcelable {
         private CharSequence mUserName;
         private Icon mUserIcon;
         private Uri mContactUri;
-        private int mUid;
+        private UserHandle mUserHandle;
         private String mPackageName;
         private String mBirthdayText;
         private long mLastInteractionTimestamp;
@@ -212,7 +213,7 @@ public class PeopleSpaceTile implements Parcelable {
             mId = info.getId();
             mUserName = info.getLabel();
             mUserIcon = convertDrawableToIcon(launcherApps.getShortcutIconDrawable(info, 0));
-            mUid = info.getUserId();
+            mUserHandle = info.getUserHandle();
             mPackageName = info.getPackage();
             mContactUri = getContactUri(info);
         }
@@ -222,7 +223,7 @@ public class PeopleSpaceTile implements Parcelable {
             mId = info.getId();
             mUserName = info.getLabel();
             mUserIcon = convertDrawableToIcon(launcherApps.getShortcutIconDrawable(info, 0));
-            mUid = info.getUserId();
+            mUserHandle = info.getUserHandle();
             mPackageName = info.getPackage();
             mContactUri = getContactUri(info);
             mStatuses = channel.getStatuses();
@@ -265,9 +266,9 @@ public class PeopleSpaceTile implements Parcelable {
             return this;
         }
 
-        /** Sets the associated uid. */
-        public Builder setUid(int uid) {
-            mUid = uid;
+        /** Sets the associated {@code userHandle}. */
+        public Builder setUserHandle(UserHandle userHandle) {
+            mUserHandle = userHandle;
             return this;
         }
 
@@ -349,7 +350,7 @@ public class PeopleSpaceTile implements Parcelable {
         mUserName = in.readCharSequence();
         mUserIcon = in.readParcelable(Icon.class.getClassLoader());
         mContactUri = in.readParcelable(Uri.class.getClassLoader());
-        mUid = in.readInt();
+        mUserHandle = in.readParcelable(UserHandle.class.getClassLoader());
         mPackageName = in.readString();
         mBirthdayText = in.readString();
         mLastInteractionTimestamp = in.readLong();
@@ -375,7 +376,7 @@ public class PeopleSpaceTile implements Parcelable {
         dest.writeCharSequence(mUserName);
         dest.writeParcelable(mUserIcon, flags);
         dest.writeParcelable(mContactUri, flags);
-        dest.writeInt(mUid);
+        dest.writeParcelable(mUserHandle, flags);
         dest.writeString(mPackageName);
         dest.writeString(mBirthdayText);
         dest.writeLong(mLastInteractionTimestamp);
