@@ -462,7 +462,6 @@ cc_defaults {
     whole_static_libs: ["libskia"],
 
     srcs: [
-        ":inputconstants_aidl",
         "canvas/CanvasFrontend.cpp",
         "canvas/CanvasOpBuffer.cpp",
         "canvas/CanvasOpRasterizer.cpp",
@@ -589,9 +588,6 @@ cc_library {
             version_script: "libhwui.map.txt",
         }
     },
-    shared_libs: [
-        "libbinder",
-    ],
 }
 
 cc_library_static {

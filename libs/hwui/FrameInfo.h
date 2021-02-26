@@ -16,7 +16,6 @@
 #ifndef FRAMEINFO_H_
 #define FRAMEINFO_H_
 
-#include <android/os/IInputConstants.h>
 #include "utils/Macros.h"
 
 #include <cutils/compiler.h>
@@ -81,8 +80,6 @@ public:
     explicit UiFrameInfoBuilder(int64_t* buffer) : mBuffer(buffer) {
         memset(mBuffer, 0, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
         set(FrameInfoIndex::FrameTimelineVsyncId) = INVALID_VSYNC_ID;
-        // The struct is zeroed by memset above. Avoid calling set for FrameInfoIndex::InputEventId.
-        static_assert(0 == android::os::IInputConstants::INVALID_INPUT_EVENT_ID);
         set(FrameInfoIndex::FrameDeadline) = std::numeric_limits<int64_t>::max();
     }
 
