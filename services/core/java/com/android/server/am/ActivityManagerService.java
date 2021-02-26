@@ -15127,13 +15127,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder allowlistToken,
-                long duration, int type) {
-            mPendingIntentController.setPendingIntentAllowlistDuration(target, allowlistToken,
-                    duration, type, REASON_UNKNOWN, "");
-        }
-
-        @Override
         public int getPendingIntentFlags(IIntentSender target) {
             return mPendingIntentController.getPendingIntentFlags(target);
         }
