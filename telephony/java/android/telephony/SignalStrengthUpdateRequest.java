@@ -187,7 +187,7 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
         return mIsSystemThresholdReportingRequestedWhileIdle;
     }
 
-    /*
+    /**
      * @return the live token of the request
      *
      * @hide

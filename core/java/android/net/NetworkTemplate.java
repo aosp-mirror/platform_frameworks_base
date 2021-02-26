@@ -23,6 +23,7 @@ import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
@@ -99,6 +100,22 @@ public class NetworkTemplate implements Parcelable {
      */
     public static final int NETWORK_TYPE_5G_NSA = -2;
 
+    /**
+     * Value to match both OEM managed and unmanaged networks (all networks).
+     * @hide
+     */
+    public static final int OEM_MANAGED_ALL = -1;
+    /**
+     * Value to match networks which are not OEM managed.
+     * @hide
+     */
+    public static final int OEM_MANAGED_NO = OEM_NONE;
+    /**
+     * Value to match any OEM managed network.
+     * @hide
+     */
+    public static final int OEM_MANAGED_YES = -2;
+
     private static boolean isKnownMatchRule(final int rule) {
         switch (rule) {
             case MATCH_MOBILE:
@@ -151,10 +168,10 @@ public class NetworkTemplate implements Parcelable {
             @NetworkType int ratType) {
         if (TextUtils.isEmpty(subscriberId)) {
             return new NetworkTemplate(MATCH_MOBILE_WILDCARD, null, null, null,
-                    METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType);
+                    METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType, OEM_MANAGED_ALL);
         }
         return new NetworkTemplate(MATCH_MOBILE, subscriberId, new String[]{subscriberId}, null,
-                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType);
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType, OEM_MANAGED_ALL);
     }
 
     /**
@@ -235,6 +252,9 @@ public class NetworkTemplate implements Parcelable {
     private final int mDefaultNetwork;
     private final int mSubType;
 
+    // Bitfield containing OEM network properties{@code NetworkIdentity#OEM_*}.
+    private final int mOemManaged;
+
     @UnsupportedAppUsage
     public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
         this(matchRule, subscriberId, new String[] { subscriberId }, networkId);
@@ -243,11 +263,12 @@ public class NetworkTemplate implements Parcelable {
     public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
             String networkId) {
         this(matchRule, subscriberId, matchSubscriberIds, networkId, METERED_ALL, ROAMING_ALL,
-                DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL);
+                DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_MANAGED_ALL);
     }
 
     public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
-            String networkId, int metered, int roaming, int defaultNetwork, int subType) {
+            String networkId, int metered, int roaming, int defaultNetwork, int subType,
+            int oemManaged) {
         mMatchRule = matchRule;
         mSubscriberId = subscriberId;
         mMatchSubscriberIds = matchSubscriberIds;
@@ -256,6 +277,7 @@ public class NetworkTemplate implements Parcelable {
         mRoaming = roaming;
         mDefaultNetwork = defaultNetwork;
         mSubType = subType;
+        mOemManaged = oemManaged;
 
         if (!isKnownMatchRule(matchRule)) {
             Log.e(TAG, "Unknown network template rule " + matchRule
@@ -272,6 +294,7 @@ public class NetworkTemplate implements Parcelable {
         mRoaming = in.readInt();
         mDefaultNetwork = in.readInt();
         mSubType = in.readInt();
+        mOemManaged = in.readInt();
     }
 
     @Override
@@ -284,6 +307,7 @@ public class NetworkTemplate implements Parcelable {
         dest.writeInt(mRoaming);
         dest.writeInt(mDefaultNetwork);
         dest.writeInt(mSubType);
+        dest.writeInt(mOemManaged);
     }
 
     @Override
@@ -319,13 +343,16 @@ public class NetworkTemplate implements Parcelable {
         if (mSubType != NETWORK_TYPE_ALL) {
             builder.append(", subType=").append(mSubType);
         }
+        if (mOemManaged != OEM_MANAGED_ALL) {
+            builder.append(", oemManaged=").append(mOemManaged);
+        }
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mMatchRule, mSubscriberId, mNetworkId, mMetered, mRoaming,
-                mDefaultNetwork, mSubType);
+                mDefaultNetwork, mSubType, mOemManaged);
     }
 
     @Override
@@ -338,7 +365,8 @@ public class NetworkTemplate implements Parcelable {
                     && mMetered == other.mMetered
                     && mRoaming == other.mRoaming
                     && mDefaultNetwork == other.mDefaultNetwork
-                    && mSubType == other.mSubType;
+                    && mSubType == other.mSubType
+                    && mOemManaged == other.mOemManaged;
         }
         return false;
     }
@@ -384,6 +412,7 @@ public class NetworkTemplate implements Parcelable {
         if (!matchesMetered(ident)) return false;
         if (!matchesRoaming(ident)) return false;
         if (!matchesDefaultNetwork(ident)) return false;
+        if (!matchesOemNetwork(ident)) return false;
 
         switch (mMatchRule) {
             case MATCH_MOBILE:
@@ -423,6 +452,13 @@ public class NetworkTemplate implements Parcelable {
         return (mDefaultNetwork == DEFAULT_NETWORK_ALL)
             || (mDefaultNetwork == DEFAULT_NETWORK_YES && ident.mDefaultNetwork)
             || (mDefaultNetwork == DEFAULT_NETWORK_NO && !ident.mDefaultNetwork);
+    }
+
+    private boolean matchesOemNetwork(NetworkIdentity ident) {
+        return (mOemManaged == OEM_MANAGED_ALL)
+            || (mOemManaged == OEM_MANAGED_YES
+                    && ident.mOemManaged != OEM_NONE)
+            || (mOemManaged == ident.mOemManaged);
     }
 
     private boolean matchesCollapsedRatType(NetworkIdentity ident) {

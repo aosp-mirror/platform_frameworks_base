@@ -32,10 +32,6 @@ import android.os.ServiceManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -195,133 +191,6 @@ public final class UwbManager {
     }
 
     /**
-     * Check if ranging is supported, regardless of ranging method
-     *
-     * @return true if ranging is supported
-     */
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public boolean isRangingSupported() {
-        try {
-            return mUwbAdapter.isRangingSupported();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE,
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D,
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL,
-            ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL})
-    public @interface AngleOfArrivalSupportType {}
-
-    /**
-     * Indicate absence of support for angle of arrival measurement
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE = 1;
-
-    /**
-     * Indicate support for planar angle of arrival measurement, due to antenna
-     * limitation. Typically requires at least two antennas.
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D = 2;
-
-    /**
-     * Indicate support for three dimensional angle of arrival measurement.
-     * Typically requires at least three antennas. However, due to antenna
-     * arrangement, a platform may only support hemi-spherical azimuth angles
-     * ranging from -pi/2 to pi/2
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL = 3;
-
-    /**
-     * Indicate support for three dimensional angle of arrival measurement.
-     * Typically requires at least three antennas. This mode supports full
-     * azimuth angles ranging from -pi to pi.
-     */
-    public static final int ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL = 4;
-
-    /**
-     * Gets the {@link AngleOfArrivalSupportType} supported on this platform
-     * <p>Possible return values are
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE},
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D},
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL},
-     * {@link #ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL}.
-     *
-     * @return angle of arrival type supported
-     */
-    @AngleOfArrivalSupportType
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public int getAngleOfArrivalSupport() {
-        try {
-            switch (mUwbAdapter.getAngleOfArrivalSupport()) {
-                case AngleOfArrivalSupport.TWO_DIMENSIONAL:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D;
-
-                case AngleOfArrivalSupport.THREE_DIMENSIONAL_HEMISPHERICAL:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL;
-
-                case AngleOfArrivalSupport.THREE_DIMENSIONAL_SPHERICAL:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL;
-
-                case AngleOfArrivalSupport.NONE:
-                default:
-                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE;
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get a {@link List} of supported channel numbers based on the device's current location
-     * <p>The returned values are ordered by the system's desired ordered of use, with the first
-     * entry being the most preferred.
-     *
-     * <p>Channel numbers are defined based on the IEEE 802.15.4z standard for UWB.
-     *
-     * @return {@link List} of supported channel numbers ordered by preference
-     */
-    @NonNull
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public List<Integer> getSupportedChannelNumbers() {
-        List<Integer> channels = new ArrayList<>();
-        try {
-            for (int channel : mUwbAdapter.getSupportedChannels()) {
-                channels.add(channel);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return channels;
-    }
-
-    /**
-     * Get a {@link List} of supported preamble code indices
-     * <p> Preamble code indices are defined based on the IEEE 802.15.4z standard for UWB.
-     *
-     * @return {@link List} of supported preamble code indices
-     */
-    @NonNull
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public Set<Integer> getSupportedPreambleCodeIndices() {
-        Set<Integer> preambles = new HashSet<>();
-        try {
-            for (int preamble : mUwbAdapter.getSupportedPreambleCodes()) {
-                preambles.add(preamble);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return preambles;
-    }
-
-    /**
      * Get the timestamp resolution for events in nanoseconds
      * <p>This value defines the maximum error of all timestamps for events reported to
      * {@link RangingSession.Callback}.
@@ -333,50 +202,6 @@ public final class UwbManager {
     public long elapsedRealtimeResolutionNanos() {
         try {
             return mUwbAdapter.getTimestampResolutionNanos();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the number of simultaneous sessions allowed in the system
-     *
-     * @return the maximum allowed number of simultaneously open {@link RangingSession} instances.
-     */
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public int getMaxSimultaneousSessions() {
-        try {
-            return mUwbAdapter.getMaxSimultaneousSessions();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the maximum number of remote devices in a {@link RangingSession} when the local device
-     * is the initiator.
-     *
-     * @return the maximum number of remote devices per {@link RangingSession}
-     */
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public int getMaxRemoteDevicesPerInitiatorSession() {
-        try {
-            return mUwbAdapter.getMaxRemoteDevicesPerInitiatorSession();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the maximum number of remote devices in a {@link RangingSession} when the local device
-     * is a responder.
-     *
-     * @return the maximum number of remote devices per {@link RangingSession}
-     */
-    @RequiresPermission(Manifest.permission.UWB_PRIVILEGED)
-    public int getMaxRemoteDevicesPerResponderSession() {
-        try {
-            return mUwbAdapter.getMaxRemoteDevicesPerResponderSession();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
