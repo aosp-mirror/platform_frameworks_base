@@ -520,8 +520,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mConsumeSearchKeyUp;
     boolean mPendingMetaAction;
     boolean mPendingCapsLockToggle;
-    int mMetaState;
-    int mInitialMetaState;
 
     // support for activating the lock screen while the screen is on
     private HashSet<Integer> mAllowLockscreenWhenOnDisplays = new HashSet<>();
@@ -2498,6 +2496,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
         final int displayId = event.getDisplayId();
+        final long key_consumed = -1;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
@@ -2505,7 +2504,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mKeyCombinationManager.isKeyConsumed(event)) {
-            return -1;
+            return key_consumed;
         }
 
         if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
@@ -2526,205 +2525,250 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingCapsLockToggle = false;
         }
 
-        // First we always handle the home key here, so applications
-        // can never break it, although if keyguard is on, we do let
-        // it handle it, because that gives us the correct 5 second
-        // timeout.
-        if (keyCode == KEYCODE_HOME) {
-            DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(displayId);
-            if (handler == null) {
-                handler = new DisplayHomeButtonHandler(displayId);
-                mDisplayHomeButtonHandlers.put(displayId, handler);
-            }
-            return handler.handleHomeButton(focusedToken, event);
-        } else if (keyCode == KeyEvent.KEYCODE_MENU) {
-            // Hijack modified menu keys for debugging features
-            final int chordBug = KeyEvent.META_SHIFT_ON;
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_HOME:
+                // First we always handle the home key here, so applications
+                // can never break it, although if keyguard is on, we do let
+                // it handle it, because that gives us the correct 5 second
+                // timeout.
+                DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(displayId);
+                if (handler == null) {
+                    handler = new DisplayHomeButtonHandler(displayId);
+                    mDisplayHomeButtonHandlers.put(displayId, handler);
+                }
+                return handler.handleHomeButton(focusedToken, event);
+            case KeyEvent.KEYCODE_MENU:
+                // Hijack modified menu keys for debugging features
+                final int chordBug = KeyEvent.META_SHIFT_ON;
 
-            if (down && repeatCount == 0) {
-                if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                    Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                            null, null, null, 0, null, null);
-                    return -1;
-                }
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-            if (down) {
-                if (repeatCount == 0) {
-                    mSearchKeyShortcutPending = true;
-                    mConsumeSearchKeyUp = false;
-                }
-            } else {
-                mSearchKeyShortcutPending = false;
-                if (mConsumeSearchKeyUp) {
-                    mConsumeSearchKeyUp = false;
-                    return -1;
-                }
-            }
-            return 0;
-        } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (!keyguardOn) {
                 if (down && repeatCount == 0) {
-                    preloadRecentApps();
-                } else if (!down) {
-                    toggleRecentApps();
-                }
-            }
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
-            if (down) {
-                IStatusBarService service = getStatusBarService();
-                if (service != null) {
-                    try {
-                        service.expandNotificationsPanel();
-                    } catch (RemoteException e) {
-                        // do nothing.
+                    if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
+                        Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
+                        mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
+                                null, null, null, 0, null, null);
+                        return key_consumed;
                     }
                 }
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_S && event.isMetaPressed()
-                && event.isCtrlPressed()) {
-            if (down && repeatCount == 0) {
-                int type = event.isShiftPressed() ? TAKE_SCREENSHOT_SELECTED_REGION
-                        : TAKE_SCREENSHOT_FULLSCREEN;
-                mScreenshotRunnable.setScreenshotType(type);
-                mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_OTHER);
-                mHandler.post(mScreenshotRunnable);
-                return -1;
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_SLASH && event.isMetaPressed()) {
-            if (down && repeatCount == 0 && !isKeyguardLocked()) {
-                toggleKeyboardShortcutsMenu(event.getDeviceId());
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
-            Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
-            Slog.wtf(TAG, "KEYCODE_VOICE_ASSIST should be handled in interceptKeyBeforeQueueing");
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
-            if (down && repeatCount == 0) {
-                mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
-                mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_OTHER);
-                mHandler.post(mScreenshotRunnable);
-            }
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP
-                || keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN) {
-            if (down) {
-                int direction = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP ? 1 : -1;
+                break;
+            case  KeyEvent.KEYCODE_SEARCH:
+                if (down) {
+                    if (repeatCount == 0) {
+                        mSearchKeyShortcutPending = true;
+                        mConsumeSearchKeyUp = false;
+                    }
+                } else {
+                    mSearchKeyShortcutPending = false;
+                    if (mConsumeSearchKeyUp) {
+                        mConsumeSearchKeyUp = false;
+                        return key_consumed;
+                    }
+                }
+                return 0;
+            case KeyEvent.KEYCODE_APP_SWITCH:
+                if (!keyguardOn) {
+                    if (down && repeatCount == 0) {
+                        preloadRecentApps();
+                    } else if (!down) {
+                        toggleRecentApps();
+                    }
+                }
+                return key_consumed;
+            case KeyEvent.KEYCODE_N:
+                if (down && event.isMetaPressed()) {
+                    IStatusBarService service = getStatusBarService();
+                    if (service != null) {
+                        try {
+                            service.expandNotificationsPanel();
+                        } catch (RemoteException e) {
+                            // do nothing.
+                        }
+                        return key_consumed;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_S:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    int type = event.isShiftPressed() ? TAKE_SCREENSHOT_SELECTED_REGION
+                            : TAKE_SCREENSHOT_FULLSCREEN;
+                    mScreenshotRunnable.setScreenshotType(type);
+                    mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_OTHER);
+                    mHandler.post(mScreenshotRunnable);
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_SLASH:
+                if (down && repeatCount == 0 && event.isMetaPressed() && !keyguardOn) {
+                    toggleKeyboardShortcutsMenu(event.getDeviceId());
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_ASSIST:
+                Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
+                return key_consumed;
+            case KeyEvent.KEYCODE_VOICE_ASSIST:
+                Slog.wtf(TAG, "KEYCODE_VOICE_ASSIST should be handled in"
+                        + " interceptKeyBeforeQueueing");
+                return key_consumed;
+            case KeyEvent.KEYCODE_SYSRQ:
+                if (down && repeatCount == 0) {
+                    mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
+                    mScreenshotRunnable.setScreenshotSource(SCREENSHOT_KEY_OTHER);
+                    mHandler.post(mScreenshotRunnable);
+                }
+                return key_consumed;
+            case KeyEvent.KEYCODE_BRIGHTNESS_UP:
+            case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
+                if (down) {
+                    int direction = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP ? 1 : -1;
 
-                // Disable autobrightness if it's on
-                int auto = Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_MODE,
-                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                        UserHandle.USER_CURRENT_OR_SELF);
-                if (auto != 0) {
-                    Settings.System.putIntForUser(mContext.getContentResolver(),
+                    // Disable autobrightness if it's on
+                    int auto = Settings.System.getIntForUser(
+                            mContext.getContentResolver(),
                             Settings.System.SCREEN_BRIGHTNESS_MODE,
                             Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                             UserHandle.USER_CURRENT_OR_SELF);
+                    if (auto != 0) {
+                        Settings.System.putIntForUser(mContext.getContentResolver(),
+                                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                                UserHandle.USER_CURRENT_OR_SELF);
+                    }
+                    float minFloat = mPowerManager.getBrightnessConstraint(
+                            PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+                    float maxFloat = mPowerManager.getBrightnessConstraint(
+                            PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+                    float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
+                    float brightnessFloat = Settings.System.getFloatForUser(
+                            mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                            mContext.getDisplay().getBrightnessDefault(),
+                            UserHandle.USER_CURRENT_OR_SELF);
+                    brightnessFloat += stepFloat;
+                    // Make sure we don't go beyond the limits.
+                    brightnessFloat = Math.min(maxFloat, brightnessFloat);
+                    brightnessFloat = Math.max(minFloat, brightnessFloat);
+
+                    Settings.System.putFloatForUser(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessFloat,
+                            UserHandle.USER_CURRENT_OR_SELF);
+                    startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
+                            UserHandle.CURRENT_OR_SELF);
                 }
-                float minFloat = mPowerManager.getBrightnessConstraint(
-                        PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-                float maxFloat = mPowerManager.getBrightnessConstraint(
-                        PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-                float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
-                float brightnessFloat = Settings.System.getFloatForUser(
-                        mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                        mContext.getDisplay().getBrightnessDefault(),
-                        UserHandle.USER_CURRENT_OR_SELF);
-                brightnessFloat += stepFloat;
-                // Make sure we don't go beyond the limits.
-                brightnessFloat = Math.min(maxFloat, brightnessFloat);
-                brightnessFloat = Math.max(minFloat, brightnessFloat);
-
-                Settings.System.putFloatForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessFloat,
-                        UserHandle.USER_CURRENT_OR_SELF);
-                startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
-                        UserHandle.CURRENT_OR_SELF);
-            }
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
-                || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
-            if (mUseTvRouting || mHandleVolumeKeysInWM) {
-                // On TVs or when the configuration is enabled, volume keys never
-                // go to the foreground app.
-                dispatchDirectAudioEvent(event);
-                return -1;
-            }
-
-            // If the device is in VR mode and keys are "internal" (e.g. on the side of the
-            // device), then drop the volume keys and don't forward it to the application/dispatch
-            // the audio event.
-            if (mDefaultDisplayPolicy.isPersistentVrModeEnabled()) {
-                final InputDevice d = event.getDevice();
-                if (d != null && !d.isExternal()) {
-                    return -1;
+                return key_consumed;
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                if (mUseTvRouting || mHandleVolumeKeysInWM) {
+                    // On TVs or when the configuration is enabled, volume keys never
+                    // go to the foreground app.
+                    dispatchDirectAudioEvent(event);
+                    return key_consumed;
                 }
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_TAB && event.isMetaPressed()) {
-            // Pass through keyboard navigation keys.
-            return 0;
-        } else if (keyCode == KeyEvent.KEYCODE_ALL_APPS) {
-            if (!down) {
-                mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
-                Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
-                msg.setAsynchronous(true);
-                msg.sendToTarget();
-            }
-            return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_NOTIFICATION) {
-            if (!down) {
-                toggleNotificationPanel();
-            }
-            return -1;
-        }
 
-        // Toggle Caps Lock on META-ALT.
-        boolean actionTriggered = false;
-        if (KeyEvent.isModifierKey(keyCode)) {
-            if (!mPendingCapsLockToggle) {
-                // Start tracking meta state for combo.
-                mInitialMetaState = mMetaState;
-                mPendingCapsLockToggle = true;
-            } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                int altOnMask = mMetaState & KeyEvent.META_ALT_MASK;
-                int metaOnMask = mMetaState & KeyEvent.META_META_MASK;
-
-                // Check for Caps Lock toggle
-                if ((metaOnMask != 0) && (altOnMask != 0)) {
-                    // Check if nothing else is pressed
-                    if (mInitialMetaState == (mMetaState ^ (altOnMask | metaOnMask))) {
-                        // Handle Caps Lock Toggle
-                        mInputManagerInternal.toggleCapsLock(event.getDeviceId());
-                        actionTriggered = true;
+                // If the device is in VR mode and keys are "internal" (e.g. on the side of the
+                // device), then drop the volume keys and don't forward it to the
+                // application/dispatch the audio event.
+                if (mDefaultDisplayPolicy.isPersistentVrModeEnabled()) {
+                    final InputDevice d = event.getDevice();
+                    if (d != null && !d.isExternal()) {
+                        return key_consumed;
                     }
                 }
+                break;
+            case KeyEvent.KEYCODE_TAB:
+                if (event.isMetaPressed()) {
+                    // Pass through keyboard navigation keys.
+                    return 0;
+                }
+                // Display task switcher for ALT-TAB.
+                if (down && repeatCount == 0) {
+                    if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
+                        final int shiftlessModifiers =
+                                event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
+                        if (KeyEvent.metaStateHasModifiers(
+                                shiftlessModifiers, KeyEvent.META_ALT_ON)) {
+                            mRecentAppsHeldModifiers = shiftlessModifiers;
+                            showRecentApps(true);
+                            return key_consumed;
+                        }
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_ALL_APPS:
+                if (!down) {
+                    mHandler.removeMessages(MSG_HANDLE_ALL_APPS);
+                    Message msg = mHandler.obtainMessage(MSG_HANDLE_ALL_APPS);
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
+                }
+                return key_consumed;
+            case KeyEvent.KEYCODE_NOTIFICATION:
+                if (!down) {
+                    toggleNotificationPanel();
+                }
+                return key_consumed;
 
-                // Always stop tracking when key goes up.
-                mPendingCapsLockToggle = false;
-            }
-        }
-        // Store current meta state to be able to evaluate it later.
-        mMetaState = metaState;
+            case KeyEvent.KEYCODE_SPACE:
+                // Handle keyboard layout switching.
+                if ((metaState & (KeyEvent.META_CTRL_MASK | KeyEvent.META_META_MASK)) == 0) {
+                    return 0;
+                }
+                // Share the same behavior with KEYCODE_LANGUAGE_SWITCH.
+            case KeyEvent.KEYCODE_LANGUAGE_SWITCH:
+                if (down && repeatCount == 0) {
+                    int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+                    mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_META_LEFT:
+            case KeyEvent.KEYCODE_META_RIGHT:
+                if (down) {
+                    if (event.isAltPressed()) {
+                        mPendingCapsLockToggle = true;
+                        mPendingMetaAction = false;
+                    } else {
+                        mPendingCapsLockToggle = false;
+                        mPendingMetaAction = true;
+                    }
+                } else {
+                    // Toggle Caps Lock on META-ALT.
+                    if (mPendingCapsLockToggle) {
+                        mInputManagerInternal.toggleCapsLock(event.getDeviceId());
+                        mPendingCapsLockToggle = false;
+                    } else if (mPendingMetaAction) {
+                        launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
+                                event.getDeviceId(),
+                                event.getEventTime());
+                        mPendingMetaAction = false;
+                    }
+                }
+                return key_consumed;
+            case KeyEvent.KEYCODE_ALT_LEFT:
+            case KeyEvent.KEYCODE_ALT_RIGHT:
+                if (down) {
+                    if (event.isMetaPressed()) {
+                        mPendingCapsLockToggle = true;
+                        mPendingMetaAction = false;
+                    } else {
+                        mPendingCapsLockToggle = false;
+                    }
+                } else {
+                    // hide recent if triggered by ALT-TAB.
+                    if (mRecentAppsHeldModifiers != 0
+                            && (metaState & mRecentAppsHeldModifiers) == 0) {
+                        mRecentAppsHeldModifiers = 0;
+                        hideRecentApps(true, false);
+                        return key_consumed;
+                    }
 
-        if (actionTriggered) {
-            return -1;
-        }
-
-        if (KeyEvent.isMetaKey(keyCode)) {
-            if (down) {
-                mPendingMetaAction = true;
-            } else if (mPendingMetaAction) {
-                launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId(),
-                        event.getEventTime());
-            }
-            return -1;
+                    // Toggle Caps Lock on META-ALT.
+                    if (mPendingCapsLockToggle) {
+                        mInputManagerInternal.toggleCapsLock(event.getDeviceId());
+                        mPendingCapsLockToggle = false;
+                        return key_consumed;
+                    }
+                }
+                break;
         }
 
         // Shortcuts are invoked through Search+key, so intercept those here
@@ -2754,7 +2798,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 + "SEARCH+" + KeyEvent.keyCodeToString(keyCode));
                     }
                 }
-                return -1;
+                return key_consumed;
             }
         }
 
@@ -2776,7 +2820,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 + "the activity to which it is registered was not found: "
                                 + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
                     }
-                    return -1;
+                    return key_consumed;
                 }
             }
         }
@@ -2795,39 +2839,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + "the activity to which it is registered was not found: "
                             + "keyCode=" + keyCode + ", category=" + category, ex);
                 }
-                return -1;
+                return key_consumed;
             }
-        }
-
-        // Display task switcher for ALT-TAB.
-        if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_TAB) {
-            if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
-                final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
-                if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
-                    mRecentAppsHeldModifiers = shiftlessModifiers;
-                    showRecentApps(true);
-                    return -1;
-                }
-            }
-        } else if (!down && mRecentAppsHeldModifiers != 0
-                && (metaState & mRecentAppsHeldModifiers) == 0) {
-            mRecentAppsHeldModifiers = 0;
-            hideRecentApps(true, false);
-        }
-
-        // Handle keyboard language switching.
-        final boolean isCtrlOrMetaSpace = keyCode == KeyEvent.KEYCODE_SPACE
-                && (metaState & (KeyEvent.META_CTRL_MASK | KeyEvent.META_META_MASK)) != 0;
-        if (down && repeatCount == 0
-                && (keyCode == KeyEvent.KEYCODE_LANGUAGE_SWITCH || isCtrlOrMetaSpace)) {
-            int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
-            return -1;
         }
 
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
-            return -1;
+            return key_consumed;
         }
 
         if (down) {
@@ -2857,13 +2875,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } catch (RemoteException e) {
                     mShortcutKeyServices.delete(shortcutCode);
                 }
-                return -1;
+                return key_consumed;
             }
         }
 
         // Reserve all the META modifier combos for system behavior
         if ((metaState & KeyEvent.META_META_ON) != 0) {
-            return -1;
+            return key_consumed;
         }
 
         // Let the application handle the key.
