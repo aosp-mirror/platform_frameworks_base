@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -134,9 +135,11 @@ public class CastTileTest extends SysuiTestCase {
     public void testStateUnavailable_wifiDisabled() {
         NetworkController.IconState qsIcon =
                 new NetworkController.IconState(false, 0, "");
-        mSignalCallback.setWifiIndicators(false, mock(NetworkController.IconState.class),
+        WifiIndicators indicators = new WifiIndicators(
+                false, mock(NetworkController.IconState.class),
                 qsIcon, false,false, "",
                 false, "");
+        mSignalCallback.setWifiIndicators(indicators);
         mTestableLooper.processAllMessages();
 
         assertEquals(Tile.STATE_UNAVAILABLE, mCastTile.getState().state);
@@ -146,9 +149,11 @@ public class CastTileTest extends SysuiTestCase {
     public void testStateUnavailable_wifiNotConnected() {
         NetworkController.IconState qsIcon =
                 new NetworkController.IconState(false, 0, "");
-        mSignalCallback.setWifiIndicators(true, mock(NetworkController.IconState.class),
+        WifiIndicators indicators = new WifiIndicators(
+                true, mock(NetworkController.IconState.class),
                 qsIcon, false,false, "",
                 false, "");
+        mSignalCallback.setWifiIndicators(indicators);
         mTestableLooper.processAllMessages();
 
         assertEquals(Tile.STATE_UNAVAILABLE, mCastTile.getState().state);
@@ -157,9 +162,11 @@ public class CastTileTest extends SysuiTestCase {
     private void enableWifiAndProcessMessages() {
         NetworkController.IconState qsIcon =
                 new NetworkController.IconState(true, 0, "");
-        mSignalCallback.setWifiIndicators(true, mock(NetworkController.IconState.class),
+        WifiIndicators indicators = new WifiIndicators(
+                true, mock(NetworkController.IconState.class),
                 qsIcon, false,false, "",
                 false, "");
+        mSignalCallback.setWifiIndicators(indicators);
         mTestableLooper.processAllMessages();
     }
 
