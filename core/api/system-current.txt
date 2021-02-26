@@ -2120,6 +2120,10 @@ package android.content {
     method @NonNull public final android.os.UserHandle getSendingUser();
   }
 
+  public class ClipboardManager extends android.text.ClipboardManager {
+    method @RequiresPermission(android.Manifest.permission.SET_CLIP_SOURCE) public void setPrimaryClipAsPackage(@NonNull android.content.ClipData, @NonNull String);
+  }
+
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
     method public int checkUriPermission(@NonNull android.net.Uri, int, int);
   }
