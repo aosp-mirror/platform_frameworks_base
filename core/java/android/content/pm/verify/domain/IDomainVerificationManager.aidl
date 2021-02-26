@@ -16,6 +16,7 @@
 
 package android.content.pm.verify.domain;
 
+import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationUserSelection;
@@ -35,6 +36,9 @@ interface IDomainVerificationManager {
     @nullable
     DomainVerificationUserSelection getDomainVerificationUserSelection(String packageName,
             int userId);
+
+    @nullable
+    List<DomainOwner> getOwnersForDomain(String domain, int userId);
 
     void setDomainVerificationStatus(String domainSetId, in DomainSet domains, int state);
 
