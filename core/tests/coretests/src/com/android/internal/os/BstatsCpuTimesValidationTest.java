@@ -382,6 +382,7 @@ public class BstatsCpuTimesValidationTest {
     }
 
     @Test
+    @SkipPresubmit("b/180015146 flakey")
     public void testCpuFreqTimes_stateFgService() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
             Log.w(TAG, "Skipping " + testName.getMethodName()
@@ -514,6 +515,7 @@ public class BstatsCpuTimesValidationTest {
     }
 
     @Test
+    @SkipPresubmit("b/180015146")
     public void testCpuFreqTimes_trackingDisabled() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
             Log.w(TAG, "Skipping " + testName.getMethodName()

@@ -87,6 +87,7 @@ public class KernelCpuUidUserSysTimeReaderTest {
     }
 
     @Test
+    @SkipPresubmit("b/180015146")
     public void testThrottler() throws Exception {
         mReader = new KernelCpuUidUserSysTimeReader(
                 new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), true);
