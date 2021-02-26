@@ -41671,7 +41671,6 @@ package android.telephony {
 
   public final class SignalStrengthUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.os.IBinder getLiveToken();
     method @NonNull public java.util.Collection<android.telephony.SignalThresholdInfo> getSignalThresholdInfos();
     method public boolean isReportingRequestedWhileIdle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
