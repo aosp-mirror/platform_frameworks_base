@@ -21,14 +21,16 @@
     android:orientation="vertical">
 
     <View android:id="@+id/splashscreen_icon_view"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:layout_gravity="center"/>
+          android:layout_height="wrap_content"
+          android:layout_width="wrap_content"
+          android:layout_gravity="center"
+          android:contentDescription="@string/splash_screen_view_icon_description"/>
 
     <View android:id="@+id/splashscreen_branding_view"
           android:layout_height="wrap_content"
           android:layout_width="wrap_content"
           android:layout_gravity="center_horizontal|bottom"
-          android:layout_marginBottom="60dp"/>
+          android:layout_marginBottom="60dp"
+          android:contentDescription="@string/splash_screen_view_branding_description"/>
 
 </android.window.SplashScreenView>
