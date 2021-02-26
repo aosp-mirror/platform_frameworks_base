@@ -1956,7 +1956,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(mnc);
 
         fixUpLocaleList();
-        dest.writeParcelable(mLocaleList, flags);
+        dest.writeTypedObject(mLocaleList, flags);
 
         if(userSetLocale) {
             dest.writeInt(1);
@@ -1980,7 +1980,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
-        dest.writeValue(windowConfiguration);
+        windowConfiguration.writeToParcel(dest, flags);
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
         dest.writeInt(fontWeightAdjustment);
@@ -1991,7 +1991,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         mcc = source.readInt();
         mnc = source.readInt();
 
-        mLocaleList = source.readParcelable(LocaleList.class.getClassLoader());
+        mLocaleList = source.readTypedObject(LocaleList.CREATOR);
         locale = mLocaleList.get(0);
 
         userSetLocale = (source.readInt()==1);
@@ -2012,7 +2012,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
-        windowConfiguration.setTo((WindowConfiguration) source.readValue(null));
+        windowConfiguration.readFromParcel(source);
         assetsSeq = source.readInt();
         seq = source.readInt();
         fontWeightAdjustment = source.readInt();
