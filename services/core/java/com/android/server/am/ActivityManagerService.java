@@ -10382,6 +10382,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     endTime = SystemClock.currentThreadTimeMillis();
                     hasSwapPss = mi.hasSwappedOutPss;
+                    memtrackGraphics = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
+                    memtrackGl = mi.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                 } else {
                     reportType = ProcessStats.ADD_PSS_EXTERNAL;
                     startTime = SystemClock.currentThreadTimeMillis();
@@ -10533,6 +10535,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (!Debug.getMemoryInfo(st.pid, info)) {
                             return;
                         }
+                        memtrackGraphics = info.getOtherPrivate(Debug.MemoryInfo.OTHER_GRAPHICS);
+                        memtrackGl = info.getOtherPrivate(Debug.MemoryInfo.OTHER_GL);
                     } else {
                         long pss = Debug.getPss(st.pid, tmpLong, memtrackTmp);
                         if (pss == 0) {
