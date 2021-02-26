@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -67,7 +66,7 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
@@ -108,12 +107,12 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun noUncoveredRegions() =
         testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() =
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)

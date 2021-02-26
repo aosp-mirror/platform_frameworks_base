@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -125,7 +124,7 @@ class EnterPipToOtherOrientationTest(
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun testAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
@@ -133,11 +132,11 @@ class EnterPipToOtherOrientationTest(
         }
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
