@@ -20,11 +20,15 @@ import static android.app.backup.BackupManager.OperationType;
 
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
@@ -95,6 +99,14 @@ public class FullBackup {
     public static final String FLAG_REQUIRED_DEVICE_TO_DEVICE_TRANSFER = "deviceToDeviceTransfer";
     public static final String FLAG_REQUIRED_FAKE_CLIENT_SIDE_ENCRYPTION =
             "fakeClientSideEncryption";
+
+    /**
+     * When  this change is enabled, include / exclude rules specified via
+     * {@code android:fullBackupContent} are ignored during D2D transfers.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long IGNORE_FULL_BACKUP_CONTENT_IN_D2D = 180523564L;
 
     @StringDef({
         ConfigSection.CLOUD_BACKUP,
@@ -527,7 +539,10 @@ public class FullBackup {
                 }
             }
 
-            // TODO(b/180523564): Ignore the old config for apps targeting Android S+ during D2D.
+            if (operationType == OperationType.MIGRATION
+                    && CompatChanges.isChangeEnabled(IGNORE_FULL_BACKUP_CONTENT_IN_D2D)) {
+                return;
+            }
 
             if (mFullBackupContent != 0) {
                 // Fall back to the old config.

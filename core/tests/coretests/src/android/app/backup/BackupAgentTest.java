@@ -57,14 +57,6 @@ public class BackupAgentTest {
     }
 
     @Test
-    public void testGetIncludeExcludeRules_isMigration_returnsEmptyRules()  throws Exception {
-        mBackupAgent = getAgentForOperationType(OperationType.MIGRATION);
-
-        IncludeExcludeRules rules = mBackupAgent.getIncludeExcludeRules(mBackupScheme);
-        assertThat(rules).isEqualTo(IncludeExcludeRules.emptyRules());
-    }
-
-    @Test
     public void testGetIncludeExcludeRules_isNotMigration_returnsRules() throws Exception {
         PathWithRequiredFlags path = new PathWithRequiredFlags("path", /* requiredFlags */ 0);
         Map<String, Set<PathWithRequiredFlags>> includePaths = Collections.singletonMap("test",
