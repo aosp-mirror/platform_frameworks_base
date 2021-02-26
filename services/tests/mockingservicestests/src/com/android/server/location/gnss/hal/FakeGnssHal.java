@@ -500,7 +500,7 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
-    protected boolean isAntennaInfoListeningSupported() {
+    protected boolean isAntennaInfoSupported() {
         return mIsAntennaInfoListeningSupported;
     }
 

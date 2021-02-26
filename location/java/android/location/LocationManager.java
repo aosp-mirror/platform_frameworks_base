@@ -43,10 +43,8 @@ import android.app.PropertyInvalidatedCache;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
@@ -347,28 +345,6 @@ public class LocationManager {
      * @see #ACTION_GNSS_CAPABILITIES_CHANGED
      */
     public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
-
-    /**
-     * Broadcast intent action when GNSS antenna infos change. Includes an intent extra,
-     * {@link #EXTRA_GNSS_ANTENNA_INFOS}, with an ArrayList of the new {@link GnssAntennaInfo}. This
-     * may be read via {@link android.content.Intent#getParcelableArrayListExtra(String)}.
-     *
-     * @see #EXTRA_GNSS_ANTENNA_INFOS
-     * @see #getGnssAntennaInfos()
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_GNSS_ANTENNA_INFOS_CHANGED =
-            "android.location.action.GNSS_ANTENNA_INFOS_CHANGED";
-
-    /**
-     * Intent extra included with {@link #ACTION_GNSS_ANTENNA_INFOS_CHANGED} broadcasts, containing
-     * the new ArrayList of {@link GnssAntennaInfo}. This may be read via
-     * {@link android.content.Intent#getParcelableArrayListExtra(String)}.
-     *
-     * @see #ACTION_GNSS_ANTENNA_INFOS_CHANGED
-     */
-    public static final String EXTRA_GNSS_ANTENNA_INFOS =
-            "android.location.extra.GNSS_ANTENNA_INFOS";
 
     /**
      * Broadcast intent action for Settings app to inject a footer at the bottom of location
@@ -2659,10 +2635,11 @@ public class LocationManager {
     }
 
     /**
-     * Registers a GNSS antenna info listener. GNSS antenna info updates will only be received while
-     * the {@link #GPS_PROVIDER} is enabled, and while the client app is in the foreground.
+     * Registers a GNSS antenna info listener that will receive all changes to antenna info. Use
+     * {@link #getGnssAntennaInfos()} to get current antenna info.
      *
-     * <p>Not all GNSS chipsets support antenna info updates, see {@link #getGnssCapabilities()}.
+     * <p>Not all GNSS chipsets support antenna info updates, see {@link #getGnssCapabilities()}. If
+     * unsupported, the listener will never be invoked.
      *
      * <p>Prior to Android S, this requires the {@link Manifest.permission#ACCESS_FINE_LOCATION}
      * permission.
@@ -2673,10 +2650,7 @@ public class LocationManager {
      *
      * @throws IllegalArgumentException if executor is null
      * @throws IllegalArgumentException if listener is null
-     *
-     * @deprecated Prefer to use a receiver for {@link #ACTION_GNSS_ANTENNA_INFOS_CHANGED}.
      */
-    @Deprecated
     public boolean registerAntennaInfoListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull GnssAntennaInfo.Listener listener) {
@@ -2686,13 +2660,10 @@ public class LocationManager {
     }
 
     /**
-     * Unregisters a GNSS Antenna Info listener.
+     * Unregisters a GNSS antenna info listener.
      *
      * @param listener a {@link GnssAntennaInfo.Listener} object to remove
-     *
-     * @deprecated Prefer to use a receiver for {@link #ACTION_GNSS_ANTENNA_INFOS_CHANGED}.
      */
-    @Deprecated
     public void unregisterAntennaInfoListener(@NonNull GnssAntennaInfo.Listener listener) {
         GnssLazyLoader.sGnssAntennaInfoListeners.removeListener(listener);
     }
@@ -3009,14 +2980,17 @@ public class LocationManager {
         }
 
         @Override
-        protected void registerTransport(GnssAntennaInfoTransport transport) {
-            transport.getContext().registerReceiver(transport,
-                    new IntentFilter(ACTION_GNSS_ANTENNA_INFOS_CHANGED));
+        protected void registerTransport(GnssAntennaInfoTransport transport)
+                throws RemoteException {
+            getService().addGnssAntennaInfoListener(transport, transport.getPackage(),
+                    transport.getAttributionTag(),
+                    AppOpsManager.toReceiverId(transport.getListener()));
         }
 
         @Override
-        protected void unregisterTransport(GnssAntennaInfoTransport transport) {
-            transport.getContext().unregisterReceiver(transport);
+        protected void unregisterTransport(GnssAntennaInfoTransport transport)
+                throws RemoteException {
+            getService().removeGnssAntennaInfoListener(transport);
         }
     }
 
@@ -3376,11 +3350,12 @@ public class LocationManager {
         }
     }
 
-    private static class GnssAntennaInfoTransport extends BroadcastReceiver implements
+    private static class GnssAntennaInfoTransport extends IGnssAntennaInfoListener.Stub implements
             ListenerTransport<GnssAntennaInfo.Listener> {
 
         private final Executor mExecutor;
-        private final Context mContext;
+        private final String mPackageName;
+        private final String mAttributionTag;
 
         private volatile @Nullable GnssAntennaInfo.Listener mListener;
 
@@ -3389,12 +3364,17 @@ public class LocationManager {
             Preconditions.checkArgument(executor != null, "invalid null executor");
             Preconditions.checkArgument(listener != null, "invalid null listener");
             mExecutor = executor;
-            mContext = context;
+            mPackageName = context.getPackageName();
+            mAttributionTag = context.getAttributionTag();
             mListener = listener;
         }
 
-        public Context getContext() {
-            return mContext;
+        public String getPackage() {
+            return mPackageName;
+        }
+
+        public String getAttributionTag() {
+            return mAttributionTag;
         }
 
         @Override
@@ -3408,12 +3388,8 @@ public class LocationManager {
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            ArrayList<GnssAntennaInfo> infos = intent.getParcelableArrayListExtra(
-                    EXTRA_GNSS_ANTENNA_INFOS);
-            if (infos != null) {
-                execute(mExecutor, callback -> callback.onGnssAntennaInfoReceived(infos));
-            }
+        public void onGnssAntennaInfoChanged(List<GnssAntennaInfo> antennaInfos) {
+            execute(mExecutor, callback -> callback.onGnssAntennaInfoReceived(antennaInfos));
         }
     }
 

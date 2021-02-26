@@ -19290,8 +19290,8 @@ package android.location {
     method @NonNull public android.location.GnssAntennaInfo.Builder setSignalGainCorrections(@Nullable android.location.GnssAntennaInfo.SphericalCorrections);
   }
 
-  @Deprecated public static interface GnssAntennaInfo.Listener {
-    method @Deprecated public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
+  public static interface GnssAntennaInfo.Listener {
+    method public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
   }
 
   public static final class GnssAntennaInfo.PhaseCenterOffset implements android.os.Parcelable {
@@ -19680,7 +19680,7 @@ package android.location {
     method public boolean hasProvider(@NonNull String);
     method public boolean isLocationEnabled();
     method public boolean isProviderEnabled(@NonNull String);
-    method @Deprecated public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
+    method public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
@@ -19717,13 +19717,11 @@ package android.location {
     method public void setTestProviderEnabled(@NonNull String, boolean);
     method public void setTestProviderLocation(@NonNull String, @NonNull android.location.Location);
     method @Deprecated public void setTestProviderStatus(@NonNull String, int, @Nullable android.os.Bundle, long);
-    method @Deprecated public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
+    method public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
     method public void unregisterGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
     method public void unregisterGnssNavigationMessageCallback(@NonNull android.location.GnssNavigationMessage.Callback);
     method public void unregisterGnssStatusCallback(@NonNull android.location.GnssStatus.Callback);
-    field public static final String ACTION_GNSS_ANTENNA_INFOS_CHANGED = "android.location.action.GNSS_ANTENNA_INFOS_CHANGED";
     field public static final String ACTION_GNSS_CAPABILITIES_CHANGED = "android.location.action.GNSS_CAPABILITIES_CHANGED";
-    field public static final String EXTRA_GNSS_ANTENNA_INFOS = "android.location.extra.GNSS_ANTENNA_INFOS";
     field public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
     field public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
     field public static final String EXTRA_PROVIDER_ENABLED = "android.location.extra.PROVIDER_ENABLED";
