@@ -70,7 +70,7 @@ public class GnssNavigationMessageProvider extends
     }
 
     @Override
-    protected boolean isServiceSupported() {
+    public boolean isSupported() {
         return mGnssNative.isNavigationMessageCollectionSupported();
     }
 
