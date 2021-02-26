@@ -239,10 +239,6 @@ public final class Permission {
         return (mPermissionInfo.flags & PermissionInfo.FLAG_IMMUTABLY_RESTRICTED) != 0;
     }
 
-    public boolean isInstallerExemptIgnored() {
-        return (mPermissionInfo.flags & PermissionInfo.FLAG_INSTALLER_EXEMPT_IGNORED) != 0;
-    }
-
     public boolean isSignature() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_SIGNATURE;
