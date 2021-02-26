@@ -36,12 +36,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.Utils;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -61,6 +61,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     private int mLightTextColor;
     private int mDarkTextColor;
     private int mDefaultTextColor;
+    private boolean mAdjustTheme;
 
     public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
@@ -97,6 +98,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
         mView = view;
         mRow = row;
         onReinflated();
+        mAdjustTheme = ctx.getResources().getBoolean(
+                R.bool.config_adjustThemeOnNotificationCustomViews);
     }
 
     /**
@@ -124,12 +127,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
         mLightTextColor = mView.getContext().getColor(
                 com.android.internal.R.color.notification_primary_text_color_light);
         mDarkTextColor = mView.getContext().getColor(
-                R.color.notification_primary_text_color_dark);
+                com.android.internal.R.color.notification_primary_text_color_dark);
 
         Context themedContext = new ContextThemeWrapper(mView.getContext(),
-                R.style.Theme_DeviceDefault_DayNight);
-        mDefaultTextColor = Utils.getColorAttr(themedContext, R.attr.textColorPrimary)
-                .getDefaultColor();
+                com.android.internal.R.style.Theme_DeviceDefault_DayNight);
+        mDefaultTextColor = Utils.getColorAttr(themedContext,
+                com.android.internal.R.attr.textColorPrimary).getDefaultColor();
     }
 
     protected boolean needsInversion(int defaultBackgroundColor, View view) {
@@ -208,7 +211,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     }
 
     protected void ensureThemeOnChildren() {
-        if (mView == null) {
+        if (!mAdjustTheme || mView == null) {
             return;
         }
 
@@ -219,26 +222,20 @@ public abstract class NotificationViewWrapper implements TransformableView {
         }
 
         // Now let's check if there's unprotected text somewhere, and apply the theme if we find it.
-        if (!(mView instanceof ViewGroup)) {
-            return;
-        }
-        processChildrenTextColor((ViewGroup) mView);
+        processTextColorRecursive(mView);
     }
 
-    private void processChildrenTextColor(ViewGroup viewGroup) {
-        if (viewGroup == null) {
-            return;
-        }
-
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            View child = viewGroup.getChildAt(i);
-            if (child instanceof TextView) {
-                int foreground = ((TextView) child).getCurrentTextColor();
-                if (foreground == mLightTextColor || foreground == mDarkTextColor) {
-                    ((TextView) child).setTextColor(mDefaultTextColor);
-                }
-            } else if (child instanceof ViewGroup) {
-                processChildrenTextColor((ViewGroup) child);
+    private void processTextColorRecursive(View view) {
+        if (view instanceof TextView) {
+            TextView textView = (TextView) view;
+            int foreground = textView.getCurrentTextColor();
+            if (foreground == mLightTextColor || foreground == mDarkTextColor) {
+                textView.setTextColor(mDefaultTextColor);
+            }
+        } else if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) view;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                processTextColorRecursive(viewGroup.getChildAt(i));
             }
         }
     }

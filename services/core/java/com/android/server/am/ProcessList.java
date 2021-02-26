@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
@@ -57,6 +58,7 @@ import static com.android.server.am.AppProfiler.TAG_PSS;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppProtoEnums;
@@ -227,6 +229,11 @@ public final class ProcessList {
     // This is a process bound by the system (or other app) that's more important than services but
     // not so perceptible that it affects the user immediately if killed.
     static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
+
+    // This is a process hosting services that are not perceptible to the user but the
+    // client (system) binding to it requested to treat it as if it is perceptible and avoid killing
+    // it if possible.
+    static final int PERCEPTIBLE_MEDIUM_APP_ADJ = 225;
 
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
@@ -1027,6 +1034,9 @@ public final class ProcessList {
         } else if (setAdj >= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
             return buildOomTag("prcl  ", "prcl", null, setAdj,
                     ProcessList.PERCEPTIBLE_LOW_APP_ADJ, compact);
+        } else if (setAdj >= ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ) {
+            return buildOomTag("prcm  ", "prcm", null, setAdj,
+                    ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ, compact);
         } else if (setAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
             return buildOomTag("prcp  ", "prcp", null, setAdj,
                     ProcessList.PERCEPTIBLE_APP_ADJ, compact);
@@ -4395,6 +4405,7 @@ public final class ProcessList {
             printOomLevel(pw, "FOREGROUND_APP_ADJ", FOREGROUND_APP_ADJ);
             printOomLevel(pw, "VISIBLE_APP_ADJ", VISIBLE_APP_ADJ);
             printOomLevel(pw, "PERCEPTIBLE_APP_ADJ", PERCEPTIBLE_APP_ADJ);
+            printOomLevel(pw, "PERCEPTIBLE_MEDIUM_APP_ADJ", PERCEPTIBLE_MEDIUM_APP_ADJ);
             printOomLevel(pw, "PERCEPTIBLE_LOW_APP_ADJ", PERCEPTIBLE_LOW_APP_ADJ);
             printOomLevel(pw, "BACKUP_APP_ADJ", BACKUP_APP_ADJ);
             printOomLevel(pw, "HEAVY_WEIGHT_APP_ADJ", HEAVY_WEIGHT_APP_ADJ);
@@ -4658,11 +4669,24 @@ public final class ProcessList {
         }
     }
 
-    /** Returns the uid's process state or PROCESS_STATE_NONEXISTENT if not running */
+    /**
+     * Returns the uid's process state or {@link ActivityManager#PROCESS_STATE_NONEXISTENT}
+     * if not running
+     */
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getUidProcStateLOSP(int uid) {
         UidRecord uidRec = mActiveUids.get(uid);
         return uidRec == null ? PROCESS_STATE_NONEXISTENT : uidRec.getCurProcState();
+    }
+
+    /**
+     * Returns the uid's process capability or {@link ActivityManager#PROCESS_CAPABILITY_NONE}
+     * if not running
+     */
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    @ProcessCapability int getUidProcessCapabilityLOSP(int uid) {
+        UidRecord uidRec = mActiveUids.get(uid);
+        return uidRec == null ? PROCESS_CAPABILITY_NONE : uidRec.getCurCapability();
     }
 
     /** Returns the UidRecord for the given uid, if it exists. */
@@ -4749,8 +4773,9 @@ public final class ProcessList {
             if (!UserHandle.isApp(uidRec.getUid()) || !uidRec.hasInternetPermission) {
                 continue;
             }
-            // If process state is not changed, then there's nothing to do.
-            if (uidRec.getSetProcState() == uidRec.getCurProcState()) {
+            // If process state and capabilities are not changed, then there's nothing to do.
+            if (uidRec.getSetProcState() == uidRec.getCurProcState()
+                    && uidRec.getSetCapability() == uidRec.getCurCapability()) {
                 continue;
             }
             final int blockState = getBlockStateForUid(uidRec);

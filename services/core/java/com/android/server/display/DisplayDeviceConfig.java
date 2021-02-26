@@ -18,9 +18,12 @@ package com.android.server.display;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.util.MathUtils;
 import android.util.Slog;
+import android.util.Spline;
 import android.view.DisplayAddress;
 
 import com.android.internal.R;
@@ -72,15 +75,31 @@ public class DisplayDeviceConfig {
 
     private final Context mContext;
 
+    // Nits and backlight values that are loaded from either the display device config file, or
+    // config.xml. These are the raw values and just used for the dumpsys
+    private float[] mRawNits;
+    private float[] mRawBacklight;
+
+    // These arrays are calculated from the raw arrays, but clamped to contain values equal to and
+    // between mBacklightMinimum and mBacklightMaximum. These three arrays should all be the same
+    // length
+    // Nits array that is used to store the entire range of nits values that the device supports
     private float[] mNits;
+    // Backlight array holds the values that the HAL uses to display the corresponding nits values
+    private float[] mBacklight;
+    // Purely an array that covers the ranges of values 0.0 - 1.0, indicating the system brightness
+    // for the corresponding values above
     private float[] mBrightness;
-    private float mBrightnessMinimum = Float.NaN;
-    private float mBrightnessMaximum = Float.NaN;
+
+    private float mBacklightMinimum = Float.NaN;
+    private float mBacklightMaximum = Float.NaN;
     private float mBrightnessDefault = Float.NaN;
     private float mBrightnessRampFastDecrease = Float.NaN;
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private Spline mBrightnessToBacklightSpline;
+    private Spline mBacklightToBrightnessSpline;
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
@@ -167,7 +186,7 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * Return the brightness mapping nits array if one is defined in the configuration file.
+     * Return the brightness mapping nits array.
      *
      * @return The brightness mapping nits array.
      */
@@ -176,22 +195,40 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * Return the brightness mapping value array if one is defined in the configuration file.
+     * Return the brightness mapping backlight array.
      *
-     * @return The brightness mapping value array.
+     * @return The backlight mapping value array.
+     */
+    public float[] getBacklight() {
+        return mBacklight;
+    }
+
+    /**
+     * Calculates the backlight value, as recognised by the HAL, from the brightness value
+     * given that the rest of the system deals with.
+     *
+     * @param brightness value on the framework scale of 0-1
+     * @return backlight value on the HAL scale of 0-1
+     */
+    public float getBacklightFromBrightness(float brightness) {
+        return mBrightnessToBacklightSpline.interpolate(brightness);
+    }
+
+    /**
+     * Return an array of equal length to backlight and nits, that covers the entire system
+     * brightness range of 0.0-1.0.
+     *
+     * @return brightness array
      */
     public float[] getBrightness() {
         return mBrightness;
     }
 
-    public float getBrightnessMinimum() {
-        return mBrightnessMinimum;
-    }
-
-    public float getBrightnessMaximum() {
-        return mBrightnessMaximum;
-    }
-
+    /**
+     * Return the default brightness on a scale of 0.0f - 1.0f
+     *
+     * @return default brightness
+     */
     public float getBrightnessDefault() {
         return mBrightnessDefault;
     }
@@ -237,10 +274,15 @@ public class DisplayDeviceConfig {
     @Override
     public String toString() {
         String str = "DisplayDeviceConfig{"
-                + "mBrightness=" + Arrays.toString(mBrightness)
+                + "mBacklight=" + Arrays.toString(mBacklight)
                 + ", mNits=" + Arrays.toString(mNits)
-                + ", mBrightnessMinimum=" + mBrightnessMinimum
-                + ", mBrightnessMaximum=" + mBrightnessMaximum
+                + ", mRawBacklight=" + Arrays.toString(mRawBacklight)
+                + ", mRawNits=" + Arrays.toString(mRawNits)
+                + ", mBrightness=" + Arrays.toString(mBrightness)
+                + ", mBrightnessToBacklightSpline=" + mBrightnessToBacklightSpline
+                + ", mBacklightToBrightnessSpline=" + mBacklightToBrightnessSpline
+                + ", mBacklightMinimum=" + mBacklightMinimum
+                + ", mBacklightMaximum=" + mBacklightMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
@@ -253,10 +295,6 @@ public class DisplayDeviceConfig {
         return str;
     }
 
-    private float getMaxBrightness() {
-        return mBrightness[mBrightness.length - 1];
-    }
-
     private static DisplayDeviceConfig getConfigFromSuffix(Context context, File baseDirectory,
             String suffixFormat, long idNumber) {
 
@@ -264,7 +302,6 @@ public class DisplayDeviceConfig {
         final String filename = String.format(CONFIG_FILE_FORMAT, suffix);
         final File filePath = Environment.buildPath(
                 baseDirectory, ETC_DIR, DISPLAY_CONFIG_DIR, filename);
-
         if (filePath.exists()) {
             final DisplayDeviceConfig config = new DisplayDeviceConfig(context);
             config.initFromFile(filePath);
@@ -299,9 +336,9 @@ public class DisplayDeviceConfig {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
             if (config != null) {
-                loadBrightnessMap(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
+                loadBrightnessMap(config);
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
@@ -318,13 +355,20 @@ public class DisplayDeviceConfig {
         // If no ddc exists, use config.xml
         loadBrightnessDefaultFromConfigXml();
         loadBrightnessConstraintsFromConfigXml();
+        loadBrightnessMapFromConfigXml();
         loadBrightnessRampsFromConfigXml();
     }
 
     private void initFromPmValues() {
-        mBrightnessMinimum = PowerManager.BRIGHTNESS_MIN;
-        mBrightnessMaximum = PowerManager.BRIGHTNESS_MAX;
+        // Set all to basic values
+        mBacklightMinimum = PowerManager.BRIGHTNESS_MIN;
+        mBacklightMaximum = PowerManager.BRIGHTNESS_MAX;
         mBrightnessDefault = BRIGHTNESS_DEFAULT;
+        mBrightnessRampFastDecrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampFastIncrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
+        setSimpleMappingStrategyValues();
     }
 
     private void loadBrightnessDefaultFromDdcXml(DisplayConfiguration config) {
@@ -364,24 +408,27 @@ public class DisplayDeviceConfig {
         final float max = mContext.getResources().getFloat(com.android.internal.R.dimen
                 .config_screenBrightnessSettingMaximumFloat);
         if (min == INVALID_BRIGHTNESS_IN_CONFIG || max == INVALID_BRIGHTNESS_IN_CONFIG) {
-            mBrightnessMinimum = BrightnessSynchronizer.brightnessIntToFloat(
+            mBacklightMinimum = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
                             .config_screenBrightnessSettingMinimum));
-            mBrightnessMaximum = BrightnessSynchronizer.brightnessIntToFloat(
+            mBacklightMaximum = BrightnessSynchronizer.brightnessIntToFloat(
                     mContext.getResources().getInteger(com.android.internal.R.integer
                             .config_screenBrightnessSettingMaximum));
         } else {
-            mBrightnessMinimum = min;
-            mBrightnessMaximum = max;
+            mBacklightMinimum = min;
+            mBacklightMaximum = max;
         }
     }
 
     private void loadBrightnessMap(DisplayConfiguration config) {
         final NitsMap map = config.getScreenBrightnessMap();
-        // Map may not exist in config file
+        // Map may not exist in display device config
         if (map == null) {
+            loadBrightnessMapFromConfigXml();
             return;
         }
+
+        // Use the (preferred) display device config mapping
         final List<Point> points = map.getPoint();
         final int size = points.size();
 
@@ -408,8 +455,123 @@ public class DisplayDeviceConfig {
             }
             ++i;
         }
-        mNits = nits;
-        mBrightness = backlight;
+        mRawNits = nits;
+        mRawBacklight = backlight;
+        constrainNitsAndBacklightArrays();
+    }
+
+    private void loadBrightnessMapFromConfigXml() {
+        // Use the config.xml mapping
+        final Resources res = mContext.getResources();
+        final float[] sysNits = BrightnessMappingStrategy.getFloatArray(res.obtainTypedArray(
+                com.android.internal.R.array.config_screenBrightnessNits));
+        final int[] sysBrightness = res.getIntArray(
+                com.android.internal.R.array.config_screenBrightnessBacklight);
+        final float[] sysBrightnessFloat = new float[sysBrightness.length];
+
+        for (int i = 0; i < sysBrightness.length; i++) {
+            sysBrightnessFloat[i] = BrightnessSynchronizer.brightnessIntToFloat(
+                    sysBrightness[i]);
+        }
+
+        // These arrays are allowed to be empty, we set null values so that
+        // BrightnessMappingStrategy will create a SimpleMappingStrategy instead.
+        if (sysBrightnessFloat.length == 0 || sysNits.length == 0) {
+            setSimpleMappingStrategyValues();
+            return;
+        }
+
+        mRawNits = sysNits;
+        mRawBacklight = sysBrightnessFloat;
+        constrainNitsAndBacklightArrays();
+    }
+
+    private void setSimpleMappingStrategyValues() {
+        // No translation from backlight to brightness should occur if we are using a
+        // SimpleMappingStrategy (ie they should be the same) so the splines are
+        // set to be linear, between 0.0 and 1.0
+        mNits = null;
+        mBacklight = null;
+        float[] simpleMappingStrategyArray = new float[]{0.0f, 1.0f};
+        mBrightnessToBacklightSpline = Spline.createSpline(simpleMappingStrategyArray,
+                simpleMappingStrategyArray);
+        mBacklightToBrightnessSpline = Spline.createSpline(simpleMappingStrategyArray,
+                simpleMappingStrategyArray);
+    }
+
+    /**
+     * Change the nits and backlight arrays, so that they cover only the allowed backlight values
+     * Use the brightness minimum and maximum values to clamp these arrays.
+     */
+    private void constrainNitsAndBacklightArrays() {
+        if (mRawBacklight[0] > mBacklightMinimum
+                || mRawBacklight[mRawBacklight.length - 1] < mBacklightMaximum
+                || mBacklightMinimum > mBacklightMaximum) {
+            throw new IllegalStateException("Min or max values are invalid"
+                    + "; raw min=" + mRawBacklight[0]
+                    + "; raw max=" + mRawBacklight[mRawBacklight.length - 1]
+                    + "; backlight min=" + mBacklightMinimum
+                    + "; backlight max=" + mBacklightMaximum);
+        }
+
+        float[] newNits = new float[mRawBacklight.length];
+        float[] newBacklight = new float[mRawBacklight.length];
+        // Find the starting index of the clamped arrays. This may be less than the min so
+        // we'll need to clamp this value still when actually doing the remapping.
+        int newStart = 0;
+        for (int i = 0; i < mRawBacklight.length - 1; i++) {
+            if (mRawBacklight[i + 1] > mBacklightMinimum) {
+                newStart = i;
+                break;
+            }
+        }
+
+        boolean isLastValue = false;
+        int newIndex = 0;
+        for (int i = newStart; i < mRawBacklight.length && !isLastValue; i++) {
+            newIndex = i - newStart;
+            final float newBacklightVal;
+            final float newNitsVal;
+            isLastValue = mRawBacklight[i] > mBacklightMaximum
+                    || i >= mRawBacklight.length - 1;
+            // Clamp beginning and end to valid backlight values.
+            if (newIndex == 0) {
+                newBacklightVal = MathUtils.max(mRawBacklight[i], mBacklightMinimum);
+                newNitsVal = rawBacklightToNits(i, newBacklightVal);
+            } else if (isLastValue) {
+                newBacklightVal = MathUtils.min(mRawBacklight[i], mBacklightMaximum);
+                newNitsVal = rawBacklightToNits(i - 1, newBacklightVal);
+            } else {
+                newBacklightVal = mRawBacklight[i];
+                newNitsVal = mRawNits[i];
+            }
+            newBacklight[newIndex] = newBacklightVal;
+            newNits[newIndex] = newNitsVal;
+        }
+        mBacklight = Arrays.copyOf(newBacklight, newIndex + 1);
+        mNits = Arrays.copyOf(newNits, newIndex + 1);
+        createBacklightConversionSplines();
+    }
+
+    private float rawBacklightToNits(int i, float backlight) {
+        return MathUtils.map(mRawBacklight[i], mRawBacklight[i + 1],
+                mRawNits[i], mRawNits[i + 1], backlight);
+    }
+
+    // This method creates a brightness spline that is of equal length with proportional increments
+    // to the backlight spline. The values of this array range from 0.0f to 1.0f instead of the
+    // potential constrained range that the backlight array covers
+    // These splines are used to convert from the system brightness value to the HAL backlight
+    // value
+    private void createBacklightConversionSplines() {
+        mBrightness = new float[mBacklight.length];
+        for (int i = 0; i < mBrightness.length; i++) {
+            mBrightness[i] = MathUtils.map(mBacklight[0],
+                    mBacklight[mBacklight.length - 1],
+                    PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, mBacklight[i]);
+        }
+        mBrightnessToBacklightSpline = Spline.createSpline(mBrightness, mBacklight);
+        mBacklightToBrightnessSpline = Spline.createSpline(mBacklight, mBrightness);
     }
 
     private void loadQuirks(DisplayConfiguration config) {
@@ -425,12 +587,14 @@ public class DisplayDeviceConfig {
             mIsHighBrightnessModeEnabled = hbm.getEnabled();
             mHbmData = new HighBrightnessModeData();
             mHbmData.minimumLux = hbm.getMinimumLux_all().floatValue();
-            mHbmData.transitionPoint = hbm.getTransitionPoint_all().floatValue();
-            if (mHbmData.transitionPoint >= getMaxBrightness()) {
+            float transitionPointBacklightScale = hbm.getTransitionPoint_all().floatValue();
+            if (transitionPointBacklightScale >= mBacklightMaximum) {
                 throw new IllegalArgumentException("HBM transition point invalid. "
                         + mHbmData.transitionPoint + " is not less than "
-                        + getMaxBrightness());
+                        + mBacklightMaximum);
             }
+            mHbmData.transitionPoint =
+                    mBacklightToBrightnessSpline.interpolate(transitionPointBacklightScale);
             final HbmTiming hbmTiming = hbm.getTiming_all();
             mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
             mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;

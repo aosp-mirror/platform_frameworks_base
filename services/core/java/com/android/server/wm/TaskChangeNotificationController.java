@@ -130,8 +130,8 @@ class TaskChangeNotificationController {
         l.onActivityForcedResizable((String) m.obj, m.arg1, m.arg2);
     };
 
-    private final TaskStackConsumer mNotifyActivityDismissingDockedStack = (l, m) -> {
-        l.onActivityDismissingDockedStack();
+    private final TaskStackConsumer mNotifyActivityDismissingDockedTask = (l, m) -> {
+        l.onActivityDismissingDockedTask();
     };
 
     private final TaskStackConsumer mNotifyActivityLaunchOnSecondaryDisplayFailed = (l, m) -> {
@@ -235,7 +235,7 @@ class TaskChangeNotificationController {
                     forAllRemoteListeners(mNotifyActivityForcedResizable, msg);
                     break;
                 case NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG:
-                    forAllRemoteListeners(mNotifyActivityDismissingDockedStack, msg);
+                    forAllRemoteListeners(mNotifyActivityDismissingDockedTask, msg);
                     break;
                 case NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG:
                     forAllRemoteListeners(mNotifyActivityLaunchOnSecondaryDisplayFailed, msg);
@@ -391,7 +391,7 @@ class TaskChangeNotificationController {
     void notifyActivityDismissingDockedRootTask() {
         mHandler.removeMessages(NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG);
         final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG);
-        forAllLocalListeners(mNotifyActivityDismissingDockedStack, msg);
+        forAllLocalListeners(mNotifyActivityDismissingDockedTask, msg);
         msg.sendToTarget();
     }
 

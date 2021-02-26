@@ -43,7 +43,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void onActivityPinned(String packageName, int userId, int taskId, int stackId)
+    public void onActivityPinned(String packageName, int userId, int taskId, int rootTaskId)
             throws RemoteException {
     }
 
@@ -66,7 +66,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void onActivityDismissingDockedStack() throws RemoteException {
+    public void onActivityDismissingDockedTask() throws RemoteException {
     }
 
     @Override

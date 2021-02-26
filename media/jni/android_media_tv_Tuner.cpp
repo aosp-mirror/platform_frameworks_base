@@ -561,7 +561,7 @@ jobjectArray FilterClientCallbackImpl::getTsRecordEvent(
                 const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TsRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJ)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJI)V");
 
     for (int i = 0; i < events.size(); i++) {
         auto event = events[i];
@@ -614,7 +614,7 @@ jobjectArray FilterClientCallbackImpl::getMmtpRecordEvent(
                 const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJ)V");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJII)V");
 
     for (int i = 0; i < events.size(); i++) {
         auto event = events[i];
@@ -3571,26 +3571,28 @@ static DemuxFilterSettings getFilterConfiguration(
                 .tpid = tpid,
             };
 
-            DemuxTsFilterType tsType = static_cast<DemuxTsFilterType>(subtype);
-            switch (tsType) {
-                case DemuxTsFilterType::SECTION:
-                    tsFilterSettings.filterSettings.section(
-                            getFilterSectionSettings(env, settingsObj));
-                    break;
-                case DemuxTsFilterType::AUDIO:
-                case DemuxTsFilterType::VIDEO:
-                    tsFilterSettings.filterSettings.av(getFilterAvSettings(env, settingsObj));
-                    break;
-                case DemuxTsFilterType::PES:
-                    tsFilterSettings.filterSettings.pesData(
-                            getFilterPesDataSettings(env, settingsObj));
-                    break;
-                case DemuxTsFilterType::RECORD:
-                    tsFilterSettings.filterSettings.record(
-                            getFilterRecordSettings(env, settingsObj));
-                    break;
-                default:
-                    break;
+            if (settingsObj != NULL) {
+                DemuxTsFilterType tsType = static_cast<DemuxTsFilterType>(subtype);
+                switch (tsType) {
+                    case DemuxTsFilterType::SECTION:
+                        tsFilterSettings.filterSettings.section(
+                                getFilterSectionSettings(env, settingsObj));
+                        break;
+                    case DemuxTsFilterType::AUDIO:
+                    case DemuxTsFilterType::VIDEO:
+                        tsFilterSettings.filterSettings.av(getFilterAvSettings(env, settingsObj));
+                        break;
+                    case DemuxTsFilterType::PES:
+                        tsFilterSettings.filterSettings.pesData(
+                                getFilterPesDataSettings(env, settingsObj));
+                        break;
+                    case DemuxTsFilterType::RECORD:
+                        tsFilterSettings.filterSettings.record(
+                                getFilterRecordSettings(env, settingsObj));
+                        break;
+                    default:
+                        break;
+                }
             }
             filterSettings.ts(tsFilterSettings);
             break;
@@ -3602,60 +3604,55 @@ static DemuxFilterSettings getFilterConfiguration(
             DemuxMmtpFilterSettings mmtpFilterSettings {
                 .mmtpPid = mmtpPid,
             };
-            DemuxMmtpFilterType mmtpType = static_cast<DemuxMmtpFilterType>(subtype);
-            switch (mmtpType) {
-                case DemuxMmtpFilterType::SECTION:
-                    mmtpFilterSettings.filterSettings.section(
-                            getFilterSectionSettings(env, settingsObj));
-                    break;
-                case DemuxMmtpFilterType::AUDIO:
-                case DemuxMmtpFilterType::VIDEO:
-                    mmtpFilterSettings.filterSettings.av(getFilterAvSettings(env, settingsObj));
-                    break;
-                case DemuxMmtpFilterType::PES:
-                    mmtpFilterSettings.filterSettings.pesData(
-                            getFilterPesDataSettings(env, settingsObj));
-                    break;
-                case DemuxMmtpFilterType::RECORD:
-                    mmtpFilterSettings.filterSettings.record(
-                            getFilterRecordSettings(env, settingsObj));
-                    break;
-                case DemuxMmtpFilterType::DOWNLOAD:
-                    mmtpFilterSettings.filterSettings.download(
-                            getFilterDownloadSettings(env, settingsObj));
-                    break;
-                default:
-                    break;
+
+            if (settingsObj != NULL) {
+                DemuxMmtpFilterType mmtpType = static_cast<DemuxMmtpFilterType>(subtype);
+                switch (mmtpType) {
+                    case DemuxMmtpFilterType::SECTION:
+                        mmtpFilterSettings.filterSettings.section(
+                                getFilterSectionSettings(env, settingsObj));
+                        break;
+                    case DemuxMmtpFilterType::AUDIO:
+                    case DemuxMmtpFilterType::VIDEO:
+                        mmtpFilterSettings.filterSettings.av(getFilterAvSettings(env, settingsObj));
+                        break;
+                    case DemuxMmtpFilterType::PES:
+                        mmtpFilterSettings.filterSettings.pesData(
+                                getFilterPesDataSettings(env, settingsObj));
+                        break;
+                    case DemuxMmtpFilterType::RECORD:
+                        mmtpFilterSettings.filterSettings.record(
+                                getFilterRecordSettings(env, settingsObj));
+                        break;
+                    case DemuxMmtpFilterType::DOWNLOAD:
+                        mmtpFilterSettings.filterSettings.download(
+                                getFilterDownloadSettings(env, settingsObj));
+                        break;
+                    default:
+                        break;
+                }
             }
             filterSettings.mmtp(mmtpFilterSettings);
             break;
         }
         case DemuxFilterMainType::IP: {
             DemuxIpAddress ipAddr = getDemuxIpAddress(env, filterConfigObj);
-
             DemuxIpFilterSettings ipFilterSettings {
                 .ipAddr = ipAddr,
             };
+
             DemuxIpFilterType ipType = static_cast<DemuxIpFilterType>(subtype);
-            switch (ipType) {
-                case DemuxIpFilterType::SECTION: {
-                    ipFilterSettings.filterSettings.section(
-                            getFilterSectionSettings(env, settingsObj));
-                    break;
-                }
-                case DemuxIpFilterType::IP: {
-                    jclass clazz = env->FindClass(
-                            "android/media/tv/tuner/filter/IpFilterConfiguration");
-                    bool bPassthrough = static_cast<bool>(
-                            env->GetBooleanField(
-                                    filterConfigObj, env->GetFieldID(
-                                            clazz, "mPassthrough", "Z")));
-                    ipFilterSettings.filterSettings.bPassthrough(bPassthrough);
-                    break;
-                }
-                default: {
-                    break;
-                }
+            if (ipType == DemuxIpFilterType::SECTION && settingsObj != NULL) {
+                ipFilterSettings.filterSettings.section(
+                                getFilterSectionSettings(env, settingsObj));
+            } else if (ipType == DemuxIpFilterType::IP) {
+                jclass clazz = env->FindClass(
+                        "android/media/tv/tuner/filter/IpFilterConfiguration");
+                bool bPassthrough = static_cast<bool>(
+                        env->GetBooleanField(
+                                filterConfigObj, env->GetFieldID(
+                                        clazz, "mPassthrough", "Z")));
+                ipFilterSettings.filterSettings.bPassthrough(bPassthrough);
             }
             filterSettings.ip(ipFilterSettings);
             break;
@@ -3672,24 +3669,17 @@ static DemuxFilterSettings getFilterConfiguration(
                 .packetType = packetType,
                 .isCompressedIpPacket = isCompressedIpPacket,
             };
+
             DemuxTlvFilterType tlvType = static_cast<DemuxTlvFilterType>(subtype);
-            switch (tlvType) {
-                case DemuxTlvFilterType::SECTION: {
-                    tlvFilterSettings.filterSettings.section(
-                            getFilterSectionSettings(env, settingsObj));
-                    break;
-                }
-                case DemuxTlvFilterType::TLV: {
-                    bool bPassthrough = static_cast<bool>(
-                            env->GetBooleanField(
-                                    filterConfigObj, env->GetFieldID(
-                                            clazz, "mPassthrough", "Z")));
-                    tlvFilterSettings.filterSettings.bPassthrough(bPassthrough);
-                    break;
-                }
-                default: {
-                    break;
-                }
+            if (tlvType == DemuxTlvFilterType::SECTION && settingsObj != NULL) {
+                tlvFilterSettings.filterSettings.section(
+                        getFilterSectionSettings(env, settingsObj));
+            } else if (tlvType == DemuxTlvFilterType::TLV) {
+                bool bPassthrough = static_cast<bool>(
+                env->GetBooleanField(
+                        filterConfigObj, env->GetFieldID(
+                                clazz, "mPassthrough", "Z")));
+                tlvFilterSettings.filterSettings.bPassthrough(bPassthrough);
             }
             filterSettings.tlv(tlvFilterSettings);
             break;
@@ -3704,14 +3694,17 @@ static DemuxFilterSettings getFilterConfiguration(
                 .packetType = packetType,
                 .lengthType = lengthType,
             };
-            DemuxAlpFilterType alpType = static_cast<DemuxAlpFilterType>(subtype);
-            switch (alpType) {
-                case DemuxAlpFilterType::SECTION:
-                    alpFilterSettings.filterSettings.section(
-                            getFilterSectionSettings(env, settingsObj));
-                    break;
-                default:
-                    break;
+
+            if (settingsObj != NULL) {
+                DemuxAlpFilterType alpType = static_cast<DemuxAlpFilterType>(subtype);
+                switch (alpType) {
+                    case DemuxAlpFilterType::SECTION:
+                        alpFilterSettings.filterSettings.section(
+                                getFilterSectionSettings(env, settingsObj));
+                        break;
+                    default:
+                        break;
+                }
             }
             filterSettings.alp(alpFilterSettings);
             break;

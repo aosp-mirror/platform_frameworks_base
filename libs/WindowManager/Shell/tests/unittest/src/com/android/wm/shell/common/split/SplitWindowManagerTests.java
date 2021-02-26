@@ -29,6 +29,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import org.mockito.MockitoAnnotations;
 public class SplitWindowManagerTests extends ShellTestCase {
     @Mock SurfaceControl mSurfaceControl;
     @Mock SplitLayout mSplitLayout;
+    @Mock DisplayImeController mDisplayImeController;
     private SplitWindowManager mSplitWindowManager;
 
     @Before
@@ -50,7 +52,7 @@ public class SplitWindowManagerTests extends ShellTestCase {
         final Configuration configuration = new Configuration();
         configuration.setToDefaults();
         mSplitWindowManager = new SplitWindowManager("TestSplitDivider", mContext, configuration,
-                b -> b.setParent(mSurfaceControl));
+                b -> b.setParent(mSurfaceControl), mDisplayImeController);
         when(mSplitLayout.getDividerBounds()).thenReturn(
                 new Rect(0, 0, configuration.windowConfiguration.getBounds().width(),
                         configuration.windowConfiguration.getBounds().height()));

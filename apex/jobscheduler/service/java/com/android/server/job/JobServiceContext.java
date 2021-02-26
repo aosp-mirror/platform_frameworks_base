@@ -271,7 +271,9 @@ public final class JobServiceContext implements ServiceConnection {
                 if (job.shouldTreatAsExpeditedJob()) {
                     // TODO(171305774): The job should run on the little cores. We'll probably need
                     // another binding flag for that.
-                    bindFlags = Context.BIND_AUTO_CREATE;
+                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                            | Context.BIND_ALMOST_PERCEPTIBLE
+                            | Context.BIND_ALLOW_NETWORK_ACCESS;
                 } else {
                     bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                             | Context.BIND_NOT_PERCEPTIBLE;

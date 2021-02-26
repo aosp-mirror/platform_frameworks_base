@@ -20,17 +20,17 @@ import static org.mockito.Mockito.mock;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-
-import org.mockito.Mock;
 
 public class TestAppPairsController extends AppPairsController {
     private TestAppPairsPool mPool;
 
     public TestAppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
             DisplayController displayController) {
-        super(organizer, syncQueue, displayController, mock(ShellExecutor.class));
+        super(organizer, syncQueue, displayController, mock(ShellExecutor.class),
+                mock(DisplayImeController.class));
         mPool = new TestAppPairsPool(this);
         setPairsPool(mPool);
     }

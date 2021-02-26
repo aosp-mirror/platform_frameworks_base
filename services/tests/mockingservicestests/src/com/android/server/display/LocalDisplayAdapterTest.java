@@ -27,11 +27,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,6 +47,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.display.LocalDisplayAdapter.BacklightAdapter;
 import com.android.server.lights.LightsManager;
@@ -98,6 +102,9 @@ public class LocalDisplayAdapterTest {
 
     @Mock
     private LocalDisplayAdapter.SurfaceControlProxy mSurfaceControlProxy;
+    private static final float[] DISPLAY_RANGE_NITS = { 2.685f, 478.5f };
+    private static final int[] BACKLIGHT_RANGE = { 1, 255 };
+    private static final float[] BACKLIGHT_RANGE_ZERO_TO_ONE = { 0.0f, 1.0f };
 
     @Before
     public void setUp() throws Exception {
@@ -114,6 +121,18 @@ public class LocalDisplayAdapterTest {
                 mListener, mInjector);
         spyOn(mAdapter);
         doReturn(mMockedContext).when(mAdapter).getOverlayContext();
+
+        TypedArray mockNitsRange = createFloatTypedArray(DISPLAY_RANGE_NITS);
+        when(mMockedResources.obtainTypedArray(R.array.config_screenBrightnessNits))
+                .thenReturn(mockNitsRange);
+        when(mMockedResources.getIntArray(R.array.config_screenBrightnessBacklight))
+                .thenReturn(BACKLIGHT_RANGE);
+        when(mMockedResources.getFloat(com.android.internal.R.dimen
+                .config_screenBrightnessSettingMinimumFloat))
+                .thenReturn(BACKLIGHT_RANGE_ZERO_TO_ONE[0]);
+        when(mMockedResources.getFloat(com.android.internal.R.dimen
+                .config_screenBrightnessSettingMaximumFloat))
+                .thenReturn(BACKLIGHT_RANGE_ZERO_TO_ONE[1]);
     }
 
     @After
@@ -629,13 +648,13 @@ public class LocalDisplayAdapterTest {
         // Test as default display
         BacklightAdapter ba = new BacklightAdapter(displayToken, true /*isDefault*/,
                 mSurfaceControlProxy);
-        ba.setBrightness(0.514f);
+        ba.setBacklight(0.514f);
         verify(mSurfaceControlProxy).setDisplayBrightness(displayToken, 0.514f);
 
         // Test as not default display
         BacklightAdapter ba2 = new BacklightAdapter(displayToken, false /*isDefault*/,
                 mSurfaceControlProxy);
-        ba2.setBrightness(0.323f);
+        ba2.setBacklight(0.323f);
         verify(mSurfaceControlProxy).setDisplayBrightness(displayToken, 0.323f);
     }
 
@@ -648,7 +667,7 @@ public class LocalDisplayAdapterTest {
 
         BacklightAdapter ba = new BacklightAdapter(displayToken, true /*isDefault*/,
                 mSurfaceControlProxy);
-        ba.setBrightness(0.123f);
+        ba.setBacklight(0.123f);
         verify(mMockedBacklight).setBrightness(0.123f);
     }
 
@@ -661,7 +680,7 @@ public class LocalDisplayAdapterTest {
 
         BacklightAdapter ba = new BacklightAdapter(displayToken, false /*isDefault*/,
                 mSurfaceControlProxy);
-        ba.setBrightness(0.456f);
+        ba.setBacklight(0.456f);
 
         // Adapter does not forward any brightness in this case.
         verify(mMockedBacklight, never()).setBrightness(anyFloat());
@@ -864,4 +883,23 @@ public class LocalDisplayAdapterTest {
         }
     }
 
+    private TypedArray createFloatTypedArray(float[] vals) {
+        TypedArray mockArray = mock(TypedArray.class);
+        when(mockArray.length()).thenAnswer(invocation -> {
+            return vals.length;
+        });
+        when(mockArray.getFloat(anyInt(), anyFloat())).thenAnswer(invocation -> {
+            final float def = (float) invocation.getArguments()[1];
+            if (vals == null) {
+                return def;
+            }
+            int idx = (int) invocation.getArguments()[0];
+            if (idx >= 0 && idx < vals.length) {
+                return vals[idx];
+            } else {
+                return def;
+            }
+        });
+        return mockArray;
+    }
 }

@@ -318,7 +318,8 @@ public class PowerStatsServiceTest {
         assertTrue(pssProto.energyMeasurement.length == ENERGY_METER_COUNT);
         for (int i = 0; i < pssProto.energyMeasurement.length; i++) {
             assertTrue(pssProto.energyMeasurement[i].id == i);
-            assertTrue(pssProto.energyMeasurement[i].timestampMs == i);
+            assertTrue(pssProto.energyMeasurement[i].timestampMs ==
+                    i + mPowerStatsLogger.getStartWallTime());
             assertTrue(pssProto.energyMeasurement[i].durationMs == i);
             assertTrue(pssProto.energyMeasurement[i].energyUws == i);
         }
@@ -359,7 +360,8 @@ public class PowerStatsServiceTest {
         assertTrue(pssProto.energyConsumerResult.length == ENERGY_CONSUMER_COUNT);
         for (int i = 0; i < pssProto.energyConsumerResult.length; i++) {
             assertTrue(pssProto.energyConsumerResult[i].id == i);
-            assertTrue(pssProto.energyConsumerResult[i].timestampMs == i);
+            assertTrue(pssProto.energyConsumerResult[i].timestampMs ==
+                    i + mPowerStatsLogger.getStartWallTime());
             assertTrue(pssProto.energyConsumerResult[i].energyUws == i);
             assertTrue(pssProto.energyConsumerResult[i].attribution.length
                     == ENERGY_CONSUMER_ATTRIBUTION_COUNT);
@@ -420,7 +422,8 @@ public class PowerStatsServiceTest {
                 assertTrue(stateResidency.id == j);
                 assertTrue(stateResidency.totalTimeInStateMs == j);
                 assertTrue(stateResidency.totalStateEntryCount == j);
-                assertTrue(stateResidency.lastEntryTimestampMs == j);
+                assertTrue(stateResidency.lastEntryTimestampMs ==
+                        j + mPowerStatsLogger.getStartWallTime());
             }
         }
     }

@@ -67,39 +67,40 @@ import java.util.function.BiFunction;
  *              .setImeContainer(imeContainer)
  *              .setTaskDisplayAreas(rootTdaList);
  *
- *      // Build root hierarchy of front and rear DisplayAreaGroup.
- *      RootDisplayArea frontRoot = new RootDisplayArea(wmService, "FrontRoot", FEATURE_FRONT_ROOT);
- *      DisplayAreaPolicyBuilder.HierarchyBuilder frontGroupHierarchy =
- *          new DisplayAreaPolicyBuilder.HierarchyBuilder(frontRoot)
+ *      // Build root hierarchy of first and second DisplayAreaGroup.
+ *      RootDisplayArea firstRoot = new RootDisplayArea(wmService, "FirstRoot", FEATURE_FIRST_ROOT);
+ *      DisplayAreaPolicyBuilder.HierarchyBuilder firstGroupHierarchy =
+ *          new DisplayAreaPolicyBuilder.HierarchyBuilder(firstRoot)
  *              // (Optional) .addFeature(...)
- *              .setTaskDisplayAreas(frontTdaList);
+ *              .setTaskDisplayAreas(firstTdaList);
  *
- *      RootDisplayArea rearRoot = new RootDisplayArea(wmService, "RearRoot", FEATURE_REAR_ROOT);
- *      DisplayAreaPolicyBuilder.HierarchyBuilder rearGroupHierarchy =
- *          new DisplayAreaPolicyBuilder.HierarchyBuilder(rearRoot)
+ *      RootDisplayArea secondRoot = new RootDisplayArea(wmService, "SecondRoot",
+ *          FEATURE_REAR_ROOT);
+ *      DisplayAreaPolicyBuilder.HierarchyBuilder secondGroupHierarchy =
+ *          new DisplayAreaPolicyBuilder.HierarchyBuilder(secondRoot)
  *              // (Optional) .addFeature(...)
- *              .setTaskDisplayAreas(rearTdaList);
+ *              .setTaskDisplayAreas(secondTdaList);
  *
  *      // Define the function to select root for window to attach.
  *      BiFunction<WindowToken, Bundle, RootDisplayArea> selectRootForWindowFunc =
- *                (windowToken, bundle) -> {
- *                    if (bundle == null) {
+ *                (windowToken, options) -> {
+ *                    if (options == null) {
  *                        return root;
  *                    }
  *                    // OEMs need to define the condition.
  *                    if (...) {
- *                        return frontRoot;
+ *                        return firstRoot;
  *                    }
  *                    if (...) {
- *                        return rearRoot;
+ *                        return secondRoot;
  *                    }
  *                    return root;
  *                };
  *
  *      return new DisplayAreaPolicyBuilder()
  *                .setRootHierarchy(rootHierarchy)
- *                .addDisplayAreaGroupHierarchy(frontGroupHierarchy)
- *                .addDisplayAreaGroupHierarchy(rearGroupHierarchy)
+ *                .addDisplayAreaGroupHierarchy(firstGroupHierarchy)
+ *                .addDisplayAreaGroupHierarchy(secondGroupHierarchy)
  *                .setSelectRootForWindowFunc(selectRootForWindowFunc)
  *                .build(wmService, content);
  * </pre>
@@ -110,12 +111,12 @@ import java.util.function.BiFunction;
  *          - WindowedMagnification
  *              - DisplayArea.Tokens (Wallpapers can be attached here)
  *              - TaskDisplayArea
- *              - RootDisplayArea (FrontRoot)
+ *              - RootDisplayArea (FirstRoot)
  *                  - DisplayArea.Tokens (Wallpapers can be attached here)
  *                  - TaskDisplayArea
  *                  - DisplayArea.Tokens (windows above Tasks up to IME can be attached here)
  *                  - DisplayArea.Tokens (windows above IME can be attached here)
- *              - RootDisplayArea (RearRoot)
+ *              - RootDisplayArea (SecondRoot)
  *                  - DisplayArea.Tokens (Wallpapers can be attached here)
  *                  - TaskDisplayArea
  *                  - DisplayArea.Tokens (windows above Tasks up to IME can be attached here)
@@ -133,14 +134,23 @@ import java.util.function.BiFunction;
  * {@link RootDisplayArea}.
  */
 class DisplayAreaPolicyBuilder {
+
+    /**
+     * Key to specify the {@link RootDisplayArea} to attach the window to. Should be used by the
+     * function passed in from {@link #setSelectRootForWindowFunc(BiFunction)}
+     */
+    static final String KEY_ROOT_DISPLAY_AREA_ID = "root_display_area_id";
+
     @Nullable private HierarchyBuilder mRootHierarchyBuilder;
-    private ArrayList<HierarchyBuilder> mDisplayAreaGroupHierarchyBuilders = new ArrayList<>();
+    private final ArrayList<HierarchyBuilder> mDisplayAreaGroupHierarchyBuilders =
+            new ArrayList<>();
 
     /**
      * When a window is created, the policy will use this function, which takes window type and
      * options, to select the {@link RootDisplayArea} to place that window in. The selected root
      * can be either the one of the {@link #mRootHierarchyBuilder} or the one of any of the
      * {@link #mDisplayAreaGroupHierarchyBuilders}.
+     * @see DefaultSelectRootForWindowFunction as an example.
      **/
     @Nullable private BiFunction<Integer, Bundle, RootDisplayArea> mSelectRootForWindowFunc;
 
@@ -160,7 +170,10 @@ class DisplayAreaPolicyBuilder {
         return this;
     }
 
-    /** The policy will use this function to find the root to place windows in. */
+    /**
+     * The policy will use this function to find the root to place windows in.
+     * @see DefaultSelectRootForWindowFunction as an example.
+     */
     DisplayAreaPolicyBuilder setSelectRootForWindowFunc(
             BiFunction<Integer, Bundle, RootDisplayArea> selectRootForWindowFunc) {
         mSelectRootForWindowFunc = selectRootForWindowFunc;
@@ -169,7 +182,7 @@ class DisplayAreaPolicyBuilder {
 
     /**
      * Makes sure the setting meets the requirement:
-     * 1. {@link mRootHierarchyBuilder} must be set.
+     * 1. {@link #mRootHierarchyBuilder} must be set.
      * 2. {@link RootDisplayArea} and {@link TaskDisplayArea} must have unique ids.
      * 3. {@link Feature} below the same {@link RootDisplayArea} must have unique ids.
      * 4. There must be exactly one {@link HierarchyBuilder} that contains the IME container.
@@ -309,8 +322,54 @@ class DisplayAreaPolicyBuilder {
             hierarchyBuilder.build();
             displayAreaGroupRoots.add(hierarchyBuilder.mRoot);
         }
+        // Use the default function if it is not specified otherwise.
+        if (mSelectRootForWindowFunc == null) {
+            mSelectRootForWindowFunc = new DefaultSelectRootForWindowFunction(
+                    mRootHierarchyBuilder.mRoot, displayAreaGroupRoots);
+        }
         return new Result(wmService, mRootHierarchyBuilder.mRoot, displayAreaGroupRoots,
                 mSelectRootForWindowFunc);
+    }
+
+    /**
+     * The default function to be used for finding {@link RootDisplayArea} for window to be attached
+     * to if there is no other function set through {@link #setSelectRootForWindowFunc(BiFunction)}.
+     *
+     * When a window is created with {@link Bundle} options, this function will select the
+     * {@link RootDisplayArea} based on the options. Returns {@link #mDisplayRoot} if there is no
+     * match found.
+     */
+    private static class DefaultSelectRootForWindowFunction implements
+            BiFunction<Integer, Bundle, RootDisplayArea> {
+        final RootDisplayArea mDisplayRoot;
+        final List<RootDisplayArea> mDisplayAreaGroupRoots;
+
+        DefaultSelectRootForWindowFunction(RootDisplayArea displayRoot,
+                List<RootDisplayArea> displayAreaGroupRoots) {
+            mDisplayRoot = displayRoot;
+            mDisplayAreaGroupRoots = Collections.unmodifiableList(displayAreaGroupRoots);
+        }
+
+        @Override
+        public RootDisplayArea apply(Integer windowType, Bundle options) {
+            if (mDisplayAreaGroupRoots.isEmpty()) {
+                return mDisplayRoot;
+            }
+
+            // Select the RootDisplayArea set in options.
+            if (options != null && options.containsKey(KEY_ROOT_DISPLAY_AREA_ID)) {
+                final int rootId = options.getInt(KEY_ROOT_DISPLAY_AREA_ID);
+                if (mDisplayRoot.mFeatureId == rootId) {
+                    return mDisplayRoot;
+                }
+                for (int i = mDisplayAreaGroupRoots.size() - 1; i >= 0; i--) {
+                    if (mDisplayAreaGroupRoots.get(i).mFeatureId == rootId) {
+                        return mDisplayAreaGroupRoots.get(i);
+                    }
+                }
+            }
+            return mDisplayRoot;
+        }
     }
 
     /**
@@ -672,15 +731,10 @@ class DisplayAreaPolicyBuilder {
 
         Result(WindowManagerService wmService, RootDisplayArea root,
                 List<RootDisplayArea> displayAreaGroupRoots,
-                @Nullable BiFunction<Integer, Bundle, RootDisplayArea>
-                        selectRootForWindowFunc) {
+                BiFunction<Integer, Bundle, RootDisplayArea> selectRootForWindowFunc) {
             super(wmService, root);
             mDisplayAreaGroupRoots = Collections.unmodifiableList(displayAreaGroupRoots);
-            mSelectRootForWindowFunc = selectRootForWindowFunc == null
-                    // Always return the highest level root of the logical display when the func is
-                    // not specified.
-                    ? (type, options) -> mRoot
-                    : selectRootForWindowFunc;
+            mSelectRootForWindowFunc = selectRootForWindowFunc;
 
             // Cache the default TaskDisplayArea for quick access.
             mDefaultTaskDisplayArea = mRoot.getItemFromTaskDisplayAreas(taskDisplayArea ->

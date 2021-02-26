@@ -75,6 +75,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private static final int ACTION_ADD = 1;
     private static final int ACTION_MOVE = 2;
 
+    private static final int NUM_COLUMNS_ID = R.integer.quick_settings_edit_num_columns;
+
     private final Context mContext;
 
     private final Handler mHandler = new Handler();
@@ -87,6 +89,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mEditIndex;
     private int mTileDividerIndex;
     private int mFocusIndex;
+
     private boolean mNeedsFocus;
     private List<String> mCurrentSpecs;
     private List<TileInfo> mOtherTiles;
@@ -109,7 +112,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mDecoration = new TileItemDecoration(context);
         mMarginDecoration = new MarginTileDecoration();
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
-        mNumColumns = context.getResources().getInteger(R.integer.quick_settings_num_columns);
+        mNumColumns = context.getResources().getInteger(NUM_COLUMNS_ID);
         mAccessibilityDelegate = new TileAdapterDelegate();
     }
 
@@ -129,7 +132,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
      * @return {@code true} if the number of columns changed, {@code false} otherwise
      */
     public boolean updateNumColumns() {
-        int numColumns = mContext.getResources().getInteger(R.integer.quick_settings_num_columns);
+        int numColumns = mContext.getResources().getInteger(NUM_COLUMNS_ID);
         if (numColumns != mNumColumns) {
             mNumColumns = numColumns;
             return true;

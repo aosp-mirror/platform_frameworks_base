@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip;
 
+import static android.util.RotationUtils.rotateBounds;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
@@ -37,7 +38,6 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.common.DisplayLayout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -141,7 +141,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         // Apply fraction 1 to compute the end value.
         animator.applySurfaceControlTransaction(mLeash, new DummySurfaceControlTx(), 1);
         final Rect rotatedEndBounds = new Rect(endBounds);
-        DisplayLayout.rotateBounds(rotatedEndBounds, endBounds, ROTATION_90);
+        rotateBounds(rotatedEndBounds, endBounds, ROTATION_90);
 
         assertEquals("Expect 90 degree rotated bounds", rotatedEndBounds, animator.mCurrentValue);
     }

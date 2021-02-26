@@ -3084,6 +3084,7 @@
     <public name="hand_minuteTintMode"/>
     <public name="hand_secondTint"/>
     <public name="hand_secondTintMode"/>
+    <public name="dataExtractionRules"/>
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
@@ -3165,6 +3166,8 @@
     <public name="config_customMediaKeyDispatcher" />
     <!-- @hide @SystemApi -->
     <public name="config_customMediaSessionPolicyProvider" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSpeechRecognizer" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">

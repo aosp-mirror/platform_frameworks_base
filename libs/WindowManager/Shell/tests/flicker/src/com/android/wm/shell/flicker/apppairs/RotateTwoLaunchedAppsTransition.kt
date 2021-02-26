@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.Bundle
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -30,7 +29,7 @@ abstract class RotateTwoLaunchedAppsTransition(
     override val nonResizeableApp: SplitScreenHelper?
         get() = null
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             setup {
                 test {

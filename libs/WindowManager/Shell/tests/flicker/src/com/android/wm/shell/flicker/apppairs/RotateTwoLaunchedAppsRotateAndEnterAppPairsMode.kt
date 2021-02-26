@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.Bundle
 import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -55,7 +54,7 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
     testSpec: FlickerTestParameter
 ) : RotateTwoLaunchedAppsTransition(testSpec) {
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
             super.transition(this, it)
             transitions {

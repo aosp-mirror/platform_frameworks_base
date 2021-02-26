@@ -171,7 +171,7 @@ public class DataLoaderManagerService extends SystemService {
         }
     }
 
-    private class DataLoaderServiceConnection implements ServiceConnection {
+    private class DataLoaderServiceConnection implements ServiceConnection, IBinder.DeathRecipient {
         final int mId;
         final IDataLoaderStatusListener mListener;
         IDataLoader mDataLoader;
@@ -194,6 +194,13 @@ public class DataLoaderManagerService extends SystemService {
                 mContext.unbindService(this);
                 return;
             }
+            try {
+                service.linkToDeath(this, /*flags=*/0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to link to DataLoader's death: " + mId, e);
+                onBindingDied(className);
+                return;
+            }
             callListener(IDataLoaderStatusListener.DATA_LOADER_BOUND);
         }
 
@@ -214,6 +221,13 @@ public class DataLoaderManagerService extends SystemService {
         @Override
         public void onNullBinding(ComponentName name) {
             Slog.i(TAG, "DataLoader " + mId + " failed to start");
+            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
+            destroy();
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.i(TAG, "DataLoader " + mId + " died");
             callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
             destroy();
         }

@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.apppairs
 
 import android.app.Instrumentation
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.system.helpers.ActivityHelper
 import android.util.Log
@@ -66,7 +65,7 @@ abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
-    internal open val transition: FlickerBuilder.(Bundle) -> Unit
+    internal open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setup {
                 test {

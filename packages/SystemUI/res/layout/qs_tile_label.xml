@@ -20,7 +20,6 @@
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="48dp"
     android:paddingTop="12dp">
     <LinearLayout
         android:id="@+id/label_group"

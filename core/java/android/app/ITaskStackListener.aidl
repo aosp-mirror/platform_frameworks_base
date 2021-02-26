@@ -60,9 +60,9 @@ oneway interface ITaskStackListener {
     void onActivityForcedResizable(String packageName, int taskId, int reason);
 
     /**
-     * Called when we launched an activity that dismissed the docked stack.
+     * Called when we launched an activity that dismissed the docked task.
      */
-    void onActivityDismissingDockedStack();
+    void onActivityDismissingDockedTask();
 
     /**
      * Called when an activity was requested to be launched on a secondary display but was not

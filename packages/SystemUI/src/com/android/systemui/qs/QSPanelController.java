@@ -18,7 +18,6 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.annotation.NonNull;
@@ -66,7 +65,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     private BrightnessMirrorController mBrightnessMirrorController;
     private boolean mGridContentVisible = true;
-    private boolean mQsLabelsFlag;
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
@@ -93,7 +91,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory,
-            @Named(QS_LABELS_FLAG) boolean qsLabelsFlag,
             FeatureFlags featureFlags) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager, featureFlags);
@@ -108,9 +105,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mView.setBrightnessView(mBrightnessSlider.getRootView());
 
         mBrightnessController = brightnessControllerFactory.create(mBrightnessSlider);
-
-        mQsLabelsFlag = qsLabelsFlag;
-        mSideLabels = qsLabelsFlag;
     }
 
     @Override
@@ -329,7 +323,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         @Override
         public void onTuningChanged(String key, String newValue) {
             if (QS_REMOVE_LABELS.equals(key)) {
-                if (!mQsLabelsFlag) return;
+                if (!mQSLabelFlag) return;
                 boolean newShowLabels = newValue == null || "0".equals(newValue);
                 if (mShowLabels == newShowLabels) return;
                 mShowLabels = newShowLabels;

@@ -52,6 +52,8 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationManagerInternal;
+import android.location.LocationManagerInternal.LocationTagInfo;
+import android.location.LocationManagerInternal.OnProviderLocationTagsChangeListener;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
@@ -85,6 +87,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.LocationPermissions;
@@ -117,6 +120,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
@@ -1288,6 +1292,9 @@ public class LocationProviderManager extends
     @GuardedBy("mLock")
     private @Nullable OnAlarmListener mDelayedRegister;
 
+    @GuardedBy("mLock")
+    private @Nullable OnProviderLocationTagsChangeListener mOnLocationTagsChangeListener;
+
     public LocationProviderManager(Context context, Injector injector, LocationEventLog eventLog,
             String name, @Nullable PassiveLocationProviderManager passiveManager) {
         mContext = context;
@@ -1445,6 +1452,19 @@ public class LocationProviderManager extends
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+    /**
+     * Registers a listener for the location tags of the provider.
+     *
+     * @param listener The listener
+     */
+    public void setOnProviderLocationTagsChangeListener(
+            @Nullable OnProviderLocationTagsChangeListener listener) {
+        Preconditions.checkArgument(mOnLocationTagsChangeListener == null || listener == null);
+        synchronized (mLock) {
+            mOnLocationTagsChangeListener = listener;
         }
     }
 
@@ -2243,6 +2263,27 @@ public class LocationProviderManager extends
 
         if (oldState.allowed != newState.allowed) {
             onEnabledChanged(UserHandle.USER_ALL);
+        }
+
+        if (!Objects.equals(oldState.locationTags, newState.locationTags)) {
+            if (mOnLocationTagsChangeListener != null) {
+                if (oldState.identity != null) {
+                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                            OnProviderLocationTagsChangeListener::onLocationTagsChanged,
+                            mOnLocationTagsChangeListener, new LocationTagInfo(
+                                    oldState.identity.getUid(), oldState.identity.getPackageName(),
+                                    Collections.emptySet())
+                            ));
+                }
+                if (newState.identity != null) {
+                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                            OnProviderLocationTagsChangeListener::onLocationTagsChanged,
+                            mOnLocationTagsChangeListener, new LocationTagInfo(
+                                    newState.identity.getUid(), newState.identity.getPackageName(),
+                                    newState.locationTags)
+                            ));
+                }
+            }
         }
     }
 

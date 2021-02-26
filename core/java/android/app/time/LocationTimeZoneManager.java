@@ -37,7 +37,7 @@ public final class LocationTimeZoneManager {
     /**
      * The name of the service for shell commands
      */
-    public static final String SHELL_COMMAND_SERVICE_NAME = "location_time_zone_manager";
+    public static final String SERVICE_NAME = "location_time_zone_manager";
 
     /**
      * A shell command that starts the service (after stop).

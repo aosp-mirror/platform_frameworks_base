@@ -22,7 +22,7 @@ import android.os.RemoteException;
 
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
-import com.android.wm.shell.pip.PinnedStackListenerForwarder.PinnedStackListener;
+import com.android.wm.shell.pip.PinnedStackListenerForwarder.PinnedTaskListener;
 
 /**
  * The singleton wrapper to communicate between WindowManagerService and WMShell features
@@ -46,7 +46,7 @@ public class WindowManagerShellWrapper {
      * Adds a pinned stack listener, which will receive updates from the window manager service
      * along with any other pinned stack listeners that were added via this method.
      */
-    public void addPinnedStackListener(PinnedStackListener listener)
+    public void addPinnedStackListener(PinnedTaskListener listener)
             throws RemoteException {
         mPinnedStackListenerForwarder.addListener(listener);
         mPinnedStackListenerForwarder.register(DEFAULT_DISPLAY);
@@ -55,7 +55,7 @@ public class WindowManagerShellWrapper {
     /**
      * Removes a pinned stack listener.
      */
-    public void removePinnedStackListener(PinnedStackListener listener) {
+    public void removePinnedStackListener(PinnedTaskListener listener) {
         mPinnedStackListenerForwarder.removeListener(listener);
     }
 

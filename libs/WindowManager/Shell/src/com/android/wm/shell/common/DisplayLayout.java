@@ -22,6 +22,8 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
+import static android.util.RotationUtils.rotateBounds;
+import static android.util.RotationUtils.rotateInsets;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
@@ -37,7 +39,6 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.RotationUtils;
 import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -49,6 +50,7 @@ import com.android.internal.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Contains information about the layout-properties of a display. This refers to internal layout
@@ -80,6 +82,31 @@ public class DisplayLayout {
     private boolean mHasNavigationBar = false;
     private boolean mHasStatusBar = false;
     private int mNavBarFrameHeight = 0;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DisplayLayout)) return false;
+        final DisplayLayout other = (DisplayLayout) o;
+        return mUiMode == other.mUiMode
+                && mWidth == other.mWidth
+                && mHeight == other.mHeight
+                && Objects.equals(mCutout, other.mCutout)
+                && mRotation == other.mRotation
+                && mDensityDpi == other.mDensityDpi
+                && Objects.equals(mNonDecorInsets, other.mNonDecorInsets)
+                && Objects.equals(mStableInsets, other.mStableInsets)
+                && mHasNavigationBar == other.mHasNavigationBar
+                && mHasStatusBar == other.mHasStatusBar
+                && mNavBarFrameHeight == other.mNavBarFrameHeight;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mUiMode, mWidth, mHeight, mCutout, mRotation, mDensityDpi,
+                mNonDecorInsets, mStableInsets, mHasNavigationBar, mHasStatusBar,
+                mNavBarFrameHeight);
+    }
 
     /**
      * Create empty layout.
@@ -241,38 +268,6 @@ public class DisplayLayout {
     }
 
     /**
-     * Rotates bounds as if parentBounds and bounds are a group. The group is rotated by `delta`
-     * 90-degree counter-clockwise increments. This assumes that parentBounds is at 0,0 and
-     * remains at 0,0 after rotation.
-     *
-     * Only 'bounds' is mutated.
-     */
-    public static void rotateBounds(Rect inOutBounds, Rect parentBounds, int delta) {
-        int rdelta = ((delta % 4) + 4) % 4;
-        int origLeft = inOutBounds.left;
-        switch (rdelta) {
-            case 0:
-                return;
-            case 1:
-                inOutBounds.left = inOutBounds.top;
-                inOutBounds.top = parentBounds.right - inOutBounds.right;
-                inOutBounds.right = inOutBounds.bottom;
-                inOutBounds.bottom = parentBounds.right - origLeft;
-                return;
-            case 2:
-                inOutBounds.left = parentBounds.right - inOutBounds.right;
-                inOutBounds.right = parentBounds.right - origLeft;
-                return;
-            case 3:
-                inOutBounds.left = parentBounds.bottom - inOutBounds.bottom;
-                inOutBounds.bottom = inOutBounds.right;
-                inOutBounds.right = parentBounds.bottom - inOutBounds.top;
-                inOutBounds.top = origLeft;
-                return;
-        }
-    }
-
-    /**
      * Calculates the stable insets if we already have the non-decor insets.
      */
     private static void convertNonDecorInsetsToStableInsets(Resources res, Rect inOutInsets,
@@ -359,8 +354,7 @@ public class DisplayLayout {
         if (rotation == ROTATION_0) {
             return computeSafeInsets(cutout, displayWidth, displayHeight);
         }
-        final Insets waterfallInsets =
-                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
+        final Insets waterfallInsets = rotateInsets(cutout.getWaterfallInsets(), rotation);
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         Rect[] cutoutRects = cutout.getBoundingRectsAll();
         final Rect[] newBounds = new Rect[cutoutRects.length];

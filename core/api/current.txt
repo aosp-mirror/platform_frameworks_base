@@ -507,6 +507,7 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
+    field public static final int dataExtractionRules = 16844350; // 0x101063e
     field public static final int datePickerDialogTheme = 16843948; // 0x10104ac
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
@@ -6269,14 +6270,14 @@ package android.app {
     method public static android.app.PendingIntent getActivities(android.content.Context, int, @NonNull android.content.Intent[], int, @Nullable android.os.Bundle);
     method public static android.app.PendingIntent getActivity(android.content.Context, int, android.content.Intent, int);
     method public static android.app.PendingIntent getActivity(android.content.Context, int, @NonNull android.content.Intent, int, @Nullable android.os.Bundle);
-    method public static android.app.PendingIntent getBroadcast(android.content.Context, int, android.content.Intent, int);
-    method @Nullable public String getCreatorPackage();
+    method public static android.app.PendingIntent getBroadcast(android.content.Context, int, @NonNull android.content.Intent, int);
+    method @NonNull public String getCreatorPackage();
     method public int getCreatorUid();
-    method @Nullable public android.os.UserHandle getCreatorUserHandle();
+    method @NonNull public android.os.UserHandle getCreatorUserHandle();
     method public static android.app.PendingIntent getForegroundService(android.content.Context, int, @NonNull android.content.Intent, int);
-    method public android.content.IntentSender getIntentSender();
+    method @NonNull public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, @NonNull android.content.Intent, int);
-    method @Deprecated public String getTargetPackage();
+    method @Deprecated @NonNull public String getTargetPackage();
     method public boolean isActivity();
     method public boolean isBroadcast();
     method public boolean isForegroundService();
@@ -9740,7 +9741,7 @@ package android.companion {
   public interface DeviceFilter<D extends android.os.Parcelable> extends android.os.Parcelable {
   }
 
-  public class DeviceNotAssociatedException extends java.lang.Exception {
+  public class DeviceNotAssociatedException extends java.lang.RuntimeException {
   }
 
   public final class WifiDeviceFilter implements android.companion.DeviceFilter<android.net.wifi.ScanResult> {
@@ -10388,7 +10389,7 @@ package android.content {
     method public abstract void grantUriPermission(String, android.net.Uri, int);
     method public abstract boolean isDeviceProtectedStorage();
     method public boolean isRestricted();
-    method public static boolean isUiContext(@NonNull android.content.Context);
+    method public boolean isUiContext();
     method public abstract boolean moveDatabaseFrom(android.content.Context, String);
     method public abstract boolean moveSharedPreferencesFrom(android.content.Context, String);
     method @NonNull public final android.content.res.TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[]);
@@ -18895,6 +18896,7 @@ package android.inputmethodservice {
   public abstract class AbstractInputMethodService extends android.app.Service implements android.view.KeyEvent.Callback {
     ctor public AbstractInputMethodService();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
+    method public final boolean isUiContext();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
@@ -19660,6 +19662,7 @@ package android.location {
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void addProximityAlert(double, double, float, long, @NonNull android.app.PendingIntent);
     method public void addTestProvider(@NonNull String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
     method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties);
+    method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties, @NonNull java.util.Set<java.lang.String>);
     method @Deprecated public void clearTestProviderEnabled(@NonNull String);
     method @Deprecated public void clearTestProviderLocation(@NonNull String);
     method @Deprecated public void clearTestProviderStatus(@NonNull String);
@@ -22148,6 +22151,14 @@ package android.media {
     field public static final String KEY_TILE_HEIGHT = "tile-height";
     field public static final String KEY_TILE_WIDTH = "tile-width";
     field public static final String KEY_TRACK_ID = "track-id";
+    field public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
+    field public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
+    field public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
+    field public static final String KEY_VIDEO_QP_I_MIN = "video-qp-i-min";
+    field public static final String KEY_VIDEO_QP_MAX = "video-qp-max";
+    field public static final String KEY_VIDEO_QP_MIN = "video-qp-min";
+    field public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
+    field public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
     field public static final String KEY_WIDTH = "width";
     field public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     field public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
@@ -37163,8 +37174,10 @@ package android.security {
     method @NonNull public static android.content.Intent createInstallIntent();
     method @NonNull public static android.content.Intent createManageCredentialsIntent(@NonNull android.security.AppUriAuthenticationPolicy);
     method @Nullable @WorkerThread public static java.security.cert.X509Certificate[] getCertificateChain(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
+    method @NonNull public static android.security.AppUriAuthenticationPolicy getCredentialManagementAppPolicy(@NonNull android.content.Context) throws java.lang.SecurityException;
     method @Nullable @WorkerThread public static java.security.PrivateKey getPrivateKey(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method @Deprecated public static boolean isBoundKeyAlgorithm(@NonNull String);
+    method public static boolean isCredentialManagementApp(@NonNull android.content.Context);
     method public static boolean isKeyAlgorithmSupported(@NonNull String);
     field public static final String ACTION_KEYCHAIN_CHANGED = "android.security.action.KEYCHAIN_CHANGED";
     field public static final String ACTION_KEY_ACCESS_CHANGED = "android.security.action.KEY_ACCESS_CHANGED";
@@ -48030,10 +48043,15 @@ package android.view {
   }
 
   public class SoundEffectConstants {
+    method public static int getConstantForFocusDirection(int, boolean);
     method public static int getContantForFocusDirection(int);
     field public static final int CLICK = 0; // 0x0
     field public static final int NAVIGATION_DOWN = 4; // 0x4
     field public static final int NAVIGATION_LEFT = 1; // 0x1
+    field public static final int NAVIGATION_REPEAT_DOWN = 8; // 0x8
+    field public static final int NAVIGATION_REPEAT_LEFT = 5; // 0x5
+    field public static final int NAVIGATION_REPEAT_RIGHT = 7; // 0x7
+    field public static final int NAVIGATION_REPEAT_UP = 6; // 0x6
     field public static final int NAVIGATION_RIGHT = 3; // 0x3
     field public static final int NAVIGATION_UP = 2; // 0x2
   }
