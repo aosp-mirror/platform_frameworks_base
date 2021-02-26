@@ -153,31 +153,11 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
 
     @Presubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() {
-        Assume.assumeFalse(testSpec.isRotated)
-        testSpec.navBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerIsAlwaysVisible_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        testSpec.navBarLayerIsAlwaysVisible()
-    }
+    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() {
-        Assume.assumeFalse(testSpec.isRotated)
-        testSpec.statusBarLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest
-    @Test
-    fun statusBarLayerIsAlwaysVisible_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
-        testSpec.statusBarLayerIsAlwaysVisible()
-    }
+    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
     @Presubmit
     @Test
