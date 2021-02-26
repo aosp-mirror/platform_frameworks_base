@@ -23,7 +23,9 @@ import android.telephony.SubscriptionInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -119,63 +121,29 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     @Override
-    public void setWifiIndicators(final boolean enabled, final IconState statusIcon,
-            final IconState qsIcon, final boolean activityIn, final boolean activityOut,
-            final String description, boolean isTransient, String secondaryLabel) {
+    public void setWifiIndicators(final WifiIndicators indicators) {
         String log = new StringBuilder()
                 .append(SSDF.format(System.currentTimeMillis())).append(",")
-                .append("setWifiIndicators: ")
-                .append("enabled=").append(enabled).append(",")
-                .append("statusIcon=").append(statusIcon).append(",")
-                .append("qsIcon=").append(qsIcon).append(",")
-                .append("activityIn=").append(activityIn).append(",")
-                .append("activityOut=").append(activityOut).append(",")
-                .append("description=").append(description).append(",")
-                .append("isTransient=").append(isTransient).append(",")
-                .append("secondaryLabel=").append(secondaryLabel)
+                .append(indicators)
                 .toString();
         recordLastCallback(log);
         post(() -> {
             for (SignalCallback callback : mSignalCallbacks) {
-                callback.setWifiIndicators(enabled, statusIcon, qsIcon, activityIn, activityOut,
-                        description, isTransient, secondaryLabel);
+                callback.setWifiIndicators(indicators);
             }
         });
-
-
     }
 
     @Override
-    public void setMobileDataIndicators(final IconState statusIcon, final IconState qsIcon,
-            final int statusType, final int qsType, final boolean activityIn,
-            final boolean activityOut, final CharSequence typeContentDescription,
-            CharSequence typeContentDescriptionHtml, final CharSequence description,
-            final boolean isWide, final int subId, boolean roaming, boolean showTriangle) {
+    public void setMobileDataIndicators(final MobileDataIndicators indicators) {
         String log = new StringBuilder()
                 .append(SSDF.format(System.currentTimeMillis())).append(",")
-                .append("setMobileDataIndicators: ")
-                .append("statusIcon=").append(statusIcon).append(",")
-                .append("qsIcon=").append(qsIcon).append(",")
-                .append("statusType=").append(statusType).append(",")
-                .append("qsType=").append(qsType).append(",")
-                .append("activityIn=").append(activityIn).append(",")
-                .append("activityOut=").append(activityOut).append(",")
-                .append("typeContentDescription=").append(typeContentDescription).append(",")
-                .append("typeContentDescriptionHtml=").append(typeContentDescriptionHtml)
-                .append(",")
-                .append("description=").append(description).append(",")
-                .append("isWide=").append(isWide).append(",")
-                .append("subId=").append(subId).append(",")
-                .append("roaming=").append(roaming).append(",")
-                .append("showTriangle=").append(showTriangle)
+                .append(indicators)
                 .toString();
         recordLastCallback(log);
         post(() -> {
             for (SignalCallback signalCluster : mSignalCallbacks) {
-                signalCluster.setMobileDataIndicators(statusIcon, qsIcon, statusType, qsType,
-                        activityIn, activityOut, typeContentDescription,
-                        typeContentDescriptionHtml, description, isWide, subId, roaming,
-                        showTriangle);
+                signalCluster.setMobileDataIndicators(indicators);
             }
         });
     }
