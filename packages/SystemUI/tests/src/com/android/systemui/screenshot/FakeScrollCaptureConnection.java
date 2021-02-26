@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.view.IScrollCaptureCallbacks;
 import android.view.IScrollCaptureConnection;
@@ -46,7 +47,7 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
     }
 
     @Override
-    public void startCapture(Surface surface) {
+    public ICancellationSignal startCapture(Surface surface) {
         mSurface = surface;
         mHwuiContext = new HwuiContext(false, surface);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -56,27 +57,28 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+        return null;
     }
 
     @Override
-    public void requestImage(Rect rect) {
+    public ICancellationSignal requestImage(Rect rect) {
         Canvas canvas = mHwuiContext.lockCanvas(rect.width(), rect.height());
         mPaint.setColor(mColors[mNextColor]);
         canvas.drawRect(rect, mPaint);
         mNextColor = (mNextColor++) % mColors.length;
-        long frameNumber = mSurface.getNextFrameNumber();
         mHwuiContext.unlockAndPost(canvas);
         try {
-            mCallbacks.onCaptureBufferSent(frameNumber, rect);
+            mCallbacks.onImageRequestCompleted(0, rect);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+        return null;
     }
 
     @Override
-    public void endCapture() {
+    public ICancellationSignal endCapture() {
         try {
-            mCallbacks.onConnectionClosed();
+            mCallbacks.onCaptureEnded();
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         } finally {
@@ -84,6 +86,12 @@ class FakeScrollCaptureConnection extends IScrollCaptureConnection.Stub {
             mSurface = null;
             mCallbacks = null;
         }
+        return null;
+    }
+
+    @Override
+    public void close() throws RemoteException {
+
     }
 
     // From android.view.Surface, but issues render requests synchronously with waitForPresent(true)
