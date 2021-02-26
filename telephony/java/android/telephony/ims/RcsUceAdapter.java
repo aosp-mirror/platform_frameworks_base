@@ -467,7 +467,7 @@ public class RcsUceAdapter {
      * poll on the network unless there are contacts being queried with stale information.
      * <p>
      * Be sure to check the availability of this feature using
-     * {@link ImsRcsManager#isAvailable(int)} and ensuring
+     * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is enabled or else
      * this operation will fail with {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
@@ -484,7 +484,8 @@ public class RcsUceAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
+            Manifest.permission.READ_CONTACTS})
     public void requestCapabilities(@NonNull List<Uri> contactNumbers,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilitiesCallback c) throws ImsException {
@@ -557,7 +558,7 @@ public class RcsUceAdapter {
      *
      * <p>
      * Be sure to check the availability of this feature using
-     * {@link ImsRcsManager#isAvailable(int)} and ensuring
+     * {@link ImsRcsManager#isAvailable(int, int)} and ensuring
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} or
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is
      * enabled or else this operation will fail with
@@ -571,7 +572,8 @@ public class RcsUceAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE,
+            Manifest.permission.READ_CONTACTS})
     public void requestAvailability(@NonNull Uri contactNumber,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilitiesCallback c) throws ImsException {
