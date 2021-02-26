@@ -49,6 +49,8 @@ final class FakeVibratorControllerProvider {
     private int mCapabilities;
     private int[] mSupportedEffects;
     private int[] mSupportedPrimitives;
+    private float mResonantFrequency;
+    private float mQFactor;
 
     private final class FakeNativeWrapper extends VibratorController.NativeWrapper {
         public int vibratorId;
@@ -87,6 +89,14 @@ final class FakeVibratorControllerProvider {
 
         public int[] getSupportedPrimitives() {
             return mSupportedPrimitives;
+        }
+
+        public float getResonantFrequency() {
+            return mResonantFrequency;
+        }
+
+        public float getQFactor() {
+            return mQFactor;
         }
 
         public long perform(long effect, long strength, long vibrationId) {
@@ -196,6 +206,16 @@ final class FakeVibratorControllerProvider {
             Arrays.sort(primitives);
         }
         mSupportedPrimitives = primitives;
+    }
+
+    /** Set the resonant frequency of the fake vibrator hardware. */
+    public void setResonantFrequency(float resonantFrequency) {
+        mResonantFrequency = resonantFrequency;
+    }
+
+    /** Set the Q factor of the fake vibrator hardware. */
+    public void setQFactor(float qFactor) {
+        mQFactor = qFactor;
     }
 
     /**

@@ -16,9 +16,10 @@
 
 package android.os;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.hardware.vibrator.IVibrator;
 import android.platform.test.annotations.Presubmit;
@@ -33,72 +34,128 @@ public class VibratorInfoTest {
 
     @Test
     public void testHasAmplitudeControl() {
-        assertFalse(createInfo(/* capabilities= */ 0).hasAmplitudeControl());
-        assertTrue(createInfo(IVibrator.CAP_COMPOSE_EFFECTS
-                | IVibrator.CAP_AMPLITUDE_CONTROL).hasAmplitudeControl());
+        VibratorInfo noCapabilities = new InfoBuilder().build();
+        assertFalse(noCapabilities.hasAmplitudeControl());
+        VibratorInfo composeAndAmplitudeControl = new InfoBuilder()
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS
+                        | IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build();
+        assertTrue(composeAndAmplitudeControl.hasAmplitudeControl());
     }
 
     @Test
     public void testHasCapabilities() {
-        assertTrue(createInfo(IVibrator.CAP_COMPOSE_EFFECTS)
-                .hasCapability(IVibrator.CAP_COMPOSE_EFFECTS));
-        assertFalse(createInfo(IVibrator.CAP_COMPOSE_EFFECTS)
-                .hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL));
+        VibratorInfo info = new InfoBuilder()
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .build();
+        assertTrue(info.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS));
+        assertFalse(info.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL));
     }
 
     @Test
     public void testIsEffectSupported() {
-        VibratorInfo info = new VibratorInfo(/* id= */ 0, /* capabilities= */0,
-                new int[]{VibrationEffect.EFFECT_CLICK}, null);
+        VibratorInfo noEffects = new InfoBuilder().build();
+        VibratorInfo canClick = new InfoBuilder()
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .build();
         assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN,
-                createInfo(/* capabilities= */ 0).isEffectSupported(VibrationEffect.EFFECT_CLICK));
+                noEffects.isEffectSupported(VibrationEffect.EFFECT_CLICK));
         assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_YES,
-                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+                canClick.isEffectSupported(VibrationEffect.EFFECT_CLICK));
         assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_NO,
-                info.isEffectSupported(VibrationEffect.EFFECT_TICK));
+                canClick.isEffectSupported(VibrationEffect.EFFECT_TICK));
     }
 
     @Test
     public void testIsPrimitiveSupported() {
-        VibratorInfo info = new VibratorInfo(/* id= */ 0, IVibrator.CAP_COMPOSE_EFFECTS,
-                null, new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
+        VibratorInfo info = new InfoBuilder()
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .build();
         assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
 
         // Returns false when there is no compose capability.
-        info = new VibratorInfo(/* id= */ 0, /* capabilities= */ 0,
-                null, new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
+        info = new InfoBuilder()
+                .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .build();
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
     }
 
     @Test
     public void testEquals() {
-        VibratorInfo empty = new VibratorInfo(1, 0, null, null);
-        VibratorInfo complete = new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
-                new int[]{VibrationEffect.EFFECT_CLICK},
-                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
+        InfoBuilder completeBuilder = new InfoBuilder()
+                .setId(1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .setQFactor(2f)
+                .setResonantFrequency(150f);
+        VibratorInfo complete = completeBuilder.build();
 
         assertEquals(complete, complete);
-        assertEquals(complete, new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
-                new int[]{VibrationEffect.EFFECT_CLICK},
-                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK}));
+        assertEquals(complete, completeBuilder.build());
 
-        assertFalse(empty.equals(new VibratorInfo(1, 0, new int[]{}, new int[]{})));
-        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_COMPOSE_EFFECTS,
-                new int[]{VibrationEffect.EFFECT_CLICK},
-                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK})));
-        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
-                new int[]{}, new int[]{})));
-        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
-                null, new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK})));
-        assertFalse(complete.equals(new VibratorInfo(1, IVibrator.CAP_AMPLITUDE_CONTROL,
-                new int[]{VibrationEffect.EFFECT_CLICK}, null)));
+        VibratorInfo completeWithComposeControl = completeBuilder
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .build();
+        assertNotEquals(complete, completeWithComposeControl);
+
+        VibratorInfo completeWithNoEffects = completeBuilder
+                .setSupportedEffects()
+                .setSupportedPrimitives()
+                .build();
+        assertNotEquals(complete, completeWithNoEffects);
+
+        VibratorInfo completeWithUnknownEffects = completeBuilder
+                .setSupportedEffects(null)
+                .build();
+        assertNotEquals(complete, completeWithNoEffects);
+
+        VibratorInfo completeWithUnknownPrimitives = completeBuilder
+                .setSupportedPrimitives(null)
+                .build();
+        assertNotEquals(complete, completeWithUnknownPrimitives);
+
+        VibratorInfo completeWithDifferentF0 = completeBuilder
+                .setResonantFrequency(complete.getResonantFrequency() + 3f)
+                .build();
+        assertNotEquals(complete, completeWithDifferentF0);
+
+        VibratorInfo completeWithUnknownF0 = completeBuilder
+                .setResonantFrequency(Float.NaN)
+                .build();
+        assertNotEquals(complete, completeWithUnknownF0);
+
+        VibratorInfo completeWithUnknownQFactor = completeBuilder
+                .setQFactor(Float.NaN)
+                .build();
+        assertNotEquals(complete, completeWithUnknownQFactor);
+
+        VibratorInfo completeWithDifferentQFactor = completeBuilder
+                .setQFactor(complete.getQFactor() + 3f)
+                .build();
+        assertNotEquals(complete, completeWithDifferentQFactor);
+
+        VibratorInfo empty = new InfoBuilder().setId(1).build();
+        VibratorInfo emptyWithKnownSupport = new InfoBuilder()
+                .setId(1)
+                .setSupportedEffects()
+                .setSupportedPrimitives()
+                .build();
+        assertNotEquals(empty, emptyWithKnownSupport);
     }
 
     @Test
-    public void testSerialization() {
-        VibratorInfo original = new VibratorInfo(1, IVibrator.CAP_COMPOSE_EFFECTS,
-                new int[]{VibrationEffect.EFFECT_CLICK}, null);
+    public void testParceling() {
+        VibratorInfo original = new InfoBuilder()
+                .setId(1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                .setSupportedPrimitives(null)
+                .setResonantFrequency(1.3f)
+                .setQFactor(Float.NaN)
+                .build();
 
         Parcel parcel = Parcel.obtain();
         original.writeToParcel(parcel, 0);
@@ -107,7 +164,47 @@ public class VibratorInfoTest {
         assertEquals(original, restored);
     }
 
-    private static VibratorInfo createInfo(long capabilities) {
-        return new VibratorInfo(/* id= */ 0, capabilities, null, null);
+    private static class InfoBuilder {
+        private int mId = 0;
+        private int mCapabilities = 0;
+        private int[] mSupportedEffects = null;
+        private int[] mSupportedPrimitives = null;
+        private float mResonantFrequency = Float.NaN;
+        private float mQFactor = Float.NaN;
+
+        public InfoBuilder setId(int id) {
+            mId = id;
+            return this;
+        }
+
+        public InfoBuilder setCapabilities(int capabilities) {
+            mCapabilities = capabilities;
+            return this;
+        }
+
+        public InfoBuilder setSupportedEffects(int... supportedEffects) {
+            mSupportedEffects = supportedEffects;
+            return this;
+        }
+
+        public InfoBuilder setSupportedPrimitives(int... supportedPrimitives) {
+            mSupportedPrimitives = supportedPrimitives;
+            return this;
+        }
+
+        public InfoBuilder setResonantFrequency(float resonantFrequency) {
+            mResonantFrequency = resonantFrequency;
+            return this;
+        }
+
+        public InfoBuilder setQFactor(float qFactor) {
+            mQFactor = qFactor;
+            return this;
+        }
+
+        public VibratorInfo build() {
+            return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedPrimitives,
+                    mResonantFrequency, mQFactor);
+        }
     }
 }

@@ -266,6 +266,8 @@ public class VibratorManagerServiceTest {
         vibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS, IVibrator.CAP_AMPLITUDE_CONTROL);
         vibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         vibrator.setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK);
+        vibrator.setResonantFrequency(123.f);
+        vibrator.setQFactor(Float.NaN);
         VibratorInfo info = createSystemReadyService().getVibratorInfo(1);
 
         assertNotNull(info);
@@ -279,6 +281,8 @@ public class VibratorManagerServiceTest {
                 info.isEffectSupported(VibrationEffect.EFFECT_TICK));
         assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
+        assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
+        assertTrue(Float.isNaN(info.getQFactor()));
     }
 
     @Test

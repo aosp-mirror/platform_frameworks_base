@@ -32,8 +32,6 @@
 #include "com_android_server_vibrator_VibratorManagerService.h"
 
 namespace V1_0 = android::hardware::vibrator::V1_0;
-namespace V1_1 = android::hardware::vibrator::V1_1;
-namespace V1_2 = android::hardware::vibrator::V1_2;
 namespace V1_3 = android::hardware::vibrator::V1_3;
 namespace aidl = android::hardware::vibrator;
 
@@ -85,10 +83,11 @@ static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId)
 class VibratorControllerWrapper {
 public:
     VibratorControllerWrapper(JNIEnv* env, int32_t vibratorId, jobject callbackListener)
-          : mHal(std::move(findVibrator(vibratorId))),
+          : mHal(findVibrator(vibratorId)),
             mVibratorId(vibratorId),
             mCallbackListener(env->NewGlobalRef(callbackListener)) {
-        LOG_ALWAYS_FATAL_IF(mHal == nullptr, "Unable to find reference to vibrator hal");
+        LOG_ALWAYS_FATAL_IF(mHal == nullptr,
+                            "Failed to connect to vibrator HAL, or vibratorId is invalid");
         LOG_ALWAYS_FATAL_IF(mCallbackListener == nullptr,
                             "Unable to create global reference to vibration callback handler");
     }
@@ -130,15 +129,15 @@ static void destroyNativeWrapper(void* ptr) {
     }
 }
 
-static jlong vibratorInit(JNIEnv* env, jclass /* clazz */, jint vibratorId,
-                          jobject callbackListener) {
+static jlong vibratorNativeInit(JNIEnv* env, jclass /* clazz */, jint vibratorId,
+                                jobject callbackListener) {
     std::unique_ptr<VibratorControllerWrapper> wrapper =
             std::make_unique<VibratorControllerWrapper>(env, vibratorId, callbackListener);
     wrapper->hal()->init();
     return reinterpret_cast<jlong>(wrapper.release());
 }
 
-static jlong vibratorGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
+static jlong vibratorGetNativeFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyNativeWrapper));
 }
 
@@ -286,25 +285,46 @@ static void vibratorAlwaysOnDisable(JNIEnv* env, jclass /* clazz */, jlong ptr, 
     wrapper->hal()->alwaysOnDisable(static_cast<int32_t>(id));
 }
 
+static float vibratorGetResonantFrequency(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
+    if (wrapper == nullptr) {
+        ALOGE("vibratorGetResonantFrequency failed because native wrapper was not initialized");
+        return NAN;
+    }
+    auto result = wrapper->hal()->getResonantFrequency();
+    return result.isOk() ? static_cast<jfloat>(result.value()) : NAN;
+}
+
+static float vibratorGetQFactor(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
+    if (wrapper == nullptr) {
+        ALOGE("vibratorGetQFactor failed because native wrapper was not initialized");
+        return NAN;
+    }
+    auto result = wrapper->hal()->getQFactor();
+    return result.isOk() ? static_cast<jfloat>(result.value()) : NAN;
+}
+
 static const JNINativeMethod method_table[] = {
-        {"vibratorInit",
+        {"nativeInit",
          "(ILcom/android/server/vibrator/VibratorController$OnVibrationCompleteListener;)J",
-         (void*)vibratorInit},
-        {"vibratorGetFinalizer", "()J", (void*)vibratorGetFinalizer},
-        {"vibratorIsAvailable", "(J)Z", (void*)vibratorIsAvailable},
-        {"vibratorOn", "(JJJ)V", (void*)vibratorOn},
-        {"vibratorOff", "(J)V", (void*)vibratorOff},
-        {"vibratorSetAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
-        {"vibratorPerformEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
-        {"vibratorPerformComposedEffect",
-         "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;J)J",
+         (void*)vibratorNativeInit},
+        {"getNativeFinalizer", "()J", (void*)vibratorGetNativeFinalizer},
+        {"isAvailable", "(J)Z", (void*)vibratorIsAvailable},
+        {"on", "(JJJ)V", (void*)vibratorOn},
+        {"off", "(J)V", (void*)vibratorOff},
+        {"setAmplitude", "(JI)V", (void*)vibratorSetAmplitude},
+        {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
+        {"performComposedEffect", "(J[Landroid/os/VibrationEffect$Composition$PrimitiveEffect;J)J",
          (void*)vibratorPerformComposedEffect},
-        {"vibratorGetSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
-        {"vibratorGetSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
-        {"vibratorSetExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
-        {"vibratorGetCapabilities", "(J)J", (void*)vibratorGetCapabilities},
-        {"vibratorAlwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
-        {"vibratorAlwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
+        {"getSupportedEffects", "(J)[I", (void*)vibratorGetSupportedEffects},
+        {"getSupportedPrimitives", "(J)[I", (void*)vibratorGetSupportedPrimitives},
+        {"setExternalControl", "(JZ)V", (void*)vibratorSetExternalControl},
+        {"getCapabilities", "(J)J", (void*)vibratorGetCapabilities},
+        {"alwaysOnEnable", "(JJJJ)V", (void*)vibratorAlwaysOnEnable},
+        {"alwaysOnDisable", "(JJ)V", (void*)vibratorAlwaysOnDisable},
+        {"getResonantFrequency", "(J)F", (void*)vibratorGetResonantFrequency},
+        {"getQFactor", "(J)F", (void*)vibratorGetQFactor},
 };
 
 int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env) {
@@ -320,7 +340,8 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sPrimitiveClassInfo.scale = GetFieldIDOrDie(env, primitiveClass, "scale", "F");
     sPrimitiveClassInfo.delay = GetFieldIDOrDie(env, primitiveClass, "delay", "I");
 
-    return jniRegisterNativeMethods(env, "com/android/server/vibrator/VibratorController",
+    return jniRegisterNativeMethods(env,
+                                    "com/android/server/vibrator/VibratorController$NativeWrapper",
                                     method_table, NELEM(method_table));
 }
 

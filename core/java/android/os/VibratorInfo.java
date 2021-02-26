@@ -42,21 +42,27 @@ public final class VibratorInfo implements Parcelable {
     private final SparseBooleanArray mSupportedEffects;
     @Nullable
     private final SparseBooleanArray mSupportedPrimitives;
+    private final float mResonantFrequency;
+    private final float mQFactor;
 
     VibratorInfo(Parcel in) {
         mId = in.readInt();
         mCapabilities = in.readLong();
         mSupportedEffects = in.readSparseBooleanArray();
         mSupportedPrimitives = in.readSparseBooleanArray();
+        mResonantFrequency = in.readFloat();
+        mQFactor = in.readFloat();
     }
 
     /** @hide */
     public VibratorInfo(int id, long capabilities, int[] supportedEffects,
-            int[] supportedPrimitives) {
+            int[] supportedPrimitives, float resonantFrequency, float qFactor) {
         mId = id;
         mCapabilities = capabilities;
         mSupportedEffects = toSparseBooleanArray(supportedEffects);
         mSupportedPrimitives = toSparseBooleanArray(supportedPrimitives);
+        mResonantFrequency = resonantFrequency;
+        mQFactor = qFactor;
     }
 
     @Override
@@ -65,6 +71,8 @@ public final class VibratorInfo implements Parcelable {
         dest.writeLong(mCapabilities);
         dest.writeSparseBooleanArray(mSupportedEffects);
         dest.writeSparseBooleanArray(mSupportedPrimitives);
+        dest.writeFloat(mResonantFrequency);
+        dest.writeFloat(mQFactor);
     }
 
     @Override
@@ -83,12 +91,15 @@ public final class VibratorInfo implements Parcelable {
         VibratorInfo that = (VibratorInfo) o;
         return mId == that.mId && mCapabilities == that.mCapabilities
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
-                && Objects.equals(mSupportedPrimitives, that.mSupportedPrimitives);
+                && Objects.equals(mSupportedPrimitives, that.mSupportedPrimitives)
+                && Objects.equals(mResonantFrequency, that.mResonantFrequency)
+                && Objects.equals(mQFactor, that.mQFactor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedPrimitives);
+        return Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedPrimitives,
+                mResonantFrequency, mQFactor);
     }
 
     @Override
@@ -99,6 +110,8 @@ public final class VibratorInfo implements Parcelable {
                 + ", mCapabilities flags=" + Long.toBinaryString(mCapabilities)
                 + ", mSupportedEffects=" + Arrays.toString(getSupportedEffectsNames())
                 + ", mSupportedPrimitives=" + Arrays.toString(getSupportedPrimitivesNames())
+                + ", mResonantFrequency=" + mResonantFrequency
+                + ", mQFactor=" + mQFactor
                 + '}';
     }
 
@@ -154,6 +167,26 @@ public final class VibratorInfo implements Parcelable {
      */
     public boolean hasCapability(long capability) {
         return (mCapabilities & capability) == capability;
+    }
+
+    /**
+     * Gets the resonant frequency of the vibrator.
+     *
+     * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
+     *         this vibrator is a composite of multiple physical devices.
+     */
+    public float getResonantFrequency() {
+        return mResonantFrequency;
+    }
+
+    /**
+     * Gets the <a href="https://en.wikipedia.org/wiki/Q_factor">Q factor</a> of the vibrator.
+     *
+     * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown or
+     *         this vibrator is a composite of multiple physical devices.
+     */
+    public float getQFactor() {
+        return mQFactor;
     }
 
     private String[] getCapabilitiesNames() {
