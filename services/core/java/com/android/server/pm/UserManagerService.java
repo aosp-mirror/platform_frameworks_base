@@ -983,7 +983,11 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo getProfileParent(@UserIdInt int userId) {
-        checkManageUsersPermission("get the profile parent");
+        if (!hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS or INTERACT_ACROSS_USERS permission to get the "
+                            + "profile parent");
+        }
         synchronized (mUsersLock) {
             return getProfileParentLU(userId);
         }
@@ -1531,11 +1535,14 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public String getUserName() {
-        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
-            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
-                    + "permissions to: get user name");
+        final int callingUid = Binder.getCallingUid();
+        if (!hasManageOrCreateUsersPermission()
+                || hasPermissionGranted(
+                        android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid)) {
+            throw new SecurityException("You need MANAGE_USERS or CREATE_USERS or "
+                    + "GET_ACCOUNTS_PRIVILEGED permissions to: get user name");
         }
-        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        final int userId = UserHandle.getUserId(callingUid);
         synchronized (mUsersLock) {
             UserInfo userInfo = userWithName(getUserInfoLU(userId));
             return userInfo == null ? "" : userInfo.name;
@@ -3287,7 +3294,7 @@ public class UserManagerService extends IUserManager.Stub {
      * as well as for {@link UserManager#USER_TYPE_FULL_RESTRICTED}.
      */
     @Override
-    public UserInfo createProfileForUserWithThrow(String name, @NonNull String userType,
+    public UserInfo createProfileForUserWithThrow(@Nullable String name, @NonNull String userType,
             @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages)
             throws ServiceSpecificException {
         checkManageOrCreateUsersPermission(flags);
@@ -3868,7 +3875,7 @@ public class UserManagerService extends IUserManager.Stub {
      * @hide
      */
     @Override
-    public UserInfo createRestrictedProfileWithThrow(String name, int parentUserId) {
+    public UserInfo createRestrictedProfileWithThrow(@Nullable String name, int parentUserId) {
         checkManageOrCreateUsersPermission("setupRestrictedProfile");
         final UserInfo user = createProfileForUserWithThrow(
                 name, UserManager.USER_TYPE_FULL_RESTRICTED, 0, parentUserId, null);

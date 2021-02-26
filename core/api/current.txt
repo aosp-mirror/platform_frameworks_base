@@ -31466,10 +31466,10 @@ package android.os {
     method public static android.content.Intent createUserCreationIntent(@Nullable String, @Nullable String, @Nullable String, @Nullable android.os.PersistableBundle);
     method @WorkerThread public android.os.Bundle getApplicationRestrictions(String);
     method public long getSerialNumberForUser(android.os.UserHandle);
-    method @RequiresPermission("android.permission.MANAGE_USERS") public int getUserCount();
+    method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS"}) public int getUserCount();
     method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}, conditional=true) public String getUserName();
+    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, "android.permission.CREATE_USERS"}, conditional=true) public String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
