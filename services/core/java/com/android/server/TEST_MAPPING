@@ -21,9 +21,7 @@
                 }
             ],
             "file_patterns": ["NotificationManagerService\\.java"]
-        }
-    ],
-    "presubmit-large": [
+        },
         {
             "name": "CtsScopedStorageCoreHostTest",
             "file_patterns": ["StorageManagerService\\.java"]
