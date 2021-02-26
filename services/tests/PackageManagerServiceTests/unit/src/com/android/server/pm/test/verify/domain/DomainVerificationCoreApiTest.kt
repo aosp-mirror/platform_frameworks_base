@@ -100,7 +100,7 @@ class DomainVerificationCoreApiTest {
                         UserHandle.of(10),
                         true,
                         massiveSet.withIndex()
-                            .associate { it.value to (it.index % 2 == 0) }
+                            .associate { it.value to (it.index % 3) }
                     )
                 },
                 unparcel = { DomainVerificationUserSelection.CREATOR.createFromParcel(it) },
@@ -118,8 +118,8 @@ class DomainVerificationCoreApiTest {
                         first, second, { it.isLinkHandlingAllowed },
                         { it.component4() }, IS_EQUAL_TO
                     )
-                    assertAll<DomainVerificationUserSelection, Map<String, Boolean>>(
-                        first, second, { it.hostToUserSelectionMap },
+                    assertAll<DomainVerificationUserSelection, Map<String, Int>>(
+                        first, second, { it.hostToStateMap },
                         { it.component5() }, IS_MAP_EQUAL_TO
                     )
                 }
