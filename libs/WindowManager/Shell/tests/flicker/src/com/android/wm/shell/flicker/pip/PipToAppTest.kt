@@ -66,7 +66,7 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
             }
         }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
@@ -107,12 +107,12 @@ class PipToAppTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun noUncoveredRegions() =
         testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() =
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
