@@ -138,12 +138,20 @@
             android:orientation="vertical"
             >
 
-            <include
-                layout="@layout/notification_template_text"
+            <com.android.internal.widget.NotificationVanishingFrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/notification_headerless_line_height"
-                android:layout_marginTop="0dp"
-                />
+                >
+                <!-- This is the simplest way to keep this text vertically centered without using
+                 gravity="center_vertical" which causes jumpiness in expansion animations. -->
+                <include
+                    layout="@layout/notification_template_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/notification_text_height"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="0dp"
+                    />
+            </com.android.internal.widget.NotificationVanishingFrameLayout>
 
             <include
                 layout="@layout/notification_template_progress"
