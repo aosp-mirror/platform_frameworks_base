@@ -17,15 +17,11 @@
 package com.android.systemui.statusbar.notification.row;
 
 
-import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
-import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -1317,7 +1313,7 @@ public class NotificationContentView extends FrameLayout {
 
     private boolean isBubblesEnabled() {
         return Settings.Global.getInt(mContext.getContentResolver(),
-                NOTIFICATION_BUBBLES, 0) == 1;
+                Settings.Global.NOTIFICATION_BUBBLES, 0) == 1;
     }
 
     /**
@@ -1373,27 +1369,26 @@ public class NotificationContentView extends FrameLayout {
         }
         ImageView snoozeButton = layout.findViewById(com.android.internal.R.id.snooze_button);
         View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
-        LinearLayout actionContainerLayout =
-                layout.findViewById(com.android.internal.R.id.actions_container_layout);
-        if (snoozeButton == null || actionContainer == null || actionContainerLayout == null) {
+        if (snoozeButton == null || actionContainer == null) {
             return;
         }
         final boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
-                SHOW_NOTIFICATION_SNOOZE, 0) == 1;
-        if (!showSnooze) {
+                Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1;
+        // Notification.Builder can 'disable' the snooze button to prevent it from being shown here
+        boolean snoozeDisabled = !snoozeButton.isEnabled();
+        if (!showSnooze || snoozeDisabled) {
             snoozeButton.setVisibility(GONE);
             return;
         }
 
-        Resources res = mContext.getResources();
-        Drawable snoozeDrawable = res.getDrawable(R.drawable.ic_snooze);
+        Drawable snoozeDrawable = mContext.getDrawable(R.drawable.ic_snooze);
         mContainingNotification.updateNotificationColor();
         snoozeDrawable.setTint(mContainingNotification.getNotificationColor());
         snoozeButton.setImageDrawable(snoozeDrawable);
 
         final NotificationSnooze snoozeGuts = (NotificationSnooze) LayoutInflater.from(mContext)
                 .inflate(R.layout.notification_snooze, null, false);
-        final String snoozeDescription = res.getString(
+        final String snoozeDescription = mContext.getString(
                 R.string.notification_menu_snooze_description);
         final NotificationMenuRowPlugin.MenuItem snoozeMenuItem =
                 new NotificationMenuRow.NotificationMenuItem(
