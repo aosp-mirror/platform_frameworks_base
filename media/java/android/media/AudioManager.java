@@ -568,7 +568,7 @@ public class AudioManager {
     public static final int FLAG_FROM_KEY = 1 << 12;
 
     /** @hide */
-    @IntDef(flag = false, prefix = "FLAG", value = {
+    @IntDef(flag = true, prefix = "FLAG", value = {
             FLAG_SHOW_UI,
             FLAG_ALLOW_RINGER_MODES,
             FLAG_PLAY_SOUND,
