@@ -6812,14 +6812,18 @@ package android.app {
   public final class WallpaperColors implements android.os.Parcelable {
     ctor public WallpaperColors(android.os.Parcel);
     ctor public WallpaperColors(@NonNull android.graphics.Color, @Nullable android.graphics.Color, @Nullable android.graphics.Color);
+    ctor public WallpaperColors(@NonNull android.graphics.Color, @Nullable android.graphics.Color, @Nullable android.graphics.Color, int);
     method public int describeContents();
     method public static android.app.WallpaperColors fromBitmap(@NonNull android.graphics.Bitmap);
     method public static android.app.WallpaperColors fromDrawable(android.graphics.drawable.Drawable);
+    method public int getColorHints();
     method @NonNull public android.graphics.Color getPrimaryColor();
     method @Nullable public android.graphics.Color getSecondaryColor();
     method @Nullable public android.graphics.Color getTertiaryColor();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+    field public static final int HINT_SUPPORTS_DARK_TEXT = 1; // 0x1
+    field public static final int HINT_SUPPORTS_DARK_THEME = 2; // 0x2
   }
 
   public final class WallpaperInfo implements android.os.Parcelable {

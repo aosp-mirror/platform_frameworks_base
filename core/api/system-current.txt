@@ -855,13 +855,6 @@ package android.app {
     method public void onVrStateChanged(boolean);
   }
 
-  public final class WallpaperColors implements android.os.Parcelable {
-    ctor public WallpaperColors(@NonNull android.graphics.Color, @Nullable android.graphics.Color, @Nullable android.graphics.Color, int);
-    method public int getColorHints();
-    field public static final int HINT_SUPPORTS_DARK_TEXT = 1; // 0x1
-    field public static final int HINT_SUPPORTS_DARK_THEME = 2; // 0x2
-  }
-
   public final class WallpaperInfo implements android.os.Parcelable {
     method public boolean supportsAmbientMode();
   }
