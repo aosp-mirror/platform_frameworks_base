@@ -29,6 +29,8 @@ import static android.os.PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
 import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
+import static android.os.PowerWhitelistManager.REASON_LOCATION_PROVIDER;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
@@ -227,7 +229,10 @@ public class LocationProviderManager extends
             BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setDontSendToRestrictedApps(true);
             // allows apps to start a fg service in response to a location PI
-            options.setTemporaryAppWhitelistDuration(TEMPORARY_APP_ALLOWLIST_DURATION_MS);
+            options.setTemporaryAppAllowlist(TEMPORARY_APP_ALLOWLIST_DURATION_MS,
+                    TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    REASON_LOCATION_PROVIDER,
+                    "");
 
             Intent intent = new Intent().putExtra(KEY_LOCATION_CHANGED,
                     locationResult.getLastLocation());
