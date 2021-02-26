@@ -1797,6 +1797,7 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @UnsupportedAppUsage
     protected ApplicationPackageManager(ContextImpl context, IPackageManager pm) {
         mContext = context;
         mPM = pm;
