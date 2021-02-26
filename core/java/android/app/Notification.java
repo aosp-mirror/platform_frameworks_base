@@ -5494,12 +5494,28 @@ public class Notification implements Parcelable
             big.setViewVisibility(R.id.notification_material_reply_text_3, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_3, null);
 
-            final boolean snoozeEnabled = mContext.getContentResolver() != null
-                    && (Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
-            int bottomMarginDimen = snoozeEnabled ? 0 : R.dimen.notification_content_margin;
+            // This may get erased by bindSnoozeAction
             big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
-                    RemoteViews.MARGIN_BOTTOM, bottomMarginDimen);
+                    RemoteViews.MARGIN_BOTTOM, R.dimen.notification_content_margin);
+        }
+
+        private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
+            boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
+                    || isColorized(p) || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+            big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
+            if (hideSnoozeButton) {
+                // Only hide; NotificationContentView will show it when it adds the click listener
+                big.setViewVisibility(R.id.snooze_button, View.GONE);
+            }
+
+            final boolean snoozeEnabled = !hideSnoozeButton
+                    && mContext.getContentResolver() != null
+                    && (Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
+            if (snoozeEnabled) {
+                big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
+                        RemoteViews.MARGIN_BOTTOM, 0);
+            }
         }
 
         /**
@@ -5521,6 +5537,7 @@ public class Notification implements Parcelable
             RemoteViews big = applyStandardTemplate(layoutId, p, result);
 
             resetStandardTemplateWithActions(big);
+            bindSnoozeAction(big, p);
 
             boolean validRemoteInput = false;
 
@@ -9358,6 +9375,7 @@ public class Notification implements Parcelable
 
             // Bind actions.
             mBuilder.resetStandardTemplateWithActions(contentView);
+            mBuilder.bindSnoozeAction(contentView, p);
             bindCallActions(contentView, p);
 
             // Bind some extra conversation-specific header fields.
@@ -11998,6 +12016,7 @@ public class Notification implements Parcelable
         boolean mHideTitle;
         boolean mHideActions;
         boolean mHideProgress;
+        boolean mHideSnoozeButton;
         boolean mPromotePicture;
         boolean mAllowActionIcons;
         CharSequence title;
@@ -12015,6 +12034,7 @@ public class Notification implements Parcelable
             mHideTitle = false;
             mHideActions = false;
             mHideProgress = false;
+            mHideSnoozeButton = false;
             mPromotePicture = false;
             mAllowActionIcons = false;
             title = null;
@@ -12058,6 +12078,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams allowActionIcons(boolean allowActionIcons) {
             this.mAllowActionIcons = allowActionIcons;
+            return this;
+        }
+
+        final StandardTemplateParams hideSnoozeButton(boolean hideSnoozeButton) {
+            this.mHideSnoozeButton = hideSnoozeButton;
             return this;
         }
 
