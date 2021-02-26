@@ -144,7 +144,7 @@ message StateResidencyProto {
      */
     optional int64 total_state_entry_count = 3;
     /**
-     * Last time this state was entered. Time in milliseconds since boot
+     * Last time this state was entered. Walltime in milliseconds since Unix epoch.
      */
     optional int64 last_entry_timestamp_ms = 4;
 }
@@ -208,7 +208,7 @@ message EnergyConsumerResultProto {
     /** Unique index identifying the energy consumer. */
     optional int32 id = 1;
 
-    /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
+    /** Walltime in milliseconds since Unix epoch */
     optional int64 timestamp_ms = 2;
 
     /** Accumulated energy since device boot in microwatt-seconds (uWs) */
@@ -247,7 +247,7 @@ message EnergyMeasurementProto {
      */
     optional int32 id = 1;
 
-    /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
+    /** Walltime in milliseconds since Unix epoch */
     optional int64 timestamp_ms = 2;
 
     /** Accumulated energy since device boot in microwatt-seconds (uWs) */

@@ -90,8 +90,8 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final ConfigurationInternal CONFIG_INT_USER_RESTRICTED_AUTO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(false)
-                    .setAutoDetectionSupported(true)
-                    .setGeoDetectionSupported(true)
+                    .setAutoDetectionFeatureSupported(true)
+                    .setGeoDetectionFeatureSupported(true)
                     .setAutoDetectionEnabled(false)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(false)
@@ -100,8 +100,8 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final ConfigurationInternal CONFIG_INT_USER_RESTRICTED_AUTO_ENABLED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(false)
-                    .setAutoDetectionSupported(true)
-                    .setGeoDetectionSupported(true)
+                    .setAutoDetectionFeatureSupported(true)
+                    .setGeoDetectionFeatureSupported(true)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(true)
@@ -110,8 +110,8 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final ConfigurationInternal CONFIG_INT_AUTO_DETECT_NOT_SUPPORTED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(true)
-                    .setAutoDetectionSupported(false)
-                    .setGeoDetectionSupported(false)
+                    .setAutoDetectionFeatureSupported(false)
+                    .setGeoDetectionFeatureSupported(false)
                     .setAutoDetectionEnabled(false)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(false)
@@ -120,8 +120,8 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final ConfigurationInternal CONFIG_INT_AUTO_SUPPORTED_GEO_NOT_SUPPORTED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(true)
-                    .setAutoDetectionSupported(true)
-                    .setGeoDetectionSupported(false)
+                    .setAutoDetectionFeatureSupported(true)
+                    .setGeoDetectionFeatureSupported(false)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(true)
@@ -130,8 +130,8 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final ConfigurationInternal CONFIG_INT_AUTO_DISABLED_GEO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
                     .setUserConfigAllowed(true)
-                    .setAutoDetectionSupported(true)
-                    .setGeoDetectionSupported(true)
+                    .setAutoDetectionFeatureSupported(true)
+                    .setGeoDetectionFeatureSupported(true)
                     .setAutoDetectionEnabled(false)
                     .setLocationEnabled(true)
                     .setGeoDetectionEnabled(false)
@@ -139,8 +139,8 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private static final ConfigurationInternal CONFIG_INT_AUTO_ENABLED_GEO_DISABLED =
             new ConfigurationInternal.Builder(USER_ID)
-                    .setAutoDetectionSupported(true)
-                    .setGeoDetectionSupported(true)
+                    .setAutoDetectionFeatureSupported(true)
+                    .setGeoDetectionFeatureSupported(true)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)
@@ -149,8 +149,8 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private static final ConfigurationInternal CONFIG_INT_AUTO_ENABLED_GEO_ENABLED =
             new ConfigurationInternal.Builder(USER_ID)
-                    .setAutoDetectionSupported(true)
-                    .setGeoDetectionSupported(true)
+                    .setAutoDetectionFeatureSupported(true)
+                    .setGeoDetectionFeatureSupported(true)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionEnabled(true)
                     .setLocationEnabled(true)

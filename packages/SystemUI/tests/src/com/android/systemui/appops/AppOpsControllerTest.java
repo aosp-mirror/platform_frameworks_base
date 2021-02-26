@@ -16,8 +16,8 @@
 
 package com.android.systemui.appops;
 
-import static android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_CAMERA;
-import static android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE;
+import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
+import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
 import static junit.framework.TestCase.assertFalse;
 
@@ -125,9 +125,9 @@ public class AppOpsControllerTest extends SysuiTestCase {
         when(mAudioManager.getActiveRecordingConfigurations())
                 .thenReturn(List.of(mPausedMockRecording));
 
-        when(mSensorPrivacyController.isSensorBlocked(INDIVIDUAL_SENSOR_CAMERA))
+        when(mSensorPrivacyController.isSensorBlocked(CAMERA))
                 .thenReturn(false);
-        when(mSensorPrivacyController.isSensorBlocked(INDIVIDUAL_SENSOR_CAMERA))
+        when(mSensorPrivacyController.isSensorBlocked(CAMERA))
                 .thenReturn(false);
 
         mController = new AppOpsControllerImpl(
@@ -505,7 +505,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
         assertFalse(list.get(0).isDisabled());
 
         // Add a camera op, and disable the microphone. The camera op should be the only op returned
-        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_MICROPHONE, true);
+        mController.onSensorBlockedChanged(MICROPHONE, true);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
@@ -515,7 +515,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
 
 
         // Re enable the microphone, and verify the op returns
-        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_MICROPHONE, false);
+        mController.onSensorBlockedChanged(MICROPHONE, false);
         mTestableLooper.processAllMessages();
 
         list = mController.getActiveAppOps();
@@ -538,7 +538,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
         assertFalse(list.get(0).isDisabled());
 
         // Add an audio op, and disable the camera. The audio op should be the only op returned
-        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_CAMERA, true);
+        mController.onSensorBlockedChanged(CAMERA, true);
         mController.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
@@ -547,7 +547,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
         assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(0).getCode());
 
         // Re enable the camera, and verify the op returns
-        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_CAMERA, false);
+        mController.onSensorBlockedChanged(CAMERA, false);
         mTestableLooper.processAllMessages();
 
         list = mController.getActiveAppOps();

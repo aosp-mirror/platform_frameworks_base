@@ -112,7 +112,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private int mMediaTotalBottomMargin;
     private int mFooterMarginStartHorizontal;
     private Consumer<Boolean> mMediaVisibilityChangedListener;
-    private boolean mSideLabels;
+    protected boolean mSideLabels;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -201,16 +201,20 @@ public class QSPanel extends LinearLayout implements Tunable {
                 mFooterPageIndicator.setNumPages(((PagedTileLayout) mTileLayout).getNumPages());
             }
 
-            // Allow the UI to be as big as it want's to, we're in a scroll view
-            int newHeight = 10000;
-            int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
-            int excessHeight = newHeight - availableHeight;
-            // Measure with EXACTLY. That way, The content will only use excess height and will
-            // be measured last, after other views and padding is accounted for. This only
-            // works because our Layouts in here remeasure themselves with the exact content
-            // height.
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.EXACTLY);
-            ((PagedTileLayout) mTileLayout).setExcessHeight(excessHeight);
+            // In landscape, mTileLayout's parent is not the panel but a view that contains the
+            // tile layout and the media controls.
+            if (((View) mTileLayout).getParent() == this) {
+                // Allow the UI to be as big as it want's to, we're in a scroll view
+                int newHeight = 10000;
+                int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
+                int excessHeight = newHeight - availableHeight;
+                // Measure with EXACTLY. That way, The content will only use excess height and will
+                // be measured last, after other views and padding is accounted for. This only
+                // works because our Layouts in here remeasure themselves with the exact content
+                // height.
+                heightMeasureSpec = MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.EXACTLY);
+                ((PagedTileLayout) mTileLayout).setExcessHeight(excessHeight);
+            }
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
@@ -758,7 +762,7 @@ public class QSPanel extends LinearLayout implements Tunable {
                 // Let's use 3 columns to match the current layout
                 int columns;
                 if (mSideLabels) {
-                    columns = horizontal ? 1 : 2;
+                    columns = horizontal ? 2 : 4;
                 } else {
                     columns = horizontal ? 3 : TileLayout.NO_MAX_COLUMNS;
                 }

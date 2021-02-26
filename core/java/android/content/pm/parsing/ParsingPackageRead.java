@@ -587,6 +587,11 @@ public interface ParsingPackageRead extends Parcelable {
      */
     int getFullBackupContent();
 
+    /**
+     * @see R.styleable#AndroidManifestApplication_dataExtractionRules
+     */
+    int getDataExtractionRules();
+
     /** @see ApplicationInfo#PRIVATE_FLAG_HAS_DOMAIN_URLS */
     boolean isHasDomainUrls();
 

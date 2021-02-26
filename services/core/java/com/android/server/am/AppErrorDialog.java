@@ -18,10 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
@@ -138,19 +135,6 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         findViewById(com.android.internal.R.id.customPanel).setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        getContext().registerReceiver(mReceiver,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getContext().unregisterReceiver(mReceiver);
-    }
-
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             setResult(msg.what);
@@ -203,15 +187,6 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
                 break;
         }
     }
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                cancel();
-            }
-        }
-    };
 
     static class Data {
         AppErrorResult result;

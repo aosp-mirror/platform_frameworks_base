@@ -31,9 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -42,10 +40,9 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
-import com.android.server.timedetector.DeviceConfig;
 
 import java.util.Objects;
-import java.util.concurrent.Executor;
+import java.util.Optional;
 
 /**
  * The real implementation of {@link TimeZoneDetectorStrategyImpl.Environment}.
@@ -59,8 +56,7 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
     @NonNull private final Handler mHandler;
     @NonNull private final ContentResolver mCr;
     @NonNull private final UserManager mUserManager;
-    @NonNull private final DeviceConfig mDeviceConfig;
-    @NonNull private final boolean mGeoDetectionSupported;
+    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final LocationManager mLocationManager;
 
     // @NonNull after setConfigChangeListener() is called.
@@ -68,17 +64,16 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
     private ConfigurationChangeListener mConfigChangeListener;
 
     EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
-            @NonNull DeviceConfig deviceConfig, boolean geoDetectionSupported) {
+            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
-        Executor handlerExecutor = new HandlerExecutor(mHandler);
         mCr = context.getContentResolver();
         mUserManager = context.getSystemService(UserManager.class);
         mLocationManager = context.getSystemService(LocationManager.class);
-        mDeviceConfig = deviceConfig;
-        mGeoDetectionSupported = geoDetectionSupported;
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
 
-        // Wire up the change listeners. All invocations are performed on the mHandler thread.
+        // Wire up the config change listeners. All invocations are performed on the mHandler
+        // thread.
 
         // Listen for the user changing / the user's location mode changing.
         IntentFilter filter = new IntentFilter();
@@ -112,13 +107,6 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
                         handleConfigChangeOnHandlerThread();
                     }
                 }, UserHandle.USER_ALL);
-
-        // Add async callbacks for changes to server-side flags: some of the flags affect device /
-        // user config. All changes can be treated like a config change. If flags that affect config
-        // haven't changed then call will be a no-op.
-        mDeviceConfig.addListener(
-                handlerExecutor,
-                this::handleConfigChangeOnHandlerThread);
     }
 
     private void handleConfigChangeOnHandlerThread() {
@@ -140,10 +128,12 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
     @Override
     public ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
         return new ConfigurationInternal.Builder(userId)
-                .setUserConfigAllowed(isUserConfigAllowed(userId))
-                .setAutoDetectionSupported(isAutoDetectionSupported())
-                .setGeoDetectionSupported(isGeoDetectionSupported())
+                .setAutoDetectionFeatureSupported(
+                        mServiceConfigAccessor.isAutoDetectionFeatureSupported())
+                .setGeoDetectionFeatureSupported(
+                        mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupported())
                 .setAutoDetectionEnabled(isAutoDetectionEnabled())
+                .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setLocationEnabled(isLocationEnabled(userId))
                 .setGeoDetectionEnabled(isGeoDetectionEnabled(userId))
                 .build();
@@ -186,18 +176,19 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
         // time zone detection: if we wrote it down then we'd set the value explicitly, which would
         // prevent detecting "default" later. That might influence what happens on later releases
         // that support new types of auto detection on the same hardware.
-        if (isAutoDetectionSupported()) {
+        if (mServiceConfigAccessor.isAutoDetectionFeatureSupported()) {
             final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
             setAutoDetectionEnabledIfRequired(autoDetectionEnabled);
 
-            // Avoid writing the geo detection enabled setting for devices that do not support geo
-            // time zone detection: if we wrote it down then we'd set the value explicitly, which
-            // would prevent detecting "default" later. That might influence what happens on later
-            // releases that support geo detection on the same hardware.
-            // Also avoid writing the geo detection enabled setting for devices that are currently
-            // force-enabled: otherwise we might overwrite a droidfood user's real setting
-            // permanently.
-            if (isGeoDetectionSupported() && !isGeoDetectionForceEnabled()) {
+            // Avoid writing the geo detection enabled setting for devices with settings that
+            // are currently overridden by server flags: otherwise we might overwrite a droidfood
+            // user's real setting permanently.
+            // Also avoid writing the geo detection enabled setting for devices that do not support
+            // geo time zone detection: if we wrote it down then we'd set the value explicitly,
+            // which would prevent detecting "default" later. That might influence what happens on
+            // later releases that start to support geo detection on the same hardware.
+            if (!mServiceConfigAccessor.getGeoDetectionSettingEnabledOverride().isPresent()
+                    && mServiceConfigAccessor.isGeoTimeZoneDetectionFeatureSupported()) {
                 final boolean geoTzDetectionEnabled = configuration.isGeoDetectionEnabled();
                 setGeoDetectionEnabledIfRequired(userId, geoTzDetectionEnabled);
             }
@@ -207,14 +198,6 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
     private boolean isUserConfigAllowed(@UserIdInt int userId) {
         UserHandle userHandle = UserHandle.of(userId);
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
-    }
-
-    private boolean isAutoDetectionSupported() {
-        return deviceHasTelephonyNetwork() || isGeoDetectionSupported();
-    }
-
-    private boolean isGeoDetectionSupported() {
-        return mGeoDetectionSupported;
     }
 
     private boolean isAutoDetectionEnabled() {
@@ -237,22 +220,18 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
 
     private boolean isGeoDetectionEnabled(@UserIdInt int userId) {
         // We may never use this, but it gives us a way to force location-based time zone detection
-        // on for testers (where their other settings allow).
-        boolean forceEnabled = isGeoDetectionForceEnabled();
-        if (forceEnabled) {
-            return true;
+        // on/off for testers (but only where their other settings would allow them to turn it on
+        // for themselves).
+        Optional<Boolean> override = mServiceConfigAccessor.getGeoDetectionSettingEnabledOverride();
+        if (override.isPresent()) {
+            return override.get();
         }
 
-        final boolean geoDetectionEnabledByDefault = mDeviceConfig.getBoolean(
-                DeviceConfig.KEY_LOCATION_TIME_ZONE_DETECTION_ENABLED_DEFAULT, false);
+        final boolean geoDetectionEnabledByDefault =
+                mServiceConfigAccessor.isGeoDetectionEnabledForUsersByDefault();
         return Settings.Secure.getIntForUser(mCr,
                 Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
                 (geoDetectionEnabledByDefault ? 1 : 0) /* defaultValue */, userId) != 0;
-    }
-
-    private boolean isGeoDetectionForceEnabled() {
-        return mDeviceConfig.getBoolean(
-                DeviceConfig.KEY_FORCE_LOCATION_TIME_ZONE_DETECTION_ENABLED, false);
     }
 
     private void setGeoDetectionEnabledIfRequired(@UserIdInt int userId, boolean enabled) {
@@ -261,11 +240,5 @@ public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Envir
             Settings.Secure.putIntForUser(mCr, Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
                     enabled ? 1 : 0, userId);
         }
-    }
-
-    private boolean deviceHasTelephonyNetwork() {
-        // TODO b/150583524 Avoid the use of a deprecated API.
-        return mContext.getSystemService(ConnectivityManager.class)
-                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 }

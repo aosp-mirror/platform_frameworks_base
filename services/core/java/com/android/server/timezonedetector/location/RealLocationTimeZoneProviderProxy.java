@@ -25,7 +25,6 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneManag
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -41,6 +40,7 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.ServiceWatcher;
+import com.android.server.ServiceWatcher.BoundService;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -123,7 +123,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         return resolves;
     }
 
-    private void onBind(IBinder binder, ComponentName componentName) {
+    private void onBind(IBinder binder, BoundService boundService) {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {

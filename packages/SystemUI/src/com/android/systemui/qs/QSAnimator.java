@@ -29,7 +29,6 @@ import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.qs.dagger.QSScope;
-import com.android.systemui.qs.tileimpl.QSTileBaseView;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -56,7 +55,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final ArrayList<View> mAllViews = new ArrayList<>();
     /**
      * List of {@link View}s representing Quick Settings that are being animated from the quick QS
-     * position to the normal QS panel.
+     * position to the normal QS panel. These views will only show once the animation is complete,
+     * to prevent overlapping of semi transparent views
      */
     private final ArrayList<View> mQuickQsViews = new ArrayList<>();
     private final QuickQSPanel mQuickQsPanel;
@@ -233,7 +233,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 // Quick tiles.
                 QSTileView quickTileView = mQuickQSPanelController.getTileView(tile);
                 if (quickTileView == null) continue;
-                View qqsBgCircle = ((QSTileBaseView) quickTileView).getBgCircle();
 
                 getRelativePosition(loc1, quickTileView.getIcon().getIconView(), view);
                 getRelativePosition(loc2, tileIcon, view);
@@ -255,11 +254,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
                     translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
 
-                    if (mFeatureFlags.isQSLabelsEnabled()) {
-                        firstPageBuilder.addFloat(qqsBgCircle, "alpha", 1, 1, 0);
-                        mAllViews.add(qqsBgCircle);
-                    }
-
                 } else { // These tiles disappear when expanding
                     firstPageBuilder.addFloat(quickTileView, "alpha", 1, 0);
                     translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
@@ -271,7 +265,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                             translationX);
                 }
 
-                mQuickQsViews.add(tileView.getIconWithBackground());
+                if (mFeatureFlags.isQSLabelsEnabled()) {
+                    mQuickQsViews.add(tileView);
+                } else {
+                    mQuickQsViews.add(tileView.getIconWithBackground());
+                }
                 mAllViews.add(tileView.getIcon());
                 mAllViews.add(quickTileView);
             } else if (mFullRows && isIconInAnimatedRow(count)) {
@@ -362,7 +360,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if(view == parent || view == null) return;
         // Ignore tile pages as they can have some offset we don't want to take into account in
         // RTL.
-        if (!(view instanceof PagedTileLayout.TilePage || view instanceof SideLabelTileLayout)) {
+        if (!isAPage(view)) {
             loc1[0] += view.getLeft();
             loc1[1] += view.getTop();
         }
@@ -372,6 +370,16 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             loc1[1] -= view.getScrollY();
         }
         getRelativePositionInt(loc1, (View) view.getParent(), parent);
+    }
+
+    // Returns true if the view is a possible page in PagedTileLayout
+    private boolean isAPage(View view) {
+        if (view instanceof PagedTileLayout.TilePage) {
+            return true;
+        } else if (view instanceof SideLabelTileLayout) {
+            return !(view instanceof QuickQSPanel.QQSSideLabelTileLayout);
+        }
+        return false;
     }
 
     public void setPosition(float position) {

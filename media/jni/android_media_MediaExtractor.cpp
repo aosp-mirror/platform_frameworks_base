@@ -282,7 +282,6 @@ status_t JMediaExtractor::getMetrics(Parcel *reply) const {
     return status;
 }
 
-
 status_t JMediaExtractor::getSampleMeta(sp<MetaData> *sampleMeta) {
     return mImpl->getSampleMeta(sampleMeta);
 }
@@ -294,6 +293,10 @@ bool JMediaExtractor::getCachedDuration(int64_t *durationUs, bool *eos) const {
 status_t JMediaExtractor::getAudioPresentations(size_t trackIdx,
         AudioPresentationCollection *presentations) const {
     return mImpl->getAudioPresentations(trackIdx, presentations);
+}
+
+status_t JMediaExtractor::setPlaybackId(const String8 &playbackId) {
+    return mImpl->setPlaybackId(playbackId);
 }
 }  // namespace android
 
@@ -920,6 +923,23 @@ android_media_MediaExtractor_native_getMetrics(JNIEnv * env, jobject thiz)
     return mybundle;
 }
 
+static void
+android_media_MediaExtractor_native_setPlaybackId(
+        JNIEnv * env, jobject thiz, jstring playbackIdJString)
+{
+    ALOGV("android_media_MediaExtractor_native_setPlaybackId");
+
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+    if (extractor == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", nullptr);
+    }
+
+    const char* playbackId = env->GetStringUTFChars(playbackIdJString, nullptr);
+    if (extractor->setPlaybackId(String8(playbackId)) != OK) {
+        ALOGE("setPlaybackId failed");
+    }
+    env->ReleaseStringUTFChars(playbackIdJString, playbackId);
+}
 
 static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
@@ -989,6 +1009,9 @@ static const JNINativeMethod gMethods[] = {
 
     {"native_getMetrics",          "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaExtractor_native_getMetrics},
+
+    { "native_setPlaybackId", "(Ljava/lang/String;)V",
+      (void *)android_media_MediaExtractor_native_setPlaybackId},
 
     { "native_getAudioPresentations", "(I)Ljava/util/List;",
       (void *)android_media_MediaExtractor_getAudioPresentations },

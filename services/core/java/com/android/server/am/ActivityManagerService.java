@@ -143,6 +143,7 @@ import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
+import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -306,6 +307,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
+import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -1817,6 +1819,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void startObservingNativeCrashes() {
         final NativeCrashListener ncl = new NativeCrashListener(this);
         ncl.start();
+    }
+
+    /**
+     * Sets a policy for handling app ops.
+     *
+     * @param appOpsPolicy The policy.
+     */
+    public void setAppOpsPolicy(@Nullable CheckOpsDelegate appOpsPolicy) {
+        mAppOpsService.setAppOpsPolicy(appOpsPolicy);
     }
 
     public IAppOpsService getAppOpsService() {
@@ -3778,10 +3789,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mi.getTotalUss(), mi.getTotalRss(), false,
                                 ProcessStats.ADD_PSS_EXTERNAL_SLOW, duration);
                         proc.getPkgList().forEachPackageProcessStats(holder -> {
+                            final ProcessState state = holder.state;
                             FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                                     proc.info.uid,
-                                    holder.state.getName(),
-                                    holder.state.getPackage(),
+                                    state != null ? state.getName() : proc.processName,
+                                    state != null ? state.getPackage() : proc.info.packageName,
                                     mi.getTotalPss(),
                                     mi.getTotalUss(),
                                     mi.getTotalRss(),
@@ -6586,6 +6598,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public @ProcessCapability int getUidProcessCapabilities(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "getUidProcessState");
+        }
+
+        synchronized (mProcLock) {
+            return mProcessList.getUidProcessCapabilityLOSP(uid);
+        }
+    }
+
+    @Override
     public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {
@@ -7201,6 +7225,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long memoryGrowthThreshold =
                     Math.max(totalMemoryInKb / 100, MINIMUM_MEMORY_GROWTH_THRESHOLD);
             mProcessList.forEachLruProcessesLOSP(false, proc -> {
+                if (proc.getThread() == null) {
+                    return;
+                }
                 final ProcessProfileRecord pr = proc.mProfile;
                 final ProcessStateRecord state = proc.mState;
                 final int setProcState = state.getSetProcState();
@@ -10031,6 +10058,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessList.PERSISTENT_SERVICE_ADJ, ProcessList.FOREGROUND_APP_ADJ,
             ProcessList.VISIBLE_APP_ADJ,
             ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_LOW_APP_ADJ,
+            ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
             ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MIN_ADJ
@@ -10038,7 +10066,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
-            "Visible", "Perceptible", "Perceptible Low",
+            "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
             "Heavy Weight", "Backup",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
@@ -10046,7 +10074,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
             "native",
             "sys", "pers", "persvc", "fore",
-            "vis", "percept", "perceptl",
+            "vis", "percept", "perceptl", "perceptm",
             "heavy", "backup",
             "servicea", "home",
             "prev", "serviceb", "cached"
@@ -13904,7 +13932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void noteUidProcessState(final int uid, final int state,
-                final @ActivityManager.ProcessCapability int capability) {
+                final @ProcessCapability int capability) {
         mBatteryStatsService.noteUidProcessState(uid, state);
         mAppOpsService.updateUidProcState(uid, state, capability);
         if (mTrackingAssociations) {
@@ -13955,6 +13983,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long uptimeSince = curUptime - mLastPowerCheckUptime;
             mLastPowerCheckUptime = curUptime;
             mProcessList.forEachLruProcessesLOSP(false, app -> {
+                if (app.getThread() == null) {
+                    return;
+                }
                 if (app.mState.getSetProcState() >= ActivityManager.PROCESS_STATE_HOME) {
                     int cpuLimit;
                     long checkDur = curUptime - app.mState.getWhenUnimportant();
@@ -14056,11 +14087,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mBatteryStatsService.reportExcessiveCpu(app.info.uid, app.processName,
                         uptimeSince, cputimeUsed);
                 app.getPkgList().forEachPackageProcessStats(holder -> {
+                    final ProcessState state = holder.state;
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
                             app.info.uid,
                             processName,
-                            holder.state.getPackage(),
+                            state != null ? state.getPackage() : app.info.packageName,
                             holder.appVersion);
                 });
                 return true;

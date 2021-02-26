@@ -3601,7 +3601,7 @@ public abstract class PackageManager {
      * 1 - IncFs v1, core features, no PerUid support. Optional in R.
      * 2 - IncFs v2, PerUid support, fs-verity support. Required in S.
      *
-     * @see IncrementalManager#isFeatureEnabled and IncrementalManager#isV2()
+     * @see IncrementalManager#getVersion()
      * @hide
      */
     @SystemApi
@@ -3623,11 +3623,26 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports a enabling/disabling sensor privacy for
-     * camera. When sensory privacy for the camera is enabled no camera data is send to clients,
+     * microphone. When sensory privacy for the microphone is enabled no microphone data is sent to
+     * clients, e.g. all audio data is silent.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_MICROPHONE_TOGGLE = "android.hardware.microphone.toggle";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports a enabling/disabling sensor privacy for
+     * camera. When sensory privacy for the camera is enabled no camera data is sent to clients,
      * e.g. the view finder in a camera app would appear blank.
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_TOGGLE = "android.hardware.camera.toggle";
 

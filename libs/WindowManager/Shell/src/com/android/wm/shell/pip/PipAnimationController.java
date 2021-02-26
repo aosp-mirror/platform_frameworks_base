@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip;
 
+import static android.util.RotationUtils.rotateBounds;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
@@ -33,7 +34,6 @@ import android.view.SurfaceControl;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.common.DisplayLayout;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -90,14 +90,14 @@ public class PipAnimationController {
 
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
 
-    private PipTransitionAnimator mCurrentAnimator;
-
-    private ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
+    private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
             ThreadLocal.withInitial(() -> {
                 AnimationHandler handler = new AnimationHandler();
                 handler.setProvider(new SfVsyncFrameCallbackProvider());
                 return handler;
             });
+
+    private PipTransitionAnimator mCurrentAnimator;
 
     public PipAnimationController(PipSurfaceTransactionHelper helper) {
         mSurfaceTransactionHelper = helper;
@@ -268,6 +268,7 @@ public class PipAnimationController {
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationEnd(mTaskInfo, tx, this);
             }
+            mTransitionDirection = TRANSITION_DIRECTION_NONE;
         }
 
         @Override
@@ -275,6 +276,7 @@ public class PipAnimationController {
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationCancel(mTaskInfo, this);
             }
+            mTransitionDirection = TRANSITION_DIRECTION_NONE;
         }
 
         @Override public void onAnimationRepeat(Animator animation) {}
@@ -448,7 +450,7 @@ public class PipAnimationController {
                 // Rotate the end bounds according to the rotation delta because the display will
                 // be rotated to the same orientation.
                 rotatedEndRect = new Rect(endValue);
-                DisplayLayout.rotateBounds(rotatedEndRect, endValue, rotationDelta);
+                rotateBounds(rotatedEndRect, endValue, rotationDelta);
             } else {
                 rotatedEndRect = null;
             }

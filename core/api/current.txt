@@ -507,6 +507,7 @@ package android {
     field public static final int dashGap = 16843175; // 0x10101a7
     field public static final int dashWidth = 16843174; // 0x10101a6
     field public static final int data = 16842798; // 0x101002e
+    field public static final int dataExtractionRules = 16844350; // 0x101063e
     field public static final int datePickerDialogTheme = 16843948; // 0x10104ac
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
@@ -9740,7 +9741,7 @@ package android.companion {
   public interface DeviceFilter<D extends android.os.Parcelable> extends android.os.Parcelable {
   }
 
-  public class DeviceNotAssociatedException extends java.lang.Exception {
+  public class DeviceNotAssociatedException extends java.lang.RuntimeException {
   }
 
   public final class WifiDeviceFilter implements android.companion.DeviceFilter<android.net.wifi.ScanResult> {
@@ -10388,7 +10389,7 @@ package android.content {
     method public abstract void grantUriPermission(String, android.net.Uri, int);
     method public abstract boolean isDeviceProtectedStorage();
     method public boolean isRestricted();
-    method public static boolean isUiContext(@NonNull android.content.Context);
+    method public boolean isUiContext();
     method public abstract boolean moveDatabaseFrom(android.content.Context, String);
     method public abstract boolean moveSharedPreferencesFrom(android.content.Context, String);
     method @NonNull public final android.content.res.TypedArray obtainStyledAttributes(@NonNull @StyleableRes int[]);
@@ -18895,6 +18896,7 @@ package android.inputmethodservice {
   public abstract class AbstractInputMethodService extends android.app.Service implements android.view.KeyEvent.Callback {
     ctor public AbstractInputMethodService();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
+    method public final boolean isUiContext();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
@@ -19660,6 +19662,7 @@ package android.location {
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void addProximityAlert(double, double, float, long, @NonNull android.app.PendingIntent);
     method public void addTestProvider(@NonNull String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
     method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties);
+    method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties, @NonNull java.util.Set<java.lang.String>);
     method @Deprecated public void clearTestProviderEnabled(@NonNull String);
     method @Deprecated public void clearTestProviderLocation(@NonNull String);
     method @Deprecated public void clearTestProviderStatus(@NonNull String);
@@ -21977,7 +21980,7 @@ package android.media {
     ctor public MediaDrmResetException(String);
   }
 
-  public final class MediaExtractor {
+  public final class MediaExtractor implements android.media.metrics.PlaybackComponent {
     ctor public MediaExtractor();
     method public boolean advance();
     method protected void finalize();
@@ -21986,6 +21989,7 @@ package android.media {
     method public android.media.MediaExtractor.CasInfo getCasInfo(int);
     method public android.media.DrmInitData getDrmInitData();
     method public android.os.PersistableBundle getMetrics();
+    method @NonNull public String getPlaybackId();
     method @Nullable public java.util.Map<java.util.UUID,byte[]> getPsshInfo();
     method public boolean getSampleCryptoInfo(@NonNull android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
@@ -22007,6 +22011,7 @@ package android.media {
     method public void setDataSource(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     method public void setDataSource(@NonNull java.io.FileDescriptor, long, long) throws java.io.IOException;
     method public void setMediaCas(@NonNull android.media.MediaCas);
+    method public void setPlaybackId(@NonNull String);
     method public void unselectTrack(int);
     field public static final int SAMPLE_FLAG_ENCRYPTED = 2; // 0x2
     field public static final int SAMPLE_FLAG_PARTIAL_FRAME = 4; // 0x4
@@ -37168,8 +37173,10 @@ package android.security {
     method @NonNull public static android.content.Intent createInstallIntent();
     method @NonNull public static android.content.Intent createManageCredentialsIntent(@NonNull android.security.AppUriAuthenticationPolicy);
     method @Nullable @WorkerThread public static java.security.cert.X509Certificate[] getCertificateChain(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
+    method @NonNull public static android.security.AppUriAuthenticationPolicy getCredentialManagementAppPolicy(@NonNull android.content.Context) throws java.lang.SecurityException;
     method @Nullable @WorkerThread public static java.security.PrivateKey getPrivateKey(@NonNull android.content.Context, @NonNull String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method @Deprecated public static boolean isBoundKeyAlgorithm(@NonNull String);
+    method public static boolean isCredentialManagementApp(@NonNull android.content.Context);
     method public static boolean isKeyAlgorithmSupported(@NonNull String);
     field public static final String ACTION_KEYCHAIN_CHANGED = "android.security.action.KEYCHAIN_CHANGED";
     field public static final String ACTION_KEY_ACCESS_CHANGED = "android.security.action.KEY_ACCESS_CHANGED";
@@ -42419,6 +42426,7 @@ package android.telephony {
     method public static int getDefaultSmsSubscriptionId();
     method public static int getDefaultSubscriptionId();
     method public static int getDefaultVoiceSubscriptionId();
+    method public int getDeviceToDeviceStatusSharing(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getOpportunisticSubscriptions();
     method public static int getSlotIndex(int);
     method @Nullable public int[] getSubscriptionIds(int);
@@ -42431,6 +42439,7 @@ package android.telephony {
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDeviceToDeviceStatusSharing(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
     method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
@@ -42442,6 +42451,11 @@ package android.telephony {
     field public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
     field public static final String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
+    field public static final int D2D_SHARING_ALL = 3; // 0x3
+    field public static final int D2D_SHARING_ALL_CONTACTS = 1; // 0x1
+    field public static final int D2D_SHARING_DISABLED = 0; // 0x0
+    field public static final int D2D_SHARING_STARRED_CONTACTS = 2; // 0x2
+    field public static final String D2D_STATUS_SHARING = "d2d_sharing_status";
     field public static final int DATA_ROAMING_DISABLE = 0; // 0x0
     field public static final int DATA_ROAMING_ENABLE = 1; // 0x1
     field public static final int DEFAULT_SUBSCRIPTION_ID = 2147483647; // 0x7fffffff
@@ -48035,10 +48049,15 @@ package android.view {
   }
 
   public class SoundEffectConstants {
+    method public static int getConstantForFocusDirection(int, boolean);
     method public static int getContantForFocusDirection(int);
     field public static final int CLICK = 0; // 0x0
     field public static final int NAVIGATION_DOWN = 4; // 0x4
     field public static final int NAVIGATION_LEFT = 1; // 0x1
+    field public static final int NAVIGATION_REPEAT_DOWN = 8; // 0x8
+    field public static final int NAVIGATION_REPEAT_LEFT = 5; // 0x5
+    field public static final int NAVIGATION_REPEAT_RIGHT = 7; // 0x7
+    field public static final int NAVIGATION_REPEAT_UP = 6; // 0x6
     field public static final int NAVIGATION_RIGHT = 3; // 0x3
     field public static final int NAVIGATION_UP = 2; // 0x2
   }

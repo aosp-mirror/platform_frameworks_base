@@ -46,8 +46,8 @@ public class ConfigurationInternalTest {
     public void test_unrestricted() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionSupported(true)
-                .setGeoDetectionSupported(true)
+                .setAutoDetectionFeatureSupported(true)
+                .setGeoDetectionFeatureSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)
@@ -108,8 +108,8 @@ public class ConfigurationInternalTest {
     public void test_restricted() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(false)
-                .setAutoDetectionSupported(true)
-                .setGeoDetectionSupported(true)
+                .setAutoDetectionFeatureSupported(true)
+                .setGeoDetectionFeatureSupported(true)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)
@@ -170,8 +170,8 @@ public class ConfigurationInternalTest {
     public void test_autoDetectNotSupported() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionSupported(false)
-                .setGeoDetectionSupported(false)
+                .setAutoDetectionFeatureSupported(false)
+                .setGeoDetectionFeatureSupported(false)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)
@@ -232,8 +232,8 @@ public class ConfigurationInternalTest {
     public void test_geoDetectNotSupported() {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
-                .setAutoDetectionSupported(true)
-                .setGeoDetectionSupported(false)
+                .setAutoDetectionFeatureSupported(true)
+                .setGeoDetectionFeatureSupported(false)
                 .setAutoDetectionEnabled(true)
                 .setLocationEnabled(true)
                 .setGeoDetectionEnabled(true)

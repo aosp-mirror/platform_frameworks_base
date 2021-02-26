@@ -70,6 +70,8 @@ struct JMediaExtractor : public RefBase {
     status_t getAudioPresentations(size_t trackIdx,
             AudioPresentationCollection *presentations) const;
 
+    status_t setPlaybackId(const String8& playbackId);
+
 protected:
     virtual ~JMediaExtractor();
 

@@ -50,28 +50,7 @@
                     android:strokeWidth="1"
                     android:pathData="M 12.5 13.92 L 15.59 17 L 17 15.59 L 13.91 12.5 L 16.5 12.5 L 16.5 10.5 L 10.5 10.5 L 10.5 16.5 L 12.5 16.5 Z" />
             </group>
-            <group
-                android:translateX="22.000000"
-                android:translateY="2.000000">
-                <group
-                    android:translateX="3.000000"
-                    android:translateY="3.000000">
-                    <group
-                        android:translateX="-3.000000"
-                        android:translateY="-3.000000">
-                        <path
-                            android:fillColor="#80868B"
-                            android:fillType="evenOdd"
-                            android:strokeWidth="1"
-                            android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
-                    </group>
-                </group>
-            </group>
         </vector>
-    </item>
-
-    <item>
-        <ripple android:color="@color/GM2_grey_600"></ripple>
     </item>
 
 </layer-list>

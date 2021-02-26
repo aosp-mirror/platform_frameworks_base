@@ -24,7 +24,7 @@ import android.content.Context;
  * instance.
  *
  * @see Context#getSystemService(String)
- * @see Context#isUiContext(Context)
+ * @see Context#isUiContext
  * @see android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
  */
 public final class IncorrectContextUseViolation extends Violation {

@@ -132,7 +132,7 @@ public class NavigationModeController implements Dumpable {
             Settings.Secure.putString(mCurrentUserContext.getContentResolver(),
                     Secure.NAVIGATION_MODE, String.valueOf(mode)));
         if (DEBUG) {
-            Log.e(TAG, "updateCurrentInteractionMode: mode=" + mode);
+            Log.d(TAG, "updateCurrentInteractionMode: mode=" + mode);
             dumpAssetPaths(mCurrentUserContext);
         }
 

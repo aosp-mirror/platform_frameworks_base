@@ -18,3 +18,5 @@ package com.android.wm.shell.flicker
 
 const val IME_WINDOW_NAME = "InputMethod"
 const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
+const val APP_PAIR_SPLIT_DIVIDER = "AppPairSplitDivider"
+const val DOCKED_STACK_DIVIDER = "DockedStackDivider"

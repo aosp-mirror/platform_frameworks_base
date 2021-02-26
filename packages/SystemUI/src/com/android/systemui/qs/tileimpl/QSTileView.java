@@ -105,22 +105,25 @@ public class QSTileView extends QSTileBaseView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mLabel.setSingleLine(false);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        // Remeasure view if the primary label requires more then 2 lines or the secondary label
-        // text will be cut off.
-        if (mLabel.getLineCount() > mMaxLabelLines || !TextUtils.isEmpty(mSecondLine.getText())
-                        && mSecondLine.getLineHeight() > mSecondLine.getHeight()) {
-            if (!mLabel.isSingleLine()) {
-                mLabel.setSingleLine();
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            }
-        } else {
-            if (mLabel.isSingleLine()) {
-                mLabel.setSingleLine(false);
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            }
+        // Remeasure view if the primary label requires more than mMaxLabelLines lines or the
+        // secondary label text will be cut off.
+        if (shouldLabelBeSingleLine()) {
+            mLabel.setSingleLine();
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
+    }
+
+    private boolean shouldLabelBeSingleLine() {
+        if (mLabel.getLineCount() > mMaxLabelLines) {
+            return true;
+        } else if (!TextUtils.isEmpty(mSecondLine.getText())
+                && mLabel.getLineCount() > mMaxLabelLines - 1) {
+            return true;
+        }
+        return false;
     }
 
     @Override

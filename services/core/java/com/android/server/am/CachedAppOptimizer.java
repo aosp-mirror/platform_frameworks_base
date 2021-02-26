@@ -536,18 +536,6 @@ public final class CachedAppOptimizer {
     }
 
     /**
-     * Enable or disable the freezer. When enable == false all frozen processes are unfrozen,
-     * but aren't removed from the freezer. While in this state, processes can be added or removed
-     * by using Process.setProcessFrozen(), but they wouldn't be actually frozen until the freezer
-     * is enabled. If enable == true all processes in the freezer are frozen.
-     *
-     * @param enable Specify whether to enable (true) or disable (false) the freezer.
-     *
-     * @hide
-     */
-    private static native void enableFreezerInternal(boolean enable);
-
-    /**
      * Informs binder that a process is about to be frozen. If freezer is enabled on a process via
      * this method, this method will synchronously dispatch all pending transactions to the
      * specified pid. This method will not add significant latencies when unfreezing.
@@ -590,10 +578,6 @@ public final class CachedAppOptimizer {
 
             if (state == '1' || state == '0') {
                 supported = true;
-                // This is a workaround after reverting the cgroup v2 uid/pid hierarchy due to
-                // http://b/179006802.
-                // TODO: remove once the uid/pid hierarchy is restored
-                enableFreezerInternal(true);
             } else {
                 Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
             }

@@ -19,16 +19,16 @@ package com.android.server.wm;
 import android.graphics.Rect;
 
 /**
- * Keeps information about the docked stack divider.
+ * Keeps information about the docked task divider.
  */
-public class DockedStackDividerController {
+public class DockedTaskDividerController {
 
     private final DisplayContent mDisplayContent;
     private boolean mResizing;
 
     private final Rect mTouchRegion = new Rect();
 
-    DockedStackDividerController(DisplayContent displayContent) {
+    DockedTaskDividerController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
     }
 
@@ -58,6 +58,6 @@ public class DockedStackDividerController {
 
     private void resetDragResizingChangeReported() {
         mDisplayContent.forAllWindows(WindowState::resetDragResizingChangeReported,
-                true /* traverseTopToBottom */ );
+                true /* traverseTopToBottom */);
     }
 }

@@ -81,11 +81,11 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
 
         final MeasuredEnergyStats newStats = MeasuredEnergyStats.createFromTemplate(stats);
 
@@ -114,11 +114,11 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
         stats.writeToParcel(parcel);
@@ -149,11 +149,11 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
         MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
@@ -185,17 +185,17 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats template
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        template.updateCustomBucket(0, 50, true);
+        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        template.updateCustomBucket(0, 50);
 
         final MeasuredEnergyStats stats = MeasuredEnergyStats.createFromTemplate(template);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 200, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 7, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 63, true);
-        stats.updateCustomBucket(0, 315, true);
-        stats.updateCustomBucket(1, 316, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 200);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 7);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 63);
+        stats.updateCustomBucket(0, 315);
+        stats.updateCustomBucket(1, 316);
 
         final Parcel parcel = Parcel.obtain();
         MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
@@ -243,8 +243,8 @@ public class MeasuredEnergyStatsTest {
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
         // Accumulate energy in one bucket and one custom bucket, the rest should be zero
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 200, true);
-        stats.updateCustomBucket(1, 60, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 200);
+        stats.updateCustomBucket(1, 60);
 
         // Let's try parcelling with including zeros
         final Parcel includeZerosParcel = Parcel.obtain();
@@ -305,11 +305,11 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
 
         final Parcel parcel = Parcel.obtain();
         MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
@@ -331,14 +331,14 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats template
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        template.updateCustomBucket(0, 50, true);
+        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        template.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        template.updateCustomBucket(0, 50);
 
         final MeasuredEnergyStats stats = MeasuredEnergyStats.createFromTemplate(template);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 0L, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 7L, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 0L);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 7L);
 
         final Parcel parcel = Parcel.obtain();
         MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
@@ -369,14 +369,14 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_DOZE, 30, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_DOZE, 30);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
 
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
-        stats.updateCustomBucket(0, 3, true);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
+        stats.updateCustomBucket(0, 3);
 
         assertEquals(15, stats.getAccumulatedStandardBucketEnergy(ENERGY_BUCKET_SCREEN_ON));
         assertEquals(ENERGY_DATA_UNAVAILABLE,
@@ -409,10 +409,10 @@ public class MeasuredEnergyStatsTest {
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], 3);
 
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
-        stats.updateCustomBucket(2, 13, true);
-        stats.updateCustomBucket(1, 70, true);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
+        stats.updateCustomBucket(2, 13);
+        stats.updateCustomBucket(1, 70);
 
         final long[] output = stats.getAccumulatedCustomBucketEnergies();
         assertEquals(3, output.length);
@@ -449,11 +449,11 @@ public class MeasuredEnergyStatsTest {
 
         final MeasuredEnergyStats stats
                 = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
-        stats.updateCustomBucket(0, 50, true);
-        stats.updateCustomBucket(1, 60, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 10);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 5);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_OTHER, 40);
+        stats.updateCustomBucket(0, 50);
+        stats.updateCustomBucket(1, 60);
 
         MeasuredEnergyStats.resetIfNotNull(stats);
         // All energy should be reset to 0
@@ -471,10 +471,10 @@ public class MeasuredEnergyStatsTest {
         }
 
         // Values should increase as usual.
-        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 70, true);
+        stats.updateStandardBucket(ENERGY_BUCKET_SCREEN_ON, 70);
         assertEquals(70L, stats.getAccumulatedStandardBucketEnergy(ENERGY_BUCKET_SCREEN_ON));
 
-        stats.updateCustomBucket(1, 12, true);
+        stats.updateCustomBucket(1, 12);
         assertEquals(12L, stats.getAccumulatedCustomBucketEnergy(1));
     }
 

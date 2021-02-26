@@ -260,6 +260,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setFullBackupContent(int fullBackupContent);
 
+    ParsingPackage setDataExtractionRules(int dataExtractionRules);
+
     ParsingPackage setHasDomainUrls(boolean hasDomainUrls);
 
     ParsingPackage setIconRes(int iconRes);

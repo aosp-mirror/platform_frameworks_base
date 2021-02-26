@@ -339,7 +339,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     SparseIntArray mProfileOwners;
 
     @GuardedBy("this")
-    private CheckOpsDelegate mCheckOpsDelegate;
+    private CheckOpsDelegate mAppOpsPolicy;
+
+    @GuardedBy("this")
+    private CheckOpsDelegateDispatcher mCheckOpsDelegateDispatcher;
 
     /**
       * Reverse lookup for {@link AppOpsManager#opToSwitch(int)}. Initialized once and never
@@ -1770,6 +1773,17 @@ public class AppOpsService extends IAppOpsService.Stub {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
+    /**
+     * Sets a policy for handling app ops.
+     *
+     * @param appOpsPolicy The policy.
+     */
+    public void setAppOpsPolicy(@Nullable CheckOpsDelegate appOpsPolicy) {
+        synchronized (AppOpsService.this) {
+            mAppOpsPolicy = appOpsPolicy;
+        }
+    }
+
     public void packageRemoved(int uid, String packageName) {
         synchronized (this) {
             UidState uidState = mUidStates.get(uid);
@@ -2868,13 +2882,19 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public CheckOpsDelegate getAppOpsServiceDelegate() {
         synchronized (this) {
-            return mCheckOpsDelegate;
+            return (mCheckOpsDelegateDispatcher != null)
+                    ? mCheckOpsDelegateDispatcher.getCheckOpsDelegate()
+                    : null;
         }
     }
 
     public void setAppOpsServiceDelegate(CheckOpsDelegate delegate) {
         synchronized (this) {
-            mCheckOpsDelegate = delegate;
+            if (delegate != null) {
+                mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(delegate);
+            } else {
+                mCheckOpsDelegateDispatcher = null;
+            }
         }
     }
 
@@ -2889,19 +2909,28 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private int checkOperationInternal(int code, int uid, String packageName, boolean raw) {
-        final CheckOpsDelegate delegate;
-        synchronized (this) {
-            delegate = mCheckOpsDelegate;
+        final CheckOpsDelegate policy;
+        final CheckOpsDelegateDispatcher delegateDispatcher;
+        synchronized (AppOpsService.this) {
+            policy = mAppOpsPolicy;
+            delegateDispatcher = mCheckOpsDelegateDispatcher;
         }
-        if (delegate == null) {
-            return checkOperationImpl(code, uid, packageName, raw);
+        if (policy != null) {
+            if (delegateDispatcher != null) {
+                return policy.checkOperation(code, uid, packageName, raw,
+                        delegateDispatcher::checkOperationImpl);
+            } else {
+                return policy.checkOperation(code, uid, packageName, raw,
+                        AppOpsService.this::checkOperationImpl);
+            }
+        } else if (delegateDispatcher != null) {
+            delegateDispatcher.getCheckOpsDelegate().checkOperation(code, uid,
+                    packageName, raw, AppOpsService.this::checkOperationImpl);
         }
-        return delegate.checkOperation(code, uid, packageName, raw,
-                    AppOpsService.this::checkOperationImpl);
+        return checkOperationImpl(code, uid, packageName, raw);
     }
 
-    private int checkOperationImpl(int code, int uid, String packageName,
-                boolean raw) {
+    private int checkOperationImpl(int code, int uid, String packageName, boolean raw) {
         verifyIncomingOp(code);
         verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
 
@@ -2956,15 +2985,25 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-        final CheckOpsDelegate delegate;
-        synchronized (this) {
-            delegate = mCheckOpsDelegate;
+        final CheckOpsDelegate policy;
+        final CheckOpsDelegateDispatcher delegateDispatcher;
+        synchronized (AppOpsService.this) {
+            policy = mAppOpsPolicy;
+            delegateDispatcher = mCheckOpsDelegateDispatcher;
         }
-        if (delegate == null) {
-            return checkAudioOperationImpl(code, usage, uid, packageName);
+        if (policy != null) {
+            if (delegateDispatcher != null) {
+                return policy.checkAudioOperation(code, usage, uid, packageName,
+                        delegateDispatcher::checkAudioOperationImpl);
+            } else {
+                return policy.checkAudioOperation(code, usage, uid, packageName,
+                        AppOpsService.this::checkAudioOperationImpl);
+            }
+        } else if (delegateDispatcher != null) {
+            delegateDispatcher.getCheckOpsDelegate().checkAudioOperation(code, usage,
+                    uid, packageName, AppOpsService.this::checkAudioOperationImpl);
         }
-        return delegate.checkAudioOperation(code, usage, uid, packageName,
-                AppOpsService.this::checkAudioOperationImpl);
+        return checkAudioOperationImpl(code, usage, uid, packageName);
     }
 
     private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
@@ -3078,17 +3117,29 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int noteOperation(int code, int uid, String packageName, String attributionTag,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage) {
-        final CheckOpsDelegate delegate;
-        synchronized (this) {
-            delegate = mCheckOpsDelegate;
+        final CheckOpsDelegate policy;
+        final CheckOpsDelegateDispatcher delegateDispatcher;
+        synchronized (AppOpsService.this) {
+            policy = mAppOpsPolicy;
+            delegateDispatcher = mCheckOpsDelegateDispatcher;
         }
-        if (delegate == null) {
-            return noteOperationImpl(code, uid, packageName, attributionTag,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+        if (policy != null) {
+            if (delegateDispatcher != null) {
+                return policy.noteOperation(code, uid, packageName, attributionTag,
+                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                        delegateDispatcher::noteOperationImpl);
+            } else {
+                return policy.noteOperation(code, uid, packageName, attributionTag,
+                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                        AppOpsService.this::noteOperationImpl);
+            }
+        } else if (delegateDispatcher != null) {
+            delegateDispatcher.getCheckOpsDelegate().noteOperation(code, uid, packageName,
+                    attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                    AppOpsService.this::noteOperationImpl);
         }
-        return delegate.noteOperation(code, uid, packageName, attributionTag,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                AppOpsService.this::noteOperationImpl);
+        return noteOperationImpl(code, uid, packageName, attributionTag,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
     private int noteOperationImpl(int code, int uid, @Nullable String packageName,
@@ -6589,7 +6640,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-
     /**
      * Async task for writing note op stack trace, op code, package name and version to file
      * More specifically, writes all the collected ops from {@link #mNoteOpCallerStacktraces}
@@ -6724,6 +6774,36 @@ public class AppOpsService extends IAppOpsService.Stub {
                     });
                 }, this), 2500);
             }
+        }
+    }
+
+    private final class CheckOpsDelegateDispatcher {
+        private final @NonNull CheckOpsDelegate mCheckOpsDelegate;
+
+        CheckOpsDelegateDispatcher(@NonNull CheckOpsDelegate checkOpsDelegate) {
+            mCheckOpsDelegate = checkOpsDelegate;
+        }
+
+        public @NonNull CheckOpsDelegate getCheckOpsDelegate() {
+            return mCheckOpsDelegate;
+        }
+
+        public int checkOperationImpl(int code, int uid, String packageName, boolean raw) {
+            return mCheckOpsDelegate.checkOperation(code, uid, packageName, raw,
+                    AppOpsService.this::checkOperationImpl);
+        }
+
+        public int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
+            return mCheckOpsDelegate.checkAudioOperation(code, usage, uid, packageName,
+                    AppOpsService.this::checkAudioOperationImpl);
+        }
+
+        public int noteOperationImpl(int code, int uid, @Nullable String packageName,
+                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage) {
+            return mCheckOpsDelegate.noteOperation(code, uid, packageName, featureId,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                    AppOpsService.this::noteOperationImpl);
         }
     }
 }
