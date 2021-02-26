@@ -97,11 +97,21 @@ class PackageParsingPerfTest {
     private val state: BenchmarkState get() = perfStatusReporter.benchmarkState
     private val apks: List<File> get() = params.apks
 
+    private fun safeParse(parser: ParallelParser<*>, file: File) {
+        try {
+            parser.parse(file)
+        } catch (e: Exception) {
+            // ignore
+        }
+    }
+
     @Test
     fun sequentialNoCache() {
         params.cacheDirToParser(null).use { parser ->
             while (state.keepRunning()) {
-                apks.forEach { parser.parse(it) }
+                apks.forEach {
+                    safeParse(parser, it)
+                }
             }
         }
     }
@@ -110,10 +120,10 @@ class PackageParsingPerfTest {
     fun sequentialCached() {
         params.cacheDirToParser(testFolder.newFolder()).use { parser ->
             // Fill the cache
-            apks.forEach { parser.parse(it) }
+            apks.forEach { safeParse(parser, it) }
 
             while (state.keepRunning()) {
-                apks.forEach { parser.parse(it) }
+                apks.forEach { safeParse(parser, it) }
             }
         }
     }
@@ -132,7 +142,7 @@ class PackageParsingPerfTest {
     fun parallelCached() {
         params.cacheDirToParser(testFolder.newFolder()).use { parser ->
             // Fill the cache
-            apks.forEach { parser.parse(it) }
+            apks.forEach { safeParse(parser, it) }
 
             while (state.keepRunning()) {
                 apks.forEach { parser.submit(it) }
