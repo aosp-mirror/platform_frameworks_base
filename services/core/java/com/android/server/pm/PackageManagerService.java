@@ -9167,6 +9167,11 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public String[] getPackagesForUid(int uid) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+        enforceCrossUserOrProfilePermission(callingUid, userId,
+                /* requireFullPermission */ false,
+                /* checkShell */ false, "getPackagesForUid");
         return snapshotComputer().getPackagesForUid(uid);
     }
 
