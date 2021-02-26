@@ -5414,37 +5414,36 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @BinderThread
         @ShellCommandResult
         private int onCommandWithSystemIdentity(@Nullable String cmd) {
-            if ("get-last-switch-user-id".equals(cmd)) {
-                return mService.getLastSwitchUserId(this);
-            }
-
-            // For existing "adb shell ime <command>".
-            if ("ime".equals(cmd)) {
-                final String imeCommand = getNextArg();
-                if (imeCommand == null || "help".equals(imeCommand) || "-h".equals(imeCommand)) {
-                    onImeCommandHelp();
-                    return ShellCommandResult.SUCCESS;
+            switch (TextUtils.emptyIfNull(cmd)) {
+                case "get-last-switch-user-id":
+                    return mService.getLastSwitchUserId(this);
+                case "ime": {  // For "adb shell ime <command>".
+                    final String imeCommand = TextUtils.emptyIfNull(getNextArg());
+                    switch (imeCommand) {
+                        case "":
+                        case "-h":
+                        case "help":
+                            return onImeCommandHelp();
+                        case "list":
+                            return mService.handleShellCommandListInputMethods(this);
+                        case "enable":
+                            return mService.handleShellCommandEnableDisableInputMethod(this, true);
+                        case "disable":
+                            return mService.handleShellCommandEnableDisableInputMethod(this, false);
+                        case "set":
+                            return mService.handleShellCommandSetInputMethod(this);
+                        case "reset":
+                            return mService.handleShellCommandResetInputMethod(this);
+                        case "tracing":
+                            return mService.handleShellCommandTraceInputMethod(this);
+                        default:
+                            getOutPrintWriter().println("Unknown command: " + imeCommand);
+                            return ShellCommandResult.FAILURE;
+                    }
                 }
-                switch (imeCommand) {
-                    case "list":
-                        return mService.handleShellCommandListInputMethods(this);
-                    case "enable":
-                        return mService.handleShellCommandEnableDisableInputMethod(this, true);
-                    case "disable":
-                        return mService.handleShellCommandEnableDisableInputMethod(this, false);
-                    case "set":
-                        return mService.handleShellCommandSetInputMethod(this);
-                    case "reset":
-                        return mService.handleShellCommandResetInputMethod(this);
-                    case "tracing":
-                        return mService.handleShellCommandTraceInputMethod(this);
-                    default:
-                        getOutPrintWriter().println("Unknown command: " + imeCommand);
-                        return ShellCommandResult.FAILURE;
-                }
+                default:
+                    return handleDefaultCommands(cmd);
             }
-
-            return handleDefaultCommands(cmd);
         }
 
         @BinderThread
@@ -5461,7 +5460,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        private void onImeCommandHelp() {
+        @BinderThread
+        @ShellCommandResult
+        private int onImeCommandHelp() {
             try (IndentingPrintWriter pw =
                          new IndentingPrintWriter(getOutPrintWriter(), "  ", 100)) {
                 pw.println("ime <command>:");
@@ -5516,6 +5517,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 pw.decreaseIndent();
             }
+            return ShellCommandResult.SUCCESS;
         }
     }
 
