@@ -20,11 +20,13 @@ import android.content.Context
 import android.util.AttributeSet
 import com.android.systemui.R
 
-open class SideLabelTileLayout(context: Context, attrs: AttributeSet) : TileLayout(context, attrs) {
+open class SideLabelTileLayout(
+    context: Context,
+    attrs: AttributeSet?
+) : TileLayout(context, attrs) {
 
     override fun updateResources(): Boolean {
         return super.updateResources().also {
-            mResourceColumns = 2
             mMaxAllowedRows = 4
             mCellMarginHorizontal = (mCellMarginHorizontal * 1.2).toInt()
             mCellMarginVertical = mCellMarginHorizontal

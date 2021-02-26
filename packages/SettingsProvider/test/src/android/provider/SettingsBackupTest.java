@@ -283,6 +283,7 @@ public class SettingsBackupTest {
                     Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
                     Settings.Global.EUICC_SWITCH_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FORCED_APP_STANDBY_ENABLED,
                     Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,

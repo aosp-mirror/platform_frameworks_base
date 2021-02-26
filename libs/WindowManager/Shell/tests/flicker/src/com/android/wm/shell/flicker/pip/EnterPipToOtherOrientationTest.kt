@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -56,7 +55,7 @@ class EnterPipToOtherOrientationTest(
     private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
 
-    override val transition: FlickerBuilder.(Bundle) -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = { configuration ->
             setupAndTeardown(this, configuration)
 
@@ -121,7 +120,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun pipAppLayerHidesTestApp() {
         testSpec.assertLayersStart {
-            hasVisibleRegion(pipApp.defaultWindowName, startingBounds)
+            coversExactly(startingBounds, pipApp.defaultWindowName)
             isInvisible(testApp.defaultWindowName)
         }
     }
@@ -130,7 +129,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppLayerCoversFullScreen() {
         testSpec.assertLayersEnd {
-            hasVisibleRegion(testApp.defaultWindowName, endingBounds)
+            coversExactly(endingBounds, testApp.defaultWindowName)
         }
     }
 

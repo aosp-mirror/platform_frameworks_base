@@ -45,14 +45,18 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.Immutable;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -87,26 +91,30 @@ public class ServiceWatcher implements ServiceConnection {
     /** Function to run on binder interface when first bound. */
     public interface OnBindRunner {
         /** Called to run client code with the binder. */
-        void run(IBinder binder, ComponentName service) throws RemoteException;
+        void run(IBinder binder, BoundService service) throws RemoteException;
     }
 
     /**
      * Information on the service ServiceWatcher has selected as the best option for binding.
      */
-    private static final class ServiceInfo implements Comparable<ServiceInfo> {
+    @Immutable
+    public static final class BoundService implements Comparable<BoundService> {
 
-        public static final ServiceInfo NONE = new ServiceInfo(Integer.MIN_VALUE, null,
-                UserHandle.USER_NULL, false);
+        public static final BoundService NONE = new BoundService(Integer.MIN_VALUE, null,
+                false, null, -1);
 
         public final int version;
-        @Nullable public final ComponentName component;
-        @UserIdInt public final int userId;
+        @Nullable
+        public final ComponentName component;
         public final boolean serviceIsMultiuser;
+        public final int uid;
+        @Nullable
+        public final Bundle metadata;
 
-        ServiceInfo(ResolveInfo resolveInfo, int currentUserId) {
+        BoundService(ResolveInfo resolveInfo) {
             Preconditions.checkArgument(resolveInfo.serviceInfo.getComponentName() != null);
 
-            Bundle metadata = resolveInfo.serviceInfo.metaData;
+            metadata = resolveInfo.serviceInfo.metaData;
             if (metadata != null) {
                 version = metadata.getInt(EXTRA_SERVICE_VERSION, Integer.MIN_VALUE);
                 serviceIsMultiuser = metadata.getBoolean(EXTRA_SERVICE_IS_MULTIUSER, false);
@@ -116,16 +124,17 @@ public class ServiceWatcher implements ServiceConnection {
             }
 
             component = resolveInfo.serviceInfo.getComponentName();
-            userId = serviceIsMultiuser ? UserHandle.USER_SYSTEM : currentUserId;
+            uid = resolveInfo.serviceInfo.applicationInfo.uid;
         }
 
-        private ServiceInfo(int version, @Nullable ComponentName component, int userId,
-                boolean serviceIsMultiuser) {
+        private BoundService(int version, @Nullable ComponentName component,
+                boolean serviceIsMultiuser, @Nullable Bundle metadata, int uid) {
             Preconditions.checkArgument(component != null || version == Integer.MIN_VALUE);
             this.version = version;
             this.component = component;
-            this.userId = userId;
             this.serviceIsMultiuser = serviceIsMultiuser;
+            this.metadata = metadata;
+            this.uid = uid;
         }
 
         public @Nullable String getPackageName() {
@@ -137,21 +146,21 @@ public class ServiceWatcher implements ServiceConnection {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof ServiceInfo)) {
+            if (!(o instanceof BoundService)) {
                 return false;
             }
-            ServiceInfo that = (ServiceInfo) o;
-            return version == that.version && userId == that.userId
+            BoundService that = (BoundService) o;
+            return version == that.version && uid == that.uid
                     && Objects.equals(component, that.component);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(version, component, userId);
+            return Objects.hash(version, component, uid);
         }
 
         @Override
-        public int compareTo(ServiceInfo that) {
+        public int compareTo(BoundService that) {
             // ServiceInfos with higher version numbers always win (having a version number >
             // MIN_VALUE implies having a non-null component). if version numbers are equal, a
             // non-null component wins over a null component. if the version numbers are equal and
@@ -164,10 +173,11 @@ public class ServiceWatcher implements ServiceConnection {
                 } else if (component != null && that.component == null) {
                     ret = 1;
                 } else {
-                    if (userId != UserHandle.USER_SYSTEM && that.userId == UserHandle.USER_SYSTEM) {
+                    if (UserHandle.getUserId(uid) != UserHandle.USER_SYSTEM
+                            && UserHandle.getUserId(that.uid) == UserHandle.USER_SYSTEM) {
                         ret = -1;
-                    } else if (userId == UserHandle.USER_SYSTEM
-                            && that.userId != UserHandle.USER_SYSTEM) {
+                    } else if (UserHandle.getUserId(uid) == UserHandle.USER_SYSTEM
+                            && UserHandle.getUserId(that.uid) != UserHandle.USER_SYSTEM) {
                         ret = 1;
                     }
                 }
@@ -180,7 +190,8 @@ public class ServiceWatcher implements ServiceConnection {
             if (component == null) {
                 return "none";
             } else {
-                return component.toShortString() + "@" + version + "[u" + userId + "]";
+                return component.toShortString() + "@" + version + "[u"
+                        + UserHandle.getUserId(uid) + "]";
             }
         }
     }
@@ -227,17 +238,23 @@ public class ServiceWatcher implements ServiceConnection {
         }
     };
 
-    @Nullable private final OnBindRunner mOnBind;
-    @Nullable private final Runnable mOnUnbind;
+    // read/write from handler thread only
+    private final Map<ComponentName, BoundService> mPendingBinds = new ArrayMap<>();
 
-    // write from caller thread only, read anywhere
-    private volatile boolean mRegistered;
+    @Nullable
+    private final OnBindRunner mOnBind;
+
+    @Nullable
+    private final Runnable mOnUnbind;
+
+    // read/write from handler thread only
+    private boolean mRegistered;
 
     // read/write from handler thread only
     private int mCurrentUserId;
 
     // write from handler thread only, read anywhere
-    private volatile ServiceInfo mTargetService;
+    private volatile BoundService mTargetService;
     private volatile IBinder mBinder;
 
     public ServiceWatcher(Context context, String action,
@@ -274,7 +291,7 @@ public class ServiceWatcher implements ServiceConnection {
 
         mCurrentUserId = UserHandle.USER_NULL;
 
-        mTargetService = ServiceInfo.NONE;
+        mTargetService = BoundService.NONE;
         mBinder = null;
     }
 
@@ -299,6 +316,11 @@ public class ServiceWatcher implements ServiceConnection {
      * Starts the process of determining the best matching service and maintaining a binding to it.
      */
     public void register() {
+        mHandler.sendMessage(PooledLambda.obtainMessage(ServiceWatcher::registerInternal,
+                ServiceWatcher.this));
+    }
+
+    private void registerInternal() {
         Preconditions.checkState(!mRegistered);
 
         mPackageMonitor.register(mContext, UserHandle.ALL, true, mHandler);
@@ -309,6 +331,8 @@ public class ServiceWatcher implements ServiceConnection {
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, intentFilter, null,
                 mHandler);
 
+        // TODO: This makes the behavior of the class unpredictable as the caller needs
+        // to know the internal impl detail that calling register would pick the current user.
         mCurrentUserId = ActivityManager.getCurrentUser();
 
         mRegistered = true;
@@ -320,6 +344,11 @@ public class ServiceWatcher implements ServiceConnection {
      * Stops the process of determining the best matching service and releases any binding.
      */
     public void unregister() {
+        mHandler.sendMessage(PooledLambda.obtainMessage(ServiceWatcher::unregisterInternal,
+                ServiceWatcher.this));
+    }
+
+    private void unregisterInternal() {
         Preconditions.checkState(mRegistered);
 
         mRegistered = false;
@@ -333,7 +362,7 @@ public class ServiceWatcher implements ServiceConnection {
     private void onBestServiceChanged(boolean forceRebind) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
-        ServiceInfo bestServiceInfo = ServiceInfo.NONE;
+        BoundService bestServiceInfo = BoundService.NONE;
 
         if (mRegistered) {
             List<ResolveInfo> resolveInfos = mContext.getPackageManager().queryIntentServicesAsUser(
@@ -344,7 +373,7 @@ public class ServiceWatcher implements ServiceConnection {
                 if (!mServiceCheckPredicate.test(resolveInfo)) {
                     continue;
                 }
-                ServiceInfo serviceInfo = new ServiceInfo(resolveInfo, mCurrentUserId);
+                BoundService serviceInfo = new BoundService(resolveInfo);
                 if (serviceInfo.compareTo(bestServiceInfo) > 0) {
                     bestServiceInfo = serviceInfo;
                 }
@@ -356,21 +385,22 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    private void rebind(ServiceInfo newServiceInfo) {
+    private void rebind(BoundService newServiceInfo) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
-        if (!mTargetService.equals(ServiceInfo.NONE)) {
+        if (!mTargetService.equals(BoundService.NONE)) {
             if (D) {
                 Log.d(TAG, "[" + mIntent.getAction() + "] unbinding from " + mTargetService);
             }
 
             mContext.unbindService(this);
             onServiceDisconnected(mTargetService.component);
-            mTargetService = ServiceInfo.NONE;
+            mPendingBinds.remove(mTargetService.component);
+            mTargetService = BoundService.NONE;
         }
 
         mTargetService = newServiceInfo;
-        if (mTargetService.equals(ServiceInfo.NONE)) {
+        if (mTargetService.equals(BoundService.NONE)) {
             return;
         }
 
@@ -381,10 +411,12 @@ public class ServiceWatcher implements ServiceConnection {
         Intent bindIntent = new Intent(mIntent).setComponent(mTargetService.component);
         if (!mContext.bindServiceAsUser(bindIntent, this,
                 BIND_AUTO_CREATE | BIND_NOT_FOREGROUND | BIND_NOT_VISIBLE,
-                mHandler, UserHandle.of(mTargetService.userId))) {
-            mTargetService = ServiceInfo.NONE;
+                mHandler, UserHandle.of(UserHandle.getUserId(mTargetService.uid)))) {
+            mTargetService = BoundService.NONE;
             Log.e(TAG, getLogPrefix() + " unexpected bind failure - retrying later");
             mHandler.postDelayed(() -> onBestServiceChanged(false), RETRY_DELAY_MS);
+        } else {
+            mPendingBinds.put(mTargetService.component, mTargetService);
         }
     }
 
@@ -397,10 +429,15 @@ public class ServiceWatcher implements ServiceConnection {
             Log.d(TAG, getLogPrefix() + " connected to " + component.toShortString());
         }
 
+        final BoundService boundService = mPendingBinds.remove(component);
+        if (boundService == null) {
+            return;
+        }
+
         mBinder = binder;
         if (mOnBind != null) {
             try {
-                mOnBind.run(binder, component);
+                mOnBind.run(binder, boundService);
             } catch (RuntimeException | RemoteException e) {
                 // binders may propagate some specific non-RemoteExceptions from the other side
                 // through the binder as well - we cannot allow those to crash the system server

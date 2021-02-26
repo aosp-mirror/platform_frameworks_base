@@ -198,7 +198,7 @@ public class TaskStackListenerImplTest {
 
     @Test
     public void testOnActivityDismissingDockedStack() {
-        mImpl.onActivityDismissingDockedStack();
+        mImpl.onActivityDismissingDockedTask();
         verify(mCallback).onActivityDismissingDockedStack();
         verify(mOtherCallback).onActivityDismissingDockedStack();
     }

@@ -71,7 +71,8 @@ public class MockableLocationProviderTest {
                         .setPowerUsage(POWER_USAGE_LOW)
                         .setAccuracy(ACCURACY_FINE)
                         .build(),
-                CallerIdentity.forTest(0, 1, "testpackage", "test"));
+                CallerIdentity.forTest(0, 1, "testpackage", "test"),
+                null);
 
         mProvider = new MockableLocationProvider(lock);
         mProvider.getController().setListener(mListener);

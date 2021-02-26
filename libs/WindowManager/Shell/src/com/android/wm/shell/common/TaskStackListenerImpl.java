@@ -227,7 +227,7 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     }
 
     @Override
-    public void onActivityDismissingDockedStack() {
+    public void onActivityDismissingDockedTask() {
         mMainHandler.sendEmptyMessage(ON_ACTIVITY_DISMISSING_DOCKED_STACK);
     }
 

@@ -16,13 +16,13 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -54,7 +54,15 @@ class ChangeAppRotationTest(
     testSpec: FlickerTestParameter
 ) : RotationTransition(testSpec) {
     override val testApp = SimpleAppHelper(instrumentation)
-    override fun getAppLaunchParams(configuration: Bundle): Map<String, String> = emptyMap()
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = {
+            super.transition(this, it)
+            setup {
+                test {
+                    testApp.launchViaIntent(wmHelper)
+                }
+            }
+        }
 
     @Presubmit
     @Test
@@ -78,11 +86,11 @@ class ChangeAppRotationTest(
     @Test
     fun screenshotLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.showsLayer(testApp.getPackage())
+            this.isVisible(testApp.getPackage())
                 .then()
-                .showsLayer(SCREENSHOT_LAYER)
+                .isVisible(SCREENSHOT_LAYER)
                 .then()
-                .showsLayer(testApp.getPackage())
+                .isVisible(testApp.getPackage())
         }
     }
 
@@ -113,7 +121,7 @@ class ChangeAppRotationTest(
     @Test
     fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
-            this.hasVisibleRegion(testApp.getPackage(), startingPos)
+            this.coversExactly(startingPos, testApp.getPackage())
         }
     }
 
@@ -121,7 +129,7 @@ class ChangeAppRotationTest(
     @Test
     fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
-            this.hasVisibleRegion(testApp.getPackage(), endingPos)
+            this.coversExactly(endingPos, testApp.getPackage())
         }
     }
 

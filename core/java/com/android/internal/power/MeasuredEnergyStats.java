@@ -193,34 +193,30 @@ public class MeasuredEnergyStats {
         return mAccumulatedEnergiesMicroJoules.length;
     }
 
-    // TODO: Get rid of the 'accumulate' boolean. It's always true.
     /** Updates the given standard energy bucket with the given energy if accumulate is true. */
-    public void updateStandardBucket(@StandardEnergyBucket int bucket, long energyDeltaUJ,
-            boolean accumulate) {
+    public void updateStandardBucket(@StandardEnergyBucket int bucket, long energyDeltaUJ) {
         checkValidStandardBucket(bucket);
-        updateEntry(bucket, energyDeltaUJ, accumulate);
+        updateEntry(bucket, energyDeltaUJ);
     }
 
     /** Updates the given custom energy bucket with the given energy if accumulate is true. */
-    public void updateCustomBucket(int customBucket, long energyDeltaUJ, boolean accumulate) {
+    public void updateCustomBucket(int customBucket, long energyDeltaUJ) {
         if (!isValidCustomBucket(customBucket)) {
             Slog.e(TAG, "Attempted to update invalid custom bucket " + customBucket);
             return;
         }
         final int index = customBucketToIndex(customBucket);
-        updateEntry(index, energyDeltaUJ, accumulate);
+        updateEntry(index, energyDeltaUJ);
     }
 
     /** Updates the given index with the given energy if accumulate is true. */
-    private void updateEntry(int index, long energyDeltaUJ, boolean accumulate) {
-        if (accumulate) {
-            if (mAccumulatedEnergiesMicroJoules[index] >= 0L) {
-                mAccumulatedEnergiesMicroJoules[index] += energyDeltaUJ;
-            } else {
-                Slog.wtf(TAG, "Attempting to add " + energyDeltaUJ + " to unavailable bucket "
-                        + getBucketName(index) + " whose value was "
-                        + mAccumulatedEnergiesMicroJoules[index]);
-            }
+    private void updateEntry(int index, long energyDeltaUJ) {
+        if (mAccumulatedEnergiesMicroJoules[index] >= 0L) {
+            mAccumulatedEnergiesMicroJoules[index] += energyDeltaUJ;
+        } else {
+            Slog.wtf(TAG, "Attempting to add " + energyDeltaUJ + " to unavailable bucket "
+                    + getBucketName(index) + " whose value was "
+                    + mAccumulatedEnergiesMicroJoules[index]);
         }
     }
 

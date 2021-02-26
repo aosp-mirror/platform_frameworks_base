@@ -377,7 +377,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     private void registerWmShellPinnedStackListener(WindowManagerShellWrapper wmShell) {
         try {
-            wmShell.addPinnedStackListener(new PinnedStackListenerForwarder.PinnedStackListener() {
+            wmShell.addPinnedStackListener(new PinnedStackListenerForwarder.PinnedTaskListener() {
                 @Override
                 public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
                     if (DEBUG) {

@@ -38,6 +38,12 @@ import com.android.internal.R;
 
 import org.junit.Test;
 
+/**
+ * Tests for {@link DisplayLayout}.
+ *
+ * Build/Install/Run:
+ *  atest WMShellUnitTests:DisplayLayoutTest
+ */
 @SmallTest
 public class DisplayLayoutTest {
 
@@ -70,18 +76,6 @@ public class DisplayLayoutTest {
     @Test
     public void testRotate() {
         // Basic rotate utility
-        Rect testParent = new Rect(0, 0, 1000, 600);
-        Rect testInner = new Rect(40, 20, 120, 80);
-        Rect testResult = new Rect(testInner);
-        DisplayLayout.rotateBounds(testResult, testParent, 1);
-        assertEquals(new Rect(20, 880, 80, 960), testResult);
-        testResult.set(testInner);
-        DisplayLayout.rotateBounds(testResult, testParent, 2);
-        assertEquals(new Rect(880, 20, 960, 80), testResult);
-        testResult.set(testInner);
-        DisplayLayout.rotateBounds(testResult, testParent, 3);
-        assertEquals(new Rect(520, 40, 580, 120), testResult);
-
         Resources res = createResources(40, 50, false, 30, 40);
         DisplayInfo info = createDisplayInfo(1000, 1500, 60, ROTATION_0);
         DisplayLayout dl = new DisplayLayout(info, res, true, true);

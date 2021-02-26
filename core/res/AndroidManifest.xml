@@ -2641,6 +2641,16 @@
         android:label="@string/permlab_manageProfileAndDeviceOwners"
         android:description="@string/permdesc_manageProfileAndDeviceOwners" />
 
+    <!-- @TestApi @hide Allows an application to reset the record of previous system update freeze
+         periods. -->
+    <permission android:name="android.permission.CLEAR_FREEZE_PERIOD"
+                android:protectionLevel="signature" />
+
+    <!-- @TestApi @hide Allows an application to force available DevicePolicyManager logs to
+         DPC. -->
+    <permission android:name="android.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS"
+                android:protectionLevel="signature" />
+
     <!-- Allows an application to get full detailed information about
          recently running tasks, with full fidelity to the real state.
          @hide -->
@@ -5421,6 +5431,12 @@
          @hide -->
     <permission android:name="android.permission.MANAGE_SENSOR_PRIVACY"
                 android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows sensor privacy changes to be observed.
+         @hide -->
+    <permission android:name="android.permission.OBSERVE_SENSOR_PRIVACY"
+                android:protectionLevel="signature|installer" />
+
     <!-- @SystemApi Permission that protects the {@link Intent#ACTION_REVIEW_ACCESSIBILITY_SERVICES}
          intent.
          @hide -->

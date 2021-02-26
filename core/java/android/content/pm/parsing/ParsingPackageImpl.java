@@ -334,6 +334,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int descriptionRes;
 
     private int fullBackupContent;
+    private int dataExtractionRules;
     private int iconRes;
     private int installLocation = ParsingPackageUtils.PARSE_DEFAULT_INSTALL_LOCATION;
     private int labelRes;
@@ -1015,6 +1016,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.enabled = getBoolean(Booleans.ENABLED);
 //        appInfo.enabledSetting
         appInfo.fullBackupContent = fullBackupContent;
+        appInfo.dataExtractionRulesRes = dataExtractionRules;
         // TODO(b/135203078): See ParsingPackageImpl#getHiddenApiEnforcementPolicy
 //        appInfo.mHiddenApiPolicy
 //        appInfo.hiddenUntilInstalled
@@ -1163,6 +1165,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeInt(this.compatibleWidthLimitDp);
         dest.writeInt(this.descriptionRes);
         dest.writeInt(this.fullBackupContent);
+        dest.writeInt(this.dataExtractionRules);
         dest.writeInt(this.iconRes);
         dest.writeInt(this.installLocation);
         dest.writeInt(this.labelRes);
@@ -1284,6 +1287,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.compatibleWidthLimitDp = in.readInt();
         this.descriptionRes = in.readInt();
         this.fullBackupContent = in.readInt();
+        this.dataExtractionRules = in.readInt();
         this.iconRes = in.readInt();
         this.installLocation = in.readInt();
         this.labelRes = in.readInt();
@@ -1808,6 +1812,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public int getDataExtractionRules() {
+        return dataExtractionRules;
+    }
+
+    @Override
     public int getIconRes() {
         return iconRes;
     }
@@ -2260,6 +2269,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setFullBackupContent(int value) {
         fullBackupContent = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setDataExtractionRules(int value) {
+        dataExtractionRules = value;
         return this;
     }
 

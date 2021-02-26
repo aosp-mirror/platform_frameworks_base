@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.DisplayImeController;
 
 /**
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
@@ -59,11 +60,13 @@ public class SplitLayout {
 
     public SplitLayout(String windowName, Context context, Configuration configuration,
             LayoutChangeListener layoutChangeListener,
-            SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks) {
+            SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
+            DisplayImeController displayImeController) {
         mContext = context.createConfigurationContext(configuration);
         mLayoutChangeListener = layoutChangeListener;
         mSplitWindowManager = new SplitWindowManager(
-                windowName, mContext, configuration, parentContainerCallbacks);
+                windowName, mContext, configuration, parentContainerCallbacks,
+                displayImeController);
 
         mDividerWindowWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);

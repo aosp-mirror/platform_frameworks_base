@@ -46,6 +46,7 @@ import static com.android.server.am.ProcessList.HEAVY_WEIGHT_APP_ADJ;
 import static com.android.server.am.ProcessList.HOME_APP_ADJ;
 import static com.android.server.am.ProcessList.PERCEPTIBLE_APP_ADJ;
 import static com.android.server.am.ProcessList.PERCEPTIBLE_LOW_APP_ADJ;
+import static com.android.server.am.ProcessList.PERCEPTIBLE_MEDIUM_APP_ADJ;
 import static com.android.server.am.ProcessList.PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ;
 import static com.android.server.am.ProcessList.PERSISTENT_PROC_ADJ;
 import static com.android.server.am.ProcessList.PERSISTENT_SERVICE_ADJ;
@@ -873,6 +874,39 @@ public class MockingOomAdjusterTests {
         sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
 
         assertEquals(PERCEPTIBLE_APP_ADJ, app.mState.getSetAdj());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_Service_MediumPerceptible() {
+        {
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+            ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+            bindService(app, client, null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertEquals(PERCEPTIBLE_MEDIUM_APP_ADJ, app.mState.getSetAdj());
+        }
+
+        {
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+            ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+            WindowProcessController wpc = client.getWindowProcessController();
+            doReturn(true).when(wpc).isHeavyWeightProcess();
+            bindService(app, client, null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
+            doReturn(false).when(wpc).isHeavyWeightProcess();
+
+            assertEquals(PERCEPTIBLE_MEDIUM_APP_ADJ, app.mState.getSetAdj());
+        }
     }
 
     @SuppressWarnings("GuardedBy")

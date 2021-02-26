@@ -241,10 +241,12 @@ public final class IncrementalManager {
     }
 
     /**
-     * Checks if device supports V2 calls (e.g. PerUid).
+     * 0 - IncFs is disabled.
+     * 1 - IncFs v1, core features, no PerUid support. Optional in R.
+     * 2 - IncFs v2, PerUid support, fs-verity support. Required in S.
      */
-    public static boolean isV2Available() {
-        return nativeIsV2Available();
+    public static int getVersion() {
+        return nativeIsEnabled() ? nativeIsV2Available() ? 2 : 1 : 0;
     }
 
     /**

@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.READ_FRAME_BUFFER;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
@@ -426,8 +425,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         if (windowingMode > -1) {
-            if (mService.isInLockTaskMode() && windowingMode != WINDOWING_MODE_FULLSCREEN) {
-                throw new UnsupportedOperationException("Not supported to set non-fullscreen"
+            if (mService.isInLockTaskMode()
+                    && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+                throw new UnsupportedOperationException("Not supported to set multi-window"
                         + " windowing mode during locked task mode.");
             }
             container.setWindowingMode(windowingMode);
