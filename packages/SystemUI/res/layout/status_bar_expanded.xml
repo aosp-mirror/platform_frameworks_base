@@ -55,12 +55,14 @@
             android:id="@+id/qs_frame"
             android:layout="@layout/qs_panel"
             android:layout_width="@dimen/qs_panel_width"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:clipToPadding="false"
             android:clipChildren="false"
             systemui:viewType="com.android.systemui.plugins.qs.QS"
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
+            systemui:layout_constraintTop_toTopOf="parent"
+            systemui:layout_constraintBottom_toBottomOf="parent"
         />
 
         <androidx.constraintlayout.widget.Guideline
