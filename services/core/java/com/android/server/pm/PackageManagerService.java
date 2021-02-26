@@ -2604,10 +2604,22 @@ public class PackageManagerService extends IPackageManager.Stub
             final ArrayList<ResolveInfo> matchAllList = new ArrayList<>();
             final ArrayList<ResolveInfo> undefinedList = new ArrayList<>();
 
+            // Blocking instant apps is usually done in applyPostResolutionFilter, but since
+            // domain verification can resolve to a single result, which can be an instant app,
+            // it will then be filtered to an empty list in that method. Instead, do blocking
+            // here so that instant apps can be ignored for approval filtering and a lower
+            // priority result chosen instead.
+            final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled(userId);
+
             final int count = candidates.size();
             // First, try to use approved apps.
             for (int n = 0; n < count; n++) {
                 ResolveInfo info = candidates.get(n);
+                if (blockInstant && (info.isInstantAppAvailable
+                        || isInstantApp(info.activityInfo.packageName, userId))) {
+                    continue;
+                }
+
                 // Add to the special match all list (Browser use case)
                 if (info.handleAllWebDataURI) {
                     matchAllList.add(info);
