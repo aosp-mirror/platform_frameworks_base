@@ -3969,11 +3969,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void addFrameCallbackIfNeeded() {
-        boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
-        boolean hasBlur = mBlurRegionAggregator.hasRegions();
-        boolean reportNextDraw = mReportNextDraw;
+        final boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
+        final boolean reportNextDraw = mReportNextDraw;
+        final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
+        final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!nextDrawUseBlastSync && !reportNextDraw && !hasBlur) {
+        if (!nextDrawUseBlastSync && !reportNextDraw && !needsCallbackForBlur) {
             return;
         }
 
@@ -3981,18 +3982,22 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "Creating frameDrawingCallback"
                     + " nextDrawUseBlastSync=" + nextDrawUseBlastSync
                     + " reportNextDraw=" + reportNextDraw
-                    + " hasBlur=" + hasBlur);
+                    + " hasBlurUpdates=" + hasBlurUpdates);
         }
 
-        // The callback will run on a worker thread pool from the render thread.
+        final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
+                needsCallbackForBlur ?  mBlurRegionAggregator.getBlurRegionsCopyForRT() : null;
+
+        // The callback will run on the render thread.
         HardwareRenderer.FrameDrawingCallback frameDrawingCallback = frame -> {
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Received frameDrawingCallback frameNum=" + frame + "."
                         + " Creating transactionCompleteCallback=" + nextDrawUseBlastSync);
             }
 
-            if (hasBlur) {
-                mBlurRegionAggregator.dispatchBlurTransactionIfNeeded(frame);
+            if (needsCallbackForBlur) {
+                mBlurRegionAggregator
+                    .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates);
             }
 
             if (mBlastBufferQueue == null) {
