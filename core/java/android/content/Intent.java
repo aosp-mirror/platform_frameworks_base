@@ -1787,7 +1787,7 @@ public class Intent implements Parcelable, Cloneable {
      * the package name of the current installed package to be uninstalled.
      * You can optionally supply {@link #EXTRA_RETURN_RESULT}.
      * <p>
-     * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the install
+     * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the uninstall
      * succeeded.
      * <p>
      * Requires {@link android.Manifest.permission#REQUEST_DELETE_PACKAGES}
