@@ -15,6 +15,7 @@
 package com.android.systemui.utils.leaks;
 
 import android.app.admin.DeviceAdminInfo;
+import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.testing.LeakCheck;
 
@@ -65,6 +66,16 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     @Override
     public CharSequence getWorkProfileOrganizationName() {
         return null;
+    }
+
+    @Override
+    public ComponentName getDeviceOwnerComponentOnAnyUser() {
+        return null;
+    }
+
+    @Override
+    public int getDeviceOwnerType(ComponentName admin) {
+        return 0;
     }
 
     @Override
