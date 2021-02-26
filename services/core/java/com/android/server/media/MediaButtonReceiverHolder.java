@@ -29,7 +29,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
-import android.os.PowerWhitelistManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -196,9 +195,8 @@ final class MediaButtonReceiverHolder {
         mediaButtonIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackageName);
 
         final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setTemporaryAppAllowlist(FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS,
-                PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                PowerWhitelistManager.REASON_MEDIA_BUTTON, "");
+        options.setTemporaryAppWhitelistDuration(
+                FGS_STARTS_TEMP_ALLOWLIST_DURATION_MS);
         if (mPendingIntent != null) {
             if (DEBUG_KEY_EVENT) {
                 Log.d(TAG, "Sending " + keyEvent + " to the last known PendingIntent "
