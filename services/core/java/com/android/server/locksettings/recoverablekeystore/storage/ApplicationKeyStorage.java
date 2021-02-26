@@ -21,9 +21,13 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_SERVIC
 import android.annotation.Nullable;
 import android.os.ServiceSpecificException;
 import android.security.Credentials;
+import android.security.KeyStore;
+import android.security.KeyStore2;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.KeyStore;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
+import android.system.keystore2.KeyPermission;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -47,32 +51,37 @@ public class ApplicationKeyStorage {
 
     private static final String APPLICATION_KEY_ALIAS_PREFIX =
             "com.android.server.locksettings.recoverablekeystore/application/";
+    private static final String APPLICATION_KEY_GRANT_PREFIX = "recoverable_key:";
 
     private final KeyStoreProxy mKeyStore;
-    private final KeyStore mKeystoreService;
 
-    public static ApplicationKeyStorage getInstance(KeyStore keystoreService)
+    /**
+     * Creates a new instance.
+     */
+    public static ApplicationKeyStorage getInstance()
             throws KeyStoreException {
         return new ApplicationKeyStorage(
-                new KeyStoreProxyImpl(KeyStoreProxyImpl.getAndLoadAndroidKeyStore()),
-                keystoreService);
+                new KeyStoreProxyImpl(KeyStoreProxyImpl.getAndLoadAndroidKeyStore()));
     }
 
     @VisibleForTesting
-    ApplicationKeyStorage(KeyStoreProxy keyStore, KeyStore keystoreService) {
+    ApplicationKeyStorage(KeyStoreProxy keyStore) {
         mKeyStore = keyStore;
-        mKeystoreService = keystoreService;
     }
 
     /**
-     * Returns grant alias, valid in Applications namespace.
+     * Returns String representation of {@code KeyDescriptor} valid in application's namespace.
      */
     public @Nullable String getGrantAlias(int userId, int uid, String alias) {
-        // Aliases used by {@link KeyStore} are different than used by public API.
-        // {@code USER_PRIVATE_KEY} prefix is used secret keys.
         Log.i(TAG, String.format(Locale.US, "Get %d/%d/%s", userId, uid, alias));
-        String keystoreAlias = Credentials.USER_PRIVATE_KEY + getInternalAlias(userId, uid, alias);
-        return mKeystoreService.grant(keystoreAlias, uid);
+        String keystoreAlias = getInternalAlias(userId, uid, alias);
+        if (useKeyStore2()) {
+            return makeKeystoreEngineGrantString(uid, keystoreAlias);
+        } else {
+            // Aliases used by {@link KeyStore} are different than used by public API.
+            // {@code USER_PRIVATE_KEY} prefix is used secret keys.
+            return KeyStore.getInstance().grant(Credentials.USER_PRIVATE_KEY + keystoreAlias, uid);
+        }
     }
 
     public void setSymmetricKeyEntry(int userId, int uid, String alias, byte[] secretKey)
@@ -117,4 +126,31 @@ public class ApplicationKeyStorage {
     private String getInternalAlias(int userId, int uid, String alias) {
         return APPLICATION_KEY_ALIAS_PREFIX + userId + "/" + uid + "/" + alias;
     }
+
+    private String makeKeystoreEngineGrantString(int uid, String alias) {
+        if (alias == null) {
+            return null;
+        }
+
+        KeyDescriptor key = new KeyDescriptor();
+        key.domain = Domain.APP;
+        key.nspace = KeyProperties.NAMESPACE_APPLICATION;
+        key.alias = alias;
+        key.blob = null;
+
+        int grantAccessVector = KeyPermission.USE | KeyPermission.GET_INFO | KeyPermission.DELETE;
+
+        try {
+            key = KeyStore2.getInstance().grant(key, uid, grantAccessVector);
+        } catch (android.security.KeyStoreException e) {
+            Log.e(TAG, "Failed to get grant for KeyStore key.", e);
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        }
+        return String.format("%s%016X", APPLICATION_KEY_GRANT_PREFIX, key.nspace);
+    }
+
+    private static boolean useKeyStore2() {
+        return android.security.keystore2.AndroidKeyStoreProvider.isInstalled();
+    }
+
 }

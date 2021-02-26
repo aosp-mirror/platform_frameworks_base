@@ -28,6 +28,7 @@ import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -121,12 +122,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -8127,6 +8126,11 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
+     * setPreferredNetworkTypesBitmap is used instead.
      *
      * @param subId the id of the subscription to set the preferred network type for.
      * @param networkType the preferred network type
@@ -8158,6 +8162,11 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
+     * setPreferredNetworkTypesBitmap is used instead.
      *
      * @param networkTypeBitmask The bitmask of preferred network types.
      * @return true on success; false on any failure.
@@ -8183,12 +8192,20 @@ public class TelephonyManager {
      * Set the allowed network types of the device. This is for carrier or privileged apps to
      * enable/disable certain network types on the device. The user preferred network types should
      * be set through {@link #setPreferredNetworkTypeBitmask}.
+     * <p>
+     * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
+     * setPreferredNetworkTypesBitmap is used instead.
      *
      * @param allowedNetworkTypes The bitmask of allowed network types.
      * @return true on success; false on any failure.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
     @SystemApi
     public boolean setAllowedNetworkTypes(@NetworkTypeBitMask long allowedNetworkTypes) {
         try {
@@ -8227,12 +8244,12 @@ public class TelephonyManager {
      * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
-     * including the configuration done through {@link setAllowedNetworkTypes}.
-     * While this API and {@link setAllowedNetworkTypes} is controlling allowed network types
-     * on device, user preference will still be set through {@link #setPreferredNetworkTypeBitmask}.
-     * Thus resultant network type configured on modem will be an intersection of the network types
-     * from setAllowedNetworkTypesForReason, {@link setAllowedNetworkTypes}
-     * and {@link #setPreferredNetworkTypeBitmask}.
+     * including the configuration done through other reasons.
+     * <p>
+     * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
+     * ({@link TelephonyManager#CAPABILITY_ALLOWED_NETWORK_TYPES_USED}) returns true, then
+     * setAllowedNetworkTypesBitmap is used on the radio interface.  Otherwise,
+     * setPreferredNetworkTypesBitmap is used instead.
      *
      * @param reason the reason the allowed network type change is taking place
      * @param allowedNetworkTypes The bitmask of allowed network types.
@@ -8241,6 +8258,9 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
     public void setAllowedNetworkTypesForReason(@AllowedNetworkTypesReason int reason,
             @NetworkTypeBitMask long allowedNetworkTypes) {
         if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
@@ -8278,6 +8298,9 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(
+            enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
+            value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
     public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
             @AllowedNetworkTypesReason int reason) {
         if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
@@ -14356,10 +14379,24 @@ public class TelephonyManager {
     public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE =
             "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
 
+    /**
+     * Indicates whether {@link #setPreferredNetworkType}, {@link
+     * #setPreferredNetworkTypeBitmask}, {@link #setAllowedNetworkTypes} and
+     * {@link #setAllowedNetworkTypesForReason} rely on
+     * setAllowedNetworkTypesBitmap instead of setPreferredNetworkTypesBitmap on the radio
+     * interface.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CAPABILITY_ALLOWED_NETWORK_TYPES_USED =
+            "CAPABILITY_ALLOWED_NETWORK_TYPES_USED";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(prefix = "CAPABILITY_", value = {
             CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
+            CAPABILITY_ALLOWED_NETWORK_TYPES_USED,
     })
     public @interface RadioInterfaceCapability {}
 

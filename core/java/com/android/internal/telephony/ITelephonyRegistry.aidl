@@ -93,5 +93,5 @@ interface ITelephonyRegistry {
     void notifyBarringInfoChanged(int slotIndex, int subId, in BarringInfo barringInfo);
     void notifyPhysicalChannelConfigForSubscriber(in int subId,
             in List<PhysicalChannelConfig> configs);
-    void notifyDataEnabled(boolean enabled, int reason);
+    void notifyDataEnabled(in int phoneId, int subId, boolean enabled, int reason);
 }
