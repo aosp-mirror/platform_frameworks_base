@@ -313,6 +313,10 @@ class ControlsFavoritingActivity @Inject constructor(
             setOnClickListener {
                 val i = Intent().apply {
                     component = ComponentName(context, ControlsProviderSelectorActivity::class.java)
+                    putExtra(
+                        ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
+                        backToGlobalActions
+                    )
                 }
                 if (doneButton.isEnabled) {
                     // The user has made changes
