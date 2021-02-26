@@ -312,9 +312,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private List<PhysicalChannelConfig> mPhysicalChannelConfigs;
 
-    private boolean mIsDataEnabled = false;
+    private boolean[] mIsDataEnabled;
 
-    private int mDataEnabledReason;
+    private int[] mDataEnabledReason;
 
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
@@ -521,6 +521,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
         mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
         mTelephonyDisplayInfos = copyOf(mTelephonyDisplayInfos, mNumPhones);
+        mIsDataEnabled= copyOf(mIsDataEnabled, mNumPhones);
+        mDataEnabledReason = copyOf(mDataEnabledReason, mNumPhones);
 
         // ds -> ss switch.
         if (mNumPhones < oldNumPhones) {
@@ -563,6 +565,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
             mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
+            mIsDataEnabled[i] = false;
+            mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
         }
     }
 
@@ -622,6 +626,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mBarringInfo = new ArrayList<>();
         mTelephonyDisplayInfos = new TelephonyDisplayInfo[numPhones];
         mPhysicalChannelConfigs = new ArrayList<>();
+        mIsDataEnabled = new boolean[numPhones];
+        mDataEnabledReason = new int[numPhones];
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -652,6 +658,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
             mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
+            mIsDataEnabled[i] = false;
+            mDataEnabledReason[i] = TelephonyManager.DATA_ENABLED_REASON_USER;
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1146,7 +1154,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (events.contains(
                         PhoneStateListener.EVENT_DATA_ENABLED_CHANGED)) {
                     try {
-                        r.callback.onDataEnabledChanged(mIsDataEnabled, mDataEnabledReason);
+                        r.callback.onDataEnabledChanged(
+                                mIsDataEnabled[phoneId], mDataEnabledReason[phoneId]);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2358,30 +2367,36 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     /**
      * Notify that the data enabled has changed.
      *
+     * @param phoneId the phone id.
+     * @param subId the subId.
      * @param enabled True if data is enabled, otherwise disabled.
      * @param reason  Reason for data enabled/disabled. See {@code DATA_*} in
      *                {@link TelephonyManager}.
      */
-    public void notifyDataEnabled(boolean enabled,
+    public void notifyDataEnabled(int phoneId, int subId, boolean enabled,
                                   @TelephonyManager.DataEnabledReason int reason) {
         if (!checkNotifyPermission("notifyDataEnabled()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyDataEnabled: enabled=" + enabled + " reason=" + reason);
+            log("notifyDataEnabled: PhoneId=" + phoneId + " subId=" + subId +
+                    " enabled=" + enabled + " reason=" + reason);
         }
 
-        mIsDataEnabled = enabled;
-        mDataEnabledReason = reason;
         synchronized (mRecords) {
-            for (Record r : mRecords) {
-                if (r.matchPhoneStateListenerEvent(
-                        PhoneStateListener.EVENT_DATA_ENABLED_CHANGED)) {
-                    try {
-                        r.callback.onDataEnabledChanged(enabled, reason);
-                    } catch (RemoteException ex) {
-                        mRemoveList.add(r.binder);
+            if (validatePhoneId(phoneId)) {
+                mIsDataEnabled[phoneId] = enabled;
+                mDataEnabledReason[phoneId] = reason;
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.EVENT_DATA_ENABLED_CHANGED)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onDataEnabledChanged(enabled, reason);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
                     }
                 }
             }
@@ -2431,6 +2446,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mOutgoingSmsEmergencyNumber=" + mOutgoingSmsEmergencyNumber[i]);
                 pw.println("mBarringInfo=" + mBarringInfo.get(i));
                 pw.println("mTelephonyDisplayInfo=" + mTelephonyDisplayInfos[i]);
+                pw.println("mIsDataEnabled=" + mIsDataEnabled);
+                pw.println("mDataEnabledReason=" + mDataEnabledReason);
                 pw.decreaseIndent();
             }
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);
@@ -2441,8 +2458,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mDefaultPhoneId=" + mDefaultPhoneId);
             pw.println("mDefaultSubId=" + mDefaultSubId);
             pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs);
-            pw.println("mIsDataEnabled=" + mIsDataEnabled);
-            pw.println("mDataEnabledReason=" + mDataEnabledReason);
 
             pw.decreaseIndent();
 
