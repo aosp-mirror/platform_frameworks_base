@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
@@ -40,6 +42,7 @@ import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
@@ -94,8 +97,12 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private static final String ORGANIZATION_NAME = "organization";
 
+    private static final ComponentName DEVICE_OWNER_COMPONENT = new ComponentName("com.android.foo",
+            "bar");
+
     private String mDisclosureWithOrganization;
     private String mDisclosureGeneric;
+    private String mFinancedDisclosureWithOrganization;
 
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
@@ -156,6 +163,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
         mDisclosureGeneric = mContext.getString(R.string.do_disclosure_generic);
+        mFinancedDisclosureWithOrganization = mContext.getString(
+                R.string.do_financed_disclosure_with_name, ORGANIZATION_NAME);
 
         when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
@@ -164,6 +173,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text_bottom))
                 .thenReturn(mIndicationAreaBottom);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
+
+        when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
+                .thenReturn(DEVICE_OWNER_COMPONENT);
+        when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
 
         mWakeLock = new WakeLockFake();
         mWakeLockBuilder = new WakeLockFake.Builder(mContext);
@@ -369,6 +383,22 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         sendUpdateDisclosureBroadcast();
 
         verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_DISCLOSURE);
+    }
+
+    @Test
+    public void disclosure_deviceOwner_financedDeviceWithOrganizationName() {
+        createController();
+
+        when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
+        when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
+        when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+        sendUpdateDisclosureBroadcast();
+
+        verify(mRotateTextViewController).updateIndication(eq(INDICATION_TYPE_DISCLOSURE),
+                mKeyguardIndicationCaptor.capture(), eq(false));
+        assertThat(mKeyguardIndicationCaptor.getValue().getMessage())
+                .isEqualTo(mFinancedDisclosureWithOrganization);
     }
 
     @Test
