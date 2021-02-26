@@ -40439,7 +40439,7 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.ImsServiceEntitlement {
-    field public static final String KEY_AES_URL_STRING = "imsserviceentitlement.aes_url_string";
+    field public static final String KEY_ENTITLEMENT_SERVER_URL_STRING = "imsserviceentitlement.entitlement_server_url_string";
     field public static final String KEY_PREFIX = "imsserviceentitlement.";
   }
 
