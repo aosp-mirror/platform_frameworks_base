@@ -611,11 +611,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 }
 
                 PackageInstaller.SessionInfo session = mContext.getPackageManager()
-                        .getPackageInstaller().getSessionInfo(rollback.getStagedSessionId());
+                        .getPackageInstaller().getSessionInfo(rollback.getOriginalSessionId());
                 if (session == null || session.isStagedSessionFailed()) {
                     if (rollback.isEnabling()) {
                         iter.remove();
-                        deleteRollback(rollback, "Session " + rollback.getStagedSessionId()
+                        deleteRollback(rollback, "Session " + rollback.getOriginalSessionId()
                                 + " not existed or failed");
                     }
                     continue;
@@ -1307,7 +1307,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
                     installerPackageName, packageSessionIds, getExtensionVersions());
         } else {
-            rollback = mRollbackStore.createNonStagedRollback(rollbackId, userId,
+            rollback = mRollbackStore.createNonStagedRollback(rollbackId, parentSessionId, userId,
                     installerPackageName, packageSessionIds, getExtensionVersions());
         }
 
@@ -1339,7 +1339,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         // We expect mRollbacks to be a very small list; linear search should be plenty fast.
         for (int i = 0; i < mRollbacks.size(); ++i) {
             Rollback rollback = mRollbacks.get(i);
-            if (rollback.getStagedSessionId() == sessionId
+            if (rollback.getOriginalSessionId() == sessionId
                     || rollback.containsSessionId(sessionId)) {
                 return rollback;
             }
