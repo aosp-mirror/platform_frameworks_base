@@ -1960,9 +1960,10 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean isInstantAppInternal(String packageName, @UserIdInt int userId, int callingUid);
         boolean isInstantAppInternalBody(String packageName, @UserIdInt int userId, int callingUid);
         boolean isInstantAppResolutionAllowed(Intent intent, List<ResolveInfo> resolvedActivities,
-                int userId, boolean skipPackageCheck);
+                int userId, boolean skipPackageCheck, int flags);
         boolean isInstantAppResolutionAllowedBody(Intent intent,
-                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck);
+                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck,
+                int flags);
         boolean isPersistentPreferredActivitySetByDpm(Intent intent, int userId,
                 String resolvedType, int flags);
         boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId);
@@ -2321,7 +2322,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
                         intent, resolvedType, flags, userId), userId);
                 addInstant = isInstantAppResolutionAllowed(intent, result, userId,
-                        false /*skipPackageCheck*/);
+                        false /*skipPackageCheck*/, flags);
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
                 xpResolveInfo = queryCrossProfileIntents(
@@ -2386,8 +2387,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (result == null || result.size() == 0) {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
-                    addInstant = isInstantAppResolutionAllowed(
-                                    intent, null /*result*/, userId, true /*skipPackageCheck*/);
+                    addInstant = isInstantAppResolutionAllowed(intent, null /*result*/, userId,
+                            true /*skipPackageCheck*/, flags);
                     if (result == null) {
                         result = new ArrayList<>();
                     }
@@ -2617,7 +2618,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
@@ -2801,7 +2802,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
-                        .approvalLevelForDomain(ps, intent, riTargetUser.targetUserId),
+                        .approvalLevelForDomain(ps, intent, flags, riTargetUser.targetUserId),
                         result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
@@ -3048,7 +3049,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
                                 userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "Instant app approved for intent; pkg: "
@@ -3927,7 +3928,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public boolean isInstantAppResolutionAllowed(
                 Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-                boolean skipPackageCheck) {
+                boolean skipPackageCheck, int flags) {
             if (mInstantAppResolverConnection == null) {
                 return false;
             }
@@ -3960,14 +3961,14 @@ public class PackageManagerService extends IPackageManager.Stub
             // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
             // Or if there's already an ephemeral app installed that handles the action
             return isInstantAppResolutionAllowedBody(intent, resolvedActivities, userId,
-                                                       skipPackageCheck);
+                                                       skipPackageCheck, flags);
         }
 
         // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
         // Or if there's already an ephemeral app installed that handles the action
         public boolean isInstantAppResolutionAllowedBody(
                 Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-                boolean skipPackageCheck) {
+                boolean skipPackageCheck, int flags) {
             final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
             for (int n = 0; n < count; n++) {
                 final ResolveInfo info = resolvedActivities.get(n);
@@ -3976,7 +3977,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
                                 userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
@@ -4675,10 +4676,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         public boolean isInstantAppResolutionAllowedBody(Intent intent,
-                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck) {
+                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck,
+                int flags) {
             synchronized (mLock) {
                 return super.isInstantAppResolutionAllowedBody(intent, resolvedActivities, userId,
-                        skipPackageCheck);
+                        skipPackageCheck, flags);
             }
         }
         public int getPackageUidInternal(String packageName, int flags, int userId,
@@ -9469,20 +9471,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private boolean isInstantAppResolutionAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-            boolean skipPackageCheck) {
+            boolean skipPackageCheck, int flags) {
         return liveComputer().isInstantAppResolutionAllowed(
             intent, resolvedActivities, userId,
-            skipPackageCheck);
+            skipPackageCheck, flags);
     }
 
     // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
     // Or if there's already an ephemeral app installed that handles the action
     private boolean isInstantAppResolutionAllowedBody(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-            boolean skipPackageCheck) {
+            boolean skipPackageCheck, int flags) {
         return liveComputer().isInstantAppResolutionAllowedBody(
             intent, resolvedActivities, userId,
-            skipPackageCheck);
+            skipPackageCheck, flags);
     }
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
@@ -9539,7 +9541,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
                         if (ps != null && hasAnyDomainApproval(mDomainVerificationManager, ps,
-                                intent, userId)) {
+                                intent, flags, userId)) {
                             return ri;
                         }
                     }
@@ -9596,8 +9598,9 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static boolean hasAnyDomainApproval(
             @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
-            @NonNull Intent intent, @UserIdInt int userId) {
-        return manager.approvalLevelForDomain(pkgSetting, intent, userId)
+            @NonNull Intent intent, @PackageManager.ResolveInfoFlags int resolveInfoFlags,
+            @UserIdInt int userId) {
+        return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
                 > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
