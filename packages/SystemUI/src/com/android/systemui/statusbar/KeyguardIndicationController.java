@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -41,6 +42,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
@@ -277,10 +279,7 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
         // avoid calling this method since it has an IPC
         if (whitelistIpcs(this::isOrganizationOwnedDevice)) {
             final CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
-            final CharSequence disclosure =  organizationName != null
-                    ? mContext.getResources().getString(R.string.do_disclosure_with_name,
-                    organizationName)
-                    : mContext.getResources().getText(R.string.do_disclosure_generic);
+            final CharSequence disclosure = getDisclosureText(organizationName);
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_DISCLOSURE,
                     new KeyguardIndication.Builder()
@@ -294,6 +293,22 @@ public class KeyguardIndicationController implements KeyguardStateController.Cal
 
         if (isKeyguardLayoutEnabled()) {
             updateResting();
+        }
+    }
+
+    private CharSequence getDisclosureText(@Nullable CharSequence organizationName) {
+        final Resources packageResources = mContext.getResources();
+        if (organizationName == null) {
+            return packageResources.getText(R.string.do_disclosure_generic);
+        } else if (mDevicePolicyManager.isDeviceManaged()
+                && mDevicePolicyManager.getDeviceOwnerType(
+                mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
+                == DEVICE_OWNER_TYPE_FINANCED) {
+            return packageResources.getString(R.string.do_financed_disclosure_with_name,
+                    organizationName);
+        } else {
+            return packageResources.getString(R.string.do_disclosure_with_name,
+                    organizationName);
         }
     }
 

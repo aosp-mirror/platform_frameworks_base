@@ -1054,6 +1054,9 @@
     <!-- Text on keyguard screen and in Quick Settings footer indicating that user's device belongs to their organization. [CHAR LIMIT=40] -->
     <string name="do_disclosure_with_name">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
 
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that the user's device is provided by the Creditor. [CHAR LIMIT=60] -->
+    <string name="do_financed_disclosure_with_name">This device is provided by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
+
     <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
     <string name="phone_hint">Swipe from icon for phone</string>
 
