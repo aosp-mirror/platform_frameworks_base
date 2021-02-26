@@ -485,10 +485,6 @@ public final class PermissionManager {
      * One for cases where the installer of the package allowlists a permission. This list
      * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER} flag. Can be
      * accessed by pre-installed holders of a dedicated permission or the installer on record.
-     * <li>
-     * One for cases where the system exempts the permission when granting a role. This list
-     * corresponds to the {@link PackageManager#FLAG_PERMISSION_ALLOWLIST_ROLE} flag. Can be
-     * accessed by pre-installed holders of a dedicated permission.
      * </ol>
      *
      * @param packageName the app for which to get allowlisted permissions
@@ -502,7 +498,6 @@ public final class PermissionManager {
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER
-     * @see PackageManager#FLAG_PERMISSION_ALLOWLIST_ROLE
      *
      * @hide Pending API
      */
@@ -549,10 +544,6 @@ public final class PermissionManager {
      * One for cases where the installer of the package allowlists a permission. This list
      * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER} flag. Can be
      * accessed by pre-installed holders of a dedicated permission or the installer on record.
-     * <li>
-     * One for cases where the system exempts the permission when granting a role. This list
-     * corresponds to the {@link PackageManager#FLAG_PERMISSION_ALLOWLIST_ROLE} flag. Can be
-     * accessed by pre-installed holders of a dedicated permission.
      * </ol>
      * <p>
      * You need to specify the allowlists for which to set the allowlisted permissions which will
@@ -570,7 +561,6 @@ public final class PermissionManager {
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER
-     * @see PackageManager#FLAG_PERMISSION_ALLOWLIST_ROLE
      *
      * @hide Pending API
      */
@@ -613,10 +603,6 @@ public final class PermissionManager {
      * One for cases where the installer of the package allowlists a permission. This list
      * corresponds to the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER} flag. Can be
      * accessed by pre-installed holders of a dedicated permission or the installer on record.
-     * <li>
-     * One for cases where the system exempts the permission when granting a role. This list
-     * corresponds to the {@link PackageManager#FLAG_PERMISSION_ALLOWLIST_ROLE} flag. Can be
-     * accessed by pre-installed holders of a dedicated permission.
      * </ol>
      * <p>
      * You need to specify the allowlists for which to set the allowlisted permissions which will
@@ -634,7 +620,6 @@ public final class PermissionManager {
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_UPGRADE
      * @see PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER
-     * @see PackageManager#FLAG_PERMISSION_ALLOWLIST_ROLE
      *
      * @hide Pending API
      */
