@@ -89,6 +89,8 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     private View mEdit;
     @Mock
     private MultiUserSwitch mMultiUserSwitch;
+    @Mock
+    private View mPowerMenuLiteView;
 
     private QSFooterViewController mController;
 
@@ -111,11 +113,12 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         when(mView.findViewById(R.id.build)).thenReturn(mBuildText);
         when(mView.findViewById(android.R.id.edit)).thenReturn(mEdit);
         when(mView.findViewById(R.id.multi_user_switch)).thenReturn(mMultiUserSwitch);
+        when(mView.findViewById(R.id.pm_lite)).thenReturn(mPowerMenuLiteView);
 
         mController = new QSFooterViewController(mView, mUserManager, mUserInfoController,
                 mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
                 new QSDetailDisplayer(), mQuickQSPanelController, mFakeTunerService,
-                mMetricsLogger);
+                mMetricsLogger, false);
 
         mController.init();
     }
