@@ -12295,7 +12295,7 @@ package android.telephony.ims.stub {
   }
 
   public static interface CapabilityExchangeEventListener.OptionsRequestCallback {
-    method public default void onRespondToCapabilityRequest(@NonNull android.telephony.ims.RcsContactUceCapability, boolean);
+    method public void onRespondToCapabilityRequest(@NonNull android.telephony.ims.RcsContactUceCapability, boolean);
     method public void onRespondToCapabilityRequestWithError(@IntRange(from=100, to=699) int, @NonNull String);
   }
 
