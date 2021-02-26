@@ -26,6 +26,10 @@
 
     <color name="notification_default_color_dark">#ddffffff</color>
 
+    <color name="notification_primary_text_color_current">@color/notification_primary_text_color_dark</color>
+    <color name="notification_secondary_text_color_current">@color/notification_secondary_text_color_dark</color>
+    <color name="notification_default_color_current">@color/notification_default_color_dark</color>
+
     <color name="chooser_row_divider">@color/list_divider_color_dark</color>
     <color name="chooser_gradient_background">@color/loading_gradient_background_color_dark</color>
     <color name="chooser_gradient_highlight">@color/loading_gradient_highlight_color_dark</color>
