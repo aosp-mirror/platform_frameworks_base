@@ -1359,6 +1359,7 @@ public class MediaPlayer extends PlayerBase
     private void startImpl() {
         baseStart(0); // unknown device at this point
         stayAwake(true);
+        tryToEnableNativeRoutingCallback();
         _start();
     }
 
@@ -1384,6 +1385,7 @@ public class MediaPlayer extends PlayerBase
         stayAwake(false);
         _stop();
         baseStop();
+        tryToDisableNativeRoutingCallback();
     }
 
     private native void _stop() throws IllegalStateException;
@@ -1525,8 +1527,9 @@ public class MediaPlayer extends PlayerBase
                 native_enableDeviceCallback(true);
                 return true;
             } catch (IllegalStateException e) {
-                // Fail silently as media player state could have changed in between start
-                // and enabling routing callback, return false to indicate not enabled
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "testEnableNativeRoutingCallbacks failed", e);
+                }
             }
         }
         return false;
@@ -1589,7 +1592,7 @@ public class MediaPlayer extends PlayerBase
             Handler handler) {
         synchronized (mRoutingChangeListeners) {
             if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                testEnableNativeRoutingCallbacksLocked();
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
                 mRoutingChangeListeners.put(
                         listener, new NativeRoutingEventHandlerDelegate(this, listener,
                                 handler != null ? handler : mEventHandler));
@@ -3482,9 +3485,6 @@ public class MediaPlayer extends PlayerBase
 
             case MEDIA_STOPPED:
                 {
-                    tryToDisableNativeRoutingCallback();
-                    // FIXME see b/179218630
-                    //baseStop();
                     TimeProvider timeProvider = mTimeProvider;
                     if (timeProvider != null) {
                         timeProvider.onStopped();
@@ -3493,18 +3493,9 @@ public class MediaPlayer extends PlayerBase
                 break;
 
             case MEDIA_STARTED:
-                {
-                    // FIXME see b/179218630
-                    //baseStart(native_getRoutedDeviceId());
-                    tryToEnableNativeRoutingCallback();
-                }
                 // fall through
             case MEDIA_PAUSED:
                 {
-                    // FIXME see b/179218630
-                    //if (msg.what == MEDIA_PAUSED) {
-                    //    basePause();
-                    //}
                     TimeProvider timeProvider = mTimeProvider;
                     if (timeProvider != null) {
                         timeProvider.onPaused(msg.what == MEDIA_PAUSED);

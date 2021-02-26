@@ -3526,8 +3526,9 @@ public class AudioTrack extends PlayerBase
                 native_enableDeviceCallback();
                 return true;
             } catch (IllegalStateException e) {
-                // Fail silently as track state could have changed in between start
-                // and enabling routing callback, return false to indicate not enabled
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "testEnableNativeRoutingCallbacks failed", e);
+                }
             }
         }
         return false;
@@ -3577,7 +3578,7 @@ public class AudioTrack extends PlayerBase
             Handler handler) {
         synchronized (mRoutingChangeListeners) {
             if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                testEnableNativeRoutingCallbacksLocked();
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
                 mRoutingChangeListeners.put(
                         listener, new NativeRoutingEventHandlerDelegate(this, listener,
                                 handler != null ? handler : new Handler(mInitializationLooper)));
