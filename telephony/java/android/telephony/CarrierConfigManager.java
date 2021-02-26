@@ -3676,14 +3676,13 @@ public class CarrierConfigManager {
         /** Prefix of all ImsServiceEntitlement.KEY_* constants. */
         public static final String KEY_PREFIX = "imsserviceentitlement.";
 
-
         /** The address of the entitlement configuration server. */
-        public static final String KEY_AES_URL_STRING = KEY_PREFIX + "aes_url_string";
-
+        public static final String KEY_ENTITLEMENT_SERVER_URL_STRING =
+                KEY_PREFIX + "entitlement_server_url_string";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
-            defaults.putString(KEY_AES_URL_STRING, "");
+            defaults.putString(KEY_ENTITLEMENT_SERVER_URL_STRING, "");
             return defaults;
         }
     }
