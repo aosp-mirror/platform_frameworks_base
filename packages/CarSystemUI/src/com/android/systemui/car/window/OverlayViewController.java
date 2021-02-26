@@ -17,11 +17,16 @@
 package com.android.systemui.car.window;
 
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.WindowInsets;
+
+import androidx.annotation.IdRes;
+
+import com.android.car.ui.FocusArea;
 
 /**
  * Owns a {@link View} that is present in SystemUIOverlayWindow.
@@ -126,6 +131,66 @@ public class OverlayViewController {
     /** Returns the {@link OverlayViewGlobalStateController}. */
     protected final OverlayViewGlobalStateController getOverlayViewGlobalStateController() {
         return mOverlayViewGlobalStateController;
+    }
+
+    /** Returns whether the view controlled by this controller is visible. */
+    public final boolean isVisible() {
+        return mLayout.getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * Returns the ID of the focus area that should receive focus when this view is the
+     * topmost view or {@link View#NO_ID} if there is no focus area.
+     */
+    @IdRes
+    protected int getFocusAreaViewId() {
+        return View.NO_ID;
+    }
+
+    /** Returns whether the view controlled by this controller has rotary focus. */
+    protected final boolean hasRotaryFocus() {
+        return !mLayout.isInTouchMode() && mLayout.hasFocus();
+    }
+
+    /**
+     * Sets whether this view allows rotary focus. This should be set to {@code true} for the
+     * topmost layer in the overlay window and {@code false} for the others.
+     */
+    public void setAllowRotaryFocus(boolean allowRotaryFocus) {
+        if (!isInflated()) {
+            return;
+        }
+
+        if (!(mLayout instanceof ViewGroup)) {
+            return;
+        }
+
+        ViewGroup viewGroup = (ViewGroup) mLayout;
+        viewGroup.setDescendantFocusability(allowRotaryFocus
+                ? ViewGroup.FOCUS_BEFORE_DESCENDANTS
+                : ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+    }
+
+    /**
+     * Refreshes the rotary focus in this view if we are in rotary mode. If the view already has
+     * rotary focus, it leaves the focus alone. Returns {@code true} if a new view was focused.
+     */
+    public boolean refreshRotaryFocusIfNeeded() {
+        if (mLayout.isInTouchMode()) {
+            return false;
+        }
+
+        if (hasRotaryFocus()) {
+            return false;
+        }
+
+        View view = mLayout.findViewById(getFocusAreaViewId());
+        if (view == null || !(view instanceof FocusArea)) {
+            return mLayout.requestFocus();
+        }
+
+        FocusArea focusArea = (FocusArea) view;
+        return focusArea.performAccessibilityAction(ACTION_FOCUS, /* arguments= */ null);
     }
 
     /**

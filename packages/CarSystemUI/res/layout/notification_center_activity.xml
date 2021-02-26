@@ -22,10 +22,6 @@
     android:layout_height="match_parent"
     android:background="@color/notification_shade_background_color">
 
-    <com.android.car.ui.FocusParkingView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <View
         android:id="@+id/glass_pane"
         android:layout_width="match_parent"
@@ -37,20 +33,15 @@
         app:layout_constraintTop_toTopOf="parent"
     />
 
-    <com.android.car.ui.FocusArea
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notifications"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/notification_shade_list_padding_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/notifications"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="@dimen/notification_shade_list_padding_bottom"/>
-    </com.android.car.ui.FocusArea>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <include layout="@layout/notification_handle_bar"/>
 
