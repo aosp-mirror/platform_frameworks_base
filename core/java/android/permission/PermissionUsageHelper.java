@@ -57,6 +57,8 @@ import android.util.ArraySet;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -184,6 +186,15 @@ public class PermissionUsageHelper {
         return shouldShowPermissionsHub() && getUserContext(user).getPackageManager()
                 .checkPermission(Manifest.permission.MANAGE_APP_PREDICTIONS, packageName)
                 == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isSpeechRecognizerUsage(String op, String packageName) {
+        if (!OPSTR_RECORD_AUDIO.equals(op)) {
+            return false;
+        }
+
+        return packageName.equals(
+                mContext.getString(R.string.config_systemSpeechRecognizer));
     }
 
     /**
@@ -317,7 +328,8 @@ public class PermissionUsageHelper {
                     if (packageName.equals(SYSTEM_PKG)
                             || (!isUserSensitive(packageName, user, op)
                             && !isLocationProvider(packageName, user)
-                            && !isAppPredictor(packageName, user))) {
+                            && !isAppPredictor(packageName, user))
+                            && !isSpeechRecognizerUsage(op, packageName)) {
                         continue;
                     }
 
