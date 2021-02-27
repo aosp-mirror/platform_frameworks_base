@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ట్రాన్స్‌కోడింగ్ ఆటోమేటిక్ సెట్టింగ్‌లను ఓవర్‌రైడ్ చేయండి"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ట్రాన్స్‌కోడింగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="transcode_default" msgid="3784803084573509491">"యాప్‌లు ఆధునిక ఫార్మాట్‌లకు సపోర్ట్ చేస్తాయని అనుకోండి"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"ట్రాన్స్‌కోడింగ్ నోటిఫికేషన్‌లను చూపండి"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"అమలులో ఉన్న సేవలు"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సేవలను వీక్షించండి మరియు నియంత్రించండి"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>

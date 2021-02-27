@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ට්‍රාන්ස්කෝඩින් පෙරනිමි ප්‍රතික්ෂේප කරන්න"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ට්‍රාන්ස්කෝඩින් සබල කරන්න"</string>
     <string name="transcode_default" msgid="3784803084573509491">"යෙදුම් නවීන ආකෘති සඳහා සහාය දක්වයි යැයි උපකල්පනය කරමු"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"ට්‍රාන්ස්කෝඩින් දැනුම්දීම් පෙන්වන්න"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ධාවනය වන සේවා"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"දැනට ධාවනය වන සේවා බලන්න සහ පාලනය කරන්න"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ක්‍රියාත්මක කිරීම"</string>

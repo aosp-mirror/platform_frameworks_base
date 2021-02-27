@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Anular los valores predeterminados de transcodificación"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Habilitar la transcodificación"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Suponer que las apps admiten formatos modernos"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificaciones de transcodificación"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"En ejecución"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ver y controlar servicios actuales en ejecución"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementación de WebView"</string>
