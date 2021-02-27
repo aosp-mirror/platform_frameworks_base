@@ -3440,6 +3440,10 @@ package android.hardware.lights {
     field @Deprecated public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
   }
 
+  public static final class LightsRequest.Builder {
+    method @Deprecated @NonNull public android.hardware.lights.LightsRequest.Builder setLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
+  }
+
 }
 
 package android.hardware.location {
