@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Prepísať predvolené nastavenia prekódovania"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Povoliť prekódovanie"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Prepdokladať, že aplikácie podporujú moderné formáty"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Zobraziť upozornenia prekódovania"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Spustené služby"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Zobrazovať a riadiť aktuálne spustené služby"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementácia WebView"</string>
