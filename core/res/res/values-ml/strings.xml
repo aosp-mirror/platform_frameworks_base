@@ -685,10 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"അനുമതി ഉപയോഗം കാണാൻ ആരംഭിക്കുക"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ഒരു ആപ്പിനുള്ള അനുമതി ഉപയോഗം ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
-    <skip />
-    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
-    <skip />
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ഉയർന്ന സാം‍പ്ലിംഗ് റേറ്റിൽ സെൻസർ ഡാറ്റ ആക്സസ് ചെയ്യുക"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-നേക്കാൾ ഉയർന്ന റേറ്റിൽ സെൻസർ ഡാറ്റ സാമ്പിൾ ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1873,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS അഭ്യർത്ഥന, വീഡിയോ കോളിലേക്ക് മാറ്റി"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS അഭ്യർത്ഥന, USSD അഭ്യർത്ഥനയിലേക്ക് മാറ്റി"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"പുതിയ SS അഭ്യർത്ഥനയിലേക്ക് മാറ്റി"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ഫിഷിംഗ് മുന്നറിയിപ്പ്"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"മുന്നറിയിപ്പ് നൽകി"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"വികസിപ്പിക്കുക"</string>

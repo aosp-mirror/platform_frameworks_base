@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS 요청이 화상 통화로 변경됨"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS 요청이 USSD 요청으로 변경됨"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"새 SS 요청으로 변경됨"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"피싱 알림"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"직장 프로필"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"알림 전송됨"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"펼치기"</string>
