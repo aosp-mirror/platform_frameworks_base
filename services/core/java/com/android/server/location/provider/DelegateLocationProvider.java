@@ -24,6 +24,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.concurrent.Executor;
 
 /**
@@ -40,7 +41,7 @@ class DelegateLocationProvider extends AbstractLocationProvider
     private boolean mInitialized = false;
 
     DelegateLocationProvider(Executor executor, AbstractLocationProvider delegate) {
-        super(executor, null, null, null);
+        super(executor, null, null, Collections.emptySet());
 
         mDelegate = delegate;
     }
