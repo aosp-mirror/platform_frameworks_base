@@ -75,8 +75,7 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
     @Override
     public SearchResultsShim search(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
-        SearchResults searchResults =
-                mGlobalSearchSession.search(queryExpression, searchSpec, mExecutor);
+        SearchResults searchResults = mGlobalSearchSession.search(queryExpression, searchSpec);
         return new SearchResultsShimImpl(searchResults, mExecutor);
     }
 

@@ -109,7 +109,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             new PeopleSpaceTile
                     .Builder(SHORTCUT_ID, "username", ICON, new Intent())
                     .setPackageName(TEST_PACKAGE_A)
-                    .setUid(0)
+                    .setUserHandle(new UserHandle(1))
                     .setNotificationKey(NOTIFICATION_KEY + "1")
                     .setNotificationContent(NOTIFICATION_CONTENT)
                     .setNotificationDataUri(URI)

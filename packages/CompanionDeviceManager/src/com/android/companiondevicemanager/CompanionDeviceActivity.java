@@ -143,7 +143,7 @@ public class CompanionDeviceActivity extends Activity {
     }
 
     static void notifyDevicesChanged() {
-        if (sInstance != null && !sInstance.isFinishing()) {
+        if (sInstance != null && sInstance.mDevicesAdapter != null && !sInstance.isFinishing()) {
             sInstance.mDevicesAdapter.notifyDataSetChanged();
         }
     }

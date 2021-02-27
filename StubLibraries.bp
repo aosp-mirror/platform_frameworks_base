@@ -58,6 +58,9 @@ stubs_defaults {
         local_include_dirs: [
             "apex/media/aidl/stable",
             "media/aidl",
+            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
+            // frameworks/base
+            "packages/Connectivity/framework/aidl-export",
             "telephony/java",
         ],
         include_dirs: ["frameworks/av/aidl"],
@@ -310,6 +313,7 @@ java_library_static {
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-appsearch.stubs",
+        "framework-connectivity.stubs",
         "framework-graphics.stubs",
         "framework-media.stubs",
         "framework-mediaprovider.stubs",
@@ -334,6 +338,7 @@ java_library_static {
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-appsearch.stubs.system",
+        "framework-connectivity.stubs.system",
         "framework-graphics.stubs.system",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",
@@ -374,6 +379,7 @@ java_library_static {
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-appsearch.stubs.system",
+        "framework-connectivity.stubs.system",
         "framework-graphics.stubs.system",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",

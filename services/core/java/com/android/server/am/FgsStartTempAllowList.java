@@ -18,24 +18,53 @@ package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
+import android.annotation.Nullable;
+import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.SystemClock;
 import android.util.Slog;
-import android.util.SparseLongArray;
+import android.util.SparseArray;
 
 /**
  * List of uids that are temporarily allowed to start FGS from background.
  */
 final class FgsStartTempAllowList {
     private static final int MAX_SIZE = 100;
+
+    public static final class TempFgsAllowListEntry {
+        final long mExpirationTime;
+        final long mDuration;
+        final @ReasonCode int mReasonCode;
+        final String mReason;
+        final int mCallingUid;
+
+        TempFgsAllowListEntry(long expirationTime, long duration, @ReasonCode int reasonCode,
+                String reason, int callingUid) {
+            mExpirationTime = expirationTime;
+            mDuration = duration;
+            mReasonCode = reasonCode;
+            mReason = reason;
+            mCallingUid = callingUid;
+        }
+    }
+
     /**
-     * The key is the uid, the value is expiration elapse time in ms of this temp-allowed uid.
+     * The key is the uid, the value is a TempAllowListEntry.
      */
-    private final SparseLongArray mTempAllowListFgs = new SparseLongArray();
+    private final SparseArray<TempFgsAllowListEntry> mTempAllowListFgs = new SparseArray<>();
 
     FgsStartTempAllowList() {
     }
 
-    void add(int uid, long duration) {
+    /**
+     * Add a uid and its duration with reason into the FGS temp-allowlist.
+     * @param uid
+     * @param duration temp-allowlisted duration in milliseconds.
+     * @param reason A human-readable reason for logging purposes.
+     * @param callingUid the callingUid that setup this temp allowlist, only valid when param adding
+     *                   is true.
+     */
+    void add(int uid, long duration, @ReasonCode int reasonCode, @Nullable String reason,
+            int callingUid) {
         if (duration <= 0) {
             Slog.e(TAG_AM, "FgsStartTempAllowList bad duration:" + duration + " uid: "
                     + uid);
@@ -48,26 +77,36 @@ final class FgsStartTempAllowList {
         }
         final long now = SystemClock.elapsedRealtime();
         for (int index = mTempAllowListFgs.size() - 1; index >= 0; index--) {
-            if (mTempAllowListFgs.valueAt(index) < now) {
+            if (mTempAllowListFgs.valueAt(index).mExpirationTime < now) {
                 mTempAllowListFgs.removeAt(index);
             }
         }
-        final long existingExpirationTime = mTempAllowListFgs.get(uid, -1);
+        final TempFgsAllowListEntry existing = mTempAllowListFgs.get(uid);
         final long expirationTime = now + duration;
-        if (existingExpirationTime == -1 || existingExpirationTime < expirationTime) {
-            mTempAllowListFgs.put(uid, expirationTime);
+        if (existing == null || existing.mExpirationTime < expirationTime) {
+            mTempAllowListFgs.put(uid,
+                    new TempFgsAllowListEntry(expirationTime, duration, reasonCode,
+                            reason == null ? "" : reason, callingUid));
         }
     }
 
-    boolean isAllowed(int uid) {
+    /**
+     * Is this uid temp-allowlisted to start FGS.
+     * @param uid
+     * @return If uid is in the temp-allowlist, return the {@link TempFgsAllowListEntry}; If not in
+     *         temp-allowlist, return null.
+     */
+    @Nullable
+    TempFgsAllowListEntry getAllowedDurationAndReason(int uid) {
         final int index = mTempAllowListFgs.indexOfKey(uid);
         if (index < 0) {
-            return false;
-        } else if (mTempAllowListFgs.valueAt(index) < SystemClock.elapsedRealtime()) {
+            return null;
+        } else if (mTempAllowListFgs.valueAt(index).mExpirationTime
+                < SystemClock.elapsedRealtime()) {
             mTempAllowListFgs.removeAt(index);
-            return false;
+            return null;
         } else {
-            return true;
+            return mTempAllowListFgs.valueAt(index);
         }
     }
 
