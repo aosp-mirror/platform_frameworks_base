@@ -16,30 +16,42 @@
 
 package com.android.internal.widget;
 
-import static com.android.internal.widget.ColoredIconHelper.applyGrayTint;
-
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import com.android.internal.R;
+
+import java.util.Locale;
 
 /**
  * An expand button in a notification
  */
 @RemoteViews.RemoteView
-public class NotificationExpandButton extends ImageView {
+public class NotificationExpandButton extends FrameLayout {
 
-    private final int mMinTouchTargetSize;
+    private View mPillView;
+    private TextView mNumberView;
+    private ImageView mIconView;
     private boolean mExpanded;
-    private int mOriginalNotificationColor;
+    private int mNumber;
+    private int mDefaultPillColor;
+    private int mDefaultTextColor;
+    private int mHighlightPillColor;
+    private int mHighlightTextColor;
+    private boolean mDisallowColor;
 
     public NotificationExpandButton(Context context) {
         this(context, null, 0, 0);
@@ -57,7 +69,14 @@ public class NotificationExpandButton extends ImageView {
     public NotificationExpandButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mMinTouchTargetSize = (int) (getResources().getDisplayMetrics().density * 48 + 0.5);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mPillView = findViewById(R.id.expand_button_pill);
+        mNumberView = findViewById(R.id.expand_button_number);
+        mIconView = findViewById(R.id.expand_button_icon);
     }
 
     /**
@@ -72,7 +91,6 @@ public class NotificationExpandButton extends ImageView {
         } else {
             super.getBoundsOnScreen(outRect, clipToParent);
         }
-        extendRectToMinTouchSize(outRect);
     }
 
     /**
@@ -89,32 +107,12 @@ public class NotificationExpandButton extends ImageView {
         return super.pointInView(localX, localY, slop);
     }
 
-    @RemotableViewMethod
-    public void setOriginalNotificationColor(int color) {
-        mOriginalNotificationColor = color;
-    }
-
-    public int getOriginalNotificationColor() {
-        return mOriginalNotificationColor;
-    }
-
     /**
-     * Set the button's color filter: to gray if true, otherwise colored.
-     * If this button has no original color, this has no effect.
+     * Disable the use of the accent colors for this view, if true.
      */
     public void setGrayedOut(boolean shouldApply) {
-        applyGrayTint(mContext, getDrawable(), shouldApply, mOriginalNotificationColor);
-    }
-
-    private void extendRectToMinTouchSize(Rect rect) {
-        if (rect.width() < mMinTouchTargetSize) {
-            rect.left = rect.centerX() - mMinTouchTargetSize / 2;
-            rect.right = rect.left + mMinTouchTargetSize;
-        }
-        if (rect.height() < mMinTouchTargetSize) {
-            rect.top = rect.centerY() - mMinTouchTargetSize / 2;
-            rect.bottom = rect.top + mMinTouchTargetSize;
-        }
+        mDisallowColor = shouldApply;
+        updateColors();
     }
 
     @Override
@@ -129,10 +127,10 @@ public class NotificationExpandButton extends ImageView {
     @RemotableViewMethod
     public void setExpanded(boolean expanded) {
         mExpanded = expanded;
-        updateExpandButton();
+        updateExpandedState();
     }
 
-    private void updateExpandButton() {
+    private void updateExpandedState() {
         int drawableId;
         int contentDescriptionId;
         if (mExpanded) {
@@ -142,8 +140,87 @@ public class NotificationExpandButton extends ImageView {
             drawableId = R.drawable.ic_expand_notification;
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
         }
-        setImageDrawable(getContext().getDrawable(drawableId));
-        setColorFilter(mOriginalNotificationColor);
         setContentDescription(mContext.getText(contentDescriptionId));
+        mIconView.setImageDrawable(getContext().getDrawable(drawableId));
+
+        // changing the expanded state can affect the number display
+        updateNumber();
+    }
+
+    private void updateNumber() {
+        if (shouldShowNumber()) {
+            CharSequence text = mNumber >= 100
+                    ? getResources().getString(R.string.unread_convo_overflow, 99)
+                    : String.format(Locale.getDefault(), "%d", mNumber);
+            mNumberView.setText(text);
+            mNumberView.setVisibility(VISIBLE);
+        } else {
+            mNumberView.setVisibility(GONE);
+        }
+
+        // changing number can affect the color
+        updateColors();
+    }
+
+    private void updateColors() {
+        if (shouldShowNumber() && !mDisallowColor) {
+            mPillView.setBackgroundTintList(ColorStateList.valueOf(mHighlightPillColor));
+            mIconView.setColorFilter(mHighlightTextColor);
+            mNumberView.setTextColor(mHighlightTextColor);
+        } else {
+            mPillView.setBackgroundTintList(ColorStateList.valueOf(mDefaultPillColor));
+            mIconView.setColorFilter(mDefaultTextColor);
+            mNumberView.setTextColor(mDefaultTextColor);
+        }
+    }
+
+    private boolean shouldShowNumber() {
+        return !mExpanded && mNumber > 1;
+    }
+
+    /**
+     * Set the color used for the expand chevron and the text
+     */
+    @RemotableViewMethod
+    public void setDefaultTextColor(int color) {
+        mDefaultTextColor = color;
+        updateColors();
+    }
+
+    /**
+     * Sets the color used to for the expander when there is no number shown
+     */
+    @RemotableViewMethod
+    public void setDefaultPillColor(@ColorInt int color) {
+        mDefaultPillColor = color;
+        updateColors();
+    }
+
+    /**
+     * Set the color used for the expand chevron and the text
+     */
+    @RemotableViewMethod
+    public void setHighlightTextColor(int color) {
+        mHighlightTextColor = color;
+        updateColors();
+    }
+
+    /**
+     * Sets the color used to highlight the expander when there is a number shown
+     */
+    @RemotableViewMethod
+    public void setHighlightPillColor(@ColorInt int color) {
+        mHighlightPillColor = color;
+        updateColors();
+    }
+
+    /**
+     * Sets the number shown inside the expand button.
+     * This only appears when the expand button is collapsed, and when greater than 1.
+     */
+    @RemotableViewMethod
+    public void setNumber(int number) {
+        mNumber = number;
+        updateNumber();
     }
 }

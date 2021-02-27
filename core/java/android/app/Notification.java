@@ -5326,11 +5326,17 @@ public class Notification implements Parcelable
         }
 
         private void bindExpandButton(RemoteViews contentView, StandardTemplateParams p) {
-            int color = isColorized(p) ? getPrimaryTextColor(p) : getSecondaryTextColor(p);
-            contentView.setDrawableTint(R.id.expand_button, false, color,
-                    PorterDuff.Mode.SRC_ATOP);
-            contentView.setInt(R.id.expand_button, "setOriginalNotificationColor",
-                    color);
+            int primaryColor = getPrimaryTextColor(p);
+            // TODO(b/181048615): Use 'protection' color from the new palette
+            int protectionColor = primaryColor & 0x44ffffff;
+            int opaqueProtectionColor =
+                    ContrastColorUtil.compositeColors(protectionColor, resolveBackgroundColor(p));
+            contentView.setInt(R.id.expand_button, "setDefaultTextColor", primaryColor);
+            contentView.setInt(R.id.expand_button, "setDefaultPillColor", opaqueProtectionColor);
+            contentView.setInt(
+                    R.id.expand_button, "setHighlightTextColor", resolveBackgroundColor(p));
+            contentView.setInt(
+                    R.id.expand_button, "setHighlightPillColor", resolveContrastColor(p));
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView,
@@ -9373,7 +9379,6 @@ public class Notification implements Parcelable
                     .hideLargeIcon(true)
                     .text(text)
                     .summaryText(mBuilder.processLegacyText(mVerificationText));
-            // TODO(b/179178086): hide the snooze button
             RemoteViews contentView = mBuilder.applyStandardTemplate(
                     mBuilder.getCallLayoutResource(), p, null /* result */);
 
