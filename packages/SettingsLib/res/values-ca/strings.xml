@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Substitueix els valors predeterminats de la transcodificació"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Activa la transcodificació"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Assumeix que les aplicacions són compatibles amb formats moderns"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Mostra les notificacions de transcodificació"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualitza i controla els serveis en execució"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>

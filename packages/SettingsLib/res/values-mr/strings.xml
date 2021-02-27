@@ -404,6 +404,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ट्रान्सकोडिंग डीफॉल्ट ओव्हरराइड करा"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ट्रान्सकोडिंग सुरू करा"</string>
     <string name="transcode_default" msgid="3784803084573509491">"असे गृहीत धरा की, ॲप्स आधुनिक फॉरमॅटना सपोर्ट करतात"</string>
+    <!-- no translation found for transcode_notification (5560515979793436168) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"सुरू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"सध्या सुरू असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबदृश्य अंमलबजावणी"</string>
