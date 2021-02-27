@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Отфрли стандардни вредности за транскодирање"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Овозможи транскодирање"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Претпостави дека апликациите поддржуваат модерни формати"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Прикажувај известувања за транскодирање"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Погледнете и контролирајте услуги што се моментално активни"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Воведување WebView"</string>
