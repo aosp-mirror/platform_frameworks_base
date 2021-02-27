@@ -1186,7 +1186,7 @@
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Жаңыртууну издөө"</string>
     <string name="smv_application" msgid="3775183542777792638">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу (<xliff:g id="PROCESS">%2$s</xliff:g> процесси) өз алдынча иштеткен StrictMode саясатын бузду."</string>
     <string name="smv_process" msgid="1398801497130695446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>
-    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңыртылууда…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Телефон жаңырууда…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Планшет жаңыртылууда…"</string>
     <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Түзмөк жаңыртылууда…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"Телефон күйгүзүлүүдө…"</string>
@@ -1196,7 +1196,7 @@
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Сактагыч ыңгайлаштырылууда."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Тутумду жаңыртуу аяктоодо…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> жаңыртылууда..."</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо ыңгайлаштырылууда."</string>
+    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо оптималдаштырылууда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> даярдалууда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
