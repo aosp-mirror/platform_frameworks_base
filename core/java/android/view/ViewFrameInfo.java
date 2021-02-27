@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.FrameInfo;
+import android.os.IInputConstants;
 
 /**
  * The timing information of events taking place in ViewRootImpl
@@ -24,32 +25,14 @@ import android.graphics.FrameInfo;
  */
 public class ViewFrameInfo {
     public long drawStart;
-    public long oldestInputEventTime; // the time of the oldest input event consumed for this frame
-    public long newestInputEventTime; // the time of the newest input event consumed for this frame
+
+
     // Various flags set to provide extra metadata about the current frame. See flag definitions
     // inside FrameInfo.
     // @see android.graphics.FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED
     public long flags;
 
-    /**
-     * Update the oldest event time.
-     * @param eventTime the time of the input event
-     */
-    public void updateOldestInputEvent(long eventTime) {
-        if (oldestInputEventTime == 0 || eventTime < oldestInputEventTime) {
-            oldestInputEventTime = eventTime;
-        }
-    }
-
-    /**
-     * Update the newest event time.
-     * @param eventTime the time of the input event
-     */
-    public void updateNewestInputEvent(long eventTime) {
-        if (newestInputEventTime == 0 || eventTime > newestInputEventTime) {
-            newestInputEventTime = eventTime;
-        }
-    }
+    private int mInputEventId;
 
     /**
      * Populate the missing fields using the data from ViewFrameInfo
@@ -58,8 +41,7 @@ public class ViewFrameInfo {
     public void populateFrameInfo(FrameInfo frameInfo) {
         frameInfo.frameInfo[FrameInfo.FLAGS] |= flags;
         frameInfo.frameInfo[FrameInfo.DRAW_START] = drawStart;
-        // TODO(b/169866723): Use InputEventAssigner
-        frameInfo.frameInfo[FrameInfo.INPUT_EVENT_ID] = newestInputEventTime;
+        frameInfo.frameInfo[FrameInfo.INPUT_EVENT_ID] = mInputEventId;
     }
 
     /**
@@ -67,8 +49,7 @@ public class ViewFrameInfo {
      */
     public void reset() {
         drawStart = 0;
-        oldestInputEventTime = 0;
-        newestInputEventTime = 0;
+        mInputEventId = IInputConstants.INVALID_INPUT_EVENT_ID;
         flags = 0;
     }
 
@@ -77,5 +58,13 @@ public class ViewFrameInfo {
      */
     public void markDrawStart() {
         drawStart = System.nanoTime();
+    }
+
+    /**
+     * Assign the value for input event id
+     * @param eventId the id of the input event
+     */
+    public void setInputEvent(int eventId) {
+        mInputEventId = eventId;
     }
 }

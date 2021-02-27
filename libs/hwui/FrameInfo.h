@@ -80,6 +80,10 @@ public:
     explicit UiFrameInfoBuilder(int64_t* buffer) : mBuffer(buffer) {
         memset(mBuffer, 0, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
         set(FrameInfoIndex::FrameTimelineVsyncId) = INVALID_VSYNC_ID;
+        // The struct is zeroed by memset above. That also sets FrameInfoIndex::InputEventId to
+        // equal android::os::IInputConstants::INVALID_INPUT_EVENT_ID == 0.
+        // Therefore, we can skip setting the value for InputEventId here. If the value for
+        // INVALID_INPUT_EVENT_ID changes, this code would have to be updated, as well.
         set(FrameInfoIndex::FrameDeadline) = std::numeric_limits<int64_t>::max();
     }
 
