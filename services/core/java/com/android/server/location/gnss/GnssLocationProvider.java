@@ -103,6 +103,7 @@ import com.android.server.location.provider.AbstractLocationProvider;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -372,7 +373,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public GnssLocationProvider(Context context, Injector injector, GnssNative gnssNative,
             GnssMetrics gnssMetrics) {
         super(FgThread.getExecutor(), CallerIdentity.fromContext(context), PROPERTIES,
-                /*locationTags*/ null);
+                Collections.emptySet());
 
         mContext = context;
         mGnssNative = gnssNative;

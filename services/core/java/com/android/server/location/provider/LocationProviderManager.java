@@ -2265,8 +2265,8 @@ public class LocationProviderManager extends
             onEnabledChanged(UserHandle.USER_ALL);
         }
 
-        if (!Objects.equals(oldState.locationTags, newState.locationTags)) {
-            if (mOnLocationTagsChangeListener != null) {
+        if (mOnLocationTagsChangeListener != null) {
+            if (!oldState.extraAttributionTags.equals(newState.extraAttributionTags)) {
                 if (oldState.identity != null) {
                     FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             OnProviderLocationTagsChangeListener::onLocationTagsChanged,
@@ -2280,7 +2280,7 @@ public class LocationProviderManager extends
                             OnProviderLocationTagsChangeListener::onLocationTagsChanged,
                             mOnLocationTagsChangeListener, new LocationTagInfo(
                                     newState.identity.getUid(), newState.identity.getPackageName(),
-                                    newState.locationTags)
+                                    newState.extraAttributionTags)
                             ));
                 }
             }

@@ -1943,7 +1943,7 @@ public class LocationManager {
      *
      * @param provider the provider name
      * @param properties the provider properties
-     * @param locationTags the attribution tags for accessing location from the provider
+     * @param extraAttributionTags additional attribution tags associated with this provider
      *
      * @throws IllegalArgumentException if provider is null
      * @throws IllegalArgumentException if properties is null
@@ -1952,13 +1952,14 @@ public class LocationManager {
      * allowed} for your app.
      */
     public void addTestProvider(@NonNull String provider, @NonNull ProviderProperties properties,
-            @NonNull Set<String> locationTags) {
+            @NonNull Set<String> extraAttributionTags) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
         Preconditions.checkArgument(properties != null, "invalid null properties");
-        Preconditions.checkArgument(locationTags != null, "invalid null location tags");
+        Preconditions.checkArgument(extraAttributionTags != null,
+                "invalid null extra attribution tags");
 
         try {
-            mService.addTestProvider(provider, properties, new ArrayList<>(locationTags),
+            mService.addTestProvider(provider, properties, new ArrayList<>(extraAttributionTags),
                     mContext.getOpPackageName(), mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

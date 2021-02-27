@@ -26,6 +26,8 @@ import com.android.modules.utils.BasicShellCommandHandler;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -50,15 +52,11 @@ class LocationShellCommand extends BasicShellCommandHandler {
 
         switch (cmd) {
             case "is-location-enabled": {
-                int userId = parseUserId();
-                boolean enabled = mService.isLocationEnabledForUser(userId);
-                getOutPrintWriter().println(enabled);
+                handleIsLocationEnabled();
                 return 0;
             }
             case "set-location-enabled": {
-                int userId = parseUserId();
-                boolean enabled = Boolean.parseBoolean(getNextArgRequired());
-                mService.setLocationEnabledForUser(enabled, userId);
+                handleSetLocationEnabled();
                 return 0;
             }
             case "providers": {
@@ -73,36 +71,23 @@ class LocationShellCommand extends BasicShellCommandHandler {
     private int parseProvidersCommand(String cmd) {
         switch (cmd) {
             case "add-test-provider": {
-                String provider = getNextArgRequired();
-                ProviderProperties properties = parseTestProviderProviderProperties();
-                mService.addTestProvider(provider, properties, /*locationTags*/ null,
-                        mContext.getOpPackageName(), mContext.getFeatureId());
+                handleAddTestProvider();
                 return 0;
             }
             case "remove-test-provider": {
-                String provider = getNextArgRequired();
-                mService.removeTestProvider(provider, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                handleRemoveTestProvider();
                 return 0;
             }
             case "set-test-provider-enabled": {
-                String provider = getNextArgRequired();
-                boolean enabled = Boolean.parseBoolean(getNextArgRequired());
-                mService.setTestProviderEnabled(provider, enabled, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                handleSetTestProviderEnabled();
                 return 0;
             }
             case "set-test-provider-location": {
-                String provider = getNextArgRequired();
-                Location location = parseTestProviderLocation(provider);
-                mService.setTestProviderLocation(provider, location, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                handleSetTestProviderLocation();
                 return 0;
             }
             case "send-extra-command": {
-                String provider = getNextArgRequired();
-                String command = getNextArgRequired();
-                mService.sendExtraCommand(provider, command, null);
+                handleSendExtraCommand();
                 return 0;
             }
             default:
@@ -110,21 +95,47 @@ class LocationShellCommand extends BasicShellCommandHandler {
         }
     }
 
-    private int parseUserId() {
-        final String option = getNextOption();
-        if (option != null) {
-            if (option.equals("--user")) {
-                return UserHandle.parseUserArg(getNextArgRequired());
-            } else {
-                throw new IllegalArgumentException(
-                        "Expected \"--user\" option, but got \"" + option + "\" instead");
-            }
-        }
+    private void handleIsLocationEnabled() {
+        int userId = UserHandle.USER_CURRENT_OR_SELF;
 
-        return UserHandle.USER_CURRENT_OR_SELF;
+        do {
+            String option = getNextOption();
+            if (option == null) {
+                break;
+            }
+            if ("--user".equals(option)) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + option);
+            }
+        } while (true);
+
+        getOutPrintWriter().println(mService.isLocationEnabledForUser(userId));
     }
 
-    private ProviderProperties parseTestProviderProviderProperties() {
+    private void handleSetLocationEnabled() {
+        boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+
+        int userId = UserHandle.USER_CURRENT_OR_SELF;
+
+        do {
+            String option = getNextOption();
+            if (option == null) {
+                break;
+            }
+            if ("--user".equals(option)) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + option);
+            }
+        } while (true);
+
+        mService.setLocationEnabledForUser(enabled, userId);
+    }
+
+    private void handleAddTestProvider() {
+        String provider = getNextArgRequired();
+
         boolean requiresNetwork = false;
         boolean requiresSatellite = false;
         boolean requiresCell = false;
@@ -135,8 +146,13 @@ class LocationShellCommand extends BasicShellCommandHandler {
         int powerRequirement = Criteria.POWER_LOW;
         int accuracy = Criteria.ACCURACY_FINE;
 
-        String option = getNextOption();
-        while (option != null) {
+        List<String> extraAttributionTags = Collections.emptyList();
+
+        do {
+            String option = getNextOption();
+            if (option == null) {
+                break;
+            }
             switch (option) {
                 case "--requiresNetwork": {
                     requiresNetwork = true;
@@ -174,12 +190,15 @@ class LocationShellCommand extends BasicShellCommandHandler {
                     accuracy = Integer.parseInt(getNextArgRequired());
                     break;
                 }
+                case "--extraAttributionTags": {
+                    extraAttributionTags = Arrays.asList(getNextArgRequired().split(","));
+                    break;
+                }
                 default:
                     throw new IllegalArgumentException(
                             "Received unexpected option: " + option);
             }
-            option = getNextOption();
-        }
+        } while(true);
 
         ProviderProperties properties = new ProviderProperties.Builder()
                 .setHasNetworkRequirement(requiresNetwork)
@@ -192,30 +211,50 @@ class LocationShellCommand extends BasicShellCommandHandler {
                 .setPowerUsage(powerRequirement)
                 .setAccuracy(accuracy)
                 .build();
-
-        return properties;
+        mService.addTestProvider(provider, properties, extraAttributionTags,
+                mContext.getOpPackageName(), mContext.getAttributionTag());
     }
 
-    private Location parseTestProviderLocation(String provider) {
-        boolean hasLatitude = false;
-        boolean hasLongitude = false;
+    private void handleRemoveTestProvider() {
+        String provider = getNextArgRequired();
+        mService.removeTestProvider(provider, mContext.getOpPackageName(),
+                mContext.getAttributionTag());
+    }
+
+    private void handleSetTestProviderEnabled() {
+        String provider = getNextArgRequired();
+        boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        mService.setTestProviderEnabled(provider, enabled, mContext.getOpPackageName(),
+                mContext.getAttributionTag());
+    }
+
+    private void handleSetTestProviderLocation() {
+        String provider = getNextArgRequired();
+
+        boolean hasLatLng = false;
 
         Location location = new Location(provider);
         location.setAccuracy(DEFAULT_TEST_LOCATION_ACCURACY);
         location.setTime(System.currentTimeMillis());
+        location.setElapsedRealtimeNanos(System.nanoTime());
 
-        String option = getNextOption();
-        while (option != null) {
+        do {
+            String option = getNextOption();
+            if (option == null) {
+                break;
+            }
             switch (option) {
                 case "--location": {
                     String[] locationInput = getNextArgRequired().split(",");
                     if (locationInput.length != 2) {
-                        throw new IllegalArgumentException(
-                                "Unexpected location format: " + Arrays.toString(locationInput));
+                        throw new IllegalArgumentException("Location argument must be in the form "
+                                + "of \"<LATITUDE>,<LONGITUDE>\", not "
+                                + Arrays.toString(locationInput));
                     }
 
                     location.setLatitude(Double.parseDouble(locationInput[0]));
                     location.setLongitude(Double.parseDouble(locationInput[1]));
+                    hasLatLng = true;
                     break;
                 }
                 case "--accuracy": {
@@ -227,15 +266,22 @@ class LocationShellCommand extends BasicShellCommandHandler {
                     break;
                 }
                 default:
-                    throw new IllegalArgumentException(
-                            "Received unexpected option: " + option);
+                    throw new IllegalArgumentException("Unknown option: " + option);
             }
-            option = getNextOption();
+        } while (true);
+
+        if (!hasLatLng) {
+            throw new IllegalArgumentException("Option \"--location\" is required");
         }
 
-        location.setElapsedRealtimeNanos(System.nanoTime());
+        mService.setTestProviderLocation(provider, location, mContext.getOpPackageName(),
+                mContext.getAttributionTag());
+    }
 
-        return location;
+    private void handleSendExtraCommand() {
+        String provider = getNextArgRequired();
+        String command = getNextArgRequired();
+        mService.sendExtraCommand(provider, command, null);
     }
 
     @Override
@@ -245,24 +291,29 @@ class LocationShellCommand extends BasicShellCommandHandler {
         pw.println("  help or -h");
         pw.println("    Print this help text.");
         pw.println("  is-location-enabled [--user <USER_ID>]");
-        pw.println("    Gets the master location switch enabled state.");
-        pw.println("  set-location-enabled [--user <USER_ID>] true|false");
-        pw.println("    Sets the master location switch enabled state.");
+        pw.println("    Gets the master location switch enabled state. If no user is specified,");
+        pw.println("    the current user is assumed.");
+        pw.println("  set-location-enabled true|false [--user <USER_ID>]");
+        pw.println("    Sets the master location switch enabled state. If no user is specified,");
+        pw.println("    the current user is assumed.");
         pw.println("  providers");
+        pw.println("    The providers command is followed by a subcommand, as listed below:");
+        pw.println();
         pw.println("    add-test-provider <PROVIDER> [--requiresNetwork] [--requiresSatellite]");
         pw.println("      [--requiresCell] [--hasMonetaryCost] [--supportsAltitude]");
         pw.println("      [--supportsSpeed] [--supportsBearing]");
         pw.println("      [--powerRequirement <POWER_REQUIREMENT>]");
+        pw.println("      [--extraAttributionTags <TAG>,<TAG>,...]");
         pw.println("      Add the given test provider. Requires MOCK_LOCATION permissions which");
         pw.println("      can be enabled by running \"adb shell appops set <uid>");
         pw.println("      android:mock_location allow\". There are optional flags that can be");
-        pw.println("      used to configure the provider properties. If no flags are included,");
-        pw.println("      then default values will be used.");
+        pw.println("      used to configure the provider properties and additional arguments. If");
+        pw.println("      no flags are included, then default values will be used.");
         pw.println("    remove-test-provider <PROVIDER>");
         pw.println("      Remove the given test provider.");
         pw.println("    set-test-provider-enabled <PROVIDER> true|false");
         pw.println("      Sets the given test provider enabled state.");
-        pw.println("    set-test-provider-location <PROVIDER> [--location <LATITUDE>,<LONGITUDE>]");
+        pw.println("    set-test-provider-location <PROVIDER> --location <LATITUDE>,<LONGITUDE>");
         pw.println("      [--accuracy <ACCURACY>] [--time <TIME>]");
         pw.println("      Set location for given test provider. Accuracy and time are optional.");
         pw.println("    send-extra-command <PROVIDER> <COMMAND>");
