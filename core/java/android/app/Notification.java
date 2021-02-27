@@ -5013,6 +5013,7 @@ public class Notification implements Parcelable
             bindNotificationHeader(contentView, p);
             bindLargeIconAndApplyMargin(contentView, p, result);
             boolean showProgress = handleProgressBar(contentView, ex, p);
+            boolean hasSecondLine = showProgress;
             if (p.hasTitle()) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
@@ -5028,9 +5029,25 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(textId, processTextSpans(p.text));
                 setTextViewColorSecondary(contentView, textId, p);
                 contentView.setViewVisibility(textId, View.VISIBLE);
+                hasSecondLine = true;
             }
+            setHeaderlessVerticalMargins(contentView, p, hasSecondLine);
 
             return contentView;
+        }
+
+        private static void setHeaderlessVerticalMargins(RemoteViews contentView,
+                StandardTemplateParams p, boolean hasSecondLine) {
+            if (!p.mHeaderless) {
+                return;
+            }
+            int marginDimen = hasSecondLine
+                    ? R.dimen.notification_headerless_margin_twoline
+                    : R.dimen.notification_headerless_margin_oneline;
+            contentView.setViewLayoutMarginDimen(R.id.notification_headerless_view_column,
+                    RemoteViews.MARGIN_TOP, marginDimen);
+            contentView.setViewLayoutMarginDimen(R.id.notification_headerless_view_column,
+                    RemoteViews.MARGIN_BOTTOM, marginDimen);
         }
 
         private CharSequence processTextSpans(CharSequence text) {
@@ -6851,26 +6868,13 @@ public class Notification implements Parcelable
                 if (decorationType <= DevFlags.DECORATION_PARTIAL) {
                     template.removeFromParent(R.id.notification_top_line);
                 }
-                if (decorationType != DevFlags.DECORATION_FULL_COMPATIBLE) {
-                    // Change the max content size from 60dp (the compatible size) to 48dp
-                    // (the constrained size).  This is done by increasing the minimum margin
-                    // (implemented as top/bottom margins) and decreasing the extra margin
-                    // (implemented as the height of shrinkable top/bottom views in the column).
-                    template.setViewLayoutMarginDimen(
-                            R.id.notification_headerless_view_column,
-                            RemoteViews.MARGIN_TOP,
-                            R.dimen.notification_headerless_margin_constrained_minimum);
-                    template.setViewLayoutMarginDimen(
-                            R.id.notification_headerless_view_column,
-                            RemoteViews.MARGIN_BOTTOM,
-                            R.dimen.notification_headerless_margin_constrained_minimum);
-                    template.setViewLayoutHeightDimen(
-                            R.id.notification_headerless_margin_extra_top,
-                            R.dimen.notification_headerless_margin_constrained_extra);
-                    template.setViewLayoutHeightDimen(
-                            R.id.notification_headerless_margin_extra_bottom,
-                            R.dimen.notification_headerless_margin_constrained_extra);
-                }
+                // The vertical margins are bigger in the "two-line" scenario than the "one-line"
+                //  scenario, but the 'compatible' decoration state is intended to have 3 lines,
+                //  (1 for the top line views and 2 for the custom views), so in that one case we
+                //  use the smaller 1-line margins. This gives the compatible case 88-16*2=56 dp of
+                //  height, 24dp of which goes to the top line, leaving 32dp for the custom view.
+                boolean hasSecondLine = decorationType != DevFlags.DECORATION_FULL_COMPATIBLE;
+                Builder.setHeaderlessVerticalMargins(template, p, hasSecondLine);
             } else {
                 // also update the end margin to account for the large icon or expander
                 Resources resources = context.getResources();
