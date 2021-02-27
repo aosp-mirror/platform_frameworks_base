@@ -17,6 +17,8 @@ package com.android.server.notification;
 
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 
 import static com.android.server.notification.NotificationManagerService.NotificationListeners.TAG_REQUESTED_LISTENERS;
 
@@ -202,6 +204,52 @@ public class NotificationListenersTest extends UiServiceTestCase {
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ALERTING);
+    }
+
+    @Test
+    public void testEnsureFilters_newServiceWithMetadata_onlyOneListed() {
+        ServiceInfo si = new ServiceInfo();
+        si.packageName = "new";
+        si.name = "comp";
+        si.metaData = new Bundle();
+        si.metaData.putInt(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, 2);
+
+        mListeners.ensureFilters(si, 0);
+
+        assertThat(mListeners.getNotificationListenerFilter(
+                Pair.create(si.getComponentName(), 0)).getTypes())
+                .isEqualTo(FLAG_FILTER_TYPE_ALERTING);
+    }
+
+    @Test
+    public void testEnsureFilters_newServiceWithMetadata_disabledTypes() {
+        ServiceInfo si = new ServiceInfo();
+        si.packageName = "new";
+        si.name = "comp";
+        si.metaData = new Bundle();
+        si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, "1,2");
+
+        mListeners.ensureFilters(si, 0);
+
+        assertThat(mListeners.getNotificationListenerFilter(
+                Pair.create(si.getComponentName(), 0)).getTypes())
+                .isEqualTo(FLAG_FILTER_TYPE_SILENT | FLAG_FILTER_TYPE_ONGOING);
+    }
+
+    @Test
+    public void testEnsureFilters_newServiceWithMetadata_metaDataDisagrees() {
+        ServiceInfo si = new ServiceInfo();
+        si.packageName = "new";
+        si.name = "comp";
+        si.metaData = new Bundle();
+        si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1,2");
+        si.metaData.putInt(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, 1);
+
+        mListeners.ensureFilters(si, 0);
+
+        assertThat(mListeners.getNotificationListenerFilter(
+                Pair.create(si.getComponentName(), 0)).getTypes())
+                .isEqualTo(FLAG_FILTER_TYPE_ALERTING);
     }
 
     @Test
