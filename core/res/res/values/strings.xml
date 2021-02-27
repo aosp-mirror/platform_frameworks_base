@@ -5011,6 +5011,9 @@
     <!-- Content description of the alerting icon in the notification. [CHAR_LIMIT=NONE] -->
     <string name="notification_alerted_content_description">Alerted</string>
 
+    <!-- Default content description of the verification icon in the call notification. [CHAR_LIMIT=NONE] -->
+    <string name="notification_verified_content_description">Verified</string>
+
     <!-- Content description of the expand button icon in the notification when collaped.-->
     <string name="expand_button_content_description_collapsed">Expand</string>
 

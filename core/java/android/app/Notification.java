@@ -9439,11 +9439,16 @@ public class Notification implements Parcelable
         }
 
         private void bindCallerVerification(RemoteViews contentView, StandardTemplateParams p) {
+            String iconContentDescription = null;
+            boolean showDivider = true;
             if (mVerificationIcon != null) {
                 contentView.setImageViewIcon(R.id.verification_icon, mVerificationIcon);
                 contentView.setDrawableTint(R.id.verification_icon, false /* targetBackground */,
                         mBuilder.getSecondaryTextColor(p), PorterDuff.Mode.SRC_ATOP);
                 contentView.setViewVisibility(R.id.verification_icon, View.VISIBLE);
+                iconContentDescription = mBuilder.mContext.getString(
+                        R.string.notification_verified_content_description);
+                showDivider = false;  // the icon replaces the divider
             } else {
                 contentView.setViewVisibility(R.id.verification_icon, View.GONE);
             }
@@ -9451,8 +9456,17 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.verification_text, mVerificationText);
                 mBuilder.setTextViewColorSecondary(contentView, R.id.verification_text, p);
                 contentView.setViewVisibility(R.id.verification_text, View.VISIBLE);
+                iconContentDescription = null;  // let the app's text take precedence
             } else {
                 contentView.setViewVisibility(R.id.verification_text, View.GONE);
+                showDivider = false;  // no divider if no text
+            }
+            contentView.setContentDescription(R.id.verification_icon, iconContentDescription);
+            if (showDivider) {
+                contentView.setViewVisibility(R.id.verification_divider, View.VISIBLE);
+                mBuilder.setTextViewColorSecondary(contentView, R.id.verification_divider, p);
+            } else {
+                contentView.setViewVisibility(R.id.verification_divider, View.GONE);
             }
         }
 
