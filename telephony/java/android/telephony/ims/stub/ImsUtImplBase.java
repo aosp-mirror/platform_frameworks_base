@@ -224,11 +224,10 @@ public class ImsUtImplBase {
                 } else if (listener != null && mUtListener == null) {
                     mUtListener = new ImsUtListener(listener);
                 } else {
-                    // This is a limitation of the current API surface, there can only be one
-                    // listener connected. Fail fast instead of silently overwriting the other
-                    // listener.
-                    throw new IllegalStateException("ImsUtImplBase#setListener: listener already "
-                            + "set by another connected interface!");
+                    // Warn that the listener is being replaced while active
+                    Log.w(TAG, "setListener is being called when there is already an active "
+                            + "listener");
+                    mUtListener = new ImsUtListener(listener);
                 }
             }
 

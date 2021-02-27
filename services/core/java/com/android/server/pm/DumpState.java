@@ -56,6 +56,7 @@ public final class DumpState {
 
     private boolean mTitlePrinted;
     private boolean mFullPreferred;
+    private boolean mCheckIn;
 
     private String mTargetPackageName;
 
@@ -117,5 +118,13 @@ public final class DumpState {
 
     public void setFullPreferred(boolean fullPreferred) {
         mFullPreferred = fullPreferred;
+    }
+
+    public boolean isCheckIn() {
+        return mCheckIn;
+    }
+
+    public void setCheckIn(boolean checkIn) {
+        mCheckIn = checkIn;
     }
 }

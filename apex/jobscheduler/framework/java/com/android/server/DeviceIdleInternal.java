@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import android.annotation.Nullable;
+import android.os.PowerWhitelistManager.ReasonCode;
 import android.os.PowerWhitelistManager.TempAllowListType;
 
 import com.android.server.deviceidle.IDeviceIdleConstraint;
@@ -34,6 +36,10 @@ public interface DeviceIdleInternal {
     void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
             long duration, int userId, boolean sync, String reason);
 
+    void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+            long duration, int userId, boolean sync, @ReasonCode int reasonCode,
+            @Nullable String reason);
+
     /**
      * Called by ActivityManagerService to directly add UID to DeviceIdleController's temp
      * allowlist.
@@ -41,11 +47,12 @@ public interface DeviceIdleInternal {
      * @param duration duration in milliseconds
      * @param type temp allowlist type defined at {@link TempAllowListType}
      * @param sync
+     * @param reasonCode one of {@link ReasonCode}
      * @param reason
      */
     void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
-            @TempAllowListType int type, boolean sync,
-            String reason);
+            @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
+            @Nullable String reason);
 
     // duration in milliseconds
     long getNotificationAllowlistDuration();

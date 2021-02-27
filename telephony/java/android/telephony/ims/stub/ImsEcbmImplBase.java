@@ -57,10 +57,10 @@ public class ImsEcbmImplBase {
                 } else if (listener != null && mListener == null) {
                     mListener = listener;
                 } else {
-                    // Fail fast here instead of silently overwriting the listener to another
-                    // listener due to another connection connecting.
-                    throw new IllegalStateException("ImsEcbmImplBase: Listener already set by "
-                            + "another connection.");
+                    // Warn that the listener is being replaced while active
+                    Log.w(TAG, "setListener is being called when there is already an active "
+                            + "listener");
+                    mListener = listener;
                 }
             }
         }

@@ -151,7 +151,7 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
-        config.lastModifiedDate = expectedModifiedDate;
+        config.lastModifiedMillis = expectedModifiedDate;
         writeConfig(config, mConfigFile);
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
@@ -507,7 +507,7 @@ public final class UpdatableFontDirTest {
         File readonlyFile = new File(readonlyDir, "readonly_config.xml");
 
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
-        config.lastModifiedDate = expectedModifiedDate;
+        config.lastModifiedMillis = expectedModifiedDate;
         writeConfig(config, readonlyFile);
 
         assertThat(readonlyDir.setWritable(false, false)).isTrue();
