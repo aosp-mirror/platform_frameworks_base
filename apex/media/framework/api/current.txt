@@ -26,6 +26,7 @@ package android.media {
   }
 
   public class MediaCommunicationManager {
+    method @NonNull public java.util.List<android.media.Session2Token> getSession2Tokens();
     method @IntRange(from=1) public int getVersion();
   }
 

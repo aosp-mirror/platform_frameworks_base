@@ -24754,7 +24754,7 @@ package android.media.session {
     method @NonNull public java.util.List<android.media.session.MediaController> getActiveSessions(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<android.media.Session2Token> getSession2Tokens();
     method public boolean isTrustedForMediaControl(@NonNull android.media.session.MediaSessionManager.RemoteUserInfo);
-    method public void notifySession2Created(@NonNull android.media.Session2Token);
+    method @Deprecated public void notifySession2Created(@NonNull android.media.Session2Token);
     method public void removeOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener);
     method public void removeOnSession2TokensChangedListener(@NonNull android.media.session.MediaSessionManager.OnSession2TokensChangedListener);
   }
