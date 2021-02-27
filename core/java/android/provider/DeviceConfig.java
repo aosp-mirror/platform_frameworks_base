@@ -157,6 +157,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_BLUETOOTH = "bluetooth";
 
     /**
+     * Namespace for features relating to clipboard.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_CLIPBOARD = "clipboard";
+
+    /**
      * Namespace for all networking connectivity related features.
      *
      * @hide

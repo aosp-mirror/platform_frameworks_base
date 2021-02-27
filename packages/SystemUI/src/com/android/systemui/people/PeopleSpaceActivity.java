@@ -19,8 +19,6 @@ package com.android.systemui.people;
 import static android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID;
 import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 
-import static com.android.systemui.people.PeopleSpaceUtils.getUserHandle;
-
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
@@ -155,7 +153,7 @@ public class PeopleSpaceActivity extends Activity {
                 if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + tile.getId());
                 mLauncherApps.cacheShortcuts(tile.getPackageName(),
                         Collections.singletonList(tile.getId()),
-                        getUserHandle(tile), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
+                        tile.getUserHandle(), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
             } catch (Exception e) {
                 Log.w(TAG, "Exception caching shortcut:" + e);
             }

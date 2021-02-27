@@ -469,18 +469,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         DisplayDeviceConfig displayDeviceConfig = logicalDisplay
                 .getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig();
-        // TODO: (b/178183143) Ensure that the ddc is not null
-        if (displayDeviceConfig != null) {
-            mBrightnessRampRateFastDecrease = displayDeviceConfig.getBrightnessRampFastDecrease();
-            mBrightnessRampRateFastIncrease = displayDeviceConfig.getBrightnessRampFastIncrease();
-            mBrightnessRampRateSlowDecrease = displayDeviceConfig.getBrightnessRampSlowDecrease();
-            mBrightnessRampRateSlowIncrease = displayDeviceConfig.getBrightnessRampSlowIncrease();
-        } else {
-            mBrightnessRampRateFastDecrease = 1.0f;
-            mBrightnessRampRateFastIncrease = 1.0f;
-            mBrightnessRampRateSlowDecrease = 1.0f;
-            mBrightnessRampRateSlowIncrease = 1.0f;
-        }
+        mBrightnessRampRateFastDecrease = displayDeviceConfig.getBrightnessRampFastDecrease();
+        mBrightnessRampRateFastIncrease = displayDeviceConfig.getBrightnessRampFastIncrease();
+        mBrightnessRampRateSlowDecrease = displayDeviceConfig.getBrightnessRampSlowDecrease();
+        mBrightnessRampRateSlowIncrease = displayDeviceConfig.getBrightnessRampSlowIncrease();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 

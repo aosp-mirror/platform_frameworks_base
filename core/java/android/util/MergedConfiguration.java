@@ -33,9 +33,9 @@ import java.io.PrintWriter;
  */
 public class MergedConfiguration implements Parcelable {
 
-    private Configuration mGlobalConfig = new Configuration();
-    private Configuration mOverrideConfig = new Configuration();
-    private Configuration mMergedConfig = new Configuration();
+    private final Configuration mGlobalConfig = new Configuration();
+    private final Configuration mOverrideConfig = new Configuration();
+    private final Configuration mMergedConfig = new Configuration();
 
     public MergedConfiguration() {
     }
@@ -59,15 +59,15 @@ public class MergedConfiguration implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mGlobalConfig, flags);
-        dest.writeParcelable(mOverrideConfig, flags);
-        dest.writeParcelable(mMergedConfig, flags);
+        mGlobalConfig.writeToParcel(dest, flags);
+        mOverrideConfig.writeToParcel(dest, flags);
+        mMergedConfig.writeToParcel(dest, flags);
     }
 
     public void readFromParcel(Parcel source) {
-        mGlobalConfig = source.readParcelable(Configuration.class.getClassLoader());
-        mOverrideConfig = source.readParcelable(Configuration.class.getClassLoader());
-        mMergedConfig = source.readParcelable(Configuration.class.getClassLoader());
+        mGlobalConfig.readFromParcel(source);
+        mOverrideConfig.readFromParcel(source);
+        mMergedConfig.readFromParcel(source);
     }
 
     @Override

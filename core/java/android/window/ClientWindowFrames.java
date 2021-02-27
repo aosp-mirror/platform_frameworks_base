@@ -58,9 +58,9 @@ public class ClientWindowFrames implements Parcelable {
 
     /** Needed for AIDL out parameters. */
     public void readFromParcel(Parcel in) {
-        frame.set(Rect.CREATOR.createFromParcel(in));
-        displayFrame.set(Rect.CREATOR.createFromParcel(in));
-        backdropFrame.set(Rect.CREATOR.createFromParcel(in));
+        frame.readFromParcel(in);
+        displayFrame.readFromParcel(in);
+        backdropFrame.readFromParcel(in);
     }
 
     @Override

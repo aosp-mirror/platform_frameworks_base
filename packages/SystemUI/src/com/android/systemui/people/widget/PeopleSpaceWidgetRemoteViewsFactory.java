@@ -123,7 +123,8 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
             fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, tile.getId());
             fillInIntent.putExtra(
                     PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
-            fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_UID, tile.getUid());
+            fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE,
+                    tile.getUserHandle());
             personView.setOnClickFillInIntent(R.id.item, fillInIntent);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);

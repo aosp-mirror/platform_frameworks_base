@@ -464,7 +464,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(0)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, sbn);
@@ -482,7 +482,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_3, "userName", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(0)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromNotification(mContext, tile, sbn);
@@ -496,7 +496,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(0)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromVisibleNotifications(mContext, tile,
@@ -511,7 +511,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_4, "userName", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(0)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         PeopleSpaceTile actual = PeopleSpaceUtils
                 .augmentTileFromVisibleNotifications(mContext, tile,
@@ -526,7 +526,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(0)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         List<PeopleSpaceTile> actualList = PeopleSpaceUtils
                 .augmentTilesFromVisibleNotifications(
@@ -545,13 +545,13 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_1, "userName", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(1)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         PeopleSpaceTile tile2 =
                 new PeopleSpaceTile
                         .Builder(SHORTCUT_ID_2, "userName2", ICON, new Intent())
                         .setPackageName(PACKAGE_NAME)
-                        .setUid(0)
+                        .setUserHandle(new UserHandle(0))
                         .build();
         List<PeopleSpaceTile> actualList = PeopleSpaceUtils
                 .augmentTilesFromVisibleNotifications(mContext, List.of(tile1, tile2),

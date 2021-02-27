@@ -42,6 +42,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+import static android.os.PowerWhitelistManager.REASON_DENIED;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -52,7 +53,6 @@ import static android.os.Process.setProcessGroup;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 
-import static com.android.server.am.ActiveServices.FGS_FEATURE_DENIED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
@@ -1968,7 +1968,7 @@ public final class OomAdjuster {
                     int clientProcState = cstate.getCurRawProcState();
 
                     // pass client's mAllowStartFgs to the app if client is not persistent process.
-                    if (cstate.getAllowedStartFgs() != FGS_FEATURE_DENIED
+                    if (cstate.getAllowedStartFgs() != REASON_DENIED
                             && cstate.getMaxAdj() >= ProcessList.FOREGROUND_APP_ADJ) {
                         state.setAllowStartFgs(cstate.getAllowedStartFgs());
                     }

@@ -106,21 +106,15 @@ public class GlobalSearchSession implements Closeable {
      * @param queryExpression query string to search.
      * @param searchSpec spec for setting document filters, adding projection, setting term match
      *     type, etc.
-     * @param executor        Executor on which to invoke the callback of the following request
-     *                        {@link SearchResults#getNextPage}.
      * @return a {@link SearchResults} object for retrieved matched documents.
      */
     @NonNull
-    public SearchResults search(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec,
-            @NonNull @CallbackExecutor Executor executor) {
+    public SearchResults search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         Objects.requireNonNull(queryExpression);
         Objects.requireNonNull(searchSpec);
-        Objects.requireNonNull(executor);
         Preconditions.checkState(!mIsClosed, "GlobalSearchSession has already been closed");
         return new SearchResults(mService, mPackageName, /*databaseName=*/null, queryExpression,
-                searchSpec, mUserId, executor);
+                searchSpec, mUserId);
     }
 
     /** Closes the {@link GlobalSearchSession}. */

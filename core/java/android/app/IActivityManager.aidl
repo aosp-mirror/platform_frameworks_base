@@ -549,7 +549,7 @@ interface IActivityManager {
     /**
      * Add a bare uid to the background restrictions whitelist.  Only the system uid may call this.
      */
-    void backgroundWhitelistUid(int uid);
+    void backgroundAllowlistUid(int uid);
 
     // Start of P transactions
     /**

@@ -3166,6 +3166,8 @@
     <public name="config_customMediaKeyDispatcher" />
     <!-- @hide @SystemApi -->
     <public name="config_customMediaSessionPolicyProvider" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemSpeechRecognizer" />
   </public-group>
 
   <public-group type="id" first-id="0x01020055">
