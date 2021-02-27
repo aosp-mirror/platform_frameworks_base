@@ -2152,14 +2152,16 @@ public class NotificationManagerService extends SystemService {
 
         mUserProfiles.updateCache(getContext());
 
-        telephonyManager.listen(new PhoneStateListener() {
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-                if (mCallState == state) return;
-                if (DBG) Slog.d(TAG, "Call state changed: " + callStateToString(state));
-                mCallState = state;
-            }
-        }, PhoneStateListener.LISTEN_CALL_STATE);
+        if (mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            telephonyManager.listen(new PhoneStateListener() {
+                @Override
+                public void onCallStateChanged(int state, String incomingNumber) {
+                    if (mCallState == state) return;
+                    if (DBG) Slog.d(TAG, "Call state changed: " + callStateToString(state));
+                    mCallState = state;
+                }
+            }, PhoneStateListener.LISTEN_CALL_STATE);
+        }
 
         mSettingsObserver = new SettingsObserver(mHandler);
 
