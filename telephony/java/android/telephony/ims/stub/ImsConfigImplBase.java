@@ -37,6 +37,7 @@ import com.android.internal.telephony.util.RemoteCallbackListExt;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -368,7 +369,13 @@ public class ImsConfigImplBase {
     }
 
     private void onNotifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
-        mRcsConfigData = isCompressed ? RcsConfig.decompressGzip(config) : config;
+        // cache uncompressed config
+        config = isCompressed ? RcsConfig.decompressGzip(config) : config;
+        if (Arrays.equals(mRcsConfigData, config)) {
+            return;
+        }
+        mRcsConfigData = config;
+
         // can be null in testing
         if (mRcsCallbacks != null) {
             mRcsCallbacks.broadcastAction(c -> {
