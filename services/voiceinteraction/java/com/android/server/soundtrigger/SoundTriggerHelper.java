@@ -867,10 +867,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     @Override
-    public void onResourceConditionChange() {
-        if (DBG) Slog.d(TAG, "onResourceConditionChange");
+    public void onResourcesAvailable() {
+        if (DBG) Slog.d(TAG, "onResourcesAvailable");
         synchronized (mLock) {
-            onResourceConditionChangeLocked();
+            onResourcesAvailableLocked();
         }
     }
 
@@ -909,7 +909,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
-    private void onResourceConditionChangeLocked() {
+    private void onResourcesAvailableLocked() {
         updateAllRecognitionsLocked();
     }
 

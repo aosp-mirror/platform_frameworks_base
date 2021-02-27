@@ -569,8 +569,8 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
         }
 
         @Override
-        public void tryAgain() {
-            mDelegate.tryAgain();
+        public void onResourcesAvailable() {
+            mDelegate.onResourcesAvailable();
         }
     }
 

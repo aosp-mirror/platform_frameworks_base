@@ -45,7 +45,7 @@ oneway interface ISoundTriggerCallback {
      * reasons (threw a ServiceSpecificException(RESOURCE_CONTENTION) or have been preempted) may
      * now succeed. This is not a guarantee, but a hint for the client to retry.
      */
-    void onResourceConditionChange();
+    void onResourcesAvailable();
     /**
      * Notifies the client that a model had been preemptively unloaded by the service.
      * The caller may retry after the next onRecognitionAvailabilityChange() callback.

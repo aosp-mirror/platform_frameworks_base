@@ -187,7 +187,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
     }
 
     @Override
-    public void tryAgain() {
+    public void onResourcesAvailable() {
         List<ISoundTriggerCallback> callbacks;
         synchronized (this) {
             callbacks = new ArrayList<>(mActiveSessions.size());
@@ -198,7 +198,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         // Trigger the callbacks outside of the lock to avoid deadlocks.
         for (ISoundTriggerCallback callback : callbacks) {
             try {
-                callback.onResourceConditionChange();
+                callback.onResourcesAvailable();
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }

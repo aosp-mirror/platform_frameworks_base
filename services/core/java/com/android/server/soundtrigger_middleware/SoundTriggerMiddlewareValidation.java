@@ -763,10 +763,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onResourceConditionChange() {
+            public void onResourcesAvailable() {
                 // Not locking to avoid deadlocks (not affecting any state).
                 try {
-                    mCallback.onResourceConditionChange();
+                    mCallback.onResourcesAvailable();
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.

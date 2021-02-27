@@ -317,12 +317,12 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             }
 
             @Override
-            public void onResourceConditionChange() throws RemoteException {
+            public void onResourcesAvailable() throws RemoteException {
                 try {
-                    mCallbackDelegate.onResourceConditionChange();
-                    logVoidReturn("onResourceConditionChange");
+                    mCallbackDelegate.onResourcesAvailable();
+                    logVoidReturn("onResourcesAvailable");
                 } catch (Exception e) {
-                    logException("onResourceConditionChange", e);
+                    logException("onResourcesAvailable", e);
                     throw e;
                 }
             }

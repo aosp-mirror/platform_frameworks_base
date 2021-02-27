@@ -308,8 +308,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onResourceConditionChange() throws RemoteException {
-                mDelegate.onResourceConditionChange();
+            public void onResourcesAvailable() throws RemoteException {
+                mDelegate.onResourcesAvailable();
             }
 
             @Override

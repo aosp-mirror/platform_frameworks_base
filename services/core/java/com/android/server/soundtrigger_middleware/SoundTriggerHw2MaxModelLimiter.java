@@ -111,7 +111,7 @@ public class SoundTriggerHw2MaxModelLimiter implements ISoundTriggerHw2 {
         if (wasAtMaxCapacity) {
             // It is legal to invoke callbacks from within unloadSoundModel().
             // See README.md for details.
-            mGlobalCallback.tryAgain();
+            mGlobalCallback.onResourcesAvailable();
         }
     }
 

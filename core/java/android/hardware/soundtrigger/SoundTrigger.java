@@ -2132,7 +2132,7 @@ public class SoundTrigger {
          * previously failed or got preempted may now succeed. This is not a guarantee, merely a
          * hint that the client may want to retry operations.
          */
-        void onResourceConditionChange();
+        void onResourcesAvailable();
 
         /**
          * Called when the sound trigger native service dies

@@ -368,12 +368,12 @@ public class SoundHw2CompatTest {
             assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
 
-        // Unload a single model and expect a tryAgain().
+        // Unload a single model and expect a onResourcesAvailable().
         mCanonical.unloadSoundModel(modelHandles[0]);
         verify(mHalDriver).unloadSoundModel(modelHandles[0]);
 
         mCanonical.flushCallbacks();
-        verify(globalCallback).tryAgain();
+        verify(globalCallback).onResourcesAvailable();
     }
 
     private void testLoadGenericModelBusy_2_4() throws Exception {
@@ -744,9 +744,9 @@ public class SoundHw2CompatTest {
         // Deactivate external capture.
         mCaptureStateNotifier.setState(false);
 
-        // Expect a tryAgain().
+        // Expect a onResourcesAvailable().
         mCanonical.flushCallbacks();
-        verify(globalCallback).tryAgain();
+        verify(globalCallback).onResourcesAvailable();
     }
 
     @Test
@@ -781,9 +781,9 @@ public class SoundHw2CompatTest {
         // Deactivate external capture.
         mCaptureStateNotifier.setState(false);
 
-        // Expect a tryAgain().
+        // Expect a onResourcesAvailable().
         mCanonical.flushCallbacks();
-        verify(globalCallback).tryAgain();
+        verify(globalCallback).onResourcesAvailable();
     }
 
     @Test
@@ -959,9 +959,9 @@ public class SoundHw2CompatTest {
     private void validateGlobalCallback_2_4(
             android.hardware.soundtrigger.V2_4.ISoundTriggerHwGlobalCallback hwCallback,
             ISoundTriggerHw2.GlobalCallback canonicalCallback) throws Exception {
-        hwCallback.tryAgain();
+        hwCallback.onResourcesAvailable();
         mCanonical.flushCallbacks();
-        verify(canonicalCallback).tryAgain();
+        verify(canonicalCallback).onResourcesAvailable();
     }
 
     private void validateCallback_2_0(

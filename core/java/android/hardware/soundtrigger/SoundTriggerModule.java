@@ -48,7 +48,7 @@ public class SoundTriggerModule {
 
     private static final int EVENT_RECOGNITION = 1;
     private static final int EVENT_SERVICE_DIED = 2;
-    private static final int EVENT_RESOURCE_CONDITION_CHANGE = 3;
+    private static final int EVENT_RESOURCES_AVAILABLE = 3;
     private static final int EVENT_MODEL_UNLOADED = 4;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mId;
@@ -336,8 +336,8 @@ public class SoundTriggerModule {
                             listener.onRecognition(
                                     (SoundTrigger.RecognitionEvent) msg.obj);
                             break;
-                        case EVENT_RESOURCE_CONDITION_CHANGE:
-                            listener.onResourceConditionChange();
+                        case EVENT_RESOURCES_AVAILABLE:
+                            listener.onResourcesAvailable();
                             break;
                         case EVENT_MODEL_UNLOADED:
                             listener.onModelUnloaded((Integer) msg.obj);
@@ -376,8 +376,8 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onResourceConditionChange() throws RemoteException {
-            Message m = mHandler.obtainMessage(EVENT_RESOURCE_CONDITION_CHANGE);
+        public synchronized void onResourcesAvailable() throws RemoteException {
+            Message m = mHandler.obtainMessage(EVENT_RESOURCES_AVAILABLE);
             mHandler.sendMessage(m);
         }
 

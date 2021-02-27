@@ -157,7 +157,7 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
                     }
                 }
             } else {
-                mGlobalCallback.tryAgain();
+                mGlobalCallback.onResourcesAvailable();
             }
 
             mCaptureState = active;
@@ -189,8 +189,8 @@ public class SoundTriggerHw2ConcurrentCaptureHandler implements ISoundTriggerHw2
     public void registerCallback(GlobalCallback callback) {
         mGlobalCallback = new GlobalCallback() {
             @Override
-            public void tryAgain() {
-                mCallbackThread.push(callback::tryAgain);
+            public void onResourcesAvailable() {
+                mCallbackThread.push(callback::onResourcesAvailable);
             }
         };
         mDelegate.registerCallback(mGlobalCallback);

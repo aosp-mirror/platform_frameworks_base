@@ -183,8 +183,8 @@ interface ISoundTriggerHw2 {
      */
     interface GlobalCallback {
         /**
-         * @see ISoundTriggerHwGlobalCallback#tryAgain()
+         * @see ISoundTriggerHwGlobalCallback#onResourcesAvailable()
          */
-        void tryAgain();
+        void onResourcesAvailable();
     }
 }
