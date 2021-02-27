@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Se ha cambiado la solicitud de SS a una videollamada"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Se ha cambiado la solicitud de SS a una solicitud de USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Se ha cambiado a una nueva solicitud de SS"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerta de phishing"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabajo"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Con sonido"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Mostrar"</string>

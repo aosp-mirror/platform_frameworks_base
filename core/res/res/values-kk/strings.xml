@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS сұрауы бейне қоңырауға өзгертілді"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS сұрауы USSD сұрауына өзгертілді"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Жаңа SS сұрауына өзгертілді"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Фишинг ескертуі"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Жұмыс профилі"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Ескертілді"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Жаю"</string>
