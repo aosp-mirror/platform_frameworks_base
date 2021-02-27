@@ -1346,9 +1346,9 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public int approvalLevelForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
-            @UserIdInt int userId) {
+            @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
         String packageName = pkgSetting.name;
-        if (!DomainVerificationUtils.isDomainVerificationIntent(intent)) {
+        if (!DomainVerificationUtils.isDomainVerificationIntent(intent, resolveInfoFlags)) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, intent, userId, false, "not valid intent");
             }

@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -148,17 +147,35 @@ class OpenAppFromOverviewTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun focusChanges() = testSpec.focusChanges("NexusLauncherActivity", testApp.`package`)
 
-    @Postsubmit
+    @Presubmit
     @Test
-    fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        Assume.assumeFalse(testSpec.isRotated)
         testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
 
     @FlakyTest
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry_Flaky() {
+        Assume.assumeTrue(testSpec.isRotated)
+        testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
 
-    @FlakyTest(bugId = 141361128)
+    @Presubmit
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        Assume.assumeFalse(testSpec.isRotated)
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @FlakyTest
+    @Test
+    fun visibleLayersShownMoreThanOneConsecutiveEntry_Flaky() {
+        Assume.assumeTrue(testSpec.isRotated)
+        testSpec.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    @Presubmit
     @Test
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(Surface.ROTATION_0,
         testSpec.config.endRotation)

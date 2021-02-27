@@ -1173,7 +1173,6 @@ public class PackageInstaller {
          * {@hide}
          */
         @SystemApi
-        @RequiresPermission(android.Manifest.permission.USE_INSTALLER_V2)
         public @Nullable DataLoaderParams getDataLoaderParams() {
             try {
                 DataLoaderParamsParcel data = mSession.getDataLoaderParams();
@@ -1213,7 +1212,6 @@ public class PackageInstaller {
          * {@hide}
          */
         @SystemApi
-        @RequiresPermission(android.Manifest.permission.USE_INSTALLER_V2)
         public void addFile(@FileLocation int location, @NonNull String name, long lengthBytes,
                 @NonNull byte[] metadata, @Nullable byte[] signature) {
             try {
@@ -1237,7 +1235,6 @@ public class PackageInstaller {
          * {@hide}
          */
         @SystemApi
-        @RequiresPermission(android.Manifest.permission.USE_INSTALLER_V2)
         public void removeFile(@FileLocation int location, @NonNull String name) {
             try {
                 mSession.removeFile(location, name);
@@ -2050,9 +2047,7 @@ public class PackageInstaller {
          * {@hide}
          */
         @SystemApi
-        @RequiresPermission(allOf = {
-                Manifest.permission.INSTALL_PACKAGES,
-                Manifest.permission.USE_INSTALLER_V2})
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setDataLoaderParams(@NonNull DataLoaderParams dataLoaderParams) {
             this.dataLoaderParams = dataLoaderParams;
         }

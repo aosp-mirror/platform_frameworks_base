@@ -43,10 +43,10 @@ interface IDeviceIdleController {
     boolean isPowerSaveWhitelistApp(String name);
     @UnsupportedAppUsage(maxTargetSdk = 30,
      publicAlternatives = "Use SystemApi {@code PowerWhitelistManager#whitelistAppTemporarily(String, int, String)}.")
-    void addPowerSaveTempWhitelistApp(String name, long duration, int userId, String reason);
-    long addPowerSaveTempWhitelistAppForMms(String name, int userId, String reason);
-    long addPowerSaveTempWhitelistAppForSms(String name, int userId, String reason);
-    long whitelistAppTemporarily(String name, int userId, String reason);
+    void addPowerSaveTempWhitelistApp(String name, long duration, int userId, int reasonCode, String reason);
+    long addPowerSaveTempWhitelistAppForMms(String name, int userId, int reasonCode, String reason);
+    long addPowerSaveTempWhitelistAppForSms(String name, int userId, int reasonCode, String reason);
+    long whitelistAppTemporarily(String name, int userId, int reasonCode, String reason);
     void exitIdle(String reason);
     int setPreIdleTimeoutMode(int Mode);
     void resetPreIdleTimeoutMode();

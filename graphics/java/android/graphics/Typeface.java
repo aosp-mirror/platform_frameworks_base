@@ -172,9 +172,9 @@ public class Typeface {
      * @hide
      */
     @UnsupportedAppUsage
-    public long native_instance;
+    public final long native_instance;
 
-    private Runnable mCleaner;
+    private final Runnable mCleaner;
 
     /** @hide */
     @IntDef(value = {NORMAL, BOLD, ITALIC, BOLD_ITALIC})
@@ -189,9 +189,9 @@ public class Typeface {
     /** @hide */ public static final int STYLE_MASK = 0x03;
 
     @UnsupportedAppUsage
-    private @Style int mStyle = 0;
+    private @Style final int mStyle;
 
-    private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) int mWeight = 0;
+    private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) final int mWeight;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
@@ -207,6 +207,7 @@ public class Typeface {
     private static final int STYLE_NORMAL = 0;
     private static final int STYLE_ITALIC = 1;
 
+    @GuardedBy("this")
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 

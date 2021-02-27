@@ -1961,9 +1961,10 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean isInstantAppInternal(String packageName, @UserIdInt int userId, int callingUid);
         boolean isInstantAppInternalBody(String packageName, @UserIdInt int userId, int callingUid);
         boolean isInstantAppResolutionAllowed(Intent intent, List<ResolveInfo> resolvedActivities,
-                int userId, boolean skipPackageCheck);
+                int userId, boolean skipPackageCheck, int flags);
         boolean isInstantAppResolutionAllowedBody(Intent intent,
-                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck);
+                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck,
+                int flags);
         boolean isPersistentPreferredActivitySetByDpm(Intent intent, int userId,
                 String resolvedType, int flags);
         boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId);
@@ -2322,7 +2323,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
                         intent, resolvedType, flags, userId), userId);
                 addInstant = isInstantAppResolutionAllowed(intent, result, userId,
-                        false /*skipPackageCheck*/);
+                        false /*skipPackageCheck*/, flags);
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
                 xpResolveInfo = queryCrossProfileIntents(
@@ -2387,8 +2388,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (result == null || result.size() == 0) {
                     // the caller wants to resolve for a particular package; however, there
                     // were no installed results, so, try to find an ephemeral result
-                    addInstant = isInstantAppResolutionAllowed(
-                                    intent, null /*result*/, userId, true /*skipPackageCheck*/);
+                    addInstant = isInstantAppResolutionAllowed(intent, null /*result*/, userId,
+                            true /*skipPackageCheck*/, flags);
                     if (result == null) {
                         result = new ArrayList<>();
                     }
@@ -2618,7 +2619,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
@@ -2802,7 +2803,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
-                        .approvalLevelForDomain(ps, intent, riTargetUser.targetUserId),
+                        .approvalLevelForDomain(ps, intent, flags, riTargetUser.targetUserId),
                         result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
@@ -3049,7 +3050,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
                                 userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "Instant app approved for intent; pkg: "
@@ -3928,7 +3929,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public boolean isInstantAppResolutionAllowed(
                 Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-                boolean skipPackageCheck) {
+                boolean skipPackageCheck, int flags) {
             if (mInstantAppResolverConnection == null) {
                 return false;
             }
@@ -3961,14 +3962,14 @@ public class PackageManagerService extends IPackageManager.Stub
             // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
             // Or if there's already an ephemeral app installed that handles the action
             return isInstantAppResolutionAllowedBody(intent, resolvedActivities, userId,
-                                                       skipPackageCheck);
+                                                       skipPackageCheck, flags);
         }
 
         // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
         // Or if there's already an ephemeral app installed that handles the action
         public boolean isInstantAppResolutionAllowedBody(
                 Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-                boolean skipPackageCheck) {
+                boolean skipPackageCheck, int flags) {
             final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
             for (int n = 0; n < count; n++) {
                 final ResolveInfo info = resolvedActivities.get(n);
@@ -3977,7 +3978,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
                                 userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
@@ -4403,6 +4404,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {
             final String packageName = dumpState.getTargetPackageName();
+            final boolean checkin = dumpState.isCheckIn();
 
             switch (type) {
                 case DumpState.DUMP_VERSION:
@@ -4412,6 +4414,56 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     pw.println("Database versions:");
                     mSettings.dumpVersionLPr(new IndentingPrintWriter(pw, "  "));
+                    break;
+                }
+
+                case DumpState.DUMP_LIBS:
+                {
+                    boolean printedHeader = false;
+                    final int numSharedLibraries = mSharedLibraries.size();
+                    for (int index = 0; index < numSharedLibraries; index++) {
+                        final String libName = mSharedLibraries.keyAt(index);
+                        final WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
+                                mSharedLibraries.get(libName);
+                        if (versionedLib == null) {
+                            continue;
+                        }
+                        final int versionCount = versionedLib.size();
+                        for (int i = 0; i < versionCount; i++) {
+                            SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
+                            if (!checkin) {
+                                if (!printedHeader) {
+                                    if (dumpState.onTitlePrinted()) {
+                                        pw.println();
+                                    }
+                                    pw.println("Libraries:");
+                                    printedHeader = true;
+                                }
+                                pw.print("  ");
+                            } else {
+                                pw.print("lib,");
+                            }
+                            pw.print(libraryInfo.getName());
+                            if (libraryInfo.isStatic()) {
+                                pw.print(" version=" + libraryInfo.getLongVersion());
+                            }
+                            if (!checkin) {
+                                pw.print(" -> ");
+                            }
+                            if (libraryInfo.getPath() != null) {
+                                if (libraryInfo.isNative()) {
+                                    pw.print(" (so) ");
+                                } else {
+                                    pw.print(" (jar) ");
+                                }
+                                pw.print(libraryInfo.getPath());
+                            } else {
+                                pw.print(" (apk) ");
+                                pw.print(libraryInfo.getPackageName());
+                            }
+                            pw.println();
+                        }
+                    }
                     break;
                 }
 
@@ -4676,10 +4728,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         public boolean isInstantAppResolutionAllowedBody(Intent intent,
-                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck) {
+                List<ResolveInfo> resolvedActivities, int userId, boolean skipPackageCheck,
+                int flags) {
             synchronized (mLock) {
                 return super.isInstantAppResolutionAllowedBody(intent, resolvedActivities, userId,
-                        skipPackageCheck);
+                        skipPackageCheck, flags);
             }
         }
         public int getPackageUidInternal(String packageName, int flags, int userId,
@@ -9167,6 +9220,11 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public String[] getPackagesForUid(int uid) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+        enforceCrossUserOrProfilePermission(callingUid, userId,
+                /* requireFullPermission */ false,
+                /* checkShell */ false, "getPackagesForUid");
         return snapshotComputer().getPackagesForUid(uid);
     }
 
@@ -9470,20 +9528,20 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private boolean isInstantAppResolutionAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-            boolean skipPackageCheck) {
+            boolean skipPackageCheck, int flags) {
         return liveComputer().isInstantAppResolutionAllowed(
             intent, resolvedActivities, userId,
-            skipPackageCheck);
+            skipPackageCheck, flags);
     }
 
     // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
     // Or if there's already an ephemeral app installed that handles the action
     private boolean isInstantAppResolutionAllowedBody(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
-            boolean skipPackageCheck) {
+            boolean skipPackageCheck, int flags) {
         return liveComputer().isInstantAppResolutionAllowedBody(
             intent, resolvedActivities, userId,
-            skipPackageCheck);
+            skipPackageCheck, flags);
     }
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
@@ -9540,7 +9598,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
                         if (ps != null && hasAnyDomainApproval(mDomainVerificationManager, ps,
-                                intent, userId)) {
+                                intent, flags, userId)) {
                             return ri;
                         }
                     }
@@ -9597,8 +9655,9 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static boolean hasAnyDomainApproval(
             @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
-            @NonNull Intent intent, @UserIdInt int userId) {
-        return manager.approvalLevelForDomain(pkgSetting, intent, userId)
+            @NonNull Intent intent, @PackageManager.ResolveInfoFlags int resolveInfoFlags,
+            @UserIdInt int userId) {
+        return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
                 > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
@@ -23699,8 +23758,6 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         DumpState dumpState = new DumpState();
-        boolean checkin = false;
-
         ArraySet<String> permissionNames = null;
 
         int opti = 0;
@@ -23750,7 +23807,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
-                checkin = true;
+                dumpState.setCheckIn(true);
             } else if ("--all-components".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_DUMP_ALL_COMPONENTS);
             } else if ("-f".equals(opt)) {
@@ -23904,6 +23961,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final String packageName = dumpState.getTargetPackageName();
+        final boolean checkin = dumpState.isCheckIn();
         if (checkin) {
             pw.println("vers,1");
         }
@@ -23992,11 +24050,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
-            // TODO: Move it to ComputerEngine once LongSparseArray<SharedLibraryInfo> is copied
-            //  in snapshot.
-            synchronized (mLock) {
-                dumpSharedLibrariesLPr(pw, dumpState, checkin);
-            }
+            dump(DumpState.DUMP_LIBS, fd, pw, dumpState);
         }
 
         if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
@@ -24333,53 +24387,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             libraryInfo.getPackageName());
                 }
                 proto.end(sharedLibraryToken);
-            }
-        }
-    }
-
-    private void dumpSharedLibrariesLPr(PrintWriter pw, DumpState dumpState, boolean checkin) {
-        boolean printedHeader = false;
-        final int numSharedLibraries = mSharedLibraries.size();
-        for (int index = 0; index < numSharedLibraries; index++) {
-            final String libName = mSharedLibraries.keyAt(index);
-            WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(libName);
-            if (versionedLib == null) {
-                continue;
-            }
-            final int versionCount = versionedLib.size();
-            for (int i = 0; i < versionCount; i++) {
-                SharedLibraryInfo libraryInfo = versionedLib.valueAt(i);
-                if (!checkin) {
-                    if (!printedHeader) {
-                        if (dumpState.onTitlePrinted()) {
-                            pw.println();
-                        }
-                        pw.println("Libraries:");
-                        printedHeader = true;
-                    }
-                    pw.print("  ");
-                } else {
-                    pw.print("lib,");
-                }
-                pw.print(libraryInfo.getName());
-                if (libraryInfo.isStatic()) {
-                    pw.print(" version=" + libraryInfo.getLongVersion());
-                }
-                if (!checkin) {
-                    pw.print(" -> ");
-                }
-                if (libraryInfo.getPath() != null) {
-                    if (libraryInfo.isNative()) {
-                        pw.print(" (so) ");
-                    } else {
-                        pw.print(" (jar) ");
-                    }
-                    pw.print(libraryInfo.getPath());
-                } else {
-                    pw.print(" (apk) ");
-                    pw.print(libraryInfo.getPackageName());
-                }
-                pw.println();
             }
         }
     }

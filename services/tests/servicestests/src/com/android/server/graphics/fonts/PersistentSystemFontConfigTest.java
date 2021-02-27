@@ -45,7 +45,7 @@ public final class PersistentSystemFontConfigTest {
     public void testWriteRead() throws Exception {
         long expectedModifiedDate = 1234567890;
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
-        config.lastModifiedDate = expectedModifiedDate;
+        config.lastModifiedMillis = expectedModifiedDate;
         config.updatedFontDirs.add("~~abc");
         config.updatedFontDirs.add("~~def");
 
@@ -65,7 +65,7 @@ public final class PersistentSystemFontConfigTest {
                 PersistentSystemFontConfig.Config another = new PersistentSystemFontConfig.Config();
                 PersistentSystemFontConfig.loadFromXml(bais, another);
 
-                assertThat(another.lastModifiedDate).isEqualTo(expectedModifiedDate);
+                assertThat(another.lastModifiedMillis).isEqualTo(expectedModifiedDate);
                 assertThat(another.updatedFontDirs).containsExactly("~~abc", "~~def");
                 assertThat(another.fontFamilies).containsExactly(fontFamily);
             }
@@ -82,7 +82,7 @@ public final class PersistentSystemFontConfigTest {
                      new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))) {
             PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
             PersistentSystemFontConfig.loadFromXml(bais, config);
-            assertThat(config.lastModifiedDate).isEqualTo(0);
+            assertThat(config.lastModifiedMillis).isEqualTo(0);
         }
     }
 
