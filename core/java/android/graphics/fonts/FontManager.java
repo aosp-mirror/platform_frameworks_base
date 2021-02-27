@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -29,7 +28,6 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.text.FontConfig;
-import android.util.Log;
 
 import com.android.internal.graphics.fonts.IFontManager;
 
@@ -198,12 +196,11 @@ public class FontManager {
      * @return The current font configuration. null if failed to fetch information from the system
      *         service.
      */
-    public @Nullable FontConfig getFontConfig() {
+    public @NonNull FontConfig getFontConfig() {
         try {
             return mIFontManager.getFontConfig();
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call getFontConfig", e);
-            return null;
+            throw e.rethrowAsRuntimeException();
         }
     }
 

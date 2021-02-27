@@ -1327,6 +1327,8 @@ public class AppProfiler {
         // Get a list of Stats that have vsize > 0
         final List<ProcessCpuTracker.Stats> stats = getCpuStats(st -> st.vsize > 0);
         final int statsCount = stats.size();
+        long totalMemtrackGraphics = 0;
+        long totalMemtrackGl = 0;
         for (int i = 0; i < statsCount; i++) {
             ProcessCpuTracker.Stats st = stats.get(i);
             long pss = Debug.getPss(st.pid, swaptrackTmp, memtrackTmp);
@@ -1337,6 +1339,8 @@ public class AppProfiler {
                     mi.pss = pss;
                     mi.swapPss = swaptrackTmp[1];
                     mi.memtrack = memtrackTmp[0];
+                    totalMemtrackGraphics += memtrackTmp[1];
+                    totalMemtrackGl += memtrackTmp[2];
                     memInfos.add(mi);
                 }
             }
@@ -1345,20 +1349,18 @@ public class AppProfiler {
         long totalPss = 0;
         long totalSwapPss = 0;
         long totalMemtrack = 0;
-        long totalMemtrackGraphics = 0;
-        long totalMemtrackGl = 0;
         for (int i = 0, size = memInfos.size(); i < size; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
                 mi.pss = Debug.getPss(mi.pid, swaptrackTmp, memtrackTmp);
                 mi.swapPss = swaptrackTmp[1];
                 mi.memtrack = memtrackTmp[0];
+                totalMemtrackGraphics += memtrackTmp[1];
+                totalMemtrackGl += memtrackTmp[2];
             }
             totalPss += mi.pss;
             totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
-            totalMemtrackGraphics += memtrackTmp[1];
-            totalMemtrackGl += memtrackTmp[2];
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
             @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {

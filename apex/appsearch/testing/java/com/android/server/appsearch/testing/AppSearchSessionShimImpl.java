@@ -124,8 +124,7 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
     @NonNull
     public SearchResultsShim search(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
-        SearchResults searchResults =
-                mAppSearchSession.search(queryExpression, searchSpec, mExecutor);
+        SearchResults searchResults = mAppSearchSession.search(queryExpression, searchSpec);
         return new SearchResultsShimImpl(searchResults, mExecutor);
     }
 

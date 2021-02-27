@@ -55,7 +55,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
@@ -160,7 +159,6 @@ public class PeopleSpaceUtils {
         List<ConversationChannelWrapper> conversations =
                 notificationManager.getConversations(
                         false).getList();
-
         // Add priority conversations to tiles list.
         Stream<ShortcutInfo> priorityConversations = conversations.stream()
                 .filter(c -> c.getNotificationChannel() != null
@@ -252,7 +250,11 @@ public class PeopleSpaceUtils {
             }
 
             // If tile is null, we need to retrieve from persisted storage.
-            if (DEBUG) Log.d(TAG, "Retrieving from storage after reboots");
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Retrieving from storage after reboots: " + shortcutId + " user: " + userId
+                                + " pkg: " + pkg);
+            }
             LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
             ConversationChannel channel = peopleManager.getConversation(pkg, userId, shortcutId);
             if (channel == null) {
@@ -384,7 +386,7 @@ public class PeopleSpaceUtils {
             PeopleSpaceTile tile, Map<String, NotificationEntry> visibleNotifications) {
         String shortcutId = tile.getId();
         String packageName = tile.getPackageName();
-        int userId = UserHandle.getUserHandleForUid(tile.getUid()).getIdentifier();
+        int userId = getUserId(tile);
         String key = getKey(shortcutId, packageName, userId);
         if (!visibleNotifications.containsKey(key)) {
             if (DEBUG) Log.d(TAG, "No existing notifications for key:" + key);
@@ -641,7 +643,8 @@ public class PeopleSpaceUtils {
             activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, tile.getId());
             activityIntent.putExtra(
                     PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
-            activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_UID, tile.getUid());
+            activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE,
+                    tile.getUserHandle());
             views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
                     context,
                     appWidgetId,
@@ -788,7 +791,6 @@ public class PeopleSpaceUtils {
             Log.i(TAG, "ConversationChannel is null");
             return null;
         }
-
         PeopleSpaceTile tile = new PeopleSpaceTile.Builder(channel, launcherApps).build();
         if (!PeopleSpaceUtils.shouldKeepConversation(tile)) {
             Log.i(TAG, "PeopleSpaceTile is not valid");
@@ -1069,11 +1071,6 @@ public class PeopleSpaceUtils {
 
     /** Returns the userId associated with a {@link PeopleSpaceTile} */
     public static int getUserId(PeopleSpaceTile tile) {
-        return getUserHandle(tile).getIdentifier();
-    }
-
-    /** Returns the {@link UserHandle} associated with a {@link PeopleSpaceTile} */
-    public static UserHandle getUserHandle(PeopleSpaceTile tile) {
-        return UserHandle.getUserHandleForUid(tile.getUid());
+        return tile.getUserHandle().getIdentifier();
     }
 }

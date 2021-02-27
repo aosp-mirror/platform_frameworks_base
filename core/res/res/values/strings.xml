@@ -1644,7 +1644,7 @@
     <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->
     <string name="face_acquired_pan_too_extreme">Turn your head a little less.</string>
     <!-- Message shown during acqusition when the user's face is tilted too high or too low [CHAR LIMIT=50] -->
-    <string name="face_acquired_tilt_too_extreme">Turn your head a little less.</string>
+    <string name="face_acquired_tilt_too_extreme">Tilt your head a little less.</string>
     <!-- Message shown during acquisiton when the user's face is tilted too far left or right [CHAR LIMIT=50] -->
     <string name="face_acquired_roll_too_extreme">Turn your head a little less.</string>
     <!-- Message shown during acquisition when the user's face is obscured [CHAR LIMIT=50] -->
@@ -5849,4 +5849,8 @@ ul.</string>
     <!--- Label for notification channel for all sensor privacy related notifications. [CHAR LIMIT=NONE] -->
     <string name="sensor_privacy_notification_channel_label">Sensor Privacy</string>
 
+    <!-- Content description for the icon on the splash screen. [CHAR LIMIT=50] -->
+    <string name="splash_screen_view_icon_description">Application icon</string>
+    <!-- Content description for the branding image on the splash screen. [CHAR LIMIT=50] -->
+    <string name="splash_screen_view_branding_description">Application branding image</string>
 </resources>

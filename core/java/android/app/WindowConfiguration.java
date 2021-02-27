@@ -57,7 +57,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * TODO: Investigate combining with {@link #mAppBounds}. Can the latter be a product of the
      * former?
      */
-    private Rect mBounds = new Rect();
+    private final Rect mBounds = new Rect();
 
     /**
      * {@link android.graphics.Rect} defining app bounds. The dimensions override usages of
@@ -71,7 +71,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * The maximum {@link Rect} bounds that an app can expect. It is used to report value of
      * {@link WindowManager#getMaximumWindowMetrics()}.
      */
-    private Rect mMaxBounds = new Rect();
+    private final Rect mMaxBounds = new Rect();
 
     /**
      * The current rotation of this window container relative to the default
@@ -240,9 +240,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mBounds, flags);
-        dest.writeParcelable(mAppBounds, flags);
-        dest.writeParcelable(mMaxBounds, flags);
+        mBounds.writeToParcel(dest, flags);
+        dest.writeTypedObject(mAppBounds, flags);
+        mMaxBounds.writeToParcel(dest, flags);
         dest.writeInt(mWindowingMode);
         dest.writeInt(mActivityType);
         dest.writeInt(mAlwaysOnTop);
@@ -250,10 +250,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         dest.writeInt(mDisplayWindowingMode);
     }
 
-    private void readFromParcel(Parcel source) {
-        mBounds = source.readParcelable(Rect.class.getClassLoader());
-        mAppBounds = source.readParcelable(Rect.class.getClassLoader());
-        mMaxBounds = source.readParcelable(Rect.class.getClassLoader());
+    /** @hide */
+    public void readFromParcel(@NonNull Parcel source) {
+        mBounds.readFromParcel(source);
+        mAppBounds = source.readTypedObject(Rect.CREATOR);
+        mMaxBounds.readFromParcel(source);
         mWindowingMode = source.readInt();
         mActivityType = source.readInt();
         mAlwaysOnTop = source.readInt();
@@ -693,9 +694,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
         protoOutputStream.write(WINDOWING_MODE, mWindowingMode);
         protoOutputStream.write(ACTIVITY_TYPE, mActivityType);
-        if (mBounds != null) {
-            mBounds.dumpDebug(protoOutputStream, BOUNDS);
-        }
+        mBounds.dumpDebug(protoOutputStream, BOUNDS);
         mMaxBounds.dumpDebug(protoOutputStream, MAX_BOUNDS);
         protoOutputStream.end(token);
     }
@@ -719,11 +718,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                         mAppBounds.readFromProto(proto, APP_BOUNDS);
                         break;
                     case (int) BOUNDS:
-                        mBounds = new Rect();
                         mBounds.readFromProto(proto, BOUNDS);
                         break;
                     case (int) MAX_BOUNDS:
-                        mMaxBounds = new Rect();
                         mMaxBounds.readFromProto(proto, MAX_BOUNDS);
                         break;
                     case (int) WINDOWING_MODE:

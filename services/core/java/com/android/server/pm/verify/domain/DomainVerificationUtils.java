@@ -40,10 +40,13 @@ public final class DomainVerificationUtils {
         throw new NameNotFoundException("Package " + packageName + " unavailable");
     }
 
-    public static boolean isDomainVerificationIntent(Intent intent) {
-        return intent.isWebIntent()
-                && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
-                && intent.hasCategory(Intent.CATEGORY_DEFAULT);
+    public static boolean isDomainVerificationIntent(Intent intent, int resolveInfoFlags) {
+        if (!intent.isWebIntent() || !intent.hasCategory(Intent.CATEGORY_BROWSABLE)) {
+            return false;
+        }
+
+        return ((resolveInfoFlags & PackageManager.MATCH_DEFAULT_ONLY) != 0)
+                || intent.hasCategory(Intent.CATEGORY_DEFAULT);
     }
 
     static boolean isChangeEnabled(PlatformCompat platformCompat, AndroidPackage pkg,
