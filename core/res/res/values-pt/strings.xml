@@ -867,7 +867,7 @@
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausar"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"Reproduzir"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Parar"</string>
-    <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Retroceder"</string>
+    <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Voltar"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avançar"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Rede bloqueada"</string>
@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Solicitação SS alterada para videochamada"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Solicitação SS alterada para solicitação USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Alterada para uma nova solicitação SS"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Alerta de phishing"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de trabalho"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Alertado"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expandir"</string>

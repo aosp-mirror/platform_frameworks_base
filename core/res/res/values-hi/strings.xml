@@ -685,7 +685,7 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"देखने की अनुमतियां चालू करें"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"इस्तेमाल करने वाले को किसी ऐप्लिकेशन के लिए अनुमतियों का इस्तेमाल शुरू करने देता है. सामान्य ऐप्लिकेशन के लिए इसकी ज़रूरत कभी नहीं पड़ती."</string>
-    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को, नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यह अनुमति मिलने पर ऐप्लिकेशन, 200 हर्ट्ज़ से ज़्यादा की दर पर सेंसर डेटा का नमूना ले पाएगा"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>

@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Yêu cầu SS đã thay đổi thành cuộc gọi video"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Yêu cầu SS đã thay đổi thành yêu cầu USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Đã thay đổi thành yêu cầu SS mới"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Cảnh báo về hành vi lừa đảo"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Hồ sơ công việc"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Đã phát âm báo"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Mở rộng"</string>
