@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"ఇక ముఖం గుర్తించలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"ఒకే మాదిరిగా ఉంది, దయచేసి భంగిమను మార్చండి."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"మీ తలను ఇంకాస్త తక్కువ తిప్పండి."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"మీ తలను ఇంకాస్త తక్కువ తిప్పండి."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"మీ తలను ఎడమ/కుడి వైపుగా ఇంకాస్త తిప్పండి."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేస్తుంది."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"నల్లని పట్టీతో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"కలర్ సరిచేయడం"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"ప్రకాశాన్ని తగ్గించండి"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఉపయోగించడానికి వాల్యూమ్ కీలు రెండింటినీ 3 సెకన్లు నొక్కి ఉంచండి"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"కొనసాగించడానికి, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&amp;gtకు మీ పరికరం యొక్క కెమెరా యాక్సెస్ అవసరం."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ఆన్ చేయి"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"సెన్సార్ గోప్యత"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>

@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan nie meer gesig herken nie. Probeer weer."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Te eenders. Verander asseblief jou pose."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Draai jou kop \'n bietjie minder."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Draai jou kop \'n bietjie minder."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Draai jou kop \'n bietjie minder."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Verwyder enigiets wat jou gesig versteek."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Maak die bokant van jou skerm skoon, insluitend die swart balk"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gebruik kortpad"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleuromkering"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Kleurkorreksie"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Verminder helderheid"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Het volumesleutels ingehou. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aangeskakel."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Het volumesleutels ingehou. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> is afgeskakel"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Druk en hou albei volumesleutels drie sekondes lank om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruik"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Om voort te gaan, moet &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; toegang tot jou toestel se kamera hê."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Skakel aan"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorprivaatheid"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>

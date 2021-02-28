@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"अब चेहरे की पहचान नहीं कर पा रहा. फिर से कोशिश करें."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"चेहरा काफ़ी मिलता-जुलता है, कृपया अपना पोज़ बदलें."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"अपना सिर थोड़ा कम घुमाएं."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"अपना सिर थोड़ा कम घुमाएं."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"अपना सिर थोड़ा कम घुमाएं."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"आपके चेहरे को छिपाने वाली सभी चीज़ों को हटाएं."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"अपनी स्क्रीन के सबसे ऊपरी हिस्से को साफ़ करें, जिसमें काले रंग वाला बार भी शामिल है"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट का उपयोग करें"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंग बदलने की सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग में सुधार करने की सुविधा"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"स्क्रीन की चमक कम करें"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू कर दिया गया."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद कर दिया गया."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> इस्तेमाल करने के लिए आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"जारी रखने के लिए, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; को आपके डिवाइस का कैमरा ऐक्सेस करने की ज़रूरत है."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"चालू करें"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेंसर से जुड़ी निजता के बारे में सूचना"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>
