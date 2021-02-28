@@ -266,8 +266,9 @@ public class TaskRecordTests extends WindowTestsBase {
         root.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(root, task.getRootActivity());
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getRootActivity().getOrientation());
-        assertThat(task.getBounds().width()).isLessThan(task.getBounds().height());
-        assertEquals(fullScreenBounds.height(), task.getBounds().height());
+        // Portrait orientation is enforced on activity level. Task should fill fullscreen bounds.
+        assertThat(task.getBounds().height()).isLessThan(task.getBounds().width());
+        assertEquals(fullScreenBounds, task.getBounds());
 
         // Top activity gets used
         final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).setParentTask(stack)
@@ -286,8 +287,11 @@ public class TaskRecordTests extends WindowTestsBase {
         // Fix the display orientation to portrait which is 90 degrees for the test display.
         dr.setUserRotation(USER_ROTATION_FREE, ROTATION_90);
 
-        assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
-        assertEquals(fullScreenBoundsPort.width(), task.getBounds().width());
+        // Fixed orientation request should be resolved on activity level. Task fills display
+        // bounds.
+        assertThat(task.getBounds().height()).isGreaterThan(task.getBounds().width());
+        assertThat(top.getBounds().width()).isGreaterThan(top.getBounds().height());
+        assertEquals(fullScreenBoundsPort, task.getBounds());
 
         // in FREEFORM, no constraint
         final Rect freeformBounds = new Rect(display.getBounds());
@@ -297,10 +301,11 @@ public class TaskRecordTests extends WindowTestsBase {
         task.setBounds(freeformBounds);
         assertEquals(freeformBounds, task.getBounds());
 
-        // FULLSCREEN letterboxes bounds
+        // FULLSCREEN letterboxes bounds on activity level, no constraint on task level.
         stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
-        assertEquals(fullScreenBoundsPort.width(), task.getBounds().width());
+        assertThat(task.getBounds().height()).isGreaterThan(task.getBounds().width());
+        assertThat(top.getBounds().width()).isGreaterThan(top.getBounds().height());
+        assertEquals(fullScreenBoundsPort, task.getBounds());
 
         // FREEFORM restores bounds as before
         stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -327,9 +332,10 @@ public class TaskRecordTests extends WindowTestsBase {
 
         assertEquals(fullScreenBounds, task.getBounds());
 
-        // Setting app to fixed portrait fits within parent
+        // Setting app to fixed portrait fits within parent on activity level. Task fills parent.
         root.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
-        assertThat(task.getBounds().width()).isLessThan(task.getBounds().height());
+        assertThat(root.getBounds().width()).isLessThan(root.getBounds().height());
+        assertEquals(task.getBounds(), fullScreenBounds);
 
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, task.getOrientation());
     }
@@ -424,7 +430,8 @@ public class TaskRecordTests extends WindowTestsBase {
         // to the input bounds.
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord.CompatDisplayInsets compatIntsets =
-                new ActivityRecord.CompatDisplayInsets(display, activity);
+                new ActivityRecord.CompatDisplayInsets(
+                        display, activity, /* fixedOrientationBounds= */ null);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatIntsets);
 
         assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());

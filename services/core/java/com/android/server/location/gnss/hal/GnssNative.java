@@ -699,11 +699,11 @@ public class GnssNative {
     }
 
     /**
-     * Returns true if antenna info listening is supported.
+     * Returns true if antenna info is supported.
      */
-    public boolean isAntennaInfoListeningSupported() {
+    public boolean isAntennaInfoSupported() {
         Preconditions.checkState(mRegistered);
-        return mGnssHal.isAntennaInfoListeningSupported();
+        return mGnssHal.isAntennaInfoSupported();
     }
 
     /**
@@ -1259,7 +1259,7 @@ public class GnssNative {
             return native_stop_navigation_message_collection();
         }
 
-        protected boolean isAntennaInfoListeningSupported() {
+        protected boolean isAntennaInfoSupported() {
             return native_is_antenna_info_supported();
         }
 

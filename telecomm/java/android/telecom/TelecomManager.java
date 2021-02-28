@@ -1702,22 +1702,22 @@ public class TelecomManager {
     }
 
     /**
-     * Returns whether the caller has {@link InCallService} access for companion apps.
-     *
-     * A companion app is an app associated with a physical wearable device via the
-     * {@link android.companion.CompanionDeviceManager} API.
+     * Returns whether the caller has {@link android.Manifest.permission#MANAGE_ONGOING_CALLS}
+     * permission. The permission can be obtained by associating with a physical wearable device
+     * via the {@link android.companion.CompanionDeviceManager} API as a companion app. If the
+     * caller app has the permission, it has {@link InCallService} access to manage ongoing calls.
      *
      * @return {@code true} if the caller has {@link InCallService} access for
      *      companion app; {@code false} otherwise.
      */
-    public boolean hasCompanionInCallServiceAccess() {
+    public boolean hasManageOngoingCallsPermission() {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.hasCompanionInCallServiceAccess(
+                return service.hasManageOngoingCallsPermission(
                         mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException calling hasCompanionInCallServiceAccess().", e);
+                Log.e(TAG, "RemoteException calling hasManageOngoingCallsPermission().", e);
                 if (!isSystemProcess()) {
                     e.rethrowAsRuntimeException();
                 }

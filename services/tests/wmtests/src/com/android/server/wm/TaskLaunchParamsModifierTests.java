@@ -683,12 +683,12 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
-    public void testLaunchesAppInWindowOnFreeformDisplay() {
+    public void testLaunchesPortraitSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
         mAtm.mSizeCompatFreeform = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
-        Rect expectedLaunchBounds = new Rect(0, 0, 200, 100);
+        Rect expectedLaunchBounds = new Rect(0, 0, 100, 200);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -699,11 +699,44 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         mCurrent.mBounds.set(expectedLaunchBounds);
 
         mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
 
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquals(expectedLaunchBounds, mResult.mBounds);
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+                WINDOWING_MODE_FREEFORM);
+    }
+
+    @Test
+    public void testLaunchesLandscapeSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
+        mAtm.mSizeCompatFreeform = true;
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
+                WINDOWING_MODE_FREEFORM);
+    }
+
+    @Test
+    public void testLaunchesPortraitUnresizableOnFreeformDisplayWithFreeformSizeCompat() {
+        mAtm.mSizeCompatFreeform = true;
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);

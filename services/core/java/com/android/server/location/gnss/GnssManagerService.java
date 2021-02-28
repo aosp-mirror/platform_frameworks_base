@@ -27,6 +27,7 @@ import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssNmeaListener;
@@ -49,7 +50,6 @@ import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.Injector;
 
 import java.io.FileDescriptor;
-import java.util.ArrayList;
 import java.util.List;
 
 /** Manages Gnss providers and related Gnss functions for LocationManagerService. */
@@ -68,11 +68,11 @@ public class GnssManagerService {
     private final GnssNmeaProvider mGnssNmeaProvider;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
+    private final GnssAntennaInfoProvider mGnssAntennaInfoProvider;
     private final IGpsGeofenceHardware mGnssGeofenceProxy;
 
     private final GnssGeofenceHalModule mGeofenceHalModule;
     private final GnssCapabilitiesHalModule mCapabilitiesHalModule;
-    private final GnssAntennaInfoHalModule mAntennaInfoHalModule;
 
     private final GnssMetrics mGnssMetrics;
 
@@ -89,11 +89,11 @@ public class GnssManagerService {
         mGnssNmeaProvider = new GnssNmeaProvider(injector, mGnssNative);
         mGnssMeasurementsProvider = new GnssMeasurementsProvider(injector, mGnssNative);
         mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(injector, mGnssNative);
+        mGnssAntennaInfoProvider = new GnssAntennaInfoProvider(mGnssNative);
         mGnssGeofenceProxy = new GnssGeofenceProxy(mGnssNative);
 
         mGeofenceHalModule = new GnssGeofenceHalModule(mGnssNative);
         mCapabilitiesHalModule = new GnssCapabilitiesHalModule(mGnssNative);
-        mAntennaInfoHalModule = new GnssAntennaInfoHalModule(mGnssNative);
 
         // allow gnss access to begin - we must assume that callbacks can start immediately
         mGnssNative.register();
@@ -140,7 +140,7 @@ public class GnssManagerService {
      * Get GNSS antenna information.
      */
     public @Nullable List<GnssAntennaInfo> getGnssAntennaInfos() {
-        return mAntennaInfoHalModule.getAntennaInfos();
+        return mGnssAntennaInfoProvider.getAntennaInfos();
     }
 
     /**
@@ -242,6 +242,24 @@ public class GnssManagerService {
     }
 
     /**
+     * Adds a GNSS antenna info listener.
+     */
+    public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
+            @Nullable String attributionTag, String listenerId) {
+
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
+        mGnssAntennaInfoProvider.addListener(identity, listener);
+    }
+
+    /**
+     * Removes a GNSS antenna info listener.
+     */
+    public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
+        mGnssAntennaInfoProvider.removeListener(listener);
+    }
+
+    /**
      * Send Ni Response, indicating a location request initiated by a network carrier.
      */
     public void sendNiResponse(int notifId, int userResponse) {
@@ -263,25 +281,34 @@ public class GnssManagerService {
 
         ipw.println("Capabilities: " + mGnssNative.getCapabilities());
 
-        List<GnssAntennaInfo> infos = mAntennaInfoHalModule.getAntennaInfos();
-        if (infos != null) {
-            ipw.println("Antenna Infos: " + infos);
+        if (mGnssStatusProvider.isSupported()) {
+            ipw.println("Status Provider:");
+            ipw.increaseIndent();
+            mGnssStatusProvider.dump(fd, ipw, args);
+            ipw.decreaseIndent();
         }
 
-        ipw.println("Measurements Provider:");
-        ipw.increaseIndent();
-        mGnssMeasurementsProvider.dump(fd, ipw, args);
-        ipw.decreaseIndent();
+        if (mGnssMeasurementsProvider.isSupported()) {
+            ipw.println("Measurements Provider:");
+            ipw.increaseIndent();
+            mGnssMeasurementsProvider.dump(fd, ipw, args);
+            ipw.decreaseIndent();
+        }
 
-        ipw.println("Navigation Message Provider:");
-        ipw.increaseIndent();
-        mGnssNavigationMessageProvider.dump(fd, ipw, args);
-        ipw.decreaseIndent();
+        if (mGnssNavigationMessageProvider.isSupported()) {
+            ipw.println("Navigation Message Provider:");
+            ipw.increaseIndent();
+            mGnssNavigationMessageProvider.dump(fd, ipw, args);
+            ipw.decreaseIndent();
+        }
 
-        ipw.println("Status Provider:");
-        ipw.increaseIndent();
-        mGnssStatusProvider.dump(fd, ipw, args);
-        ipw.decreaseIndent();
+        if (mGnssAntennaInfoProvider.isSupported()) {
+            ipw.println("Navigation Message Provider:");
+            ipw.increaseIndent();
+            ipw.println("Antenna Infos: " + mGnssAntennaInfoProvider.getAntennaInfos());
+            mGnssAntennaInfoProvider.dump(fd, ipw, args);
+            ipw.decreaseIndent();
+        }
 
         GnssPowerStats powerStats = mGnssNative.getPowerStats();
         if (powerStats != null) {
@@ -396,55 +423,6 @@ public class GnssManagerService {
                     return GeofenceHardware.GEOFENCE_ERROR_ID_UNKNOWN;
                 default:
                     return -1;
-            }
-        }
-    }
-
-    private class GnssAntennaInfoHalModule implements GnssNative.BaseCallbacks,
-            GnssNative.AntennaInfoCallbacks {
-
-        private final GnssNative mGnssNative;
-
-        private volatile @Nullable List<GnssAntennaInfo> mAntennaInfos;
-
-        GnssAntennaInfoHalModule(GnssNative gnssNative) {
-            mGnssNative = gnssNative;
-            mGnssNative.addBaseCallbacks(this);
-            mGnssNative.addAntennaInfoCallbacks(this);
-        }
-
-        @Nullable List<GnssAntennaInfo> getAntennaInfos() {
-            return mAntennaInfos;
-        }
-
-        @Override
-        public void onHalStarted() {
-            mGnssNative.startAntennaInfoListening();
-        }
-
-        @Override
-        public void onHalRestarted() {
-            mGnssNative.startAntennaInfoListening();
-        }
-
-        @Override
-        public void onReportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
-            if (antennaInfos.equals(mAntennaInfos)) {
-                return;
-            }
-
-            mAntennaInfos = antennaInfos;
-
-            long ident = Binder.clearCallingIdentity();
-            try {
-                Intent intent = new Intent(LocationManager.ACTION_GNSS_ANTENNA_INFOS_CHANGED)
-                        .putParcelableArrayListExtra(LocationManager.EXTRA_GNSS_ANTENNA_INFOS,
-                                new ArrayList<>(antennaInfos))
-                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
     }

@@ -1264,6 +1264,8 @@ public final class AudioAttributes implements Parcelable {
      *
      * @param usage one of the {@link AudioAttributes} usage constants
      * @return string representing the {@link AudioAttributes} usage constant passed as a parameter
+     *
+     * @hide
      */
     @NonNull
     public static String usageToString(@AttributeSdkUsage int usage) {

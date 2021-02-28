@@ -19,7 +19,9 @@ package android.content.pm.verify.domain;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
+import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
 
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
@@ -34,12 +36,12 @@ import java.util.UUID;
  * against the digital asset links response from the server hosting that domain.
  * <p>
  * These values for each domain can be modified through
- * {@link DomainVerificationManager#setDomainVerificationStatus(UUID, Set, int)}.
+ * {@link DomainVerificationManager#setDomainVerificationStatus(UUID,
+ * Set, int)}.
  *
  * @hide
  */
 @SystemApi
-@SuppressWarnings("DefaultAnnotationParam")
 @DataClass(genAidl = true, genHiddenConstructor = true, genParcelable = true, genToString = true,
         genEqualsHashCode = true)
 public final class DomainVerificationInfo implements Parcelable {
@@ -71,21 +73,29 @@ public final class DomainVerificationInfo implements Parcelable {
     private final String mPackageName;
 
     /**
-     * Map of host names to their current state. State is an integer, which defaults to
-     * {@link DomainVerificationManager#STATE_NO_RESPONSE}. State can be modified by the
-     * domain verification agent (the intended consumer of this API), which can be equal
-     * to {@link DomainVerificationManager#STATE_SUCCESS} when verified, or equal to or
-     * greater than {@link DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED} for
-     * any unsuccessful response.
+     * Map of host names to their current state. State is an integer, which defaults to {@link
+     * DomainVerificationManager#STATE_NO_RESPONSE}. State can be modified by the domain
+     * verification agent (the intended consumer of this API), which can be equal to {@link
+     * DomainVerificationManager#STATE_SUCCESS} when verified, or equal to or greater than {@link
+     * DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED} for any unsuccessful response.
      * <p>
-     * Any value non-inclusive between those 2 values are reserved for use by the system.
-     * The domain verification agent may be able to act on these reserved values, and this
-     * ability can be queried using {@link DomainVerificationManager#isStateModifiable(int)}.
-     * It is expected that the agent attempt to verify all domains that it can modify the
-     * state of, even if it does not understand the meaning of those values.
+     * Any value non-inclusive between those 2 values are reserved for use by the system. The domain
+     * verification agent may be able to act on these reserved values, and this ability can be
+     * queried using {@link DomainVerificationManager#isStateModifiable(int)}. It is expected that
+     * the agent attempt to verify all domains that it can modify the state of, even if it does not
+     * understand the meaning of those values.
      */
     @NonNull
     private final Map<String, Integer> mHostToStateMap;
+
+    private void parcelHostToStateMap(Parcel dest, @SuppressWarnings("unused") int flags) {
+        DomainVerificationUtils.writeHostMap(dest, mHostToStateMap);
+    }
+
+    private Map<String, Integer> unparcelHostToStateMap(Parcel in) {
+        return DomainVerificationUtils.readHostMap(in, new ArrayMap<>(),
+                DomainVerificationUserSelection.class.getClassLoader());
+    }
 
 
 
@@ -95,7 +105,8 @@ public final class DomainVerificationInfo implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationInfo.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain
+    // /DomainVerificationInfo.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -123,18 +134,17 @@ public final class DomainVerificationInfo implements Parcelable {
      * @param packageName
      *   The package name that this data corresponds to.
      * @param hostToStateMap
-     *   Map of host names to their current state. State is an integer, which defaults to
-     *   {@link DomainVerificationManager#STATE_NO_RESPONSE}. State can be modified by the
-     *   domain verification agent (the intended consumer of this API), which can be equal
-     *   to {@link DomainVerificationManager#STATE_SUCCESS} when verified, or equal to or
-     *   greater than {@link DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED} for
-     *   any unsuccessful response.
+     *   Map of host names to their current state. State is an integer, which defaults to {@link
+     *   DomainVerificationManager#STATE_NO_RESPONSE}. State can be modified by the domain
+     *   verification agent (the intended consumer of this API), which can be equal to {@link
+     *   DomainVerificationManager#STATE_SUCCESS} when verified, or equal to or greater than {@link
+     *   DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED} for any unsuccessful response.
      *   <p>
-     *   Any value non-inclusive between those 2 values are reserved for use by the system.
-     *   The domain verification agent may be able to act on these reserved values, and this
-     *   ability can be queried using {@link DomainVerificationManager#isStateModifiable(int)}.
-     *   It is expected that the agent attempt to verify all domains that it can modify the
-     *   state of, even if it does not understand the meaning of those values.
+     *   Any value non-inclusive between those 2 values are reserved for use by the system. The domain
+     *   verification agent may be able to act on these reserved values, and this ability can be
+     *   queried using {@link DomainVerificationManager#isStateModifiable(int)}. It is expected that
+     *   the agent attempt to verify all domains that it can modify the state of, even if it does not
+     *   understand the meaning of those values.
      * @hide
      */
     @DataClass.Generated.Member
@@ -185,18 +195,17 @@ public final class DomainVerificationInfo implements Parcelable {
     }
 
     /**
-     * Map of host names to their current state. State is an integer, which defaults to
-     * {@link DomainVerificationManager#STATE_NO_RESPONSE}. State can be modified by the
-     * domain verification agent (the intended consumer of this API), which can be equal
-     * to {@link DomainVerificationManager#STATE_SUCCESS} when verified, or equal to or
-     * greater than {@link DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED} for
-     * any unsuccessful response.
+     * Map of host names to their current state. State is an integer, which defaults to {@link
+     * DomainVerificationManager#STATE_NO_RESPONSE}. State can be modified by the domain
+     * verification agent (the intended consumer of this API), which can be equal to {@link
+     * DomainVerificationManager#STATE_SUCCESS} when verified, or equal to or greater than {@link
+     * DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED} for any unsuccessful response.
      * <p>
-     * Any value non-inclusive between those 2 values are reserved for use by the system.
-     * The domain verification agent may be able to act on these reserved values, and this
-     * ability can be queried using {@link DomainVerificationManager#isStateModifiable(int)}.
-     * It is expected that the agent attempt to verify all domains that it can modify the
-     * state of, even if it does not understand the meaning of those values.
+     * Any value non-inclusive between those 2 values are reserved for use by the system. The domain
+     * verification agent may be able to act on these reserved values, and this ability can be
+     * queried using {@link DomainVerificationManager#isStateModifiable(int)}. It is expected that
+     * the agent attempt to verify all domains that it can modify the state of, even if it does not
+     * understand the meaning of those values.
      */
     @DataClass.Generated.Member
     public @NonNull Map<String,Integer> getHostToStateMap() {
@@ -260,13 +269,13 @@ public final class DomainVerificationInfo implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         sParcellingForIdentifier.parcel(mIdentifier, dest, flags);
         dest.writeString(mPackageName);
-        dest.writeMap(mHostToStateMap);
+        parcelHostToStateMap(dest, flags);
     }
 
     @Override
@@ -276,14 +285,13 @@ public final class DomainVerificationInfo implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ DomainVerificationInfo(@NonNull android.os.Parcel in) {
+    /* package-private */ DomainVerificationInfo(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         UUID identifier = sParcellingForIdentifier.unparcel(in);
         String packageName = in.readString();
-        Map<String,Integer> hostToStateMap = new java.util.LinkedHashMap<>();
-        in.readMap(hostToStateMap, Integer.class.getClassLoader());
+        Map<String,Integer> hostToStateMap = unparcelHostToStateMap(in);
 
         this.mIdentifier = identifier;
         com.android.internal.util.AnnotationValidations.validate(
@@ -307,16 +315,16 @@ public final class DomainVerificationInfo implements Parcelable {
         }
 
         @Override
-        public DomainVerificationInfo createFromParcel(@NonNull android.os.Parcel in) {
+        public DomainVerificationInfo createFromParcel(@NonNull Parcel in) {
             return new DomainVerificationInfo(in);
         }
     };
 
     @DataClass.Generated(
-            time = 1611862790369L,
+            time = 1613002530369L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationInfo.java",
-            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nclass DomainVerificationInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true)")
+            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nprivate  void parcelHostToStateMap(android.os.Parcel,int)\nprivate  java.util.Map<java.lang.String,java.lang.Integer> unparcelHostToStateMap(android.os.Parcel)\nclass DomainVerificationInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

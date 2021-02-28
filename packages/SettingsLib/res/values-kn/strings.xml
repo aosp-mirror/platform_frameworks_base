@@ -404,6 +404,8 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಅತಿಕ್ರಮಿಸಿ"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ಆ್ಯಪ್‌ಗಳು ಆಧುನಿಕ ಫಾರ್ಮ್ಯಾಟ್‌ಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ ಎಂದು ಊಹಿಸಿ"</string>
+    <!-- no translation found for transcode_notification (5560515979793436168) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ಹೊಂದಿಸಿ"</string>

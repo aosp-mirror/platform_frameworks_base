@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Демейки жүргүзүлгөн транскоддоону өзгөртүп коюу"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Транскоддоо жүргүзүүнү иштетүү"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Колдонмолордо заманбап форматтар колдоого алынат"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Транскоддоо билдирмелерин көрсөтүү"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Иштеп жаткан кызматтар"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Учурда иштеп жаткан кызматтарды көрүп, көзөмөлдөп турасыз"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView кызматы"</string>

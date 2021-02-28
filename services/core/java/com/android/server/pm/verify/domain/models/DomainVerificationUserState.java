@@ -58,6 +58,11 @@ public class DomainVerificationUserState {
         return this;
     }
 
+    public DomainVerificationUserState removeHost(String host) {
+        mEnabledHosts.remove(host);
+        return this;
+    }
+
     public DomainVerificationUserState removeHosts(@NonNull ArraySet<String> newHosts) {
         mEnabledHosts.removeAll(newHosts);
         return this;

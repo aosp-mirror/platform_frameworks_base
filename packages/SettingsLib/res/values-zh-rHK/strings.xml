@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"覆寫轉碼預設設定"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"啟用轉碼功能"</string>
     <string name="transcode_default" msgid="3784803084573509491">"假設應用程式支援新型格式"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"顯示轉碼通知"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"執行中的服務"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"查看並控制目前正在執行中的服務"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 設置"</string>

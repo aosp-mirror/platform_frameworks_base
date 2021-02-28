@@ -77,7 +77,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -7463,92 +7463,73 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Offsets the given rectangle in parent's local coordinates into child's coordinate space
-     * and clips the result to the child View's bounds, padding and clipRect if appropriate. If the
-     * resulting rectangle is not empty, the request is forwarded to the child.
-     * <p>
-     * Note: This method does not account for any static View transformations which may be
-     * applied to the child view.
-     *
-     * @param child            the child to dispatch to
-     * @param localVisibleRect the visible (clipped) area of this ViewGroup, in local coordinates
-     * @param windowOffset     the offset of localVisibleRect within the window
-     * @param targets          a queue to collect located targets
-     */
-    private void dispatchTransformedScrollCaptureSearch(View child, Rect localVisibleRect,
-            Point windowOffset, Queue<ScrollCaptureTarget> targets) {
-
-        // copy local visible rect for modification and dispatch
-        final Rect childVisibleRect = getTempRect();
-        childVisibleRect.set(localVisibleRect);
-
-        // transform to child coords
-        final Point childWindowOffset = getTempPoint();
-        childWindowOffset.set(windowOffset.x, windowOffset.y);
-
-        final int dx = child.mLeft - mScrollX;
-        final int dy = child.mTop - mScrollY;
-
-        childVisibleRect.offset(-dx, -dy);
-        childWindowOffset.offset(dx, dy);
-
-        boolean rectIsVisible = true;
-        final int width = mRight - mLeft;
-        final int height = mBottom - mTop;
-
-        // Clip to child bounds
-        if (getClipChildren()) {
-            rectIsVisible = childVisibleRect.intersect(0, 0, child.getWidth(), child.getHeight());
-        }
-
-        // Clip to child padding.
-        if (rectIsVisible && (child instanceof ViewGroup)
-                && ((ViewGroup) child).getClipToPadding()) {
-            rectIsVisible = childVisibleRect.intersect(
-                    child.mPaddingLeft, child.mPaddingTop,
-                    child.getWidth() - child.mPaddingRight,
-                    child.getHeight() - child.mPaddingBottom);
-        }
-        // Clip to child clipBounds.
-        if (rectIsVisible && child.mClipBounds != null) {
-            rectIsVisible = childVisibleRect.intersect(child.mClipBounds);
-        }
-        if (rectIsVisible) {
-            child.dispatchScrollCaptureSearch(childVisibleRect, childWindowOffset, targets);
-        }
-    }
-
-    /**
      * Handle the scroll capture search request by checking this view if applicable, then to each
      * child view.
      *
      * @param localVisibleRect the visible area of this ViewGroup in local coordinates, according to
      *                         the parent
      * @param windowOffset     the offset of this view within the window
-     * @param targets          the collected list of scroll capture targets
-     *
-     * @hide
+     * @param targets          accepts potential scroll capture targets; {@link Consumer#accept
+     *                         results.accept} may be called zero or more times on the calling
+     *                         thread before onScrollCaptureSearch returns
      */
     @Override
     public void dispatchScrollCaptureSearch(
             @NonNull Rect localVisibleRect, @NonNull Point windowOffset,
-            @NonNull Queue<ScrollCaptureTarget> targets) {
+            @NonNull Consumer<ScrollCaptureTarget> targets) {
+
+        // copy local visible rect for modification and dispatch
+        final Rect rect = getTempRect();
+        rect.set(localVisibleRect);
+
+        if (getClipToPadding()) {
+            rect.inset(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
+        }
 
         // Dispatch to self first.
         super.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targets);
 
-        // Then dispatch to children, if not excluding descendants.
-        if ((getScrollCaptureHint() & SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS) == 0) {
-            final int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = getChildAt(i);
-                // Only visible views can be captured.
-                if (child.getVisibility() != View.VISIBLE) {
-                    continue;
-                }
-                // Transform to child coords and dispatch
-                dispatchTransformedScrollCaptureSearch(child, localVisibleRect, windowOffset,
-                        targets);
+        // Skip children if descendants excluded.
+        if ((getScrollCaptureHint() & SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS) != 0) {
+            return;
+        }
+
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            // Only visible views can be captured.
+            if (child.getVisibility() != View.VISIBLE) {
+                continue;
+            }
+            // Offset the given rectangle (in parent's local coordinates) into child's coordinate
+            // space and clip the result to the child View's bounds, padding and clipRect as needed.
+            // If the resulting rectangle is not empty, the request is forwarded to the child.
+
+            // copy local visible rect for modification and dispatch
+            final Rect childVisibleRect = getTempRect();
+            childVisibleRect.set(localVisibleRect);
+
+            // transform to child coords
+            final Point childWindowOffset = getTempPoint();
+            childWindowOffset.set(windowOffset.x, windowOffset.y);
+
+            final int dx = child.mLeft - mScrollX;
+            final int dy = child.mTop - mScrollY;
+
+            childVisibleRect.offset(-dx, -dy);
+            childWindowOffset.offset(dx, dy);
+
+            boolean rectIsVisible = true;
+
+            // Clip to child bounds
+            if (getClipChildren()) {
+                rectIsVisible = childVisibleRect.intersect(0, 0, child.getWidth(),
+                        child.getHeight());
+            }
+
+            // Clip to child padding.
+            if (rectIsVisible) {
+                child.dispatchScrollCaptureSearch(childVisibleRect, childWindowOffset, targets);
             }
         }
     }

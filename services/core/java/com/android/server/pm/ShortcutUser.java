@@ -18,9 +18,14 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.AppSearchSession;
 import android.content.pm.ShortcutManager;
 import android.metrics.LogMaker;
+import android.os.Binder;
 import android.os.FileUtils;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -32,6 +37,7 @@ import android.util.TypedXmlSerializer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.FgThread;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;
 
@@ -45,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -111,6 +118,8 @@ class ShortcutUser {
     }
 
     final ShortcutService mService;
+    final AppSearchManager mAppSearchManager;
+    final Executor mExecutor;
 
     @UserIdInt
     private final int mUserId;
@@ -132,6 +141,9 @@ class ShortcutUser {
     public ShortcutUser(ShortcutService service, int userId) {
         mService = service;
         mUserId = userId;
+        mAppSearchManager = service.mContext.createContextAsUser(UserHandle.of(userId), 0)
+                .getSystemService(AppSearchManager.class);
+        mExecutor = FgThread.getExecutor();
     }
 
     public int getUserId() {
@@ -692,5 +704,19 @@ class ShortcutUser {
                 .setSubtype(packageWithShareTargetsCount));
         logger.write(logMaker.setType(MetricsEvent.SHORTCUTS_CHANGED_SHORTCUT_COUNT)
                 .setSubtype(totalSharingShortcutCount));
+    }
+
+    void runInAppSearch(@NonNull final AppSearchManager.SearchContext searchContext,
+            @NonNull final Consumer<AppSearchResult<AppSearchSession>> callback) {
+        if (mAppSearchManager == null) {
+            Slog.e(TAG, "app search manager is null");
+            return;
+        }
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            mAppSearchManager.createSearchSession(searchContext, mExecutor, callback);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
     }
 }
