@@ -353,7 +353,7 @@ public class LocationProviderManagerTest {
     @Test
     public void testGetLastLocation_ClearOnMockRemoval() {
         MockLocationProvider mockProvider = new MockLocationProvider(PROPERTIES, PROVIDER_IDENTITY,
-                null);
+                Collections.emptySet());
         mockProvider.setAllowed(true);
         mManager.setMockProvider(mockProvider);
 
@@ -1049,7 +1049,7 @@ public class LocationProviderManagerTest {
         private final ArrayList<Runnable> mFlushCallbacks = new ArrayList<>();
 
         TestProvider(ProviderProperties properties, CallerIdentity identity) {
-            super(DIRECT_EXECUTOR, identity, properties, null);
+            super(DIRECT_EXECUTOR, identity, properties, Collections.emptySet());
         }
 
         public void setProviderAllowed(boolean allowed) {

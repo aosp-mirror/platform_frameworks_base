@@ -34,7 +34,7 @@ operator fun DomainVerificationUserSelection.component1() = identifier
 operator fun DomainVerificationUserSelection.component2() = packageName
 operator fun DomainVerificationUserSelection.component3() = user
 operator fun DomainVerificationUserSelection.component4() = isLinkHandlingAllowed
-operator fun DomainVerificationUserSelection.component5() = hostToUserSelectionMap
+operator fun DomainVerificationUserSelection.component5() = hostToStateMap
 
 operator fun DomainVerificationPersistence.ReadResult.component1() = active
 operator fun DomainVerificationPersistence.ReadResult.component2() = restored

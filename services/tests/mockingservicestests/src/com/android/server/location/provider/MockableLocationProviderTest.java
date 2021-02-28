@@ -43,6 +43,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Collections;
+
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -72,7 +74,7 @@ public class MockableLocationProviderTest {
                         .setAccuracy(ACCURACY_FINE)
                         .build(),
                 CallerIdentity.forTest(0, 1, "testpackage", "test"),
-                null);
+                Collections.emptySet());
 
         mProvider = new MockableLocationProvider(lock);
         mProvider.getController().setListener(mListener);

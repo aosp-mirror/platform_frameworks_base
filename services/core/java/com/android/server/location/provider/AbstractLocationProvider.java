@@ -28,6 +28,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -66,9 +67,10 @@ public abstract class AbstractLocationProvider {
 
         /**
          * Default state value for a location provider that is disabled with no properties and an
-         * empty provider package list.
+         * empty extra attribution tag set.
          */
-        public static final State EMPTY_STATE = new State(false, null, null, null);
+        public static final State EMPTY_STATE = new State(false, null, null,
+                Collections.emptySet());
 
         /**
          * The provider's allowed state.
@@ -85,14 +87,18 @@ public abstract class AbstractLocationProvider {
          */
         @Nullable public final CallerIdentity identity;
 
-        @Nullable public final Set<String> locationTags;
+        /**
+         * A set of attribution tags also associated with this provider - these attribution tags may
+         * be afforded special privileges.
+         */
+        public final Set<String> extraAttributionTags;
 
         private State(boolean allowed, ProviderProperties properties, CallerIdentity identity,
-                Set<String> locationTags) {
+                Set<String> extraAttributionTags) {
             this.allowed = allowed;
             this.properties = properties;
             this.identity = identity;
-            this.locationTags = locationTags;
+            this.extraAttributionTags = Objects.requireNonNull(extraAttributionTags);
         }
 
         /**
@@ -102,7 +108,7 @@ public abstract class AbstractLocationProvider {
             if (allowed == this.allowed) {
                 return this;
             } else {
-                return new State(allowed, properties, identity, locationTags);
+                return new State(allowed, properties, identity, extraAttributionTags);
             }
         }
 
@@ -113,7 +119,7 @@ public abstract class AbstractLocationProvider {
             if (Objects.equals(properties, this.properties)) {
                 return this;
             } else {
-                return new State(allowed, properties, identity, locationTags);
+                return new State(allowed, properties, identity, extraAttributionTags);
             }
         }
 
@@ -124,18 +130,18 @@ public abstract class AbstractLocationProvider {
             if (Objects.equals(identity, this.identity)) {
                 return this;
             } else {
-                return new State(allowed, properties, identity, locationTags);
+                return new State(allowed, properties, identity, extraAttributionTags);
             }
         }
 
         /**
-         * Returns a state the same as the current but with location tags set as specified.
+         * Returns a state the same as the current but with extra attribution tags set as specified.
          */
-        public State withLocationTags(@Nullable Set<String> locationTags) {
-            if (Objects.equals(locationTags, this.locationTags)) {
+        public State withExtraAttributionTags(Set<String> extraAttributionTags) {
+            if (extraAttributionTags.equals(this.extraAttributionTags)) {
                 return this;
             } else {
-                return new State(allowed, properties, identity, locationTags);
+                return new State(allowed, properties, identity, extraAttributionTags);
             }
         }
 
@@ -151,12 +157,12 @@ public abstract class AbstractLocationProvider {
             State state = (State) o;
             return allowed == state.allowed && properties == state.properties
                     && Objects.equals(identity, state.identity)
-                    && Objects.equals(locationTags, state.locationTags);
+                    && extraAttributionTags.equals(state.extraAttributionTags);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(allowed, properties, identity, locationTags);
+            return Objects.hash(allowed, properties, identity, extraAttributionTags);
         }
     }
 
@@ -213,14 +219,14 @@ public abstract class AbstractLocationProvider {
      * An optional identity and properties may be provided to initialize the location provider.
      */
     protected AbstractLocationProvider(Executor executor, @Nullable CallerIdentity identity,
-            @Nullable ProviderProperties properties, @Nullable Set<String> locationTags) {
+            @Nullable ProviderProperties properties, Set<String> extraAttributionTags) {
         Preconditions.checkArgument(identity == null || identity.getListenerId() == null);
-        mExecutor = executor;
+        mExecutor = Objects.requireNonNull(executor);
         mInternalState = new AtomicReference<>(new InternalState(null,
                 State.EMPTY_STATE
                         .withIdentity(identity)
-                        .withProperties(properties).withLocationTags(locationTags))
-        );
+                        .withProperties(properties)
+                        .withExtraAttributionTags(extraAttributionTags)));
         mController = new Controller();
     }
 
@@ -292,7 +298,7 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * Call this method to report a change in provider packages.
+     * Call this method to report a change in the provider's identity.
      */
     protected void setIdentity(@Nullable CallerIdentity identity) {
         Preconditions.checkArgument(identity == null || identity.getListenerId() == null);
@@ -300,10 +306,10 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * Call this method to report a change in provider location tags.
+     * Call this method to report a change in the provider's extra attribution tags.
      */
-    protected void setLocationTags(@Nullable Set<String> locationTags) {
-        setState(state -> state.withLocationTags(locationTags));
+    protected void setExtraAttributionTags(Set<String> extraAttributionTags) {
+        setState(state -> state.withExtraAttributionTags(extraAttributionTags));
     }
 
     /**

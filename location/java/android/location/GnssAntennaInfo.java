@@ -39,11 +39,7 @@ public final class GnssAntennaInfo implements Parcelable {
 
     /**
      * Used for receiving GNSS antenna info from the GNSS engine.
-     *
-     * @deprecated Prefer to use a broadcast receiver for
-     * {@link LocationManager#ACTION_GNSS_ANTENNA_INFOS_CHANGED}.
      */
-    @Deprecated
     public interface Listener {
         /**
          * Invoked on a change to GNSS antenna info.

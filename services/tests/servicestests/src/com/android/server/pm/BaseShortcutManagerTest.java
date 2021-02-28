@@ -45,6 +45,13 @@ import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.Person;
 import android.app.admin.DevicePolicyManager;
+import android.app.appsearch.AppSearchBatchResult;
+import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.IAppSearchBatchResultCallback;
+import android.app.appsearch.IAppSearchManager;
+import android.app.appsearch.IAppSearchResultCallback;
+import android.app.appsearch.PackageIdentifier;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -78,6 +85,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -150,12 +158,19 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     return mMockUserManager;
                 case Context.DEVICE_POLICY_SERVICE:
                     return mMockDevicePolicyManager;
+                case Context.APP_SEARCH_SERVICE:
+                    return new AppSearchManager(getTestContext(), mMockAppSearchManager);
                 case Context.ROLE_SERVICE:
                     // RoleManager is final and cannot be mocked, so we only override the inject
                     // accessor methods in ShortcutService.
                     return getTestContext().getSystemService(name);
             }
             throw new UnsupportedOperationException("Couldn't find system service: " + name);
+        }
+
+        @Override
+        public String getOpPackageName() {
+            return getTestContext().getOpPackageName();
         }
 
         @Override
@@ -601,6 +616,123 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
     }
 
+    protected class MockAppSearchManager implements IAppSearchManager {
+
+        protected Map<String, List<PackageIdentifier>> mSchemasPackageAccessible =
+                new ArrayMap<>(1);
+
+        @Override
+        public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
+                List<String> schemasNotPlatformSurfaceable,
+                Map<String, List<Bundle>> schemasPackageAccessibleBundles, boolean forceOverride,
+                int userId, IAppSearchResultCallback callback) throws RemoteException {
+            for (Map.Entry<String, List<Bundle>> entry :
+                    schemasPackageAccessibleBundles.entrySet()) {
+                final String key = entry.getKey();
+                final List<PackageIdentifier> packageIdentifiers;
+                if (!mSchemasPackageAccessible.containsKey(key)) {
+                    packageIdentifiers = new ArrayList<>(entry.getValue().size());
+                    mSchemasPackageAccessible.put(key, packageIdentifiers);
+                } else {
+                    packageIdentifiers = mSchemasPackageAccessible.get(key);
+                }
+                for (int i = 0; i < entry.getValue().size(); i++) {
+                    packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));
+                }
+            }
+            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+        }
+
+        @Override
+        public void getSchema(String packageName, String databaseName, int userId,
+                IAppSearchResultCallback callback) throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void putDocuments(String packageName, String databaseName,
+                List<Bundle> documentBundles, int userId, IAppSearchBatchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void getDocuments(String packageName, String databaseName, String namespace,
+                List<String> uris, Map<String, List<String>> typePropertyPaths, int userId,
+                IAppSearchBatchResultCallback callback) throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void query(String packageName, String databaseName, String queryExpression,
+                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void globalQuery(String packageName, String queryExpression, Bundle searchSpecBundle,
+                int userId, IAppSearchResultCallback callback) throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void getNextPage(long nextPageToken, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void invalidateNextPageToken(long nextPageToken, int userId) throws RemoteException {
+
+        }
+
+        @Override
+        public void reportUsage(String packageName, String databaseName, String namespace,
+                String uri, long usageTimeMillis, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void removeByUri(String packageName, String databaseName, String namespace,
+                List<String> uris, int userId, IAppSearchBatchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void removeByQuery(String packageName, String databaseName, String queryExpression,
+                Bundle searchSpecBundle, int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public void persistToDisk(int userId) throws RemoteException {
+
+        }
+
+        @Override
+        public void initialize(int userId, IAppSearchResultCallback callback)
+                throws RemoteException {
+            ignore(callback);
+        }
+
+        @Override
+        public IBinder asBinder() {
+            return null;
+        }
+
+        private void ignore(IAppSearchResultCallback callback) throws RemoteException {
+            callback.onResult(AppSearchResult.newSuccessfulResult(null));
+        }
+
+        private void ignore(IAppSearchBatchResultCallback callback) throws RemoteException {
+            callback.onResult(new AppSearchBatchResult.Builder().build());
+        }
+    }
+
     public static class ShortcutActivity extends Activity {
     }
 
@@ -652,6 +784,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
     protected DevicePolicyManager mMockDevicePolicyManager;
+    protected MockAppSearchManager mMockAppSearchManager;
     protected UserManagerInternal mMockUserManagerInternal;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
@@ -801,6 +934,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
         mMockDevicePolicyManager = mock(DevicePolicyManager.class);
+        mMockAppSearchManager = new MockAppSearchManager();
         mMockUserManagerInternal = mock(UserManagerInternal.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);

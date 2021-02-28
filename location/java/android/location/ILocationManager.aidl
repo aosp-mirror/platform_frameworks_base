@@ -26,6 +26,7 @@ import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
@@ -91,6 +92,9 @@ interface ILocationManager
 
     void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, @nullable String attributionTag, String listenerId);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
+
+    void addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener, String packageName, @nullable String attributionTag, String listenerId);
+    void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
 
     void addProviderRequestListener(in IProviderRequestListener listener);
     void removeProviderRequestListener(in IProviderRequestListener listener);

@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"デフォルトのコード変換をオーバーライド"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"コード変換を有効にする"</string>
     <string name="transcode_default" msgid="3784803084573509491">"アプリによる最新形式のサポートを想定"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"コード変換に関する通知の表示"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"実行中のサービス"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"現在実行中のサービスを表示して制御する"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView の実装"</string>

@@ -30,6 +30,7 @@ import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.PointerIcon;
+import android.view.ScrollCaptureResponse;
 import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 
@@ -160,7 +161,9 @@ public class BaseIWindow extends IWindow.Stub {
     @Override
     public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
         try {
-            callbacks.onUnavailable();
+            callbacks.onScrollCaptureResponse(
+                    new ScrollCaptureResponse.Builder().setDescription("Not Implemented").build());
+
         } catch (RemoteException ex) {
             // ignore
         }

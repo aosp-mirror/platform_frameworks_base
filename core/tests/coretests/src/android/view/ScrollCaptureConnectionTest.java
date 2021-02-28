@@ -16,16 +16,12 @@
 
 package android.view;
 
-import static androidx.test.InstrumentationRegistry.getInstrumentation;
 import static androidx.test.InstrumentationRegistry.getTargetContext;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.ICancellationSignal;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -42,9 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
 
 /**
  * Tests of {@link ScrollCaptureConnection}.
@@ -56,261 +51,138 @@ public class ScrollCaptureConnectionTest {
     private final Point mPositionInWindow = new Point(1, 2);
     private final Rect mLocalVisibleRect = new Rect(2, 3, 4, 5);
     private final Rect mScrollBounds = new Rect(3, 4, 5, 6);
+    private final TestScrollCaptureCallback mCallback = new TestScrollCaptureCallback();
+
+    private ScrollCaptureTarget mTarget;
+    private ScrollCaptureConnection mConnection;
 
     private Handler mHandler;
-    private ScrollCaptureTarget mTarget1;
 
     @Mock
     private Surface mSurface;
     @Mock
-    private IScrollCaptureCallbacks mConnectionCallbacks;
+    private IScrollCaptureCallbacks mRemote;
     @Mock
-    private View mMockView1;
-    @Mock
-    private ScrollCaptureCallback mCallback1;
+    private View mView;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mHandler = new Handler(getTargetContext().getMainLooper());
+        when(mSurface.isValid()).thenReturn(true);
+        when(mView.getScrollCaptureHint()).thenReturn(View.SCROLL_CAPTURE_HINT_INCLUDE);
 
-        when(mMockView1.getHandler()).thenReturn(mHandler);
-        when(mMockView1.getScrollCaptureHint()).thenReturn(View.SCROLL_CAPTURE_HINT_INCLUDE);
-
-        mTarget1 = new ScrollCaptureTarget(
-                mMockView1, mLocalVisibleRect, mPositionInWindow, mCallback1);
-        mTarget1.setScrollBounds(mScrollBounds);
-    }
-
-    /** Test the DelayedAction timeout helper class works as expected. */
-    @Test
-    public void testDelayedAction() {
-        Runnable action = Mockito.mock(Runnable.class);
-        ScrollCaptureConnection.DelayedAction delayed =
-                new ScrollCaptureConnection.DelayedAction(mHandler, 100, action);
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException ex) {
-            /* ignore */
-        }
-        getInstrumentation().waitForIdleSync();
-        assertFalse(delayed.cancel());
-        assertFalse(delayed.timeoutNow());
-        verify(action, times(1)).run();
-    }
-
-    /** Test the DelayedAction cancel() */
-    @Test
-    public void testDelayedAction_cancel() {
-        Runnable action = Mockito.mock(Runnable.class);
-        ScrollCaptureConnection.DelayedAction delayed =
-                new ScrollCaptureConnection.DelayedAction(mHandler, 100, action);
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException ex) {
-            /* ignore */
-        }
-        assertTrue(delayed.cancel());
-        assertFalse(delayed.timeoutNow());
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException ex) {
-            /* ignore */
-        }
-        getInstrumentation().waitForIdleSync();
-        verify(action, never()).run();
-    }
-
-    /** Test the DelayedAction timeoutNow() - for testing only */
-    @Test
-    public void testDelayedAction_timeoutNow() {
-        Runnable action = Mockito.mock(Runnable.class);
-        ScrollCaptureConnection.DelayedAction delayed =
-                new ScrollCaptureConnection.DelayedAction(mHandler, 100, action);
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException ex) {
-            /* ignore */
-        }
-        assertTrue(delayed.timeoutNow());
-        assertFalse(delayed.cancel());
-        getInstrumentation().waitForIdleSync();
-        verify(action, times(1)).run();
+        mTarget = new ScrollCaptureTarget(mView, mLocalVisibleRect, mPositionInWindow, mCallback);
+        mTarget.setScrollBounds(mScrollBounds);
+        mConnection = new ScrollCaptureConnection(Runnable::run, mTarget, mRemote);
     }
 
     /** Test creating a client with valid info */
     @Test
     public void testConstruction() {
-        new ScrollCaptureConnection(mTarget1, mConnectionCallbacks);
+        ScrollCaptureTarget target = new ScrollCaptureTarget(
+                mView, mLocalVisibleRect, mPositionInWindow, mCallback);
+        target.setScrollBounds(new Rect(1, 2, 3, 4));
+        new ScrollCaptureConnection(Runnable::run, target, mRemote);
     }
 
     /** Test creating a client fails if arguments are not valid. */
     @Test
     public void testConstruction_requiresScrollBounds() {
         try {
-            mTarget1.setScrollBounds(null);
-            new ScrollCaptureConnection(mTarget1, mConnectionCallbacks);
+            mTarget.setScrollBounds(null);
+            new ScrollCaptureConnection(Runnable::run, mTarget, mRemote);
             fail("An exception was expected.");
         } catch (RuntimeException ex) {
             // Ignore, expected.
         }
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private static Answer<Void> runRunnable(int arg) {
-        return invocation -> {
-            Runnable r = invocation.getArgument(arg);
-            r.run();
-            return null;
-        };
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static Answer<Void> reportBufferSent(int sessionArg, long frameNum, Rect capturedArea) {
-        return invocation -> {
-            ScrollCaptureSession session = invocation.getArgument(sessionArg);
-            session.notifyBufferSent(frameNum, capturedArea);
-            return null;
-        };
-    }
-
     /** @see ScrollCaptureConnection#startCapture(Surface) */
     @Test
     public void testStartCapture() throws Exception {
-        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
-                mConnectionCallbacks);
+        mConnection.startCapture(mSurface);
 
-        // Have the session start accepted immediately
-        doAnswer(runRunnable(1)).when(mCallback1)
-                .onScrollCaptureStart(any(ScrollCaptureSession.class), any(Runnable.class));
-        connection.startCapture(mSurface);
-        getInstrumentation().waitForIdleSync();
+        mCallback.completeStartRequest();
+        assertTrue(mConnection.isStarted());
 
-        verify(mCallback1, times(1))
-                .onScrollCaptureStart(any(ScrollCaptureSession.class), any(Runnable.class));
-        verify(mConnectionCallbacks, times(1)).onCaptureStarted();
-        verifyNoMoreInteractions(mConnectionCallbacks);
+        verify(mRemote, times(1)).onCaptureStarted();
+        verifyNoMoreInteractions(mRemote);
     }
 
     @Test
-    public void testStartCaptureTimeout() throws Exception {
-        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
-                mConnectionCallbacks);
-        connection.startCapture(mSurface);
+    public void testStartCapture_cancellation() throws Exception {
+        ICancellationSignal signal = mConnection.startCapture(mSurface);
+        signal.cancel();
 
-        // Force timeout to fire
-        connection.getTimeoutAction().timeoutNow();
+        mCallback.completeStartRequest();
+        assertFalse(mConnection.isStarted());
 
-        getInstrumentation().waitForIdleSync();
-        verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
-    }
-
-    private void startCapture(ScrollCaptureConnection connection) throws Exception {
-        doAnswer(runRunnable(1)).when(mCallback1)
-                .onScrollCaptureStart(any(ScrollCaptureSession.class), any(Runnable.class));
-        connection.startCapture(mSurface);
-        getInstrumentation().waitForIdleSync();
-        reset(mCallback1, mConnectionCallbacks);
+        verifyNoMoreInteractions(mRemote);
     }
 
     /** @see ScrollCaptureConnection#requestImage(Rect) */
     @Test
     public void testRequestImage() throws Exception {
-        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
-                mConnectionCallbacks);
-        startCapture(connection);
+        mConnection.startCapture(mSurface);
+        mCallback.completeStartRequest();
+        reset(mRemote);
 
-        // Stub the callback to complete the request immediately
-        doAnswer(reportBufferSent(/* sessionArg */ 0, /* frameNum */ 1L, new Rect(1, 2, 3, 4)))
-                .when(mCallback1)
-                .onScrollCaptureImageRequest(any(ScrollCaptureSession.class), any(Rect.class));
+        mConnection.requestImage(new Rect(1, 2, 3, 4));
+        mCallback.completeImageRequest(new Rect(1, 2, 3, 4));
 
-        // Make the inbound binder call
-        connection.requestImage(new Rect(1, 2, 3, 4));
-
-        // Wait for handler thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mCallback1, times(1)).onScrollCaptureImageRequest(
-                any(ScrollCaptureSession.class), eq(new Rect(1, 2, 3, 4)));
-
-        // Wait for binder thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mConnectionCallbacks, times(1))
-                .onCaptureBufferSent(eq(1L), eq(new Rect(1, 2, 3, 4)));
-
-        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
+        verify(mRemote, times(1))
+                .onImageRequestCompleted(eq(0), eq(new Rect(1, 2, 3, 4)));
+        verifyNoMoreInteractions(mRemote);
     }
 
     @Test
-    public void testRequestImageTimeout() throws Exception {
-        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
-                mConnectionCallbacks);
-        startCapture(connection);
+    public void testRequestImage_cancellation() throws Exception {
+        mConnection.startCapture(mSurface);
+        mCallback.completeStartRequest();
+        reset(mRemote);
 
-        // Make the inbound binder call
-        connection.requestImage(new Rect(1, 2, 3, 4));
+        ICancellationSignal signal = mConnection.requestImage(new Rect(1, 2, 3, 4));
+        signal.cancel();
+        mCallback.completeImageRequest(new Rect(1, 2, 3, 4));
 
-        // Wait for handler thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mCallback1, times(1)).onScrollCaptureImageRequest(
-                any(ScrollCaptureSession.class), eq(new Rect(1, 2, 3, 4)));
-
-        // Force timeout to fire
-        connection.getTimeoutAction().timeoutNow();
-        getInstrumentation().waitForIdleSync();
-
-        // (callback not stubbed, does nothing)
-        // Timeout triggers request to end capture
-        verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
-        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
+        verifyNoMoreInteractions(mRemote);
     }
 
     /** @see ScrollCaptureConnection#endCapture() */
     @Test
     public void testEndCapture() throws Exception {
-        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
-                mConnectionCallbacks);
-        startCapture(connection);
+        mConnection.startCapture(mSurface);
+        mCallback.completeStartRequest();
+        reset(mRemote);
 
-        // Stub the callback to complete the request immediately
-        doAnswer(runRunnable(0))
-                .when(mCallback1)
-                .onScrollCaptureEnd(any(Runnable.class));
+        mConnection.endCapture();
+        mCallback.completeEndRequest();
 
-        // Make the inbound binder call
-        connection.endCapture();
+        // And the reply is sent
+        verify(mRemote, times(1)).onCaptureEnded();
+        verifyNoMoreInteractions(mRemote);
+    }
 
-        // Wait for handler thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
+    /** @see ScrollCaptureConnection#endCapture() */
+    @Test
+    public void testEndCapture_cancellation() throws Exception {
+        mConnection.startCapture(mSurface);
+        mCallback.completeStartRequest();
+        reset(mRemote);
 
-        // Wait for binder thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mConnectionCallbacks, times(1)).onConnectionClosed();
+        ICancellationSignal signal = mConnection.endCapture();
+        signal.cancel();
+        mCallback.completeEndRequest();
 
-        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
+        verifyNoMoreInteractions(mRemote);
     }
 
     @Test
-    public void testEndCaptureTimeout() throws Exception {
-        final ScrollCaptureConnection connection = new ScrollCaptureConnection(mTarget1,
-                mConnectionCallbacks);
-        startCapture(connection);
-
-        // Make the inbound binder call
-        connection.endCapture();
-
-        // Wait for handler thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mCallback1, times(1)).onScrollCaptureEnd(any(Runnable.class));
-
-        // Force timeout to fire
-        connection.getTimeoutAction().timeoutNow();
-
-        // Wait for binder thread dispatch
-        getInstrumentation().waitForIdleSync();
-        verify(mConnectionCallbacks, times(1)).onConnectionClosed();
-
-        verifyNoMoreInteractions(mCallback1, mConnectionCallbacks);
+    public void testClose() throws Exception {
+        mConnection.close();
+        assertFalse(mConnection.isConnected());
+        verifyNoMoreInteractions(mRemote);
     }
+
 }

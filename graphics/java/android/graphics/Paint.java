@@ -153,6 +153,13 @@ public class Paint {
      * resource bitmaps often are) the filtering will already have been
      * done.</p>
      *
+     * <p>On devices running {@link Build.VERSION_CODES#O} and below, hardware
+     * accelerated drawing always uses bilinear sampling on scaled bitmaps,
+     * regardless of this flag. On devices running {@link Build.VERSION_CODES#Q}
+     * and above, this flag defaults to being set on a new {@code Paint}. It can
+     * be cleared with {@link #setFlags} or {@link #setFilterBitmap}.</p>
+     *
+     * @see #Paint()
      * @see #Paint(int)
      * @see #setFlags(int)
      */
@@ -558,6 +565,12 @@ public class Paint {
 
     /**
      * Create a new paint with default settings.
+     *
+     * <p>On devices running {@link Build.VERSION_CODES#O} and below, hardware
+     * accelerated drawing always acts as if {@link #FILTER_BITMAP_FLAG} is set.
+     * On devices running {@link Build.VERSION_CODES#Q} and above,
+     * {@code FILTER_BITMAP_FLAG} is set by this constructor, and it can be
+     * cleared with {@link #setFlags} or {@link #setFilterBitmap}.</p>
      */
     public Paint() {
         this(0);
@@ -566,6 +579,13 @@ public class Paint {
     /**
      * Create a new paint with the specified flags. Use setFlags() to change
      * these after the paint is created.
+     *
+     * <p>On devices running {@link Build.VERSION_CODES#O} and below, hardware
+     * accelerated drawing always acts as if {@link #FILTER_BITMAP_FLAG} is set.
+     * On devices running {@link Build.VERSION_CODES#Q} and above,
+     * {@code FILTER_BITMAP_FLAG} is always set by this constructor, regardless
+     * of the value of {@code flags}. It can be cleared with {@link #setFlags} or
+     * {@link #setFilterBitmap}.</p>
      *
      * @param flags initial flag bits, as if they were passed via setFlags().
      */
@@ -991,6 +1011,7 @@ public class Paint {
      * device pixels. That is dependent on dithering and xfermodes.
      *
      * @see #setFilterBitmap(boolean) setFilterBitmap()
+     * @see #FILTER_BITMAP_FLAG
      */
     public final boolean isFilterBitmap() {
         return (getFlags() & FILTER_BITMAP_FLAG) != 0;
@@ -1004,6 +1025,7 @@ public class Paint {
      *
      * @param filter true to set the FILTER_BITMAP_FLAG bit in the paint's
      *               flags, false to clear it.
+     * @see #FILTER_BITMAP_FLAG
      */
     public void setFilterBitmap(boolean filter) {
         nSetFilterBitmap(mNativePaint, filter);

@@ -184,10 +184,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -1484,7 +1484,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #getScrollCaptureHint()
      * @see #setScrollCaptureHint(int)
-     * @hide
      */
     public static final int SCROLL_CAPTURE_HINT_AUTO = 0;
 
@@ -1495,7 +1494,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #getScrollCaptureHint()
      * @see #setScrollCaptureHint(int)
-     * @hide
      */
     public static final int SCROLL_CAPTURE_HINT_EXCLUDE = 0x1;
 
@@ -1506,7 +1504,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #getScrollCaptureHint()
      * @see #setScrollCaptureHint(int)
-     * @hide
      */
     public static final int SCROLL_CAPTURE_HINT_INCLUDE = 0x2;
 
@@ -1517,7 +1514,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #getScrollCaptureHint()
      * @see #setScrollCaptureHint(int)
-     * @hide
      */
     public static final int SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS = 0x4;
 
@@ -30053,8 +30049,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Returns the current scroll capture hint for this view.
      *
      * @return the current scroll capture hint
-     *
-     * @hide
      */
     @ScrollCaptureHint
     public int getScrollCaptureHint() {
@@ -30067,8 +30061,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * scroll capture targets.
      *
      * @param hint the scrollCaptureHint flags value to set
-     *
-     * @hide
      */
     public void setScrollCaptureHint(@ScrollCaptureHint int hint) {
         mPrivateFlags4 &= ~PFLAG4_SCROLL_CAPTURE_HINT_MASK;
@@ -30088,10 +30080,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * setting a custom callback to help ensure it is selected as the target.
      *
      * @param callback the new callback to assign
-     *
-     * @hide
      */
-    public void setScrollCaptureCallback(@Nullable ScrollCaptureCallback callback) {
+    public final void setScrollCaptureCallback(@Nullable ScrollCaptureCallback callback) {
         getListenerInfo().mScrollCaptureCallback = callback;
     }
 
@@ -30110,21 +30100,46 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Dispatch a scroll capture search request down the view hierarchy.
+     *
+     * @param localVisibleRect the visible area of this ViewGroup in local coordinates, according to
+     *                         the parent
+     * @param windowOffset     the offset of this view within the window
+     * @param targets          accepts potential scroll capture targets; {@link Consumer#accept
+     *                         results.accept} may be called zero or more times on the calling
+     *                         thread before onScrollCaptureSearch returns
+     */
+    public void dispatchScrollCaptureSearch(
+            @NonNull Rect localVisibleRect, @NonNull Point windowOffset,
+            @NonNull Consumer<ScrollCaptureTarget> targets) {
+        onScrollCaptureSearch(localVisibleRect, windowOffset, targets);
+    }
+
+    /**
      * Called when scroll capture is requested, to search for appropriate content to scroll. If
      * applicable, this view adds itself to the provided list for consideration, subject to the
      * flags set by {@link #setScrollCaptureHint}.
      *
      * @param localVisibleRect the local visible rect of this view
      * @param windowOffset     the offset of localVisibleRect within the window
-     * @param targets          a queue which collects potential targets
-     *
+     * @param targets          accepts potential scroll capture targets; {@link Consumer#accept
+     *                         results.accept} may be called zero or more times on the calling
+     *                         thread before onScrollCaptureSearch returns
      * @throws IllegalStateException if this view is not attached to a window
-     * @hide
      */
-    public void dispatchScrollCaptureSearch(@NonNull Rect localVisibleRect,
-            @NonNull Point windowOffset, @NonNull Queue<ScrollCaptureTarget> targets) {
+    public void onScrollCaptureSearch(@NonNull Rect localVisibleRect,
+            @NonNull Point windowOffset, @NonNull Consumer<ScrollCaptureTarget> targets) {
         int hint = getScrollCaptureHint();
         if ((hint & SCROLL_CAPTURE_HINT_EXCLUDE) != 0) {
+            return;
+        }
+        boolean rectIsVisible = true;
+
+        // Apply clipBounds if present.
+        if (mClipBounds != null) {
+            rectIsVisible = localVisibleRect.intersect(mClipBounds);
+        }
+        if (!rectIsVisible) {
             return;
         }
 
@@ -30132,7 +30147,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ScrollCaptureCallback callback =
                 (mListenerInfo == null) ? null : mListenerInfo.mScrollCaptureCallback;
 
-        // Try internal support for standard scrolling containers.
+        // Try framework support for standard scrolling containers.
         if (callback == null) {
             callback = createScrollCaptureCallbackInternal(localVisibleRect, windowOffset);
         }
@@ -30142,7 +30157,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Add to the list for consideration
             Point offset = new Point(windowOffset.x, windowOffset.y);
             Rect rect = new Rect(localVisibleRect);
-            targets.add(new ScrollCaptureTarget(this, rect, offset, callback));
+            targets.accept(new ScrollCaptureTarget(this, rect, offset, callback));
         }
     }
 

@@ -51,8 +51,8 @@ import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
 import com.android.systemui.statusbar.policy.WifiIcons;
 import com.android.wifitrackerlib.WifiEntry;
 
@@ -303,22 +303,20 @@ public class WifiTile extends QSTileImpl<SignalState> {
         final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description, boolean isTransient,
-                String statusLabel) {
-            if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
-            if (qsIcon == null) {
+        public void setWifiIndicators(WifiIndicators indicators) {
+            if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + indicators.enabled);
+            if (indicators.qsIcon == null) {
                 return;
             }
-            mInfo.enabled = enabled;
-            mInfo.connected = qsIcon.visible;
-            mInfo.wifiSignalIconId = qsIcon.icon;
-            mInfo.ssid = description;
-            mInfo.activityIn = activityIn;
-            mInfo.activityOut = activityOut;
-            mInfo.wifiSignalContentDescription = qsIcon.contentDescription;
-            mInfo.isTransient = isTransient;
-            mInfo.statusLabel = statusLabel;
+            mInfo.enabled = indicators.enabled;
+            mInfo.connected = indicators.qsIcon.visible;
+            mInfo.wifiSignalIconId = indicators.qsIcon.icon;
+            mInfo.ssid = indicators.description;
+            mInfo.activityIn = indicators.activityIn;
+            mInfo.activityOut = indicators.activityOut;
+            mInfo.wifiSignalContentDescription = indicators.qsIcon.contentDescription;
+            mInfo.isTransient = indicators.isTransient;
+            mInfo.statusLabel = indicators.statusLabel;
             if (isShowingDetail()) {
                 mDetailAdapter.updateItems();
             }

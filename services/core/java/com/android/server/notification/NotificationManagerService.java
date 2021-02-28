@@ -64,6 +64,8 @@ import static android.media.AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
+import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -73,6 +75,8 @@ import static android.service.notification.NotificationListenerService.FLAG_FILT
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_NOTIFICATION_EFFECTS;
+import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES;
+import static android.service.notification.NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
@@ -6001,10 +6005,11 @@ public class NotificationManagerService extends SystemService {
                 for (int i = 0; i < intentCount; i++) {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {
-                        am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(),
+                        am.setPendingIntentAllowlistDuration(pendingIntent.getTarget(),
                                 ALLOWLIST_TOKEN, duration,
-                                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED
-                        );
+                                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                                REASON_NOTIFICATION_SERVICE,
+                                "NotificationManagerService");
                         am.setPendingIntentAllowBgActivityStarts(pendingIntent.getTarget(),
                                 ALLOWLIST_TOKEN, (FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER
                                         | FLAG_SERVICE_SENDER));
@@ -9863,31 +9868,52 @@ public class NotificationManagerService extends SystemService {
             Pair listener = Pair.create(si.getComponentName(), userId);
             NotificationListenerFilter existingNlf =
                     mRequestedNotificationListeners.get(listener);
-            if (existingNlf  == null) {
-                // no stored filters for this listener; see if they provided a default
-                if (si.metaData != null) {
-                    String typeList = si.metaData.getString(
-                            NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES);
-                    if (typeList != null) {
-                        int types = 0;
-                        String[] typeStrings = typeList.split(XML_SEPARATOR);
-                        for (int i = 0; i < typeStrings.length; i++) {
-                            if (TextUtils.isEmpty(typeStrings[i])) {
-                                continue;
-                            }
-                            try {
-                                types |= Integer.parseInt(typeStrings[i]);
-                            } catch (NumberFormatException e) {
-                                // skip
-                            }
+            if (si.metaData != null) {
+                if (existingNlf  == null) {
+                    // no stored filters for this listener; see if they provided a default
+                    if (si.metaData.containsKey(META_DATA_DEFAULT_FILTER_TYPES)) {
+                        String typeList =
+                                si.metaData.get(META_DATA_DEFAULT_FILTER_TYPES).toString();
+                        if (typeList != null) {
+                            int types = getTypesFromStringList(typeList);
+                            NotificationListenerFilter nlf =
+                                    new NotificationListenerFilter(types, new ArraySet<>());
+                            mRequestedNotificationListeners.put(listener, nlf);
                         }
+                    }
+                }
 
-                         NotificationListenerFilter nlf =
-                                 new NotificationListenerFilter(types, new ArraySet<>());
+                // also check the types they never want bridged
+                if (si.metaData.containsKey(META_DATA_DISABLED_FILTER_TYPES)) {
+                    int neverBridge = getTypesFromStringList(si.metaData.get(
+                            META_DATA_DISABLED_FILTER_TYPES).toString());
+                    if (neverBridge != 0) {
+                        NotificationListenerFilter nlf =
+                                mRequestedNotificationListeners.getOrDefault(
+                                        listener, new NotificationListenerFilter());
+                        nlf.setTypes(nlf.getTypes() & ~neverBridge);
                         mRequestedNotificationListeners.put(listener, nlf);
                     }
                 }
             }
+        }
+
+        private int getTypesFromStringList(String typeList) {
+            int types = 0;
+            if (typeList != null) {
+                String[] typeStrings = typeList.split(XML_SEPARATOR);
+                for (int i = 0; i < typeStrings.length; i++) {
+                    if (TextUtils.isEmpty(typeStrings[i])) {
+                        continue;
+                    }
+                    try {
+                        types |= Integer.parseInt(typeStrings[i]);
+                    } catch (NumberFormatException e) {
+                        // skip
+                    }
+                }
+            }
+            return types;
         }
 
         @GuardedBy("mNotificationLock")

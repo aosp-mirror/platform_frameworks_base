@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tileimpl
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -31,12 +32,17 @@ import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState
 
+// Placeholder
+private const val CORNER_RADIUS = 40f
+
 class QSTileViewHorizontal(
     context: Context,
     icon: QSIconView
 ) : QSTileView(context, icon, false) {
 
     private var paintDrawable: PaintDrawable? = null
+    private var paintColor = Color.TRANSPARENT
+    private var paintAnimator: ValueAnimator? = null
 
     init {
         orientation = HORIZONTAL
@@ -70,8 +76,8 @@ class QSTileViewHorizontal(
     override fun newTileBackground(): Drawable? {
         val d = super.newTileBackground()
         if (paintDrawable == null) {
-            paintDrawable = PaintDrawable(Color.WHITE).apply {
-                setCornerRadius(50f)
+            paintDrawable = PaintDrawable(paintColor).apply {
+                setCornerRadius(CORNER_RADIUS)
             }
         }
         if (d is RippleDrawable) {
@@ -94,9 +100,39 @@ class QSTileViewHorizontal(
 
     override fun handleStateChanged(state: QSTile.State) {
         super.handleStateChanged(state)
-        paintDrawable?.setTint(getCircleColor(state.state))
         mSecondLine.setTextColor(mLabel.textColors)
         mLabelContainer.background = null
+
+        val allowAnimations = animationsEnabled() && paintColor != Color.TRANSPARENT
+        val newColor = getCircleColor(state.state)
+        if (allowAnimations) {
+            animateToNewState(newColor)
+        } else {
+            if (newColor != paintColor) {
+                clearAnimator()
+                paintDrawable?.paint?.color = newColor
+                paintDrawable?.invalidateSelf()
+            }
+        }
+        paintColor = newColor
+    }
+
+    private fun animateToNewState(newColor: Int) {
+        if (newColor != paintColor) {
+            clearAnimator()
+            paintAnimator = ValueAnimator.ofArgb(paintColor, newColor)
+                .setDuration(QSIconViewImpl.QS_ANIM_LENGTH).apply {
+                    addUpdateListener { animation: ValueAnimator ->
+                        paintDrawable?.paint?.color = animation.animatedValue as Int
+                        paintDrawable?.invalidateSelf()
+                    }
+                    start()
+                }
+        }
+    }
+
+    private fun clearAnimator() {
+        paintAnimator?.cancel()?.also { paintAnimator = null }
     }
 
     override fun handleExpand(dualTarget: Boolean) {}

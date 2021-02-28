@@ -253,6 +253,7 @@ import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.RemoteAnimationAdapter;
+import android.view.ScrollCaptureResponse;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -7159,12 +7160,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         final long token = Binder.clearCallingIdentity();
         try {
+            ScrollCaptureResponse.Builder responseBuilder = new ScrollCaptureResponse.Builder();
             synchronized (mGlobalLock) {
                 DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
                     ProtoLog.e(WM_ERROR,
                             "Invalid displayId for requestScrollCapture: %d", displayId);
-                    callbacks.onUnavailable();
+                    responseBuilder.setDescription(String.format("bad displayId: %d", displayId));
+                    callbacks.onScrollCaptureResponse(responseBuilder.build());
                     return;
                 }
                 WindowState topWindow = null;
@@ -7173,17 +7176,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 WindowState targetWindow = dc.findScrollCaptureTargetWindow(topWindow, taskId);
                 if (targetWindow == null) {
-                    callbacks.onUnavailable();
+                    responseBuilder.setDescription("findScrollCaptureTargetWindow returned null");
+                    callbacks.onScrollCaptureResponse(responseBuilder.build());
                     return;
                 }
-                // Forward to the window for handling.
                 try {
+                    // Forward to the window for handling, which will respond using the callback.
                     targetWindow.mClient.requestScrollCapture(callbacks);
                 } catch (RemoteException e) {
                     ProtoLog.w(WM_ERROR,
                             "requestScrollCapture: caught exception dispatching to window."
                                     + "token=%s", targetWindow.mClient.asBinder());
-                    callbacks.onUnavailable();
+                    responseBuilder.setWindowTitle(targetWindow.getName());
+                    responseBuilder.setDescription(String.format("caught exception: %s", e));
+                    callbacks.onScrollCaptureResponse(responseBuilder.build());
                 }
             }
         } catch (RemoteException e) {

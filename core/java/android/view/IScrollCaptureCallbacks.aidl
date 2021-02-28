@@ -16,11 +16,9 @@
 
 package android.view;
 
-import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.ScrollCaptureResponse;
 import android.view.Surface;
-
-import android.view.IScrollCaptureConnection;
 
 /**
  * Asynchronous callback channel for responses to scroll capture requests.
@@ -29,34 +27,30 @@ import android.view.IScrollCaptureConnection;
  */
 interface IScrollCaptureCallbacks {
     /**
-     * Scroll capture is available, and a connection has been provided.
+     * Provides the result of WindowManagerService#requestScrollCapture
      *
-     * @param connection a connection to a window process and scrollable content
-     * @param scrollAreaInWindow the location of scrolling in global (window) coordinate space
+     * @param response the response which describes the result
      */
-    oneway void onConnected(in IScrollCaptureConnection connection, in Rect scrollBounds,
-            in Point positionInWindow);
+    oneway void onScrollCaptureResponse(in ScrollCaptureResponse response);
 
     /**
-     * The window does not support scroll capture.
-     */
-    oneway void onUnavailable();
-
-    /**
-     * Called when the remote end has confirmed the request and is ready to begin providing image
-     * requests.
+     * Called in reply to IScrollCaptureConnection#startCapture, when the remote end has confirmed
+     * the request and is ready to begin capturing images.
      */
     oneway void onCaptureStarted();
 
     /**
-     * Received a response from a capture request.
+     * Received a response from a capture request. The provided rectangle indicates the portion
+     * of the requested rectangle which was captured. An empty rectangle indicates that the request
+     * could not be satisfied (most commonly due to the available scrolling range).
+     *
+     * @param flags flags describing additional status of the result
+     * @param capturedArea the actual area of the image captured
      */
-    oneway void onCaptureBufferSent(long frameNumber, in Rect capturedArea);
+    oneway void onImageRequestCompleted(int flags, in Rect capturedArea);
 
     /**
-     * Signals that the capture session has completed and the target window may be returned to
-     * normal interactive use. This may be due to normal shutdown, or after a timeout or other
-     * unrecoverable state change such as activity lifecycle, window visibility or focus.
+     * Signals that the capture session has completed and the target window is ready for normal use.
      */
-    oneway void onConnectionClosed();
+    oneway void onCaptureEnded();
 }

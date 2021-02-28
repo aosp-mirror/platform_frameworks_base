@@ -21,7 +21,6 @@ package android {
     field public static final String ACTIVITY_RECOGNITION = "android.permission.ACTIVITY_RECOGNITION";
     field public static final String ADD_VOICEMAIL = "com.android.voicemail.permission.ADD_VOICEMAIL";
     field public static final String ANSWER_PHONE_CALLS = "android.permission.ANSWER_PHONE_CALLS";
-    field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final String BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE";
     field public static final String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
@@ -134,7 +133,6 @@ package android {
     field public static final String RECEIVE_SMS = "android.permission.RECEIVE_SMS";
     field public static final String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
     field public static final String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
-    field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
@@ -12563,7 +12561,6 @@ package android.content.pm {
     field public static final String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
     field public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
     field public static final String FEATURE_WIFI_RTT = "android.hardware.wifi.rtt";
-    field public static final int FLAG_PERMISSION_ALLOWLIST_ROLE = 8; // 0x8
     field public static final int FLAG_PERMISSION_WHITELIST_INSTALLER = 2; // 0x2
     field public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1; // 0x1
     field public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 4; // 0x4
@@ -12702,7 +12699,6 @@ package android.content.pm {
     field public static final int FLAG_HARD_RESTRICTED = 4; // 0x4
     field public static final int FLAG_IMMUTABLY_RESTRICTED = 16; // 0x10
     field public static final int FLAG_INSTALLED = 1073741824; // 0x40000000
-    field public static final int FLAG_INSTALLER_EXEMPT_IGNORED = 32; // 0x20
     field public static final int FLAG_SOFT_RESTRICTED = 8; // 0x8
     field public static final int PROTECTION_DANGEROUS = 1; // 0x1
     field public static final int PROTECTION_FLAG_APPOP = 64; // 0x40
@@ -12902,6 +12898,7 @@ package android.content.pm {
     method public void reportShortcutUsed(String);
     method public boolean requestPinShortcut(@NonNull android.content.pm.ShortcutInfo, @Nullable android.content.IntentSender);
     method public boolean setDynamicShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
+    method public void updateShortcutVisibility(@NonNull String, @Nullable byte[], boolean);
     method public boolean updateShortcuts(@NonNull java.util.List<android.content.pm.ShortcutInfo>);
     field public static final int FLAG_MATCH_CACHED = 8; // 0x8
     field public static final int FLAG_MATCH_DYNAMIC = 2; // 0x2
@@ -19293,8 +19290,8 @@ package android.location {
     method @NonNull public android.location.GnssAntennaInfo.Builder setSignalGainCorrections(@Nullable android.location.GnssAntennaInfo.SphericalCorrections);
   }
 
-  @Deprecated public static interface GnssAntennaInfo.Listener {
-    method @Deprecated public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
+  public static interface GnssAntennaInfo.Listener {
+    method public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
   }
 
   public static final class GnssAntennaInfo.PhaseCenterOffset implements android.os.Parcelable {
@@ -19683,7 +19680,7 @@ package android.location {
     method public boolean hasProvider(@NonNull String);
     method public boolean isLocationEnabled();
     method public boolean isProviderEnabled(@NonNull String);
-    method @Deprecated public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
+    method public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
@@ -19720,13 +19717,11 @@ package android.location {
     method public void setTestProviderEnabled(@NonNull String, boolean);
     method public void setTestProviderLocation(@NonNull String, @NonNull android.location.Location);
     method @Deprecated public void setTestProviderStatus(@NonNull String, int, @Nullable android.os.Bundle, long);
-    method @Deprecated public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
+    method public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
     method public void unregisterGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
     method public void unregisterGnssNavigationMessageCallback(@NonNull android.location.GnssNavigationMessage.Callback);
     method public void unregisterGnssStatusCallback(@NonNull android.location.GnssStatus.Callback);
-    field public static final String ACTION_GNSS_ANTENNA_INFOS_CHANGED = "android.location.action.GNSS_ANTENNA_INFOS_CHANGED";
     field public static final String ACTION_GNSS_CAPABILITIES_CHANGED = "android.location.action.GNSS_CAPABILITIES_CHANGED";
-    field public static final String EXTRA_GNSS_ANTENNA_INFOS = "android.location.extra.GNSS_ANTENNA_INFOS";
     field public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
     field public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
     field public static final String EXTRA_PROVIDER_ENABLED = "android.location.extra.PROVIDER_ENABLED";
@@ -19869,7 +19864,6 @@ package android.media {
     method public int getFlags();
     method public int getUsage();
     method public int getVolumeControlStream();
-    method @NonNull public static String usageToString(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALLOW_CAPTURE_BY_ALL = 1; // 0x1
     field public static final int ALLOW_CAPTURE_BY_NONE = 3; // 0x3
@@ -21302,8 +21296,8 @@ package android.media {
   public static final class MediaCodecInfo.AudioCapabilities {
     method public android.util.Range<java.lang.Integer> getBitrateRange();
     method @NonNull public android.util.Range<java.lang.Integer>[] getInputChannelCountRanges();
-    method public int getMaxInputChannelCount();
-    method public int getMinInputChannelCount();
+    method @IntRange(from=1, to=255) public int getMaxInputChannelCount();
+    method @IntRange(from=1, to=255) public int getMinInputChannelCount();
     method public android.util.Range<java.lang.Integer>[] getSupportedSampleRateRanges();
     method public int[] getSupportedSampleRates();
     method public boolean isSampleRateSupported(int);
@@ -24760,7 +24754,7 @@ package android.media.session {
     method @NonNull public java.util.List<android.media.session.MediaController> getActiveSessions(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<android.media.Session2Token> getSession2Tokens();
     method public boolean isTrustedForMediaControl(@NonNull android.media.session.MediaSessionManager.RemoteUserInfo);
-    method public void notifySession2Created(@NonNull android.media.Session2Token);
+    method @Deprecated public void notifySession2Created(@NonNull android.media.Session2Token);
     method public void removeOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener);
     method public void removeOnSession2TokensChangedListener(@NonNull android.media.session.MediaSessionManager.OnSession2TokensChangedListener);
   }
@@ -31467,10 +31461,10 @@ package android.os {
     method public static android.content.Intent createUserCreationIntent(@Nullable String, @Nullable String, @Nullable String, @Nullable android.os.PersistableBundle);
     method @WorkerThread public android.os.Bundle getApplicationRestrictions(String);
     method public long getSerialNumberForUser(android.os.UserHandle);
-    method @RequiresPermission("android.permission.MANAGE_USERS") public int getUserCount();
+    method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS"}) public int getUserCount();
     method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}, conditional=true) public String getUserName();
+    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, "android.permission.CREATE_USERS"}, conditional=true) public String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
@@ -38082,6 +38076,7 @@ package android.service.notification {
     field public static final int INTERRUPTION_FILTER_PRIORITY = 2; // 0x2
     field public static final int INTERRUPTION_FILTER_UNKNOWN = 0; // 0x0
     field public static final String META_DATA_DEFAULT_FILTER_TYPES = "android.service.notification.default_filter_types";
+    field public static final String META_DATA_DISABLED_FILTER_TYPES = "android.service.notification.disabled_filter_types";
     field public static final int NOTIFICATION_CHANNEL_OR_GROUP_ADDED = 1; // 0x1
     field public static final int NOTIFICATION_CHANNEL_OR_GROUP_DELETED = 3; // 0x3
     field public static final int NOTIFICATION_CHANNEL_OR_GROUP_UPDATED = 2; // 0x2
@@ -39792,7 +39787,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handleMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handleMmi(String, android.telecom.PhoneAccountHandle);
-    method public boolean hasCompanionInCallServiceAccess();
+    method public boolean hasManageOngoingCallsPermission();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isInCall();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isInManagedCall();
     method public boolean isIncomingCallPermitted(android.telecom.PhoneAccountHandle);
@@ -40444,7 +40439,7 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.ImsServiceEntitlement {
-    field public static final String KEY_AES_URL_STRING = "imsserviceentitlement.aes_url_string";
+    field public static final String KEY_ENTITLEMENT_SERVER_URL_STRING = "imsserviceentitlement.entitlement_server_url_string";
     field public static final String KEY_PREFIX = "imsserviceentitlement.";
   }
 
@@ -41672,7 +41667,6 @@ package android.telephony {
 
   public final class SignalStrengthUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.os.IBinder getLiveToken();
     method @NonNull public java.util.Collection<android.telephony.SignalThresholdInfo> getSignalThresholdInfos();
     method public boolean isReportingRequestedWhileIdle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -47573,6 +47567,32 @@ package android.view {
     method public void onScaleEnd(android.view.ScaleGestureDetector);
   }
 
+  @UiThread public interface ScrollCaptureCallback {
+    method public void onScrollCaptureEnd(@NonNull Runnable);
+    method public void onScrollCaptureImageRequest(@NonNull android.view.ScrollCaptureSession, @NonNull android.os.CancellationSignal, @NonNull android.graphics.Rect, @NonNull java.util.function.Consumer<android.graphics.Rect>);
+    method public void onScrollCaptureSearch(@NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.graphics.Rect>);
+    method public void onScrollCaptureStart(@NonNull android.view.ScrollCaptureSession, @NonNull android.os.CancellationSignal, @NonNull Runnable);
+  }
+
+  public class ScrollCaptureSession {
+    ctor public ScrollCaptureSession(@NonNull android.view.Surface, @NonNull android.graphics.Rect, @NonNull android.graphics.Point);
+    method @NonNull public android.graphics.Point getPositionInWindow();
+    method @NonNull public android.graphics.Rect getScrollBounds();
+    method @NonNull public android.view.Surface getSurface();
+  }
+
+  public final class ScrollCaptureTarget {
+    ctor public ScrollCaptureTarget(@NonNull android.view.View, @NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull android.view.ScrollCaptureCallback);
+    method @NonNull public android.view.ScrollCaptureCallback getCallback();
+    method @NonNull public android.view.View getContainingView();
+    method public int getHint();
+    method @NonNull public android.graphics.Rect getLocalVisibleRect();
+    method @NonNull public android.graphics.Point getPositionInWindow();
+    method @Nullable public android.graphics.Rect getScrollBounds();
+    method public void setScrollBounds(@Nullable android.graphics.Rect);
+    method @UiThread public void updatePositionInWindow();
+  }
+
   public class SearchEvent {
     ctor public SearchEvent(android.view.InputDevice);
     method public android.view.InputDevice getInputDevice();
@@ -47899,6 +47919,7 @@ package android.view {
     method public void dispatchProvideStructure(android.view.ViewStructure);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
+    method public void dispatchScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
     method protected void dispatchSetActivated(boolean);
     method protected void dispatchSetPressed(boolean);
     method protected void dispatchSetSelected(boolean);
@@ -48058,6 +48079,7 @@ package android.view {
     method public int getScrollBarFadeDuration();
     method public int getScrollBarSize();
     method public int getScrollBarStyle();
+    method public int getScrollCaptureHint();
     method public int getScrollIndicators();
     method public final int getScrollX();
     method public final int getScrollY();
@@ -48226,6 +48248,7 @@ package android.view {
     method public void onRtlPropertiesChanged(int);
     method @CallSuper @Nullable protected android.os.Parcelable onSaveInstanceState();
     method public void onScreenStateChanged(int);
+    method public void onScrollCaptureSearch(@NonNull android.graphics.Rect, @NonNull android.graphics.Point, @NonNull java.util.function.Consumer<android.view.ScrollCaptureTarget>);
     method protected void onScrollChanged(int, int, int, int);
     method protected boolean onSetAlpha(int);
     method protected void onSizeChanged(int, int, int, int);
@@ -48408,6 +48431,8 @@ package android.view {
     method public void setScrollBarFadeDuration(int);
     method public void setScrollBarSize(int);
     method public void setScrollBarStyle(int);
+    method public final void setScrollCaptureCallback(@Nullable android.view.ScrollCaptureCallback);
+    method public void setScrollCaptureHint(int);
     method public void setScrollContainer(boolean);
     method public void setScrollIndicators(int);
     method public void setScrollIndicators(int, int);
@@ -48586,6 +48611,10 @@ package android.view {
     field public static final int SCROLL_AXIS_HORIZONTAL = 1; // 0x1
     field public static final int SCROLL_AXIS_NONE = 0; // 0x0
     field public static final int SCROLL_AXIS_VERTICAL = 2; // 0x2
+    field public static final int SCROLL_CAPTURE_HINT_AUTO = 0; // 0x0
+    field public static final int SCROLL_CAPTURE_HINT_EXCLUDE = 1; // 0x1
+    field public static final int SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS = 4; // 0x4
+    field public static final int SCROLL_CAPTURE_HINT_INCLUDE = 2; // 0x2
     field public static final int SCROLL_INDICATOR_BOTTOM = 2; // 0x2
     field public static final int SCROLL_INDICATOR_END = 32; // 0x20
     field public static final int SCROLL_INDICATOR_LEFT = 4; // 0x4
@@ -49370,6 +49399,7 @@ package android.view {
     method public abstract boolean performContextMenuIdentifierAction(int, int);
     method public abstract boolean performPanelIdentifierAction(int, int, int);
     method public abstract boolean performPanelShortcut(int, int, android.view.KeyEvent, int);
+    method public void registerScrollCaptureCallback(@NonNull android.view.ScrollCaptureCallback);
     method public final void removeOnFrameMetricsAvailableListener(android.view.Window.OnFrameMetricsAvailableListener);
     method public boolean requestFeature(int);
     method @NonNull public final <T extends android.view.View> T requireViewById(@IdRes int);
@@ -49449,6 +49479,7 @@ package android.view {
     method public abstract void takeKeyEvents(boolean);
     method public abstract void takeSurface(android.view.SurfaceHolder.Callback2);
     method public abstract void togglePanel(int, android.view.KeyEvent);
+    method public void unregisterScrollCaptureCallback(@NonNull android.view.ScrollCaptureCallback);
     field public static final int DECOR_CAPTION_SHADE_AUTO = 0; // 0x0
     field public static final int DECOR_CAPTION_SHADE_DARK = 2; // 0x2
     field public static final int DECOR_CAPTION_SHADE_LIGHT = 1; // 0x1

@@ -229,7 +229,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
      * registrations will be treated as inactive and the backing service will never be registered.
      *
      */
-    protected boolean isServiceSupported() {
+    public boolean isSupported() {
         return true;
     }
 
@@ -276,7 +276,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     @Override
     protected boolean isActive(GnssListenerRegistration registration) {
-        if (!isServiceSupported()) {
+        if (!isSupported()) {
             return false;
         }
 
@@ -339,7 +339,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     @Override
     protected void onRegister() {
-        if (!isServiceSupported()) {
+        if (!isSupported()) {
             return;
         }
 
@@ -356,7 +356,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     @Override
     protected void onUnregister() {
-        if (!isServiceSupported()) {
+        if (!isSupported()) {
             return;
         }
 
@@ -404,7 +404,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     @Override
     protected String getServiceState() {
-        if (!isServiceSupported()) {
+        if (!isSupported()) {
             return "unsupported";
         } else {
             return super.getServiceState();

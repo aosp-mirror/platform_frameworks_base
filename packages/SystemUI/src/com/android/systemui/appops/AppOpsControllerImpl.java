@@ -40,6 +40,7 @@ import android.util.SparseArray;
 
 import androidx.annotation.WorkerThread;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
@@ -78,6 +79,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private static final boolean DEBUG = false;
 
     private final BroadcastDispatcher mDispatcher;
+    private final Context mContext;
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
     private final LocationManager mLocationManager;
@@ -141,6 +143,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
         mLocationManager = context.getSystemService(LocationManager.class);
         mPackageManager = context.getPackageManager();
+        mContext = context;
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -357,6 +360,15 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         return mLocationProviderPackages.contains(packageName);
     }
 
+    private boolean isSpeechRecognizerUsage(int opCode, String packageName) {
+        if (AppOpsManager.OP_RECORD_AUDIO != opCode) {
+            return false;
+        }
+
+        return packageName.equals(
+                mContext.getString(R.string.config_systemSpeechRecognizer));
+    }
+
     // TODO ntmyren: remove after teamfood is finished
     private boolean shouldShowAppPredictor(String pkgName) {
         if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY, "permissions_hub_2_enabled",
@@ -388,7 +400,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         }
         // TODO ntmyren: Replace this with more robust check if this moves beyond teamfood
         if ((appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName))
-                || shouldShowAppPredictor(packageName)) {
+                || shouldShowAppPredictor(packageName)
+                || isSpeechRecognizerUsage(appOpCode, packageName)) {
             return true;
         }
 

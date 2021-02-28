@@ -244,6 +244,14 @@ class DomainVerificationEnforcerTest {
                 service(Type.LEGACY_QUERENT, "getLegacyUserState") {
                     getLegacyState(it.targetPackageName, it.userId)
                 },
+                service(Type.OWNER_QUERENT, "getOwnersForDomain") {
+                    // Re-use package name, since the result itself isn't relevant
+                    getOwnersForDomain(it.targetPackageName)
+                },
+                service(Type.OWNER_QUERENT_USER, "getOwnersForDomainUserId") {
+                    // Re-use package name, since the result itself isn't relevant
+                    getOwnersForDomain(it.targetPackageName, it.userId)
+                },
             )
         }
 
@@ -327,6 +335,7 @@ class DomainVerificationEnforcerTest {
                 domainSetId
             )
         ) {
+            whenever(getName()) { packageName }
             whenever(getPkg()) { mockPkg(packageName) }
             whenever(this.domainSetId) { domainSetId }
             whenever(userState) {
@@ -357,6 +366,8 @@ class DomainVerificationEnforcerTest {
             Type.SELECTOR_USER -> approvedUserSelector(verifyCrossUser = true)
             Type.LEGACY_QUERENT -> legacyQuerent()
             Type.LEGACY_SELECTOR -> legacyUserSelector()
+            Type.OWNER_QUERENT -> ownerQuerent(verifyCrossUser = false)
+            Type.OWNER_QUERENT_USER -> ownerQuerent(verifyCrossUser = true)
         }.run { /*exhaust*/ }
     }
 
@@ -628,6 +639,80 @@ class DomainVerificationEnforcerTest {
         runTestCases(callingUserId, notCallingUserId, throws = false)
     }
 
+    private fun ownerQuerent(verifyCrossUser: Boolean) {
+        val allowQueryAll = AtomicBoolean(false)
+        val allowUserSelection = AtomicBoolean(false)
+        val allowInteractAcrossUsers = AtomicBoolean(false)
+        val context: Context = mockThrowOnUnmocked {
+            initPermission(
+                allowQueryAll,
+                android.Manifest.permission.QUERY_ALL_PACKAGES
+            )
+            initPermission(
+                allowUserSelection,
+                android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
+            )
+            initPermission(
+                allowInteractAcrossUsers,
+                android.Manifest.permission.INTERACT_ACROSS_USERS
+            )
+        }
+        val target = params.construct(context)
+
+        fun runTestCases(callingUserId: Int, targetUserId: Int, throws: Boolean) {
+            // Owner querent makes no distinction by UID
+            val allUids = INTERNAL_UIDS + VERIFIER_UID + NON_VERIFIER_UID
+            if (throws) {
+                allUids.forEach {
+                    assertFails {
+                        runMethod(target, it, visible = true, callingUserId, targetUserId)
+                    }
+                }
+            } else {
+                allUids.forEach {
+                    runMethod(target, it, visible = true, callingUserId, targetUserId)
+                }
+            }
+        }
+
+        val callingUserId = 0
+        val notCallingUserId = 1
+
+        runTestCases(callingUserId, callingUserId, throws = true)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = true)
+        }
+
+        allowQueryAll.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = true)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = true)
+        }
+
+        allowUserSelection.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = true)
+        }
+
+        allowQueryAll.set(false)
+
+        runTestCases(callingUserId, callingUserId, throws = true)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = true)
+        }
+
+        allowQueryAll.set(true)
+        allowInteractAcrossUsers.set(true)
+
+        runTestCases(callingUserId, callingUserId, throws = false)
+        if (verifyCrossUser) {
+            runTestCases(callingUserId, notCallingUserId, throws = false)
+        }
+    }
+
     private fun Context.initPermission(boolean: AtomicBoolean, permission: String) {
         whenever(enforcePermission(eq(permission), anyInt(), anyInt(), anyString())) {
             if (!boolean.get()) {
@@ -694,6 +779,12 @@ class DomainVerificationEnforcerTest {
         LEGACY_QUERENT,
 
         // Holding the legacy preferred apps permission
-        LEGACY_SELECTOR
+        LEGACY_SELECTOR,
+
+        // Holding user setting permission, but not targeting a package
+        OWNER_QUERENT,
+
+        // Holding user setting permission, but not targeting a package, but targeting cross user
+        OWNER_QUERENT_USER,
     }
 }
