@@ -5013,6 +5013,7 @@ public class Notification implements Parcelable
             bindNotificationHeader(contentView, p);
             bindLargeIconAndApplyMargin(contentView, p, result);
             boolean showProgress = handleProgressBar(contentView, ex, p);
+            boolean hasSecondLine = showProgress;
             if (p.hasTitle()) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
@@ -5028,9 +5029,25 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(textId, processTextSpans(p.text));
                 setTextViewColorSecondary(contentView, textId, p);
                 contentView.setViewVisibility(textId, View.VISIBLE);
+                hasSecondLine = true;
             }
+            setHeaderlessVerticalMargins(contentView, p, hasSecondLine);
 
             return contentView;
+        }
+
+        private static void setHeaderlessVerticalMargins(RemoteViews contentView,
+                StandardTemplateParams p, boolean hasSecondLine) {
+            if (!p.mHeaderless) {
+                return;
+            }
+            int marginDimen = hasSecondLine
+                    ? R.dimen.notification_headerless_margin_twoline
+                    : R.dimen.notification_headerless_margin_oneline;
+            contentView.setViewLayoutMarginDimen(R.id.notification_headerless_view_column,
+                    RemoteViews.MARGIN_TOP, marginDimen);
+            contentView.setViewLayoutMarginDimen(R.id.notification_headerless_view_column,
+                    RemoteViews.MARGIN_BOTTOM, marginDimen);
         }
 
         private CharSequence processTextSpans(CharSequence text) {
@@ -5494,12 +5511,28 @@ public class Notification implements Parcelable
             big.setViewVisibility(R.id.notification_material_reply_text_3, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_3, null);
 
-            final boolean snoozeEnabled = mContext.getContentResolver() != null
-                    && (Settings.Secure.getInt(mContext.getContentResolver(),
-                        Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
-            int bottomMarginDimen = snoozeEnabled ? 0 : R.dimen.notification_content_margin;
+            // This may get erased by bindSnoozeAction
             big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
-                    RemoteViews.MARGIN_BOTTOM, bottomMarginDimen);
+                    RemoteViews.MARGIN_BOTTOM, R.dimen.notification_content_margin);
+        }
+
+        private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
+            boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
+                    || isColorized(p) || p.mViewType == StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+            big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
+            if (hideSnoozeButton) {
+                // Only hide; NotificationContentView will show it when it adds the click listener
+                big.setViewVisibility(R.id.snooze_button, View.GONE);
+            }
+
+            final boolean snoozeEnabled = !hideSnoozeButton
+                    && mContext.getContentResolver() != null
+                    && (Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
+            if (snoozeEnabled) {
+                big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
+                        RemoteViews.MARGIN_BOTTOM, 0);
+            }
         }
 
         /**
@@ -5521,6 +5554,7 @@ public class Notification implements Parcelable
             RemoteViews big = applyStandardTemplate(layoutId, p, result);
 
             resetStandardTemplateWithActions(big);
+            bindSnoozeAction(big, p);
 
             boolean validRemoteInput = false;
 
@@ -6834,26 +6868,13 @@ public class Notification implements Parcelable
                 if (decorationType <= DevFlags.DECORATION_PARTIAL) {
                     template.removeFromParent(R.id.notification_top_line);
                 }
-                if (decorationType != DevFlags.DECORATION_FULL_COMPATIBLE) {
-                    // Change the max content size from 60dp (the compatible size) to 48dp
-                    // (the constrained size).  This is done by increasing the minimum margin
-                    // (implemented as top/bottom margins) and decreasing the extra margin
-                    // (implemented as the height of shrinkable top/bottom views in the column).
-                    template.setViewLayoutMarginDimen(
-                            R.id.notification_headerless_view_column,
-                            RemoteViews.MARGIN_TOP,
-                            R.dimen.notification_headerless_margin_constrained_minimum);
-                    template.setViewLayoutMarginDimen(
-                            R.id.notification_headerless_view_column,
-                            RemoteViews.MARGIN_BOTTOM,
-                            R.dimen.notification_headerless_margin_constrained_minimum);
-                    template.setViewLayoutHeightDimen(
-                            R.id.notification_headerless_margin_extra_top,
-                            R.dimen.notification_headerless_margin_constrained_extra);
-                    template.setViewLayoutHeightDimen(
-                            R.id.notification_headerless_margin_extra_bottom,
-                            R.dimen.notification_headerless_margin_constrained_extra);
-                }
+                // The vertical margins are bigger in the "two-line" scenario than the "one-line"
+                //  scenario, but the 'compatible' decoration state is intended to have 3 lines,
+                //  (1 for the top line views and 2 for the custom views), so in that one case we
+                //  use the smaller 1-line margins. This gives the compatible case 88-16*2=56 dp of
+                //  height, 24dp of which goes to the top line, leaving 32dp for the custom view.
+                boolean hasSecondLine = decorationType != DevFlags.DECORATION_FULL_COMPATIBLE;
+                Builder.setHeaderlessVerticalMargins(template, p, hasSecondLine);
             } else {
                 // also update the end margin to account for the large icon or expander
                 Resources resources = context.getResources();
@@ -9358,6 +9379,7 @@ public class Notification implements Parcelable
 
             // Bind actions.
             mBuilder.resetStandardTemplateWithActions(contentView);
+            mBuilder.bindSnoozeAction(contentView, p);
             bindCallActions(contentView, p);
 
             // Bind some extra conversation-specific header fields.
@@ -9417,11 +9439,16 @@ public class Notification implements Parcelable
         }
 
         private void bindCallerVerification(RemoteViews contentView, StandardTemplateParams p) {
+            String iconContentDescription = null;
+            boolean showDivider = true;
             if (mVerificationIcon != null) {
                 contentView.setImageViewIcon(R.id.verification_icon, mVerificationIcon);
                 contentView.setDrawableTint(R.id.verification_icon, false /* targetBackground */,
                         mBuilder.getSecondaryTextColor(p), PorterDuff.Mode.SRC_ATOP);
                 contentView.setViewVisibility(R.id.verification_icon, View.VISIBLE);
+                iconContentDescription = mBuilder.mContext.getString(
+                        R.string.notification_verified_content_description);
+                showDivider = false;  // the icon replaces the divider
             } else {
                 contentView.setViewVisibility(R.id.verification_icon, View.GONE);
             }
@@ -9429,8 +9456,17 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.verification_text, mVerificationText);
                 mBuilder.setTextViewColorSecondary(contentView, R.id.verification_text, p);
                 contentView.setViewVisibility(R.id.verification_text, View.VISIBLE);
+                iconContentDescription = null;  // let the app's text take precedence
             } else {
                 contentView.setViewVisibility(R.id.verification_text, View.GONE);
+                showDivider = false;  // no divider if no text
+            }
+            contentView.setContentDescription(R.id.verification_icon, iconContentDescription);
+            if (showDivider) {
+                contentView.setViewVisibility(R.id.verification_divider, View.VISIBLE);
+                mBuilder.setTextViewColorSecondary(contentView, R.id.verification_divider, p);
+            } else {
+                contentView.setViewVisibility(R.id.verification_divider, View.GONE);
             }
         }
 
@@ -11998,6 +12034,7 @@ public class Notification implements Parcelable
         boolean mHideTitle;
         boolean mHideActions;
         boolean mHideProgress;
+        boolean mHideSnoozeButton;
         boolean mPromotePicture;
         boolean mAllowActionIcons;
         CharSequence title;
@@ -12015,6 +12052,7 @@ public class Notification implements Parcelable
             mHideTitle = false;
             mHideActions = false;
             mHideProgress = false;
+            mHideSnoozeButton = false;
             mPromotePicture = false;
             mAllowActionIcons = false;
             title = null;
@@ -12058,6 +12096,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams allowActionIcons(boolean allowActionIcons) {
             this.mAllowActionIcons = allowActionIcons;
+            return this;
+        }
+
+        final StandardTemplateParams hideSnoozeButton(boolean hideSnoozeButton) {
+            this.mHideSnoozeButton = hideSnoozeButton;
             return this;
         }
 

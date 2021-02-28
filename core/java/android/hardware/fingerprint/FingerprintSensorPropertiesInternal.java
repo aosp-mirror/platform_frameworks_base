@@ -85,8 +85,8 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             boolean resetLockoutRequiresHardwareAuthToken) {
         // TODO(b/179175438): Value should be provided from the HAL
         this(sensorId, strength, maxEnrollmentsPerUser, sensorType,
-                resetLockoutRequiresHardwareAuthToken, 0 /* sensorLocationX */,
-                0 /* sensorLocationY */, 0 /* sensorRadius */);
+                resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
+                1636 /* sensorLocationY */, 130 /* sensorRadius */);
     }
 
     /**

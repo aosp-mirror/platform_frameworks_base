@@ -787,6 +787,10 @@ public abstract class PackageSettingBase extends SettingBase {
         return firstInstallTime;
     }
 
+    public String getName() {
+        return name;
+    }
+
     protected PackageSettingBase updateFrom(PackageSettingBase other) {
         super.copyFrom(other);
         setPath(other.getPath());

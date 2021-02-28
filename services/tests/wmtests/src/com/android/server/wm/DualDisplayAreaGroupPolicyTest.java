@@ -171,7 +171,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         final Rect activityBounds = new Rect(mFirstActivity.getBounds());
 
         // DAG is portrait (860x1200), so Task and Activity fill DAG.
-        assertThat(mFirstTask.isTaskLetterboxed()).isFalse();
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
         assertThat(taskBounds).isEqualTo(dagBounds);
         assertThat(activityBounds).isEqualTo(taskBounds);
@@ -194,8 +194,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         final Rect activityConfigBounds =
                 new Rect(mFirstActivity.getConfiguration().windowConfiguration.getBounds());
 
-        // DAG is landscape (1200x860), Task fills parent
-        assertThat(mFirstTask.isTaskLetterboxed()).isFalse();
+        // DAG is landscape (1200x860), no fixed orientation letterbox
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isTrue();
         assertThat(newDagBounds.width()).isEqualTo(dagBounds.height());
         assertThat(newDagBounds.height()).isEqualTo(dagBounds.width());
@@ -211,7 +211,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    public void testLaunchLandscapeApp_taskIsLetterboxInDisplayAreaGroup() {
+    public void testLaunchLandscapeApp_activityIsLetterboxForFixedOrientationInDisplayAreaGroup() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
@@ -221,17 +221,18 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         final Rect taskBounds = new Rect(mFirstTask.getBounds());
         final Rect activityBounds = new Rect(mFirstActivity.getBounds());
 
-        // DAG is portrait (860x1200), so Task is letterbox (860x[860x860/1200=616])
-        assertThat(mFirstTask.isTaskLetterboxed()).isTrue();
+        // DAG is portrait (860x1200), and activity is letterboxed for fixed orientation
+        // (860x[860x860/1200=616]). Task fills DAG.
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isTrue();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
-        assertThat(taskBounds.width()).isEqualTo(dagBounds.width());
-        assertThat(taskBounds.height())
+        assertThat(taskBounds).isEqualTo(dagBounds);
+        assertThat(activityBounds.width()).isEqualTo(dagBounds.width());
+        assertThat(activityBounds.height())
                 .isEqualTo(dagBounds.width() * dagBounds.width() / dagBounds.height());
-        assertThat(activityBounds).isEqualTo(taskBounds);
     }
 
     @Test
-    public void testLaunchLandscapeApp_taskLetterboxBecomesActivityLetterboxAfterRotation() {
+    public void testLaunchLandscapeApp_fixedOrientationLetterboxBecomesSizeCompatAfterRotation() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
@@ -245,9 +246,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         final Rect newTaskBounds = new Rect(mFirstTask.getBounds());
         final Rect newActivityBounds = new Rect(mFirstActivity.getBounds());
 
-        // DAG is landscape (1200x860), Task fills parent
-        // Task letterbox size
-        assertThat(mFirstTask.isTaskLetterboxed()).isFalse();
+        // DAG is landscape (1200x860), no fixed orientation letterbox
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isTrue();
         assertThat(newDagBounds.width()).isEqualTo(dagBounds.height());
         assertThat(newDagBounds.height()).isEqualTo(dagBounds.width());
@@ -311,7 +311,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    public void testResizableFixedOrientationApp_taskLevelLetterboxing() {
+    public void testResizableFixedOrientationApp_fixedOrientationLetterboxing() {
         mFirstRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
 
@@ -324,7 +324,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mDisplay.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
         assertThat(mFirstRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
         assertThat(mFirstActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
-        assertThat(mFirstTask.isTaskLetterboxed()).isFalse();
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
 
         // Launch portrait on second DAG
@@ -336,13 +336,13 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mDisplay.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
         assertThat(mSecondRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
         assertThat(mSecondActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
-        assertThat(mSecondTask.isTaskLetterboxed()).isFalse();
+        assertThat(mSecondActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mSecondActivity.inSizeCompatMode()).isFalse();
 
         // First activity is letterboxed in portrait as requested.
         assertThat(mFirstRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
         assertThat(mFirstActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
-        assertThat(mFirstTask.isTaskLetterboxed()).isTrue();
+        assertThat(mFirstActivity.isLetterboxedForFixedOrientationAndAspectRatio()).isTrue();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
 
     }

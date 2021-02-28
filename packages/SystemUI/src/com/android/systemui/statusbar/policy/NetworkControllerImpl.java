@@ -165,7 +165,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private int mCurrentUserId;
 
     private OnSubscriptionsChangedListener mSubscriptionListener;
-
+    private NetworkCapabilities mLastDefaultNetworkCapabilities;
     // Handler that all broadcasts are received on.
     private final Handler mReceiverHandler;
     // Handler that all callbacks are made on.
@@ -315,6 +315,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             public void onLost(Network network) {
                 mLastNetwork = null;
                 mLastNetworkCapabilities = null;
+                mLastDefaultNetworkCapabilities = null;
                 String callback = new StringBuilder()
                         .append(SSDF.format(System.currentTimeMillis())).append(",")
                         .append("onLost: ")
@@ -341,6 +342,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
                 mLastNetwork = network;
                 mLastNetworkCapabilities = networkCapabilities;
+                mLastDefaultNetworkCapabilities = networkCapabilities;
                 String callback = new StringBuilder()
                         .append(SSDF.format(System.currentTimeMillis())).append(",")
                         .append("onCapabilitiesChanged: ")
@@ -959,18 +961,17 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private void updateConnectivity() {
         mConnectedTransports.clear();
         mValidatedTransports.clear();
-        for (NetworkCapabilities nc :
-                mConnectivityManager.getDefaultNetworkCapabilitiesForUser(mCurrentUserId)) {
-            for (int transportType : nc.getTransportTypes()) {
+        if (mLastDefaultNetworkCapabilities != null) {
+            for (int transportType : mLastDefaultNetworkCapabilities.getTransportTypes()) {
                 if (transportType == NetworkCapabilities.TRANSPORT_CELLULAR
-                        && Utils.tryGetWifiInfoForVcn(nc) != null) {
+                        && Utils.tryGetWifiInfoForVcn(mLastDefaultNetworkCapabilities) != null) {
                     mConnectedTransports.set(NetworkCapabilities.TRANSPORT_WIFI);
-                    if (nc.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                    if (mLastDefaultNetworkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
                         mValidatedTransports.set(NetworkCapabilities.TRANSPORT_WIFI);
                     }
                 } else {
                     mConnectedTransports.set(transportType);
-                    if (nc.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                    if (mLastDefaultNetworkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
                         mValidatedTransports.set(transportType);
                     }
                 }

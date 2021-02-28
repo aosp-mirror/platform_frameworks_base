@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
@@ -37,6 +36,7 @@ import android.testing.AndroidTestingRunner;
 import android.view.Display;
 import android.view.IScrollCaptureCallbacks;
 import android.view.IWindowManager;
+import android.view.ScrollCaptureResponse;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -82,10 +82,11 @@ public class ScrollCaptureClientTest extends SysuiTestCase {
     public void testBasicClientFlow() throws RemoteException {
         doAnswer((Answer<Void>) invocation -> {
             IScrollCaptureCallbacks cb = invocation.getArgument(3);
-            cb.onConnected(
-                    new FakeScrollCaptureConnection(cb),
-                    /* scrollBounds */ new Rect(0, 0, 100, 100),
-                    /* positionInWindow */ new Point(0, 0));
+            cb.onScrollCaptureResponse(new ScrollCaptureResponse.Builder()
+                    .setBoundsInWindow(new Rect(0, 0, 100, 100))
+                    .setWindowBounds(new Rect(0, 0, 100, 100))
+                    .setConnection(new FakeScrollCaptureConnection(cb))
+                    .build());
             return null;
         }).when(mWm).requestScrollCapture(/* displayId */ anyInt(), /* token */  isNull(),
                 /* taskId */ anyInt(), any(IScrollCaptureCallbacks.class));

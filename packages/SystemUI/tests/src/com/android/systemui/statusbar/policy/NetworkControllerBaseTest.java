@@ -21,9 +21,9 @@ import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -76,6 +76,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import org.junit.After;
@@ -173,8 +174,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mNetCapabilities = new NetworkCapabilities();
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
-        when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
-                new NetworkCapabilities[] { mNetCapabilities });
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
         doAnswer(invocation -> {
             int rssi = invocation.getArgument(0);
@@ -257,8 +256,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mMockCm, atLeastOnce())
             .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
-        mDefaultCallbackInWifiTracker = callbackArg.getAllValues().get(0);
-        mDefaultCallbackInNetworkController = callbackArg.getAllValues().get(1);
+        int captureSize = callbackArg.getAllValues().size();
+        assertTrue(captureSize > 1);
+        assertEquals(captureSize % 2, 0);
+        mDefaultCallbackInWifiTracker = callbackArg.getAllValues().get(captureSize - 2);
+        mDefaultCallbackInNetworkController = callbackArg.getAllValues().get(captureSize - 1);
         assertNotNull(mDefaultCallbackInWifiTracker);
         assertNotNull(mDefaultCallbackInNetworkController);
         verify(mMockCm, atLeastOnce()).registerNetworkCallback(
@@ -307,14 +309,18 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setLevel(DEFAULT_LEVEL);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_UMTS);
+        setConnectivityViaCallbackInNetworkController(
+                NetworkCapabilities.TRANSPORT_CELLULAR, true, true, null);
         setConnectivityViaBroadcast(
-            NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
+                NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
     public void setConnectivityViaBroadcastForVcn(
             int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
         mNetCapabilities.setTransportInfo(info);
         setConnectivityCommon(networkType, validated, isConnected);
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
         mNetworkController.onReceive(mContext, i);
     }
@@ -322,6 +328,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
         mNetworkController.onReceive(mContext, i);
     }
@@ -487,28 +495,21 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     protected void verifyLastQsMobileDataIndicators(boolean visible, int icon, int typeIcon,
             boolean dataIn, boolean dataOut) {
-        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<Boolean> dataInArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<MobileDataIndicators> indicatorsArg =
+                ArgumentCaptor.forClass(MobileDataIndicators.class);
 
         verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
-                    any(),
-                    iconArg.capture(),
-                    anyInt(),
-                    typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
-                    any(CharSequence.class), any(CharSequence.class), any(CharSequence.class),
-                    anyBoolean(), anyInt(), anyBoolean(), anyBoolean());
-        IconState iconState = iconArg.getValue();
+                    indicatorsArg.capture());
+        MobileDataIndicators expected = indicatorsArg.getValue();
         int state = SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
                 false);
-        assertEquals("Visibility in, quick settings", visible, iconState.visible);
-        assertEquals("Signal icon in, quick settings", state, iconState.icon);
-        assertEquals("Data icon in, quick settings", typeIcon, (int) typeIconArg.getValue());
+        assertEquals("Visibility in, quick settings", visible, expected.qsIcon.visible);
+        assertEquals("Signal icon in, quick settings", state, expected.qsIcon.icon);
+        assertEquals("Data icon in, quick settings", typeIcon, expected.qsType);
         assertEquals("Data direction in, in quick settings", dataIn,
-                (boolean) dataInArg.getValue());
+                expected.activityIn);
         assertEquals("Data direction out, in quick settings", dataOut,
-                (boolean) dataOutArg.getValue());
+                expected.activityOut);
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon) {
@@ -522,44 +523,35 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
         boolean roaming, boolean inet) {
-        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<MobileDataIndicators> indicatorsArg =
+                ArgumentCaptor.forClass(MobileDataIndicators.class);
 
         // TODO: Verify all fields.
         verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
-                iconArg.capture(),
-                any(),
-                typeIconArg.capture(),
-                anyInt(), anyBoolean(), anyBoolean(),
-                any(CharSequence.class), any(CharSequence.class), any(),
-                anyBoolean(), anyInt(), eq(roaming), anyBoolean());
-        IconState iconState = iconArg.getValue();
+                indicatorsArg.capture());
+        MobileDataIndicators expected = indicatorsArg.getValue();
         int state = icon == -1 ? 0
                 : SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
                         !inet);
-        assertEquals("Signal icon in status bar", state, iconState.icon);
-        assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
-        assertEquals("Visibility in status bar", visible, iconState.visible);
+        assertEquals("Signal icon in status bar", state, expected.statusIcon.icon);
+        assertEquals("Data icon in status bar", typeIcon, expected.statusType);
+        assertEquals("Visibility in status bar", visible, expected.statusIcon.visible);
     }
 
     protected void verifyLastMobileDataIndicatorsForVcn(boolean visible, int level, int typeIcon,
             boolean inet) {
-        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
-        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<MobileDataIndicators> indicatorsArg =
+                ArgumentCaptor.forClass(MobileDataIndicators.class);
 
         verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
-                iconArg.capture(),
-                any(),
-                typeIconArg.capture(),
-                anyInt(), anyBoolean(), anyBoolean(),
-                any(CharSequence.class), any(CharSequence.class), any(),
-                anyBoolean(), anyInt(), anyBoolean(), anyBoolean());
-        IconState iconState = iconArg.getValue();
+                indicatorsArg.capture());
+
+        MobileDataIndicators expected = indicatorsArg.getValue();
         int state = SignalDrawable.getState(
                 level, CellSignalStrength.getNumSignalStrengthLevels(), !inet);
-        assertEquals("Signal icon in status bar", state, iconState.icon);
-        assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
-        assertEquals("Visibility in status bar", visible, iconState.visible);
+        assertEquals("Signal icon in status bar", state, expected.statusIcon.icon);
+        assertEquals("Data icon in status bar", typeIcon, expected.statusType);
+        assertEquals("Visibility in status bar", visible, expected.statusIcon.visible);
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
@@ -580,6 +572,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             boolean qsVisible, int qsIcon, int qsTypeIcon, boolean dataIn, boolean dataOut,
             boolean cutOut, CharSequence typeContentDescription,
             CharSequence typeContentDescriptionHtml) {
+        ArgumentCaptor<MobileDataIndicators> indicatorsArg =
+                ArgumentCaptor.forClass(MobileDataIndicators.class);
         ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<IconState> qsIconArg = ArgumentCaptor.forClass(IconState.class);
@@ -592,17 +586,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(CharSequence.class);
 
         verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
-                iconArg.capture(),
-                qsIconArg.capture(),
-                typeIconArg.capture(),
-                qsTypeIconArg.capture(),
-                dataInArg.capture(),
-                dataOutArg.capture(),
-                typeContentDescriptionArg.capture(),
-                typeContentDescriptionHtmlArg.capture(),
-                any(), anyBoolean(), anyInt(), anyBoolean(), anyBoolean());
+                indicatorsArg.capture());
 
-        IconState iconState = iconArg.getValue();
+        MobileDataIndicators expected = indicatorsArg.getValue();
 
         int numSignalStrengthBins = CellSignalStrength.getNumSignalStrengthLevels();
         if (mMobileSignalController.mInflateSignalStrengths) {
@@ -610,29 +596,28 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             icon++;
         }
         int state = SignalDrawable.getState(icon, numSignalStrengthBins, cutOut);
-        assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
-        assertEquals("Signal icon in status bar", state, iconState.icon);
-        assertEquals("Visibility in status bar", visible, iconState.visible);
+        assertEquals("Data icon in status bar", typeIcon, expected.statusType);
+        assertEquals("Signal icon in status bar", state, expected.statusIcon.icon);
+        assertEquals("Visibility in status bar", visible, expected.statusIcon.visible);
 
-        iconState = qsIconArg.getValue();
         if (visible) {
-            assertEquals("Visibility in quick settings", qsVisible, iconState.visible);
-            assertEquals("Signal icon in quick settings", state, iconState.icon);
+            assertEquals("Visibility in quick settings", qsVisible, expected.qsIcon.visible);
+            assertEquals("Signal icon in quick settings", state, expected.qsIcon.icon);
         } else {
-            assertEquals("Cellular is not default", null, iconState);
+            assertEquals("Cellular is not default", null, expected.qsIcon);
         }
-        assertEquals("Data icon in quick settings", qsTypeIcon, (int) qsTypeIconArg.getValue());
+        assertEquals("Data icon in quick settings", qsTypeIcon, expected.qsType);
         assertEquals("Data direction in in quick settings", dataIn,
-                (boolean) dataInArg.getValue());
+                expected.activityIn);
         assertEquals("Data direction out in quick settings", dataOut,
-                (boolean) dataOutArg.getValue());
+                expected.activityOut);
         if (typeContentDescription != null) { // Only check if it was provided
             assertEquals("Type content description", typeContentDescription,
-                    typeContentDescriptionArg.getValue());
+                    expected.typeContentDescription);
         }
         if (typeContentDescriptionHtml != null) { // Only check if it was provided
             assertEquals("Type content description (html)", typeContentDescriptionHtml,
-                    typeContentDescriptionHtmlArg.getValue());
+                    expected.typeContentDescriptionHtml);
         }
     }
 

@@ -555,9 +555,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setRequestedOrientation(
                 isScreenPortrait ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
 
-        // Asserts it has orientation derived from bounds.
-        assertEquals(isScreenPortrait ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT,
+        // Asserts it has orientation derived requested orientation (fixed orientation letterbox).
+        assertEquals(isScreenPortrait ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE,
                 activity.getConfiguration().orientation);
+        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test

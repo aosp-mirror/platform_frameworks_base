@@ -959,7 +959,7 @@
     <!-- QuickSettings: Secondary text for when the Dark theme or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
     <string name="quick_settings_dark_mode_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
     <!-- QuickSettings: Label for the toggle that controls whether Reduce Brightness is enabled. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_reduce_bright_colors_label">Reduce Brightness</string>
+    <string name="quick_settings_reduce_bright_colors_label">Reduce brightness</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -1053,6 +1053,9 @@
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that user's device belongs to their organization. [CHAR LIMIT=40] -->
     <string name="do_disclosure_with_name">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
+
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that the user's device is provided by the Creditor. [CHAR LIMIT=60] -->
+    <string name="do_financed_disclosure_with_name">This device is provided by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
 
     <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
     <string name="phone_hint">Swipe from icon for phone</string>
@@ -1557,6 +1560,8 @@
     <string name="volume_stream_content_description_mute">%1$s. Tap to mute. Accessibility services may be muted.</string>
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
+
+    <string name="volume_ringer_change">Tap to change ringer mode</string>
 
     <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
     <string name="volume_ringer_hint_mute">mute</string>

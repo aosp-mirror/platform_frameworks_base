@@ -52,6 +52,7 @@ import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssNmeaListener;
@@ -463,7 +464,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     .build();
             final LocationProviderManager manager = getOrAddLocationProviderManager(name);
             manager.setMockProvider(new MockLocationProvider(properties,
-                    CallerIdentity.fromContext(mContext), /*locationTags*/ null));
+                    CallerIdentity.fromContext(mContext), Collections.emptySet()));
         }
     }
 
@@ -930,6 +931,22 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
+    public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
+            @Nullable String attributionTag, String listenerId) {
+        if (mGnssManagerService != null) {
+            mGnssManagerService.addGnssAntennaInfoListener(listener, packageName, attributionTag,
+                    listenerId);
+        }
+    }
+
+    @Override
+    public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
+        if (mGnssManagerService != null) {
+            mGnssManagerService.removeGnssAntennaInfoListener(listener);
+        }
+    }
+
+    @Override
     public void addProviderRequestListener(IProviderRequestListener listener) {
         for (LocationProviderManager manager : mProviderManagers) {
             manager.addProviderRequestListener(listener);
@@ -1153,7 +1170,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addTestProvider(String provider, ProviderProperties properties,
-            List<String> locationTags, String packageName, String attributionTag) {
+            List<String> extraAttributionTags, String packageName, String attributionTag) {
         // unsafe is ok because app ops will verify the package name
         CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName, attributionTag);
         if (!mInjector.getAppOpsHelper().noteOp(AppOpsManager.OP_MOCK_LOCATION, identity)) {
@@ -1162,7 +1179,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         final LocationProviderManager manager = getOrAddLocationProviderManager(provider);
         manager.setMockProvider(new MockLocationProvider(properties, identity,
-                (locationTags != null) ? new ArraySet<>(locationTags) : null));
+                new ArraySet<>(extraAttributionTags)));
     }
 
     @Override

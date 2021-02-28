@@ -605,6 +605,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardQsUserSwitchEnabled =
                 mKeyguardUserSwitcherEnabled && mResources.getBoolean(
                         R.bool.config_keyguard_user_switch_opens_qs_details);
+        keyguardUpdateMonitor.setKeyguardQsUserSwitchEnabled(mKeyguardQsUserSwitchEnabled);
         mView.setWillNotDraw(!DEBUG);
         mLayoutInflater = layoutInflater;
         mFalsingManager = falsingManager;

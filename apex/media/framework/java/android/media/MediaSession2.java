@@ -32,7 +32,6 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.BadParcelableException;
 import android.os.Bundle;
@@ -87,7 +86,7 @@ public class MediaSession2 implements AutoCloseable {
     private final String mSessionId;
     private final PendingIntent mSessionActivity;
     private final Session2Token mSessionToken;
-    private final MediaSessionManager mSessionManager;
+    private final MediaCommunicationManager mCommunicationManager;
     private final Handler mResultHandler;
 
     //@GuardedBy("mLock")
@@ -115,8 +114,7 @@ public class MediaSession2 implements AutoCloseable {
         mSessionStub = new Session2Link(this);
         mSessionToken = new Session2Token(Process.myUid(), TYPE_SESSION, context.getPackageName(),
                 mSessionStub, tokenExtras);
-        mSessionManager = (MediaSessionManager) mContext.getSystemService(
-                Context.MEDIA_SESSION_SERVICE);
+        mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
         mResultHandler = new Handler(context.getMainLooper());
         mClosed = false;
@@ -352,7 +350,7 @@ public class MediaSession2 implements AutoCloseable {
 
         final ControllerInfo controllerInfo = new ControllerInfo(
                 remoteUserInfo,
-                mSessionManager.isTrustedForMediaControl(remoteUserInfo),
+                mCommunicationManager.isTrustedForMediaControl(remoteUserInfo),
                 controller,
                 connectionHints);
         mCallbackExecutor.execute(() -> {
@@ -608,8 +606,8 @@ public class MediaSession2 implements AutoCloseable {
             // Notify framework about the newly create session after the constructor is finished.
             // Otherwise, framework may access the session before the initialization is finished.
             try {
-                MediaSessionManager manager = (MediaSessionManager) mContext.getSystemService(
-                        Context.MEDIA_SESSION_SERVICE);
+                MediaCommunicationManager manager =
+                        mContext.getSystemService(MediaCommunicationManager.class);
                 manager.notifySession2Created(session2.getToken());
             } catch (Exception e) {
                 session2.close();

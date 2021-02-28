@@ -88,11 +88,11 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
         testSpec.config.endRotation, allStates = false)
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 

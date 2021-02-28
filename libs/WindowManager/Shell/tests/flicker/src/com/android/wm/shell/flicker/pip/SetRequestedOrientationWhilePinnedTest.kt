@@ -123,11 +123,11 @@ class SetRequestedOrientationWhilePinnedTest(
         }
     }
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
-    @FlakyTest(bugId = 140855415)
+    @Presubmit
     @Test
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 

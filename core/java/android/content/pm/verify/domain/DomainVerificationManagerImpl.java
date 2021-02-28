@@ -21,11 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -89,7 +87,7 @@ public class DomainVerificationManagerImpl implements DomainVerificationManager 
             int state) throws IllegalArgumentException, NameNotFoundException {
         try {
             mDomainVerificationManager.setDomainVerificationStatus(domainSetId.toString(),
-                    new ArrayList<>(domains), state);
+                    new DomainSet(domains), state);
         } catch (Exception e) {
             Exception converted = rethrow(e, domainSetId);
             if (converted instanceof NameNotFoundException) {
@@ -126,7 +124,7 @@ public class DomainVerificationManagerImpl implements DomainVerificationManager 
             throws IllegalArgumentException, NameNotFoundException {
         try {
             mDomainVerificationManager.setDomainVerificationUserSelection(domainSetId.toString(),
-                    new ArrayList<>(domains), enabled, mContext.getUserId());
+                    new DomainSet(domains), enabled, mContext.getUserId());
         } catch (Exception e) {
             Exception converted = rethrow(e, domainSetId);
             if (converted instanceof NameNotFoundException) {
@@ -155,6 +153,16 @@ public class DomainVerificationManagerImpl implements DomainVerificationManager 
             } else {
                 throw new RuntimeException(converted);
             }
+        }
+    }
+
+    @NonNull
+    @Override
+    public List<DomainOwner> getOwnersForDomain(@NonNull String domain) {
+        try {
+            return mDomainVerificationManager.getOwnersForDomain(domain, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
