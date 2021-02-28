@@ -40,10 +40,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.IRemoteSessionCallback;
+import android.media.MediaCommunicationManager;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.IOnMediaKeyEventDispatchedListener;
@@ -151,6 +151,25 @@ public class MediaSessionService extends SystemService implements Monitor {
     private MediaSessionPolicyProvider mCustomMediaSessionPolicyProvider;
     private MediaKeyDispatcher mCustomMediaKeyDispatcher;
 
+    private MediaCommunicationManager mCommunicationManager;
+    private final MediaCommunicationManager.SessionCallback mSession2TokenCallback =
+            new MediaCommunicationManager.SessionCallback() {
+                @Override
+                public void onSession2TokenCreated(Session2Token token) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Session2 is created " + token);
+                    }
+                    MediaSession2Record record = new MediaSession2Record(token,
+                            MediaSessionService.this, mRecordThread.getLooper(), 0);
+                    synchronized (mLock) {
+                        FullUserRecord user = getFullUserRecordLocked(record.getUserId());
+                        if (user != null) {
+                            user.mPriorityStack.addSession(record);
+                        }
+                    }
+                }
+            };
+
     public MediaSessionService(Context context) {
         super(context);
         mContext = context;
@@ -200,6 +219,19 @@ public class MediaSessionService extends SystemService implements Monitor {
         final IntentFilter filter = new IntentFilter(
                 NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED);
         mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        super.onBootPhase(phase);
+        switch (phase) {
+            // This ensures MediaCommunicationService is started
+            case PHASE_BOOT_COMPLETED:
+                mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
+                mCommunicationManager.registerSessionCallback(new HandlerExecutor(mHandler),
+                        mSession2TokenCallback);
+                break;
+        }
     }
 
     private final BroadcastReceiver mNotificationListenerEnabledChangedReceiver =
@@ -1139,31 +1171,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void notifySession2Created(Session2Token sessionToken) throws RemoteException {
-            final int pid = Binder.getCallingPid();
-            final int uid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-            try {
-                if (DEBUG) {
-                    Log.d(TAG, "Session2 is created " + sessionToken);
-                }
-                if (uid != sessionToken.getUid()) {
-                    throw new SecurityException("Unexpected Session2Token's UID, expected=" + uid
-                            + " but actually=" + sessionToken.getUid());
-                }
-                MediaSession2Record record = new MediaSession2Record(sessionToken,
-                        MediaSessionService.this, mRecordThread.getLooper(), 0);
-                synchronized (mLock) {
-                    FullUserRecord user = getFullUserRecordLocked(record.getUserId());
-                    user.mPriorityStack.addSession(record);
-                }
-                // Do not immediately notify changes -- do so when framework can dispatch command
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
         public List<MediaSession.Token> getSessions(ComponentName componentName, int userId) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
@@ -1179,26 +1186,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 }
                 return tokens;
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public ParceledListSlice getSession2Tokens(int userId) {
-            final int pid = Binder.getCallingPid();
-            final int uid = Binder.getCallingUid();
-            final long token = Binder.clearCallingIdentity();
-
-            try {
-                // Check that they can make calls on behalf of the user and get the final user id
-                int resolvedUserId = handleIncomingUser(pid, uid, userId, null);
-                List<Session2Token> result;
-                synchronized (mLock) {
-                    FullUserRecord user = getFullUserRecordLocked(userId);
-                    result = user.mPriorityStack.getSession2Tokens(resolvedUserId);
-                }
-                return new ParceledListSlice(result);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Alista transkodeerimise vaikeseaded"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Luba transkodeerimine"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Oleta, et rakendused toetavad kaasaegseid vorminguid"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"Kuva transkodeerimise märguanded"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Käitatud teenused"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Praegu käitatud teenuste vaatamine ja juhtimine"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView\' rakendamine"</string>

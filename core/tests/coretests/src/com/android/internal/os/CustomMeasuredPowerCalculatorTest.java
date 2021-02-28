@@ -42,6 +42,7 @@ public class CustomMeasuredPowerCalculatorTest {
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
 
     @Test
+    @SkipPresubmit("b/180015146")
     public void testMeasuredEnergyCopiedIntoBatteryConsumers() {
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         SparseLongArray uidEnergies = new SparseLongArray();

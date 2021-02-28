@@ -16,8 +16,8 @@
 
 package com.android.internal.os;
 
+import java.io.EOFException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Handles argument parsing for args related to the zygote spawner.
@@ -245,20 +245,34 @@ class ZygoteArguments {
     /**
      * Constructs instance and parses args
      *
-     * @param args zygote command-line args
+     * @param args zygote command-line args as ZygoteCommandBuffer, positioned after argument count.
      */
-    ZygoteArguments(String[] args) throws IllegalArgumentException {
-        parseArgs(args);
+    private ZygoteArguments(ZygoteCommandBuffer args, int argCount)
+            throws IllegalArgumentException, EOFException {
+        parseArgs(args, argCount);
+    }
+
+    /**
+     * Return a new ZygoteArguments reflecting the contents of the given ZygoteCommandBuffer. Return
+     * null if the ZygoteCommandBuffer was positioned at EOF. Assumes the buffer is initially
+     * positioned at the beginning of the command.
+     */
+    public static ZygoteArguments getInstance(ZygoteCommandBuffer args)
+            throws IllegalArgumentException, EOFException {
+        int argCount = args.getCount();
+        return argCount == 0 ? null : new ZygoteArguments(args, argCount);
     }
 
     /**
      * Parses the commandline arguments intended for the Zygote spawner (such as "--setuid=" and
-     * "--setgid=") and creates an array containing the remaining args.
+     * "--setgid=") and creates an array containing the remaining args. Return false if we were
+     * at EOF.
      *
      * Per security review bug #1112214, duplicate args are disallowed in critical cases to make
      * injection harder.
      */
-    private void parseArgs(String[] args) throws IllegalArgumentException {
+    private void parseArgs(ZygoteCommandBuffer args, int argCount)
+            throws IllegalArgumentException, EOFException {
         /*
          * See android.os.ZygoteProcess.zygoteSendArgsAndGetResult()
          * Presently the wire format to the zygote process is:
@@ -269,13 +283,13 @@ class ZygoteArguments {
          * the child or -1 on failure.
          */
 
-        int curArg = 0;
-
+        String unprocessedArg = null;
+        int curArg = 0;  // Index of arg
         boolean seenRuntimeArgs = false;
-
         boolean expectRuntimeArgs = true;
-        for ( /* curArg */ ; curArg < args.length; curArg++) {
-            String arg = args[curArg];
+
+        for ( /* curArg */ ; curArg < argCount; ++curArg) {
+            String arg = args.nextArg();
 
             if (arg.equals("--")) {
                 curArg++;
@@ -367,7 +381,8 @@ class ZygoteArguments {
                         "Duplicate arg specified");
                 }
                 try {
-                    mInvokeWith = args[++curArg];
+                    ++curArg;
+                    mInvokeWith = args.nextArg();
                 } catch (IndexOutOfBoundsException ex) {
                     throw new IllegalArgumentException(
                         "--invoke-with requires argument");
@@ -397,12 +412,14 @@ class ZygoteArguments {
             } else if (arg.startsWith("--app-data-dir=")) {
                 mAppDataDir = getAssignmentValue(arg);
             } else if (arg.equals("--preload-app")) {
-                mPreloadApp = args[++curArg];
+                ++curArg;
+                mPreloadApp = args.nextArg();
             } else if (arg.equals("--preload-package")) {
-                mPreloadPackage = args[++curArg];
-                mPreloadPackageLibs = args[++curArg];
-                mPreloadPackageLibFileName = args[++curArg];
-                mPreloadPackageCacheKey = args[++curArg];
+                curArg += 4;
+                mPreloadPackage = args.nextArg();
+                mPreloadPackageLibs = args.nextArg();
+                mPreloadPackageLibFileName = args.nextArg();
+                mPreloadPackageCacheKey = args.nextArg();
             } else if (arg.equals("--preload-default")) {
                 mPreloadDefault = true;
                 expectRuntimeArgs = false;
@@ -411,8 +428,11 @@ class ZygoteArguments {
             } else if (arg.equals("--set-api-denylist-exemptions")) {
                 // consume all remaining args; this is a stand-alone command, never included
                 // with the regular fork command.
-                mApiDenylistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
-                curArg = args.length;
+                mApiDenylistExemptions = new String[argCount - curArg - 1];
+                ++curArg;
+                for (int i = 0; curArg < argCount; ++curArg, ++i) {
+                    mApiDenylistExemptions[i] = args.nextArg();
+                }
                 expectRuntimeArgs = false;
             } else if (arg.startsWith("--hidden-api-log-sampling-rate=")) {
                 String rateStr = getAssignmentValue(arg);
@@ -462,35 +482,46 @@ class ZygoteArguments {
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_DATA_DIRS)) {
                 mBindMountAppDataDirs = true;
             } else {
+                unprocessedArg = arg;
                 break;
             }
         }
+        // curArg is the index of the first unprocessed argument. That argument is either referenced
+        // by unprocessedArg or not read yet.
 
         if (mBootCompleted) {
-            if (args.length - curArg > 0) {
+            if (argCount > curArg) {
                 throw new IllegalArgumentException("Unexpected arguments after --boot-completed");
             }
         } else if (mAbiListQuery || mPidQuery) {
-            if (args.length - curArg > 0) {
+            if (argCount > curArg) {
                 throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
             }
         } else if (mPreloadPackage != null) {
-            if (args.length - curArg > 0) {
+            if (argCount > curArg) {
                 throw new IllegalArgumentException(
                     "Unexpected arguments after --preload-package.");
             }
         } else if (mPreloadApp != null) {
-            if (args.length - curArg > 0) {
+            if (argCount > curArg) {
                 throw new IllegalArgumentException(
                     "Unexpected arguments after --preload-app.");
             }
         } else if (expectRuntimeArgs) {
             if (!seenRuntimeArgs) {
-                throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
+                throw new IllegalArgumentException("Unexpected argument : "
+                    + (unprocessedArg == null ? args.nextArg() : unprocessedArg));
             }
 
-            mRemainingArgs = new String[args.length - curArg];
-            System.arraycopy(args, curArg, mRemainingArgs, 0, mRemainingArgs.length);
+            mRemainingArgs = new String[argCount - curArg];
+            int i = 0;
+            if (unprocessedArg != null) {
+                mRemainingArgs[0] = unprocessedArg;
+                ++i;
+            }
+            for (; i < argCount - curArg; ++i) {
+                mRemainingArgs[i] = args.nextArg();
+            }
         }
 
         if (mStartChildZygote) {

@@ -21,24 +21,25 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 import static java.lang.Math.min;
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.BinderThread;
 import android.annotation.UiContext;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IScrollCaptureCallbacks;
 import android.view.IScrollCaptureConnection;
 import android.view.IWindowManager;
+import android.view.ScrollCaptureResponse;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.view.ScrollCaptureViewSupport;
 
 import java.util.function.Consumer;
 
@@ -62,16 +63,19 @@ public class ScrollCaptureClient {
      */
     public interface Connection {
         /**
-         * Session start should be deferred until UI is active because of resource allocation and
-         * potential visible side effects in the target window.
-         *
+         * Start a session.
+
          * @param sessionConsumer listener to receive the session once active
          * @param maxPages the capture buffer size expressed as a multiple of the content height
          */
+        // TODO ListenableFuture
         void start(Consumer<Session> sessionConsumer, float maxPages);
 
         /**
-         * Close the connection.
+         * Close the connection. Must end capture if started to avoid potential unwanted visual
+         * artifacts.
+         *
+         * @see Session#end(Runnable)
          */
         void close();
     }
@@ -119,6 +123,7 @@ public class ScrollCaptureClient {
          * @param top the top (y) position of the tile to capture, in content rect space
          * @param consumer listener to be informed of the result
          */
+        // TODO ListenableFuture
         void requestTile(int top, Consumer<CaptureResult> consumer);
 
         /**
@@ -129,16 +134,31 @@ public class ScrollCaptureClient {
          */
         int getMaxTiles();
 
+        /**
+         * @return the height of each image tile
+         */
         int getTileHeight();
 
+        /**
+         * @return the height of scrollable content being captured
+         */
         int getPageHeight();
 
+        /**
+         * @return the width of the scrollable page
+         */
         int getPageWidth();
+
+        /**
+         * @return the bounds on screen of the window being captured.
+         */
+        Rect getWindowBounds();
 
         /**
          * End the capture session, return the target app to original state. The listener
          * will be called when the target app is ready to before visible and interactive.
          */
+        // TODO ListenableFuture
         void end(Runnable listener);
     }
 
@@ -185,13 +205,13 @@ public class ScrollCaptureClient {
                         + ", taskId=" + taskId + ", consumer=" + consumer + ")");
             }
             mWindowManagerService.requestScrollCapture(displayId, mHostWindowToken, taskId,
-                    new ControllerCallbacks(consumer));
+                    new ClientCallbacks(consumer));
         } catch (RemoteException e) {
             Log.e(TAG, "Ignored remote exception", e);
         }
     }
 
-    private static class ControllerCallbacks extends IScrollCaptureCallbacks.Stub implements
+    private static class ClientCallbacks extends IScrollCaptureCallbacks.Stub implements
             Connection, Session, IBinder.DeathRecipient {
 
         private IScrollCaptureConnection mConnection;
@@ -206,46 +226,63 @@ public class ScrollCaptureClient {
         private int mTileWidth;
         private Rect mRequestRect;
         private boolean mStarted;
+
+        private ICancellationSignal mCancellationSignal;
+        private Rect mWindowBounds;
+        private Rect mBoundsInWindow;
         private int mMaxTiles;
 
-        private ControllerCallbacks(Consumer<Connection> connectionConsumer) {
+        private ClientCallbacks(Consumer<Connection> connectionConsumer) {
             mConnectionConsumer = connectionConsumer;
         }
 
-        // IScrollCaptureCallbacks
-
+        @BinderThread
         @Override
-        public void onConnected(IScrollCaptureConnection connection, Rect scrollBounds,
-                Point positionInWindow) throws RemoteException {
+        public void onScrollCaptureResponse(ScrollCaptureResponse response) throws RemoteException {
             if (DEBUG_SCROLL) {
-                Log.d(TAG, "onConnected(connection=" + connection + ", scrollBounds=" + scrollBounds
-                        + ", positionInWindow=" + positionInWindow + ")");
+                Log.d(TAG, "onScrollCaptureResponse(response=" + response + ")");
             }
-            mConnection = connection;
-            mConnection.asBinder().linkToDeath(this, 0);
-            mScrollBounds = scrollBounds;
-            mConnectionConsumer.accept(this);
+            if (response.isConnected()) {
+                mConnection = response.getConnection();
+                mConnection.asBinder().linkToDeath(this, 0);
+                mWindowBounds = response.getWindowBounds();
+                mBoundsInWindow = response.getBoundsInWindow();
+
+                int pxPerPage = mBoundsInWindow.width() * mBoundsInWindow.height();
+                int pxPerTile = min(TILE_SIZE_PX_MAX, (pxPerPage / TILES_PER_PAGE));
+                mTileWidth = mBoundsInWindow.width();
+                mTileHeight = pxPerTile  / mBoundsInWindow.width();
+                if (DEBUG_SCROLL) {
+                    Log.d(TAG, "boundsInWindow: " + mBoundsInWindow);
+                    Log.d(TAG, "tile size: " + mTileWidth + "x" + mTileHeight);
+                    Log.d(TAG, "maxHeight: " + (mMaxTiles * mTileHeight) + "px");
+                }
+                mConnectionConsumer.accept(this);
+            }
             mConnectionConsumer = null;
-
-            int pxPerPage = mScrollBounds.width() * mScrollBounds.height();
-            int pxPerTile = min(TILE_SIZE_PX_MAX, (pxPerPage / TILES_PER_PAGE));
-            mTileWidth = mScrollBounds.width();
-            mTileHeight = pxPerTile  / mScrollBounds.width();
-            if (DEBUG_SCROLL) {
-                Log.d(TAG, "scrollBounds: " + mScrollBounds);
-                Log.d(TAG, "tile dimen: " + mTileWidth + "x" + mTileHeight);
-            }
         }
 
         @Override
-        public void onUnavailable() throws RemoteException {
+        public void start(Consumer<Session> sessionConsumer, float maxPages) {
             if (DEBUG_SCROLL) {
-                Log.d(TAG, "onUnavailable");
+                Log.d(TAG, "start(sessionConsumer=" + sessionConsumer + ","
+                        + " maxPages=" + maxPages + ")");
             }
-            // The targeted app does not support scroll capture
-            // or the window could not be found... etc etc.
+            mMaxTiles = (int) Math.ceil(maxPages * TILES_PER_PAGE);
+            mReader = ImageReader.newInstance(mTileWidth, mTileHeight, PixelFormat.RGBA_8888,
+                    mMaxTiles, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+            mSessionConsumer = sessionConsumer;
+
+            try {
+                mCancellationSignal = mConnection.startCapture(mReader.getSurface());
+                mStarted = true;
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to start", e);
+                mReader.close();
+            }
         }
 
+        @BinderThread
         @Override
         public void onCaptureStarted() {
             if (DEBUG_SCROLL) {
@@ -256,13 +293,25 @@ public class ScrollCaptureClient {
         }
 
         @Override
-        public void onCaptureBufferSent(long frameNumber, Rect contentArea) {
-            Image image = null;
-            if (frameNumber != ScrollCaptureViewSupport.NO_FRAME_PRODUCED) {
-                image = mReader.acquireNextImage();
-            }
+        public void requestTile(int top, Consumer<CaptureResult> consumer) {
             if (DEBUG_SCROLL) {
-                Log.d(TAG, "onCaptureBufferSent(frameNumber=" + frameNumber
+                Log.d(TAG, "requestTile(top=" + top + ", consumer=" + consumer + ")");
+            }
+            cancelPendingRequest();
+            mRequestRect = new Rect(0, top, mTileWidth, top + mTileHeight);
+            mResultConsumer = consumer;
+            try {
+                mCancellationSignal = mConnection.requestImage(mRequestRect);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Caught remote exception from requestImage", e);
+            }
+        }
+
+        @Override
+        public void onImageRequestCompleted(int flags, Rect contentArea) {
+            Image image = mReader.acquireLatestImage();
+            if (DEBUG_SCROLL) {
+                Log.d(TAG, "onCaptureBufferSent(flags=" + flags
                         + ", contentArea=" + contentArea + ") image=" + image);
             }
             // Save and clear first, since the consumer will likely request the next
@@ -273,61 +322,13 @@ public class ScrollCaptureClient {
         }
 
         @Override
-        public void onConnectionClosed() {
-            if (DEBUG_SCROLL) {
-                Log.d(TAG, "onConnectionClosed()");
-            }
-            disconnect();
-            if (mShutdownListener != null) {
-                mShutdownListener.run();
-                mShutdownListener = null;
-            }
-        }
-
-        // Misc
-
-        private void disconnect() {
-            if (mConnection != null) {
-                mConnection.asBinder().unlinkToDeath(this, 0);
-            }
-            mConnection = null;
-        }
-
-        // ScrollCaptureController.Connection
-
-        @Override
-        public void start(Consumer<Session> sessionConsumer, float maxPages) {
-            if (DEBUG_SCROLL) {
-                Log.d(TAG, "start(sessionConsumer=" + sessionConsumer + ","
-                        + " maxPages=" + maxPages + ")"
-                        + " [maxHeight: " + (mMaxTiles * mTileHeight) + "px]");
-            }
-            mMaxTiles = (int) Math.ceil(maxPages * TILES_PER_PAGE);
-            mReader = ImageReader.newInstance(mTileWidth, mTileHeight, PixelFormat.RGBA_8888,
-                    mMaxTiles, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
-            mSessionConsumer = sessionConsumer;
-            try {
-                mConnection.startCapture(mReader.getSurface());
-                mStarted = true;
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to start", e);
-            }
-        }
-
-        @Override
-        public void close() {
-            end(null);
-        }
-
-        // ScrollCaptureController.Session
-
-        @Override
         public void end(Runnable listener) {
             if (DEBUG_SCROLL) {
                 Log.d(TAG, "end(listener=" + listener + ")");
             }
             if (mStarted) {
                 mShutdownListener = listener;
+                mReader.close();
                 try {
                     // listener called from onConnectionClosed callback
                     mConnection.endCapture();
@@ -342,38 +343,35 @@ public class ScrollCaptureClient {
             }
         }
 
+        @BinderThread
         @Override
-        public int getPageHeight() {
-            return mScrollBounds.height();
-        }
-
-        @Override
-        public int getPageWidth() {
-            return mScrollBounds.width();
-        }
-
-        @Override
-        public int getTileHeight() {
-            return mTileHeight;
-        }
-
-        @Override
-        public int getMaxTiles() {
-            return mMaxTiles;
-        }
-
-        @Override
-        public void requestTile(int top, Consumer<CaptureResult> consumer) {
-            if (DEBUG_SCROLL) {
-                Log.d(TAG, "requestTile(top=" + top + ", consumer=" + consumer + ")");
+        public void onCaptureEnded() {
+            close();
+            if (mShutdownListener != null) {
+                mShutdownListener.run();
+                mShutdownListener = null;
             }
-            mRequestRect = new Rect(0, top, mTileWidth, top + mTileHeight);
-            mResultConsumer = consumer;
-            try {
-                mConnection.requestImage(mRequestRect);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Caught remote exception from requestImage", e);
+        }
+
+        @Override
+        public void close() {
+            if (mConnection != null) {
+                try {
+                    mConnection.close();
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+                disconnect();
             }
+        }
+
+        // Misc
+
+        private void disconnect() {
+            if (mConnection != null) {
+                mConnection.asBinder().unlinkToDeath(this, 0);
+            }
+            mConnection = null;
         }
 
         /**
@@ -385,6 +383,41 @@ public class ScrollCaptureClient {
                 Log.d(TAG, "binderDied()");
             }
             disconnect();
+        }
+
+        @Override
+        public int getPageHeight() {
+            return mBoundsInWindow.height();
+        }
+
+        @Override
+        public int getPageWidth() {
+            return mBoundsInWindow.width();
+        }
+
+        @Override
+        public int getTileHeight() {
+            return mTileHeight;
+        }
+
+        public Rect getWindowBounds() {
+            return new Rect(mWindowBounds);
+        }
+
+        @Override
+        public int getMaxTiles() {
+            return mMaxTiles;
+        }
+
+        private void cancelPendingRequest() {
+            if (mCancellationSignal != null) {
+                try {
+                    mCancellationSignal.cancel();
+                } catch (RemoteException e) {
+                    /* ignore */
+                }
+                mCancellationSignal = null;
+            }
         }
     }
 }

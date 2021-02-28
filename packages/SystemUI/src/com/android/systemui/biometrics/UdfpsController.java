@@ -68,6 +68,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     private final Context mContext;
     private final FingerprintManager mFingerprintManager;
+    @NonNull private final LayoutInflater mInflater;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
     private final StatusBarStateController mStatusBarStateController;
@@ -75,10 +76,8 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
     private final WindowManager.LayoutParams mCoreLayoutParams;
-    private final UdfpsView mView;
-    // Indicates whether the overlay is currently showing. Even if it has been requested, it might
-    // not be showing.
-    private boolean mIsOverlayShowing;
+
+    @Nullable private UdfpsView mView;
     // Indicates whether the overlay has been requested.
     private boolean mIsOverlayRequested;
     // Reason the overlay has been requested. See IUdfpsOverlayController for definitions.
@@ -111,19 +110,47 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
         @Override
         public void onEnrollmentProgress(int sensorId, int remaining) {
+            if (mView == null) {
+                return;
+            }
             mView.onEnrollmentProgress(remaining);
         }
 
         @Override
         public void onEnrollmentHelp(int sensorId) {
+            if (mView == null) {
+                return;
+            }
             mView.onEnrollmentHelp();
         }
 
         @Override
         public void setDebugMessage(int sensorId, String message) {
+            if (mView == null) {
+                return;
+            }
             mView.setDebugMessage(message);
         }
     }
+
+    @VisibleForTesting
+    final StatusBar.ExpansionChangedListener mStatusBarExpansionListener =
+            (expansion, expanded) -> {
+                if (mView != null) {
+                    mView.onExpansionChanged(expansion, expanded);
+                }
+    };
+
+    @VisibleForTesting
+    final StatusBarStateController.StateListener mStatusBarStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onStateChanged(int newState) {
+                    if (mView != null) {
+                        mView.onStateChanged(newState);
+                    }
+                }
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     private final UdfpsView.OnTouchListener mOnTouchListener = (v, event) -> {
@@ -157,13 +184,14 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
     @Inject
     public UdfpsController(@NonNull Context context,
             @Main Resources resources,
-            LayoutInflater inflater,
+            @NonNull LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
             WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
             @Nullable StatusBar statusBar) {
         mContext = context;
+        mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
         mFingerprintManager = checkNotNull(fingerprintManager);
@@ -189,15 +217,10 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mCoreLayoutParams.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
-        mView = (UdfpsView) inflater.inflate(R.layout.udfps_view, null, false);
-        mView.setSensorProperties(mSensorProps);
-        mView.setHbmCallback(this);
-
-        statusBar.addExpansionChangedListener(mView);
-        statusBarStateController.addCallback(mView);
+        statusBar.addExpansionChangedListener(mStatusBarExpansionListener);
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
-        mIsOverlayShowing = false;
     }
 
     @Nullable
@@ -220,7 +243,13 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
      * @return where the UDFPS exists on the screen in pixels.
      */
     public RectF getSensorLocation() {
-        return mView.getSensorRect();
+        // This is currently used to calculate the amount of space available for notifications
+        // on lockscreen. Keyguard is only shown in portrait mode for now, so this will need to
+        // be updated if that ever changes.
+        return new RectF(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
     }
 
     private void showOverlay(int reason) {
@@ -298,14 +327,18 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     private void showUdfpsOverlay(int reason) {
         mFgExecutor.execute(() -> {
-            if (!mIsOverlayShowing) {
+            if (mView == null) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
+
+                    mView = (UdfpsView) mInflater.inflate(R.layout.udfps_view, null, false);
+                    mView.setSensorProperties(mSensorProps);
+                    mView.setHbmCallback(this);
+
                     final UdfpsAnimation animation = getUdfpsAnimationForReason(reason);
                     mView.setExtras(animation, mEnrollHelper);
                     mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
-                    mIsOverlayShowing = true;
                 } catch (RuntimeException e) {
                     Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
                 }
@@ -334,14 +367,12 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     private void hideUdfpsOverlay() {
         mFgExecutor.execute(() -> {
-            if (mIsOverlayShowing) {
+            if (mView != null) {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
-                mView.setExtras(null, null);
-                mView.setOnTouchListener(null);
                 // Reset the controller back to its starting state.
                 onFingerUp();
                 mWindowManager.removeView(mView);
-                mIsOverlayShowing = false;
+                mView = null;
             } else {
                 Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
             }
@@ -388,12 +419,20 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
 
     // This method can be called from the UI thread.
     private void onFingerDown(int x, int y, float minor, float major) {
+        if (mView == null) {
+            Log.w(TAG, "Null view in onFingerDown");
+            return;
+        }
         mView.startIllumination(() ->
                 mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major));
     }
 
     // This method can be called from the UI thread.
     private void onFingerUp() {
+        if (mView == null) {
+            Log.w(TAG, "Null view in onFingerUp");
+            return;
+        }
         mFingerprintManager.onPointerUp(mSensorProps.sensorId);
         mView.stopIllumination();
     }

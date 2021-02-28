@@ -56,6 +56,7 @@ public class BatteryStatsSamplingTimerTest extends TestCase {
     }
 
     @SmallTest
+    @SkipPresubmit("b/180015146")
     public void testEndSampleAndContinueWhenTimeOrCountDecreases() throws Exception {
         final MockClocks clocks = new MockClocks();
         final BatteryStatsImpl.TimeBase timeBase = Mockito.mock(BatteryStatsImpl.TimeBase.class);

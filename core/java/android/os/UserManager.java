@@ -1688,6 +1688,7 @@ public class UserManager {
      * @return Whether guest user is always ephemeral
      * @hide
      */
+    @TestApi
     public static boolean isGuestUserEphemeral() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
@@ -1802,6 +1803,20 @@ public class UserManager {
     }
 
     /**
+     * @return the user type of the context user.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
+    @UserHandleAware
+    public @NonNull String getUserType() {
+        UserInfo userInfo = getUserInfo(mUserId);
+        return userInfo == null ? "" : userInfo.userType;
+    }
+
+    /**
      * Returns the user name of the context user. This call is only available to applications on
      * the system image; it requires the {@code android.permission.MANAGE_USERS} or {@code
      * android.permission.GET_ACCOUNTS_PRIVILEGED} permissions.
@@ -1809,7 +1824,8 @@ public class UserManager {
      * @return the user name
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}, conditional = true)
+            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED,
+            android.Manifest.permission.CREATE_USERS}, conditional = true)
     @UserHandleAware
     public @NonNull String getUserName() {
         if (UserHandle.myUserId() == mUserId) {
@@ -2792,6 +2808,7 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
+    @TestApi
     public @Nullable UserInfo createUser(@Nullable String name, @NonNull String userType,
             @UserInfoFlag int flags) {
         try {
@@ -2828,6 +2845,7 @@ public class UserManager {
      * @throws UserOperationException if the user could not be created.
      * @hide
      */
+    @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public @NonNull UserInfo preCreateUser(@NonNull String userType)
@@ -2976,10 +2994,11 @@ public class UserManager {
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createProfileForUser(String name, @NonNull String userType,
-            @UserInfoFlag int flags, @UserIdInt int userId, String[] disallowedPackages) {
+    public @Nullable UserInfo createProfileForUser(@Nullable String name, @NonNull String userType,
+            @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages) {
         try {
             return mService.createProfileForUserWithThrow(name, userType, flags, userId,
                     disallowedPackages);
@@ -3022,9 +3041,10 @@ public class UserManager {
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createRestrictedProfile(String name) {
+    public @Nullable UserInfo createRestrictedProfile(@Nullable String name) {
         try {
             UserHandle parentUserHandle = Process.myUserHandle();
             UserInfo user = mService.createRestrictedProfileWithThrow(name,
@@ -3248,10 +3268,11 @@ public class UserManager {
 
     /**
      * Return the number of users currently created on the device.
-     * <p>This API is not for use by third-party apps. It requires the {@code MANAGE_USERS}
-     * permission.</p>
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public int getUserCount() {
         List<UserInfo> users = getUsers();
         return users != null ? users.size() : 1;
@@ -3274,7 +3295,10 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public List<UserInfo> getUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ false,
                 /* excludePreCreated= */ true);
@@ -3292,7 +3316,10 @@ public class UserManager {
      * @return the list of users that were created.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public @NonNull List<UserInfo> getAliveUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ true,
                 /* excludePreCreated= */ true);
@@ -3306,7 +3333,10 @@ public class UserManager {
      */
     @Deprecated
     @UnsupportedAppUsage
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         return getUsers(/*excludePartial= */ true, excludeDying,
                 /* excludePreCreated= */ true);
@@ -3317,8 +3347,12 @@ public class UserManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
+    public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
             boolean excludePreCreated) {
         try {
             return mService.getUsers(excludePartial, excludeDying, excludePreCreated);
@@ -3335,7 +3369,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public @NonNull List<UserHandle> getUserHandles(boolean excludeDying) {
         List<UserInfo> users = getUsers(/* excludePartial= */ true, excludeDying,
                 /* excludePreCreated= */ true);
@@ -3354,7 +3391,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS
+    })
     public long[] getSerialNumbersOfUsers(boolean excludeDying) {
         List<UserInfo> users = getUsers(/* excludePartial= */ true, excludeDying,
                 /* excludePreCreated= */ true);
@@ -3678,7 +3718,10 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS
+    })
     public UserInfo getProfileParent(@UserIdInt int userId) {
         try {
             return mService.getProfileParent(userId);
@@ -3697,7 +3740,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS
+    })
     public @Nullable UserHandle getProfileParent(@NonNull UserHandle user) {
         UserInfo info = getProfileParent(user.getIdentifier());
 

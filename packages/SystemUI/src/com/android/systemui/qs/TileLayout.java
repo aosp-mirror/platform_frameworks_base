@@ -36,7 +36,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mCellMarginTop;
     protected boolean mListening;
     protected int mMaxAllowedRows = 3;
-    private boolean mShowLabels = true;
 
     // Prototyping with less rows
     private final boolean mLessRows;
@@ -53,12 +52,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         setFocusableInTouchMode(true);
         mLessRows = ((Settings.System.getInt(context.getContentResolver(), "qs_less_rows", 0) != 0)
                 || useQsMediaPlayer(context));
-        updateResources();
-    }
-
-    @Override
-    public void setShowLabels(boolean show) {
-        mShowLabels = show;
         updateResources();
     }
 
@@ -128,12 +121,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mMaxCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
-        if (!mShowLabels && mCellMarginVertical == 0) {
-            mCellMarginVertical = mCellMarginHorizontal;
-        }
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
-        if (mLessRows && mShowLabels) mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
+        if (mLessRows) mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         if (updateColumns()) {
             requestLayout();
             return true;
@@ -194,9 +184,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 + mCellMarginVertical;
         final int previousRows = mRows;
         mRows = availableHeight / (getCellHeight() + mCellMarginVertical);
-        final int minRows = mShowLabels ? mMinRows : mMinRows + 1;
-        if (mRows < minRows) {
-            mRows = minRows;
+        if (mRows < mMinRows) {
+            mRows = mMinRows;
         } else if (mRows >= mMaxAllowedRows) {
             mRows = mMaxAllowedRows;
         }
@@ -216,7 +205,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getCellHeight() {
-        return mShowLabels ? mMaxCellHeight : mMaxCellHeight / 2;
+        return mMaxCellHeight;
     }
 
     protected void layoutTileRecords(int numRecords) {

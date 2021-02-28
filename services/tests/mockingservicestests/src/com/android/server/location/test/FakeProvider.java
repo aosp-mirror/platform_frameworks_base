@@ -23,6 +23,7 @@ import com.android.server.location.provider.AbstractLocationProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 
 public class FakeProvider extends AbstractLocationProvider {
 
@@ -40,7 +41,7 @@ public class FakeProvider extends AbstractLocationProvider {
     private final FakeProviderInterface mFakeInterface;
 
     public FakeProvider(FakeProviderInterface fakeInterface) {
-        super(Runnable::run, null, null, null);
+        super(Runnable::run, null, null, Collections.emptySet());
         mFakeInterface = fakeInterface;
     }
 

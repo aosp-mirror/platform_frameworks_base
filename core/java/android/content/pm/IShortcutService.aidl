@@ -78,4 +78,7 @@ interface IShortcutService {
     ParceledListSlice getShortcuts(String packageName, int matchFlags, int userId);
 
     void pushDynamicShortcut(String packageName, in ShortcutInfo shortcut, int userId);
+
+    void updateShortcutVisibility(String callingPkg, String packageName, in byte[] certificate,
+            in boolean visible, int userId);
 }

@@ -411,14 +411,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_IMMUTABLY_RESTRICTED = 1<<4;
 
     /**
-     * Flag for {@link #flags}, corresponding to <code>installerExemptIgnored</code>
-     * value of {@link android.R.attr#permissionFlags}.
-     *
-     * <p> Modifier for permission restriction. This permission cannot be exempted by the installer.
-     */
-    public static final int FLAG_INSTALLER_EXEMPT_IGNORED = 1 << 5;
-
-    /**
      * Flag for {@link #flags}, indicating that this permission has been
      * installed into the system's globally defined permissions.
      */
@@ -721,11 +713,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isRestricted() {
         return isHardRestricted() || isSoftRestricted();
-    }
-
-    /** @hide */
-    public boolean isInstallerExemptIgnored() {
-        return (flags & PermissionInfo.FLAG_INSTALLER_EXEMPT_IGNORED) != 0;
     }
 
     /** @hide */

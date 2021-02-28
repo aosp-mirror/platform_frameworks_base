@@ -468,7 +468,7 @@ GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
 GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float):
     
 GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setCorrelationVectors(java.util.Collection<android.location.CorrelationVector>):
     
 GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasNanos(double):
@@ -480,7 +480,7 @@ GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasN
 GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasUncertaintyNanos(double):
     
 GetterSetterNames: android.location.GnssMeasurement#setSatellitePvt(android.location.SatellitePvt):
-
+    
 GetterSetterNames: android.location.GnssMeasurement#setSnrInDb(double):
     
 GetterSetterNames: android.location.LocationRequest#isLocationSettingsIgnored():
@@ -953,6 +953,32 @@ MissingNullability: android.content.pm.PackageManager#holdLock(android.os.IBinde
     
 MissingNullability: android.content.pm.ShortcutManager#ShortcutManager(android.content.Context) parameter #0:
     
+MissingNullability: android.content.pm.UserInfo#UserInfo(android.content.pm.UserInfo) parameter #0:
+    Missing nullability on parameter `orig` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#UserInfo(int, String, String, int) parameter #1:
+    Missing nullability on parameter `name` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#UserInfo(int, String, String, int) parameter #2:
+    Missing nullability on parameter `iconPath` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#UserInfo(int, String, String, int, String) parameter #1:
+    Missing nullability on parameter `name` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#UserInfo(int, String, String, int, String) parameter #2:
+    Missing nullability on parameter `iconPath` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#UserInfo(int, String, String, int, String) parameter #4:
+    Missing nullability on parameter `userType` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#UserInfo(int, String, int) parameter #1:
+    Missing nullability on parameter `name` in method `UserInfo`
+MissingNullability: android.content.pm.UserInfo#getUserHandle():
+    Missing nullability on method `getUserHandle` return
+MissingNullability: android.content.pm.UserInfo#iconPath:
+    Missing nullability on field `iconPath` in class `class android.content.pm.UserInfo`
+MissingNullability: android.content.pm.UserInfo#lastLoggedInFingerprint:
+    Missing nullability on field `lastLoggedInFingerprint` in class `class android.content.pm.UserInfo`
+MissingNullability: android.content.pm.UserInfo#name:
+    Missing nullability on field `name` in class `class android.content.pm.UserInfo`
+MissingNullability: android.content.pm.UserInfo#userType:
+    Missing nullability on field `userType` in class `class android.content.pm.UserInfo`
+MissingNullability: android.content.pm.UserInfo#writeToParcel(android.os.Parcel, int) parameter #0:
+    Missing nullability on parameter `dest` in method `writeToParcel`
 MissingNullability: android.content.res.AssetManager#getOverlayablesToString(String) parameter #0:
     
 MissingNullability: android.content.res.Configuration#windowConfiguration:
@@ -2433,6 +2459,38 @@ MutableBareField: android.content.AutofillOptions#disabledActivities:
     
 MutableBareField: android.content.AutofillOptions#whitelistedActivitiesForAugmentedAutofill:
     
+MutableBareField: android.content.pm.UserInfo#convertedFromPreCreated:
+    Bare field convertedFromPreCreated must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#creationTime:
+    Bare field creationTime must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#flags:
+    Bare field flags must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#guestToRemove:
+    Bare field guestToRemove must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#iconPath:
+    Bare field iconPath must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#id:
+    Bare field id must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#lastLoggedInFingerprint:
+    Bare field lastLoggedInFingerprint must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#lastLoggedInTime:
+    Bare field lastLoggedInTime must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#name:
+    Bare field name must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#partial:
+    Bare field partial must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#preCreated:
+    Bare field preCreated must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#profileBadge:
+    Bare field profileBadge must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#profileGroupId:
+    Bare field profileGroupId must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#restrictedProfileParentId:
+    Bare field restrictedProfileParentId must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#serialNumber:
+    Bare field serialNumber must be marked final, or moved behind accessors if mutable
+MutableBareField: android.content.pm.UserInfo#userType:
+    Bare field userType must be marked final, or moved behind accessors if mutable
 MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#cache:
     
 MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#dbName:
@@ -2548,15 +2606,15 @@ NoSettingsProvider: android.provider.Settings.Global#TETHER_OFFLOAD_DISABLED:
 NoSettingsProvider: android.provider.Settings.Global#USE_OPEN_WIFI_PACKAGE:
     
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED:
-
+    
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_CAPABILITY:
-
+    
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE:
-
+    
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_ALL:
-
+    
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN:
-
+    
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW:
     
 NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE:
@@ -2617,6 +2675,10 @@ NotCloseable: android.os.HwParcel:
     
 NotCloseable: android.telephony.ims.stub.ImsUtImplBase:
     
+
+
+NullableCollection: android.os.UserManager#createProfileForUser(String, String, int, int, String[]) parameter #4:
+    Type of parameter disallowedPackages in android.os.UserManager.createProfileForUser(String name, String userType, int flags, int userId, String[] disallowedPackages) is a nullable collection (`java.lang.String[]`); must be non-null
 
 
 OnNameExpected: android.service.autofill.augmented.AugmentedAutofillService#dump(java.io.PrintWriter, String[]):
@@ -2729,6 +2791,8 @@ ParcelCreator: android.service.autofill.InternalValidator:
 
 ParcelNotFinal: android.app.WindowConfiguration:
     
+ParcelNotFinal: android.content.pm.UserInfo:
+    Parcelable classes must be final: android.content.pm.UserInfo is not final
 ParcelNotFinal: android.net.metrics.IpConnectivityLog.Event:
     
 ParcelNotFinal: android.os.IncidentManager.IncidentReport:

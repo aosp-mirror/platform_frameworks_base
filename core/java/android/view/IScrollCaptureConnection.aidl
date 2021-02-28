@@ -17,33 +17,45 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.os.ICancellationSignal;
 import android.view.Surface;
 
 
  /**
-   * Interface implemented by a client of the Scroll Capture framework to receive requests
-   * to start, capture images and end the session.
+   * A remote connection to a scroll capture target.
    *
    * {@hide}
    */
 interface IScrollCaptureConnection {
 
     /**
-     * Informs the client that it has been selected for scroll capture and should prepare to
-     * to begin handling capture requests.
-     */
-    oneway void startCapture(in Surface surface);
-
-    /**
-     * Request the client capture an image within the provided rectangle.
+     * Informs the target that it has been selected for scroll capture.
      *
-     * @see android.view.ScrollCaptureCallback#onScrollCaptureRequest
+     * @param surface a return channel for image buffers
+     *
+     * @return a cancallation signal which is used cancel the request
      */
-    oneway void requestImage(in Rect captureArea);
+    ICancellationSignal startCapture(in Surface surface);
 
     /**
-     * Inform the client that capture has ended. The client should shut down and release all
-     * local resources in use and prepare for return to normal interactive usage.
+     * Request the target capture an image within the provided rectangle.
+     *
+     * @param surface a return channel for image buffers
+     * @param signal a cancallation signal which can interrupt the request
+     *
+     * @return a cancallation signal which is used cancel the request
      */
-    oneway void endCapture();
+    ICancellationSignal requestImage(in Rect captureArea);
+
+    /**
+     * Inform the target that capture has ended.
+     *
+     * @return a cancallation signal which is used cancel the request
+     */
+    ICancellationSignal endCapture();
+
+    /**
+     * Closes the connection.
+     */
+    oneway void close();
 }

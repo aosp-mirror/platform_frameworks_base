@@ -237,6 +237,7 @@ class DomainVerificationSettingsMutationTest {
                 TEST_UUID
             )
         ) {
+            whenever(getName()) { TEST_PKG }
             whenever(getPkg()) { mockPkg() }
             whenever(domainSetId) { TEST_UUID }
             whenever(userState) {

@@ -2895,8 +2895,6 @@
   <java-symbol type="id" name="alternate_expand_target" />
   <java-symbol type="id" name="notification_header" />
   <java-symbol type="id" name="notification_top_line" />
-  <java-symbol type="id" name="notification_headerless_margin_extra_top" />
-  <java-symbol type="id" name="notification_headerless_margin_extra_bottom" />
   <java-symbol type="id" name="time_divider" />
   <java-symbol type="id" name="header_text_divider" />
   <java-symbol type="id" name="header_text_secondary_divider" />
@@ -2918,8 +2916,8 @@
   <java-symbol type="dimen" name="notification_header_icon_size" />
   <java-symbol type="dimen" name="notification_header_app_name_margin_start" />
   <java-symbol type="dimen" name="notification_header_separating_margin" />
-  <java-symbol type="dimen" name="notification_headerless_margin_constrained_minimum" />
-  <java-symbol type="dimen" name="notification_headerless_margin_constrained_extra" />
+  <java-symbol type="dimen" name="notification_headerless_margin_oneline" />
+  <java-symbol type="dimen" name="notification_headerless_margin_twoline" />
   <java-symbol type="string" name="default_notification_channel_label" />
   <java-symbol type="string" name="importance_from_user" />
   <java-symbol type="string" name="importance_from_person" />
@@ -3112,8 +3110,10 @@
   <java-symbol type="dimen" name="call_notification_collapsible_indent"/>
   <java-symbol type="drawable" name="ic_call_answer" />
   <java-symbol type="drawable" name="ic_call_decline" />
+  <java-symbol type="id" name="verification_divider" />
   <java-symbol type="id" name="verification_icon" />
   <java-symbol type="id" name="verification_text" />
+  <java-symbol type="string" name="notification_verified_content_description" />
 
   <!-- Notification handler / dashboard package -->
   <java-symbol type="string" name="config_notificationHandlerPackage" />

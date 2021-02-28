@@ -40,9 +40,9 @@ public class MockLocationProvider extends AbstractLocationProvider {
     @Nullable private Location mLocation;
 
     public MockLocationProvider(ProviderProperties properties, CallerIdentity identity,
-            @Nullable Set<String> locationTags) {
+            Set<String> extraAttributionTags) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR, identity, properties, locationTags);
+        super(DIRECT_EXECUTOR, identity, properties, extraAttributionTags);
     }
 
     /** Sets the allowed state of this mock provider. */

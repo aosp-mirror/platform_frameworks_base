@@ -185,6 +185,29 @@ public class DomainVerificationEnforcer {
         return !mCallback.filterAppAccess(packageName, callingUid, targetUserId);
     }
 
+    /**
+     * Querying for the owners of a domain. Because this API cannot filter the returned list of
+     * packages, enforces {@link android.Manifest.permission.QUERY_ALL_PACKAGES}, but also enforces
+     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS} because each user has a different
+     * state.
+     */
+    public void assertOwnerQuerent(int callingUid, @UserIdInt int callingUserId,
+            @UserIdInt int targetUserId) {
+        final int callingPid = Binder.getCallingPid();
+        if (callingUserId != targetUserId) {
+            mContext.enforcePermission(android.Manifest.permission.INTERACT_ACROSS_USERS,
+                    callingPid, callingUid, "Caller is not allowed to query other users");
+        }
+
+        mContext.enforcePermission(android.Manifest.permission.QUERY_ALL_PACKAGES,
+                callingPid, callingUid, "Caller " + callingUid + " does not hold "
+                        + android.Manifest.permission.QUERY_ALL_PACKAGES);
+
+        mContext.enforcePermission(
+                android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION,
+                callingPid, callingUid, "Caller is not allowed to query user selections");
+    }
+
     public interface Callback {
         /**
          * @return true if access to the given package should be filtered and the method failed as
