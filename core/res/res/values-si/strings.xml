@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"තවදුරටත් මුහුණ හඳුනාගත නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"ඉතා සමානයි, ඔබේ හැඩ ගැසීම වෙනස් කරන්න."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ඔබේ මුහුණ සඟවන කිසිවක් ඉවත් කරන්න."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"කලු තීරුව ඇතුළුව, ඔබේ තිරයෙහි මුදුන පිරිසිදු කරන්න"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"වර්ණ නිවැරදි කිරීම"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"දීප්තිය අඩු කරන්න"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> භාවිත කිරීමට හඬ පරිමා යතුරු දෙකම තත්පර තුනකට ඔබාගෙන සිටින්න"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"දිගටම කර ගෙන යාමට, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; හට ඔබගේ උපාංගයෙහි කැමරාවට ප්‍රවේශය අවශ්‍යයි."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ක්‍රියාත්මක කරන්න"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"සංවේදක පෞද්ගලිකත්වය"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>
