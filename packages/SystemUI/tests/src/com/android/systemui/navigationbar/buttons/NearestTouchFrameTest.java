@@ -69,7 +69,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
         mNearestTouchFrame.addView(left);
         mNearestTouchFrame.addView(right);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
                 12 /* x */, 5 /* y */, 0);
@@ -86,7 +86,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
         mNearestTouchFrame.addView(left);
         mNearestTouchFrame.addView(right);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
                 12 /* x */, 5 /* y */, 0);
@@ -105,7 +105,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
         mNearestTouchFrame.addView(left);
         mNearestTouchFrame.addView(right);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         // Would go to left view if attached, but goes to right instead as left should be detached.
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
@@ -122,7 +122,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
         mNearestTouchFrame.addView(left);
         mNearestTouchFrame.addView(right);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
                 12 /* x */, 5 /* y */, 0);
@@ -138,7 +138,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
 
         mNearestTouchFrame.addView(left);
         mNearestTouchFrame.addView(right);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
                 18 /* x */, 5 /* y */, 0);
@@ -154,7 +154,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         mNearestTouchFrame.setIsVertical(true);
         mNearestTouchFrame.addView(top);
         mNearestTouchFrame.addView(bottom);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
                 5 /* x */, 12 /* y */, 0);
@@ -170,7 +170,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         mNearestTouchFrame.setIsVertical(true);
         mNearestTouchFrame.addView(top);
         mNearestTouchFrame.addView(bottom);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0,
                 5 /* x */, 18 /* y */, 0);
@@ -184,7 +184,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         View view = mockViewAt(0, 20, 10, 10);
         when(view.isAttachedToWindow()).thenReturn(false);
         mNearestTouchFrame.addView(view);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0, 5 /* x */, 18 /* y */, 0);
         mNearestTouchFrame.onTouchEvent(ev);
@@ -201,7 +201,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         mNearestTouchFrame.addView(view1);
         mNearestTouchFrame.addView(view2);
         mNearestTouchFrame.addView(view3);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 30, 30);
 
         MotionEvent ev = MotionEvent.obtain(0, 0, 0, 5 /* x */, 18 /* y */, 0);
         mNearestTouchFrame.onTouchEvent(ev);
@@ -213,11 +213,9 @@ public class NearestTouchFrameTest extends SysuiTestCase {
     public void testCachedRegionsSplit_horizontal() {
         View left = mockViewAt(0, 0, 5, 20);
         View right = mockViewAt(15, 0, 5, 20);
-        mNearestTouchFrame.layout(0, 0, 20, 20);
-
         mNearestTouchFrame.addView(left);
         mNearestTouchFrame.addView(right);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.layout(0, 0, 20, 20);
 
         Map<View, Rect> childRegions = mNearestTouchFrame.getFullTouchableChildRegions();
         assertEquals(2, childRegions.size());
@@ -231,12 +229,10 @@ public class NearestTouchFrameTest extends SysuiTestCase {
     public void testCachedRegionsSplit_vertical() {
         View top = mockViewAt(0, 0, 20, 5);
         View bottom = mockViewAt(0, 15, 20, 5);
-        mNearestTouchFrame.layout(0, 0, 20, 20);
-        mNearestTouchFrame.setIsVertical(true);
-
         mNearestTouchFrame.addView(top);
         mNearestTouchFrame.addView(bottom);
-        mNearestTouchFrame.onMeasure(0, 0);
+        mNearestTouchFrame.setIsVertical(true);
+        mNearestTouchFrame.layout(0, 0, 20, 20);
 
         Map<View, Rect> childRegions = mNearestTouchFrame.getFullTouchableChildRegions();
         assertEquals(2, childRegions.size());
@@ -256,6 +252,8 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         }).when(v).getLocationInWindow(any());
         when(v.isClickable()).thenReturn(true);
         when(v.isAttachedToWindow()).thenReturn(true);
+        when(v.getWidth()).thenReturn(width);
+        when(v.getHeight()).thenReturn(height);
 
         // Stupid final methods.
         v.setLeft(0);

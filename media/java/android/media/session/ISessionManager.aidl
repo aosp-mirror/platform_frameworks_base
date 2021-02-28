@@ -38,9 +38,7 @@ import android.view.KeyEvent;
 interface ISessionManager {
     ISession createSession(String packageName, in ISessionCallback sessionCb, String tag,
             in Bundle sessionInfo, int userId);
-    void notifySession2Created(in Session2Token sessionToken);
     List<MediaSession.Token> getSessions(in ComponentName compName, int userId);
-    ParceledListSlice getSession2Tokens(int userId);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
     boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,

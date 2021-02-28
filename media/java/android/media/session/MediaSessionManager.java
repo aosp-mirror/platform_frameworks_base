@@ -25,9 +25,9 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.IRemoteSessionCallback;
+import android.media.MediaCommunicationManager;
 import android.media.MediaFrameworkPlatformInitializer;
 import android.media.MediaSession2;
 import android.media.Session2Token;
@@ -84,6 +84,7 @@ public final class MediaSessionManager {
     public static final int RESULT_MEDIA_KEY_HANDLED = 1;
 
     private final ISessionManager mService;
+    private final MediaCommunicationManager mCommunicationManager;
     private final OnMediaKeyEventDispatchedListenerStub mOnMediaKeyEventDispatchedListenerStub =
             new OnMediaKeyEventDispatchedListenerStub();
     private final OnMediaKeyEventSessionChangedListenerStub
@@ -128,6 +129,8 @@ public final class MediaSessionManager {
                 .getMediaServiceManager()
                 .getMediaSessionServiceRegisterer()
                 .get());
+        mCommunicationManager = (MediaCommunicationManager) context
+                .getSystemService(Context.MEDIA_COMMUNICATION_SERVICE);
     }
 
     /**
@@ -164,17 +167,11 @@ public final class MediaSessionManager {
      * {@link MediaSession2.Builder} instead.
      *
      * @param token newly created session2 token
+     * @deprecated Don't use this method. A new media session is notified automatically.
      */
+    @Deprecated
     public void notifySession2Created(@NonNull Session2Token token) {
-        Objects.requireNonNull(token, "token shouldn't be null");
-        if (token.getType() != Session2Token.TYPE_SESSION) {
-            throw new IllegalArgumentException("token's type should be TYPE_SESSION");
-        }
-        try {
-            mService.notifySession2Created(token);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
+        // Does nothing
     }
 
     /**
@@ -255,37 +252,7 @@ public final class MediaSessionManager {
      */
     @NonNull
     public List<Session2Token> getSession2Tokens() {
-        return getSession2Tokens(UserHandle.myUserId());
-    }
-
-    /**
-     * Gets a list of {@link Session2Token} with type {@link Session2Token#TYPE_SESSION} for the
-     * given user.
-     * <p>
-     * The calling application needs to hold the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
-     * retrieve session tokens for user ids that do not belong to current process.
-     *
-     * @param userHandle The user handle to fetch sessions for.
-     * @return A list of {@link Session2Token}
-     * @hide
-     */
-    @NonNull
-    @SuppressLint("UserHandle")
-    public List<Session2Token> getSession2Tokens(@NonNull UserHandle userHandle) {
-        Objects.requireNonNull(userHandle, "userHandle shouldn't be null");
-        return getSession2Tokens(userHandle.getIdentifier());
-
-    }
-
-    private List<Session2Token> getSession2Tokens(int userId) {
-        try {
-            ParceledListSlice slice = mService.getSession2Tokens(userId);
-            return slice == null ? new ArrayList<>() : slice.getList();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get session tokens", e);
-        }
-        return new ArrayList<>();
+        return mCommunicationManager.getSession2Tokens();
     }
 
     /**
@@ -534,8 +501,7 @@ public final class MediaSessionManager {
         }
         if (shouldRegisterCallback) {
             try {
-                mService.registerRemoteSessionCallback(
-                        mRemoteSessionCallbackStub);
+                mService.registerRemoteSessionCallback(mRemoteSessionCallbackStub);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to register remote volume controller callback", e);
             }

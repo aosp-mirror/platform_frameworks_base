@@ -18,7 +18,6 @@ package com.android.server.location.provider.proxy;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,6 +43,7 @@ import com.android.server.location.provider.AbstractLocationProvider;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,8 +52,8 @@ import java.util.Objects;
  */
 public class ProxyLocationProvider extends AbstractLocationProvider {
 
-    private static final String KEY_LOCATION_TAGS = "android:location_allow_listed_tags";
-    private static final String LOCATION_TAGS_SEPARATOR = ";";
+    private static final String KEY_EXTRA_ATTRIBUTION_TAGS = "android:location_allow_listed_tags";
+    private static final String EXTRA_ATTRIBUTION_TAGS_SEPARATOR = ";";
 
     /**
      * Creates and registers this proxy. If no suitable service is available for the proxy, returns
@@ -90,7 +90,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
             int nonOverlayPackageResId) {
         // safe to use direct executor since our locks are not acquired in a code path invoked by
         // our owning provider
-        super(DIRECT_EXECUTOR, null, null, null);
+        super(DIRECT_EXECUTOR, null, null, Collections.emptySet());
 
         mContext = context;
         mServiceWatcher = new ServiceWatcher(context, action, this::onBind,
@@ -98,16 +98,6 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
         mProxy = null;
         mRequest = ProviderRequest.EMPTY_REQUEST;
-    }
-
-    private void updateLocationTagInfo(@NonNull BoundService boundService) {
-        if (boundService.metadata != null) {
-            final String tagsList = boundService.metadata.getString(KEY_LOCATION_TAGS);
-            if (tagsList != null) {
-                final String[] tags = tagsList.split(LOCATION_TAGS_SEPARATOR);
-                setLocationTags(new ArraySet<>(tags));
-            }
-        }
     }
 
     private boolean checkServiceResolves() {
@@ -120,14 +110,22 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         synchronized (mLock) {
             mProxy = new Proxy();
             mService = boundService.component;
+
+            // update extra attribution tag info from manifest
+            if (boundService.metadata != null) {
+                String tagsList = boundService.metadata.getString(KEY_EXTRA_ATTRIBUTION_TAGS);
+                if (tagsList != null) {
+                    setExtraAttributionTags(
+                            new ArraySet<>(tagsList.split(EXTRA_ATTRIBUTION_TAGS_SEPARATOR)));
+                }
+            }
+
             provider.setLocationProviderManager(mProxy);
 
             ProviderRequest request = mRequest;
             if (!request.equals(ProviderRequest.EMPTY_REQUEST)) {
                 provider.setRequest(request);
             }
-
-            updateLocationTagInfo(boundService);
         }
     }
 

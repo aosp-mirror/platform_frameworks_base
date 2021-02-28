@@ -2604,10 +2604,22 @@ public class PackageManagerService extends IPackageManager.Stub
             final ArrayList<ResolveInfo> matchAllList = new ArrayList<>();
             final ArrayList<ResolveInfo> undefinedList = new ArrayList<>();
 
+            // Blocking instant apps is usually done in applyPostResolutionFilter, but since
+            // domain verification can resolve to a single result, which can be an instant app,
+            // it will then be filtered to an empty list in that method. Instead, do blocking
+            // here so that instant apps can be ignored for approval filtering and a lower
+            // priority result chosen instead.
+            final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled(userId);
+
             final int count = candidates.size();
             // First, try to use approved apps.
             for (int n = 0; n < count; n++) {
                 ResolveInfo info = candidates.get(n);
+                if (blockInstant && (info.isInstantAppAvailable
+                        || isInstantApp(info.activityInfo.packageName, userId))) {
+                    continue;
+                }
+
                 // Add to the special match all list (Browser use case)
                 if (info.handleAllWebDataURI) {
                     matchAllList.add(info);
@@ -5092,23 +5104,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         InstallArgs args = data.args;
                         PackageInstalledInfo parentRes = data.res;
 
-                        final boolean grantPermissions = (args.installFlags
-                                & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0;
                         final boolean killApp = (args.installFlags
                                 & PackageManager.INSTALL_DONT_KILL_APP) == 0;
                         final boolean virtualPreload = ((args.installFlags
                                 & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
-                        final String[] grantedPermissions = args.installGrantPermissions;
-                        final List<String> whitelistedRestrictedPermissions = ((args.installFlags
-                                & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0
-                                    && parentRes.pkg != null)
-                                ? parentRes.pkg.getRequestedPermissions()
-                                : args.whitelistedRestrictedPermissions;
-                        int autoRevokePermissionsMode = args.autoRevokePermissionsMode;
 
-                        handlePackagePostInstall(parentRes, grantPermissions,
-                                killApp, virtualPreload, grantedPermissions,
-                                whitelistedRestrictedPermissions, autoRevokePermissionsMode,
+                        handlePackagePostInstall(parentRes, killApp, virtualPreload,
                                 didRestore, args.installSource.installerPackageName, args.observer,
                                 args.mDataLoaderType);
 
@@ -5387,11 +5388,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
-            boolean killApp, boolean virtualPreload,
-            String[] grantedPermissions, List<String> allowlistedRestrictedPermissions,
-            int autoRevokePermissionsMode,
-            boolean launchedForRestore, String installerPackage,
+    private void handlePackagePostInstall(PackageInstalledInfo res, boolean killApp,
+            boolean virtualPreload, boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver, int dataLoaderType) {
         boolean succeeded = res.returnCode == PackageManager.INSTALL_SUCCEEDED;
         final boolean update = res.removedInfo != null && res.removedInfo.removedPackage != null;
@@ -5420,29 +5418,6 @@ public class PackageManagerService extends IPackageManager.Stub
             // Send the removed broadcasts
             if (res.removedInfo != null) {
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
-            }
-
-            final PermissionManagerServiceInternal.PackageInstalledParams.Builder
-                    permissionParamsBuilder =
-                    new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
-            final List<String> grantedPermissionsList;
-            if (grantPermissions) {
-                if (grantedPermissions != null) {
-                    permissionParamsBuilder.setGrantedPermissions(Arrays.asList(
-                            grantedPermissions));
-                } else {
-                    permissionParamsBuilder.setGrantedPermissions(
-                            res.pkg.getRequestedPermissions());
-                }
-            }
-            if (allowlistedRestrictedPermissions != null) {
-                permissionParamsBuilder.setAllowlistedRestrictedPermissions(
-                        allowlistedRestrictedPermissions);
-            }
-            permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
-            for (final int userId : res.newUsers) {
-                mPermissionManager.onPackageInstalled(res.pkg, permissionParamsBuilder.build(),
-                        userId);
             }
 
             final String installerPackageName =
@@ -18445,6 +18420,37 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 mSettings.writeKernelMappingLPr(ps);
+
+                final PermissionManagerServiceInternal.PackageInstalledParams.Builder
+                        permissionParamsBuilder =
+                        new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
+                final boolean grantPermissions = (installArgs.installFlags
+                        & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0;
+                if (grantPermissions) {
+                    final List<String> grantedPermissions =
+                            installArgs.installGrantPermissions != null
+                                    ? Arrays.asList(installArgs.installGrantPermissions)
+                                    : pkg.getRequestedPermissions();
+                    permissionParamsBuilder.setGrantedPermissions(grantedPermissions);
+                }
+                final boolean allowlistAllRestrictedPermissions =
+                        (installArgs.installFlags
+                                & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS) != 0;
+                final List<String> allowlistedRestrictedPermissions =
+                        allowlistAllRestrictedPermissions ? pkg.getRequestedPermissions()
+                        : installArgs.whitelistedRestrictedPermissions;
+                if (allowlistedRestrictedPermissions != null) {
+                    permissionParamsBuilder.setAllowlistedRestrictedPermissions(
+                            allowlistedRestrictedPermissions);
+                }
+                final int autoRevokePermissionsMode = installArgs.autoRevokePermissionsMode;
+                permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
+                for (int currentUserId : allUsersList) {
+                    if (ps.getInstalled(currentUserId)) {
+                        mPermissionManager.onPackageInstalled(pkg, permissionParamsBuilder.build(),
+                                currentUserId);
+                    }
+                }
             }
             res.name = pkgName;
             res.uid = pkg.getUid();
@@ -22673,7 +22679,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         final Intent intent = getHomeIntent();
         final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
-                PackageManager.GET_META_DATA, userId);
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
                 intent, null, 0, resolveInfos, 0, true, false, false, userId);
         final String packageName = preferredResolveInfo != null

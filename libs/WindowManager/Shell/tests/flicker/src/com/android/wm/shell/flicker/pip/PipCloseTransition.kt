@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
-import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -35,21 +32,10 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import org.junit.FixMethodOrder
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test Pip launch.
- * To run this test: `atest WMShellFlickerTests:PipToHomeTest`
- */
-@RequiresDevice
-@RunWith(Parameterized::class)
-@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+abstract class PipCloseTransition(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition(eachRun = true) { configuration ->
             setup {
@@ -62,30 +48,27 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
                     this.setRotation(Surface.ROTATION_0)
                 }
             }
-            transitions {
-                pipApp.closePipWindow(wmHelper)
-            }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    open fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    open fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    open fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    open fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun pipWindowBecomesInvisible() {
+    open fun pipWindowBecomesInvisible() {
         testSpec.assertWm {
             this.showsAppWindow(PIP_WINDOW_TITLE)
                 .then()
@@ -95,7 +78,7 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
 
     @Presubmit
     @Test
-    fun pipLayerBecomesInvisible() {
+    open fun pipLayerBecomesInvisible() {
         testSpec.assertLayers {
             this.isVisible(PIP_WINDOW_TITLE)
                 .then()
@@ -105,22 +88,22 @@ class PipToHomeTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() =
+    open fun statusBarLayerRotatesScales() =
         testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
-    @Postsubmit
+    @Presubmit
     @Test
-    fun noUncoveredRegions() =
+    open fun noUncoveredRegions() =
         testSpec.noUncoveredRegions(testSpec.config.startRotation, Surface.ROTATION_0)
 
-    @Postsubmit
+    @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() =
+    open fun navBarLayerRotatesAndScales() =
         testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
 
     @FlakyTest(bugId = 151179149)
     @Test
-    fun focusChanges() = testSpec.focusChanges(pipApp.launcherName, "NexusLauncherActivity")
+    open fun focusChanges() = testSpec.focusChanges(pipApp.launcherName, "NexusLauncherActivity")
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

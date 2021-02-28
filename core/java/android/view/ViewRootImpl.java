@@ -141,6 +141,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.MergedConfiguration;
@@ -202,6 +203,7 @@ import com.android.internal.view.SurfaceCallbackHelper;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -273,6 +275,11 @@ public final class ViewRootImpl implements ViewParent,
      * Value for {@link #mContentCaptureEnabled} when it was checked and set to {@code false}.
      */
     private static final int CONTENT_CAPTURE_ENABLED_FALSE = 2;
+
+    /**
+     * Maximum time to wait for {@link View#dispatchScrollCaptureSearch} to complete.
+     */
+    private static final int SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS = 2500;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
@@ -668,8 +675,6 @@ public final class ViewRootImpl implements ViewParent,
     private final InsetsController mInsetsController;
     private final ImeFocusController mImeFocusController;
 
-    private ScrollCaptureConnection mScrollCaptureConnection;
-
     private boolean mIsSurfaceOpaque;
 
     private final BackgroundBlurDrawable.Aggregator mBlurRegionAggregator =
@@ -681,12 +686,6 @@ public final class ViewRootImpl implements ViewParent,
     @NonNull
     public ImeFocusController getImeFocusController() {
         return mImeFocusController;
-    }
-
-    /** @return The current {@link ScrollCaptureConnection} for this instance, if any is active. */
-    @Nullable
-    public ScrollCaptureConnection getScrollCaptureConnection() {
-        return mScrollCaptureConnection;
     }
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
@@ -729,6 +728,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mRequestedTraverseWhilePaused = false;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
+
+    private long mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
 
     /**
      * Increment this value when the surface has been replaced.
@@ -817,6 +818,8 @@ public final class ViewRootImpl implements ViewParent,
         mImeFocusController = new ImeFocusController(this);
         AudioManager audioManager = mContext.getSystemService(AudioManager.class);
         mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
+
+        mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -3966,11 +3969,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void addFrameCallbackIfNeeded() {
-        boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
-        boolean hasBlur = mBlurRegionAggregator.hasRegions();
-        boolean reportNextDraw = mReportNextDraw;
+        final boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
+        final boolean reportNextDraw = mReportNextDraw;
+        final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
+        final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!nextDrawUseBlastSync && !reportNextDraw && !hasBlur) {
+        if (!nextDrawUseBlastSync && !reportNextDraw && !needsCallbackForBlur) {
             return;
         }
 
@@ -3978,18 +3982,22 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "Creating frameDrawingCallback"
                     + " nextDrawUseBlastSync=" + nextDrawUseBlastSync
                     + " reportNextDraw=" + reportNextDraw
-                    + " hasBlur=" + hasBlur);
+                    + " hasBlurUpdates=" + hasBlurUpdates);
         }
 
-        // The callback will run on a worker thread pool from the render thread.
+        final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
+                needsCallbackForBlur ?  mBlurRegionAggregator.getBlurRegionsCopyForRT() : null;
+
+        // The callback will run on the render thread.
         HardwareRenderer.FrameDrawingCallback frameDrawingCallback = frame -> {
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Received frameDrawingCallback frameNum=" + frame + "."
                         + " Creating transactionCompleteCallback=" + nextDrawUseBlastSync);
             }
 
-            if (hasBlur) {
-                mBlurRegionAggregator.dispatchBlurTransactionIfNeeded(frame);
+            if (needsCallbackForBlur) {
+                mBlurRegionAggregator
+                    .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates);
             }
 
             if (mBlastBufferQueue == null) {
@@ -9223,9 +9231,9 @@ public final class ViewRootImpl implements ViewParent,
      * Collect and include any ScrollCaptureCallback instances registered with the window.
      *
      * @see #addScrollCaptureCallback(ScrollCaptureCallback)
-     * @param targets the search queue for targets
+     * @param results an object to collect the results of the search
      */
-    private void collectRootScrollCaptureTargets(Queue<ScrollCaptureTarget> targets) {
+    private void collectRootScrollCaptureTargets(ScrollCaptureSearchResults results) {
         if (mRootScrollCaptureCallbacks == null) {
             return;
         }
@@ -9233,26 +9241,45 @@ public final class ViewRootImpl implements ViewParent,
             // Add to the list for consideration
             Point offset = new Point(mView.getLeft(), mView.getTop());
             Rect rect = new Rect(0, 0, mView.getWidth(), mView.getHeight());
-            targets.add(new ScrollCaptureTarget(mView, rect, offset, cb));
+            results.addTarget(new ScrollCaptureTarget(mView, rect, offset, cb));
         }
     }
 
     /**
-     * Handles an inbound request for scroll capture from the system. If a client is not already
-     * active, a search will be dispatched through the view tree to locate scrolling content.
+     * Update the timeout for scroll capture requests. Only affects this view root.
+     * The default value is {@link #SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS}.
+     *
+     * @param timeMillis the new timeout in milliseconds
+     */
+    public void setScrollCaptureRequestTimeout(int timeMillis) {
+        mScrollCaptureRequestTimeout = timeMillis;
+    }
+
+    /**
+     * Get the current timeout for scroll capture requests.
+     *
+     * @return the timeout in milliseconds
+     */
+    public long getScrollCaptureRequestTimeout() {
+        return mScrollCaptureRequestTimeout;
+    }
+
+    /**
+     * Handles an inbound request for scroll capture from the system. A search will be
+     * dispatched through the view tree to locate scrolling content.
      * <p>
-     * Either {@link IScrollCaptureCallbacks#onConnected(IScrollCaptureConnection, Rect,
-     * Point)} or {@link IScrollCaptureCallbacks#onUnavailable()} will be returned
-     * depending on the results of the search.
+     * A call to {@link IScrollCaptureCallbacks#onScrollCaptureResponse(ScrollCaptureResponse)}
+     * will follow.
      *
      * @param callbacks to receive responses
-     * @see ScrollCaptureTargetResolver
+     * @see ScrollCaptureTargetSelector
      */
     public void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
-        LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
+        ScrollCaptureSearchResults results =
+                new ScrollCaptureSearchResults(mContext.getMainExecutor());
 
         // Window (root) level callbacks
-        collectRootScrollCaptureTargets(targetList);
+        collectRootScrollCaptureTargets(results);
 
         // Search through View-tree
         View rootView = getView();
@@ -9260,58 +9287,70 @@ public final class ViewRootImpl implements ViewParent,
             Point point = new Point();
             Rect rect = new Rect(0, 0, rootView.getWidth(), rootView.getHeight());
             getChildVisibleRect(rootView, rect, point);
-            rootView.dispatchScrollCaptureSearch(rect, point, targetList);
+            rootView.dispatchScrollCaptureSearch(rect, point, results::addTarget);
         }
-
-        // No-op path. Scroll capture not offered for this window.
-        if (targetList.isEmpty()) {
-            dispatchScrollCaptureSearchResult(callbacks, null);
-            return;
+        Runnable onComplete = () -> dispatchScrollCaptureSearchResult(callbacks, results);
+        results.setOnCompleteListener(onComplete);
+        if (!results.isComplete()) {
+            mHandler.postDelayed(results::finish, getScrollCaptureRequestTimeout());
         }
-
-        // Request scrollBounds from each of the targets.
-        // Continues with the consumer once all responses are consumed, or the timeout expires.
-        ScrollCaptureTargetResolver resolver = new ScrollCaptureTargetResolver(targetList);
-        resolver.start(mHandler, 1000,
-                (selected) -> dispatchScrollCaptureSearchResult(callbacks, selected));
     }
 
     /** Called by {@link #handleScrollCaptureRequest} when a result is returned */
     private void dispatchScrollCaptureSearchResult(
             @NonNull IScrollCaptureCallbacks callbacks,
-            @Nullable ScrollCaptureTarget selectedTarget) {
+            @NonNull ScrollCaptureSearchResults results) {
 
-        // If timeout or no eligible targets found.
+        ScrollCaptureTarget selectedTarget = results.getTopResult();
+
+        ScrollCaptureResponse.Builder response = new ScrollCaptureResponse.Builder();
+        response.setWindowTitle(getTitle().toString());
+
+        StringWriter writer =  new StringWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(writer);
+        results.dump(pw);
+        pw.flush();
+        response.addMessage(writer.toString());
+
         if (selectedTarget == null) {
+            response.setDescription("No scrollable targets found in window");
             try {
-                if (DEBUG_SCROLL_CAPTURE) {
-                    Log.d(TAG, "scrollCaptureSearch returned no targets available.");
-                }
-                callbacks.onUnavailable();
+                callbacks.onScrollCaptureResponse(response.build());
             } catch (RemoteException e) {
-                if (DEBUG_SCROLL_CAPTURE) {
-                    Log.w(TAG, "Failed to send scroll capture search result.", e);
-                }
+                Log.e(TAG, "Failed to send scroll capture search result", e);
             }
             return;
         }
 
-        // Create a client instance and return it to the caller
-        mScrollCaptureConnection = new ScrollCaptureConnection(selectedTarget, callbacks);
+        response.setDescription("Connected");
+
+        // Compute area covered by scrolling content within window
+        Rect boundsInWindow = new Rect();
+        View containingView = selectedTarget.getContainingView();
+        containingView.getLocationInWindow(mAttachInfo.mTmpLocation);
+        boundsInWindow.set(selectedTarget.getScrollBounds());
+        boundsInWindow.offset(mAttachInfo.mTmpLocation[0], mAttachInfo.mTmpLocation[1]);
+        response.setBoundsInWindow(boundsInWindow);
+
+        // Compute the area on screen covered by the window
+        Rect boundsOnScreen = new Rect();
+        mView.getLocationOnScreen(mAttachInfo.mTmpLocation);
+        boundsOnScreen.set(0, 0, mView.getWidth(), mView.getHeight());
+        boundsOnScreen.offset(mAttachInfo.mTmpLocation[0], mAttachInfo.mTmpLocation[1]);
+        response.setWindowBounds(boundsOnScreen);
+
+        // Create a connection and return it to the caller
+        ScrollCaptureConnection connection = new ScrollCaptureConnection(
+                mView.getContext().getMainExecutor(), selectedTarget, callbacks);
+        response.setConnection(connection);
+
         try {
-            if (DEBUG_SCROLL_CAPTURE) {
-                Log.d(TAG, "scrollCaptureSearch returning client: " + getScrollCaptureConnection());
-            }
-            callbacks.onConnected(
-                    mScrollCaptureConnection,
-                    selectedTarget.getScrollBounds(),
-                    selectedTarget.getPositionInWindow());
+            callbacks.onScrollCaptureResponse(response.build());
         } catch (RemoteException e) {
             if (DEBUG_SCROLL_CAPTURE) {
-                Log.w(TAG, "Failed to send scroll capture search result.", e);
+                Log.w(TAG, "Failed to send scroll capture search response.", e);
             }
-            mScrollCaptureConnection.disconnect();
-            mScrollCaptureConnection = null;
+            connection.close();
         }
     }
 

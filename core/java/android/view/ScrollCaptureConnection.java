@@ -18,18 +18,23 @@ package android.view;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Handler;
+import android.os.CancellationSignal;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.CloseGuard;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Mediator between a selected scroll capture target view and a remote process.
@@ -41,270 +46,276 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
     private static final String TAG = "ScrollCaptureConnection";
-    private static final int DEFAULT_TIMEOUT = 1000;
 
-    private final Handler mHandler;
-    private ScrollCaptureTarget mSelectedTarget;
-    private int mTimeoutMillis = DEFAULT_TIMEOUT;
-
-    protected Surface mSurface;
-    private IScrollCaptureCallbacks mCallbacks;
-
+    private final Object mLock = new Object();
     private final Rect mScrollBounds;
     private final Point mPositionInWindow;
     private final CloseGuard mCloseGuard;
+    private final Executor mUiThread;
 
-    // The current session instance in use by the callback.
+    private ScrollCaptureCallback mLocal;
+    private IScrollCaptureCallbacks mRemote;
+
     private ScrollCaptureSession mSession;
 
-    // Helps manage timeout callbacks registered to handler and aids testing.
-    private DelayedAction mTimeoutAction;
+    private CancellationSignal mCancellation;
+
+    private volatile boolean mStarted;
+    private volatile boolean mConnected;
 
     /**
      * Constructs a ScrollCaptureConnection.
      *
      * @param selectedTarget  the target the client is controlling
-     * @param callbacks the callbacks to reply to system requests
+     * @param remote the callbacks to reply to system requests
      *
      * @hide
      */
     public ScrollCaptureConnection(
+            @NonNull Executor uiThread,
             @NonNull ScrollCaptureTarget selectedTarget,
-            @NonNull IScrollCaptureCallbacks callbacks) {
+            @NonNull IScrollCaptureCallbacks remote) {
+        mUiThread = requireNonNull(uiThread, "<uiThread> must non-null");
         requireNonNull(selectedTarget, "<selectedTarget> must non-null");
-        requireNonNull(callbacks, "<callbacks> must non-null");
-        final Rect scrollBounds = requireNonNull(selectedTarget.getScrollBounds(),
+        mRemote = requireNonNull(remote, "<callbacks> must non-null");
+        mScrollBounds = requireNonNull(Rect.copyOrNull(selectedTarget.getScrollBounds()),
                 "target.getScrollBounds() must be non-null to construct a client");
 
-        mSelectedTarget = selectedTarget;
-        mHandler = selectedTarget.getContainingView().getHandler();
-        mScrollBounds = new Rect(scrollBounds);
+        mLocal = selectedTarget.getCallback();
         mPositionInWindow = new Point(selectedTarget.getPositionInWindow());
 
-        mCallbacks = callbacks;
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
-
-        selectedTarget.getContainingView().addOnAttachStateChangeListener(
-                new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(View v) {
-
-                    }
-
-                    @Override
-                    public void onViewDetachedFromWindow(View v) {
-                        selectedTarget.getContainingView().removeOnAttachStateChangeListener(this);
-                        endCapture();
-                    }
-                });
+        mConnected = true;
     }
 
-    @VisibleForTesting
-    public void setTimeoutMillis(int timeoutMillis) {
-        mTimeoutMillis = timeoutMillis;
-    }
-
-    @VisibleForTesting
-    public DelayedAction getTimeoutAction() {
-        return mTimeoutAction;
-    }
-
-    private void checkConnected() {
-        if (mSelectedTarget == null || mCallbacks == null) {
-            throw new IllegalStateException("This client has been disconnected.");
-        }
-    }
-
-    private void checkStarted() {
-        if (mSession == null) {
-            throw new IllegalStateException("Capture session has not been started!");
-        }
-    }
-
-    @WorkerThread // IScrollCaptureConnection
+    @BinderThread
     @Override
-    public void startCapture(Surface surface) throws RemoteException {
+    public ICancellationSignal startCapture(Surface surface) throws RemoteException {
         checkConnected();
-        mSurface = surface;
-        scheduleTimeout(mTimeoutMillis, this::onStartCaptureTimeout);
-        mSession = new ScrollCaptureSession(mSurface, mScrollBounds, mPositionInWindow, this);
-        mHandler.post(() -> mSelectedTarget.getCallback().onScrollCaptureStart(mSession,
-                this::onStartCaptureCompleted));
+        if (!surface.isValid()) {
+            throw new RemoteException(new IllegalArgumentException("surface must be valid"));
+        }
+
+        ICancellationSignal cancellation = CancellationSignal.createTransport();
+        mCancellation = CancellationSignal.fromTransport(cancellation);
+        mSession = new ScrollCaptureSession(surface, mScrollBounds, mPositionInWindow);
+
+        Runnable listener =
+                SafeCallback.create(mCancellation, mUiThread, this::onStartCaptureCompleted);
+        // -> UiThread
+        mUiThread.execute(() -> mLocal.onScrollCaptureStart(mSession, mCancellation, listener));
+        return cancellation;
     }
 
     @UiThread
     private void onStartCaptureCompleted() {
-        if (cancelTimeout()) {
-            mHandler.post(() -> {
-                try {
-                    mCallbacks.onCaptureStarted();
-                } catch (RemoteException e) {
-                    doShutdown();
-                }
-            });
+        mStarted = true;
+        try {
+            mRemote.onCaptureStarted();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Shutting down due to error: ", e);
+            close();
         }
     }
 
-    @UiThread
-    private void onStartCaptureTimeout() {
-        endCapture();
-    }
 
-    @WorkerThread // IScrollCaptureConnection
+    @BinderThread
     @Override
-    public void requestImage(Rect requestRect) {
+    public ICancellationSignal requestImage(Rect requestRect) throws RemoteException {
+        Trace.beginSection("requestImage");
         checkConnected();
         checkStarted();
-        scheduleTimeout(mTimeoutMillis, this::onRequestImageTimeout);
-        // Response is dispatched via ScrollCaptureSession, to onRequestImageCompleted
-        mHandler.post(() -> mSelectedTarget.getCallback().onScrollCaptureImageRequest(
-                mSession, new Rect(requestRect)));
+
+        ICancellationSignal cancellation = CancellationSignal.createTransport();
+        mCancellation = CancellationSignal.fromTransport(cancellation);
+
+        Consumer<Rect> listener =
+                SafeCallback.create(mCancellation, mUiThread, this::onImageRequestCompleted);
+        // -> UiThread
+        mUiThread.execute(() -> mLocal.onScrollCaptureImageRequest(
+                mSession, mCancellation, new Rect(requestRect), listener));
+        Trace.endSection();
+        return cancellation;
     }
 
     @UiThread
-    void onRequestImageCompleted(long frameNumber, Rect capturedArea) {
-        final Rect finalCapturedArea = new Rect(capturedArea);
-        if (cancelTimeout()) {
-            mHandler.post(() -> {
-                try {
-                    mCallbacks.onCaptureBufferSent(frameNumber, finalCapturedArea);
-                } catch (RemoteException e) {
-                    doShutdown();
-                }
-            });
-        }
-    }
-
-    @UiThread
-    private void onRequestImageTimeout() {
-        endCapture();
-    }
-
-    @WorkerThread // IScrollCaptureConnection
-    @Override
-    public void endCapture() {
-        if (isStarted()) {
-            scheduleTimeout(mTimeoutMillis, this::onEndCaptureTimeout);
-            mHandler.post(() ->
-                    mSelectedTarget.getCallback().onScrollCaptureEnd(this::onEndCaptureCompleted));
-        } else {
-            disconnect();
-        }
-    }
-
-    private boolean isStarted() {
-        return mCallbacks != null && mSelectedTarget != null;
-    }
-
-    @UiThread
-    private void onEndCaptureCompleted() { // onEndCaptureCompleted
-        if (cancelTimeout()) {
-            doShutdown();
-        }
-    }
-
-    @UiThread
-    private void onEndCaptureTimeout() {
-        doShutdown();
-    }
-
-
-    private void doShutdown() {
+    void onImageRequestCompleted(Rect capturedArea) {
         try {
-            if (mCallbacks != null) {
-                mCallbacks.onConnectionClosed();
-            }
+            mRemote.onImageRequestCompleted(0, capturedArea);
         } catch (RemoteException e) {
-            // Ignore
-        } finally {
-            disconnect();
+            Log.w(TAG, "Shutting down due to error: ", e);
+            close();
         }
+    }
+
+    @BinderThread
+    @Override
+    public ICancellationSignal endCapture() throws RemoteException {
+        checkConnected();
+        checkStarted();
+
+        ICancellationSignal cancellation = CancellationSignal.createTransport();
+        mCancellation = CancellationSignal.fromTransport(cancellation);
+
+        Runnable listener =
+                SafeCallback.create(mCancellation, mUiThread, this::onEndCaptureCompleted);
+        // -> UiThread
+        mUiThread.execute(() -> mLocal.onScrollCaptureEnd(listener));
+        return cancellation;
+    }
+
+    @UiThread
+    private void onEndCaptureCompleted() {
+        synchronized (mLock) {
+            mStarted = false;
+            try {
+                mRemote.onCaptureEnded();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Shutting down due to error: ", e);
+                close();
+            }
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void close() {
+        if (mStarted) {
+            Log.w(TAG, "close(): capture is still started?! Ending now.");
+
+            // -> UiThread
+            mUiThread.execute(() -> mLocal.onScrollCaptureEnd(() -> { /* ignore */ }));
+            mStarted = false;
+        }
+        disconnect();
     }
 
     /**
      * Shuts down this client and releases references to dependent objects. No attempt is made
      * to notify the controller, use with caution!
      */
-    public void disconnect() {
-        if (mSession != null) {
-            mSession.disconnect();
+    private void disconnect() {
+        synchronized (mLock) {
             mSession = null;
+            mConnected = false;
+            mStarted = false;
+            mRemote = null;
+            mLocal = null;
+            mCloseGuard.close();
         }
+    }
 
-        mSelectedTarget = null;
-        mCallbacks = null;
+    public boolean isConnected() {
+        return mConnected;
+    }
+
+    public boolean isStarted() {
+        return mStarted;
+    }
+
+    private synchronized void checkConnected() throws RemoteException {
+        synchronized (mLock) {
+            if (!mConnected) {
+                throw new RemoteException(new IllegalStateException("Not connected"));
+            }
+        }
+    }
+
+    private void checkStarted() throws RemoteException {
+        synchronized (mLock) {
+            if (!mStarted) {
+                throw new RemoteException(new IllegalStateException("Not started!"));
+            }
+        }
     }
 
     /** @return a string representation of the state of this client */
     public String toString() {
         return "ScrollCaptureConnection{"
+                + "connected=" + mConnected
+                + ", started=" + mStarted
                 + ", session=" + mSession
-                + ", selectedTarget=" + mSelectedTarget
-                + ", clientCallbacks=" + mCallbacks
+                + ", remote=" + mRemote
+                + ", local=" + mLocal
                 + "}";
     }
 
-    private boolean cancelTimeout() {
-        if (mTimeoutAction != null) {
-            return mTimeoutAction.cancel();
-        }
-        return false;
-    }
-
-    private void scheduleTimeout(long timeoutMillis, Runnable action) {
-        if (mTimeoutAction != null) {
-            mTimeoutAction.cancel();
-        }
-        mTimeoutAction = new DelayedAction(mHandler, timeoutMillis, action);
-    }
-
-    /** @hide */
     @VisibleForTesting
-    public static class DelayedAction {
-        private final AtomicBoolean mCompleted = new AtomicBoolean();
-        private final Object mToken = new Object();
-        private final Handler mHandler;
-        private final Runnable mAction;
+    public CancellationSignal getCancellation() {
+        return mCancellation;
+    }
 
-        @VisibleForTesting
-        public DelayedAction(Handler handler, long timeoutMillis, Runnable action) {
-            mHandler = handler;
-            mAction = action;
-            mHandler.postDelayed(this::onTimeout, mToken, timeoutMillis);
-        }
-
-        private boolean onTimeout() {
-            if (mCompleted.compareAndSet(false, true)) {
-                mAction.run();
-                return true;
+    protected void finalize() throws Throwable {
+        try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
             }
-            return false;
+            close();
+        } finally {
+            super.finalize();
+        }
+    }
+
+    private static class SafeCallback<T> {
+        private final CancellationSignal mSignal;
+        private final WeakReference<T> mTargetRef;
+        private final Executor mExecutor;
+        private boolean mExecuted;
+
+        protected SafeCallback(CancellationSignal signal, Executor executor, T target) {
+            mSignal = signal;
+            mTargetRef = new WeakReference<>(target);
+            mExecutor = executor;
         }
 
-        /**
-         * Cause the timeout action to run immediately and mark as timed out.
-         *
-         * @return true if the timeout was run, false if the timeout had already been canceled
-         */
-        @VisibleForTesting
-        public boolean timeoutNow() {
-            return onTimeout();
-        }
-
-        /**
-         * Attempt to cancel the timeout action (such as after a callback is made)
-         *
-         * @return true if the timeout was canceled and will not run, false if time has expired and
-         * the timeout action has or will run momentarily
-         */
-        public boolean cancel() {
-            if (!mCompleted.compareAndSet(false, true)) {
-                // Whoops, too late!
-                return false;
+        // Provide the target to the consumer to invoke, forward on handler thread ONCE,
+        // and only if noy cancelled, and the target is still available (not collected)
+        protected final void maybeAccept(Consumer<T> targetConsumer) {
+            if (mExecuted) {
+                return;
             }
-            mHandler.removeCallbacksAndMessages(mToken);
-            return true;
+            mExecuted = true;
+            if (mSignal.isCanceled()) {
+                return;
+            }
+            T target = mTargetRef.get();
+            if (target == null) {
+                return;
+            }
+            mExecutor.execute(() -> targetConsumer.accept(target));
+        }
+
+        static Runnable create(CancellationSignal signal, Executor executor, Runnable target) {
+            return new RunnableCallback(signal, executor, target);
+        }
+
+        static <T> Consumer<T> create(CancellationSignal signal, Executor executor,
+                Consumer<T> target) {
+            return new ConsumerCallback<T>(signal, executor, target);
+        }
+    }
+
+    private static final class RunnableCallback extends SafeCallback<Runnable> implements Runnable {
+        RunnableCallback(CancellationSignal signal, Executor executor, Runnable target) {
+            super(signal, executor, target);
+        }
+
+        @Override
+        public void run() {
+            maybeAccept(Runnable::run);
+        }
+    }
+
+    private static final class ConsumerCallback<T> extends SafeCallback<Consumer<T>>
+            implements Consumer<T> {
+        ConsumerCallback(CancellationSignal signal, Executor executor, Consumer<T> target) {
+            super(signal, executor, target);
+        }
+
+        @Override
+        public void accept(T value) {
+            maybeAccept((target) -> target.accept(value));
         }
     }
 }

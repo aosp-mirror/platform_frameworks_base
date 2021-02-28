@@ -246,8 +246,8 @@ public class ClipboardService extends SystemService {
         ClipData primaryClip;
         /** UID that set {@link #primaryClip}. */
         int primaryClipUid = android.os.Process.NOBODY_UID;
-        /** Application label of the app that set {@link #primaryClip}. */
-        CharSequence mPrimaryClipAppLabel;
+        /** Package of the app that set {@link #primaryClip}. */
+        String mPrimaryClipPackage;
 
         final HashSet<String> activePermissionOwners
                 = new HashSet<String>();
@@ -528,20 +528,9 @@ public class ClipboardService extends SystemService {
             }
         }
 
-        // Retrieve the app label of the source of the clip data
-        CharSequence sourceAppLabel = null;
-        if (clip != null && sourcePackage != null) {
-            try {
-                sourceAppLabel =
-                        mPm.getApplicationLabel(mPm.getApplicationInfo(sourcePackage, 0));
-            } catch (PackageManager.NameNotFoundException e) {
-                // leave label as null
-            }
-        }
-
         // Update this user
         final int userId = UserHandle.getUserId(uid);
-        setPrimaryClipInternal(getClipboard(userId), clip, uid, sourceAppLabel);
+        setPrimaryClipInternal(getClipboard(userId), clip, uid, sourcePackage);
 
         // Update related users
         List<UserInfo> related = getRelatedProfiles(userId);
@@ -576,7 +565,7 @@ public class ClipboardService extends SystemService {
                                 UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
                         if (canCopyIntoProfile) {
                             setPrimaryClipInternal(
-                                    getClipboard(id), clip, uid, sourceAppLabel);
+                                    getClipboard(id), clip, uid, sourcePackage);
                         }
                     }
                 }
@@ -590,7 +579,7 @@ public class ClipboardService extends SystemService {
     }
 
     private void setPrimaryClipInternal(PerUserClipboard clipboard, @Nullable ClipData clip,
-            int uid, @Nullable CharSequence sourceAppLabel) {
+            int uid, @Nullable String sourcePackage) {
         revokeUris(clipboard);
         clipboard.activePermissionOwners.clear();
         if (clip == null && clipboard.primaryClip == null) {
@@ -599,10 +588,10 @@ public class ClipboardService extends SystemService {
         clipboard.primaryClip = clip;
         if (clip != null) {
             clipboard.primaryClipUid = uid;
-            clipboard.mPrimaryClipAppLabel = sourceAppLabel;
+            clipboard.mPrimaryClipPackage = sourcePackage;
         } else {
             clipboard.primaryClipUid = android.os.Process.NOBODY_UID;
-            clipboard.mPrimaryClipAppLabel = null;
+            clipboard.mPrimaryClipPackage = null;
         }
         if (clip != null) {
             final ClipDescription description = clip.getDescription();
@@ -887,12 +876,23 @@ public class ClipboardService extends SystemService {
             return;
         }
 
+        // Retrieve the app label of the source of the clip data
+        CharSequence sourceAppLabel = null;
+        if (clipboard.mPrimaryClipPackage != null) {
+            try {
+                sourceAppLabel = mPm.getApplicationLabel(
+                        mPm.getApplicationInfo(clipboard.mPrimaryClipPackage, 0));
+            } catch (PackageManager.NameNotFoundException e) {
+                // leave label as null
+            }
+        }
+
         try {
             CharSequence callingAppLabel = mPm.getApplicationLabel(
                     mPm.getApplicationInfo(callingPackage, 0));
             String message;
-            if (clipboard.mPrimaryClipAppLabel != null) {
-                message = callingAppLabel + " pasted from " + clipboard.mPrimaryClipAppLabel;
+            if (sourceAppLabel != null) {
+                message = callingAppLabel + " pasted from " + sourceAppLabel;
             } else {
                 message = callingAppLabel + " pasted from clipboard";
             }

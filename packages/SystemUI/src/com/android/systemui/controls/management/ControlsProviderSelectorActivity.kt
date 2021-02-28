@@ -32,6 +32,8 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.ui.ControlsDialog
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsComponent
@@ -49,13 +51,15 @@ class ControlsProviderSelectorActivity @Inject constructor(
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
     private val globalActionsComponent: GlobalActionsComponent,
-    broadcastDispatcher: BroadcastDispatcher
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val uiController: ControlsUiController
 ) : LifecycleActivity() {
 
     companion object {
         private const val TAG = "ControlsProviderSelectorActivity"
     }
 
+    private var backToGlobalActions = true
     private lateinit var recyclerView: RecyclerView
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = listingController.currentUserId
@@ -101,10 +105,19 @@ class ControlsProviderSelectorActivity @Inject constructor(
             }
         }
         requireViewById<View>(R.id.done).visibility = View.GONE
+
+        backToGlobalActions = intent.getBooleanExtra(
+            ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
+            true
+        )
     }
 
     override fun onBackPressed() {
-        globalActionsComponent.handleShowGlobalActionsMenu()
+        if (backToGlobalActions) {
+            globalActionsComponent.handleShowGlobalActionsMenu()
+        } else {
+            ControlsDialog(applicationContext, broadcastDispatcher).show(uiController)
+        }
         animateExitAndFinish()
     }
 
@@ -152,8 +165,13 @@ class ControlsProviderSelectorActivity @Inject constructor(
                             listingController.getAppLabel(it))
                     putExtra(Intent.EXTRA_COMPONENT_NAME, it)
                     putExtra(ControlsFavoritingActivity.EXTRA_FROM_PROVIDER_SELECTOR, true)
+                    putExtra(
+                        ControlsUiController.BACK_TO_GLOBAL_ACTIONS,
+                        backToGlobalActions
+                    )
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
+                animateExitAndFinish()
             }
         }
     }

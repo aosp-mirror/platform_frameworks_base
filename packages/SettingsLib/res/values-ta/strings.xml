@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"இயல்புநிலை குறிமாற்றங்களை மீறிச் செயல்படு"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"குறிமாற்றத்தை இயக்கு"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ஆப்ஸ் மாடர்ன் வடிவங்களை ஆதரிக்கும்படி அமை"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"குறிமாற்ற அறிவிப்புகளைக் காட்டு"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView செயல்படுத்தல்"</string>

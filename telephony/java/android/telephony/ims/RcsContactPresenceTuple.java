@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,6 +38,15 @@ import java.util.List;
  */
 @SystemApi
 public final class RcsContactPresenceTuple implements Parcelable {
+
+    /**
+     * The service ID used to indicate that service discovery via presence is available.
+     * <p>
+     * See RCC.07 v5.0 specification for more information.
+     * @hide
+     */
+    public static final String SERVICE_ID_PRESENCE =
+            "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcse.dp";
 
     /**
      * The service ID used to indicate that MMTEL service is available.
@@ -329,6 +339,13 @@ public final class RcsContactPresenceTuple implements Parcelable {
         public @NonNull @DuplexMode List<String> getUnsupportedDuplexModes() {
             return Collections.unmodifiableList(mUnsupportedDuplexModeList);
         }
+
+        @Override
+        public String toString() {
+            return "servCaps{" + "a=" + mIsAudioCapable + ", v=" + mIsVideoCapable
+                    + ", supported=" + mSupportedDuplexModeList + ", unsupported="
+                    + mUnsupportedDuplexModeList + '}';
+        }
     }
 
     /**
@@ -486,5 +503,37 @@ public final class RcsContactPresenceTuple implements Parcelable {
     /** @return the {@link ServiceCapabilities} of the tuple if it exists. */
     public @Nullable ServiceCapabilities getServiceCapabilities() {
         return mServiceCapabilities;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("{");
+        if (Build.IS_ENG) {
+            builder.append("u=");
+            builder.append(mContactUri);
+        } else {
+            builder.append("u=");
+            builder.append(mContactUri != null ? "XXX" : "null");
+        }
+        builder.append(", id=");
+        builder.append(mServiceId);
+        builder.append(", v=");
+        builder.append(mServiceVersion);
+        builder.append(", s=");
+        builder.append(mStatus);
+        if (mTimestamp != null) {
+            builder.append(", timestamp=");
+            builder.append(mTimestamp);
+        }
+        if (mServiceDescription != null) {
+            builder.append(", servDesc=");
+            builder.append(mServiceDescription);
+        }
+        if (mServiceCapabilities != null) {
+            builder.append(", servCaps=");
+            builder.append(mServiceCapabilities);
+        }
+        builder.append("}");
+        return builder.toString();
     }
 }

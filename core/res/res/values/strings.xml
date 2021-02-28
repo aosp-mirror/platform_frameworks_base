@@ -4538,7 +4538,7 @@
     <string name="color_correction_feature_name">Color Correction</string>
 
     <!-- Title of Reduce Brightness feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
-    <string name="reduce_bright_colors_feature_name">Reduce Brightness</string>
+    <string name="reduce_bright_colors_feature_name">Reduce brightness</string>
 
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
@@ -5010,6 +5010,9 @@
 
     <!-- Content description of the alerting icon in the notification. [CHAR_LIMIT=NONE] -->
     <string name="notification_alerted_content_description">Alerted</string>
+
+    <!-- Default content description of the verification icon in the call notification. [CHAR_LIMIT=NONE] -->
+    <string name="notification_verified_content_description">Verified</string>
 
     <!-- Content description of the expand button icon in the notification when collaped.-->
     <string name="expand_button_content_description_collapsed">Expand</string>

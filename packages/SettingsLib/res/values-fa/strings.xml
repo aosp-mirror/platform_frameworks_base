@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ملغی کردن پیش‌فرض‌های تراتبدیل"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"فعال کردن تراتبدیل"</string>
     <string name="transcode_default" msgid="3784803084573509491">"فرض شود برنامه‌ها از قالب‌های مدرن پشتیبانی می‌کنند"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"نمایش اعلان‌های تراتبدیل"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"اجرای وب‌نما"</string>

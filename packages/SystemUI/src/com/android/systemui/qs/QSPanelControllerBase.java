@@ -198,7 +198,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = mHost.createTileView(tile, collapsedView);
-        r.tileView.setShowLabels(mShowLabels);
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();

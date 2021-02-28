@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -47,6 +48,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@TestApi
 public class UserInfo implements Parcelable {
 
     /**

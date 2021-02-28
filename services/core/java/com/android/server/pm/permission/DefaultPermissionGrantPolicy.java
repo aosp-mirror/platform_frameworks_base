@@ -1277,12 +1277,7 @@ final class DefaultPermissionGrantPolicy {
                     newFlags |= (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT);
 
                     // If we are allowlisting the permission, update the exempt flag before grant.
-                    // If the permission can't be allowlisted by an installer, skip it here because
-                    // this is where the platform takes the role of the installer for exempting
-                    // preinstalled apps.
-                    if (whitelistRestrictedPermissions && pm.isPermissionRestricted(permission)
-                            && !pm.getPermissionInfo(permission).isInstallerExemptIgnored()) {
-
+                    if (whitelistRestrictedPermissions && pm.isPermissionRestricted(permission)) {
                         pm.updatePermissionFlags(permission, pkg,
                                 PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT,
                                 PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, user);
