@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS ವಿನಂತಿಯನ್ನು ವೀಡಿಯೊ ಕರೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ಹೊಸ SS ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ಫಿಶಿಂಗ್ ಕುರಿತು ಎಚ್ಚರಿಕೆ‌"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ಎಚ್ಚರಿಕೆ ನೀಡಲಾಗಿದೆ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ವಿಸ್ತೃತಗೊಳಿಸಿ"</string>

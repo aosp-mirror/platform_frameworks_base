@@ -685,10 +685,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि एपलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"वाहकलाई कुनै एपसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण एपहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
-    <!-- no translation found for permlab_highSamplingRateSensors (3941068435726317070) -->
-    <skip />
-    <!-- no translation found for permdesc_highSamplingRateSensors (8430061978931155995) -->
-    <skip />
+    <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"नमुना लिने उच्च दरमा सेन्सरसम्बन्धी डेटा प्रयोग गर्ने"</string>
+    <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यो अनुमति दिइएमा एपले २०० हर्जभन्दा बढी दरमा सेन्सरसम्बन्धी डेटाको नमुना लिन सक्छ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
@@ -1873,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS अनुरोधलाई भिडियो कलमा परिवर्तन गरियो"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS अनुरोधलाई USSD अनुरोधमा परिवर्तन गरियो"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"नयाँ SS अनुरोधमा परिवर्तन गरियो"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"फिसिङसम्बन्धी अलर्ट"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"कार्य प्रोफाइल"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"सतर्कता गरियो"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"विस्तृत गर्नुहोस्"</string>
