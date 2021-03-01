@@ -22,4 +22,12 @@ package com.android.server.apphibernation;
 final class UserLevelState {
     public String packageName;
     public boolean hibernated;
+
+    @Override
+    public String toString() {
+        return "UserLevelState{"
+                + "packageName='" + packageName + '\''
+                + ", hibernated=" + hibernated
+                + '}';
+    }
 }
