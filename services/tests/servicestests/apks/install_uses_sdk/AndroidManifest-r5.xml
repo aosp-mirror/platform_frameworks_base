@@ -18,7 +18,7 @@
 
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="29">
         <!-- This will fail to install, because minExtensionVersion is not met -->
-        <extension-sdk android:sdkVersion="10000" android:minExtensionVersion="5" />
+        <extension-sdk android:sdkVersion="30" android:minExtensionVersion="5" />
     </uses-sdk>
 
     <application>
