@@ -1526,11 +1526,18 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isUserForeground() {
-        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
+    public boolean isUserForeground(@UserIdInt int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to check if another user (" + userId
+                    + ") is running in the foreground");
+        }
+
         int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
         // TODO(b/179163496): should return true for profile users of the current user as well
-        return currentUser == callingUserId;
+        return currentUser == userId;
     }
 
     @Override
