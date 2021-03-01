@@ -336,6 +336,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_DEV_PROC(ResetCommandBuffer);
     GET_DEV_PROC(ResetFences);
     GET_DEV_PROC(WaitForFences);
+    GET_DEV_PROC(FrameBoundaryANDROID);
 }
 
 void VulkanManager::initialize() {
@@ -516,6 +517,25 @@ void VulkanManager::finishFrame(SkSurface* surface) {
     if (semaphore != VK_NULL_HANDLE) {
         if (submitted == GrSemaphoresSubmitted::kYes) {
             mSwapSemaphore = semaphore;
+            if (mFrameBoundaryANDROID) {
+                // retrieve VkImage used as render target
+                VkImage image = VK_NULL_HANDLE;
+                GrBackendRenderTarget backendRenderTarget =
+                        surface->getBackendRenderTarget(SkSurface::kFlushRead_BackendHandleAccess);
+                if (backendRenderTarget.isValid()) {
+                    GrVkImageInfo info;
+                    if (backendRenderTarget.getVkImageInfo(&info)) {
+                        image = info.fImage;
+                    } else {
+                        ALOGE("Frame boundary: backend is not vulkan");
+                    }
+                } else {
+                    ALOGE("Frame boundary: invalid backend render target");
+                }
+                // frameBoundaryANDROID needs to know about mSwapSemaphore, but
+                // it won't wait on it.
+                mFrameBoundaryANDROID(mDevice, mSwapSemaphore, image);
+            }
         } else {
             destroy_semaphore(mDestroySemaphoreContext);
             mDestroySemaphoreContext = nullptr;
