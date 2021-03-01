@@ -18,7 +18,6 @@ package com.android.systemui.qs
 
 import android.content.Context
 import android.util.AttributeSet
-import com.android.systemui.R
 
 open class SideLabelTileLayout(
     context: Context,
@@ -28,9 +27,6 @@ open class SideLabelTileLayout(
     override fun updateResources(): Boolean {
         return super.updateResources().also {
             mMaxAllowedRows = 4
-            mCellMarginHorizontal = (mCellMarginHorizontal * 1.2).toInt()
-            mCellMarginVertical = mCellMarginHorizontal
-            mMaxCellHeight = context.resources.getDimensionPixelSize(R.dimen.qs_quick_tile_size)
         }
     }
 
