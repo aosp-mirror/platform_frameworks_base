@@ -7222,7 +7222,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             public String toString() {
-                return mNetworkRequestInfo.mRequests.get(0).requestId + " : "
+                final NetworkRequest requestToShow = null != mNewNetworkRequest
+                        ? mNewNetworkRequest : mNetworkRequestInfo.mRequests.get(0);
+                return requestToShow.requestId + " : "
                         + (null != mOldNetwork ? mOldNetwork.network.getNetId() : "null")
                         + " → " + (null != mNewNetwork ? mNewNetwork.network.getNetId() : "null");
             }
