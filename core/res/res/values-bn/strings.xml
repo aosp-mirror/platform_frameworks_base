@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS অনুরোধ ভিডিও কলে পরিবর্তন করা হয়েছে"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS অনুরোধ USSD অনুরোধে পরিবর্তন করা হয়েছে"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"নতুন SS অনুরোধে পরিবর্তন করা হয়েছে"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ফিশিংয়ের সতর্কতা"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"কর্মস্থলের প্রোফাইল"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"সতর্ক করা হয়েছে"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"বড় করুন"</string>

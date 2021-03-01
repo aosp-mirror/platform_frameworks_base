@@ -404,6 +404,7 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"ຍົກເລີກຄ່າເລີ່ມຕົ້ນການ​ປ່ຽນ​ຮູບ​ແບບ​ລະ​ຫັດ"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ເປີດການນຳໃຊ້ການ​ປ່ຽນ​ຮູບ​ແບບ​ລະ​ຫັດ"</string>
     <string name="transcode_default" msgid="3784803084573509491">"ສົມມຸດວ່າແອັບຮອງຮັບຮູບແບບສະໄໝໃໝ່"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"ສະແດງການແຈ້ງເຕືອນການ​ປ່ຽນ​ຮູບ​ແບບ​ລະ​ຫັດ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ບໍລິການທີ່ເຮັດວຽກຢູ່"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ເບິ່ງ ແລະຈັດການບໍລິການທີ່ກຳລັງເຮັດວຽກຢູ່ໃນປັດຈຸບັນ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>

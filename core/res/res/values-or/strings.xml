@@ -1871,8 +1871,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SSଙ୍କ ଅନୁରୋଧକୁ ଭିଡିଓ କଲ୍‌ରେ ପରିବର୍ତ୍ତନ କରାଗଲା"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS ଅନୁରୋଧ, USSD ଅନୁରୋଧକୁ ପରିବର୍ତ୍ତନ ହେଲା"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ନୂତନ SS ଅନୁରୋଧରେ ପରିବର୍ତ୍ତନ ହେଲା"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ଫିସିଂ ଆଲର୍ଟ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ଆଲର୍ଟ କରାଯାଇଛି"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ବଢ଼ାନ୍ତୁ"</string>

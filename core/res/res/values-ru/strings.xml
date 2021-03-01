@@ -1933,8 +1933,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS-запрос преобразован в видеовызов"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS-запрос преобразован в USSD-запрос"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Преобразовано в SS-запрос"</string>
-    <!-- no translation found for notification_phishing_alert_content_description (494227305355958790) -->
-    <skip />
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Предупреждение о фишинге"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Рабочий профиль"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Отправлено оповещение"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Развернуть"</string>

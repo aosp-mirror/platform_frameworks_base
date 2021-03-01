@@ -858,8 +858,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void cleanupHandlerThreadAfterStop() {
         setProximitySensorEnabled(false);
         mHandler.removeCallbacksAndMessages(null);
-        mPowerState.stop();
-        mPowerState = null;
+        if (mPowerState != null) {
+            mPowerState.stop();
+            mPowerState = null;
+        }
     }
 
     private void updatePowerState() {
