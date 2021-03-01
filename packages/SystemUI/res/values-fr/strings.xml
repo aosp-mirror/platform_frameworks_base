@@ -238,7 +238,7 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Notification masquée"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Volet des notifications"</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Paramètres rapides"</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Réglages rapides"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Écran de verrouillage"</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"Paramètres"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"Aperçu"</string>
@@ -640,7 +640,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Afficher le pourcentage intégré de la batterie"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Affichez le pourcentage correspondant au niveau de la batterie dans l\'icône de la barre d\'état lorsque l\'appareil n\'est pas en charge."</string>
-    <string name="quick_settings" msgid="6211774484997470203">"Configuration rapide"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"Réglages rapides"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
     <string name="overview" msgid="3522318590458536816">"Aperçu"</string>
     <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface du système"</string>
@@ -650,13 +650,13 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>
-    <string name="add_tile" msgid="6239678623873086686">"Ajouter une tuile"</string>
-    <string name="broadcast_tile" msgid="5224010633596487481">"Tuile de diffusion"</string>
+    <string name="add_tile" msgid="6239678623873086686">"Ajouter un bloc"</string>
+    <string name="broadcast_tile" msgid="5224010633596487481">"Bloc de diffusion"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>, sauf si vous désactivez cette option avant."</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>."</string>
     <string name="alarm_template" msgid="2234991538018805736">"à <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"le <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Configuration rapide – <xliff:g id="TITLE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Réglages rapides – <xliff:g id="TITLE">%s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Point d\'accès"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil professionnel"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Divertissant pour certains, mais pas pour tous"</string>
@@ -669,8 +669,8 @@
     <string name="activity_not_found" msgid="8711661533828200293">"L\'application n\'est pas installée sur votre appareil."</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Afficher les secondes sur l\'horloge"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"Afficher les secondes dans la barre d\'état. Cela risque de réduire l\'autonomie de la batterie."</string>
-    <string name="qs_rearrange" msgid="484816665478662911">"Réorganiser la fenêtre de configuration rapide"</string>
-    <string name="show_brightness" msgid="6700267491672470007">"Afficher la luminosité dans fenêtre de configuration rapide"</string>
+    <string name="qs_rearrange" msgid="484816665478662911">"Réorganiser les Réglages rapides"</string>
+    <string name="show_brightness" msgid="6700267491672470007">"Afficher la luminosité dans les Réglages rapides"</string>
     <string name="experimental" msgid="3549865454812314826">"Paramètres expérimentaux"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Activer le Bluetooth ?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Pour connecter un clavier à votre tablette, vous devez avoir activé le Bluetooth."</string>
@@ -878,20 +878,20 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"Afficher les icônes de notification à faible priorité"</string>
     <string name="other" msgid="429768510980739978">"Autre"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"supprimer la carte"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ajouter la carte à la fin"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Déplacer la carte"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Ajouter une carte"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"supprimer le bloc"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ajouter le bloc à la fin"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Déplacer le bloc"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Ajouter un bloc"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Déplacer vers <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Ajouter à la position <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Position <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Carte ajoutée"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Carte supprimée"</string>
-    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Éditeur de configuration rapide."</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Bloc ajouté"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Bloc supprimé"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Éditeur Réglages rapides"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notification <xliff:g id="ID_1">%1$s</xliff:g> : <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Ouvrir les paramètres."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Ouvrir la fenêtre de configuration rapide."</string>
-    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Fermer la fenêtre de configuration rapide."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Ouvrir les Réglages rapides."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Fermer les Réglages rapides."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"Alarme définie."</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Connecté en tant que <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Aucun accès à Internet"</string>
@@ -1038,6 +1038,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Ajouter"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Suggérée par <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Appareil verrouillé"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Le code contient des lettres ou des symboles"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Valider <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Code incorrect"</string>
