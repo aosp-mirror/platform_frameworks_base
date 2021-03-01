@@ -1050,6 +1050,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Přidat"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Návrh z aplikace <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládací prvky aktualizovány"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Zařízení uzamčeno"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kód PIN obsahuje písmena nebo symboly"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Ověření zařízení <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Chybný PIN"</string>
