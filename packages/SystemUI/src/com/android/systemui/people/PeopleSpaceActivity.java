@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -34,12 +33,10 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.ViewGroup;
 
-import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -54,15 +51,14 @@ public class PeopleSpaceActivity extends Activity {
 
     private ViewGroup mPeopleSpaceLayout;
     private IPeopleManager mPeopleManager;
+    private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     private INotificationManager mNotificationManager;
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
     private Context mContext;
-    private AppWidgetManager mAppWidgetManager;
     private NotificationEntryManager mNotificationEntryManager;
     private int mAppWidgetId;
     private boolean mShowSingleConversation;
-    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     @Inject
     public PeopleSpaceActivity(NotificationEntryManager notificationEntryManager) {
@@ -81,8 +77,8 @@ public class PeopleSpaceActivity extends Activity {
         mPackageManager = getPackageManager();
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
+        mPeopleSpaceWidgetManager = new PeopleSpaceWidgetManager(mContext);
         mLauncherApps = mContext.getSystemService(LauncherApps.class);
-        mAppWidgetManager = AppWidgetManager.getInstance(mContext);
         setTileViewsWithPriorityConversations();
         mAppWidgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID,
                 INVALID_APPWIDGET_ID);
@@ -142,29 +138,13 @@ public class PeopleSpaceActivity extends Activity {
                         + mAppWidgetId);
             }
         }
-
-        PeopleSpaceUtils.setStorageForTile(mContext, tile, mAppWidgetId);
-        int[] widgetIds = new int[mAppWidgetId];
-        // TODO: Populate new widget with existing conversation notification, if there is any.
-        PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds, mAppWidgetManager,
-                mPeopleManager);
-        if (mLauncherApps != null) {
-            try {
-                if (DEBUG) Log.d(TAG, "Caching shortcut for PeopleTile: " + tile.getId());
-                mLauncherApps.cacheShortcuts(tile.getPackageName(),
-                        Collections.singletonList(tile.getId()),
-                        tile.getUserHandle(), LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS);
-            } catch (Exception e) {
-                Log.w(TAG, "Exception caching shortcut:" + e);
-            }
-        }
+        mPeopleSpaceWidgetManager.addNewWidget(tile, mAppWidgetId);
         finishActivity();
     }
 
     /** Finish activity with a successful widget configuration result. */
     private void finishActivity() {
         if (DEBUG) Log.d(TAG, "Widget added!");
-        mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
         setActivityResult(RESULT_OK);
         finish();
     }
