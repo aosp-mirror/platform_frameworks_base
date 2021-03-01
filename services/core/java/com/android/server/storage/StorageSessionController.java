@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.provider.MediaStore;
@@ -369,6 +370,60 @@ public final class StorageSessionController {
     @Nullable
     public ComponentName getExternalStorageServiceComponentName() {
         return mExternalStorageServiceComponent;
+    }
+
+    /**
+     * Notify the controller that an app with {@code uid} and {@code tid} is blocked on an IO
+     * request on {@code volumeUuid} for {@code reason}.
+     *
+     * This blocked state can be queried with {@link #isAppIoBlocked}
+     *
+     * @hide
+     */
+    public void notifyAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            connection.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
+        }
+    }
+
+    /**
+     * Notify the controller that an app with {@code uid} and {@code tid} has resmed a previously
+     * blocked IO request on {@code volumeUuid} for {@code reason}.
+     *
+     * All app IO will be automatically marked as unblocked if {@code volumeUuid} is unmounted.
+     */
+    public void notifyAppIoResumed(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            connection.notifyAppIoResumed(volumeUuid, uid, tid, reason);
+        }
+    }
+
+    /** Returns {@code true} if {@code uid} is blocked on IO, {@code false} otherwise */
+    public boolean isAppIoBlocked(int uid) {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            return connection.isAppIoBlocked(uid);
+        }
+        return false;
     }
 
     private void killExternalStorageService(int userId) {
