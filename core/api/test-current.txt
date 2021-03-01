@@ -707,6 +707,10 @@ package android.content.pm {
     field public int privateFlags;
   }
 
+  public class CrossProfileApps {
+    method public boolean canConfigureInteractAcrossProfiles(@NonNull String);
+  }
+
   public class LauncherApps {
     ctor public LauncherApps(android.content.Context);
   }
