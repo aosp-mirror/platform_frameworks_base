@@ -42,7 +42,7 @@ public class AppSearchPerson extends GenericDocument {
     public static final String KEY_IS_BOT = "isBot";
     public static final String KEY_IS_IMPORTANT = "isImportant";
 
-    private AppSearchPerson(@NonNull GenericDocument document) {
+    public AppSearchPerson(@NonNull GenericDocument document) {
         super(document);
     }
 

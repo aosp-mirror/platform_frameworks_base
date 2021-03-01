@@ -68,7 +68,8 @@ public final class ShortcutInfo implements Parcelable {
 
     private static final int IMPLICIT_RANK_MASK = 0x7fffffff;
 
-    private static final int RANK_CHANGED_BIT = ~IMPLICIT_RANK_MASK;
+    /** @hide */
+    public static final int RANK_CHANGED_BIT = ~IMPLICIT_RANK_MASK;
 
     /** @hide */
     public static final int RANK_NOT_SET = Integer.MAX_VALUE;
@@ -1595,6 +1596,9 @@ public final class ShortcutInfo implements Parcelable {
      */
     @Nullable
     public Intent[] getIntents() {
+        if (mIntents == null) {
+            return null;
+        }
         final Intent[] ret = new Intent[mIntents.length];
 
         for (int i = 0; i < ret.length; i++) {
