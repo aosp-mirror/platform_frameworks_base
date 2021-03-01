@@ -333,7 +333,6 @@ filegroup {
     srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-blobstore-sources",
-        ":framework-connectivity-sources", // framework-connectivity is not yet a module
         ":framework-core-sources",
         ":framework-drm-sources",
         ":framework-graphics-sources",
@@ -395,6 +394,7 @@ filegroup {
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
+        ":framework-connectivity-sources",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
         ":framework-sdkextensions-sources",
@@ -580,6 +580,7 @@ java_library {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
+        ":framework-connectivity-sources",
         "core/java/**/*.logtags",
     ],
     // See comment on framework-atb-backward-compatibility module below
@@ -628,6 +629,8 @@ java_library {
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base",
+        // TODO: remove when framework-connectivity can build against API
+        "//frameworks/base/packages/Connectivity/framework",
         // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
@@ -1281,6 +1284,7 @@ java_library {
     ],
     libs: [
         "framework-annotations-lib",
+        "framework-connectivity",
         "unsupportedappusage",
     ],
     visibility: [
