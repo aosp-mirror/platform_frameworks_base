@@ -57,10 +57,13 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -511,6 +514,37 @@ public final class AppHibernationService extends SystemService {
         return mIsServiceEnabled;
     }
 
+    private void dump(PrintWriter pw) {
+        // Check usage stats permission since hibernation indirectly informs usage.
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
+
+        IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
+
+        synchronized (mLock) {
+            final int userCount = mUserStates.size();
+            for (int i = 0; i < userCount; i++) {
+                final int userId = mUserStates.keyAt(i);
+                idpw.print("User Level Hibernation States, ");
+                idpw.printPair("user", userId);
+                idpw.println();
+                Map<String, UserLevelState> stateMap = mUserStates.get(i);
+                idpw.increaseIndent();
+                for (UserLevelState state : stateMap.values()) {
+                    idpw.print(state);
+                    idpw.println();
+                }
+                idpw.decreaseIndent();
+            }
+            idpw.println();
+            idpw.print("Global Level Hibernation States");
+            idpw.println();
+            for (GlobalLevelState state : mGlobalHibernationStates.values()) {
+                idpw.print(state);
+                idpw.println();
+            }
+        }
+    }
+
     private final AppHibernationServiceStub mServiceStub = new AppHibernationServiceStub(this);
 
     static final class AppHibernationServiceStub extends IAppHibernationService.Stub {
@@ -546,6 +580,12 @@ public final class AppHibernationService extends SystemService {
                 @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver) {
             new AppHibernationShellCommand(mService).exec(this, in, out, err, args, callback,
                     resultReceiver);
+        }
+
+        @Override
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter fout,
+                @Nullable String[] args) {
+            mService.dump(fout);
         }
     }
 
