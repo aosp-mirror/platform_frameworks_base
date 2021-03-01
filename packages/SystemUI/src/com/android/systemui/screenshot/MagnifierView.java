@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -77,13 +78,12 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
         mCheckerboardPaint.setColor(Color.GRAY);
     }
 
-    public void setImageTileset(ImageTileSet tiles) {
-        if (tiles != null) {
-            mDrawable = tiles.getDrawable();
-            mDrawable.setBounds(0, 0, tiles.getWidth(), tiles.getHeight());
-        } else {
-            mDrawable = null;
-        }
+    /**
+     * Set the drawable to be displayed by the magnifier.
+     */
+    public void setDrawable(@NonNull Drawable drawable, int width, int height) {
+        mDrawable = drawable;
+        mDrawable.setBounds(0, 0, width, height);
         invalidate();
     }
 
