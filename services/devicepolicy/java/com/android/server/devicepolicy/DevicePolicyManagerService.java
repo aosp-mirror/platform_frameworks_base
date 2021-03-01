@@ -756,21 +756,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleStartUser(user.getUserIdentifier());
         }
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleUnlockUser(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopping(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleStopUser(user.getUserIdentifier());
         }
 
         @Override
         public void onUserUnlocked(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleOnUserUnlocked(user.getUserIdentifier());
         }
     }
@@ -9188,7 +9192,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.println();
                 mStatLogger.dump(pw);
                 pw.println();
-
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
                 pw.println();
 
@@ -9204,7 +9207,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mPolicyCache.dump(pw);
                 pw.println();
                 mStateCache.dump(pw);
+                pw.println();
             }
+            dumpResources(pw);
         }
     }
 
@@ -9216,6 +9221,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pw.printf("mIsAutomotive=%b\n", mIsAutomotive);
         pw.printf("mHasTelephonyFeature=%b\n", mHasTelephonyFeature);
         pw.printf("mSafetyChecker=%s\n", mSafetyChecker);
+        pw.decreaseIndent();
+    }
+
+    private void dumpResources(IndentingPrintWriter pw) {
+        mOverlayPackagesProvider.dump(pw);
+        pw.println();
+
+        pw.println("Other overlayable app resources");
+        pw.increaseIndent();
+        dumpResources(pw, mContext, "cross_profile_apps", R.array.cross_profile_apps);
+        dumpResources(pw, mContext, "vendor_cross_profile_apps", R.array.vendor_cross_profile_apps);
+        pw.decreaseIndent();
+        pw.println();
+    }
+
+    static void dumpResources(IndentingPrintWriter pw, Context context, String resName, int resId) {
+        String[] apps = context.getResources().getStringArray(resId);
+        if (apps == null || apps.length == 0) {
+            pw.printf("%s: empty\n", resName);
+            return;
+        }
+        pw.printf("%s: %d app%s\n", resName, apps.length, apps.length == 1 ? "" : "s");
+        pw.increaseIndent();
+        for (int i = 0; i < apps.length; i++) {
+            pw.printf("%d: %s\n", i, apps[i]);
+        }
         pw.decreaseIndent();
     }
 
