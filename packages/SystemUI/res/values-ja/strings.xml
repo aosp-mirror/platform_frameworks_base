@@ -412,7 +412,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"日の出まで"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>にオン"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g>まで"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"明るさを下げる"</string>
+    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC は有効です"</string>
@@ -446,6 +447,8 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"これは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が所有するデバイスです"</string>
+    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"右にスワイプして通話"</string>
     <string name="voice_hint" msgid="7476017460191291417">"アイコンからスワイプして音声アシストを起動"</string>
     <string name="camera_hint" msgid="4519495795000658637">"左にスワイプしてカメラを起動"</string>
@@ -625,6 +628,8 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s。タップしてミュートします。ユーザー補助機能サービスがミュートされる場合があります。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s。タップしてバイブレーションに設定します。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s。タップしてミュートします。"</string>
+    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"バイブレーション"</string>
@@ -1038,6 +1043,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"追加"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> によるおすすめ"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"コントロールを更新しました"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"デバイス: ロック状態"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN に英字や記号を含める"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>の確認"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN が間違っています"</string>
