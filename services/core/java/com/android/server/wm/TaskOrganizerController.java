@@ -285,18 +285,20 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return false;
         }
 
-        private boolean removeTask(Task t) {
+        private boolean removeTask(Task t, boolean removeFromSystem) {
             mOrganizedTasks.remove(t);
             mInterceptBackPressedOnRootTasks.remove(t.mTaskId);
-
-            if (t.mTaskAppearedSent) {
+            boolean taskAppearedSent = t.mTaskAppearedSent;
+            if (taskAppearedSent) {
                 if (t.getSurfaceControl() != null) {
                     t.migrateToNewSurfaceControl();
                 }
                 t.mTaskAppearedSent = false;
-                return true;
             }
-            return false;
+            if (removeFromSystem) {
+                mService.removeTask(t.mTaskId);
+            }
+            return taskAppearedSent;
         }
 
         void dispose() {
@@ -311,7 +313,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (mOrganizedTasks.contains(t)) {
                     // updateTaskOrganizerState should remove the task from the list, but still
                     // check it again to avoid while-loop isn't terminate.
-                    if (removeTask(t)) {
+                    if (removeTask(t, t.mRemoveWithTaskOrganizer)) {
                         TaskOrganizerController.this.onTaskVanishedInternal(
                                 mOrganizer.mTaskOrganizer, t);
                     }
@@ -527,7 +529,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
-        if (state != null && state.removeTask(task)) {
+        if (state != null && state.removeTask(task, false /* removeFromSystem */)) {
             onTaskVanishedInternal(organizer, task);
         }
     }

@@ -835,6 +835,9 @@ class Task extends WindowContainer<WindowContainer> {
     // Tracking cookie for the creation of this task.
     IBinder mLaunchCookie;
 
+    // The task will be removed when TaskOrganizer, which is managing the task, is destroyed.
+    boolean mRemoveWithTaskOrganizer;
+
     private Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
@@ -846,7 +849,8 @@ class Task extends WindowContainer<WindowContainer> {
             boolean supportsPictureInPicture, boolean _realActivitySuspended,
             boolean userSetupComplete, int minWidth, int minHeight, ActivityInfo info,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
-            boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear) {
+            boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
+            boolean _removeWithTaskOrganizer) {
         super(atmService.mWindowManager);
 
         mAtmService = atmService;
@@ -905,6 +909,7 @@ class Task extends WindowContainer<WindowContainer> {
         mCreatedByOrganizer = _createdByOrganizer;
         mLaunchCookie = _launchCookie;
         mDeferTaskAppear = _deferTaskAppear;
+        mRemoveWithTaskOrganizer = _removeWithTaskOrganizer;
         EventLogTags.writeWmTaskCreated(mTaskId, isRootTask() ? INVALID_TASK_ID : getRootTaskId());
     }
 
@@ -7845,6 +7850,7 @@ class Task extends WindowContainer<WindowContainer> {
         private IBinder mLaunchCookie;
         private boolean mOnTop;
         private boolean mHasBeenVisible;
+        private boolean mRemoveWithTaskOrganizer;
 
         Builder(ActivityTaskManagerService atm) {
             mAtmService = atm;
@@ -8140,6 +8146,9 @@ class Task extends WindowContainer<WindowContainer> {
             mCallingPackage = mActivityInfo.packageName;
             mResizeMode = mActivityInfo.resizeMode;
             mSupportsPictureInPicture = mActivityInfo.supportsPictureInPicture();
+            if (mActivityOptions != null) {
+                mRemoveWithTaskOrganizer = mActivityOptions.getRemoveWithTaskOranizer();
+            }
 
             final Task task = buildInner();
             task.mHasBeenVisible = mHasBeenVisible;
@@ -8178,7 +8187,7 @@ class Task extends WindowContainer<WindowContainer> {
                     mCallingPackage, mCallingFeatureId, mResizeMode, mSupportsPictureInPicture,
                     mRealActivitySuspended, mUserSetupComplete, mMinWidth, mMinHeight,
                     mActivityInfo, mVoiceSession, mVoiceInteractor, mCreatedByOrganizer,
-                    mLaunchCookie, mDeferTaskAppear);
+                    mLaunchCookie, mDeferTaskAppear, mRemoveWithTaskOrganizer);
         }
     }
 }
