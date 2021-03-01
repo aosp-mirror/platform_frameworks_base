@@ -97,6 +97,10 @@ import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
 import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
+import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
+import static android.os.PowerWhitelistManager.REASON_PACKAGE_REPLACED;
+import static android.os.PowerWhitelistManager.REASON_PACKAGE_VERIFIER;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -270,6 +274,7 @@ import android.os.Parcel;
 import android.os.ParcelableException;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
+import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -5552,7 +5557,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             packageName /*targetPackage*/,
                             null /*finishedReceiver*/, updateUserIds, instantUserIds,
                             null /*broadcastAllowList*/,
-                            getTemporaryAppWhitelistBroadcastOptions().toBundle());
+                            getTemporaryAppAllowlistBroadcastOptions(REASON_PACKAGE_REPLACED)
+                                    .toBundle());
                 } else if (launchedForRestore && !res.pkg.isSystem()) {
                     // First-install and we did a restore, so we're responsible for the
                     // first-launch broadcast.
@@ -15193,7 +15199,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             }
             final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
-            final BroadcastOptions bOptions = getTemporaryAppWhitelistBroadcastOptions();
+            final BroadcastOptions bOptions = getTemporaryAppAllowlistBroadcastOptions(
+                    REASON_LOCKED_BOOT_COMPLETED);
             am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
                     requiredPermissions, android.app.AppOpsManager.OP_NONE, bOptions.toBundle(),
                     false, false,
@@ -17582,7 +17589,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         mInjector.getLocalService(DeviceIdleInternal.class);
                 final long idleDuration = getVerificationTimeout();
                 final BroadcastOptions options = BroadcastOptions.makeBasic();
-                options.setTemporaryAppWhitelistDuration(idleDuration);
+                options.setTemporaryAppAllowlist(idleDuration,
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                        REASON_PACKAGE_VERIFIER, "");
 
                 /*
                  * If any sufficient verifiers were listed in the package
@@ -17598,7 +17607,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             final ComponentName verifierComponent = sufficientVerifiers.get(i);
                             idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
                                     verifierComponent.getPackageName(), idleDuration,
-                                    verifierUser.getIdentifier(), false, "package verifier");
+                                    verifierUser.getIdentifier(), false,
+                                    REASON_PACKAGE_VERIFIER,"package verifier");
 
                             final Intent sufficientIntent = new Intent(verification);
                             sufficientIntent.setComponent(verifierComponent);
@@ -17620,7 +17630,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     verification.setComponent(requiredVerifierComponent);
                     idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
                             mRequiredVerifierPackage, idleDuration,
-                            verifierUser.getIdentifier(), false, "package verifier");
+                            verifierUser.getIdentifier(), false,
+                            REASON_PACKAGE_VERIFIER, "package verifier");
                     mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
                             android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                             /* appOp= */ AppOpsManager.OP_NONE,
@@ -20971,7 +20982,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     extras, 0, null /*targetPackage*/, null, null, null, broadcastAllowList, null);
             packageSender.sendPackageBroadcast(Intent.ACTION_MY_PACKAGE_REPLACED, null, null, 0,
                     removedPackage, null, null, null, null /* broadcastAllowList */,
-                    getTemporaryAppWhitelistBroadcastOptions().toBundle());
+                    getTemporaryAppAllowlistBroadcastOptions(REASON_PACKAGE_REPLACED).toBundle());
             if (installerPackageName != null) {
                 packageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                         removedPackage, extras, 0 /*flags*/,
@@ -27818,7 +27829,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return result.toArray(new PerUidReadTimeouts[result.size()]);
     }
 
-    static @NonNull BroadcastOptions getTemporaryAppWhitelistBroadcastOptions() {
+    static @NonNull BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
+            @PowerWhitelistManager.ReasonCode int reasonCode) {
         long duration = 10_000;
         final ActivityManagerInternal amInternal =
                 LocalServices.getService(ActivityManagerInternal.class);
@@ -27826,9 +27838,9 @@ public class PackageManagerService extends IPackageManager.Stub
             duration = amInternal.getBootTimeTempAllowListDuration();
         }
         final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
-        bOptions.setTemporaryAppWhitelistDuration(
-                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                duration);
+        bOptions.setTemporaryAppAllowlist(duration,
+                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                reasonCode, "");
         return bOptions;
     }
 
