@@ -5259,6 +5259,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mPid = nri.mPid;
             mUid = nri.mUid;
             mPendingIntent = nri.mPendingIntent;
+            mNetworkRequestCounter.incrementCountOrThrow(mUid);
             mCallingAttributionTag = nri.mCallingAttributionTag;
         }
 
