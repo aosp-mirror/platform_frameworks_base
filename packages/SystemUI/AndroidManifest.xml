@@ -338,6 +338,7 @@
         <activity android:name=".screenshot.LongScreenshotActivity"
                   android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
                   android:process=":screenshot"
+                  android:exported="false"
                   android:finishOnTaskLaunch="true" />
 
         <activity android:name=".screenrecord.ScreenRecordDialog"
