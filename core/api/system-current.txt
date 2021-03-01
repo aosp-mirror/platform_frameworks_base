@@ -10269,7 +10269,7 @@ package android.service.voice {
   public abstract class HotwordDetectionService extends android.app.Service {
     ctor public HotwordDetectionService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onDetectFromDspSource(int, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
+    method public void onDetectFromDspSource(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
   }
 
