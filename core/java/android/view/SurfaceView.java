@@ -544,6 +544,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         // recreate this Surface, so only release it when we are fully
         // detached.
         if (mSurfacePackage != null) {
+            mTmpTransaction.reparent(mSurfacePackage.getSurfaceControl(), null).apply();
             mSurfacePackage.release();
             mSurfacePackage = null;
         }
