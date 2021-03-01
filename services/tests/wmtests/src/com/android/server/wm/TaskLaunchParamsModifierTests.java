@@ -668,7 +668,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testForceMaximizesUnresizeableApp() {
-        mAtm.mSizeCompatFreeform = false;
+        mAtm.mSupportsNonResizableMultiWindow = false;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -691,7 +691,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testLaunchesPortraitSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
-        mAtm.mSizeCompatFreeform = true;
+        mAtm.mSupportsNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
 
@@ -719,7 +719,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testLaunchesLandscapeSizeCompatOnFreeformLandscapeDisplayWithFreeformSizeCompat() {
-        mAtm.mSizeCompatFreeform = true;
+        mAtm.mSupportsNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
         final ActivityOptions options = ActivityOptions.makeBasic();
@@ -735,7 +735,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     public void testLaunchesPortraitUnresizableOnFreeformDisplayWithFreeformSizeCompat() {
-        mAtm.mSizeCompatFreeform = true;
+        mAtm.mSupportsNonResizableMultiWindow = true;
         final TestDisplayContent freeformDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FREEFORM);
         final ActivityOptions options = ActivityOptions.makeBasic();

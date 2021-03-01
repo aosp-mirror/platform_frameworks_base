@@ -808,7 +808,7 @@ class ActivityClientController extends IActivityClientController.Stub {
 
                 if (rootTask.inFreeformWindowingMode()) {
                     rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-                } else if (!mService.mSizeCompatFreeform && r.inSizeCompatMode()) {
+                } else if (!mService.mSupportsNonResizableMultiWindow && r.inSizeCompatMode()) {
                     throw new IllegalStateException("Size-compat windows are currently not"
                             + "freeform-enabled");
                 } else if (rootTask.getParent().inFreeformWindowingMode()) {

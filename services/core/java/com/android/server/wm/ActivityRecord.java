@@ -2562,9 +2562,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         root task.
      */
     boolean supportsFreeform() {
-        return mAtmService.mSupportsFreeformWindowManagement
-                // Either the activity is resizable, or we allow size compat in freeform.
-                && (supportsMultiWindow() || mAtmService.mSizeCompatFreeform);
+        return mAtmService.mSupportsFreeformWindowManagement && supportsMultiWindow();
     }
 
     /**
