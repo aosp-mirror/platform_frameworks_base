@@ -71,7 +71,7 @@
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"目前登入這部裝置的使用者無法開啟無線偵錯功能。如要使用這項功能，請切換到主要使用者。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB 連接埠已停用"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"為了避免液體或灰塵導致你的裝置受損，系統已停用 USB 連接埠，因此目前無法偵測任何配件。\n\n系統會在可繼續使用 USB 連接埠時通知你。"</string>
-    <string name="usb_port_enabled" msgid="531823867664717018">"USB 通訊埠已啟用，可偵測充電器和配件"</string>
+    <string name="usb_port_enabled" msgid="531823867664717018">"USB 連接埠已啟用，可偵測充電器和配件"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"啟用 USB 連接埠"</string>
     <string name="learn_more" msgid="4690632085667273811">"瞭解詳情"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
@@ -412,7 +412,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"於日出時關閉"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"開啟時間：<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"關閉時間：<xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"調低亮度"</string>
+    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC 已啟用"</string>
@@ -446,6 +447,8 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"如要使用 NFC，請先解鎖"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"這部裝置的擁有者為貴機構"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」"</string>
+    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"滑動手機圖示即可啟用"</string>
     <string name="voice_hint" msgid="7476017460191291417">"滑動語音小幫手圖示即可啟用"</string>
     <string name="camera_hint" msgid="4519495795000658637">"滑動相機圖示即可啟用"</string>
@@ -625,6 +628,8 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s。輕觸即可設為靜音，但系統可能會將無障礙服務一併設為靜音。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s。輕觸即可設為震動。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s。輕觸即可設為靜音。"</string>
+    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"靜音"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"取消靜音"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"震動"</string>
@@ -1038,6 +1043,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"新增"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"來自「<xliff:g id="APP">%s</xliff:g>」的建議"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"已更新控制項"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"裝置已鎖定"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN 碼含有字母或符號"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"驗證「<xliff:g id="DEVICE">%s</xliff:g>」"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN 碼錯誤"</string>

@@ -93,10 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"స్క్రీన్‌షాట్‌కు స్క్రోల్ చేయండి"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"స్క్రీన్‌షాట్‌ను విస్మరించు"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"స్క్రీన్‌షాట్ ప్రివ్యూ"</string>
-    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
-    <skip />
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ఎగువ సరిహద్దు"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"దిగువ సరిహద్దు"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"స్క్రీన్ రికార్డర్"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
@@ -414,7 +412,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> కు ఆన్ అవుతుంది"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"ప్రకాశాన్ని తగ్గించండి"</string>
+    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC నిలిపివేయబడింది"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ప్రారంభించబడింది"</string>
@@ -448,6 +447,8 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>కు చెందినది"</string>
+    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="voice_hint" msgid="7476017460191291417">"వాయిస్ అసిస్టెంట్ చిహ్నం నుండి స్వైప్"</string>
     <string name="camera_hint" msgid="4519495795000658637">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
@@ -546,8 +547,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"మీ కార్యాలయ ప్రొఫైల్‌లో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ఈ పరికరంలో ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేసారు."</string>
-    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
-    <skip />
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"మీ అడ్మిన్ నెట్‌వర్క్ లాగింగ్‌ను ఆన్ చేశారు, ఇది మీ వర్క్ ప్రొఫైల్‌లోని ట్రాఫిక్‌ను పర్యవేక్షిస్తుంది కానీ మీ వ్యక్తిగత ప్రొఫైల్‌లో కాదు."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"మీరు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"మీరు ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP_0">%1$s</xliff:g> మరియు <xliff:g id="VPN_APP_1">%2$s</xliff:g>కి కనెక్ట్ చేయబడ్డారు."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"మీ కార్యాలయ ప్రొఫైల్ ఇమెయిల్‌లు, యాప్‌లు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగల <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది."</string>
@@ -628,6 +628,8 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. మ్యూట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. వైబ్రేట్ అయ్యేలా సెట్ చేయడం కోసం నొక్కండి."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. మ్యూట్ చేయడానికి నొక్కండి."</string>
+    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"అన్‌మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"వైబ్రేట్"</string>
@@ -1041,6 +1043,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"జోడించండి"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ద్వారా సూచించబడింది"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"నియంత్రణలు అప్‌డేట్ అయ్యాయి"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"పరికరంలాక్ చేయబడింది"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"పిన్ అక్షరాలను లేదా చిహ్నాలను కలిగి ఉంది"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>ను వెరిఫై చేయండి"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"పిన్ తప్పు"</string>
