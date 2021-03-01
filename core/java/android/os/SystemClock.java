@@ -338,8 +338,7 @@ public final class SystemClock {
                 try {
                     time = mMgr.getGnssTimeMillis();
                 } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                    return 0;
+                    throw e.rethrowFromSystemServer();
                 }
                 if (time == null) {
                     throw new DateTimeException("Gnss based time is not available.");
