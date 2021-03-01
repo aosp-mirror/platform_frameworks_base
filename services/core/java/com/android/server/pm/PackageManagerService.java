@@ -26097,6 +26097,11 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.hasSigningCertificate(
                 packageName, certificate, CERT_INPUT_SHA256);
         }
+
+        @Override
+        public boolean hasSystemFeature(String featureName, int version) {
+            return PackageManagerService.this.hasSystemFeature(featureName, version);
+        }
     }
 
     private AndroidPackage getPackage(String packageName) {
