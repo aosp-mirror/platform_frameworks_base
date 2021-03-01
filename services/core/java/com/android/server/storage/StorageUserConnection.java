@@ -38,10 +38,12 @@ import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.service.storage.ExternalStorageService;
 import android.service.storage.IExternalStorageService;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -73,6 +75,7 @@ public final class StorageUserConnection {
     private final StorageSessionController mSessionController;
     private final ActiveConnection mActiveConnection = new ActiveConnection();
     @GuardedBy("mLock") private final Map<String, Session> mSessions = new HashMap<>();
+    @GuardedBy("mLock") private final Set<Integer> mUidsBlockedOnIo = new ArraySet<>();
     private final HandlerThread mHandlerThread;
 
     public StorageUserConnection(Context context, int userId, StorageSessionController controller) {
@@ -170,6 +173,7 @@ public final class StorageUserConnection {
      **/
     public Session removeSession(String sessionId) {
         synchronized (mSessionsLock) {
+            mUidsBlockedOnIo.clear();
             return mSessions.remove(sessionId);
         }
     }
@@ -229,6 +233,41 @@ public final class StorageUserConnection {
     public Set<String> getAllSessionIds() {
         synchronized (mSessionsLock) {
             return new HashSet<>(mSessions.keySet());
+        }
+    }
+
+    /**
+     * Notify the controller that an app with {@code uid} and {@code tid} is blocked on an IO
+     * request on {@code volumeUuid} for {@code reason}.
+     *
+     * This blocked state can be queried with {@link #isAppIoBlocked}
+     *
+     * @hide
+     */
+    public void notifyAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        synchronized (mSessionsLock) {
+            mUidsBlockedOnIo.add(uid);
+        }
+    }
+
+    /**
+     * Notify the connection that an app with {@code uid} and {@code tid} has resmed a previously
+     * blocked IO request on {@code volumeUuid} for {@code reason}.
+     *
+     * All app IO will be automatically marked as unblocked if {@code volumeUuid} is unmounted.
+     */
+    public void notifyAppIoResumed(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        synchronized (mSessionsLock) {
+            mUidsBlockedOnIo.remove(uid);
+        }
+    }
+
+    /** Returns {@code true} if {@code uid} is blocked on IO, {@code false} otherwise */
+    public boolean isAppIoBlocked(int uid) {
+        synchronized (mSessionsLock) {
+            return mUidsBlockedOnIo.contains(uid);
         }
     }
 
