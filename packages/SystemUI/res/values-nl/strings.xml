@@ -621,16 +621,16 @@
     <string name="ring_toggle_title" msgid="5973120187287633224">"Gesprekken"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Bellen"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Trillen"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Dempen"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Geluid staat uit"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Telefoon op trillen"</string>
-    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Telefoon gedempt"</string>
+    <string name="qs_status_phone_muted" msgid="3763664791309544103">"Telefoongeluid staat uit"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tik om dempen op te heffen."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tik om in te stellen op trillen. Toegankelijkheidsservices kunnen zijn gedempt."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tik om te dempen. Toegankelijkheidsservices kunnen zijn gedempt."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tik om in te stellen op trillen. Het geluid van toegankelijkheidsservices kan hierdoor uitgaan."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tik om te dempen. Het geluid van toegankelijkheidsservices kan hierdoor uitgaan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tik om in te stellen op trillen."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tik om te dempen."</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"dempen"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"dempen opheffen"</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tik om geluid uit te zetten."</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"geluid uit"</string>
+    <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"geluid aanzetten"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"trillen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s-volumeknoppen"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gesprekken en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
