@@ -25,7 +25,6 @@ import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
-import android.util.Log;
 
 import java.util.List;
 
@@ -44,30 +43,12 @@ public interface CapabilityExchangeEventListener {
          * Respond to a remote capability request from the contact specified with the
          * capabilities of this device.
          * @param ownCapabilities The capabilities of this device.
-         * @hide
-         */
-        default void onRespondToCapabilityRequest(
-                @NonNull RcsContactUceCapability ownCapabilities) {}
-
-        /**
-         * Respond to a remote capability request from the contact specified with the
-         * capabilities of this device.
-         * @param ownCapabilities The capabilities of this device.
          * @param isBlocked Whether or not the user has blocked the number requesting the
          *         capabilities of this device. If true, the device should respond to the OPTIONS
          *         request with a 200 OK response and no capabilities.
          */
-        default void onRespondToCapabilityRequest(@NonNull RcsContactUceCapability ownCapabilities,
-                boolean isBlocked) {
-            Log.w("CapabilityExchangeEventListener", "implement "
-                    + "onRespondToCapabilityRequest(RcsContactUceCapability, boolean) instead!");
-            // Fall back to old implementation
-            if (isBlocked) {
-                onRespondToCapabilityRequestWithError(200, "OK");
-            } else {
-                onRespondToCapabilityRequest(ownCapabilities);
-            }
-        }
+        void onRespondToCapabilityRequest(@NonNull RcsContactUceCapability ownCapabilities,
+                boolean isBlocked);
 
         /**
          * Respond to a remote capability request from the contact specified with the
