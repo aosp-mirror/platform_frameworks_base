@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Лицето не бе разпознато. Опитайте отново."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Позата ви е сходна с предишна. Моля, променете я."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Не завъртайте главата си толкова много."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Не завъртайте главата си толкова много."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Не завъртайте главата си толкова много."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Премахнете всичко, което закрива лицето ви."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Почистете горната част на екрана си, включително черната лента"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Коригиране на цветовете"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Намаляване на яркостта"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Задържахте бутоните за силата на звука. Услугата <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е изключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"За да използвате <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, натиснете двата бутона за силата на звука и ги задръжте за 3 секунди"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"За да продължите, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; се нуждае от достъп до камерата на устройството ви."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Включване"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Поверителност на сензорните данни"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>
