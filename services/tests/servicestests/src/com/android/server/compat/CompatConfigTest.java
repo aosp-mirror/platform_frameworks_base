@@ -86,6 +86,7 @@ public class CompatConfigTest {
         // Assume userdebug/eng non-final build
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
         when(mBuildClassifier.isFinalBuild()).thenReturn(false);
+        when(mBuildClassifier.platformTargetSdk()).thenReturn(30);
         ChangeIdStateCache.disable();
         when(mPackageManager.getApplicationInfo(anyString(), anyInt()))
                 .thenThrow(new NameNotFoundException());
@@ -564,6 +565,34 @@ public class CompatConfigTest {
             ApplicationInfoBuilder.create().withTargetSdk(5).build())).isFalse();
         assertThat(compatConfig.isChangeEnabled(1236L,
             ApplicationInfoBuilder.create().withTargetSdk(1).build())).isTrue();
+    }
+
+    @Test
+    public void testReadApexConfig() throws IOException {
+        String configXml = "<config>"
+                + "<compat-change id=\"1234\" name=\"MY_CHANGE1\" enableAfterTargetSdk=\"2\" />"
+                + "<compat-change id=\"1235\" name=\"MY_CHANGE2\" disabled=\"true\" />"
+                + "<compat-change id=\"1236\" name=\"MY_CHANGE3\" />"
+                + "<compat-change id=\"1237\" name=\"MY_CHANGE4\" enableSinceTargetSdk=\"31\" />"
+                + "</config>";
+
+        File dir = createTempDir();
+        writeToFile(dir, "platform_compat_config.xml", configXml);
+        CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
+        compatConfig.forceNonDebuggableFinalForTest(false);
+
+        compatConfig.initConfigFromLib(dir);
+
+        assertThat(compatConfig.isChangeEnabled(1234L,
+            ApplicationInfoBuilder.create().withTargetSdk(1).build())).isFalse();
+        assertThat(compatConfig.isChangeEnabled(1234L,
+            ApplicationInfoBuilder.create().withTargetSdk(3).build())).isTrue();
+        assertThat(compatConfig.isChangeEnabled(1235L,
+            ApplicationInfoBuilder.create().withTargetSdk(5).build())).isFalse();
+        assertThat(compatConfig.isChangeEnabled(1236L,
+            ApplicationInfoBuilder.create().withTargetSdk(1).build())).isTrue();
+        assertThat(compatConfig.isChangeEnabled(1237L,
+            ApplicationInfoBuilder.create().withTargetSdk(31).build())).isTrue();
     }
 
     @Test
