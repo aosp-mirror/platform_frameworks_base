@@ -1038,6 +1038,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Aggiungi"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Suggerito da <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controlli aggiornati"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Dispositivo bloccato"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Il PIN contiene lettere o simboli"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verifica <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN errato"</string>

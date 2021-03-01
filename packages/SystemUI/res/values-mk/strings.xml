@@ -505,7 +505,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Безгласно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известувања"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите тивки известувања"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите бесчујни известувања"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известувањата се паузирани од „Не вознемирувај“"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни сега"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Нема известувања"</string>
@@ -1038,6 +1038,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Предложено од <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Контролите се ажурирани"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Уредот е заклучен"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-кодот содржи букви или симболи"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Потврдете го <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Погрешен PIN"</string>

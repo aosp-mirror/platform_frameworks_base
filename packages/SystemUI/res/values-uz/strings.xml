@@ -93,10 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"Skrinshotni aylantirish"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Skrinshotni yopish"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skrinshotga razm solish"</string>
-    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
-    <skip />
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"Yuqori chegara"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"Quyi chegara"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
@@ -546,8 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Tashkilotingiz ishchi profilingizga CA sertifikatini o‘rnatdi. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Qurilmada CA sertifikati o‘rnatilgan. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi."</string>
-    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
-    <skip />
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator ish profilingizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi (shaxsiy profildan maʼlumotlar olinmaydi)."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"<xliff:g id="VPN_APP">%1$s</xliff:g> ilovasi ishga tushirilgan. U internetdagi harakatlaringiz, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> va <xliff:g id="VPN_APP_1">%2$s</xliff:g> ilovalari ishga tushirilgan. Ular tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Ishchi profilingizda tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin bo‘lgan <xliff:g id="VPN_APP">%1$s</xliff:g> ilovasi ishga tushirilgan."</string>
@@ -1041,6 +1038,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Kiritish"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> taklif etgan"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Boshqaruv elementlari yangilandi"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Qurilma qulflandi"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Harflar yoki maxsus belgilardan iborat PIN kod"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Tekshirish: <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN kod xato"</string>

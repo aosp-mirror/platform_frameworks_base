@@ -93,10 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨੂੰ ਸਕ੍ਰੋਲ ਕਰੋ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖਾਰਜ ਕਰੋ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਪੂਰਵ-ਝਲਕ"</string>
-    <!-- no translation found for screenshot_top_boundary (1500569103321300856) -->
-    <skip />
-    <!-- no translation found for screenshot_bottom_boundary (5657242629526407311) -->
-    <skip />
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"ਉੱਪਰ ਦੀ ਸੀਮਾ"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"ਹੇਠਾਂ ਦੀ ਸੀਮਾ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਜਾਰੀ ਹੈ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
@@ -546,8 +544,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਇੱਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਟੀ ਸਥਾਪਤ ਕੀਤੀ ਗਈ ਹੈ। ਤੁਹਾਡੇ ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ ਜਾਂ ਉਸਨੂੰ ਸੋਧਿਆ ਜਾ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ਇੱਕ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਅਥਾਰਟੀ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਥਾਪਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਤੁਹਾਡੇ ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ ਜਾਂ ਉਸਨੂੰ ਸੋਧਿਆ ਜਾ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਨੈੱਟਵਰਕ ਲੌਗਿੰਗ ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਹੋਇਆ ਹੈ, ਜੋ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦਾ ਹੈ।"</string>
-    <!-- no translation found for monitoring_description_managed_profile_network_logging (6932303843097006037) -->
-    <skip />
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਨੈੱਟਵਰਕ ਲੌਗ-ਇਨ ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਹੋਇਆ ਹੈ, ਜੋ ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਟਰੈਫ਼ਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦਾ ਹੈ ਪਰ ਤੁਹਾਡੀ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਿੱਚ ਨਹੀਂ।"</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"ਤੁਸੀਂ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ਤੁਸੀਂ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ <xliff:g id="VPN_APP">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
@@ -1041,6 +1038,8 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ਵੱਲੋਂ ਸੁਝਾਇਆ ਗਿਆ"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"ਕੰਟਰੋਲ ਅੱਪਡੇਟ ਕੀਤੇ ਗਏ"</string>
+    <!-- no translation found for controls_tile_locked (731547768182831938) -->
+    <skip />
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ਪਿੰਨ ਵਿੱਚ ਅੱਖਰ ਜਾਂ ਚਿੰਨ੍ਹ ਸ਼ਾਮਲ ਹਨ"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"ਗਲਤ ਪਿੰਨ"</string>
