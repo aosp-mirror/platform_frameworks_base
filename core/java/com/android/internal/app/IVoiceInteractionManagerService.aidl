@@ -18,8 +18,10 @@ package com.android.internal.app;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
@@ -33,6 +35,7 @@ import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 
 interface IVoiceInteractionManagerService {
     void showSession(in Bundle sessionArgs, int flags);
@@ -242,4 +245,16 @@ interface IVoiceInteractionManagerService {
      * Requests to shutdown hotword detection service.
      */
     void shutdownHotwordDetectionService();
+
+    void startListeningFromMic(
+        in AudioFormat audioFormat,
+        in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
+
+    void stopListeningFromMic();
+
+    void startListeningFromExternalSource(
+        in ParcelFileDescriptor audioStream,
+        in AudioFormat audioFormat,
+        in PersistableBundle options,
+        in IMicrophoneHotwordDetectionVoiceInteractionCallback callback);
 }

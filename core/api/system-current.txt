@@ -10338,7 +10338,7 @@ package android.service.trust {
 
 package android.service.voice {
 
-  public class AlwaysOnHotwordDetector {
+  public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
     method @Nullable public android.content.Intent createEnrollIntent();
     method @Nullable public android.content.Intent createReEnrollIntent();
     method @Nullable public android.content.Intent createUnEnrollIntent();
@@ -10348,6 +10348,8 @@ package android.service.voice {
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public android.service.voice.AlwaysOnHotwordDetector.ModelParamRange queryParameter(int);
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public int setParameter(int, int);
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition();
+    method @Nullable public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
     method public final void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
@@ -10367,13 +10369,9 @@ package android.service.voice {
     field @Deprecated public static final int STATE_KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
   }
 
-  public abstract static class AlwaysOnHotwordDetector.Callback {
+  public abstract static class AlwaysOnHotwordDetector.Callback implements android.service.voice.HotwordDetector.Callback {
     ctor public AlwaysOnHotwordDetector.Callback();
     method public abstract void onAvailabilityChanged(int);
-    method public abstract void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
-    method public abstract void onError();
-    method public abstract void onRecognitionPaused();
-    method public abstract void onRecognitionResumed();
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
@@ -10418,21 +10416,34 @@ package android.service.voice {
   public abstract class HotwordDetectionService extends android.app.Service {
     ctor public HotwordDetectionService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onDetectFromDspSource(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
+    method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @NonNull android.service.voice.HotwordDetectionService.Callback);
+    method public void onDetect(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @NonNull android.service.voice.HotwordDetectionService.Callback);
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
   }
 
-  public static final class HotwordDetectionService.DspHotwordDetectionCallback {
-    method public void onDetected();
+  public static final class HotwordDetectionService.Callback {
+    method public void onDetected(@Nullable android.service.voice.HotwordDetectedResult);
     method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
   public interface HotwordDetector {
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition();
+    method public boolean startRecognition(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle);
+    method public boolean stopRecognition();
     field public static final int CONFIDENCE_LEVEL_HIGH = 3; // 0x3
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
     field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
+  }
+
+  public static interface HotwordDetector.Callback {
+    method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
+    method public void onError();
+    method public void onRecognitionPaused();
+    method public void onRecognitionResumed();
+    method public void onRejected(@Nullable android.service.voice.HotwordRejectedResult);
   }
 
   public final class HotwordRejectedResult implements android.os.Parcelable {
@@ -10445,6 +10456,7 @@ package android.service.voice {
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@NonNull android.media.AudioFormat, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
   }
 
