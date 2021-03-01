@@ -1264,6 +1264,8 @@
   <java-symbol type="array" name="vendor_disallowed_apps_managed_device" />
   <java-symbol type="array" name="cross_profile_apps" />
   <java-symbol type="array" name="vendor_cross_profile_apps" />
+  <java-symbol type="array" name="policy_exempt_apps" />
+  <java-symbol type="array" name="vendor_policy_exempt_apps" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />
