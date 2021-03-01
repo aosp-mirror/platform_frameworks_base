@@ -50,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -595,17 +596,23 @@ final class CompatConfig {
      * Rechecks all the existing overrides for a package.
      */
     void recheckOverrides(String packageName) {
+        // Local cache of compat changes. Holding a lock on mChanges for the whole duration of the
+        // method will cause a deadlock.
+        List<CompatChange> changes;
         synchronized (mChanges) {
-            boolean shouldInvalidateCache = false;
+            changes = new ArrayList<>(mChanges.size());
             for (int idx = 0; idx < mChanges.size(); ++idx) {
-                CompatChange c = mChanges.valueAt(idx);
-                OverrideAllowedState allowedState =
-                        mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
-                shouldInvalidateCache |= c.recheckOverride(packageName, allowedState, mContext);
+                changes.add(mChanges.valueAt(idx));
             }
-            if (shouldInvalidateCache) {
-                invalidateCache();
-            }
+        }
+        boolean shouldInvalidateCache = false;
+        for (CompatChange c: changes) {
+            OverrideAllowedState allowedState =
+                    mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
+            shouldInvalidateCache |= c.recheckOverride(packageName, allowedState, mContext);
+        }
+        if (shouldInvalidateCache) {
+            invalidateCache();
         }
     }
 
