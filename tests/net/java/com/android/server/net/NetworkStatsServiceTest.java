@@ -21,6 +21,9 @@ import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkIdentity.OEM_NONE;
+import static android.net.NetworkIdentity.OEM_PAID;
+import static android.net.NetworkIdentity.OEM_PRIVATE;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
@@ -40,7 +43,10 @@ import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
+import static android.net.NetworkTemplate.MATCH_MOBILE_WILDCARD;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.net.NetworkTemplate.OEM_MANAGED_NO;
+import static android.net.NetworkTemplate.OEM_MANAGED_YES;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
 import static android.net.NetworkTemplate.buildTemplateWifi;
@@ -641,6 +647,116 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         assertUidTotal(template4g, UID_RED, 4L + 33L, 4L + 27L, 3L + 8L, 1L + 10L, 1);
         // Verify 5g template gets the 5g count.
         assertUidTotal(template5g, UID_RED, 5L, 13L, 31L, 9L, 2);
+    }
+
+    @Test
+    public void testMobileStatsOemManaged() throws Exception {
+        final NetworkTemplate templateOemPaid = new NetworkTemplate(MATCH_MOBILE_WILDCARD,
+                /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_PAID);
+
+        final NetworkTemplate templateOemPrivate = new NetworkTemplate(MATCH_MOBILE_WILDCARD,
+                /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_PRIVATE);
+
+        final NetworkTemplate templateOemAll = new NetworkTemplate(MATCH_MOBILE_WILDCARD,
+                /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL,
+                OEM_PAID | OEM_PRIVATE);
+
+        final NetworkTemplate templateOemYes = new NetworkTemplate(MATCH_MOBILE_WILDCARD,
+                /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_MANAGED_YES);
+
+        final NetworkTemplate templateOemNone = new NetworkTemplate(MATCH_MOBILE_WILDCARD,
+                /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_MANAGED_NO);
+
+        // OEM_PAID network comes online.
+        NetworkState[] states = new NetworkState[]{buildOemManagedMobileState(IMSI_1, false,
+                new int[]{NetworkCapabilities.NET_CAPABILITY_OEM_PAID})};
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+                new UnderlyingNetworkInfo[0]);
+
+        // Create some traffic.
+        incrementCurrentTime(MINUTE_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addEntry(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE,
+                        36L, 41L, 24L, 96L, 0L)));
+        forcePollAndWaitForIdle();
+
+        // OEM_PRIVATE network comes online.
+        states = new NetworkState[]{buildOemManagedMobileState(IMSI_1, false,
+                new int[]{NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE})};
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+                new UnderlyingNetworkInfo[0]);
+
+        // Create some traffic.
+        incrementCurrentTime(MINUTE_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addEntry(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE,
+                        49L, 71L, 72L, 48L, 0L)));
+        forcePollAndWaitForIdle();
+
+        // OEM_PAID + OEM_PRIVATE network comes online.
+        states = new NetworkState[]{buildOemManagedMobileState(IMSI_1, false,
+                new int[]{NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE,
+                          NetworkCapabilities.NET_CAPABILITY_OEM_PAID})};
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+                new UnderlyingNetworkInfo[0]);
+
+        // Create some traffic.
+        incrementCurrentTime(MINUTE_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addEntry(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE,
+                        57L, 86L, 83L, 93L, 0L)));
+        forcePollAndWaitForIdle();
+
+        // OEM_NONE network comes online.
+        states = new NetworkState[]{buildOemManagedMobileState(IMSI_1, false, new int[]{})};
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states),
+                new UnderlyingNetworkInfo[0]);
+
+        // Create some traffic.
+        incrementCurrentTime(MINUTE_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addEntry(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE,
+                        29L, 73L, 34L, 31L, 0L)));
+        forcePollAndWaitForIdle();
+
+        // Verify OEM_PAID template gets only relevant stats.
+        assertUidTotal(templateOemPaid, UID_RED, 36L, 41L, 24L, 96L, 0);
+
+        // Verify OEM_PRIVATE template gets only relevant stats.
+        assertUidTotal(templateOemPrivate, UID_RED, 49L, 71L, 72L, 48L, 0);
+
+        // Verify OEM_PAID + OEM_PRIVATE template gets only relevant stats.
+        assertUidTotal(templateOemAll, UID_RED, 57L, 86L, 83L, 93L, 0);
+
+        // Verify OEM_NONE sees only non-OEM managed stats.
+        assertUidTotal(templateOemNone, UID_RED, 29L, 73L, 34L, 31L, 0);
+
+        // Verify OEM_MANAGED_YES sees all OEM managed stats.
+        assertUidTotal(templateOemYes, UID_RED,
+                36L + 49L + 57L,
+                41L + 71L + 86L,
+                24L + 72L + 83L,
+                96L + 48L + 93L, 0);
+
+        // Verify ALL_MOBILE template gets both OEM managed and non-OEM managed stats.
+        assertUidTotal(sTemplateImsi1, UID_RED,
+                36L + 49L + 57L + 29L,
+                41L + 71L + 86L + 73L,
+                24L + 72L + 83L + 34L,
+                96L + 48L + 93L + 31L, 0);
     }
 
     // TODO: support per IMSI state
@@ -1486,6 +1602,20 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TUN_IFACE);
         return new NetworkState(TYPE_VPN, prop, new NetworkCapabilities(), VPN_NETWORK, null);
+    }
+
+    private static NetworkState buildOemManagedMobileState(String subscriberId, boolean isRoaming,
+                int[] oemNetCapabilities) {
+        final LinkProperties prop = new LinkProperties();
+        prop.setInterfaceName(TEST_IFACE);
+        final NetworkCapabilities capabilities = new NetworkCapabilities();
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
+        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
+        for (int nc : oemNetCapabilities) {
+            capabilities.setCapability(nc, true);
+        }
+        capabilities.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        return new NetworkState(TYPE_MOBILE, prop, capabilities, MOBILE_NETWORK, subscriberId);
     }
 
     private long getElapsedRealtime() {
