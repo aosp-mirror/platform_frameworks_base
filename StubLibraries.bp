@@ -57,6 +57,9 @@ stubs_defaults {
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
+            // TODO: move to include-dirs for packages/modules/Connectivity when this moves out of
+            // frameworks/base
+            "packages/Connectivity/framework/aidl-export",
             "telephony/java",
         ],
     },
@@ -306,6 +309,7 @@ java_library_static {
         "android.net.ipsec.ike.stubs",
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
+        "framework-connectivity.stubs",
         "framework-media.stubs",
         "framework-mediaprovider.stubs",
         "framework-permission.stubs",
@@ -326,6 +330,7 @@ java_library_static {
         "android.net.ipsec.ike.stubs.system",
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
+        "framework-connectivity.stubs.system",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",
         "framework-permission.stubs.system",
@@ -362,6 +367,7 @@ java_library_static {
         "android.net.ipsec.ike.stubs.system",
         "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
+        "framework-connectivity.stubs.system",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",
         "framework-permission.stubs.system",
