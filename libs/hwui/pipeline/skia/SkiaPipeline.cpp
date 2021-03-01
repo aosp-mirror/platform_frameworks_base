@@ -454,9 +454,6 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
         renderOverdraw(clip, nodes, contentDrawBounds, surface, preTransform);
     }
 
-    ATRACE_NAME("flush commands");
-    surface->flushAndSubmit();
-
     Properties::skpCaptureEnabled = previousSkpEnabled;
 }
 
