@@ -2293,7 +2293,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Returns the maximum amount of time this job could run for. */
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
-            return mQuotaController.getMaxJobExecutionTimeMsLocked(job);
+            return Math.min(mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(job));
         }
     }
 
