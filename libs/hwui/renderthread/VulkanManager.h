@@ -69,6 +69,7 @@ public:
     void destroySurface(VulkanSurface* surface);
 
     Frame dequeueNextBuffer(VulkanSurface* surface);
+    void finishFrame(SkSurface* surface);
     void swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect);
 
     // Inserts a wait on fence command into the Vulkan command buffer.
@@ -200,6 +201,9 @@ private:
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
     GrVkExtensions mExtensions;
     uint32_t mDriverVersion = 0;
+
+    VkSemaphore mSwapSemaphore = VK_NULL_HANDLE;
+    void* mDestroySemaphoreContext = nullptr;
 };
 
 } /* namespace renderthread */
