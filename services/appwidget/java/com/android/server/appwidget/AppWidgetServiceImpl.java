@@ -19,6 +19,7 @@ package com.android.server.appwidget;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.res.Resources.ID_NULL;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -2578,9 +2579,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.updatePeriodMillis = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
             info.initialLayout = sa.getResourceId(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_initialLayout, 0);
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_initialLayout, ID_NULL);
             info.initialKeyguardLayout = sa.getResourceId(com.android.internal.R.styleable.
-                    AppWidgetProviderInfo_initialKeyguardLayout, 0);
+                    AppWidgetProviderInfo_initialKeyguardLayout, ID_NULL);
 
             String className = sa
                     .getString(com.android.internal.R.styleable.AppWidgetProviderInfo_configure);
@@ -2591,11 +2592,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.label = activityInfo.loadLabel(pm).toString();
             info.icon = activityInfo.getIconResource();
             info.previewImage = sa.getResourceId(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, ID_NULL);
             info.previewLayout = sa.getResourceId(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_previewLayout, 0);
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_previewLayout, ID_NULL);
             info.autoAdvanceViewId = sa.getResourceId(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId, -1);
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId,
+                    View.NO_ID);
             info.resizeMode = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
                     AppWidgetProviderInfo.RESIZE_NONE);
@@ -2605,8 +2607,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             info.widgetFeatures = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_widgetFeatures, 0);
             info.descriptionRes = sa.getResourceId(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_description,
-                    Resources.ID_NULL);
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_description, ID_NULL);
             sa.recycle();
             return info;
         } catch (IOException | PackageManager.NameNotFoundException | XmlPullParserException e) {
