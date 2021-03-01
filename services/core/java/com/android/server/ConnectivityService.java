@@ -3831,7 +3831,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 removeListenRequestFromNetworks(req);
             }
         }
-        mDefaultNetworkRequests.remove(nri);
+        if (mDefaultNetworkRequests.remove(nri)) {
+            // If this request was one of the defaults, then the UID rules need to be updated
+            // WARNING : if the app(s) for which this network request is the default are doing
+            // traffic, this will kill their connected sockets, even if an equivalent request
+            // is going to be reinstated right away ; unconnected traffic will go on the default
+            // until the new default is set, which will happen very soon.
+            // TODO : The only way out of this is to diff old defaults and new defaults, and only
+            // remove ranges for those requests that won't have a replacement
+            final NetworkAgentInfo satisfier = nri.getSatisfier();
+            if (null != satisfier) {
+                try {
+                    mNetd.networkRemoveUidRanges(satisfier.network.getNetId(),
+                            toUidRangeStableParcels(nri.getUids()));
+                } catch (RemoteException e) {
+                    loge("Exception setting network preference default network", e);
+                }
+            }
+        }
         mNetworkRequestCounter.decrementCount(nri.mUid);
         mNetworkRequestInfoLogs.log("RELEASE " + nri);
 
