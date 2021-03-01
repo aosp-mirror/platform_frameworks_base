@@ -36,6 +36,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -143,11 +144,18 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
 
+        verify(mIpSecSvc, times(2))
+                .setNetworkForTunnelInterface(
+                        eq(TEST_IPSEC_TUNNEL_RESOURCE_ID),
+                        eq(TEST_UNDERLYING_NETWORK_RECORD_1.network),
+                        any());
+
         for (int direction : new int[] {DIRECTION_IN, DIRECTION_OUT}) {
             verify(mIpSecSvc)
                     .applyTunnelModeTransform(
                             eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(direction), anyInt(), any());
         }
+
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
     }
 

@@ -1478,7 +1478,7 @@ public class VcnGatewayConnection extends StateMachine {
                 @NonNull IpSecTransform transform,
                 int direction) {
             try {
-                // TODO(b/180163196): Set underlying network of tunnel interface
+                tunnelIface.setUnderlyingNetwork(underlyingNetwork);
 
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
