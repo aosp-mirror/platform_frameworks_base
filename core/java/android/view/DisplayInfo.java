@@ -810,9 +810,6 @@ public final class DisplayInfo implements Parcelable {
         if ((flags & Display.FLAG_TRUSTED) != 0) {
             result.append(", FLAG_TRUSTED");
         }
-        if ((flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0) {
-            result.append(", FLAG_OWN_DISPLAY_GROUP");
-        }
         return result.toString();
     }
 }
