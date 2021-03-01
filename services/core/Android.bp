@@ -8,13 +8,6 @@ package {
 }
 
 filegroup {
-    name: "services.core-sources-deviceconfig-interface",
-    srcs: [
-         "java/com/android/server/utils/DeviceConfigInterface.java"
-    ],
-}
-
-filegroup {
     name: "services.core-sources",
     srcs: ["java/**/*.java"],
     exclude_srcs: [":connectivity-service-srcs"],
