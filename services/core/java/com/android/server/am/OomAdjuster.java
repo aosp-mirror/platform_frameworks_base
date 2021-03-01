@@ -522,8 +522,6 @@ public final class OomAdjuster {
 
         computeOomAdjLSP(app, cachedAdj, TOP_APP, doingAll, now, false, true);
 
-        boolean success = applyOomAdjLSP(app, doingAll, now, SystemClock.elapsedRealtime());
-
         if (uidRec != null) {
             // After uidRec.reset() above, for UidRecord with multiple processes (ProcessRecord),
             // we need to apply all ProcessRecord into UidRecord.
@@ -540,7 +538,7 @@ public final class OomAdjuster {
             }
         }
 
-        return success;
+        return applyOomAdjLSP(app, doingAll, now, SystemClock.elapsedRealtime());
     }
 
     /**
