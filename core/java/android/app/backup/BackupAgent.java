@@ -564,10 +564,6 @@ public abstract class BackupAgent extends ContextWrapper {
     @VisibleForTesting
     public IncludeExcludeRules getIncludeExcludeRules(FullBackup.BackupScheme backupScheme)
             throws IOException, XmlPullParserException {
-        if (isDeviceToDeviceMigration()) {
-            return IncludeExcludeRules.emptyRules();
-        }
-
         Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap;
         ArraySet<PathWithRequiredFlags> manifestExcludeSet;
 
