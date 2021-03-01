@@ -9928,12 +9928,11 @@ public class ConnectivityServiceTest {
                 .build();
 
         // Act on ConnectivityService.setOemNetworkPreference()
-        final TestOemListenerCallback mOnSetOemNetworkPreferenceTestListener =
-                new TestOemListenerCallback();
-        mService.setOemNetworkPreference(pref, mOnSetOemNetworkPreferenceTestListener);
+        final TestOemListenerCallback oemPrefListener = new TestOemListenerCallback();
+        mService.setOemNetworkPreference(pref, oemPrefListener);
 
         // Verify call returned successfully
-        mOnSetOemNetworkPreferenceTestListener.expectOnComplete();
+        oemPrefListener.expectOnComplete();
     }
 
     private static class TestOemListenerCallback implements IOnSetOemNetworkPreferenceListener {
