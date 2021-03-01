@@ -3841,6 +3841,8 @@ public final class ActiveServices {
                     r.name.getClassName());
             stopServiceAndUpdateAllowlistManagerLocked(r);
             if (r.app.getThread() != null) {
+                // Bump the process to the top of LRU list
+                mAm.updateLruProcessLocked(r.app, false, null);
                 updateServiceForegroundLocked(r.app.mServices, false);
                 try {
                     bumpServiceExecutingLocked(r, false, "destroy");
