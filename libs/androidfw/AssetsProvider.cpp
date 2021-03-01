@@ -261,6 +261,13 @@ std::optional<uint32_t> ZipAssetsProvider::GetCrc(std::string_view path) const {
   return entry.crc32;
 }
 
+std::optional<std::string_view> ZipAssetsProvider::GetPath() const {
+  if (name_.GetPath() != nullptr) {
+    return *name_.GetPath();
+  }
+  return {};
+}
+
 const std::string& ZipAssetsProvider::GetDebugName() const {
   return name_.GetDebugName();
 }
@@ -318,6 +325,10 @@ bool DirectoryAssetsProvider::ForEachFile(
   return true;
 }
 
+std::optional<std::string_view> DirectoryAssetsProvider::GetPath() const {
+  return dir_;
+}
+
 const std::string& DirectoryAssetsProvider::GetDebugName() const {
   return dir_;
 }
@@ -336,13 +347,9 @@ MultiAssetsProvider::MultiAssetsProvider(std::unique_ptr<AssetsProvider>&& prima
                                          std::unique_ptr<AssetsProvider>&& secondary)
                       : primary_(std::forward<std::unique_ptr<AssetsProvider>>(primary)),
                         secondary_(std::forward<std::unique_ptr<AssetsProvider>>(secondary)) {
-  if (primary_->GetDebugName() == kEmptyDebugString) {
-    debug_name_ = secondary_->GetDebugName();
-  } else if (secondary_->GetDebugName() == kEmptyDebugString) {
-    debug_name_ = primary_->GetDebugName();
-  } else {
-    debug_name_ = primary_->GetDebugName() + " and " + secondary_->GetDebugName();
-  }
+  debug_name_ = primary_->GetDebugName() + " and " + secondary_->GetDebugName();
+  path_ = (primary_->GetDebugName() != kEmptyDebugString) ? primary_->GetPath()
+                                                          : secondary_->GetPath();
 }
 
 std::unique_ptr<AssetsProvider> MultiAssetsProvider::Create(
@@ -365,6 +372,10 @@ bool MultiAssetsProvider::ForEachFile(const std::string& root_path,
                                       const std::function<void(const StringPiece&, FileType)>& f)
                                       const {
   return primary_->ForEachFile(root_path, f) && secondary_->ForEachFile(root_path, f);
+}
+
+std::optional<std::string_view> MultiAssetsProvider::GetPath() const {
+  return path_;
 }
 
 const std::string& MultiAssetsProvider::GetDebugName() const {
@@ -392,6 +403,10 @@ bool EmptyAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
     const std::function<void(const StringPiece&, FileType)>& /* f */) const {
   return true;
+}
+
+std::optional<std::string_view> EmptyAssetsProvider::GetPath() const {
+  return {};
 }
 
 const std::string& EmptyAssetsProvider::GetDebugName() const {

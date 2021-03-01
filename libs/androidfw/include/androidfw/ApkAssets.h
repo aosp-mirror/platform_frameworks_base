@@ -34,7 +34,6 @@ namespace android {
 // Holds an APK.
 class ApkAssets {
  public:
-
   // Creates an ApkAssets from a path on device.
   static std::unique_ptr<ApkAssets> Load(const std::string& path,
                                          package_property_t flags = 0U);
@@ -61,12 +60,11 @@ class ApkAssets {
   static std::unique_ptr<ApkAssets> LoadOverlay(const std::string& idmap_path,
                                                 package_property_t flags = 0U);
 
-  // TODO(177101983): Remove all uses of GetPath for checking whether two ApkAssets are the same.
-  //  With the introduction of ResourcesProviders, not all ApkAssets have paths. This could cause
-  //  bugs when path is used for comparison because multiple ApkAssets could have the same "firendly
-  //  name". Use pointer equality instead. ResourceManager caches and reuses ApkAssets so the
-  //  same asset should have the same pointer.
-  const std::string& GetPath() const;
+  // Path to the contents of the ApkAssets on disk. The path could represent an APk, a directory,
+  // or some other file type.
+  std::optional<std::string_view> GetPath() const;
+
+  const std::string& GetDebugName() const;
 
   const AssetsProvider* GetAssetsProvider() const {
     return assets_provider_.get();
