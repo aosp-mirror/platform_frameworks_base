@@ -4634,22 +4634,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * computer engine.  This is required because there are no locks taken in
      * the engine itself.
      */
-    private static class ComputerLocked extends ComputerEngine {
+    private static class ComputerLocked extends ComputerEngineLive {
         private final Object mLock;
 
         ComputerLocked(Snapshot args) {
             super(args);
             mLock = mService.mLock;
-        }
-
-        protected ComponentName resolveComponentName() {
-            return mService.mResolveComponentName;
-        }
-        protected ActivityInfo instantAppInstallerActivity() {
-            return mService.mInstantAppInstallerActivity;
-        }
-        protected ApplicationInfo androidApplication() {
-            return mService.mAndroidApplication;
         }
 
         public @NonNull List<ResolveInfo> queryIntentServicesInternalBody(Intent intent,
@@ -4781,8 +4771,9 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
 
-    // Compute read-only functions, based on live data.
-    private final Computer mLiveComputer;
+    // Compute read-only functions, based on live data.  This attribute may be modified multiple
+    // times during the PackageManagerService constructor but it should not be modified thereafter.
+    private Computer mLiveComputer;
     // A lock-free cache for frequently called functions.
     private volatile Computer mSnapshotComputer;
     // If true, the snapshot is invalid (stale).  The attribute is static since it may be
@@ -6401,8 +6392,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // constructor.
         mSnapshotEnabled = SNAPSHOT_ENABLED;
         sSnapshotCorked = true;
+        sSnapshotInvalid = true;
         mLiveComputer = createLiveComputer();
-        mSnapshotComputer = mLiveComputer;
+        mSnapshotComputer = null;
         registerObserver();
 
         // CHECKSTYLE:OFF IndentationCheck
@@ -7081,6 +7073,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME,
                         SystemClock.uptimeMillis() - startTime);
             }
+
+            // Rebild the live computer since some attributes have been rebuilt.
+            mLiveComputer = createLiveComputer();
+
         } // synchronized (mLock)
         } // synchronized (mInstallLock)
         // CHECKSTYLE:ON IndentationCheck
