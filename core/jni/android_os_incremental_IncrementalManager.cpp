@@ -41,6 +41,10 @@ static jboolean nativeIsIncrementalPath(JNIEnv* env,
     return (jboolean)IncFs_IsIncFsPath(path.c_str());
 }
 
+static jboolean nativeIsIncrementalFd(JNIEnv* env, jobject clazz, jint fd) {
+    return (jboolean)IncFs_IsIncFsFd(fd);
+}
+
 static jbyteArray nativeUnsafeGetFileSignature(JNIEnv* env, jobject clazz, jstring javaPath) {
     ScopedUtfChars path(env, javaPath);
 
@@ -61,6 +65,7 @@ static const JNINativeMethod method_table[] =
         {{"nativeIsEnabled", "()Z", (void*)nativeIsEnabled},
          {"nativeIsV2Available", "()Z", (void*)nativeIsV2Available},
          {"nativeIsIncrementalPath", "(Ljava/lang/String;)Z", (void*)nativeIsIncrementalPath},
+         {"nativeIsIncrementalFd", "(I)Z", (void*)nativeIsIncrementalFd},
          {"nativeUnsafeGetFileSignature", "(Ljava/lang/String;)[B",
           (void*)nativeUnsafeGetFileSignature}};
 

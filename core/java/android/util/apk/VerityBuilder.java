@@ -294,7 +294,7 @@ public abstract class VerityBuilder {
 
         // 1. Digest the whole file by chunks.
         consumeByChunk(digester,
-                new MemoryMappedFileDataSource(file.getFD(), 0, file.length()),
+                DataSource.create(file.getFD(), 0, file.length()),
                 MMAP_REGION_SIZE_BYTES);
 
         // 2. Pad 0s up to the nearest 4096-byte block before hashing.
@@ -315,7 +315,7 @@ public abstract class VerityBuilder {
 
         // 1. Digest from the beginning of the file, until APK Signing Block is reached.
         consumeByChunk(digester,
-                new MemoryMappedFileDataSource(apk.getFD(), 0, signatureInfo.apkSigningBlockOffset),
+                DataSource.create(apk.getFD(), 0, signatureInfo.apkSigningBlockOffset),
                 MMAP_REGION_SIZE_BYTES);
 
         // 2. Skip APK Signing Block and continue digesting, until the Central Directory offset
@@ -323,7 +323,7 @@ public abstract class VerityBuilder {
         long eocdCdOffsetFieldPosition =
                 signatureInfo.eocdOffset + ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_OFFSET;
         consumeByChunk(digester,
-                new MemoryMappedFileDataSource(apk.getFD(), signatureInfo.centralDirOffset,
+                DataSource.create(apk.getFD(), signatureInfo.centralDirOffset,
                     eocdCdOffsetFieldPosition - signatureInfo.centralDirOffset),
                 MMAP_REGION_SIZE_BYTES);
 
@@ -338,7 +338,7 @@ public abstract class VerityBuilder {
         long offsetAfterEocdCdOffsetField =
                 eocdCdOffsetFieldPosition + ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
         consumeByChunk(digester,
-                new MemoryMappedFileDataSource(apk.getFD(), offsetAfterEocdCdOffsetField,
+                DataSource.create(apk.getFD(), offsetAfterEocdCdOffsetField,
                     apk.length() - offsetAfterEocdCdOffsetField),
                 MMAP_REGION_SIZE_BYTES);
 
