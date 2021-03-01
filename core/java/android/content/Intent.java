@@ -6755,6 +6755,12 @@ public class Intent implements Parcelable, Cloneable {
      */
     private static final int LOCAL_FLAG_FROM_PROTECTED_COMPONENT = 1 << 2;
 
+    /**
+     * Local flag indicating this instance had unfiltered extras copied into it. This could be
+     * from either {@link #putExtras(Intent)} when an unparceled Intent is provided or {@link
+     * #putExtras(Bundle)} when the provided Bundle has not been unparceled.
+     */
+    private static final int LOCAL_FLAG_UNFILTERED_EXTRAS = 1 << 3;
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
@@ -10009,6 +10015,15 @@ public class Intent implements Parcelable, Cloneable {
                 mExtras.putAll(src.mExtras);
             }
         }
+        // If the provided Intent was unparceled and this is not an Intent delivered to a protected
+        // component then mark the extras as unfiltered. An Intent delivered to a protected
+        // component had to come from a trusted component, and if unfiltered data was copied to the
+        // delivered Intent then it would have been reported when that Intent left the sending
+        // process.
+        if ((src.mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
+                && (src.mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0) {
+            mLocalFlags |= LOCAL_FLAG_UNFILTERED_EXTRAS;
+        }
         return this;
     }
 
@@ -10023,6 +10038,10 @@ public class Intent implements Parcelable, Cloneable {
      * @see #removeExtra
      */
     public @NonNull Intent putExtras(@NonNull Bundle extras) {
+        // If the provided Bundle has not yet been unparceled then treat this as unfiltered extras.
+        if (extras.isParcelled()) {
+            mLocalFlags |= LOCAL_FLAG_UNFILTERED_EXTRAS;
+        }
         if (mExtras == null) {
             mExtras = new Bundle();
         }
@@ -11328,10 +11347,13 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         // Detect cases where we're about to launch a potentially unsafe intent
-        if ((mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
-                && (mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0
-                && StrictMode.vmUnsafeIntentLaunchEnabled()) {
-            StrictMode.onUnsafeIntentLaunch(this);
+        if (StrictMode.vmUnsafeIntentLaunchEnabled()) {
+            if ((mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
+                    && (mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0) {
+                StrictMode.onUnsafeIntentLaunch(this);
+            } else if ((mLocalFlags & LOCAL_FLAG_UNFILTERED_EXTRAS) != 0) {
+                StrictMode.onUnsafeIntentLaunch(this);
+            }
         }
     }
 
