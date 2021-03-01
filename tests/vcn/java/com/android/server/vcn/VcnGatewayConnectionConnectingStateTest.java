@@ -120,7 +120,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
-        assertFalse(mGatewayConnection.isRunning());
+        assertTrue(mGatewayConnection.isQuitting());
     }
 
     @Test
@@ -129,6 +129,6 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
-        assertTrue(mGatewayConnection.isRunning());
+        assertFalse(mGatewayConnection.isQuitting());
     }
 }

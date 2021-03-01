@@ -106,7 +106,7 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
         mTestLooper.dispatchAll();
 
         assertNull(mGatewayConnection.getCurrentState());
-        assertFalse(mGatewayConnection.isRunning());
+        assertTrue(mGatewayConnection.isQuitting());
     }
 
     @Test
@@ -115,6 +115,6 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
-        assertTrue(mGatewayConnection.isRunning());
+        assertFalse(mGatewayConnection.isQuitting());
     }
 }

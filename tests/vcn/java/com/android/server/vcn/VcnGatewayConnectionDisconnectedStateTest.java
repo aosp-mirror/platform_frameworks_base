@@ -57,7 +57,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     }
 
     @Test
-    public void testEnterWhileNotRunningTriggersQuit() throws Exception {
+    public void testEnterWhileQuittingTriggersQuit() throws Exception {
         final VcnGatewayConnection vgc =
                 new VcnGatewayConnection(
                         mVcnContext,
@@ -67,7 +67,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
                         mGatewayStatusCallback,
                         mDeps);
 
-        vgc.setIsRunning(false);
+        vgc.setIsQuitting(true);
         vgc.transitionTo(vgc.mDisconnectedState);
         mTestLooper.dispatchAll();
 
@@ -104,7 +104,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         assertNull(mGatewayConnection.getCurrentState());
         verify(mIpSecSvc).deleteTunnelInterface(eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), any());
         verifySafeModeTimeoutAlarmAndGetCallback(true /* expectCanceled */);
-        assertFalse(mGatewayConnection.isRunning());
+        assertTrue(mGatewayConnection.isQuitting());
         verify(mGatewayStatusCallback).onQuit();
     }
 
@@ -114,7 +114,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
-        assertTrue(mGatewayConnection.isRunning());
+        assertFalse(mGatewayConnection.isQuitting());
         verify(mGatewayStatusCallback, never()).onQuit();
         // No safe mode timer changes expected.
     }

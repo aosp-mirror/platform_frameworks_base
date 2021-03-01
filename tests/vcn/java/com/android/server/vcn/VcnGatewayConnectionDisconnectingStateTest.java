@@ -81,7 +81,7 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
         // Should do nothing; already tearing down.
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
         verifyTeardownTimeoutAlarmAndGetCallback(false /* expectCanceled */);
-        assertFalse(mGatewayConnection.isRunning());
+        assertTrue(mGatewayConnection.isQuitting());
     }
 
     @Test
@@ -95,6 +95,6 @@ public class VcnGatewayConnectionDisconnectingStateTest extends VcnGatewayConnec
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
-        assertTrue(mGatewayConnection.isRunning());
+        assertFalse(mGatewayConnection.isQuitting());
     }
 }
