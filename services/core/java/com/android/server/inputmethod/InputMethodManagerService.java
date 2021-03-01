@@ -5417,6 +5417,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             switch (TextUtils.emptyIfNull(cmd)) {
                 case "get-last-switch-user-id":
                     return mService.getLastSwitchUserId(this);
+                case "tracing":
+                    return mService.handleShellCommandTraceInputMethod(this);
                 case "ime": {  // For "adb shell ime <command>".
                     final String imeCommand = TextUtils.emptyIfNull(getNextArg());
                     switch (imeCommand) {
@@ -5434,7 +5436,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             return mService.handleShellCommandSetInputMethod(this);
                         case "reset":
                             return mService.handleShellCommandResetInputMethod(this);
-                        case "tracing":
+                        case "tracing":  // TODO(b/180765389): Unsupport "adb shell ime tracing"
                             return mService.handleShellCommandTraceInputMethod(this);
                         default:
                             getOutPrintWriter().println("Unknown command: " + imeCommand);
@@ -5457,6 +5459,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("    Synonym of dumpsys.");
                 pw.println("  ime <command> [options]");
                 pw.println("    Manipulate IMEs.  Run \"ime help\" for details.");
+                pw.println("  tracing <command>");
+                pw.println("    start: Start tracing.");
+                pw.println("    stop : Stop tracing.");
+                pw.println("    help : Show help.");
             }
         }
 
