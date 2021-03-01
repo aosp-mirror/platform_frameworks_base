@@ -2841,8 +2841,6 @@ class Task extends WindowContainer<WindowContainer> {
                     windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
             if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
                     && candidateWindowingMode != WINDOWING_MODE_PINNED
-                    && (candidateWindowingMode != WINDOWING_MODE_FREEFORM
-                            || !mTaskSupervisor.mService.mSizeCompatFreeform)
                     && !mTaskSupervisor.mService.mSupportsNonResizableMultiWindow) {
                 getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
                         WINDOWING_MODE_FULLSCREEN);
