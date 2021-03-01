@@ -10,65 +10,12 @@ package android.app {
 
 package android.net {
 
-  public final class ConnectivityFrameworkInitializer {
-    method public static void registerServiceWrappers();
-  }
-
-  public class ConnectivityManager {
-    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_SETTINGS}) public void registerSystemDefaultNetworkCallback(@NonNull android.net.ConnectivityManager.NetworkCallback, @NonNull android.os.Handler);
-    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @Nullable android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
-  }
-
   public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
     method public int getResourceId();
   }
 
-  public final class NetworkAgentConfig implements android.os.Parcelable {
-    method @Nullable public String getSubscriberId();
-  }
-
-  public static final class NetworkAgentConfig.Builder {
-    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
-  }
-
-  public final class NetworkCapabilities implements android.os.Parcelable {
-    field public static final int TRANSPORT_TEST = 7; // 0x7
-  }
-
   public class NetworkWatchlistManager {
     method @Nullable public byte[] getWatchlistConfigHash();
-  }
-
-  public final class Proxy {
-    method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
-  }
-
-  public final class TcpRepairWindow {
-    ctor public TcpRepairWindow(int, int, int, int, int, int);
-    field public final int maxWindow;
-    field public final int rcvWnd;
-    field public final int rcvWndScale;
-    field public final int rcvWup;
-    field public final int sndWl1;
-    field public final int sndWnd;
-  }
-
-  public final class TestNetworkInterface implements android.os.Parcelable {
-    ctor public TestNetworkInterface(@NonNull android.os.ParcelFileDescriptor, @NonNull String);
-    method public int describeContents();
-    method @NonNull public android.os.ParcelFileDescriptor getFileDescriptor();
-    method @NonNull public String getInterfaceName();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
-  }
-
-  public class TestNetworkManager {
-    method @NonNull public android.net.TestNetworkInterface createTapInterface();
-    method @NonNull public android.net.TestNetworkInterface createTunInterface(@NonNull java.util.Collection<android.net.LinkAddress>);
-    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
-    method public void teardownTestNetwork(@NonNull android.net.Network);
-    field public static final String TEST_TAP_PREFIX = "testtap";
   }
 
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
@@ -79,14 +26,6 @@ package android.net {
     field @NonNull public final String iface;
     field public final int ownerUid;
     field @NonNull public final java.util.List<java.lang.String> underlyingIfaces;
-  }
-
-  public final class VpnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
-    ctor public VpnTransportInfo(int);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.VpnTransportInfo> CREATOR;
-    field public final int type;
   }
 
 }
