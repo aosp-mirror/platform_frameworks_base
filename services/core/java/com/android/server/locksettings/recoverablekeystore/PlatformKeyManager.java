@@ -470,7 +470,7 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was a problem getting or initializing the key store.
      */
     private static KeyStore getAndLoadAndroidKeyStore() throws KeyStoreException {
-        KeyStore keyStore = KeyStore.getInstance(KeyStoreProxyImpl.androidKeystoreProviderName());
+        KeyStore keyStore = KeyStore.getInstance(KeyStoreProxyImpl.ANDROID_KEY_STORE_PROVIDER);
         try {
             keyStore.load(/*param=*/ null);
         } catch (CertificateException | IOException | NoSuchAlgorithmException e) {
