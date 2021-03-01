@@ -111,38 +111,63 @@ public final class DeviceStateManager {
     }
 
     /**
-     * Registers a listener to receive notifications about changes in device state.
+     * Registers a callback to receive notifications about changes in device state.
      *
      * @param executor the executor to process notifications.
-     * @param listener the listener to register.
+     * @param callback the callback to register.
      *
-     * @see DeviceStateListener
+     * @see DeviceStateCallback
      */
-    public void addDeviceStateListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull DeviceStateListener listener) {
-        mGlobal.registerDeviceStateListener(listener, executor);
+    public void registerCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull DeviceStateCallback callback) {
+        mGlobal.registerDeviceStateCallback(callback, executor);
     }
 
     /**
-     * Unregisters a listener previously registered with
-     * {@link #addDeviceStateListener(Executor, DeviceStateListener)}.
+     * Unregisters a callback previously registered with
+     * {@link #registerCallback(Executor, DeviceStateCallback)}.
      */
-    public void removeDeviceStateListener(@NonNull DeviceStateListener listener) {
-        mGlobal.unregisterDeviceStateListener(listener);
+    public void unregisterCallback(@NonNull DeviceStateCallback callback) {
+        mGlobal.unregisterDeviceStateCallback(callback);
     }
 
-    /**
-     * Listens for changes in device states.
-     */
-    public interface DeviceStateListener {
+    /** Callback to receive notifications about changes in device state. */
+    public interface DeviceStateCallback {
+        /**
+         * Called in response to a change in the states supported by the device.
+         * <p>
+         * Guaranteed to be called once on registration of the callback with the initial value and
+         * then on every subsequent change in the supported states.
+         *
+         * @param supportedStates the new supported states.
+         *
+         * @see DeviceStateManager#getSupportedStates()
+         */
+        default void onSupportedStatesChanged(@NonNull int[] supportedStates) {}
+
+        /**
+         * Called in response to a change in the base device state.
+         * <p>
+         * The base state is the state of the device without considering any requests made through
+         * calls to {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}
+         * from any client process. The base state is guaranteed to match the state provided with a
+         * call to {@link #onStateChanged(int)} when there are no active requests from any process.
+         * <p>
+         * Guaranteed to be called once on registration of the callback with the initial value and
+         * then on every subsequent change in the non-override state.
+         *
+         * @param state the new base device state.
+         */
+        default void onBaseStateChanged(int state) {}
+
         /**
          * Called in response to device state changes.
          * <p>
-         * Guaranteed to be called once on registration of the listener with the
-         * initial value and then on every subsequent change in device state.
+         * Guaranteed to be called once on registration of the callback with the initial value and
+         * then on every subsequent change in device state.
          *
-         * @param deviceState the new device state.
+         * @param state the new device state.
          */
-        void onDeviceStateChanged(int deviceState);
+        void onStateChanged(int state);
     }
 }
