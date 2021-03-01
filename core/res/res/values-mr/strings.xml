@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"चेहरा ओळखू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"एकाच प्रकारची पोझ देत आहात कृपया तुमची पोझ बदला."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"तुमचे डोके थोडे कमी फिरवा."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"तुमचे डोके थोडे कमी फिरवा."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"तुमचे डोके थोडे कमी फिरवा."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"तुमचा चहेरा लपवणारे काहीही काढून टाका."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ब्लॅक बार सह तुमच्या स्क्रीनची वरची बाजू साफ करा"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रंग सुधारणा"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"ब्राइटनेस कमी करा"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"पुढे सुरू ठेवण्यासाठी, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसचा कॅमेरा अ‍ॅक्सेस करण्याची आवश्यकता आहे."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"सुरू करा"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"सेन्सरशी संबंधित गोपनीयतेबाबत सूचना"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>

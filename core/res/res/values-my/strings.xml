@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"မျက်နှာ မမှတ်သားနိုင်တော့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"ဆင်တူနေသည်၊ အမူအရာ ပြောင်းပါ။"</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"သင့်မျက်နှာကို ကွယ်နေသည့်အရာအားလုံး ဖယ်ပါ။"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"အနက်ရောင်ဘားအပါအဝင် ဖန်သားပြင်ထိပ်ကို သန့်ရှင်းရေး လုပ်ပါ"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ဖြတ်လမ်းလင့်ခ်ကို သုံးရန်"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင် ပြောင်းပြန်လှန်ခြင်း"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ဆင်ခြင်း"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"တောက်ပမှုကို လျှော့ခြင်း"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ပိတ်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"ဆက်လက်လုပ်ဆောင်ရန် &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; က သင့်စက်၏ ကင်မရာကို အသုံးပြုခွင့်ရရန် လိုအပ်သည်။"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ဖွင့်ရန်"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"အာရုံခံကိရိယာ လုံခြုံရေး"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>

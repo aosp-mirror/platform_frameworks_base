@@ -606,7 +606,8 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Ce visage ne sera plus reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Trop similaire. Changez de pose."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Tournez un peu moins votre tête."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Tournez un peu moins votre tête."</string>
+    <!-- no translation found for face_acquired_tilt_too_extreme (8618210742620248049) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Tournez un peu moins votre tête."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui pourrait couvrir votre visage."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez le haut de l\'écran, y compris la barre noire"</string>
@@ -1667,7 +1668,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utiliser le raccourci"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversion des couleurs"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correction des couleurs"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Réduire la luminosité"</string>
+    <!-- no translation found for reduce_bright_colors_feature_name (8978255324027479398) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume maintenues enfoncées. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume maintenues enfoncées. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Maintenez enfoncées les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -2219,4 +2221,8 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Pour continuer, vous devez accorder l\'accès à l\'appareil photo de votre appareil à l\'application &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Activer"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Confidentialité des capteurs"</string>
+    <!-- no translation found for splash_screen_view_icon_description (180638751260598187) -->
+    <skip />
+    <!-- no translation found for splash_screen_view_branding_description (7911129347402728216) -->
+    <skip />
 </resources>
