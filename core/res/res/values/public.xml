@@ -3085,6 +3085,7 @@
     <public name="hand_secondTint"/>
     <public name="hand_secondTintMode"/>
     <public name="dataExtractionRules"/>
+    <public name="passwordsActivity"/>
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
