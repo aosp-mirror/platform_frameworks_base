@@ -36,7 +36,7 @@ public class BatteryStatsHistoryIterator {
     private final String[] mReadHistoryStrings;
     private final int[] mReadHistoryUids;
 
-    BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history,
+    public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history,
             @NonNull List<BatteryStats.HistoryTag> historyTagPool) {
         mBatteryStatsHistory = history;
 
