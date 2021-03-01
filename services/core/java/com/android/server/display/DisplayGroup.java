@@ -30,8 +30,6 @@ public class DisplayGroup {
     private final List<LogicalDisplay> mDisplays = new ArrayList<>();
     private final int mGroupId;
 
-    private int mChangeCount;
-
     DisplayGroup(int groupId) {
         mGroupId = groupId;
     }
@@ -47,14 +45,9 @@ public class DisplayGroup {
      * @param display the {@link LogicalDisplay} to add to the Group
      */
     void addDisplayLocked(LogicalDisplay display) {
-        if (!containsLocked(display)) {
-            mChangeCount++;
+        if (!mDisplays.contains(display)) {
             mDisplays.add(display);
         }
-    }
-
-    boolean containsLocked(LogicalDisplay display) {
-        return mDisplays.contains(display);
     }
 
     /**
@@ -64,18 +57,12 @@ public class DisplayGroup {
      * @return {@code true} if the {@code display} was removed; otherwise {@code false}
      */
     boolean removeDisplayLocked(LogicalDisplay display) {
-        mChangeCount++;
         return mDisplays.remove(display);
     }
 
     /** Returns {@code true} if there are no {@link LogicalDisplay LogicalDisplays} in the Group. */
     boolean isEmptyLocked() {
         return mDisplays.isEmpty();
-    }
-
-    /** Returns a count of the changes made to this display group. */
-    int getChangeCountLocked() {
-        return mChangeCount;
     }
 
     /** Returns the number of {@link LogicalDisplay LogicalDisplays} in the Group. */
