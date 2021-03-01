@@ -199,4 +199,6 @@ interface IStorageManager {
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
     PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;
+    void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 92;
+    void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 93;
 }
