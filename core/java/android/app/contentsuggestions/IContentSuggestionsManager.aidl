@@ -45,4 +45,7 @@ oneway interface IContentSuggestionsManager {
             in IClassificationsCallback callback);
     void notifyInteraction(int userId, in String requestId, in Bundle interaction);
     void isEnabled(int userId, in IResultReceiver receiver);
+    void resetTemporaryService(int userId);
+    void setTemporaryService(int userId, in String serviceName, int duration);
+    void setDefaultServiceEnabled(int userId, boolean enabled);
 }
