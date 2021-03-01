@@ -81,7 +81,6 @@ import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.KeyValueListParser;
 import android.util.Log;
-import android.util.LogWriter;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.MutableInt;
@@ -108,7 +107,6 @@ import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThrea
 import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.power.MeasuredEnergyStats.StandardEnergyBucket;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
@@ -164,7 +162,6 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final boolean DEBUG_BINDER_STATS = false;
     private static final boolean DEBUG_MEMORY = false;
     private static final boolean DEBUG_HISTORY = false;
-    private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
@@ -172,7 +169,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 193 + (USE_OLD_HISTORY ? 1000 : 0);
+    static final int VERSION = 193;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -743,7 +740,6 @@ public class BatteryStatsImpl extends BatteryStats {
     final Parcel mHistoryBuffer = Parcel.obtain();
     final HistoryItem mHistoryLastWritten = new HistoryItem();
     final HistoryItem mHistoryLastLastWritten = new HistoryItem();
-    final HistoryItem mHistoryReadTmp = new HistoryItem();
     final HistoryItem mHistoryAddTmp = new HistoryItem();
     final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap<>();
     String[] mReadHistoryStrings;
@@ -3917,44 +3913,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     void addHistoryRecordInnerLocked(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
         addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, cur);
-
-        if (!USE_OLD_HISTORY) {
-            return;
-        }
-
-        if (!mHaveBatteryLevel || !mRecordingHistory) {
-            return;
-        }
-
-        // If the current time is basically the same as the last time,
-        // and no states have since the last recorded entry changed and
-        // are now resetting back to their original value, then just collapse
-        // into one record.
-        if (mHistoryEnd != null && mHistoryEnd.cmd == HistoryItem.CMD_UPDATE
-                && (mHistoryBaseTimeMs + elapsedRealtimeMs) < (mHistoryEnd.time + 1000)
-                && ((mHistoryEnd.states^cur.states)&mChangedStates&mActiveHistoryStates) == 0
-                && ((mHistoryEnd.states2^cur.states2)&mChangedStates2&mActiveHistoryStates2) == 0) {
-            // If the current is the same as the one before, then we no
-            // longer need the entry.
-            if (mHistoryLastEnd != null && mHistoryLastEnd.cmd == HistoryItem.CMD_UPDATE
-                    && (mHistoryBaseTimeMs + elapsedRealtimeMs) < (mHistoryEnd.time + 500)
-                    && mHistoryLastEnd.sameNonEvent(cur)) {
-                mHistoryLastEnd.next = null;
-                mHistoryEnd.next = mHistoryCache;
-                mHistoryCache = mHistoryEnd;
-                mHistoryEnd = mHistoryLastEnd;
-                mHistoryLastEnd = null;
-            } else {
-                mChangedStates |= mHistoryEnd.states^(cur.states&mActiveHistoryStates);
-                mChangedStates2 |= mHistoryEnd.states^(cur.states2&mActiveHistoryStates2);
-                mHistoryEnd.setTo(mHistoryEnd.time, HistoryItem.CMD_UPDATE, cur);
-            }
-            return;
-        }
-
-        mChangedStates = 0;
-        mChangedStates2 = 0;
-        addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
     }
 
     public void addHistoryEventLocked(long elapsedRealtimeMs, long uptimeMs, int code,
@@ -3992,15 +3950,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     void clearHistoryLocked() {
         if (DEBUG_HISTORY) Slog.i(TAG, "********** CLEARING HISTORY!");
-        if (USE_OLD_HISTORY) {
-            if (mHistory != null) {
-                mHistoryEnd.next = mHistoryCache;
-                mHistoryCache = mHistory;
-                mHistory = mHistoryLastEnd = mHistoryEnd = null;
-            }
-            mNumHistoryItems = 0;
-        }
-
         mHistoryBaseTimeMs = 0;
         mLastHistoryElapsedRealtimeMs = 0;
         mTrackRunningHistoryElapsedRealtimeMs = 0;
@@ -11220,60 +11169,6 @@ public class BatteryStatsImpl extends BatteryStats {
         return mNextMaxDailyDeadlineMs;
     }
 
-    @Override
-    public boolean startIteratingOldHistoryLocked() {
-        if (DEBUG_HISTORY) Slog.i(TAG, "ITERATING: buff size=" + mHistoryBuffer.dataSize()
-                + " pos=" + mHistoryBuffer.dataPosition());
-        if ((mHistoryIterator = mHistory) == null) {
-            return false;
-        }
-        mHistoryBuffer.setDataPosition(0);
-        mHistoryReadTmp.clear();
-        mReadOverflow = false;
-        mIteratingHistory = true;
-        return true;
-    }
-
-    @Override
-    public boolean getNextOldHistoryLocked(HistoryItem out) {
-        boolean end = mHistoryBuffer.dataPosition() >= mHistoryBuffer.dataSize();
-        if (!end) {
-            readHistoryDelta(mHistoryBuffer, mHistoryReadTmp);
-            mReadOverflow |= mHistoryReadTmp.cmd == HistoryItem.CMD_OVERFLOW;
-        }
-        HistoryItem cur = mHistoryIterator;
-        if (cur == null) {
-            if (!mReadOverflow && !end) {
-                Slog.w(TAG, "Old history ends before new history!");
-            }
-            return false;
-        }
-        out.setTo(cur);
-        mHistoryIterator = cur.next;
-        if (!mReadOverflow) {
-            if (end) {
-                Slog.w(TAG, "New history ends before old history!");
-            } else if (!out.same(mHistoryReadTmp)) {
-                PrintWriter pw = new FastPrintWriter(new LogWriter(android.util.Log.WARN, TAG));
-                pw.println("Histories differ!");
-                pw.println("Old history:");
-                (new HistoryPrinter()).printNextItem(pw, out, 0, false, true);
-                pw.println("New history:");
-                (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, 0, false,
-                        true);
-                pw.flush();
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public void finishIteratingOldHistoryLocked() {
-        mIteratingHistory = false;
-        mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
-        mHistoryIterator = null;
-    }
-
     public int getHistoryTotalSize() {
         return mConstants.MAX_HISTORY_BUFFER * mConstants.MAX_HISTORY_FILES;
     }
@@ -14635,7 +14530,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         Parcel p = Parcel.obtain();
         final long start = SystemClock.uptimeMillis();
-        writeHistoryBuffer(p, true, true);
+        writeHistoryBuffer(p, true);
         if (DEBUG) {
             Slog.d(TAG, "writeHistoryBuffer duration ms:"
                     + (SystemClock.uptimeMillis() - start) + " bytes:" + p.dataSize());
@@ -14729,7 +14624,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (raw.length > 0) {
                     history.unmarshall(raw, 0, raw.length);
                     history.setDataPosition(0);
-                    readHistoryBuffer(history, true);
+                    readHistoryBuffer(history);
                 }
                 if (DEBUG) {
                     Slog.d(TAG, "readLocked history file::"
@@ -14753,10 +14648,6 @@ public class BatteryStatsImpl extends BatteryStats {
             mRecordingHistory = true;
             final long elapsedRealtimeMs = mClocks.elapsedRealtime();
             final long uptimeMs = mClocks.uptimeMillis();
-            if (USE_OLD_HISTORY) {
-                addHistoryRecordLocked(elapsedRealtimeMs, uptimeMs,
-                        HistoryItem.CMD_START, mHistoryCur);
-            }
             addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_START, mHistoryCur);
             startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
         }
@@ -14768,7 +14659,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return 0;
     }
 
-    void  readHistoryBuffer(Parcel in, boolean andOldHistory) throws ParcelFormatException {
+    void  readHistoryBuffer(Parcel in) throws ParcelFormatException {
         final int version = in.readInt();
         if (version != VERSION) {
             Slog.w("BatteryStats", "readHistoryBuffer: version got " + version
@@ -14794,10 +14685,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     + " bytes at " + curPos);
             mHistoryBuffer.appendFrom(in, curPos, bufSize);
             in.setDataPosition(curPos + bufSize);
-        }
-
-        if (andOldHistory) {
-            readOldHistory(in);
         }
 
         if (DEBUG_HISTORY) {
@@ -14828,18 +14715,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void readOldHistory(Parcel in) {
-        if (!USE_OLD_HISTORY) {
-            return;
-        }
-        mHistory = mHistoryEnd = mHistoryCache = null;
-        while (in.dataAvail() > 0) {
-            HistoryItem rec = new HistoryItem(in);
-            addHistoryRecordLocked(rec);
-        }
-    }
-
-    void writeHistoryBuffer(Parcel out, boolean inclData, boolean andOldHistory) {
+    void writeHistoryBuffer(Parcel out, boolean inclData) {
         if (DEBUG_HISTORY) {
             StringBuilder sb = new StringBuilder(128);
             sb.append("****************** WRITING mHistoryBaseTimeMs: ");
@@ -14860,22 +14736,6 @@ public class BatteryStatsImpl extends BatteryStats {
         if (DEBUG_HISTORY) Slog.i(TAG, "***************** WRITING HISTORY: "
                 + mHistoryBuffer.dataSize() + " bytes at " + out.dataPosition());
         out.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
-
-        if (andOldHistory) {
-            writeOldHistory(out);
-        }
-    }
-
-    void writeOldHistory(Parcel out) {
-        if (!USE_OLD_HISTORY) {
-            return;
-        }
-        HistoryItem rec = mHistory;
-        while (rec != null) {
-            if (rec.time >= 0) rec.writeToParcel(out, 0);
-            rec = rec.next;
-        }
-        out.writeLong(-1);
     }
 
     public void readSummaryFromParcel(Parcel in) throws ParcelFormatException {
@@ -14888,7 +14748,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         boolean inclHistory = in.readBoolean();
         if (inclHistory) {
-            readHistoryBuffer(in, true);
+            readHistoryBuffer(in);
             mBatteryStatsHistory.readFromParcel(in);
         }
 
@@ -15407,7 +15267,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         out.writeBoolean(inclHistory);
         if (inclHistory) {
-            writeHistoryBuffer(out, true, true);
+            writeHistoryBuffer(out, true);
             mBatteryStatsHistory.writeToParcel(out);
         }
 
@@ -15920,7 +15780,7 @@ public class BatteryStatsImpl extends BatteryStats {
             throw new ParcelFormatException("Bad magic number: #" + Integer.toHexString(magic));
         }
 
-        readHistoryBuffer(in, false);
+        readHistoryBuffer(in);
         mBatteryStatsHistory.readFromParcel(in);
 
         mStartCount = in.readInt();
@@ -16159,7 +16019,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         out.writeInt(MAGIC);
 
-        writeHistoryBuffer(out, true, false);
+        writeHistoryBuffer(out, true);
         mBatteryStatsHistory.writeToParcel(out);
 
         out.writeInt(mStartCount);
