@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
@@ -213,7 +214,7 @@ public class NetworkStatsCollectionTest {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
         final NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                TEST_IMSI, null, false, true, true));
+                TEST_IMSI, null, false, true, true, OEM_NONE));
 
         int myUid = Process.myUid();
         int otherUidInSameUser = Process.myUid() + 1;
@@ -468,7 +469,7 @@ public class NetworkStatsCollectionTest {
         final NetworkStatsCollection large = new NetworkStatsCollection(HOUR_IN_MILLIS);
         final NetworkIdentitySet ident = new NetworkIdentitySet();
         ident.add(new NetworkIdentity(ConnectivityManager.TYPE_MOBILE, -1, TEST_IMSI, null,
-                false, true, true));
+                false, true, true, OEM_NONE));
         large.recordData(ident, UID_ALL, SET_ALL, TAG_NONE, TIME_A, TIME_B,
                 new NetworkStats.Entry(12_730_893_164L, 1, 0, 0, 0));
 
