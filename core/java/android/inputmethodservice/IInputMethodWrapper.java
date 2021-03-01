@@ -171,7 +171,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     inputMethod.initializeInternal((IBinder) args.arg1, msg.arg1,
-                            (IInputMethodPrivilegedOperations) args.arg2, (int) args.arg3);
+                            (IInputMethodPrivilegedOperations) args.arg2);
                 } finally {
                     args.recycle();
                 }
@@ -280,10 +280,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void initializeInternal(IBinder token, int displayId,
-            IInputMethodPrivilegedOperations privOps, int configChanges) {
+            IInputMethodPrivilegedOperations privOps) {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageIOOO(DO_INITIALIZE_INTERNAL, displayId, token, privOps,
-                        configChanges));
+                mCaller.obtainMessageIOO(DO_INITIALIZE_INTERNAL, displayId, token, privOps));
     }
 
     @BinderThread

@@ -35,8 +35,7 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
  * {@hide}
  */
 oneway interface IInputMethod {
-    void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps,
-             int configChanges);
+    void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps);
 
     void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);
