@@ -3647,12 +3647,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         hideCurrentInputLocked(mCurFocusedWindow, 0, null,
                                 SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR);
                     }
-                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                            startInputFlags, startInputReason);
-                } else {
-                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                            startInputFlags, startInputReason);
                 }
+                res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                        startInputFlags, startInputReason);
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
             }
