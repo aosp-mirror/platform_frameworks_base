@@ -28,6 +28,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "frameworks-base-testutils",
+        "mockito-target-minus-junit4",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,
