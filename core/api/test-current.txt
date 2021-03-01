@@ -2570,6 +2570,9 @@ package android.view.autofill {
 package android.view.contentcapture {
 
   public final class ContentCaptureManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE) public static void resetTemporaryService(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE) public static void setDefaultServiceEnabled(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE) public static void setTemporaryService(int, @NonNull String, int);
     field public static final String DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY = "idle_flush_frequency";
     field public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
     field public static final String DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE = "log_history_size";
