@@ -87,22 +87,6 @@ public class NetworkUtils {
     public static native int bindSocketToNetwork(FileDescriptor fd, int netId);
 
     /**
-     * Protect {@code fd} from VPN connections.  After protecting, data sent through
-     * this socket will go directly to the underlying network, so its traffic will not be
-     * forwarded through the VPN.
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553,
-            publicAlternatives = "Use {@link android.net.VpnService#protect} instead.")
-    public static native boolean protectFromVpn(FileDescriptor fd);
-
-    /**
-     * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
-     * this socket will go directly to the underlying network, so its traffic will not be
-     * forwarded through the VPN.
-     */
-    public native static boolean protectFromVpn(int socketfd);
-
-    /**
      * Determine if {@code uid} can access network designated by {@code netId}.
      * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
      */
