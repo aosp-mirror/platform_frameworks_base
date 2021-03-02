@@ -27,6 +27,7 @@
 #include <android-base/chrono_utils.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnScreenCaptureListener.h>
+#include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
@@ -1022,16 +1023,24 @@ static jobject convertDeviceProductInfoToJavaObject(
     } else {
         LOG_FATAL("Unknown alternative for variant DeviceProductInfo::ManufactureOrModelDate");
     }
-    auto relativeAddress = env->NewIntArray(info->relativeAddress.size());
-    auto relativeAddressData = env->GetIntArrayElements(relativeAddress, nullptr);
-    for (int i = 0; i < info->relativeAddress.size(); i++) {
-        relativeAddressData[i] = info->relativeAddress[i];
+    jint connectionToSinkType;
+    // Relative address maps to HDMI physical address. All addresses are 4 digits long allowing
+    // for a 5–device-deep hierarchy. For more information, refer:
+    // Section 8.7 - Physical Address of HDMI Specification Version 1.3a
+    using android::hardware::display::IDeviceProductInfoConstants;
+    if (info->relativeAddress.size() != 4) {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_UNKNOWN;
+    } else if (info->relativeAddress[0] == 0) {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_BUILT_IN;
+    } else if (info->relativeAddress[1] == 0) {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_DIRECT;
+    } else {
+        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_TRANSITIVE;
     }
-    env->ReleaseIntArrayElements(relativeAddress, relativeAddressData, 0);
 
     return env->NewObject(gDeviceProductInfoClassInfo.clazz, gDeviceProductInfoClassInfo.ctor, name,
                           manufacturerPnpId, productId, modelYear, manufactureDate,
-                          relativeAddress);
+                          connectionToSinkType);
 }
 
 static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
@@ -1970,7 +1979,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
                              "Ljava/lang/String;"
                              "Ljava/lang/Integer;"
                              "Landroid/hardware/display/DeviceProductInfo$ManufactureDate;"
-                             "[I)V");
+                             "I)V");
 
     jclass deviceProductInfoManufactureDateClazz =
             FindClassOrDie(env, "android/hardware/display/DeviceProductInfo$ManufactureDate");
