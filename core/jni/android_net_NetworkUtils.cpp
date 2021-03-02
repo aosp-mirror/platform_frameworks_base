@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "NetUtils"
+#define LOG_TAG "NetworkUtils"
 
 #include <vector>
 
@@ -121,15 +121,6 @@ static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *
 static jint android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jobject javaFd,
                                                   jint netId) {
     return setNetworkForSocket(netId, AFileDescriptor_getFD(env, javaFd));
-}
-
-static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint socket)
-{
-    return (jboolean) !protectFromVpn(socket);
-}
-
-static jboolean android_net_utils_protectFromVpnWithFd(JNIEnv *env, jobject thiz, jobject javaFd) {
-    return android_net_utils_protectFromVpn(env, thiz, AFileDescriptor_getFD(env, javaFd));
 }
 
 static jboolean android_net_utils_queryUserAccess(JNIEnv *env, jobject thiz, jint uid, jint netId)
@@ -276,8 +267,6 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "getBoundNetworkForProcess", "()I", (void*) android_net_utils_getBoundNetworkForProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(Ljava/io/FileDescriptor;I)I", (void*) android_net_utils_bindSocketToNetwork },
-    { "protectFromVpn", "(I)Z", (void*) android_net_utils_protectFromVpn },
-    { "protectFromVpn", "(Ljava/io/FileDescriptor;)Z", (void*) android_net_utils_protectFromVpnWithFd },
     { "queryUserAccess", "(II)Z", (void*)android_net_utils_queryUserAccess },
     { "attachDropAllBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDropAllBPFFilter },
     { "detachBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_detachBPFFilter },
