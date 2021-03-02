@@ -18569,6 +18569,23 @@ package android.hardware.camera2.params {
 
 package android.hardware.display {
 
+  public final class DeviceProductInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConnectionToSinkType();
+    method public int getManufactureWeek();
+    method public int getManufactureYear();
+    method @NonNull public String getManufacturerPnpId();
+    method public int getModelYear();
+    method @Nullable public String getName();
+    method @NonNull public String getProductId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_TO_SINK_BUILT_IN = 1; // 0x1
+    field public static final int CONNECTION_TO_SINK_DIRECT = 2; // 0x2
+    field public static final int CONNECTION_TO_SINK_TRANSITIVE = 3; // 0x3
+    field public static final int CONNECTION_TO_SINK_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.DeviceProductInfo> CREATOR;
+  }
+
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int);
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, int, int, int, @Nullable android.view.Surface, int, @Nullable android.hardware.display.VirtualDisplay.Callback, @Nullable android.os.Handler);
@@ -46255,6 +46272,7 @@ package android.view {
     method public long getAppVsyncOffsetNanos();
     method public void getCurrentSizeRange(android.graphics.Point, android.graphics.Point);
     method @Nullable public android.view.DisplayCutout getCutout();
+    method @Nullable public android.hardware.display.DeviceProductInfo getDeviceProductInfo();
     method public int getDisplayId();
     method public int getFlags();
     method public android.view.Display.HdrCapabilities getHdrCapabilities();
