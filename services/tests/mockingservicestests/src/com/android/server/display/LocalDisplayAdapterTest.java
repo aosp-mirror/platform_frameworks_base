@@ -592,6 +592,7 @@ public class LocalDisplayAdapterTest {
                         new DisplayModeDirector.RefreshRateRange(60f, 60f),
                         new DisplayModeDirector.RefreshRateRange(60f, 60f)
                 ));
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         verify(mSurfaceControlProxy).setDesiredDisplayModeSpecs(display.token,
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 0,
