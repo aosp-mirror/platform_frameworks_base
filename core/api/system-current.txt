@@ -2552,8 +2552,7 @@ package android.content.pm {
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_CAMERA_TOGGLE = "android.hardware.camera.toggle";
     field public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
-    field @Deprecated public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
-    field public static final String FEATURE_INCREMENTAL_DELIVERY_VERSION = "android.software.incremental_delivery_version";
+    field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_MICROPHONE_TOGGLE = "android.hardware.microphone.toggle";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
