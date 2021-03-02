@@ -39,8 +39,8 @@ import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.ServiceWatcher;
-import com.android.server.ServiceWatcher.BoundService;
+import com.android.server.servicewatcher.ServiceWatcher;
+import com.android.server.servicewatcher.ServiceWatcher.BoundService;
 
 import java.util.Objects;
 import java.util.function.Predicate;

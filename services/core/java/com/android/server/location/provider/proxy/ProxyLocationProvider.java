@@ -37,9 +37,9 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.ServiceWatcher;
-import com.android.server.ServiceWatcher.BoundService;
 import com.android.server.location.provider.AbstractLocationProvider;
+import com.android.server.servicewatcher.ServiceWatcher;
+import com.android.server.servicewatcher.ServiceWatcher.BoundService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
