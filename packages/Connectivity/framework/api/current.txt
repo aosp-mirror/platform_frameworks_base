@@ -400,16 +400,6 @@ package android.net {
     method public android.net.NetworkRequest.Builder setNetworkSpecifier(android.net.NetworkSpecifier);
   }
 
-  public final class Proxy {
-    ctor public Proxy();
-    method @Deprecated public static String getDefaultHost();
-    method @Deprecated public static int getDefaultPort();
-    method @Deprecated public static String getHost(android.content.Context);
-    method @Deprecated public static int getPort(android.content.Context);
-    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
-    field public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
-  }
-
   public class ProxyInfo implements android.os.Parcelable {
     ctor public ProxyInfo(@Nullable android.net.ProxyInfo);
     method public static android.net.ProxyInfo buildDirectProxy(String, int);
