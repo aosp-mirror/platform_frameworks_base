@@ -1234,8 +1234,7 @@ public class SystemConfig {
 
         final int incrementalVersion = IncrementalManager.getVersion();
         if (incrementalVersion > 0) {
-            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, 0);
-            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY_VERSION, incrementalVersion);
+            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, incrementalVersion);
         }
 
         if (PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT) {
