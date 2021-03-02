@@ -3656,17 +3656,6 @@ public abstract class PackageManager {
     public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
 
     /**
-     * Feature for {@link android.view.WindowManager.LayoutParams.backgroundBlurRedius} and
-     * {@link android.graphics.drawable.BackgroundBlurDrawable}: the device supports cross-layer
-     * blurring.
-     *
-     * @hide
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
-
-    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
      * a Keystore implementation that can only enforce limited use key in hardware with max usage
      * count equals to 1.
