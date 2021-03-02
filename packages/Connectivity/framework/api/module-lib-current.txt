@@ -23,10 +23,6 @@ package android.net {
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
-  public final class Proxy {
-    method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
-  }
-
   public final class TcpRepairWindow {
     ctor public TcpRepairWindow(int, int, int, int, int, int);
     field public final int maxWindow;

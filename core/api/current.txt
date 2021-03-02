@@ -26028,6 +26028,16 @@ package android.net {
     field public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6; // 0x6
   }
 
+  public final class Proxy {
+    ctor public Proxy();
+    method @Deprecated public static String getDefaultHost();
+    method @Deprecated public static int getDefaultPort();
+    method @Deprecated public static String getHost(android.content.Context);
+    method @Deprecated public static int getPort(android.content.Context);
+    field @Deprecated public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
+    field public static final String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
+  }
+
   @Deprecated public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
     ctor @Deprecated public SSLCertificateSocketFactory(int);
     method @Deprecated public java.net.Socket createSocket(java.net.Socket, String, int, boolean) throws java.io.IOException;
