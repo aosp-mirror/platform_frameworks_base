@@ -29,14 +29,12 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.RouteInfo;
-import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.NetworkStackConstants;
-import com.android.server.net.BaseNetworkObserver;
 
 import java.net.Inet6Address;
 import java.util.Objects;
@@ -48,7 +46,7 @@ import java.util.Objects;
  *
  * @hide
  */
-public class Nat464Xlat extends BaseNetworkObserver {
+public class Nat464Xlat {
     private static final String TAG = Nat464Xlat.class.getSimpleName();
 
     // This must match the interface prefix in clatd.c.
@@ -70,7 +68,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
 
     private final IDnsResolver mDnsResolver;
     private final INetd mNetd;
-    private final INetworkManagementService mNMService;
 
     // The network we're running on, and its type.
     private final NetworkAgentInfo mNetwork;
@@ -99,11 +96,9 @@ public class Nat464Xlat extends BaseNetworkObserver {
 
     private boolean mPrefixDiscoveryRunning;
 
-    public Nat464Xlat(NetworkAgentInfo nai, INetd netd, IDnsResolver dnsResolver,
-            INetworkManagementService nmService) {
+    public Nat464Xlat(NetworkAgentInfo nai, INetd netd, IDnsResolver dnsResolver) {
         mDnsResolver = dnsResolver;
         mNetd = netd;
-        mNMService = nmService;
         mNetwork = nai;
     }
 
@@ -174,13 +169,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * and set internal state.
      */
     private void enterStartingState(String baseIface) {
-        try {
-            mNMService.registerObserver(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Can't register iface observer for clat on " + mNetwork.toShortString());
-            return;
-        }
-
         mNat64PrefixInUse = selectNat64Prefix();
         String addrStr = null;
         try {
@@ -216,11 +204,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * Unregister as a base observer for the stacked interface, and clear internal state.
      */
     private void leaveStartedState() {
-        try {
-            mNMService.unregisterObserver(this);
-        } catch (RemoteException | IllegalStateException e) {
-            Log.e(TAG, "Error unregistering clatd observer on " + mBaseIface + ": " + e);
-        }
         mNat64PrefixInUse = null;
         mIface = null;
         mBaseIface = null;
@@ -507,12 +490,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
         stop();
     }
 
-    @Override
     public void interfaceLinkStateChanged(String iface, boolean up) {
         mNetwork.handler().post(() -> { handleInterfaceLinkStateChanged(iface, up); });
     }
 
-    @Override
     public void interfaceRemoved(String iface) {
         mNetwork.handler().post(() -> handleInterfaceRemoved(iface));
     }

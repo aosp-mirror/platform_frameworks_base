@@ -1464,7 +1464,6 @@ public class ConnectivityServiceTest {
         mDeps = makeDependencies();
         returnRealCallingUid();
         mService = new ConnectivityService(mServiceContext,
-                mNetworkManagementService,
                 mStatsService,
                 mMockDnsResolver,
                 mock(IpConnectivityLog.class),
@@ -7859,7 +7858,6 @@ public class ConnectivityServiceTest {
         cellLp.addRoute(defaultRoute);
         cellLp.addRoute(ipv6Subnet);
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
-        reset(mNetworkManagementService);
         reset(mMockDnsResolver);
         reset(mMockNetd);
         reset(mBatteryStatsService);
@@ -7899,7 +7897,6 @@ public class ConnectivityServiceTest {
 
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
-        reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
         when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
@@ -7999,7 +7996,6 @@ public class ConnectivityServiceTest {
         verify(mMockNetd, times(1)).networkRemoveInterface(cellNetId, CLAT_PREFIX + MOBILE_IFNAME);
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
-        reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
         when(mMockNetd.interfaceGetCfg(CLAT_PREFIX + MOBILE_IFNAME))
@@ -8236,7 +8232,6 @@ public class ConnectivityServiceTest {
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName(MOBILE_IFNAME);
         mCellNetworkAgent.sendLinkProperties(cellLp);
-        reset(mNetworkManagementService);
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         verify(mMockNetd, times(1)).idletimerAddInterface(eq(MOBILE_IFNAME), anyInt(),
@@ -8930,8 +8925,8 @@ public class ConnectivityServiceTest {
                 ConnectivityManager.getNetworkTypeName(TYPE_MOBILE),
                 TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
         return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
-                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, null,
-                0, INVALID_UID, mQosCallbackTracker);
+                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, 0,
+                INVALID_UID, mQosCallbackTracker);
     }
 
     @Test
