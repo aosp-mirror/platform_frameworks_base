@@ -3338,6 +3338,39 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @Override
+    public void notifyAppIoBlocked(String volumeUuid, int uid, int tid, int reason) {
+        enforceExternalStorageService();
+
+        mStorageSessionController.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
+    }
+
+    @Override
+    public void notifyAppIoResumed(String volumeUuid, int uid, int tid, int reason) {
+        enforceExternalStorageService();
+
+        mStorageSessionController.notifyAppIoResumed(volumeUuid, uid, tid, reason);
+    }
+
+    private boolean isAppIoBlocked(int uid) {
+        return mStorageSessionController.isAppIoBlocked(uid);
+    }
+
+    /**
+     * Enforces that the caller is the {@link ExternalStorageService}
+     *
+     * @throws SecurityException if the caller doesn't have the
+     * {@link android.Manifest.permission.WRITE_MEDIA_STORAGE} permission or is not the
+     * {@link ExternalStorageService}
+     */
+    private void enforceExternalStorageService() {
+        enforcePermission(android.Manifest.permission.WRITE_MEDIA_STORAGE);
+        int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
+        if (callingAppId != mMediaStoreAuthorityAppId) {
+            throw new SecurityException("Only the ExternalStorageService is permitted");
+        }
+    }
+
     /** Not thread safe */
     class AppFuseMountScope extends AppFuseBridge.MountScope {
         private boolean mMounted = false;

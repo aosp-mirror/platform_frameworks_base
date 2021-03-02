@@ -27,8 +27,11 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.KeyStore;
-import android.security.keystore.AndroidKeyStoreProvider;
+import android.security.KeyStore2;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore2.AndroidKeyStoreProvider;
+import android.system.keystore2.Domain;
+import android.system.keystore2.KeyDescriptor;
 
 import com.android.internal.widget.ILockSettings;
 
@@ -709,10 +712,34 @@ public class RecoveryController {
      */
     @NonNull Key getKeyFromGrant(@NonNull String grantAlias)
             throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
-        return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                mKeyStore,
-                grantAlias,
-                KeyStore.UID_SELF);
+        if (grantAlias.startsWith(APPLICATION_KEY_GRANT_PREFIX)) {
+            return AndroidKeyStoreProvider
+                    .loadAndroidKeyStoreSecretKeyFromKeystore(
+                            KeyStore2.getInstance(),
+                            getGrantDescriptor(grantAlias));
+        }
+        // TODO(b/171305545): remove KeyStore1 logic.
+        return android.security.keystore.AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+            mKeyStore,
+            grantAlias,
+            KeyStore.UID_SELF);
+
+    }
+
+    private static final String APPLICATION_KEY_GRANT_PREFIX = "recoverable_key:";
+
+    private static @Nullable KeyDescriptor getGrantDescriptor(String grantAlias) {
+        KeyDescriptor result = new KeyDescriptor();
+        result.domain = Domain.GRANT;
+        result.blob = null;
+        result.alias = null;
+        try {
+            result.nspace = Long.parseUnsignedLong(
+                    grantAlias.substring(APPLICATION_KEY_GRANT_PREFIX.length()), 16);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return result;
     }
 
     /**

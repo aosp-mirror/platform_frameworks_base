@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.input.InputManagerService.ENABLE_PER_WINDOW_INPUT_ROTATION;
 
+import android.graphics.Point;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -35,6 +36,7 @@ public class PointerEventDispatcher extends InputEventReceiver {
     private PointerEventListener[] mListenersArray = new PointerEventListener[0];
 
     private final DisplayContent mDisplayContent;
+    private final Point mTmpSize = new Point();
 
     public PointerEventDispatcher(InputChannel inputChannel, DisplayContent dc) {
         super(inputChannel, UiThread.getHandler().getLooper());
@@ -48,12 +50,12 @@ public class PointerEventDispatcher extends InputEventReceiver {
                     && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                 MotionEvent motionEvent = (MotionEvent) event;
                 if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-                    int rotation = mDisplayContent.getRotation();
+                    final int rotation = mDisplayContent.getRotation();
                     if (rotation != Surface.ROTATION_0) {
+                        mDisplayContent.getDisplay().getRealSize(mTmpSize);
                         motionEvent = MotionEvent.obtain(motionEvent);
-                        motionEvent.transform(MotionEvent.createRotateMatrix(rotation,
-                                mDisplayContent.getDisplayMetrics().widthPixels,
-                                mDisplayContent.getDisplayMetrics().heightPixels));
+                        motionEvent.transform(MotionEvent.createRotateMatrix(
+                                rotation, mTmpSize.x, mTmpSize.y));
                     }
                 }
                 PointerEventListener[] listeners;

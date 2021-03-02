@@ -647,7 +647,6 @@ package android.app {
     method public void setDontSendToRestrictedApps(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(int, long);
     method public android.os.Bundle toBundle();
   }
 
@@ -10068,10 +10067,10 @@ package android.service.storage {
 
   public abstract class ExternalStorageService extends android.app.Service {
     ctor public ExternalStorageService();
+    method public void onAnrDelayStarted(@NonNull String, int, int, int);
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onEndSession(@NonNull String) throws java.io.IOException;
     method public void onFreeCache(@NonNull java.util.UUID, long) throws java.io.IOException;
-    method public long onGetAnrDelayMillis(@NonNull String, int);
     method public abstract void onStartSession(@NonNull String, int, @NonNull android.os.ParcelFileDescriptor, @NonNull java.io.File, @NonNull java.io.File) throws java.io.IOException;
     method public abstract void onVolumeStateChanged(@NonNull android.os.storage.StorageVolume) throws java.io.IOException;
     field public static final int FLAG_SESSION_ATTRIBUTE_INDEXABLE = 2; // 0x2
@@ -10269,7 +10268,7 @@ package android.service.voice {
   public abstract class HotwordDetectionService extends android.app.Service {
     ctor public HotwordDetectionService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onDetectFromDspSource(int, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
+    method public void onDetectFromDspSource(@NonNull android.os.ParcelFileDescriptor, @NonNull android.media.AudioFormat, long, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
     field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
   }
 
@@ -13407,7 +13406,7 @@ package android.telephony.ims.stub {
   }
 
   public static interface CapabilityExchangeEventListener.OptionsRequestCallback {
-    method public default void onRespondToCapabilityRequest(@NonNull android.telephony.ims.RcsContactUceCapability, boolean);
+    method public void onRespondToCapabilityRequest(@NonNull android.telephony.ims.RcsContactUceCapability, boolean);
     method public void onRespondToCapabilityRequestWithError(@IntRange(from=100, to=699) int, @NonNull String);
   }
 

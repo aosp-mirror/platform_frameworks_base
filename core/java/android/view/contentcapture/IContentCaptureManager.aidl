@@ -85,4 +85,19 @@ oneway interface IContentCaptureManager {
      * Returns a list with the ContentCaptureConditions for the package (or null if not defined).
      */
     void getContentCaptureConditions(String packageName, in IResultReceiver result);
+
+    /**
+     * Resets the temporary service implementation to the default component.
+     */
+    void resetTemporaryService(int userId);
+
+    /**
+     * Temporarily sets the service implementation.
+     */
+    void setTemporaryService(int userId, in String serviceName, int duration);
+
+    /**
+     * Sets whether the default service should be used.
+     */
+    void setDefaultServiceEnabled(int userId, boolean enabled);
 }
