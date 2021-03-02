@@ -151,7 +151,7 @@ cc_library_shared {
                 "android_os_VintfRuntimeInfo.cpp",
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
-                "android_net_NetUtils.cpp",
+                "android_net_NetworkUtils.cpp",
                 "android_service_DataLoaderService.cpp",
                 "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
