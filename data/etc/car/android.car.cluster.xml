@@ -20,5 +20,7 @@
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.car.permission.CAR_ENGINE_DETAILED"/>
+        <permission name="android.car.permission.CAR_INSTRUMENT_CLUSTER_CONTROL"/>
     </privapp-permissions>
 </permissions>

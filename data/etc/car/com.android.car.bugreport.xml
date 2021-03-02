@@ -21,5 +21,6 @@
         <permission name="android.permission.READ_LOGS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
+        <permission name="android.car.permission.CAR_DRIVING_STATE"/>
     </privapp-permissions>
   </permissions>
