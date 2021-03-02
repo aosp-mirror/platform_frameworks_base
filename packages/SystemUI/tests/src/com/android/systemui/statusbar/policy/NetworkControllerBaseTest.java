@@ -372,6 +372,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                         new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
                         mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+                mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
+                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
             } else {
                 mNetworkCallback.onLost(mock(Network.class));
             }
