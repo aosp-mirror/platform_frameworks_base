@@ -88,6 +88,7 @@ public class VibrationScalerTest {
         mVibrationSettings = new VibrationSettings(
                 mContextSpy, new Handler(mTestLooper.getLooper()));
         mVibrationScaler = new VibrationScaler(mContextSpy, mVibrationSettings);
+        mVibrationSettings.onSystemReady();
     }
 
     @After
