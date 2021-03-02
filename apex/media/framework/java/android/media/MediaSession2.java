@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.BadParcelableException;
 import android.os.Bundle;
@@ -42,6 +43,8 @@ import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,6 +89,7 @@ public class MediaSession2 implements AutoCloseable {
     private final String mSessionId;
     private final PendingIntent mSessionActivity;
     private final Session2Token mSessionToken;
+    private final MediaSessionManager mMediaSessionManager;
     private final MediaCommunicationManager mCommunicationManager;
     private final Handler mResultHandler;
 
@@ -114,7 +118,13 @@ public class MediaSession2 implements AutoCloseable {
         mSessionStub = new Session2Link(this);
         mSessionToken = new Session2Token(Process.myUid(), TYPE_SESSION, context.getPackageName(),
                 mSessionStub, tokenExtras);
-        mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
+        if (SdkLevel.isAtLeastS()) {
+            mCommunicationManager = mContext.getSystemService(MediaCommunicationManager.class);
+            mMediaSessionManager = null;
+        } else {
+            mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+            mCommunicationManager = null;
+        }
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
         mResultHandler = new Handler(context.getMainLooper());
         mClosed = false;
@@ -315,6 +325,14 @@ public class MediaSession2 implements AutoCloseable {
         return mCallback;
     }
 
+    boolean isTrustedForMediaControl(RemoteUserInfo remoteUserInfo) {
+        if (SdkLevel.isAtLeastS()) {
+            return mCommunicationManager.isTrustedForMediaControl(remoteUserInfo);
+        } else {
+            return mMediaSessionManager.isTrustedForMediaControl(remoteUserInfo);
+        }
+    }
+
     void setForegroundServiceEventCallback(ForegroundServiceEventCallback callback) {
         synchronized (mLock) {
             if (mForegroundServiceEventCallback == callback) {
@@ -350,7 +368,7 @@ public class MediaSession2 implements AutoCloseable {
 
         final ControllerInfo controllerInfo = new ControllerInfo(
                 remoteUserInfo,
-                mCommunicationManager.isTrustedForMediaControl(remoteUserInfo),
+                isTrustedForMediaControl(remoteUserInfo),
                 controller,
                 connectionHints);
         mCallbackExecutor.execute(() -> {
@@ -606,9 +624,15 @@ public class MediaSession2 implements AutoCloseable {
             // Notify framework about the newly create session after the constructor is finished.
             // Otherwise, framework may access the session before the initialization is finished.
             try {
-                MediaCommunicationManager manager =
-                        mContext.getSystemService(MediaCommunicationManager.class);
-                manager.notifySession2Created(session2.getToken());
+                if (SdkLevel.isAtLeastS()) {
+                    MediaCommunicationManager manager =
+                            mContext.getSystemService(MediaCommunicationManager.class);
+                    manager.notifySession2Created(session2.getToken());
+                } else {
+                    MediaSessionManager manager =
+                            mContext.getSystemService(MediaSessionManager.class);
+                    manager.notifySession2Created(session2.getToken());
+                }
             } catch (Exception e) {
                 session2.close();
                 throw e;
