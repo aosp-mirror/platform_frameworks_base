@@ -2636,7 +2636,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // We'll want to include browser possibilities in a few cases
             boolean includeBrowser = false;
 
-            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, matchFlags)) {
+            if (!DomainVerificationUtils.isDomainVerificationIntent(intent, candidates,
+                            matchFlags)) {
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
                 if (xpDomainInfo != null && xpDomainInfo.highestApprovalLevel
@@ -2820,8 +2821,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 result.highestApprovalLevel = Math.max(mDomainVerificationManager
-                        .approvalLevelForDomain(ps, intent, flags, riTargetUser.targetUserId),
-                        result.highestApprovalLevel);
+                        .approvalLevelForDomain(ps, intent, resultTargetUser, flags,
+                                riTargetUser.targetUserId), result.highestApprovalLevel);
             }
             if (result != null && result.highestApprovalLevel
                     <= DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE) {
@@ -3067,8 +3068,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
-                                userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                                instantApps, flags, userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "Instant app approved for intent; pkg: "
                                         + packageName);
@@ -3995,8 +3996,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent, flags,
-                                userId)) {
+                        if (hasAnyDomainApproval(mDomainVerificationManager, ps, intent,
+                                resolvedActivities, flags, userId)) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
                                         + ", approved");
@@ -9575,7 +9576,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
                         if (ps != null && hasAnyDomainApproval(mDomainVerificationManager, ps,
-                                intent, flags, userId)) {
+                                intent, query, flags, userId)) {
                             return ri;
                         }
                     }
@@ -9632,10 +9633,10 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static boolean hasAnyDomainApproval(
             @NonNull DomainVerificationManagerInternal manager, @NonNull PackageSetting pkgSetting,
-            @NonNull Intent intent, @PackageManager.ResolveInfoFlags int resolveInfoFlags,
-            @UserIdInt int userId) {
-        return manager.approvalLevelForDomain(pkgSetting, intent, resolveInfoFlags, userId)
-                > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
+            @NonNull Intent intent, @NonNull List<ResolveInfo> candidates,
+            @PackageManager.ResolveInfoFlags int resolveInfoFlags, @UserIdInt int userId) {
+        return manager.approvalLevelForDomain(pkgSetting, intent, candidates, resolveInfoFlags,
+                userId) > DomainVerificationManagerInternal.APPROVAL_LEVEL_NONE;
     }
 
     /**
