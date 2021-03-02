@@ -52,12 +52,12 @@ public final class UidRange implements Parcelable {
 
     /** Returns the smallest user Id which is contained in this UidRange */
     public int getStartUser() {
-        return start / PER_USER_RANGE;
+        return UserHandle.getUserHandleForUid(start).getIdentifier();
     }
 
     /** Returns the largest user Id which is contained in this UidRange */
     public int getEndUser() {
-        return stop / PER_USER_RANGE;
+        return UserHandle.getUserHandleForUid(stop).getIdentifier();
     }
 
     public boolean contains(int uid) {
