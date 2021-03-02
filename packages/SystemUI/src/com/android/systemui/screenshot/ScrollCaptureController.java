@@ -38,13 +38,15 @@ public class ScrollCaptureController {
     private static final float MAX_PAGES_DEFAULT = 3f;
 
     private static final String SETTING_KEY_MAX_PAGES = "screenshot.scroll_max_pages";
+    // Portion of the tiles to be acquired above the starting position in infinite scroll
+    // situations. 1.0 means maximize the area above, 0 means just go down.
+    private static final float IDEAL_PORTION_ABOVE = 0.4f;
 
-    private static final int UP = -1;
-    private static final int DOWN = 1;
+    private boolean mScrollingUp = true;
+    // If true, stop acquiring images when no more bitmap data is available in the current direction
+    // or if the desired bitmap size is reached.
+    private boolean mFinishOnBoundary;
 
-    private int mDirection = DOWN;
-    private boolean mAtBottomEdge;
-    private boolean mAtTopEdge;
     private Session mSession;
 
     public static final int MAX_HEIGHT = 12000;
@@ -86,7 +88,8 @@ public class ScrollCaptureController {
     }
 
     private void onCaptureResult(CaptureResult result) {
-        Log.d(TAG, "onCaptureResult: " + result);
+        Log.d(TAG, "onCaptureResult: " + result + " scrolling up: " + mScrollingUp
+                + " finish on boundary: " + mFinishOnBoundary);
         boolean emptyResult = result.captured.height() == 0;
         boolean partialResult = !emptyResult
                 && result.captured.height() < result.requested.height();
@@ -94,34 +97,28 @@ public class ScrollCaptureController {
 
         if (partialResult || emptyResult) {
             // Potentially reached a vertical boundary. Extend in the other direction.
-            switch (mDirection) {
-                case DOWN:
-                    Log.d(TAG, "Reached bottom edge.");
-                    mAtBottomEdge = true;
-                    mDirection = UP;
-                    break;
-                case UP:
-                    Log.d(TAG, "Reached top edge.");
-                    mAtTopEdge = true;
-                    mDirection = DOWN;
-                    break;
-            }
-
-            if (mAtTopEdge && mAtBottomEdge) {
-                Log.d(TAG, "Reached both top and bottom edge, ending.");
+            if (mFinishOnBoundary) {
                 finish = true;
             } else {
-                // only reverse if the edge was relatively close to the starting point
-                if (mImageTileSet.getHeight() < mSession.getPageHeight() * 3) {
-                    Log.d(TAG, "Restarting in reverse direction.");
-
-                    // Because of temporary limitations, we cannot just jump to the opposite edge
-                    // and continue there. Instead, clear the results and start over capturing from
-                    // here in the other direction.
-                    mImageTileSet.clear();
-                } else {
-                    Log.d(TAG, "Capture is tall enough, stopping here.");
-                    finish = true;
+                // We hit a boundary, clear the tiles, capture everything in the opposite direction,
+                // then finish.
+                mImageTileSet.clear();
+                mFinishOnBoundary = true;
+                mScrollingUp = !mScrollingUp;
+            }
+        } else {
+            // Got the full requested result, but may have got enough bitmap data now
+            int expectedTiles = mImageTileSet.size() + 1;
+            boolean hitMaxTiles = expectedTiles >= mSession.getMaxTiles();
+            if (hitMaxTiles && mFinishOnBoundary) {
+                finish = true;
+            } else {
+                if (mScrollingUp) {
+                    if (expectedTiles >= mSession.getMaxTiles() * IDEAL_PORTION_ABOVE) {
+                        // We got enough above the start point, now see how far down it can go.
+                        mImageTileSet.clear();
+                        mScrollingUp = false;
+                    }
                 }
             }
         }
@@ -136,9 +133,8 @@ public class ScrollCaptureController {
 
 
         // Stop when "too tall"
-        if (mImageTileSet.size() >= mSession.getMaxTiles()
-                || mImageTileSet.getHeight() > MAX_HEIGHT) {
-            Log.d(TAG, "Max height and/or tile count reached.");
+        if (mImageTileSet.getHeight() > MAX_HEIGHT) {
+            Log.d(TAG, "Max height reached.");
             finish = true;
         }
 
@@ -150,8 +146,8 @@ public class ScrollCaptureController {
             return;
         }
 
-        int nextTop = (mDirection == DOWN) ? result.captured.bottom
-                : result.captured.top - mSession.getTileHeight();
+        int nextTop = (mScrollingUp)
+                ? result.captured.top - mSession.getTileHeight() : result.captured.bottom;
         Log.d(TAG, "requestTile: " + nextTop);
         mSession.requestTile(nextTop, /* consumer */ this::onCaptureResult);
     }
