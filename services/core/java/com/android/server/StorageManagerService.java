@@ -573,6 +573,12 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private static final int PBKDF2_HASH_ROUNDS = 1024;
 
+    private static final String ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY =
+            "anr_delay_millis";
+
+    private static final String ANR_DELAY_NOTIFY_EXTERNAL_STORAGE_SERVICE_DEVICE_CONFIG_KEY =
+            "anr_delay_notify_external_storage_service";
+
     /**
      * Mounted OBB tracking information. Used to track the current state of all
      * OBBs.
@@ -943,25 +949,51 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    // TODO(b/170486601): Check transcoding status based on events pushed from the MediaProvider
     private class ExternalStorageServiceAnrController implements AnrController {
         @Override
         public long getAnrDelayMillis(String packageName, int uid) {
-            int delay = SystemProperties.getInt("sys.fuse.transcode_anr_delay", 0);
-            Log.d(TAG, "getAnrDelayMillis: " + packageName + ". Delaying for " + delay + "ms");
+            if (!isAppIoBlocked(uid)) {
+                return 0;
+            }
+
+            int delay = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                    ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY, 0);
+            Slog.v(TAG, "getAnrDelayMillis for " + packageName + ". " + delay + "ms");
             return delay;
         }
 
         @Override
         public void onAnrDelayStarted(String packageName, int uid) {
-            Log.d(TAG, "onAnrDelayStarted: " + packageName);
+            if (!isAppIoBlocked(uid)) {
+                return;
+            }
+
+            boolean notifyExternalStorageService = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                    ANR_DELAY_NOTIFY_EXTERNAL_STORAGE_SERVICE_DEVICE_CONFIG_KEY, true);
+            if (notifyExternalStorageService) {
+                Slog.d(TAG, "onAnrDelayStarted for " + packageName
+                        + ". Notifying external storage service");
+                try {
+                    mStorageSessionController.notifyAnrDelayStarted(packageName, uid, 0 /* tid */,
+                            StorageManager.APP_IO_BLOCKED_REASON_TRANSCODING);
+                } catch (ExternalStorageServiceException e) {
+                    Slog.e(TAG, "Failed to notify ANR delay started for " + packageName, e);
+                }
+            } else {
+                // TODO(b/170973510): Implement framework spinning dialog for ANR delay
+            }
         }
 
         @Override
         public boolean onAnrDelayCompleted(String packageName, int uid) {
-            boolean show = SystemProperties.getBoolean("sys.fuse.transcode_anr_dialog_show", true);
-            Log.d(TAG, "onAnrDelayCompleted: " + packageName + ". Show: " + show);
-            return show;
+            if (isAppIoBlocked(uid)) {
+                Slog.d(TAG, "onAnrDelayCompleted for " + packageName + ". Showing ANR dialog...");
+                return true;
+            } else {
+                Slog.d(TAG, "onAnrDelayCompleted for " + packageName + ". Skipping ANR dialog...");
+                return false;
+            }
         }
     }
 
@@ -4636,6 +4668,20 @@ class StorageManagerService extends IStorageManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public List<String> getPrimaryVolumeIds() {
+            final List<String> primaryVolumeIds = new ArrayList<>();
+            synchronized (mLock) {
+                for (int i = 0; i < mVolumes.size(); i++) {
+                    final VolumeInfo vol = mVolumes.valueAt(i);
+                    if (vol.isPrimary()) {
+                        primaryVolumeIds.add(vol.getId());
+                    }
+                }
+            }
+            return primaryVolumeIds;
         }
     }
 }

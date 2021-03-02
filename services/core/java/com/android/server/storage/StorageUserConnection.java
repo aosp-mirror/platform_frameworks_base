@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -72,6 +73,7 @@ public final class StorageUserConnection {
     private final Context mContext;
     private final int mUserId;
     private final StorageSessionController mSessionController;
+    private final StorageManagerInternal mSmInternal;
     private final ActiveConnection mActiveConnection = new ActiveConnection();
     @GuardedBy("mLock") private final Map<String, Session> mSessions = new HashMap<>();
     @GuardedBy("mLock") private final Set<Integer> mUidsBlockedOnIo = new ArraySet<>();
@@ -81,6 +83,7 @@ public final class StorageUserConnection {
         mContext = Objects.requireNonNull(context);
         mUserId = Preconditions.checkArgumentNonnegative(userId);
         mSessionController = controller;
+        mSmInternal = LocalServices.getService(StorageManagerInternal.class);
         mHandlerThread = new HandlerThread("StorageUserConnectionThread-" + mUserId);
         mHandlerThread.start();
     }
@@ -152,9 +155,13 @@ public final class StorageUserConnection {
      */
     public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason)
             throws ExternalStorageServiceException {
+        List<String> primarySessionIds = mSmInternal.getPrimaryVolumeIds();
         synchronized (mSessionsLock) {
             for (String sessionId : mSessions.keySet()) {
-                mActiveConnection.notifyAnrDelayStarted(packageName, uid, tid, reason);
+                if (primarySessionIds.contains(sessionId)) {
+                    mActiveConnection.notifyAnrDelayStarted(packageName, uid, tid, reason);
+                    return;
+                }
             }
         }
     }
@@ -201,8 +208,7 @@ public final class StorageUserConnection {
                 return;
             }
         }
-        StorageManagerInternal sm = LocalServices.getService(StorageManagerInternal.class);
-        sm.resetUser(mUserId);
+        mSmInternal.resetUser(mUserId);
     }
 
     /**
