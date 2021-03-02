@@ -3676,13 +3676,64 @@ public class CarrierConfigManager {
         /** Prefix of all ImsServiceEntitlement.KEY_* constants. */
         public static final String KEY_PREFIX = "imsserviceentitlement.";
 
-        /** The address of the entitlement configuration server. */
+        /**
+         * The address of the entitlement configuration server.
+         *
+         * Reference: GSMA TS.43-v5, section 2.1 Default Entitlement Configuration Server.
+         */
         public static final String KEY_ENTITLEMENT_SERVER_URL_STRING =
                 KEY_PREFIX + "entitlement_server_url_string";
+
+        /**
+         * For some carriers, end-users may be presented with a web portal of the carrier before
+         * being allowed to use the VoWiFi service.
+         * To support this feature, the app hosts a {@link android.webkit.WebView} in the foreground
+         * VoWiFi entitlement configuration flow to show the web portal.
+         *
+         * {@code true} - show the VoWiFi portal in a webview.
+         *
+         * Note: this is effective only if the {@link #KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING}
+         * is set to this app.
+         *
+         * Reference: GSMA TS.43-v5, section 3, VoWiFi entitlement configuration.
+         */
+        public static final String KEY_SHOW_VOWIFI_WEBVIEW_BOOL =
+                KEY_PREFIX + "show_vowifi_webview_bool";
+
+        /**
+         * For some carriers, the network is not provisioned by default to support
+         * IMS (VoLTE/VoWiFi/SMSoIP) service for all end users. Some type of network-side
+         * provisioning must then take place before offering the IMS service to the end-user.
+         *
+         * {@code true} - need this ImsServiceEntitlement app to do IMS (VoLTE/VoWiFi/SMSoIP)
+         * provisioning in the background before offering the IMS service to the end-user.
+         *
+         * Note: this is effective only if the carrier needs IMS provisioning, i.e.
+         * {@link #KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL} is set to true.
+         *
+         * Reference: GSMA TS.43-v5, section 3 - 5, VoWiFi/VoLTE/SMSoIP entitlement configuration.
+         */
+        public static final String KEY_IMS_PROVISIONING_BOOL = KEY_PREFIX + "ims_provisioning_bool";
+
+        /**
+         * The FCM sender ID for the carrier.
+         * Used to trigger a carrier network requested entitlement configuration
+         * via Firebase Cloud Messaging (FCM). Do not set if the carrier doesn't use FCM for network
+         * requested entitlement configuration.
+         *
+         * Reference: GSMA TS.43-v5, section 2.4, Network Requested Entitlement Configuration.
+         *
+         * @see <a href="https://firebase.google.com/docs/cloud-messaging/concept-options#senderid">
+         *     About FCM messages - Credentials</a>
+         */
+        public static final String KEY_FCM_SENDER_ID_STRING = KEY_PREFIX + "fcm_sender_id_string";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putString(KEY_ENTITLEMENT_SERVER_URL_STRING, "");
+            defaults.putString(KEY_FCM_SENDER_ID_STRING, "");
+            defaults.putBoolean(KEY_SHOW_VOWIFI_WEBVIEW_BOOL, false);
+            defaults.putBoolean(KEY_IMS_PROVISIONING_BOOL, false);
             return defaults;
         }
     }
