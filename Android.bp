@@ -344,8 +344,8 @@ filegroup {
 genrule {
     name: "statslog-telephony-common-java-gen",
     tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common" +
-        " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
+    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony_common"
+        + " --javaPackage com.android.internal.telephony --javaClass TelephonyCommonStatsLog",
     out: ["com/android/internal/telephony/TelephonyCommonStatsLog.java"],
 }
 
@@ -749,8 +749,8 @@ java_library {
 }
 
 platform_compat_config {
-    name: "framework-platform-compat-config",
-    src: ":framework-minus-apex",
+   name: "framework-platform-compat-config",
+   src: ":framework-minus-apex",
 }
 
 // A temporary build target that is conditionally included on the bootclasspath if
@@ -771,7 +771,7 @@ genrule {
     name: "statslog-framework-java-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --module framework" +
-        " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
+         " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
     out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
@@ -880,7 +880,7 @@ filegroup {
 
 java_library {
     name: "framework-annotations-lib",
-    srcs: [":framework-annotations"],
+    srcs: [ ":framework-annotations" ],
     sdk_version: "core_current",
 }
 
@@ -1158,6 +1158,7 @@ cc_library {
     },
 }
 
+
 // This is the full proto version of libplatformprotos. It may only
 // be used by test code that is not shipped on the device.
 cc_library {
@@ -1223,58 +1224,68 @@ filegroup {
     path: "core/java",
 }
 
-cc_defaults {
-    name: "incremental_default",
-    host_supported: true,
-    cflags: [
-        "-Wall",
-        "-Wextra",
-        "-Wextra-semi",
-        "-Werror",
-        "-Wzero-as-null-pointer-constant",
-        "-DANDROID_BASE_UNIQUE_FD_DISABLE_IMPLICIT_CONVERSION",
-    ],
-    shared_libs: [
-        "libbinder",
-        "libutils",
-    ],
-    aidl: {
-        include_dirs: [
-            "frameworks/native/aidl/binder",
-        ],
-        export_aidl_headers: true,
-    },
-}
-
-cc_library {
-    name: "libincremental_aidl-cpp",
+aidl_interface {
+    name: "libincremental_aidl",
+    unstable: true,
     srcs: [
         ":incremental_aidl",
     ],
-    defaults: ["incremental_default"],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
 }
 
-cc_library {
-    name: "libdataloader_aidl-cpp",
+aidl_interface {
+    name: "libdataloader_aidl",
+    unstable: true,
     srcs: [
         ":dataloader_aidl",
     ],
-    defaults: ["incremental_default"],
-    shared_libs: [
-        "libincremental_aidl-cpp",
+    imports: [
+        "libincremental_aidl",
     ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: false,
+        },
+    },
 }
 
-cc_library {
-    name: "libincremental_manager_aidl-cpp",
+aidl_interface {
+    name: "libincremental_manager_aidl",
+    unstable: true,
     srcs: [
         ":incremental_manager_aidl",
     ],
-    defaults: ["incremental_default"],
-    shared_libs: [
-        "libincremental_aidl-cpp",
-        "libdataloader_aidl-cpp",
+    imports: [
+        "libincremental_aidl",
+        "libdataloader_aidl",
     ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: false,
+        },
+    },
 }
 
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
@@ -1303,7 +1314,7 @@ java_library {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
-    libs: ["unsupportedappusage"],
+    libs: [ "unsupportedappusage" ],
 
     dxflags: ["--core-library"],
     installable: false,
@@ -1522,5 +1533,4 @@ java_library {
         ":protolog-common-src",
     ],
 }
-
 // protolog end
