@@ -110,7 +110,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartir"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Se canceló la grabación de pantalla"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Se guardó la grabación de pantalla; presiona para verla"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error al borrar la grabación de pantalla"</string>
+    <string name="screenrecord_delete_error" msgid="2870506119743013588">"No se pudo borrar la grabación de pantalla"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Error al obtener permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error al iniciar la grabación de pantalla"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opciones de transferencia de archivos por USB"</string>
