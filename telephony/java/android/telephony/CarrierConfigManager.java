@@ -1341,6 +1341,38 @@ public class CarrierConfigManager {
             "support_ims_conference_event_package_on_peer_bool";
 
     /**
+     * Indicates whether the carrier supports the use of RFC8285 compliant RTP header extensions for
+     * the purpose of device to device communication while in a call.
+     * <p>
+     * See also {@link #KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL}.
+     */
+    public static final String KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL =
+            "supports_device_to_device_communication_using_rtp_bool";
+
+    /**
+     * Indicates whether the carrier supports the negotiations of RFC8285 compliant RTP header
+     * extensions supported on a call during the Session Description Protocol (SDP).  This option
+     * is only used when {@link #KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL} is
+     * {@code true}.
+     * <p>
+     * When {@code true}, the RTP header extensions the platform uses for device to device
+     * communication will be offered to the remote end during the SDP negotiation process.
+     * When {@code false}, the RTP header extensions will not be negotiated during the SDP
+     * negotiation process and the platform will send RTP header extensions without prior
+     * negotiation if {@link #KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL} is
+     * {@code true}.
+     */
+    public static final String KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL =
+            "supports_sdp_negotiation_of_d2d_rtp_header_extensions_bool";
+
+    /**
+     * Indicates whether the carrier supports the use of DTMF digits A-D for the purpose of device
+     * to device communication while in a call.
+     */
+    public static final String KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL =
+            "supports_device_to_device_communication_using_dtmf_bool";
+
+    /**
      * Determines whether High Definition audio property is displayed in the dialer UI.
      * If {@code false}, remove the HD audio property from the connection so that HD audio related
      * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
@@ -5011,6 +5043,9 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL, false);
         sDefaults.putInt(KEY_IMS_CONFERENCE_SIZE_LIMIT_INT, 5);
