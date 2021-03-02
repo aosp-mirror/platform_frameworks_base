@@ -32,7 +32,6 @@ import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkProvider;
-import android.net.NetworkStack;
 import android.net.RouteInfo;
 import android.net.StringNetworkSpecifier;
 import android.net.TestNetworkInterface;
@@ -50,6 +49,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetworkStackConstants;
+import com.android.net.module.util.PermissionUtils;
 
 import java.io.UncheckedIOException;
 import java.net.Inet4Address;
@@ -320,7 +320,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         try {
             final long token = Binder.clearCallingIdentity();
             try {
-                NetworkStack.checkNetworkStackPermission(mContext);
+                PermissionUtils.enforceNetworkStackPermission(mContext);
                 NetdUtils.setInterfaceUp(mNetd, iface);
             } finally {
                 Binder.restoreCallingIdentity(token);
