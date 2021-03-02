@@ -50,7 +50,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.PowerWhitelistManager.REASON_SYSTEM_ALLOW_LISTED;
-import static android.os.PowerWhitelistManager.REASON_UNKNOWN;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
@@ -92,6 +91,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
@@ -104,7 +104,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
@@ -2596,8 +2595,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final ProcessRecord getProcessRecordLocked(String processName, int uid, boolean keepIfLarge) {
-        return mProcessList.getProcessRecordLocked(processName, uid, keepIfLarge);
+    final ProcessRecord getProcessRecordLocked(String processName, int uid) {
+        return mProcessList.getProcessRecordLocked(processName, uid);
     }
 
     @GuardedBy(anyOf = {"this", "mProcLock"})
@@ -2631,8 +2630,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false /* knownToBeDead */, 0 /* intentFlags */,
                     sNullHostingRecord  /* hostingRecord */, ZYGOTE_POLICY_FLAG_EMPTY,
                     true /* allowWhileBooting */, true /* isolated */,
-                    uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
-                    crashHandler);
+                    uid, abiOverride, entryPoint, entryPointArgs, crashHandler);
             return proc != null;
         }
     }
@@ -2641,10 +2639,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             HostingRecord hostingRecord, int zygotePolicyFlags, boolean allowWhileBooting,
-            boolean isolated, boolean keepIfLarge) {
+            boolean isolated) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
-                keepIfLarge, null /* ABI override */, null /* entryPoint */,
+                null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
 
@@ -3890,7 +3888,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Only the system server can kill an application
         if (callerUid == SYSTEM_UID) {
             synchronized (this) {
-                ProcessRecord app = getProcessRecordLocked(processName, uid, true);
+                ProcessRecord app = getProcessRecordLocked(processName, uid);
                 IApplicationThread thread;
                 if (app != null && (thread = app.getThread()) != null) {
                     try {
@@ -6086,7 +6084,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
-                    info.uid, true);
+                    info.uid);
         } else {
             app = null;
         }
@@ -11877,7 +11875,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord proc = startProcessLocked(app.processName, app,
                     false, 0,
                     new HostingRecord("backup", hostingName),
-                    ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false, false);
+                    ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -13587,7 +13585,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord app;
             synchronized (mProcLock) {
                 if (noRestart) {
-                    app = getProcessRecordLocked(ai.processName, ai.uid, true);
+                    app = getProcessRecordLocked(ai.processName, ai.uid);
                 } else {
                     // Instrumentation can kill and relaunch even persistent processes
                     forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false,
@@ -13630,7 +13628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationInfo targetInfo) {
         ProcessRecord pr;
         synchronized (this) {
-            pr = getProcessRecordLocked(targetInfo.processName, targetInfo.uid, true);
+            pr = getProcessRecordLocked(targetInfo.processName, targetInfo.uid);
         }
 
         try {
@@ -15374,8 +15372,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void killProcess(String processName, int uid, String reason) {
             synchronized (ActivityManagerService.this) {
-                final ProcessRecord proc = getProcessRecordLocked(processName, uid,
-                        true /* keepIfLarge */);
+                final ProcessRecord proc = getProcessRecordLocked(processName, uid);
                 if (proc != null) {
                     mProcessList.removeProcessLocked(proc, false /* callerWillRestart */,
                             true /* allowRestart */,  ApplicationExitInfo.REASON_OTHER, reason);
@@ -15782,7 +15779,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
                             new HostingRecord(hostingType, hostingName, isTop),
                             ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE, false /* allowWhileBooting */,
-                            false /* isolated */, true /* keepIfLarge */);
+                            false /* isolated */);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

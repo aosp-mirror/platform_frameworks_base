@@ -428,7 +428,7 @@ public class ContentProviderHelper {
                         // Use existing process if already started
                         checkTime(startTime, "getContentProviderImpl: looking for process record");
                         ProcessRecord proc = mService.getProcessRecordLocked(
-                                cpi.processName, cpr.appInfo.uid, false);
+                                cpi.processName, cpr.appInfo.uid);
                         IApplicationThread thread;
                         if (proc != null && (thread = proc.getThread()) != null
                                 && !proc.isKilled()) {
@@ -451,7 +451,7 @@ public class ContentProviderHelper {
                                     new HostingRecord("content provider",
                                         new ComponentName(
                                                 cpi.applicationInfo.packageName, cpi.name)),
-                                    Process.ZYGOTE_POLICY_FLAG_EMPTY, false, false, false);
+                                    Process.ZYGOTE_POLICY_FLAG_EMPTY, false, false);
                             checkTime(startTime, "getContentProviderImpl: after start process");
                             if (proc == null) {
                                 Slog.w(TAG, "Unable to launch app "

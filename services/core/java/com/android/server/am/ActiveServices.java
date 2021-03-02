@@ -20,7 +20,6 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
-import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -75,7 +74,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.BroadcastOptions;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -799,7 +797,7 @@ public final class ActiveServices {
         boolean addToStarting = false;
         if (!callerFg && !fgRequired && r.app == null
                 && mAm.mUserController.hasStartedUserState(r.userId)) {
-            ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid, false);
+            ProcessRecord proc = mAm.getProcessRecordLocked(r.processName, r.appInfo.uid);
             if (proc == null || proc.mState.getCurProcState() > PROCESS_STATE_RECEIVER) {
                 // If this is not coming from a foreground caller, then we may want
                 // to delay the start if there are already other background services
@@ -3348,7 +3346,7 @@ public final class ActiveServices {
         ProcessRecord app;
 
         if (!isolated) {
-            app = mAm.getProcessRecordLocked(procName, r.appInfo.uid, false);
+            app = mAm.getProcessRecordLocked(procName, r.appInfo.uid);
             if (DEBUG_MU) Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid
                         + " app=" + app);
             if (app != null) {
@@ -3396,7 +3394,7 @@ public final class ActiveServices {
             // TODO (chriswailes): Change the Zygote policy flags based on if the launch-for-service
             //  was initiated from a notification tap or not.
             if ((app = mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, false, isolated, false)) == null) {
+                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, false, isolated)) == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
