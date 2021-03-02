@@ -547,6 +547,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return mWifiSignalController.isCarrierMergedWifi(subId);
     }
 
+    boolean isNonCarrierWifiNetworkAvailable() {
+        return !mNoNetworksAvailable;
+    }
+
     boolean isEthernetDefault() {
         return mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
     }
@@ -906,6 +910,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
         return true;
+    }
+
+    @VisibleForTesting
+    void setNoNetworksAvailable(boolean noNetworksAvailable) {
+        mNoNetworksAvailable = noNetworksAvailable;
     }
 
     private void updateAirplaneMode(boolean force) {
