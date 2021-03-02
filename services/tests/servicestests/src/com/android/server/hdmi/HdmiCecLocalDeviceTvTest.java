@@ -81,8 +81,6 @@ public class HdmiCecLocalDeviceTvTest {
         PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
                 mIThermalServiceMock, new Handler(mMyLooper));
 
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
-
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                     @Override
@@ -119,16 +117,12 @@ public class HdmiCecLocalDeviceTvTest {
                     AudioManager getAudioManager() {
                         return mAudioManager;
                     }
-
-                    @Override
-                    protected HdmiCecConfig getHdmiCecConfig() {
-                        return hdmiCecConfig;
-                    }
                 };
 
         mHdmiCecLocalDeviceTv = new HdmiCecLocalDeviceTv(mHdmiControlService);
         mHdmiCecLocalDeviceTv.init();
         mHdmiControlService.setIoLooper(mMyLooper);
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());

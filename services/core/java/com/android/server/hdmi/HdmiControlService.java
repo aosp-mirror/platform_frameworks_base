@@ -221,7 +221,7 @@ public class HdmiControlService extends SystemService {
     private int mHdmiCecVolumeControl;
 
     // Make sure HdmiCecConfig is instantiated and the XMLs are read.
-    private final HdmiCecConfig mHdmiCecConfig;
+    private HdmiCecConfig mHdmiCecConfig;
 
     /**
      * Interface to report send result.
@@ -578,6 +578,11 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     void setHdmiCecNetwork(HdmiCecNetwork hdmiCecNetwork) {
         mHdmiCecNetwork = hdmiCecNetwork;
+    }
+
+    @VisibleForTesting
+    void setHdmiCecConfig(HdmiCecConfig hdmiCecConfig) {
+        mHdmiCecConfig = hdmiCecConfig;
     }
 
     public HdmiCecNetwork getHdmiCecNetwork() {
