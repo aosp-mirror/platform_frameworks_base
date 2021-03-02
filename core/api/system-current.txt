@@ -8204,10 +8204,11 @@ package android.os {
     field public static final int EVENT_MMS = 2; // 0x2
     field public static final int EVENT_SMS = 1; // 0x1
     field public static final int EVENT_UNSPECIFIED = 0; // 0x0
-    field public static final int REASON_ACTIVITY_RECOGNITION = 102; // 0x66
+    field public static final int REASON_ACTIVITY_RECOGNITION = 103; // 0x67
     field public static final int REASON_GEOFENCING = 100; // 0x64
     field public static final int REASON_OTHER = 1; // 0x1
     field public static final int REASON_PUSH_MESSAGING = 101; // 0x65
+    field public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102; // 0x66
     field public static final int REASON_UNKNOWN = 0; // 0x0
     field public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0; // 0x0
     field public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1; // 0x1
