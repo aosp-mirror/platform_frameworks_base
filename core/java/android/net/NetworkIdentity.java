@@ -18,7 +18,6 @@ package android.net;
 
 import static android.net.ConnectivityManager.TYPE_WIFI;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
@@ -180,29 +179,42 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     }
 
     /**
-     * Build a {@link NetworkIdentity} from the given {@link NetworkState} and {@code subType},
-     * assuming that any mobile networks are using the current IMSI. The subType if applicable,
-     * should be set as one of the TelephonyManager.NETWORK_TYPE_* constants, or
-     * {@link android.telephony.TelephonyManager#NETWORK_TYPE_UNKNOWN} if not.
+     * Build a {@link NetworkIdentity} from the given {@link NetworkState} and
+     * {@code subType}, assuming that any mobile networks are using the current IMSI.
+     * The subType if applicable, should be set as one of the TelephonyManager.NETWORK_TYPE_*
+     * constants, or {@link android.telephony.TelephonyManager#NETWORK_TYPE_UNKNOWN} if not.
      */
-    public static NetworkIdentity buildNetworkIdentity(Context context, NetworkState state,
-            boolean defaultNetwork, @NetworkType int subType) {
-        final int legacyType = state.legacyNetworkType;
+    // TODO: Delete this function after NetworkPolicyManagerService finishes the migration.
+    public static NetworkIdentity buildNetworkIdentity(Context context,
+            NetworkState state, boolean defaultNetwork, @NetworkType int subType) {
+        final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.linkProperties,
+                state.networkCapabilities, state.network, state.subscriberId,
+                state.legacyNetworkType);
+        return buildNetworkIdentity(context, snapshot, defaultNetwork, subType);
+    }
 
-        String subscriberId = null;
+    /**
+     * Build a {@link NetworkIdentity} from the given {@link NetworkStateSnapshot} and
+     * {@code subType}, assuming that any mobile networks are using the current IMSI.
+     * The subType if applicable, should be set as one of the TelephonyManager.NETWORK_TYPE_*
+     * constants, or {@link android.telephony.TelephonyManager#NETWORK_TYPE_UNKNOWN} if not.
+     */
+    public static NetworkIdentity buildNetworkIdentity(Context context,
+            NetworkStateSnapshot snapshot, boolean defaultNetwork, @NetworkType int subType) {
+        final int legacyType = snapshot.legacyType;
+
+        final String subscriberId = snapshot.subscriberId;
         String networkId = null;
-        boolean roaming = !state.networkCapabilities.hasCapability(
+        boolean roaming = !snapshot.networkCapabilities.hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
-        boolean metered = !state.networkCapabilities.hasCapability(
+        boolean metered = !snapshot.networkCapabilities.hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
 
-        subscriberId = state.subscriberId;
-
-        final int oemManaged = getOemBitfield(state.networkCapabilities);
+        final int oemManaged = getOemBitfield(snapshot.networkCapabilities);
 
         if (legacyType == TYPE_WIFI) {
-            if (state.networkCapabilities.getSsid() != null) {
-                networkId = state.networkCapabilities.getSsid();
+            if (snapshot.networkCapabilities.getSsid() != null) {
+                networkId = snapshot.networkCapabilities.getSsid();
                 if (networkId == null) {
                     // TODO: Figure out if this code path never runs. If so, remove them.
                     final WifiManager wifi = (WifiManager) context.getSystemService(
