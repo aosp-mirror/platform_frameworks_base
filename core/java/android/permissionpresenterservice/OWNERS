@@ -1,7 +1,3 @@
 # Bug component: 137825
 
-evanseverson@google.com
-ntmyren@google.com
-zhanghai@google.com
-svetoslavganov@android.com
-svetoslavganov@google.com
+include platform/frameworks/base:/core/java/android/permission/OWNERS
