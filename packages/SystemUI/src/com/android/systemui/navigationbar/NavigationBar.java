@@ -1243,7 +1243,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mUiEventLogger.log(NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS);
         Bundle args = new Bundle();
         args.putInt(
-                AssistManager.INVOCATION_TYPE_KEY, AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS);
+                AssistManager.INVOCATION_TYPE_KEY,
+                AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         mAssistManagerLazy.get().startAssist(args);
         mStatusBarLazy.get().awakenDreams();
 
