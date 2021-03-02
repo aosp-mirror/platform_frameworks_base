@@ -1895,6 +1895,20 @@ public class DevicePolicyManager {
     public static final String DELEGATION_CERT_SELECTION = "delegation-cert-selection";
 
     /**
+     * Grants access to {@link #setSecurityLoggingEnabled}, {@link #isSecurityLoggingEnabled},
+     * {@link #retrieveSecurityLogs}, and {@link #retrievePreRebootSecurityLogs}. Once granted the
+     * delegated app will start receiving {@link DelegatedAdminReceiver#onSecurityLogsAvailable}
+     * callback, and Device owner or Profile Owner will no longer receive the
+     * {@link DeviceAdminReceiver#onSecurityLogsAvailable} callback. There can be at most one app
+     * that has this delegation. If another app already had delegated security logging access, it
+     * will lose the delegation when a new app is delegated.
+     *
+     * <p> Can only be granted by Device Owner or Profile Owner of an organnization owned and
+     * managed profile.
+     */
+    public static final String DELEGATION_SECURITY_LOGGING = "delegation-security-logging";
+
+    /**
      * No management for current user in-effect. This is the default.
      * @hide
      */
@@ -11253,7 +11267,7 @@ public class DevicePolicyManager {
     public void setSecurityLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setSecurityLoggingEnabled");
         try {
-            mService.setSecurityLoggingEnabled(admin, enabled);
+            mService.setSecurityLoggingEnabled(admin, mContext.getPackageName(), enabled);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -11272,7 +11286,7 @@ public class DevicePolicyManager {
     public boolean isSecurityLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isSecurityLoggingEnabled");
         try {
-            return mService.isSecurityLoggingEnabled(admin);
+            return mService.isSecurityLoggingEnabled(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -11297,10 +11311,12 @@ public class DevicePolicyManager {
      * @see #isAffiliatedUser
      * @see DeviceAdminReceiver#onSecurityLogsAvailable
      */
+    @SuppressLint("NullableCollection")
     public @Nullable List<SecurityEvent> retrieveSecurityLogs(@NonNull ComponentName admin) {
         throwIfParentInstance("retrieveSecurityLogs");
         try {
-            ParceledListSlice<SecurityEvent> list = mService.retrieveSecurityLogs(admin);
+            ParceledListSlice<SecurityEvent> list = mService.retrieveSecurityLogs(
+                    admin, mContext.getPackageName());
             if (list != null) {
                 return list.getList();
             } else {
@@ -11450,11 +11466,13 @@ public class DevicePolicyManager {
      * @see #isAffiliatedUser
      * @see #retrieveSecurityLogs
      */
+    @SuppressLint("NullableCollection")
     public @Nullable List<SecurityEvent> retrievePreRebootSecurityLogs(
             @NonNull ComponentName admin) {
         throwIfParentInstance("retrievePreRebootSecurityLogs");
         try {
-            ParceledListSlice<SecurityEvent> list = mService.retrievePreRebootSecurityLogs(admin);
+            ParceledListSlice<SecurityEvent> list = mService.retrievePreRebootSecurityLogs(
+                    admin, mContext.getPackageName());
             if (list != null) {
                 return list.getList();
             } else {
