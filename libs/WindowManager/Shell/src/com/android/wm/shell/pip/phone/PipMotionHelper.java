@@ -102,7 +102,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * PhysicsAnimator instance for animating {@link PipBoundsState#getMotionBoundsState()}
      * using physics animations.
      */
-    private final PhysicsAnimator<Rect> mTemporaryBoundsPhysicsAnimator;
+    private PhysicsAnimator<Rect> mTemporaryBoundsPhysicsAnimator;
 
     private MagnetizedObject<Rect> mMagnetizedPip;
 
@@ -171,7 +171,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer, PhonePipMenuController menuController,
             PipSnapAlgorithm snapAlgorithm, PipTransitionController pipTransitionController,
-            FloatingContentCoordinator floatingContentCoordinator, ShellExecutor mainExecutor) {
+            FloatingContentCoordinator floatingContentCoordinator) {
         mContext = context;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipBoundsState = pipBoundsState;
@@ -179,21 +179,20 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
         pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
-        mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
-                mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
-
-        // Need to get the shell main thread sf vsync animation handler
-        mainExecutor.execute(() -> {
-            mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
-                    mSfAnimationHandlerThreadLocal.get());
-        });
-
         mResizePipUpdateListener = (target, values) -> {
             if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
                 mPipTaskOrganizer.scheduleUserResizePip(getBounds(),
                         mPipBoundsState.getMotionBoundsState().getBoundsInMotion(), null);
             }
         };
+    }
+
+    public void init() {
+        // Note: Needs to get the shell main thread sf vsync animation handler
+        mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
+                mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
+        mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
+                mSfAnimationHandlerThreadLocal.get());
     }
 
     @NonNull
