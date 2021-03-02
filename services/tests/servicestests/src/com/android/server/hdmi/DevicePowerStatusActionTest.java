@@ -86,8 +86,6 @@ public class DevicePowerStatusActionTest {
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
-
         mHdmiControlService = new HdmiControlService(mContextSpy) {
             @Override
             AudioManager getAudioManager() {
@@ -118,15 +116,11 @@ public class DevicePowerStatusActionTest {
             protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
-
-            @Override
-            protected HdmiCecConfig getHdmiCecConfig() {
-                return hdmiCecConfig;
-            }
         };
 
         Looper looper = mTestLooper.getLooper();
         mHdmiControlService.setIoLooper(looper);
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
