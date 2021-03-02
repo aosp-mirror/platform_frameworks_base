@@ -205,7 +205,7 @@ public class DomainVerificationPersistence {
                              .attribute(ATTR_HAS_AUTO_VERIFY_DOMAINS,
                                      pkgState.isHasAutoVerifyDomains())) {
             writeStateMap(parentSection, pkgState.getStateMap());
-            writeUserStates(parentSection, pkgState.getUserSelectionStates());
+            writeUserStates(parentSection, pkgState.getUserStates());
         }
     }
 

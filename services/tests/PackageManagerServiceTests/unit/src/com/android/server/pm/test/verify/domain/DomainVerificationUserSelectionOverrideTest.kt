@@ -21,7 +21,7 @@ import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainVerificationManager
-import android.content.pm.verify.domain.DomainVerificationUserSelection
+import android.content.pm.verify.domain.DomainVerificationUserState
 import android.os.Build
 import android.os.PatternMatcher
 import android.os.Process
@@ -39,7 +39,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import java.util.UUID
 
-class DomainVerificationUserSelectionOverrideTest {
+class DomainVerificationUserStateOverrideTest {
 
     companion object {
         private const val PKG_ONE = "com.test.one"
@@ -48,11 +48,11 @@ class DomainVerificationUserSelectionOverrideTest {
         private val UUID_TWO = UUID.fromString("a3389c16-7f9f-4e86-85e3-500d1249c74c")
 
         private val DOMAIN_ONE =
-            DomainVerificationUserSelectionOverrideTest::class.java.packageName
+            DomainVerificationUserStateOverrideTest::class.java.packageName
 
-        private const val STATE_NONE = DomainVerificationUserSelection.DOMAIN_STATE_NONE
-        private const val STATE_SELECTED = DomainVerificationUserSelection.DOMAIN_STATE_SELECTED
-        private const val STATE_VERIFIED = DomainVerificationUserSelection.DOMAIN_STATE_VERIFIED
+        private const val STATE_NONE = DomainVerificationUserState.DOMAIN_STATE_NONE
+        private const val STATE_SELECTED = DomainVerificationUserState.DOMAIN_STATE_SELECTED
+        private const val STATE_VERIFIED = DomainVerificationUserState.DOMAIN_STATE_VERIFIED
 
         private const val USER_ID = 0
     }
@@ -170,5 +170,5 @@ class DomainVerificationUserSelectionOverrideTest {
     }
 
     private fun DomainVerificationService.stateFor(pkgName: String, host: String) =
-        getDomainVerificationUserSelection(pkgName, USER_ID)!!.hostToStateMap[host]
+        getDomainVerificationUserState(pkgName, USER_ID)!!.hostToStateMap[host]
 }

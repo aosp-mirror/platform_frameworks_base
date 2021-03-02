@@ -2791,7 +2791,7 @@ package android.content.pm.verify.domain {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.domain.DomainVerificationRequest> CREATOR;
   }
 
-  public final class DomainVerificationUserSelection implements android.os.Parcelable {
+  public final class DomainVerificationUserState implements android.os.Parcelable {
     method @NonNull public java.util.UUID getIdentifier();
   }
 

@@ -217,10 +217,10 @@ class DomainVerificationSettings {
         }
 
         SparseArray<DomainVerificationInternalUserState> oldSelectionStates =
-                oldState.getUserSelectionStates();
+                oldState.getUserStates();
 
         SparseArray<DomainVerificationInternalUserState> newSelectionStates =
-                newState.getUserSelectionStates();
+                newState.getUserStates();
 
         DomainVerificationInternalUserState newUserState =
                 newSelectionStates.get(UserHandle.USER_SYSTEM);

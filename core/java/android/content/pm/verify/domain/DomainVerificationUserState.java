@@ -30,7 +30,6 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -60,7 +59,7 @@ import java.util.UUID;
 @SuppressWarnings("DefaultAnnotationParam")
 @DataClass(genAidl = true, genHiddenConstructor = true, genParcelable = true, genToString = true,
         genEqualsHashCode = true, genHiddenConstDefs = true)
-public final class DomainVerificationUserSelection implements Parcelable {
+public final class DomainVerificationUserState implements Parcelable {
 
     /**
      * The domain is unverified and unselected, and the application is unable to open web links
@@ -117,7 +116,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
     @NonNull
     private Map<String, Integer> unparcelHostToStateMap(Parcel in) {
         return DomainVerificationUtils.readHostMap(in, new ArrayMap<>(),
-                DomainVerificationUserSelection.class.getClassLoader());
+                DomainVerificationUserState.class.getClassLoader());
     }
 
     /**
@@ -137,7 +136,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserSelection.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserState.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -169,7 +168,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
     }
 
     /**
-     * Creates a new DomainVerificationUserSelection.
+     * Creates a new DomainVerificationUserState.
      *
      * @param packageName
      *   The package name that this data corresponds to.
@@ -182,7 +181,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
      * @hide
      */
     @DataClass.Generated.Member
-    public DomainVerificationUserSelection(
+    public DomainVerificationUserState(
             @NonNull UUID identifier,
             @NonNull String packageName,
             @NonNull UserHandle user,
@@ -245,7 +244,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
         // You can override field toString logic by defining methods like:
         // String fieldNameToString() { ... }
 
-        return "DomainVerificationUserSelection { " +
+        return "DomainVerificationUserState { " +
                 "identifier = " + mIdentifier + ", " +
                 "packageName = " + mPackageName + ", " +
                 "user = " + mUser + ", " +
@@ -258,13 +257,13 @@ public final class DomainVerificationUserSelection implements Parcelable {
     @DataClass.Generated.Member
     public boolean equals(@Nullable Object o) {
         // You can override field equality logic by defining either of the methods like:
-        // boolean fieldNameEquals(DomainVerificationUserSelection other) { ... }
+        // boolean fieldNameEquals(DomainVerificationUserState other) { ... }
         // boolean fieldNameEquals(FieldType otherValue) { ... }
 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         @SuppressWarnings("unchecked")
-        DomainVerificationUserSelection that = (DomainVerificationUserSelection) o;
+        DomainVerificationUserState that = (DomainVerificationUserState) o;
         //noinspection PointlessBooleanExpression
         return true
                 && java.util.Objects.equals(mIdentifier, that.mIdentifier)
@@ -322,7 +321,7 @@ public final class DomainVerificationUserSelection implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ DomainVerificationUserSelection(@NonNull Parcel in) {
+    /* package-private */ DomainVerificationUserState(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
@@ -353,24 +352,24 @@ public final class DomainVerificationUserSelection implements Parcelable {
     }
 
     @DataClass.Generated.Member
-    public static final @NonNull Parcelable.Creator<DomainVerificationUserSelection> CREATOR
-            = new Parcelable.Creator<DomainVerificationUserSelection>() {
+    public static final @NonNull Parcelable.Creator<DomainVerificationUserState> CREATOR
+            = new Parcelable.Creator<DomainVerificationUserState>() {
         @Override
-        public DomainVerificationUserSelection[] newArray(int size) {
-            return new DomainVerificationUserSelection[size];
+        public DomainVerificationUserState[] newArray(int size) {
+            return new DomainVerificationUserState[size];
         }
 
         @Override
-        public DomainVerificationUserSelection createFromParcel(@NonNull Parcel in) {
-            return new DomainVerificationUserSelection(in);
+        public DomainVerificationUserState createFromParcel(@NonNull Parcel in) {
+            return new DomainVerificationUserState(in);
         }
     };
 
     @DataClass.Generated(
-            time = 1614649708937L,
+            time = 1614721840152L,
             codegenVersion = "1.0.22",
-            sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserSelection.java",
-            inputSignatures = "public static final  int DOMAIN_STATE_NONE\npublic static final  int DOMAIN_STATE_SELECTED\npublic static final  int DOMAIN_STATE_VERIFIED\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nprivate  void parcelHostToStateMap(android.os.Parcel,int)\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> unparcelHostToStateMap(android.os.Parcel)\npublic @android.annotation.SystemApi @android.annotation.NonNull java.util.UUID getIdentifier()\nclass DomainVerificationUserSelection extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)")
+            sourceFile = "frameworks/base/core/java/android/content/pm/verify/domain/DomainVerificationUserState.java",
+            inputSignatures = "public static final  int DOMAIN_STATE_NONE\npublic static final  int DOMAIN_STATE_SELECTED\npublic static final  int DOMAIN_STATE_VERIFIED\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForUUID.class) java.util.UUID mIdentifier\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull android.os.UserHandle mUser\nprivate final @android.annotation.NonNull boolean mLinkHandlingAllowed\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> mHostToStateMap\nprivate  void parcelHostToStateMap(android.os.Parcel,int)\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,java.lang.Integer> unparcelHostToStateMap(android.os.Parcel)\npublic @android.annotation.SystemApi @android.annotation.NonNull java.util.UUID getIdentifier()\nclass DomainVerificationUserState extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=true, genHiddenConstructor=true, genParcelable=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)")
     @Deprecated
     private void __metadata() {}
 

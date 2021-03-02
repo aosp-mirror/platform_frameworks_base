@@ -33,9 +33,9 @@ import android.util.SparseArray;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
-import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -170,7 +170,7 @@ public class DomainVerificationDebug {
 
         ArraySet<String> allWebDomains = mCollector.collectAllWebDomains(pkg);
         SparseArray<DomainVerificationInternalUserState> userStates =
-                pkgState.getUserSelectionStates();
+                pkgState.getUserStates();
         if (userId == UserHandle.USER_ALL) {
             int size = userStates.size();
             if (size == 0) {

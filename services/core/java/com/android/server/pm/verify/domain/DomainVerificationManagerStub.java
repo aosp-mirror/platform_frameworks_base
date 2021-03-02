@@ -25,7 +25,7 @@ import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationManager.InvalidDomainSetException;
-import android.content.pm.verify.domain.DomainVerificationUserSelection;
+import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.os.ServiceSpecificException;
 
@@ -95,10 +95,10 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
 
     @Nullable
     @Override
-    public DomainVerificationUserSelection getDomainVerificationUserSelection(
+    public DomainVerificationUserState getDomainVerificationUserState(
             String packageName, @UserIdInt int userId) {
         try {
-            return mService.getDomainVerificationUserSelection(packageName, userId);
+            return mService.getDomainVerificationUserState(packageName, userId);
         } catch (Exception e) {
             throw rethrow(e);
         }

@@ -132,7 +132,7 @@ public class DomainVerificationEnforcer {
     /**
      * Enforced when mutating user selection state inside an exposed API method.
      */
-    public boolean assertApprovedUserSelectionQuerent(int callingUid, @UserIdInt int callingUserId,
+    public boolean assertApprovedUserStateQuerent(int callingUid, @UserIdInt int callingUserId,
             @NonNull String packageName, @UserIdInt int targetUserId) throws SecurityException {
         if (callingUserId != targetUserId) {
             mContext.enforcePermission(

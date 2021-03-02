@@ -122,8 +122,8 @@ class DomainVerificationSettingsMutationTest {
                 service("clearState") {
                     clearDomainVerificationState(listOf(TEST_PKG))
                 },
-                service("clearUserSelections") {
-                    clearUserSelections(listOf(TEST_PKG), TEST_USER_ID)
+                service("clearUserStates") {
+                    clearUserStates(listOf(TEST_PKG), TEST_USER_ID)
                 },
                 service("setStatus") {
                     setDomainVerificationStatus(
@@ -153,7 +153,7 @@ class DomainVerificationSettingsMutationTest {
                 service("setLinkHandlingAllowedInternal") {
                     setDomainVerificationLinkHandlingAllowedInternal(TEST_PKG, true, TEST_USER_ID)
                 },
-                service("setUserSelectionUserId") {
+                service("setUserStateUserId") {
                     setDomainVerificationUserSelection(
                         TEST_UUID,
                         setOf("example.com"),
@@ -161,7 +161,7 @@ class DomainVerificationSettingsMutationTest {
                         TEST_USER_ID
                     )
                 },
-                service("setUserSelectionInternal") {
+                service("setUserStateInternal") {
                     setDomainVerificationUserSelectionInternal(
                         TEST_USER_ID,
                         TEST_PKG,

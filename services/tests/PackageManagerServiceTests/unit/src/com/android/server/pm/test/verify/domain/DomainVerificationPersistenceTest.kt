@@ -102,14 +102,14 @@ class DomainVerificationPersistenceTest {
             // A domain without a written state falls back to default
             stateMap["missing-state.com"] = DomainVerificationManager.STATE_NO_RESPONSE
 
-            userSelectionStates[1] = DomainVerificationInternalUserState(1).apply {
+            userStates[1] = DomainVerificationInternalUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
                 isLinkHandlingAllowed = true
             }
         }
         val stateOne = mockEmptyPkgState(1).apply {
             // It's valid to have a user selection without any autoVerify domains
-            userSelectionStates[1] = DomainVerificationInternalUserState(1).apply {
+            userStates[1] = DomainVerificationInternalUserState(1).apply {
                 addHosts(setOf("example-user1.com", "example-user1.org"))
                 isLinkHandlingAllowed = false
             }
@@ -214,7 +214,7 @@ class DomainVerificationPersistenceTest {
 
     private fun mockPkgState(id: Int) = mockEmptyPkgState(id).apply {
         stateMap["$packageName.com"] = id
-        userSelectionStates[id] = DomainVerificationInternalUserState(id).apply {
+        userStates[id] = DomainVerificationInternalUserState(id).apply {
             addHosts(setOf("$packageName-user.com"))
             isLinkHandlingAllowed = true
         }

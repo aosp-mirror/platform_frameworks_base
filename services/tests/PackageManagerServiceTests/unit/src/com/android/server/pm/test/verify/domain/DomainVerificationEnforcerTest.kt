@@ -156,9 +156,9 @@ class DomainVerificationEnforcerTest {
                 },
                 enforcer(
                     Type.SELECTION_QUERENT,
-                    "approvedUserSelectionQuerent"
+                    "approvedUserStateQuerent"
                 ) {
-                    assertApprovedUserSelectionQuerent(
+                    assertApprovedUserStateQuerent(
                         it.callingUid, it.callingUserId,
                         it.targetPackageName, it.userId
                     )
@@ -179,7 +179,7 @@ class DomainVerificationEnforcerTest {
                         ArraySet(setOf("example.com"))
                     )
                 },
-                service(Type.INTERNAL, "setUserSelectionInternal") {
+                service(Type.INTERNAL, "setUserStateInternal") {
                     setDomainVerificationUserSelectionInternal(
                         it.userId,
                         it.targetPackageName,
@@ -193,8 +193,8 @@ class DomainVerificationEnforcerTest {
                 service(Type.INTERNAL, "clearState") {
                     clearDomainVerificationState(listOf(it.targetPackageName))
                 },
-                service(Type.INTERNAL, "clearUserSelections") {
-                    clearUserSelections(listOf(it.targetPackageName), it.userId)
+                service(Type.INTERNAL, "clearUserStates") {
+                    clearUserStates(listOf(it.targetPackageName), it.userId)
                 },
                 service(Type.VERIFIER, "queryValidPackageNames") {
                     queryValidVerificationPackageNames()
@@ -220,10 +220,10 @@ class DomainVerificationEnforcerTest {
                 service(Type.SELECTOR_USER, "setLinkHandlingAllowedUserId") {
                     setDomainVerificationLinkHandlingAllowed(it.targetPackageName, true, it.userId)
                 },
-                service(Type.SELECTION_QUERENT, "getUserSelectionUserId") {
-                    getDomainVerificationUserSelection(it.targetPackageName, it.userId)
+                service(Type.SELECTION_QUERENT, "getUserStateUserId") {
+                    getDomainVerificationUserState(it.targetPackageName, it.userId)
                 },
-                service(Type.SELECTOR_USER, "setUserSelectionUserId") {
+                service(Type.SELECTOR_USER, "setUserStateUserId") {
                     setDomainVerificationUserSelection(
                         it.targetDomainSetId,
                         setOf("example.com"),
@@ -354,7 +354,7 @@ class DomainVerificationEnforcerTest {
             Type.INTERNAL -> internal()
             Type.QUERENT -> approvedQuerent()
             Type.VERIFIER -> approvedVerifier()
-            Type.SELECTION_QUERENT -> approvedUserSelectionQuerent(verifyCrossUser = true)
+            Type.SELECTION_QUERENT -> approvedUserStateQuerent(verifyCrossUser = true)
             Type.SELECTOR -> approvedUserSelector(verifyCrossUser = false)
             Type.SELECTOR_USER -> approvedUserSelector(verifyCrossUser = true)
             Type.LEGACY_QUERENT -> legacyQuerent()
@@ -379,12 +379,12 @@ class DomainVerificationEnforcerTest {
     }
 
     private fun approvedQuerent() {
-        val allowUserSelection = AtomicBoolean(false)
+        val allowUserState = AtomicBoolean(false)
         val allowPreferredApps = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
-                allowUserSelection,
+                allowUserState,
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
             )
             initPermission(
@@ -411,7 +411,7 @@ class DomainVerificationEnforcerTest {
 
         assertFails { runMethod(target, NON_VERIFIER_UID) }
 
-        allowUserSelection.set(true)
+        allowUserState.set(true)
 
         assertFails { runMethod(target, NON_VERIFIER_UID) }
 
@@ -462,7 +462,7 @@ class DomainVerificationEnforcerTest {
         assertFails { runMethod(target, NON_VERIFIER_UID) }
     }
 
-    private fun approvedUserSelectionQuerent(verifyCrossUser: Boolean) {
+    private fun approvedUserStateQuerent(verifyCrossUser: Boolean) {
         val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
@@ -512,11 +512,11 @@ class DomainVerificationEnforcerTest {
     }
 
     private fun approvedUserSelector(verifyCrossUser: Boolean) {
-        val allowUserSelection = AtomicBoolean(false)
+        val allowUserState = AtomicBoolean(false)
         val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
-                allowUserSelection,
+                allowUserState,
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
             )
             initPermission(
@@ -557,7 +557,7 @@ class DomainVerificationEnforcerTest {
             runTestCases(callingUserId, notCallingUserId, throws = true)
         }
 
-        allowUserSelection.set(true)
+        allowUserState.set(true)
 
         runTestCases(callingUserId, callingUserId, throws = false)
         if (verifyCrossUser) {
@@ -683,7 +683,7 @@ class DomainVerificationEnforcerTest {
 
     private fun ownerQuerent(verifyCrossUser: Boolean) {
         val allowQueryAll = AtomicBoolean(false)
-        val allowUserSelection = AtomicBoolean(false)
+        val allowUserState = AtomicBoolean(false)
         val allowInteractAcrossUsers = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
@@ -691,7 +691,7 @@ class DomainVerificationEnforcerTest {
                 android.Manifest.permission.QUERY_ALL_PACKAGES
             )
             initPermission(
-                allowUserSelection,
+                allowUserState,
                 android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION
             )
             initPermission(
@@ -732,7 +732,7 @@ class DomainVerificationEnforcerTest {
             runTestCases(callingUserId, notCallingUserId, throws = true)
         }
 
-        allowUserSelection.set(true)
+        allowUserState.set(true)
 
         runTestCases(callingUserId, callingUserId, throws = false)
         if (verifyCrossUser) {

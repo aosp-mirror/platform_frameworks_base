@@ -36,7 +36,7 @@ import java.util.UUID;
 /**
  * System service to access domain verification APIs.
  *
- * Applications should use {@link #getDomainVerificationUserSelection(String)} if necessary to
+ * Applications should use {@link #getDomainVerificationUserState(String)} if necessary to
  * check if/how they are verified for a domain, which is required starting from platform
  * {@link android.os.Build.VERSION_CODES#S} in order to open {@link Intent}s which declare
  * {@link Intent#CATEGORY_BROWSABLE} or no category and also match against
@@ -222,7 +222,7 @@ public final class DomainVerificationManager {
      * {@link android.Manifest.permission#UPDATE_DOMAIN_VERIFICATION_USER_SELECTION})
      * to update the preferences of the user, when they have chosen to explicitly allow an
      * application to open links. This is done through querying
-     * {@link #getDomainVerificationUserSelection(String)} and calling
+     * {@link #getDomainVerificationUserState(String)} and calling
      * {@link #setDomainVerificationUserSelection(UUID, Set, boolean)} and
      * {@link #setDomainVerificationLinkHandlingAllowed(String, boolean)}.
      *
@@ -408,10 +408,10 @@ public final class DomainVerificationManager {
      * null if the package does not declare any HTTP/HTTPS domains.
      */
     @Nullable
-    public DomainVerificationUserSelection getDomainVerificationUserSelection(
+    public DomainVerificationUserState getDomainVerificationUserState(
             @NonNull String packageName) throws NameNotFoundException {
         try {
-            return mDomainVerificationManager.getDomainVerificationUserSelection(packageName,
+            return mDomainVerificationManager.getDomainVerificationUserState(packageName,
                     mContext.getUserId());
         } catch (Exception e) {
             Exception converted = rethrow(e, packageName);

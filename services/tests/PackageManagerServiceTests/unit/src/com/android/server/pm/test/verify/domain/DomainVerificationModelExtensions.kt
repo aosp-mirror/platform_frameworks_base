@@ -18,7 +18,7 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.pm.verify.domain.DomainVerificationRequest
 import android.content.pm.verify.domain.DomainVerificationInfo
-import android.content.pm.verify.domain.DomainVerificationUserSelection
+import android.content.pm.verify.domain.DomainVerificationUserState
 import com.android.server.pm.verify.domain.DomainVerificationPersistence
 
 operator fun <F> android.util.Pair<F, *>.component1() = first
@@ -30,11 +30,11 @@ operator fun DomainVerificationInfo.component1() = identifier
 operator fun DomainVerificationInfo.component2() = packageName
 operator fun DomainVerificationInfo.component3() = hostToStateMap
 
-operator fun DomainVerificationUserSelection.component1() = identifier
-operator fun DomainVerificationUserSelection.component2() = packageName
-operator fun DomainVerificationUserSelection.component3() = user
-operator fun DomainVerificationUserSelection.component4() = isLinkHandlingAllowed
-operator fun DomainVerificationUserSelection.component5() = hostToStateMap
+operator fun DomainVerificationUserState.component1() = identifier
+operator fun DomainVerificationUserState.component2() = packageName
+operator fun DomainVerificationUserState.component3() = user
+operator fun DomainVerificationUserState.component4() = isLinkHandlingAllowed
+operator fun DomainVerificationUserState.component5() = hostToStateMap
 
 operator fun DomainVerificationPersistence.ReadResult.component1() = active
 operator fun DomainVerificationPersistence.ReadResult.component2() = restored

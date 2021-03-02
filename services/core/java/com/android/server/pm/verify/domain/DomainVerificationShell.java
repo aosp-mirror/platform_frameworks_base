@@ -24,7 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
-import android.content.pm.verify.domain.DomainVerificationUserSelection;
+import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -118,7 +118,7 @@ public class DomainVerificationShell {
             case "set-app-links":
                 return runSetAppLinks(commandHandler);
             case "set-app-links-user-selection":
-                return runSetAppLinksUserSelection(commandHandler);
+                return runSetAppLinksUserState(commandHandler);
             case "set-app-links-allowed":
                 return runSetAppLinksAllowed(commandHandler);
         }
@@ -193,7 +193,7 @@ public class DomainVerificationShell {
     }
 
     // pm set-app-links-user-selection --user <USER_ID> [--package <PACKAGE>] <ENABLED> <DOMAINS>...
-    private boolean runSetAppLinksUserSelection(@NonNull BasicShellCommandHandler commandHandler) {
+    private boolean runSetAppLinksUserState(@NonNull BasicShellCommandHandler commandHandler) {
         Integer userId = null;
         String packageName = null;
 
@@ -224,7 +224,7 @@ public class DomainVerificationShell {
             return false;
         }
 
-        userId = translateUserId(userId, "runSetAppLinksUserSelection");
+        userId = translateUserId(userId, "runSetAppLinksUserState");
 
         String enabledString = commandHandler.getNextArgRequired();
 
@@ -326,7 +326,7 @@ public class DomainVerificationShell {
         }
 
         if (userId != null) {
-            mCallback.clearUserSelections(packageNames, userId);
+            mCallback.clearUserStates(packageNames, userId);
         } else {
             mCallback.clearDomainVerificationState(packageNames);
         }
@@ -457,10 +457,10 @@ public class DomainVerificationShell {
                 throws PackageManager.NameNotFoundException;
 
         /**
-         * @see DomainVerificationManager#getDomainVerificationUserSelection(String)
+         * @see DomainVerificationManager#getDomainVerificationUserState(String)
          */
         @Nullable
-        DomainVerificationUserSelection getDomainVerificationUserSelection(
+        DomainVerificationUserState getDomainVerificationUserState(
                 @NonNull String packageName, @UserIdInt int userId)
                 throws PackageManager.NameNotFoundException;
 
@@ -486,7 +486,7 @@ public class DomainVerificationShell {
          * Reset all the user selections for the given package names, or all package names if null
          * is provided.
          */
-        void clearUserSelections(@Nullable List<String> packageNames, @UserIdInt int userId);
+        void clearUserStates(@Nullable List<String> packageNames, @UserIdInt int userId);
 
         /**
          * Broadcast a verification request for the given package names, or all package names if
