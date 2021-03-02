@@ -17,5 +17,6 @@
 <permissions>
     <privapp-permissions package="com.android.car.hvac">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
     </privapp-permissions>
 </permissions>
