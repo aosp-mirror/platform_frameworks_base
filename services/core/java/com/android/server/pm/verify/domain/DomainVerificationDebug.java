@@ -35,7 +35,7 @@ import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
-import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
+import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -169,7 +169,7 @@ public class DomainVerificationDebug {
         }
 
         ArraySet<String> allWebDomains = mCollector.collectAllWebDomains(pkg);
-        SparseArray<DomainVerificationUserState> userStates =
+        SparseArray<DomainVerificationInternalUserState> userStates =
                 pkgState.getUserSelectionStates();
         if (userId == UserHandle.USER_ALL) {
             int size = userStates.size();
@@ -178,13 +178,13 @@ public class DomainVerificationDebug {
                         wasHeaderPrinted);
             } else {
                 for (int index = 0; index < size; index++) {
-                    DomainVerificationUserState userState = userStates.valueAt(index);
+                    DomainVerificationInternalUserState userState = userStates.valueAt(index);
                     printState(writer, pkgState, userState.getUserId(), userState, reusedSet,
                             allWebDomains, wasHeaderPrinted);
                 }
             }
         } else {
-            DomainVerificationUserState userState = userStates.get(userId);
+            DomainVerificationInternalUserState userState = userStates.get(userId);
             printState(writer, pkgState, userId, userState, reusedSet, allWebDomains,
                     wasHeaderPrinted);
         }
@@ -192,8 +192,9 @@ public class DomainVerificationDebug {
 
     boolean printState(@NonNull IndentingPrintWriter writer,
             @NonNull DomainVerificationPkgState pkgState, @UserIdInt int userId,
-            @Nullable DomainVerificationUserState userState, @NonNull ArraySet<String> reusedSet,
-            @NonNull ArraySet<String> allWebDomains, boolean wasHeaderPrinted) {
+            @Nullable DomainVerificationInternalUserState userState,
+            @NonNull ArraySet<String> reusedSet, @NonNull ArraySet<String> allWebDomains,
+            boolean wasHeaderPrinted) {
         reusedSet.clear();
         reusedSet.addAll(allWebDomains);
         if (userState != null) {

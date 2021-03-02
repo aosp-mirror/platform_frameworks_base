@@ -27,9 +27,9 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.SettingsXml;
+import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
-import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -157,7 +157,7 @@ public class DomainVerificationPersistence {
         UUID id = UUID.fromString(idString);
 
         final ArrayMap<String, Integer> stateMap = new ArrayMap<>();
-        final SparseArray<DomainVerificationUserState> userStates = new SparseArray<>();
+        final SparseArray<DomainVerificationInternalUserState> userStates = new SparseArray<>();
 
         SettingsXml.ChildSection child = section.children();
         while (child.moveToNext()) {
@@ -176,10 +176,10 @@ public class DomainVerificationPersistence {
     }
 
     private static void readUserStates(@NonNull SettingsXml.ReadSection section,
-            @NonNull SparseArray<DomainVerificationUserState> userStates) {
+            @NonNull SparseArray<DomainVerificationInternalUserState> userStates) {
         SettingsXml.ChildSection child = section.children();
         while (child.moveToNext(TAG_USER_STATE)) {
-            DomainVerificationUserState userState = createUserStateFromXml(child);
+            DomainVerificationInternalUserState userState = createUserStateFromXml(child);
             if (userState != null) {
                 userStates.put(userState.getUserId(), userState);
             }
@@ -210,7 +210,7 @@ public class DomainVerificationPersistence {
     }
 
     private static void writeUserStates(@NonNull SettingsXml.WriteSection parentSection,
-            @NonNull SparseArray<DomainVerificationUserState> states) throws IOException {
+            @NonNull SparseArray<DomainVerificationInternalUserState> states) throws IOException {
         int size = states.size();
         if (size == 0) {
             return;
@@ -245,7 +245,7 @@ public class DomainVerificationPersistence {
      * entered.
      */
     @Nullable
-    public static DomainVerificationUserState createUserStateFromXml(
+    public static DomainVerificationInternalUserState createUserStateFromXml(
             @NonNull SettingsXml.ReadSection section) {
         int userId = section.getInt(ATTR_USER_ID);
         if (userId == -1) {
@@ -260,7 +260,7 @@ public class DomainVerificationPersistence {
             readEnabledHosts(child, enabledHosts);
         }
 
-        return new DomainVerificationUserState(userId, enabledHosts, allowLinkHandling);
+        return new DomainVerificationInternalUserState(userId, enabledHosts, allowLinkHandling);
     }
 
     private static void readEnabledHosts(@NonNull SettingsXml.ReadSection section,
@@ -275,7 +275,7 @@ public class DomainVerificationPersistence {
     }
 
     public static void writeUserStateToXml(@NonNull SettingsXml.WriteSection parentSection,
-            @NonNull DomainVerificationUserState userState) throws IOException {
+            @NonNull DomainVerificationInternalUserState userState) throws IOException {
         try (SettingsXml.WriteSection section =
                      parentSection.startSection(TAG_USER_STATE)
                              .attribute(ATTR_USER_ID, userState.getUserId())

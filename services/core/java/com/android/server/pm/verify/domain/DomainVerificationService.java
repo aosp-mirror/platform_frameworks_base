@@ -56,9 +56,9 @@ import com.android.server.SystemService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
-import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyUnavailable;
 
@@ -405,7 +405,8 @@ public class DomainVerificationService extends SystemService
             final int size = mAttachedPkgStates.size();
             for (int index = 0; index < size; index++) {
                 DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
-                SparseArray<DomainVerificationUserState> array = pkgState.getUserSelectionStates();
+                SparseArray<DomainVerificationInternalUserState> array =
+                        pkgState.getUserSelectionStates();
                 int arraySize = array.size();
                 for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) {
                     array.valueAt(arrayIndex).removeHost(domain);
@@ -484,7 +485,8 @@ public class DomainVerificationService extends SystemService
 
             DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
                     false /* forAutoVerify */, callingUid, userId);
-            DomainVerificationUserState userState = pkgState.getOrCreateUserSelectionState(userId);
+            DomainVerificationInternalUserState userState =
+                    pkgState.getOrCreateUserSelectionState(userId);
 
             // Disable other packages if approving this one. Note that this check is only done for
             // enabling. This allows an escape hatch in case multiple packages somehow get selected.
@@ -524,7 +526,7 @@ public class DomainVerificationService extends SystemService
                             continue;
                         }
 
-                        DomainVerificationUserState approvedUserState =
+                        DomainVerificationInternalUserState approvedUserState =
                                 approvedPkgState.getUserSelectionState(userId);
                         if (approvedUserState == null) {
                             continue;
@@ -607,7 +609,7 @@ public class DomainVerificationService extends SystemService
 
         if (userId == UserHandle.USER_ALL) {
             for (int aUserId : mConnection.getAllUserIds()) {
-                DomainVerificationUserState userState =
+                DomainVerificationInternalUserState userState =
                         pkgState.getOrCreateUserSelectionState(aUserId);
                 if (enabled) {
                     userState.addHosts(domains);
@@ -616,7 +618,8 @@ public class DomainVerificationService extends SystemService
                 }
             }
         } else {
-            DomainVerificationUserState userState = pkgState.getOrCreateUserSelectionState(userId);
+            DomainVerificationInternalUserState userState =
+                    pkgState.getOrCreateUserSelectionState(userId);
             if (enabled) {
                 userState.addHosts(domains);
             } else {
@@ -649,7 +652,7 @@ public class DomainVerificationService extends SystemService
 
             Map<String, Integer> domains = new ArrayMap<>(webDomainsSize);
             ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
-            DomainVerificationUserState userState = pkgState.getUserSelectionState(userId);
+            DomainVerificationInternalUserState userState = pkgState.getUserSelectionState(userId);
             Set<String> enabledHosts = userState == null ? emptySet() : userState.getEnabledHosts();
 
             for (int index = 0; index < webDomainsSize; index++) {
@@ -765,7 +768,7 @@ public class DomainVerificationService extends SystemService
             AndroidPackage newPkg = newPkgSetting.getPkg();
 
             ArrayMap<String, Integer> newStateMap = new ArrayMap<>();
-            SparseArray<DomainVerificationUserState> newUserStates = new SparseArray<>();
+            SparseArray<DomainVerificationInternalUserState> newUserStates = new SparseArray<>();
 
             if (oldPkgState == null || oldPkg == null || newPkg == null) {
                 // Should be impossible, but to be safe, continue with a new blank state instead
@@ -808,7 +811,7 @@ public class DomainVerificationService extends SystemService
                 }
             }
 
-            SparseArray<DomainVerificationUserState> oldUserStates =
+            SparseArray<DomainVerificationInternalUserState> oldUserStates =
                     oldPkgState.getUserSelectionStates();
             int oldUserStatesSize = oldUserStates.size();
             if (oldUserStatesSize > 0) {
@@ -816,13 +819,14 @@ public class DomainVerificationService extends SystemService
                 for (int oldUserStatesIndex = 0; oldUserStatesIndex < oldUserStatesSize;
                         oldUserStatesIndex++) {
                     int userId = oldUserStates.keyAt(oldUserStatesIndex);
-                    DomainVerificationUserState oldUserState = oldUserStates.valueAt(
+                    DomainVerificationInternalUserState oldUserState = oldUserStates.valueAt(
                             oldUserStatesIndex);
                     ArraySet<String> oldEnabledHosts = oldUserState.getEnabledHosts();
                     ArraySet<String> newEnabledHosts = new ArraySet<>(oldEnabledHosts);
                     newEnabledHosts.retainAll(newWebDomains);
-                    DomainVerificationUserState newUserState = new DomainVerificationUserState(
-                            userId, newEnabledHosts, oldUserState.isLinkHandlingAllowed());
+                    DomainVerificationInternalUserState newUserState =
+                            new DomainVerificationInternalUserState(userId, newEnabledHosts,
+                                    oldUserState.isLinkHandlingAllowed());
                     newUserStates.put(userId, newUserState);
                 }
             }
@@ -1515,7 +1519,7 @@ public class DomainVerificationService extends SystemService
                 return APPROVAL_LEVEL_NONE;
             }
 
-            DomainVerificationUserState userState = pkgState.getUserSelectionState(userId);
+            DomainVerificationInternalUserState userState = pkgState.getUserSelectionState(userId);
 
             if (userState != null && !userState.isLinkHandlingAllowed()) {
                 if (DEBUG_APPROVAL) {
