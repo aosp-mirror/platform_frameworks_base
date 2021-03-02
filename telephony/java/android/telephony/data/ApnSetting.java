@@ -18,6 +18,8 @@ package android.telephony.data;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
@@ -26,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
+import android.telephony.Annotation;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
@@ -133,6 +136,25 @@ public class ApnSetting implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Skip464XlatStatus {}
 
+    /** @hide */
+    @StringDef(value = {
+            TYPE_ALL_STRING,
+            TYPE_CBS_STRING,
+            TYPE_DEFAULT_STRING,
+            TYPE_DUN_STRING,
+            TYPE_EMERGENCY_STRING,
+            TYPE_FOTA_STRING,
+            TYPE_HIPRI_STRING,
+            TYPE_IA_STRING,
+            TYPE_IMS_STRING,
+            TYPE_MCX_STRING,
+            TYPE_MMS_STRING,
+            TYPE_SUPL_STRING,
+            TYPE_XCAP_STRING,
+    }, prefix = "TYPE_", suffix = "_STRING")
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApnTypeString {}
+
     /**
      * APN types for data connections.  These are usage categories for an APN
      * entry.  One APN entry may support multiple APN types, eg, a single APN
@@ -140,99 +162,133 @@ public class ApnSetting implements Parcelable {
      * connections.<br/>
      * APN_TYPE_ALL is a special type to indicate that this APN entry can
      * service all data connections.
-     * <p>
-     * Note: The goal is to deprecate this.  Due to the Carrier Table being used
-     * directly, this isn't feasible right now.
      *
      * @hide
      */
+    @SystemApi
     public static final String TYPE_ALL_STRING = "*";
 
     /**
      * APN type for default data traffic
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_DEFAULT_STRING = "default";
 
 
     /**
-     * APN type for MMS traffic
+     * APN type for MMS (Multimedia Messaging Service) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_MMS_STRING = "mms";
 
 
     /**
-     * APN type for SUPL assisted GPS
+     * APN type for SUPL (Secure User Plane Location) assisted GPS.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_SUPL_STRING = "supl";
 
     /**
-     * APN type for DUN traffic
+     * APN type for DUN (Dial-up networking) traffic
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_DUN_STRING = "dun";
 
     /**
-     * APN type for HiPri traffic
+     * APN type for high-priority traffic
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_HIPRI_STRING = "hipri";
 
     /**
-     * APN type for FOTA
+     * APN type for FOTA (Firmware over-the-air) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_FOTA_STRING = "fota";
 
     /**
-     * APN type for IMS
+     * APN type for IMS (IP Multimedia Subsystem) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_IMS_STRING = "ims";
 
     /**
-     * APN type for CBS
+     * APN type for CBS (Carrier Branded Services) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_CBS_STRING = "cbs";
 
     /**
-     * APN type for IA Initial Attach APN
+     * APN type for the IA (Initial Attach) APN
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_IA_STRING = "ia";
 
     /**
      * APN type for Emergency PDN. This is not an IA apn, but is used
      * for access to carrier services in an emergency call situation.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_EMERGENCY_STRING = "emergency";
 
     /**
-     * APN type for Mission Critical Services
+     * APN type for Mission Critical Services.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_MCX_STRING = "mcx";
 
     /**
-     * APN type for XCAP
+     * APN type for XCAP (XML Configuration Access Protocol) traffic.
      *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
      * @hide
      */
+    @SystemApi
     public static final String TYPE_XCAP_STRING = "xcap";
 
 
@@ -1426,16 +1482,43 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
-     * @param apnType APN type
-     * @return APN type in string format
+     * Converts the integer representation of APN type to its string representation.
+     *
+     * @param apnType APN type as an integer
+     * @return String representation of the APN type, or an empty string if the provided integer is
+     * not a valid APN type.
      * @hide
      */
-    public static String getApnTypeString(int apnType) {
+    @SystemApi
+    public static @NonNull @ApnTypeString String getApnTypeString(@Annotation.ApnType int apnType) {
         if (apnType == TYPE_ALL) {
             return "*";
         }
         String apnTypeString = APN_TYPE_INT_MAP.get(apnType);
-        return apnTypeString == null ? "Unknown" : apnTypeString;
+        return apnTypeString == null ? "" : apnTypeString;
+    }
+
+    /**
+     * Same as {@link #getApnTypeString(int)}, but returns "Unknown" instead of an empty string
+     * when provided with an invalid int for compatibility purposes.
+     * @hide
+     */
+    public static @NonNull String getApnTypeStringInternal(@Annotation.ApnType int apnType) {
+        String result = getApnTypeString(apnType);
+        return TextUtils.isEmpty(result) ? "Unknown" : result;
+    }
+
+    /**
+     * Converts the string representation of an APN type to its integer representation.
+     *
+     * @param apnType APN type as a string
+     * @return Integer representation of the APN type, or 0 if the provided string is not a valid
+     * APN type.
+     * @hide
+     */
+    @SystemApi
+    public static @Annotation.ApnType int getApnTypeInt(@NonNull @ApnTypeString String apnType) {
+        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(), 0);
     }
 
     /**

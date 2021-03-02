@@ -77,6 +77,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -2656,10 +2657,31 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 TelephonyUtils.dataStateToString(pdcs.getState()));
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_KEY, pdcs.getApnSetting().getApnName());
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_TYPE_KEY,
-                ApnSetting.getApnTypesStringFromBitmask(pdcs.getApnSetting().getApnTypeBitmask()));
+                getApnTypesStringFromBitmask(pdcs.getApnSetting().getApnTypeBitmask()));
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, slotIndex);
         intent.putExtra(PHONE_CONSTANTS_SUBSCRIPTION_KEY, subId);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL, Manifest.permission.READ_PHONE_STATE);
+    }
+
+    /**
+     * Reimplementation of {@link ApnSetting#getApnTypesStringFromBitmask}.
+     */
+    @VisibleForTesting
+    public static String getApnTypesStringFromBitmask(int apnTypeBitmask) {
+        List<String> types = new ArrayList<>();
+        int remainingApnTypes = apnTypeBitmask;
+        // special case for DEFAULT since it's not a pure bit
+        if ((remainingApnTypes & ApnSetting.TYPE_DEFAULT) == ApnSetting.TYPE_DEFAULT) {
+            types.add(ApnSetting.TYPE_DEFAULT_STRING);
+            remainingApnTypes &= ~ApnSetting.TYPE_DEFAULT;
+        }
+        while (remainingApnTypes != 0) {
+            int highestApnTypeBit = Integer.highestOneBit(remainingApnTypes);
+            String apnString = ApnSetting.getApnTypeString(highestApnTypeBit);
+            if (!TextUtils.isEmpty(apnString)) types.add(apnString);
+            remainingApnTypes &= ~highestApnTypeBit;
+        }
+        return TextUtils.join(",", types);
     }
 
     private void enforceNotifyPermissionOrCarrierPrivilege(String method) {
