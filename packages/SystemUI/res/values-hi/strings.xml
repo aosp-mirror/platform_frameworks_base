@@ -982,8 +982,8 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- यह <xliff:g id="APP">%1$s</xliff:g> से सूचना पढ़ सकता है"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- यह <xliff:g id="APP">%1$s</xliff:g> में कार्रवाई कर सकता है"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g> को किसी भी ऐप्लिकेशन के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"मंज़ूरी दें"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"नामंज़ूर करें"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"अनुमति दें"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"अनुमति न दें"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"बैटरी सेवर शेड्यूल करने के लिए टैप करें"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"जब बैटरी खत्म होने वाली हो तब \'बैटरी सेवर\' चालू करें"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"जी नहीं, शुक्रिया"</string>

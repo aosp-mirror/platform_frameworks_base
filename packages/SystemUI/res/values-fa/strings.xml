@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"بسته به تنظیمات ممکن است تلفن زنگ بزند یا لرزش داشته باشد"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"بسته به تنظیمات ممکن است تلفن زنگ بزند یا لرزش داشته باشد. مکالمه‌های <xliff:g id="APP_NAME">%1$s</xliff:g> به‌طور پیش‌فرض در حبابک نشان داده می‌شوند."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"با میان‌بری شناور به این محتوا، توجه‌تان را جلب می‌کند."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"در بالای بخش مکالمه به‌صورت حبابک شناور نشان داده می‌شود و تصویر نمایه را در صفحه قفل نمایش می‌دهد"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"در بالای بخش مکالمه به‌صورت حبابک شناور نشان داده می‌شود و عکس نمایه را در صفحه قفل نمایش می‌دهد"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ویژگی‌های مکالمه پشتیبانی نمی‌کند"</string>
@@ -1026,7 +1026,7 @@
     <string name="priority_onboarding_title" msgid="2893070698479227616">"مکالمه روی اولویت تنظیم شده است"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"مکالمه‌های اولویت‌دار:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"نمایش در بالای بخش مکالمه"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"تصویر نمایه را در صفحه قفل نمایش می‌دهد"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"عکس نمایه را در صفحه قفل نمایش می‌دهد"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"به‌شکل حبابک شناور روی برنامه‌ها ظاهر می‌شود"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"وقفه در «مزاحم نشوید»"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"متوجه‌ام"</string>

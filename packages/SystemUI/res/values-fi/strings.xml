@@ -118,7 +118,7 @@
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Käytä kamerana (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Asenna Android File Transfer -sovellus Macille"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Takaisin"</string>
-    <string name="accessibility_home" msgid="5430449841237966217">"Aloituspainike"</string>
+    <string name="accessibility_home" msgid="5430449841237966217">"Aloitus"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Valikko"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Esteettömyys"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Näytön kääntäminen"</string>
