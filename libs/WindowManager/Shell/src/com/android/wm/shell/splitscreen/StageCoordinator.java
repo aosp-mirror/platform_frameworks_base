@@ -362,8 +362,9 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
 
     @Override
     public void onSnappedToDismiss(boolean bottomOrRight) {
-        final boolean mainStageToTop = bottomOrRight
-                && mSideStagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT;
+        final boolean mainStageToTop =
+                bottomOrRight ? mSideStagePosition == STAGE_POSITION_BOTTOM_OR_RIGHT
+                        : mSideStagePosition == STAGE_POSITION_TOP_OR_LEFT;
         exitSplitScreen(mainStageToTop ? mMainStage : mSideStage);
     }
 
