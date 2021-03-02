@@ -763,6 +763,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
 
+    // A reusable token for other purposes, e.g. content capture, translation. It shouldn't be used
+    // without security checks
+    final Binder shareableActivityToken = new Binder();
+
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
 
