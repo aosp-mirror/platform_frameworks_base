@@ -1733,24 +1733,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                             if (Process.isIsolated(uid)) {
                                 return Zygote.MOUNT_EXTERNAL_NONE;
                             }
-                            if (noteOperation(AppOpsManager.OP_READ_EXTERNAL_STORAGE, uid,
-                                    packageName, null, true, "External storage policy", true)
-                                    != AppOpsManager.MODE_ALLOWED) {
-                                return Zygote.MOUNT_EXTERNAL_NONE;
-                            }
-                            if (noteOperation(AppOpsManager.OP_WRITE_EXTERNAL_STORAGE, uid,
-                                    packageName, null, true, "External storage policy", true)
-                                    != AppOpsManager.MODE_ALLOWED) {
-                                return Zygote.MOUNT_EXTERNAL_READ;
-                            }
-                            return Zygote.MOUNT_EXTERNAL_WRITE;
+                            return Zygote.MOUNT_EXTERNAL_DEFAULT;
                         }
 
                         @Override
                         public boolean hasExternalStorage(int uid, String packageName) {
                             final int mountMode = getMountMode(uid, packageName);
-                            return mountMode == Zygote.MOUNT_EXTERNAL_READ
-                                    || mountMode == Zygote.MOUNT_EXTERNAL_WRITE;
+                            return mountMode != Zygote.MOUNT_EXTERNAL_NONE;
                         }
                     });
         }

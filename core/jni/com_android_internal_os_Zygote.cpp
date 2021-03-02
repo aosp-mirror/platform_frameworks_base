@@ -115,7 +115,6 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 static pid_t gSystemServerPid = 0;
 
 static constexpr const char* kVoldAppDataIsolation = "persist.sys.vold_app_data_isolation_enabled";
-static constexpr const char* kPropFuse = "persist.sys.fuse";
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
@@ -305,31 +304,15 @@ static std::array<UsapTableEntry, USAP_POOL_SIZE_MAX_LIMIT> gUsapTable;
 static FileDescriptorTable* gOpenFdTable = nullptr;
 
 // Must match values in com.android.internal.os.Zygote.
-// The order of entries here must be kept in sync with ExternalStorageViews array values.
+// Note that there are gaps in the constants:
+// This is to further keep the values consistent with IVold.aidl
 enum MountExternalKind {
-  MOUNT_EXTERNAL_NONE = 0,
-  MOUNT_EXTERNAL_DEFAULT = 1,
-  MOUNT_EXTERNAL_READ = 2,
-  MOUNT_EXTERNAL_WRITE = 3,
-  MOUNT_EXTERNAL_LEGACY = 4,
-  MOUNT_EXTERNAL_INSTALLER = 5,
-  MOUNT_EXTERNAL_FULL = 6,
-  MOUNT_EXTERNAL_PASS_THROUGH = 7,
-  MOUNT_EXTERNAL_ANDROID_WRITABLE = 8,
-  MOUNT_EXTERNAL_COUNT = 9
-};
-
-// The order of entries here must be kept in sync with MountExternalKind enum values.
-static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorageViews = {
-  "",                     // MOUNT_EXTERNAL_NONE
-  "/mnt/runtime/default", // MOUNT_EXTERNAL_DEFAULT
-  "/mnt/runtime/read",    // MOUNT_EXTERNAL_READ
-  "/mnt/runtime/write",   // MOUNT_EXTERNAL_WRITE
-  "/mnt/runtime/write",   // MOUNT_EXTERNAL_LEGACY
-  "/mnt/runtime/write",   // MOUNT_EXTERNAL_INSTALLER
-  "/mnt/runtime/full",    // MOUNT_EXTERNAL_FULL
-  "/mnt/runtime/full",    // MOUNT_EXTERNAL_PASS_THROUGH (only used w/ FUSE)
-  "/mnt/runtime/full",    // MOUNT_EXTERNAL_ANDROID_WRITABLE (only used w/ FUSE)
+    MOUNT_EXTERNAL_NONE = 0,
+    MOUNT_EXTERNAL_DEFAULT = 1,
+    MOUNT_EXTERNAL_INSTALLER = 5,
+    MOUNT_EXTERNAL_PASS_THROUGH = 7,
+    MOUNT_EXTERNAL_ANDROID_WRITABLE = 8,
+    MOUNT_EXTERNAL_COUNT = 9
 };
 
 // Must match values in com.android.internal.os.Zygote.
@@ -832,29 +815,20 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   PrepareDir(user_source, 0710, user_id ? AID_ROOT : AID_SHELL,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
-  bool isFuse = GetBoolProperty(kPropFuse, false);
   bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, false);
 
-  if (isFuse) {
-    if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
+  if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
       const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);
       PrepareDir(pass_through_source, 0710, AID_ROOT, AID_MEDIA_RW, fail_fn);
       BindMount(pass_through_source, "/storage", fail_fn);
-    } else if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
+  } else if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
       const std::string installer_source = StringPrintf("/mnt/installer/%d", user_id);
       BindMount(installer_source, "/storage", fail_fn);
-    } else if (isAppDataIsolationEnabled && mount_mode == MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+  } else if (isAppDataIsolationEnabled && mount_mode == MOUNT_EXTERNAL_ANDROID_WRITABLE) {
       const std::string writable_source = StringPrintf("/mnt/androidwritable/%d", user_id);
       BindMount(writable_source, "/storage", fail_fn);
-    } else {
-      BindMount(user_source, "/storage", fail_fn);
-    }
   } else {
-    const std::string& storage_source = ExternalStorageViews[mount_mode];
-    BindMount(storage_source, "/storage", fail_fn);
-
-    // Mount user-specific symlink helper into place
-    BindMount(user_source, "/storage/self", fail_fn);
+      BindMount(user_source, "/storage", fail_fn);
   }
 }
 
