@@ -179,23 +179,11 @@ public final class Zygote {
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_DEFAULT = IVold.REMOUNT_MODE_DEFAULT;
-    /** Read-only external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_READ = IVold.REMOUNT_MODE_READ;
-    /** Read-write external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_WRITE = IVold.REMOUNT_MODE_WRITE;
-    /**
-     * Mount mode for apps that are already installed on the device before the isolated_storage
-     * feature is enabled.
-     */
-    public static final int MOUNT_EXTERNAL_LEGACY = IVold.REMOUNT_MODE_LEGACY;
     /**
      * Mount mode for package installers which should give them access to
      * all obb dirs in addition to their package sandboxes
      */
     public static final int MOUNT_EXTERNAL_INSTALLER = IVold.REMOUNT_MODE_INSTALLER;
-    /** Read-write external storage should be mounted instead of package sandbox */
-    public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
-
     /** The lower file system should be bind mounted directly on external storage */
     public static final int MOUNT_EXTERNAL_PASS_THROUGH = IVold.REMOUNT_MODE_PASS_THROUGH;
 

@@ -395,16 +395,8 @@ class ZygoteArguments {
                 mNiceName = getAssignmentValue(arg);
             } else if (arg.equals("--mount-external-default")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
-            } else if (arg.equals("--mount-external-read")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_READ;
-            } else if (arg.equals("--mount-external-write")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
-            } else if (arg.equals("--mount-external-full")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_FULL;
-            }  else if (arg.equals("--mount-external-installer")) {
+            } else if (arg.equals("--mount-external-installer")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
-            }  else if (arg.equals("--mount-external-legacy")) {
-                mMountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
             } else if (arg.equals("--mount-external-pass-through")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
             } else if (arg.equals("--mount-external-android-writable")) {
