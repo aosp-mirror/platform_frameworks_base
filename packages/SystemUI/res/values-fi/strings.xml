@@ -125,7 +125,7 @@
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Käytä kamerana (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Asenna Android File Transfer -sovellus Macille"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Takaisin"</string>
-    <string name="accessibility_home" msgid="5430449841237966217">"Aloituspainike"</string>
+    <string name="accessibility_home" msgid="5430449841237966217">"Aloitus"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Valikko"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Esteettömyys"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Näytön kääntäminen"</string>
@@ -1038,6 +1038,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Lisää"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Ehdottaja: <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Säätimet päivitetty"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Laite lukittu"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-koodi sisältää kirjaimia tai symboleja"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Vahvista <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Väärä PIN-koodi"</string>

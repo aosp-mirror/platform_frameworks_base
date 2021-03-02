@@ -791,7 +791,7 @@
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Parar"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Avançar"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Anterior"</string>
-    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Retroceder"</string>
+    <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Voltar"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Avançar rapidamente"</string>
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
@@ -1038,6 +1038,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Adicionar"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugerido por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controles atualizados"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"Dispositivo bloq."</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contém letras ou símbolos"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verificar <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorreto"</string>
