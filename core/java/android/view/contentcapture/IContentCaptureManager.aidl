@@ -44,8 +44,9 @@ oneway interface IContentCaptureManager {
      * @param flags Meta flags that enable or disable content capture (see
      *     {@link IContentCaptureContext#flags}).
      */
-    void startSession(IBinder activityToken, in ComponentName componentName,
-                      int sessionId, int flags, in IResultReceiver result);
+    void startSession(IBinder activityToken, IBinder shareableActivityToken,
+                      in ComponentName componentName, int sessionId, int flags,
+                      in IResultReceiver result);
 
     /**
      * Marks the end of a session for the calling user identified by

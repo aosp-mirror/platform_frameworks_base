@@ -435,10 +435,11 @@ public final class ContentCaptureManager {
     /** @hide */
     @UiThread
     public void onActivityCreated(@NonNull IBinder applicationToken,
-            @NonNull ComponentName activityComponent) {
+            @NonNull IBinder shareableActivityToken, @NonNull ComponentName activityComponent) {
         if (mOptions.lite) return;
         synchronized (mLock) {
-            getMainContentCaptureSession().start(applicationToken, activityComponent, mFlags);
+            getMainContentCaptureSession().start(applicationToken, shareableActivityToken,
+                    activityComponent, mFlags);
         }
     }
 
