@@ -42355,7 +42355,6 @@ package android.telephony {
     field public static final int AUTHTYPE_EAP_SIM = 128; // 0x80
     field public static final int CALL_COMPOSER_STATUS_OFF = 0; // 0x0
     field public static final int CALL_COMPOSER_STATUS_ON = 1; // 0x1
-    field public static final int CALL_COMPOSER_STATUS_ON_NO_PICTURES = 2; // 0x2
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
