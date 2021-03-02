@@ -245,7 +245,7 @@
     <alias name="monaco" to="monospace" />
 
     <family name="serif-monospace">
-        <font weight="400" style="normal">CutiveMono.ttf</font>
+        <font weight="400" style="normal">CutiveMono-Regular.ttf</font>
     </family>
     <alias name="courier" to="serif-monospace" />
     <alias name="courier new" to="serif-monospace" />
@@ -255,7 +255,7 @@
     </family>
 
     <family name="cursive">
-        <font weight="400" style="normal">DancingScript-Regular.ttf</font>
+        <font weight="400" style="normal">DancingScript.ttf</font>
         <font weight="700" style="normal">DancingScript-Bold.ttf</font>
     </family>
 
