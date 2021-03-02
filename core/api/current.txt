@@ -24875,6 +24875,7 @@ package android.net {
     method @NonNull public static java.util.Set<java.lang.String> getSupportedAlgorithms();
     method public int getTruncationLengthBits();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final String AUTH_AES_CMAC = "cmac(aes)";
     field public static final String AUTH_AES_XCBC = "xcbc(aes)";
     field public static final String AUTH_CRYPT_AES_GCM = "rfc4106(gcm(aes))";
     field public static final String AUTH_CRYPT_CHACHA20_POLY1305 = "rfc7539esp(chacha20,poly1305)";
