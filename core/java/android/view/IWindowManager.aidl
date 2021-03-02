@@ -35,6 +35,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.ICrossWindowBlurEnabledListener;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
@@ -730,7 +731,7 @@ interface IWindowManager
     void showGlobalActions();
 
     /**
-     * Sets layer tracing flags for SurfaceFlingerTrace. 
+     * Sets layer tracing flags for SurfaceFlingerTrace.
      *
      * @param flags see definition in SurfaceTracing.cpp
      */
@@ -799,4 +800,20 @@ interface IWindowManager
      * @param clientToken the window context's token
      */
     void unregisterWindowContextListener(IBinder clientToken);
+
+    /**
+     * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.
+     *
+     * @param listener the listener to be registered
+     * @return true if cross-window blur is currently enabled; false otherwise
+     */
+    boolean registerCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
+
+    /**
+     * Unregisters a listener which was registered with
+     * {@link #registerCrossWindowBlurEnabledListener()}.
+     *
+     * @param listener the listener to be unregistered
+     */
+    void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
 }
