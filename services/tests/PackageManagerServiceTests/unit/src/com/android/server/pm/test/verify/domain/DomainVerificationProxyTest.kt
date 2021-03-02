@@ -477,7 +477,7 @@ class DomainVerificationProxyTest {
                     whenever(
                         addPowerSaveTempWhitelistApp(
                             anyInt(), anyString(), anyLong(), anyInt(),
-                            anyBoolean(), anyString()
+                            anyBoolean(), anyInt(), anyString()
                         )
                     )
                 }
