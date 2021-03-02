@@ -35,7 +35,7 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ଜିପ୍‍ ଫାଇଲରେ ବଗ୍‍ ରିପୋର୍ଟ ବିବରଣୀ ଯୋଡ଼ାଯାଇପାରିଲା ନାହିଁ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ବେନାମୀ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ବିବରଣୀ"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ସ୍କ୍ରିନ୍‌ସଟ୍‌"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ସ୍କ୍ରୀନ୍‌ଶଟ୍‌"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ସଫଳତାପୂର୍ବକ ସ୍କ୍ରୀନଶଟ୍‍ ନିଆଗଲା"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ସ୍କ୍ରୀନ୍‍ଶଟ୍‍ ନିଆଯାଇପାରିଲା ନାହିଁ।"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ବଗ୍‍ ରିପୋର୍ଟ <xliff:g id="ID">#%d</xliff:g>ର ବିବରଣୀ"</string>

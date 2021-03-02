@@ -38,16 +38,21 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+import android.app.StatusBarManager;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -222,6 +227,23 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertNotNull(fullscreenAppControls);
         assertEquals(1, fullscreenAppControls.length);
         assertEquals(ITYPE_STATUS_BAR, fullscreenAppControls[0].getType());
+
+        // Assume mFocusedWindow is updated but mTopFullscreenOpaqueWindowState hasn't.
+        final WindowState newFocusedFullscreenApp = addWindow(TYPE_APPLICATION, "newFullscreenApp");
+        final InsetsState newRequestedState = new InsetsState();
+        newRequestedState.getSource(ITYPE_STATUS_BAR).setVisible(true);
+        newFocusedFullscreenApp.updateRequestedInsetsState(newRequestedState);
+        // Make sure status bar is hidden by previous insets state.
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(fullscreenApp);
+
+        final StatusBarManagerInternal sbmi =
+                mDisplayContent.getDisplayPolicy().getStatusBarManagerInternal();
+        clearInvocations(sbmi);
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(newFocusedFullscreenApp);
+        // The status bar should be shown by newFocusedFullscreenApp even
+        // mTopFullscreenOpaqueWindowState is still fullscreenApp.
+        verify(sbmi).setWindowState(mDisplayContent.mDisplayId, StatusBarManager.WINDOW_STATUS_BAR,
+                StatusBarManager.WINDOW_STATE_SHOWING);
     }
 
     @Test
@@ -309,6 +331,15 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsState state = policy.getInsetsForDispatch(mAppWindow);
         state.setSourceVisible(ITYPE_STATUS_BAR, true);
         state.setSourceVisible(ITYPE_NAVIGATION_BAR, true);
+
+        final InsetsState clientState = mAppWindow.getInsetsState();
+        // The transient bar states for client should be invisible.
+        assertFalse(clientState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertFalse(clientState.getSource(ITYPE_NAVIGATION_BAR).isVisible());
+        // The original state shouldn't be modified.
+        assertTrue(state.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertTrue(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
+
         policy.onInsetsModified(mAppWindow, state);
         waitUntilWindowAnimatorIdle();
 

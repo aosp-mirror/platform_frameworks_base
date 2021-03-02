@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Baq hesabatını skrinşot olmadan paylaşmaq üçün seçin, skrinşotun tamamlanması üçün isə gözləyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"baq hesabatınızı skrinşot olmadan paylaşmaq üçün tıklayın, skrinşotun tamamlanması üçün isə gözləyin"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"baq hesabatınızı skrinşot olmadan paylaşmaq üçün tıklayın, skrinşotun tamamlanması üçün isə gözləyin"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Baq hesabatları sistemin müxtəlif jurnal fayllarından həssas təyin etdiyiniz data (tətbiq istifadəsi və məkan datası kimi) içərir. Baq raportlarını yalnız inandığınız tətbiq və adamlarla paylaşın."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Baq raportları sistemin müxtəlif jurnal fayllarından həssas təyin etdiyiniz data (tətbiq istifadəsi və məkan datası kimi) içərir. Baq raportlarını yalnız inandığınız tətbiq və adamlarla paylaşın."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Daha göstərməyin"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Baq hesabatları"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Baq hesabat faylı oxunmur"</string>

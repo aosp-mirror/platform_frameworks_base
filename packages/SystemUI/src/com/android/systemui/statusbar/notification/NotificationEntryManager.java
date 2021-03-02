@@ -574,6 +574,7 @@ public class NotificationEntryManager implements
         NotificationEntry entry = mPendingNotifications.get(key);
         if (entry != null) {
             entry.setSbn(notification);
+            entry.setRanking(ranking);
         } else {
             entry = new NotificationEntry(
                     notification,

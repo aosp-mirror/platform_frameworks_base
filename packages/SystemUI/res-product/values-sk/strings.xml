@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Telefón ste sa pokúsili <xliff:g id="NUMBER">%d</xliff:g>‑krát nesprávne odomknúť. Pracovný profil bude odstránený spolu so všetkými údajmi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"<xliff:g id="NUMBER_0">%1$d</xliff:g>‑krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie tabletu pomocou e‑mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Už ste <xliff:g id="NUMBER_0">%1$d</xliff:g>‑krát nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e‑mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Ak chcete zobraziť ďalšie možnosti, odomknite telefón"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Ak chcete zobraziť ďalšie možnosti, odomknite tablet"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Ak chcete zobraziť ďalšie možnosti, odomknite zariadenie"</string>
 </resources>

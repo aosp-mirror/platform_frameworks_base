@@ -382,6 +382,36 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdatePendingNotification_rankingUpdated() {
+        // GIVEN a notification with ranking is pending
+        final Ranking originalRanking = mEntry.getRanking();
+        mEntryManager.mPendingNotifications.put(mEntry.getKey(), mEntry);
+
+        // WHEN the same notification has been updated with a new ranking
+        final int newRank = 2345;
+        doAnswer(invocationOnMock -> {
+            Ranking ranking = (Ranking)
+                    invocationOnMock.getArguments()[1];
+            ranking.populate(
+                    mEntry.getKey(),
+                    newRank, /* this changed!! */
+                    false,
+                    0,
+                    0,
+                    IMPORTANCE_DEFAULT,
+                    null, null,
+                    null, null, null, true,
+                    Ranking.USER_SENTIMENT_NEUTRAL, false, -1,
+                    false, null, null, false, false, false, null, false);
+            return true;
+        }).when(mRankingMap).getRanking(eq(mEntry.getKey()), any(Ranking.class));
+        mEntryManager.addNotification(mSbn, mRankingMap);
+
+        // THEN ranking for the entry has been updated with new ranking
+        assertEquals(newRank, mEntry.getRanking().getRank());
+    }
+
+    @Test
     public void testLifetimeExtenders_ifNotificationIsRetainedItIsntRemoved() {
         // GIVEN an entry manager with a notification
         mEntryManager.addActiveNotificationForTest(mEntry);

@@ -149,7 +149,8 @@ public class SoundPool extends PlayerBase {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL);
 
         // do native setup
-        if (native_setup(new WeakReference<SoundPool>(this), maxStreams, attributes) != 0) {
+        if (native_setup(new WeakReference<SoundPool>(this),
+                maxStreams, attributes, getCurrentOpPackageName()) != 0) {
             throw new RuntimeException("Native setup failed");
         }
         mAttributes = attributes;
@@ -501,7 +502,7 @@ public class SoundPool extends PlayerBase {
     private native final int _load(FileDescriptor fd, long offset, long length, int priority);
 
     private native final int native_setup(Object weakRef, int maxStreams,
-            Object/*AudioAttributes*/ attributes);
+            @NonNull Object/*AudioAttributes*/ attributes, @NonNull String opPackageName);
 
     private native final int _play(int soundID, float leftVolume, float rightVolume,
             int priority, int loop, float rate);

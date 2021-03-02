@@ -60,8 +60,10 @@ class PlayerViewHolder private constructor(itemView: View) {
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
 
     // Settings screen
+    val settingsText = itemView.requireViewById<TextView>(R.id.remove_text)
     val cancel = itemView.requireViewById<View>(R.id.cancel)
-    val dismiss = itemView.requireViewById<View>(R.id.dismiss)
+    val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
+    val dismissLabel = dismiss.getChildAt(0)
     val settings = itemView.requireViewById<View>(R.id.settings)
 
     init {

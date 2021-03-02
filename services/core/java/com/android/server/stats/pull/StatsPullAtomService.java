@@ -31,6 +31,7 @@ import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
+import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
@@ -77,8 +78,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
+import android.hardware.face.FaceManager.GetFeatureCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.health.V2_0.IHealth;
 import android.net.ConnectivityManager;
@@ -246,6 +249,13 @@ public class StatsPullAtomService extends SystemService {
     // Hence, we can allow a little more room in each shard before moving to the next. Make this
     // 20% as a conservative estimate.
     private static final int MAX_PROCSTATS_RAW_SHARD_SIZE = (int) (MAX_PROCSTATS_SHARD_SIZE * 1.20);
+
+    /**
+     * Threshold to filter out small CPU times at frequency per UID. Those small values appear
+     * because of more precise accounting in a BPF program. Discarding them reduces the data by at
+     * least 20% with negligible error.
+     */
+    private static final int MIN_CPU_TIME_PER_UID_FREQ = 10;
 
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
@@ -1552,20 +1562,59 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuTimePerUidFreqLocked(int atomTag, List<StatsEvent> pulledData) {
+        // Aggregate times for the same uids.
+        SparseArray<long[]> aggregated = new SparseArray<>();
         mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
-            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                if (cpuFreqTimeMs[freqIndex] != 0) {
+            // For uids known to be aggregated from many entries allow mutating in place to avoid
+            // many copies. Otherwise, copy before aggregating.
+            boolean mutateInPlace = false;
+            if (UserHandle.isIsolated(uid)) {
+                // Skip individual isolated uids because they are recycled and quickly removed from
+                // the underlying data source.
+                return;
+            } else if (UserHandle.isSharedAppGid(uid)) {
+                // All shared app gids are accounted together.
+                uid = LAST_SHARED_APPLICATION_GID;
+                mutateInPlace = true;
+            } else if (UserHandle.isApp(uid)) {
+                // Apps are accounted under their app id.
+                uid = UserHandle.getAppId(uid);
+            }
+
+            long[] aggCpuFreqTimeMs = aggregated.get(uid);
+            if (aggCpuFreqTimeMs != null) {
+                if (!mutateInPlace) {
+                    aggCpuFreqTimeMs = Arrays.copyOf(aggCpuFreqTimeMs, cpuFreqTimeMs.length);
+                    aggregated.put(uid, aggCpuFreqTimeMs);
+                }
+                for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                    aggCpuFreqTimeMs[freqIndex] += cpuFreqTimeMs[freqIndex];
+                }
+            } else {
+                if (mutateInPlace) {
+                    cpuFreqTimeMs = Arrays.copyOf(cpuFreqTimeMs, cpuFreqTimeMs.length);
+                }
+                aggregated.put(uid, cpuFreqTimeMs);
+            }
+        });
+
+        int size = aggregated.size();
+        for (int i = 0; i < size; ++i) {
+            int uid = aggregated.keyAt(i);
+            long[] aggCpuFreqTimeMs = aggregated.valueAt(i);
+            for (int freqIndex = 0; freqIndex < aggCpuFreqTimeMs.length; ++freqIndex) {
+                if (aggCpuFreqTimeMs[freqIndex] >= MIN_CPU_TIME_PER_UID_FREQ) {
                     StatsEvent e = StatsEvent.newBuilder()
                             .setAtomId(atomTag)
                             .writeInt(uid)
                             .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
                             .writeInt(freqIndex)
-                            .writeLong(cpuFreqTimeMs[freqIndex])
+                            .writeLong(aggCpuFreqTimeMs[freqIndex])
                             .build();
                     pulledData.add(e);
                 }
             }
-        });
+        }
         return StatsManager.PULL_SUCCESS;
     }
 
@@ -3327,18 +3376,39 @@ public class StatsPullAtomService extends SystemService {
         try {
             List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             int numUsers = users.size();
+            FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+
             for (int userNum = 0; userNum < numUsers; userNum++) {
                 int userId = users.get(userNum).getUserHandle().getIdentifier();
+
+                if (faceManager != null) {
+                    // Store the current setting from the Face HAL, and upon next upload the value
+                    // reported will be correct (given the user did not modify it).
+                    faceManager.getFeature(userId, BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION,
+                            new GetFeatureCallback() {
+                                @Override
+                                public void onCompleted(boolean success, int feature,
+                                        boolean value) {
+                                    if (feature == FaceManager.FEATURE_REQUIRE_ATTENTION
+                                            && success) {
+                                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                                Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
+                                                value ? 1 : 0, userId);
+                                    }
+                                }
+                            }
+                    );
+                }
 
                 int unlockKeyguardEnabled = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
                           Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED, 1, userId);
                 int unlockDismissesKeyguard = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
-                          Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD, 0, userId);
+                          Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD, 1, userId);
                 int unlockAttentionRequired = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
-                          Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 1, userId);
+                          Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED, 0, userId);
                 int unlockAppEnabled = Settings.Secure.getIntForUser(
                           mContext.getContentResolver(),
                           Settings.Secure.FACE_UNLOCK_APP_ENABLED, 1, userId);

@@ -28,13 +28,13 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"‏پیکربندی IP انجام نشد"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"اتصال ناموفق به دلیل شبکه با کیفیت پایین"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"‏اتصال Wi-Fi برقرار نشد"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"مشکل اصالت‌سنجی"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"مشکل احراز هویت"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"برقراری اتصال ممکن نیست"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"برقراری اتصال به «<xliff:g id="AP_NAME">%1$s</xliff:g>» ممکن نیست"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"گذرواژه را بررسی و دوباره امتحان کنید"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"در محدوده نیست"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"اتصال به‌صورت خودکار انجام نمی‌شود"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"دسترسی به اینترنت ندارد"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"بدون دسترسی به اینترنت"</string>
     <string name="saved_network" msgid="7143698034077223645">"ذخیره‌شده توسط <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏اتصال خودکار ازطریق %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"اتصال خودکار ازطریق ارائه‌دهنده رتبه‌بندی شبکه"</string>
@@ -94,12 +94,12 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏صدای HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏صدای HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سمعک‌ها"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"به سمعک متصل شد"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"متصل به سمعک‌ها"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"به رسانه صوتی متصل شد"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"به تلفن صوتی متصل شد"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"به سرور انتقال فایل متصل شد"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"به نقشه متصل شد"</string>
-    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"‏به SAP متصل شد"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"‏متصل به SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"به سرور انتقال فایل متصل نیست"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"به دستگاه ورودی متصل شد"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"برای دسترسی به اینترنت، به دستگاه متصل شد"</string>
@@ -139,7 +139,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"‏قدرت سیگنال Wi‑Fi کامل است."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"شبکه باز"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"شبکه ایمن"</string>
-    <string name="process_kernel_label" msgid="950292573930336765">"‏سیستم‌عامل Android"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"‏سیستم عامل Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"برنامه‌های حذف شده"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"برنامه‌ها و کاربران حذف شده"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"به‌روزرسانی‌های سیستم"</string>
@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"ناشناس"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"کاربر: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"بعضی پیش‌فرض‌ها تنظیم شده‌اند"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"پیش‌فرضی تنظیم نشده است"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"هیچ پیش‌فرضی تنظیم نشده است"</string>
     <string name="tts_settings" msgid="8130616705989351312">"تنظیمات متن به گفتار"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"خروجی تبدیل متن به گفتار"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعت گفتار"</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"انتخاب نمایه"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصی"</string>
-    <string name="category_work" msgid="4014193632325996115">"کاری"</string>
+    <string name="category_work" msgid="4014193632325996115">"محل کار"</string>
     <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
@@ -211,8 +211,8 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"خطا"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"اشکال‌زدایی بی‌سیم"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"برای مشاهده و استفاده از دستگاه‌های در دسترس، اشکال‌زدایی بی‌سیم را روشن کنید"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"مرتبط کردن دستگاه با رمزینه پاسخ‌سریع"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"دستگاه‌های جدید را بااستفاده از اسکنر رمزینه پاسخ‌سریع مرتبط کنید"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"‏مرتبط کردن دستگاه با کد QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"‏دستگاه‌های جدید را با استفاده از اسکنر کد QR مرتبط کنید"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"مرتبط کردن دستگاه با کد مرتبط‌سازی"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"دستگاه‌های جدید را با استفاده از کد شش رقمی مرتبط کنید"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"دستگاه‌های مرتبط‌شده"</string>
@@ -226,13 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"‏کد مرتبط‌سازی Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"مرتبط‌سازی ناموفق"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"مطمئن شوید که دستگاه به همان شبکه متصل باشد."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن رمزینه پاسخ‌سریع مرتبط کنید"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن کد QR مرتبط کنید"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"مرتبط‌سازی دستگاه…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"مرتبط کردن دستگاه انجام نشد. یا رمزینه پاسخ‌سریع اشتباه بوده است، یا دستگاه به همان شبکه متصل نیست."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏مرتبط کردن دستگاه انجام نشد. یا کد QR اشتباه بوده است، یا دستگاه به همان شبکه متصل نیست."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏نشانی IP و درگاه"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"اسکن رمزینه پاسخ‌سریع"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن رمزینه پاسخ‌سریع مرتبط کنید"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏لطفاً به شبکه Wi-Fi متصل شوید"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏اسکن کد QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن کد QR مرتبط کنید"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏ADB (پل اشکال‌زدایی Android)، اشکال‌زدایی کردن، برنامه‌نویس"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"میان‌بر گزارش مشکل"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"نمایش دکمه‌ای در منوی روشن/خاموش برای گرفتن گزارش اشکال"</string>
@@ -251,9 +250,8 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏تصادفی‌سازی MAC بهبودیافته برای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"شتاب سخت‌افزاری اشتراک‌گذاری اینترنت"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏فعال کردن Gabeldorsche"</string>
@@ -283,7 +281,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"تخلیه باتری راکاهش می‌دهد و عملکرد شبکه را بهبود می‌بخشد"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏اگر این حالت فعال باشد، هر بار این دستگاه به شبکه‌ای متصل شود که تصادفی‌سازی MAC در آن فعال است، ممکن است نشانی MAC آن تغییر کند."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"محدودشده"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"محدودنشده"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"اندازه‌های حافظه موقت ثبت‌کننده"</string>
@@ -311,7 +308,6 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏دستگاه‌های بلوتوث بدون نام (فقط نشانی‌های MAC) نشان داده خواهند شد"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"درصورت وجود مشکل در صدا با دستگاه‌های راه دور مثل صدای بلند ناخوشایند یا عدم کنترل صدا، ویژگی میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏دسته ویژگی Gabeldorsche، بلوتوث را فعال می‌کند."</string>
-    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ویژگی «اتصال بهبودیافته» را فعال می‌کند."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏بررسی HDCP"</string>
@@ -358,8 +354,6 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"مقیاس طول مدت انیماتور"</string>
@@ -418,7 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"قرمزدشواربینی (قرمز-سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"آبی‌دشواربینی (آبی-زرد)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"تصحیح رنگ"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"تصحیح رنگ به شما امکان می‌دهد نحوه نمایش رنگ‌ها را در دستگاهتان تنظیم کنید"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"تصحیح رنگ به افراد مبتلا به کوررنگی کمک می‌کند رنگ‌ها را دقیق‌تر ببینند"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"توسط <xliff:g id="TITLE">%1$s</xliff:g> لغو شد"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است"</string>
@@ -432,11 +426,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"باید حدوداً تا <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) شارژ داشته باشید"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"باید حدوداً تا <xliff:g id="TIME">%1$s</xliff:g> شارژ داشته باشید"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"تا <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ممکن است باتری <xliff:g id="TIME">%1$s</xliff:g> تمام شود"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> شارژ باقی مانده است"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"بیش از <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"بیش از <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"افزایش عمر باتری پس از <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> باقی مانده"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"بیش از <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"بیش از <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی مانده است"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ممکن است تلفن به‌زودی خاموش شود"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ممکن است رایانه لوحی به‌زودی خاموش شود"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ممکن است دستگاه به‌زودی خاموش شود"</string>
@@ -485,7 +479,7 @@
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ثبت‌شده"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ثبت نشده است"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"در دسترس نیست"</string>
-    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏ویژگی MAC تصادفی است"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏ویژگی تصادفی‌سازی MAC فعال است"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">‏%1$d دستگاه متصل</item>
       <item quantity="other">‏%1$d دستگاه متصل</item>
@@ -507,50 +501,6 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"هربار پرسیده شود"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"تا زمانی‌که آن را خاموش کنید"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"هم‌اکنون"</string>
-    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"بلندگوی تلفن"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"این دستگاه"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
-    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
-    <string name="help_label" msgid="3528360748637781274">"راهنما و بازخورد"</string>
-    <string name="storage_category" msgid="2287342585424631813">"فضای ذخیره‌سازی"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"داده‌های هم‌رسانی‌شده"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"مشاهده و تغییر داده‌های هم‌رسانی‌شده"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"هیچ داده هم‌رسانی‌شده‌ای برای این کاربر وجود ندارد."</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"هنگام واکشی داده‌های هم‌رسانی‌شده خطایی رخ داد. دوباره امتحان کنید."</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"شناسه داده‌های هم‌رسانی‌شده: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"تاریخ انقضا <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"هنگام حذف داده‌های هم‌رسانی‌شده خطایی رخ داد."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"هیچ اجاره‌ای برای این داده‌های هم‌رسانی‌شده درخواست نشده است. می‌خواهید آن را حذف کنید؟"</string>
-    <string name="accessor_info_title" msgid="8289823651512477787">"داده‌های هم‌رسانی برنامه‌ها"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"برنامه هیچ توضیحی ارائه نکرده است."</string>
-    <string name="accessor_expires_text" msgid="4625619273236786252">"تاریخ انقضای کرایه <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"حذف داده‌های هم‌رسانی‌شده"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"مطمئن هستید می‌خواهید این داده‌های هم‌رسانی‌شده را حذف کنید؟"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"کاربران دارای برنامه‌ها و محتوای متعلق به خود هستند"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"می‌توانید از حساب خود دسترسی به برنامه‌ها و محتوا را محدود کنید"</string>
-    <string name="user_add_user_item_title" msgid="2394272381086965029">"کاربر"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"نمایه محدود شده"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"کاربر جدیدی اضافه می‌کنید؟"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏با ایجاد کاربران بیشتر، می‌توانید این دستگاه را با دیگران به‌اشتراک بگذارید. هر کاربر فضای مخصوص به خودش را دارد که می‌تواند آن را با برنامه‌ها، کاغذدیواری و موارد دیگر سفارشی کند. همچنین کاربران می‌توانند تنظیماتی در دستگاه ایجاد کنند، مانند تنظیمات Wi-Fi، که بر تنظیمات بقیه اثر دارد.\n\nوقتی کاربر جدیدی اضافه می‌کنید، آن شخص باید فضای خودش را تنظیم کند.\n\nهر کاربر می‌تواند برنامه‌ها را برای سایر کاربران به‌روزرسانی کند. دسترس‌پذیری، تنظیمات، و سرویس‌ها قابل‌انتقال به کاربر جدید نیستند."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"وقتی کاربر جدیدی اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"هم اکنون کاربر تنظیم شود؟"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"اکنون تنظیم شود"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"اکنون نه"</string>
-    <string name="user_add_user_type_title" msgid="551279664052914497">"افزودن"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"کاربر جدید"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"نمایه جدید"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"اطلاعات کاربر"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"اطلاعات نمایه"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"قبل از ایجاد یک نمایه محدود، باید یک قفل صفحه را برای محافظت از برنامه‌ها و داده‌های شخصی خود تنظیم کنید."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"تنظیم قفل"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"رفتن به <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"افزودن مهمان"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"حذف مهمان"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"مهمان"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"پیش‌فرض دستگاه"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاهتان باید راه‌اندازی مجدد شود. اکنون راه‌اندازی مجدد کنید یا لغو کنید."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"هدفون سیمی"</string>
 </resources>

@@ -129,7 +129,6 @@ class ActivityMetricsLogger {
      */
     private static final int IGNORE_CALLER = -1;
     private static final int INVALID_DELAY = -1;
-    private static final int INVALID_TRANSITION_TYPE = -1;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -224,21 +223,18 @@ class ActivityMetricsLogger {
         static TransitionInfo create(@NonNull ActivityRecord r,
                 @NonNull LaunchingState launchingState, boolean processRunning,
                 boolean processSwitch, int startResult) {
-            int transitionType = INVALID_TRANSITION_TYPE;
+            if (startResult != START_SUCCESS && startResult != START_TASK_TO_FRONT) {
+                return null;
+            }
+            final int transitionType;
             if (processRunning) {
-                if (startResult == START_SUCCESS) {
-                    transitionType = TYPE_TRANSITION_WARM_LAUNCH;
-                } else if (startResult == START_TASK_TO_FRONT) {
-                    transitionType = TYPE_TRANSITION_HOT_LAUNCH;
-                }
-            } else if (startResult == START_SUCCESS || startResult == START_TASK_TO_FRONT) {
+                transitionType = r.attachedToProcess()
+                        ? TYPE_TRANSITION_HOT_LAUNCH
+                        : TYPE_TRANSITION_WARM_LAUNCH;
+            } else {
                 // Task may still exist when cold launching an activity and the start result will be
                 // set to START_TASK_TO_FRONT. Treat this as a COLD launch.
                 transitionType = TYPE_TRANSITION_COLD_LAUNCH;
-            }
-            if (transitionType == INVALID_TRANSITION_TYPE) {
-                // That means the startResult is neither START_SUCCESS nor START_TASK_TO_FRONT.
-                return null;
             }
             return new TransitionInfo(r, launchingState, transitionType, processRunning,
                     processSwitch);
