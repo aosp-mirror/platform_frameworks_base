@@ -11,12 +11,6 @@ from fontTools import ttLib
 
 EMOJI_VS = 0xFE0F
 
-#TODO(179952916): Rename CutiveMono and DancingScript
-CANONICAL_NAME_EXCEPTION_LIST = [
-    'CutiveMono.ttf',
-    'DancingScript-Regular.ttf',
-]
-
 LANG_TO_SCRIPT = {
     'as': 'Beng',
     'be': 'Cyrl',
@@ -703,8 +697,6 @@ def getSuffix(font):
 def check_canonical_name():
   for record in _all_fonts:
     file_name, index = record.font
-    if file_name in CANONICAL_NAME_EXCEPTION_LIST:
-      continue
 
     if index and index != 0:
       continue
