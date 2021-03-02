@@ -177,7 +177,7 @@ class ConnectivityServiceIntegrationTest {
     }
 
     private inner class TestConnectivityService(deps: Dependencies) : ConnectivityService(
-            context, netManager, statsService, dnsResolver, log, netd, deps)
+            context, statsService, dnsResolver, log, netd, deps)
 
     private fun makeDependencies(): ConnectivityService.Dependencies {
         val deps = spy(ConnectivityService.Dependencies())
