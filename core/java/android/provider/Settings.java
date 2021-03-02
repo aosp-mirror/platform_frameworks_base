@@ -16564,30 +16564,6 @@ public final class Settings {
 
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to
-     * change the state of network, as the condition differs for pre-M, M+, and
-     * privileged/preinstalled apps. The caller is expected to have either the
-     * CHANGE_NETWORK_STATE or the WRITE_SETTINGS permission declared. Either of these
-     * permissions allow changing network state; WRITE_SETTINGS is a runtime permission and
-     * can be revoked, but (except in M, excluding M MRs), CHANGE_NETWORK_STATE is a normal
-     * permission and cannot be revoked. See http://b/23597341
-     *
-     * Note: if the check succeeds because the application holds WRITE_SETTINGS, the operation
-     * of this app will be updated to the current time.
-     * @hide
-     */
-    public static boolean checkAndNoteChangeNetworkStateOperation(Context context, int uid,
-            String callingPackage, String callingAttributionTag, boolean throwException) {
-        if (context.checkCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE)
-                == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, callingAttributionTag, throwException,
-                AppOpsManager.OP_WRITE_SETTINGS, PM_CHANGE_NETWORK_STATE, true);
-    }
-
-    /**
-     * Performs a strict and comprehensive check of whether a calling package is allowed to
      * draw on top of other apps, as the conditions differs for pre-M, M+, and
      * privileged/preinstalled apps. If the provided uid does not match the callingPackage,
      * a negative result will be returned.

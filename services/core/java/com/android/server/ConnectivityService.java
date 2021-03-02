@@ -2201,8 +2201,45 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
+    /**
+     * Performs a strict and comprehensive check of whether a calling package is allowed to
+     * change the state of network, as the condition differs for pre-M, M+, and
+     * privileged/preinstalled apps. The caller is expected to have either the
+     * CHANGE_NETWORK_STATE or the WRITE_SETTINGS permission declared. Either of these
+     * permissions allow changing network state; WRITE_SETTINGS is a runtime permission and
+     * can be revoked, but (except in M, excluding M MRs), CHANGE_NETWORK_STATE is a normal
+     * permission and cannot be revoked. See http://b/23597341
+     *
+     * Note: if the check succeeds because the application holds WRITE_SETTINGS, the operation
+     * of this app will be updated to the current time.
+     */
     private void enforceChangePermission(String callingPkg, String callingAttributionTag) {
-        ConnectivityManager.enforceChangePermission(mContext, callingPkg, callingAttributionTag);
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (callingPkg == null) {
+            throw new SecurityException("Calling package name is null.");
+        }
+
+        final AppOpsManager appOpsMgr = mContext.getSystemService(AppOpsManager.class);
+        final int uid = mDeps.getCallingUid();
+        final int mode = appOpsMgr.noteOpNoThrow(AppOpsManager.OPSTR_WRITE_SETTINGS, uid,
+                callingPkg, callingAttributionTag, null /* message */);
+
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
+
+        if ((mode == AppOpsManager.MODE_DEFAULT) && (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SETTINGS) == PackageManager.PERMISSION_GRANTED)) {
+            return;
+        }
+
+        throw new SecurityException(callingPkg + " was not granted either of these permissions:"
+                + android.Manifest.permission.CHANGE_NETWORK_STATE + ","
+                + android.Manifest.permission.WRITE_SETTINGS + ".");
     }
 
     private void enforceSettingsPermission() {
