@@ -444,6 +444,13 @@ public final class Completable {
     }
 
     /**
+     * @return an instance of {@link Completable.IInputContentUriToken}.
+     */
+    public static Completable.IInputContentUriToken createIInputContentUriToken() {
+        return new Completable.IInputContentUriToken();
+    }
+
+    /**
      * @return an instance of {@link Completable.Void}.
      */
     public static Completable.Void createVoid() {
@@ -495,6 +502,12 @@ public final class Completable {
      */
     public static final class InputMethodInfoList
             extends Values<List<android.view.inputmethod.InputMethodInfo>> { }
+
+    /**
+     * Completable object of {@link IInputContentUriToken>}.
+     */
+    public static final class IInputContentUriToken
+            extends Values<com.android.internal.inputmethod.IInputContentUriToken> { }
 
     /**
      * Await the result by the {@link Completable.Values}.
