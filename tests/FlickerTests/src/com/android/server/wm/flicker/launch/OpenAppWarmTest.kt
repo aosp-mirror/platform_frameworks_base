@@ -102,7 +102,7 @@ class OpenAppWarmTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
-    @Presubmit
+    @FlakyTest
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         testSpec.visibleWindowsShownMoreThanOneConsecutiveEntry()
