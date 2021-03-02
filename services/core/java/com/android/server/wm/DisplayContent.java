@@ -4105,13 +4105,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void onWindowAnimationFinished(@NonNull WindowContainer wc, int type) {
         if (type == ANIMATION_TYPE_APP_TRANSITION || type == ANIMATION_TYPE_RECENTS) {
-            // Unfreeze the insets state of the frozen target when the animation finished if exists.
-            final Task task = wc.asTask();
-            if (task != null) {
-                task.forAllWindows(w -> {
-                    w.clearFrozenInsetsState();
-                }, true /* traverseTopToBottom */);
-            }
             removeImeSurfaceImmediately();
         }
     }
