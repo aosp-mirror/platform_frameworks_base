@@ -20100,7 +20100,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Error deriving application ABI");
+                        "Error deriving application ABI: " + pme.getMessage());
             }
         }
 
