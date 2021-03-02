@@ -41333,7 +41333,6 @@ package android.telephony {
     method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
     method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method public int getDomain();
-    method public int getNrState();
     method @Nullable public String getRegisteredPlmn();
     method public int getTransportType();
     method public boolean isRegistered();
