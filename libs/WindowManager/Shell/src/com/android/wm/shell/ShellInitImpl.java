@@ -25,6 +25,7 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class ShellInitImpl {
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
+    private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private final InitImpl mImpl = new InitImpl();
 
@@ -53,6 +55,7 @@ public class ShellInitImpl {
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
+            Optional<StartingSurface> startingSurfaceOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             ShellExecutor mainExecutor) {
@@ -62,6 +65,7 @@ public class ShellInitImpl {
                 legacySplitScreenOptional,
                 splitScreenOptional,
                 appPairsOptional,
+                startingSurfaceOptional,
                 fullscreenTaskListener,
                 transitions,
                 mainExecutor).mImpl;
@@ -73,6 +77,7 @@ public class ShellInitImpl {
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
+            Optional<StartingSurface> startingSurfaceOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             ShellExecutor mainExecutor) {
@@ -85,6 +90,7 @@ public class ShellInitImpl {
         mFullscreenTaskListener = fullscreenTaskListener;
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
+        mStartingSurfaceOptional = startingSurfaceOptional;
     }
 
     private void init() {
@@ -93,6 +99,7 @@ public class ShellInitImpl {
 
         mShellTaskOrganizer.addListenerForType(
                 mFullscreenTaskListener, TASK_LISTENER_TYPE_FULLSCREEN);
+        mStartingSurfaceOptional.ifPresent(mShellTaskOrganizer::initStartingSurface);
         // Register the shell organizer
         mShellTaskOrganizer.registerOrganizer();
 
