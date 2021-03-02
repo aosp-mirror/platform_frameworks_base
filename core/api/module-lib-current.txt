@@ -14,6 +14,18 @@ package android.net {
     method public int getResourceId();
   }
 
+  public final class NetworkStateSnapshot implements android.os.Parcelable {
+    ctor public NetworkStateSnapshot(@NonNull android.net.Network, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @Nullable String, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
+    field public final int legacyType;
+    field @NonNull public final android.net.LinkProperties linkProperties;
+    field @NonNull public final android.net.Network network;
+    field @NonNull public final android.net.NetworkCapabilities networkCapabilities;
+    field @Nullable public final String subscriberId;
+  }
+
   public class NetworkWatchlistManager {
     method @Nullable public byte[] getWatchlistConfigHash();
   }
