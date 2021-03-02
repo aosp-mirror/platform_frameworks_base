@@ -375,6 +375,9 @@ public abstract class WMShellBaseModule {
         return new PipUiEventLogger(uiEventLogger, packageManager);
     }
 
+    @BindsOptionalOf
+    abstract PipTouchHandler optionalPipTouchHandler();
+
     //
     // Shell transitions
     //
@@ -498,6 +501,7 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<AppPairsController> appPairsOptional,
             Optional<StartingSurface> startingSurface,
+            Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -508,6 +512,7 @@ public abstract class WMShellBaseModule {
                 splitScreenOptional,
                 appPairsOptional,
                 startingSurface,
+                pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 transitions,
                 mainExecutor);
