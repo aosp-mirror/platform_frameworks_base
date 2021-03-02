@@ -510,10 +510,12 @@ public class SparseArray<E> implements Cloneable {
     }
 
     /**
+     * Compares the contents of this {@link SparseArray} to the specified {@link SparseArray}.
+     *
      * For backwards compatibility reasons, {@link Object#equals(Object)} cannot be implemented,
      * so this serves as a manually invoked alternative.
      */
-    public boolean contentEquals(@Nullable SparseArray<E> other) {
+    public boolean contentEquals(@Nullable SparseArray<?> other) {
         if (other == null) {
             return false;
         }
@@ -534,6 +536,9 @@ public class SparseArray<E> implements Cloneable {
     }
 
     /**
+     * Returns a hash code value for the contents of this {@link SparseArray}, combining the
+     * {@link Objects#hashCode(Object)} result of all its keys and values.
+     *
      * For backwards compatibility, {@link Object#hashCode()} cannot be implemented, so this serves
      * as a manually invoked alternative.
      */

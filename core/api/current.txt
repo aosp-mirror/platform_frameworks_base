@@ -45869,7 +45869,7 @@ package android.util {
     method public void clear();
     method public android.util.SparseArray<E> clone();
     method public boolean contains(int);
-    method public boolean contentEquals(@Nullable android.util.SparseArray<E>);
+    method public boolean contentEquals(@Nullable android.util.SparseArray<?>);
     method public int contentHashCode();
     method public void delete(int);
     method public E get(int);
