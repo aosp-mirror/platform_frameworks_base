@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-#include "AppInfo.h"
 #include "Link.h"
 
+#include <android-base/file.h>
+
+#include "AppInfo.h"
 #include "LoadedApk.h"
 #include "test/Test.h"
 
 using testing::Eq;
+using testing::HasSubstr;
 using testing::Ne;
 
 namespace aapt {
@@ -315,6 +318,78 @@ TEST_F(LinkTest, AppInfoWithUsesSplit) {
       "-o", feature2_apk,
   };
   ASSERT_TRUE(Link(link_args, feature2_files_dir, &diag));
+}
+
+TEST_F(LinkTest, SharedLibraryAttributeRJava) {
+  StdErrDiagnostics diag;
+  const std::string lib_values =
+      R"(<resources>
+           <attr name="foo"/>
+           <public type="attr" name="foo" id="0x00010001"/>
+           <declare-styleable name="LibraryStyleable">
+             <attr name="foo" />
+           </declare-styleable>
+         </resources>)";
+
+  const std::string client_values =
+      R"(<resources>
+           <attr name="bar" />
+           <declare-styleable name="ClientStyleable">
+             <attr name="com.example.lib:foo" />
+             <attr name="bar" />
+           </declare-styleable>
+         </resources>)";
+
+  // Build a library with a public attribute
+  const std::string lib_res = GetTestPath("library-res");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"), lib_values, lib_res, &diag));
+
+  const std::string lib_apk = GetTestPath("library.apk");
+  const std::string lib_java = GetTestPath("library_java");
+  // clang-format off
+  auto lib_manifest = ManifestBuilder(this)
+      .SetPackageName("com.example.lib")
+      .Build();
+
+  auto lib_link_args = LinkCommandBuilder(this)
+      .SetManifestFile(lib_manifest)
+      .AddFlag("--shared-lib")
+      .AddParameter("--java", lib_java)
+      .AddCompiledResDir(lib_res, &diag)
+      .Build(lib_apk);
+  // clang-format on
+  ASSERT_TRUE(Link(lib_link_args, &diag));
+
+  const std::string lib_r_java = lib_java + "/com/example/lib/R.java";
+  std::string lib_r_contents;
+  ASSERT_TRUE(android::base::ReadFileToString(lib_r_java, &lib_r_contents));
+  EXPECT_THAT(lib_r_contents, HasSubstr(" public static int foo=0x00010001;"));
+  EXPECT_THAT(lib_r_contents, HasSubstr(" com.example.lib.R.attr.foo"));
+
+  // Build a client that uses the library attribute in a declare-styleable
+  const std::string client_res = GetTestPath("client-res");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"), client_values, client_res, &diag));
+
+  const std::string client_apk = GetTestPath("client.apk");
+  const std::string client_java = GetTestPath("client_java");
+  // clang-format off
+  auto client_manifest = ManifestBuilder(this)
+      .SetPackageName("com.example.client")
+      .Build();
+
+  auto client_link_args = LinkCommandBuilder(this)
+      .SetManifestFile(client_manifest)
+      .AddParameter("--java", client_java)
+      .AddParameter("-I", lib_apk)
+      .AddCompiledResDir(client_res, &diag)
+      .Build(client_apk);
+  // clang-format on
+  ASSERT_TRUE(Link(client_link_args, &diag));
+
+  const std::string client_r_java = client_java + "/com/example/client/R.java";
+  std::string client_r_contents;
+  ASSERT_TRUE(android::base::ReadFileToString(client_r_java, &client_r_contents));
+  EXPECT_THAT(client_r_contents, HasSubstr(" com.example.lib.R.attr.foo, 0x7f010000"));
 }
 
 }  // namespace aapt
