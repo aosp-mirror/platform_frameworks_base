@@ -136,7 +136,7 @@ public final class DataCallResponse implements Parcelable {
     private final @HandoverFailureMode int mHandoverFailureMode;
     private final int mPduSessionId;
     private final Qos mDefaultQos;
-    private final List<QosSession> mQosSessions;
+    private final List<QosBearerSession> mQosBearerSessions;
     private final SliceInfo mSliceInfo;
 
     /**
@@ -187,7 +187,7 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
         mPduSessionId = PDU_SESSION_ID_NOT_SET;
         mDefaultQos = null;
-        mQosSessions = new ArrayList<>();
+        mQosBearerSessions = new ArrayList<>();
         mSliceInfo = null;
     }
 
@@ -197,7 +197,7 @@ public final class DataCallResponse implements Parcelable {
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
             @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
-            @Nullable Qos defaultQos, @Nullable List<QosSession> qosSessions,
+            @Nullable Qos defaultQos, @Nullable List<QosBearerSession> qosBearerSessions,
             @Nullable SliceInfo sliceInfo) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
@@ -219,7 +219,7 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = handoverFailureMode;
         mPduSessionId = pduSessionId;
         mDefaultQos = defaultQos;
-        mQosSessions = qosSessions;
+        mQosBearerSessions = qosBearerSessions;
         mSliceInfo = sliceInfo;
     }
 
@@ -246,8 +246,8 @@ public final class DataCallResponse implements Parcelable {
         mHandoverFailureMode = source.readInt();
         mPduSessionId = source.readInt();
         mDefaultQos = source.readParcelable(Qos.class.getClassLoader());
-        mQosSessions = new ArrayList<>();
-        source.readList(mQosSessions, QosSession.class.getClassLoader());
+        mQosBearerSessions = new ArrayList<>();
+        source.readList(mQosBearerSessions, QosBearerSession.class.getClassLoader());
         mSliceInfo = source.readParcelable(SliceInfo.class.getClassLoader());
     }
 
@@ -393,8 +393,8 @@ public final class DataCallResponse implements Parcelable {
      * @hide
      */
     @NonNull
-    public List<QosSession> getQosSessions() {
-        return mQosSessions;
+    public List<QosBearerSession> getQosBearerSessions() {
+        return mQosBearerSessions;
     }
 
     /**
@@ -426,7 +426,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" handoverFailureMode=").append(getHandoverFailureMode())
            .append(" pduSessionId=").append(getPduSessionId())
            .append(" defaultQos=").append(mDefaultQos)
-           .append(" qosSessions=").append(mQosSessions)
+           .append(" qosBearerSessions=").append(mQosBearerSessions)
            .append(" sliceInfo=").append(mSliceInfo)
            .append("}");
         return sb.toString();
@@ -446,10 +446,10 @@ public final class DataCallResponse implements Parcelable {
                 mDefaultQos == other.mDefaultQos :
                 mDefaultQos.equals(other.mDefaultQos);
 
-        final boolean isQosSessionsSame = (mQosSessions == null || mQosSessions == null) ?
-                mQosSessions == other.mQosSessions :
-                mQosSessions.size() == other.mQosSessions.size()
-                && mQosSessions.containsAll(other.mQosSessions);
+        final boolean isQosBearerSessionsSame = (mQosBearerSessions == null || mQosBearerSessions == null) ?
+                mQosBearerSessions == other.mQosBearerSessions :
+                mQosBearerSessions.size() == other.mQosBearerSessions.size()
+                && mQosBearerSessions.containsAll(other.mQosBearerSessions);
 
         return mCause == other.mCause
                 && mSuggestedRetryTime == other.mSuggestedRetryTime
@@ -471,7 +471,7 @@ public final class DataCallResponse implements Parcelable {
                 && mHandoverFailureMode == other.mHandoverFailureMode
                 && mPduSessionId == other.mPduSessionId
                 && isQosSame
-                && isQosSessionsSame
+                && isQosBearerSessionsSame
                 && Objects.equals(mSliceInfo, other.mSliceInfo);
     }
 
@@ -480,7 +480,7 @@ public final class DataCallResponse implements Parcelable {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
                 mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId, mDefaultQos,
-                mQosSessions, mSliceInfo);
+                mQosBearerSessions, mSliceInfo);
     }
 
     @Override
@@ -510,7 +510,7 @@ public final class DataCallResponse implements Parcelable {
         } else {
             dest.writeParcelable((NrQos)mDefaultQos, flags);
         }
-        dest.writeList(mQosSessions);
+        dest.writeList(mQosBearerSessions);
         dest.writeParcelable(mSliceInfo, flags);
     }
 
@@ -593,7 +593,7 @@ public final class DataCallResponse implements Parcelable {
 
         private Qos mDefaultQos;
 
-        private List<QosSession> mQosSessions = new ArrayList<>();
+        private List<QosBearerSession> mQosBearerSessions = new ArrayList<>();
 
         private SliceInfo mSliceInfo;
 
@@ -807,15 +807,16 @@ public final class DataCallResponse implements Parcelable {
         /**
          * Set the dedicated bearer QOS sessions for this data connection.
          *
-         * @param qosSessions Dedicated bearer QOS (Quality Of Service) sessions received
+         * @param qosBearerSessions Dedicated bearer QOS (Quality Of Service) sessions received
          * from network.
          *
          * @return The same instance of the builder.
          *
          * @hide
          */
-        public @NonNull Builder setQosSessions(@NonNull List<QosSession> qosSessions) {
-            mQosSessions = qosSessions;
+        public @NonNull Builder setQosBearerSessions(
+                @NonNull List<QosBearerSession> qosBearerSessions) {
+            mQosBearerSessions = qosBearerSessions;
             return this;
         }
 
@@ -843,7 +844,7 @@ public final class DataCallResponse implements Parcelable {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
                     mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
-                    mDefaultQos, mQosSessions, mSliceInfo);
+                    mDefaultQos, mQosBearerSessions, mSliceInfo);
         }
     }
 }
