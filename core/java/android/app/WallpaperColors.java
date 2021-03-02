@@ -16,9 +16,9 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -35,6 +35,8 @@ import com.android.internal.graphics.palette.Palette;
 import com.android.internal.util.ContrastColorUtil;
 
 import java.io.FileOutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +52,13 @@ import java.util.stream.Collectors;
  * or {@link WallpaperColors#getTertiaryColor()}.
  */
 public final class WallpaperColors implements Parcelable {
+    /**
+     * @hide
+     */
+    @IntDef(prefix = "HINT_", value = {HINT_SUPPORTS_DARK_TEXT, HINT_SUPPORTS_DARK_THEME},
+            flag = true)
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorsHints {}
 
     private static final boolean DEBUG_DARK_PIXELS = false;
 
@@ -57,18 +66,14 @@ public final class WallpaperColors implements Parcelable {
      * Specifies that dark text is preferred over the current wallpaper for best presentation.
      * <p>
      * eg. A launcher may set its text color to black if this flag is specified.
-     * @hide
      */
-    @SystemApi
     public static final int HINT_SUPPORTS_DARK_TEXT = 1 << 0;
 
     /**
      * Specifies that dark theme is preferred over the current wallpaper for best presentation.
      * <p>
      * eg. A launcher may set its drawer color to black if this flag is specified.
-     * @hide
      */
-    @SystemApi
     public static final int HINT_SUPPORTS_DARK_THEME = 1 << 1;
 
     /**
@@ -229,15 +234,12 @@ public final class WallpaperColors implements Parcelable {
      * @param primaryColor Primary color.
      * @param secondaryColor Secondary color.
      * @param tertiaryColor Tertiary color.
-     * @param colorHints A combination of WallpaperColor hints.
-     * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
+     * @param colorHints A combination of color hints.
      * @see WallpaperColors#fromBitmap(Bitmap)
      * @see WallpaperColors#fromDrawable(Drawable)
-     * @hide
      */
-    @SystemApi
     public WallpaperColors(@NonNull Color primaryColor, @Nullable Color secondaryColor,
-            @Nullable Color tertiaryColor, int colorHints) {
+            @Nullable Color tertiaryColor, @ColorsHints int colorHints) {
 
         if (primaryColor == null) {
             throw new IllegalArgumentException("Primary color should never be null.");
@@ -268,13 +270,14 @@ public final class WallpaperColors implements Parcelable {
      *
      * @param populationByColor Map with keys of colors, and value representing the number of
      *                          occurrences of color in the wallpaper.
-     * @param colorHints        A combination of WallpaperColor hints.
+     * @param colorHints        A combination of color hints.
      * @hide
      * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
      * @see WallpaperColors#fromBitmap(Bitmap)
      * @see WallpaperColors#fromDrawable(Drawable)
      */
-    public WallpaperColors(@NonNull Map<Integer, Integer> populationByColor, int colorHints) {
+    public WallpaperColors(@NonNull Map<Integer, Integer> populationByColor,
+            @ColorsHints int colorHints) {
         mAllColors = populationByColor;
 
         ArrayList<Map.Entry<Integer, Integer>> mapEntries = new ArrayList(
@@ -386,24 +389,11 @@ public final class WallpaperColors implements Parcelable {
     }
 
     /**
-     * Combination of WallpaperColor hints.
-     *
-     * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
-     * @return True if dark text is supported.
-     * @hide
+     * Returns the color hints for this instance.
+     * @return The color hints.
      */
-    @SystemApi
-    public int getColorHints() {
+    public @ColorsHints int getColorHints() {
         return mColorHints;
-    }
-
-    /**
-     * @param colorHints Combination of WallpaperColors hints.
-     * @see WallpaperColors#HINT_SUPPORTS_DARK_TEXT
-     * @hide
-     */
-    public void setColorHints(int colorHints) {
-        mColorHints = colorHints;
     }
 
     /**
