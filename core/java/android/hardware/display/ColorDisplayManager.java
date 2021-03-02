@@ -537,6 +537,26 @@ public final class ColorDisplayManager {
     }
 
     /**
+     * Returns the minimum allowed brightness reduction strength in percentage when activated.
+     *
+     * @hide
+     */
+    public static int getMinimumReduceBrightColorsStrength(Context context) {
+        return context.getResources()
+                .getInteger(R.integer.config_reduceBrightColorsStrengthMin);
+    }
+
+    /**
+     * Returns the maximum allowed brightness reduction strength in percentage when activated.
+     *
+     * @hide
+     */
+    public static int getMaximumReduceBrightColorsStrength(Context context) {
+        return context.getResources()
+                .getInteger(R.integer.config_reduceBrightColorsStrengthMax);
+    }
+
+    /**
      * Check if the color transforms are color accelerated. Some transforms are experimental only
      * on non-accelerated platforms due to the performance implications.
      *
