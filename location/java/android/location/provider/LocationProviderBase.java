@@ -96,7 +96,6 @@ public abstract class LocationProviderBase {
             "com.android.location.service.FusedLocationProvider";
 
     private final String mTag;
-    private final @Nullable String mPackageName;
     private final @Nullable String mAttributionTag;
     private final IBinder mBinder;
 
@@ -108,7 +107,6 @@ public abstract class LocationProviderBase {
     public LocationProviderBase(@NonNull Context context, @NonNull String tag,
             @NonNull ProviderProperties properties) {
         mTag = tag;
-        mPackageName = context.getPackageName();
         mAttributionTag = context.getAttributionTag();
         mBinder = new Service();
 
@@ -305,7 +303,7 @@ public abstract class LocationProviderBase {
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    manager.onInitialize(mAllowed, mProperties, mPackageName, mAttributionTag);
+                    manager.onInitialize(mAllowed, mProperties, mAttributionTag);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 } catch (RuntimeException e) {

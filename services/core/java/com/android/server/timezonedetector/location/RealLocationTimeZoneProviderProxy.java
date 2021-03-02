@@ -16,19 +16,14 @@
 
 package com.android.server.timezonedetector.location;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.Manifest.permission.BIND_TIME_ZONE_PROVIDER_SERVICE;
+import static android.Manifest.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
-import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.warnLog;
-
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,11 +34,12 @@ import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.servicewatcher.CurrentUserServiceSupplier;
+import com.android.server.servicewatcher.CurrentUserServiceSupplier.BoundServiceInfo;
 import com.android.server.servicewatcher.ServiceWatcher;
-import com.android.server.servicewatcher.ServiceWatcher.BoundService;
+import com.android.server.servicewatcher.ServiceWatcher.ServiceListener;
 
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * System server-side proxy for ITimeZoneProvider implementations, i.e. this provides the
@@ -52,7 +48,8 @@ import java.util.function.Predicate;
  * different process. As "remote" providers are bound / unbound this proxy will rebind to the "best"
  * available remote process.
  */
-class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
+class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy implements
+        ServiceListener<BoundServiceInfo> {
 
     @NonNull private final ServiceWatcher mServiceWatcher;
 
@@ -69,38 +66,13 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         super(context, threadingDomain);
         mManagerProxy = null;
         mRequest = TimeZoneProviderRequest.createStopUpdatesRequest();
-
-        // A predicate that is used to confirm that an intent service can be used as a
-        // location-based TimeZoneProvider. The service must:
-        // 1) Declare android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE" - this
-        //    ensures that the provider will only communicate with the system server.
-        // 2) Be in an application that has been granted the
-        //    android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE permission. This
-        //    ensures only trusted time zone providers will be discovered.
-        final String requiredClientPermission = Manifest.permission.BIND_TIME_ZONE_PROVIDER_SERVICE;
-        final String requiredPermission =
-                Manifest.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE;
-        Predicate<ResolveInfo> intentServiceCheckPredicate = resolveInfo -> {
-            ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-
-            boolean hasClientPermissionRequirement =
-                    requiredClientPermission.equals(serviceInfo.permission);
-
-            String packageName = serviceInfo.packageName;
-            PackageManager packageManager = context.getPackageManager();
-            int checkResult = packageManager.checkPermission(requiredPermission, packageName);
-            boolean hasRequiredPermission = checkResult == PERMISSION_GRANTED;
-
-            boolean result = hasClientPermissionRequirement && hasRequiredPermission;
-            if (!result) {
-                warnLog("resolveInfo=" + resolveInfo + " does not meet requirements:"
-                        + " hasClientPermissionRequirement=" + hasClientPermissionRequirement
-                        + ", hasRequiredPermission=" + hasRequiredPermission);
-            }
-            return result;
-        };
-        mServiceWatcher = new ServiceWatcher(context, handler, action, this::onBind, this::onUnbind,
-                enableOverlayResId, nonOverlayPackageResId, intentServiceCheckPredicate);
+        mServiceWatcher = ServiceWatcher.create(context,
+                handler,
+                "RealLocationTimeZoneProviderProxy",
+                new CurrentUserServiceSupplier(context, action, enableOverlayResId,
+                        nonOverlayPackageResId, BIND_TIME_ZONE_PROVIDER_SERVICE,
+                        INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE),
+                this);
     }
 
     @Override
@@ -123,7 +95,8 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         return resolves;
     }
 
-    private void onBind(IBinder binder, BoundService boundService) {
+    @Override
+    public void onBind(IBinder binder, BoundServiceInfo boundService) {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
@@ -138,7 +111,8 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         }
     }
 
-    private void onUnbind() {
+    @Override
+    public void onUnbind() {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
@@ -199,7 +173,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         synchronized (mSharedLock) {
             ipw.println("{RealLocationTimeZoneProviderProxy}");
             ipw.println("mRequest=" + mRequest);
-            mServiceWatcher.dump(null, ipw, args);
+            mServiceWatcher.dump(ipw);
         }
     }
 

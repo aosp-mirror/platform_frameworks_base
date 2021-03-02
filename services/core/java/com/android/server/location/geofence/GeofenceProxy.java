@@ -29,14 +29,17 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.server.servicewatcher.CurrentUserServiceSupplier;
+import com.android.server.servicewatcher.CurrentUserServiceSupplier.BoundServiceInfo;
 import com.android.server.servicewatcher.ServiceWatcher;
+import com.android.server.servicewatcher.ServiceWatcher.ServiceListener;
 
 import java.util.Objects;
 
 /**
  * @hide
  */
-public final class GeofenceProxy {
+public final class GeofenceProxy implements ServiceListener<BoundServiceInfo> {
 
     private static final String TAG = "GeofenceProxy";
     private static final String SERVICE_ACTION = "com.android.location.service.GeofenceProvider";
@@ -62,10 +65,12 @@ public final class GeofenceProxy {
 
     private GeofenceProxy(Context context, IGpsGeofenceHardware gpsGeofence) {
         mGpsGeofenceHardware = Objects.requireNonNull(gpsGeofence);
-        mServiceWatcher = new ServiceWatcher(context, SERVICE_ACTION,
-                (binder, service) -> updateGeofenceHardware(binder), null,
-                com.android.internal.R.bool.config_enableGeofenceOverlay,
-                com.android.internal.R.string.config_geofenceProviderPackageName);
+        mServiceWatcher = ServiceWatcher.create(context,
+                "GeofenceProxy",
+                new CurrentUserServiceSupplier(context, SERVICE_ACTION,
+                        com.android.internal.R.bool.config_enableGeofenceOverlay,
+                        com.android.internal.R.string.config_geofenceProviderPackageName),
+                this);
 
         mGeofenceHardware = null;
     }
@@ -86,6 +91,14 @@ public final class GeofenceProxy {
         }
         return resolves;
     }
+
+    @Override
+    public void onBind(IBinder binder, BoundServiceInfo boundServiceInfo) throws RemoteException {
+        updateGeofenceHardware(binder);
+    }
+
+    @Override
+    public void onUnbind() {}
 
     private class GeofenceProxyServiceConnection implements ServiceConnection {
 
