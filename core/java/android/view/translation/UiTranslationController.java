@@ -40,6 +40,7 @@ import android.view.translation.UiTranslationManager.UiTranslationState;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,6 +130,23 @@ public class UiTranslationController {
             mViews.clear();
             destroyTranslators();
             mWorkerThread.quitSafely();
+        }
+    }
+
+    /**
+     * Called to dump the translation information for Activity.
+     */
+    public void dump(String outerPrefix, PrintWriter pw) {
+        pw.print(outerPrefix); pw.println("UiTranslationController:");
+        final String pfx = outerPrefix + "  ";
+        pw.print(pfx); pw.print("activity: "); pw.println(mActivity);
+        final int translatorSize = mTranslators.size();
+        pw.print(outerPrefix); pw.print("number translator: "); pw.println(translatorSize);
+        for (int i = 0; i < translatorSize; i++) {
+            pw.print(outerPrefix); pw.print("#"); pw.println(i);
+            final Translator translator = mTranslators.valueAt(i);
+            translator.dump(outerPrefix, pw);
+            pw.println();
         }
     }
 
