@@ -185,6 +185,9 @@ class ShortcutUser {
     public ShortcutPackage removePackage(@NonNull String packageName) {
         final ShortcutPackage removed = mPackages.remove(packageName);
 
+        if (removed != null) {
+            removed.removeShortcuts();
+        }
         mService.cleanupBitmapsForPackage(mUserId, packageName);
 
         return removed;
@@ -330,7 +333,10 @@ class ShortcutUser {
 
         if (!shortcutPackage.rescanPackageIfNeeded(isNewApp, forceRescan)) {
             if (isNewApp) {
-                mPackages.remove(packageName);
+                final ShortcutPackage sp = mPackages.remove(packageName);
+                if (sp != null) {
+                    sp.removeShortcuts();
+                }
             }
         }
     }
@@ -454,6 +460,7 @@ class ShortcutUser {
                         case ShortcutPackage.TAG_ROOT: {
                             final ShortcutPackage shortcuts = ShortcutPackage.loadFromXml(
                                     s, ret, parser, fromBackup);
+                            shortcuts.restoreParsedShortcuts(false);
 
                             // Don't use addShortcut(), we don't need to save the icon.
                             ret.mPackages.put(shortcuts.getPackageName(), shortcuts);
@@ -488,6 +495,7 @@ class ShortcutUser {
                 final ShortcutPackage sp = ShortcutPackage.loadFromFile(s, ret, f, fromBackup);
                 if (sp != null) {
                     ret.mPackages.put(sp.getPackageName(), sp);
+                    sp.restoreParsedShortcuts(false);
                 }
             });
 
@@ -570,6 +578,7 @@ class ShortcutUser {
                 Log.w(TAG, "Shortcuts for package " + sp.getPackageName() + " are being restored."
                         + " Existing non-manifeset shortcuts will be overwritten.");
             }
+            sp.restoreParsedShortcuts(true);
             addPackage(sp);
             restoredPackages[0]++;
             restoredShortcuts[0] += sp.getShortcutCount();

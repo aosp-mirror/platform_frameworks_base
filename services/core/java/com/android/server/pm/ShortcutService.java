@@ -662,7 +662,7 @@ public class ShortcutService extends IShortcutService.Stub {
     /** lifecycle event */
     void handleUnlockUser(int userId) {
         if (DEBUG) {
-        Slog.d(TAG, "handleUnlockUser: user=" + userId);
+            Slog.d(TAG, "handleUnlockUser: user=" + userId);
         }
         synchronized (mUnlockedUsers) {
             mUnlockedUsers.put(userId, true);
@@ -1179,6 +1179,14 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    void postValue(@NonNull final ShortcutInfo shortcutInfo,
+            @NonNull final Consumer<ShortcutInfo> cb) {
+        final String pkg = shortcutInfo.getPackage();
+        final int userId = shortcutInfo.getUserId();
+        final String id = shortcutInfo.getId();
+        getPackageShortcutsLocked(pkg, userId).mutateShortcut(id, shortcutInfo, cb);
+    }
+
     /** Return the last reset time. */
     @GuardedBy("mLock")
     long getLastResetTimeLocked() {
@@ -1566,7 +1574,6 @@ public class ShortcutService extends IShortcutService.Stub {
      * resource-based strings.
      */
     void fixUpShortcutResourceNamesAndValues(ShortcutInfo si) {
-        // TODO: update resource names in AppSearch
         final Resources publisherRes = injectGetResourcesForApplicationAsUser(
                 si.getPackage(), si.getUserId());
         if (publisherRes != null) {
@@ -1947,7 +1954,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final boolean unlimited = injectHasUnlimitedShortcutsApiCallsPermission(
                 injectBinderCallingPid(), injectBinderCallingUid());
 
-        List<ShortcutInfo> changedShortcuts = null;
+        final List<ShortcutInfo> changedShortcuts = new ArrayList<>(1);
 
         synchronized (mLock) {
             throwIfUserLockedL(userId);
@@ -1975,59 +1982,57 @@ public class ShortcutService extends IShortcutService.Stub {
                 final ShortcutInfo source = newShortcuts.get(i);
                 fixUpIncomingShortcutInfo(source, /* forUpdate= */ true);
 
-                final ShortcutInfo target = ps.findShortcutById(source.getId());
+                ps.mutateShortcut(source.getId(), null, target -> {
+                    // Invisible shortcuts can't be updated.
+                    if (target == null || !target.isVisibleToPublisher()) {
+                        return;
+                    }
 
-                // Invisible shortcuts can't be updated.
-                if (target == null || !target.isVisibleToPublisher()) {
-                    continue;
-                }
+                    if (target.isEnabled() != source.isEnabled()) {
+                        Slog.w(TAG,
+                                "ShortcutInfo.enabled cannot be changed with updateShortcuts()");
+                    }
 
-                if (target.isEnabled() != source.isEnabled()) {
-                    Slog.w(TAG,
-                            "ShortcutInfo.enabled cannot be changed with updateShortcuts()");
-                }
+                    if (target.isLongLived() != source.isLongLived()) {
+                        Slog.w(TAG,
+                                "ShortcutInfo.longLived cannot be changed with updateShortcuts()");
+                    }
 
-                if (target.isLongLived() != source.isLongLived()) {
-                    Slog.w(TAG,
-                            "ShortcutInfo.longLived cannot be changed with updateShortcuts()");
-                }
+                    // When updating the rank, we need to insert between existing ranks, so set
+                    // this setRankChanged, and also copy the implicit rank fo adjustRanks().
+                    if (source.hasRank()) {
+                        target.setRankChanged();
+                        target.setImplicitRank(source.getImplicitRank());
+                    }
 
-                // When updating the rank, we need to insert between existing ranks, so set
-                // this setRankChanged, and also copy the implicit rank fo adjustRanks().
-                if (source.hasRank()) {
-                    target.setRankChanged();
-                    target.setImplicitRank(source.getImplicitRank());
-                }
+                    final boolean replacingIcon = (source.getIcon() != null);
+                    if (replacingIcon) {
+                        removeIconLocked(target);
+                    }
 
-                final boolean replacingIcon = (source.getIcon() != null);
-                if (replacingIcon) {
-                    removeIconLocked(target);
-                }
+                    // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
+                    target.copyNonNullFieldsFrom(source);
+                    target.setTimestamp(injectCurrentTimeMillis());
 
-                // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
-                target.copyNonNullFieldsFrom(source);
-                target.setTimestamp(injectCurrentTimeMillis());
+                    if (replacingIcon) {
+                        saveIconAndFixUpShortcutLocked(target);
+                    }
 
-                if (replacingIcon) {
-                    saveIconAndFixUpShortcutLocked(target);
-                }
+                    // When we're updating any resource related fields, re-extract the res names and
+                    // the values.
+                    if (replacingIcon || source.hasStringResources()) {
+                        fixUpShortcutResourceNamesAndValues(target);
+                    }
 
-                // When we're updating any resource related fields, re-extract the res names and
-                // the values.
-                if (replacingIcon || source.hasStringResources()) {
-                    fixUpShortcutResourceNamesAndValues(target);
-                }
-
-                if (changedShortcuts == null) {
-                    changedShortcuts = new ArrayList<>(1);
-                }
-                changedShortcuts.add(target);
+                    changedShortcuts.add(target);
+                });
             }
 
             // Lastly, adjust the ranks.
             ps.adjustRanks();
         }
-        packageShortcutsChanged(packageName, userId, changedShortcuts, null);
+        packageShortcutsChanged(packageName, userId,
+                changedShortcuts.isEmpty() ? null : changedShortcuts, null);
 
         verifyStates();
 
@@ -3114,7 +3119,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
                     if (doCache) {
                         if (si.isLongLived()) {
-                            si.addFlags(cacheFlags);
+                            sp.mutateShortcut(si.getId(), si,
+                                    shortcut -> shortcut.addFlags(cacheFlags));
                             if (changedShortcuts == null) {
                                 changedShortcuts = new ArrayList<>(1);
                             }
@@ -3125,7 +3131,8 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                     } else {
                         ShortcutInfo removed = null;
-                        si.clearFlags(cacheFlags);
+                        sp.mutateShortcut(si.getId(), si, shortcut ->
+                                shortcut.clearFlags(cacheFlags));
                         if (!si.isDynamic() && !si.isCached()) {
                             removed = sp.deleteLongLivedWithId(id, /*ignoreInvisible=*/ true);
                         }
