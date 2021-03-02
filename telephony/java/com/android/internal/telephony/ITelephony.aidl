@@ -2357,6 +2357,16 @@ interface ITelephony {
     void triggerRcsReconfiguration(int subId);
 
     /**
+     * Enables or disables the test mode for RCS VoLTE single registration.
+     */
+    void setRcsSingleRegistrationTestModeEnabled(boolean enabled);
+
+    /**
+     * Gets the test mode for RCS VoLTE single registration.
+     */
+    boolean getRcsSingleRegistrationTestModeEnabled();
+
+    /**
      * Overrides the config of RCS VoLTE single registration enabled for the device.
      */
     void setDeviceSingleRegistrationEnabledOverride(String enabled);
