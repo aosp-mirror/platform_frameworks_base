@@ -2204,13 +2204,11 @@ android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP(
     return jStatus;
 }
 
-static jint
-android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
-                                             jobject jSurroundFormats, jboolean reported)
-{
+static jint android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
+                                                         jobject jSurroundFormats) {
     ALOGV("getSurroundFormats");
 
-    if (jSurroundFormats == NULL) {
+    if (jSurroundFormats == nullptr) {
         ALOGE("jSurroundFormats is NULL");
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
@@ -2221,10 +2219,10 @@ android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
 
     jint jStatus;
     unsigned int numSurroundFormats = 0;
-    audio_format_t *surroundFormats = NULL;
-    bool *surroundFormatsEnabled = NULL;
-    status_t status = AudioSystem::getSurroundFormats(
-            &numSurroundFormats, surroundFormats, surroundFormatsEnabled, reported);
+    audio_format_t *surroundFormats = nullptr;
+    bool *surroundFormatsEnabled = nullptr;
+    status_t status = AudioSystem::getSurroundFormats(&numSurroundFormats, surroundFormats,
+                                                      surroundFormatsEnabled);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
         jStatus = nativeToJavaStatus(status);
@@ -2236,8 +2234,8 @@ android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
     }
     surroundFormats = (audio_format_t *)calloc(numSurroundFormats, sizeof(audio_format_t));
     surroundFormatsEnabled = (bool *)calloc(numSurroundFormats, sizeof(bool));
-    status = AudioSystem::getSurroundFormats(
-            &numSurroundFormats, surroundFormats, surroundFormatsEnabled, reported);
+    status = AudioSystem::getSurroundFormats(&numSurroundFormats, surroundFormats,
+                                             surroundFormatsEnabled);
     jStatus = nativeToJavaStatus(status);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
@@ -2255,6 +2253,50 @@ android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
 exit:
     free(surroundFormats);
     free(surroundFormatsEnabled);
+    return jStatus;
+}
+
+static jint android_media_AudioSystem_getReportedSurroundFormats(JNIEnv *env, jobject thiz,
+                                                                 jobject jSurroundFormats) {
+    ALOGV("getReportedSurroundFormats");
+
+    if (jSurroundFormats == nullptr) {
+        ALOGE("jSurroundFormats is NULL");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jSurroundFormats, gArrayListClass)) {
+        ALOGE("jSurroundFormats not an arraylist");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    jint jStatus;
+    unsigned int numSurroundFormats = 0;
+    audio_format_t *surroundFormats = nullptr;
+    status_t status = AudioSystem::getReportedSurroundFormats(&numSurroundFormats, surroundFormats);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getReportedSurroundFormats error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        goto exit;
+    }
+    if (numSurroundFormats == 0) {
+        jStatus = (jint)AUDIO_JAVA_SUCCESS;
+        goto exit;
+    }
+    surroundFormats = (audio_format_t *)calloc(numSurroundFormats, sizeof(audio_format_t));
+    status = AudioSystem::getReportedSurroundFormats(&numSurroundFormats, surroundFormats);
+    jStatus = nativeToJavaStatus(status);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getReportedSurroundFormats error %d", status);
+        goto exit;
+    }
+    for (size_t i = 0; i < numSurroundFormats; i++) {
+        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor,
+                                                audioFormatFromNative(surroundFormats[i]));
+        env->CallObjectMethod(jSurroundFormats, gArrayListMethods.add, surroundFormat);
+        env->DeleteLocalRef(surroundFormat);
+    }
+
+exit:
+    free(surroundFormats);
     return jStatus;
 }
 
@@ -2619,8 +2661,10 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_getOffloadSupport},
          {"getMicrophones", "(Ljava/util/ArrayList;)I",
           (void *)android_media_AudioSystem_getMicrophones},
-         {"getSurroundFormats", "(Ljava/util/Map;Z)I",
+         {"getSurroundFormats", "(Ljava/util/Map;)I",
           (void *)android_media_AudioSystem_getSurroundFormats},
+         {"getReportedSurroundFormats", "(Ljava/util/ArrayList;)I",
+          (void *)android_media_AudioSystem_getReportedSurroundFormats},
          {"setSurroundFormatEnabled", "(IZ)I",
           (void *)android_media_AudioSystem_setSurroundFormatEnabled},
          {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
