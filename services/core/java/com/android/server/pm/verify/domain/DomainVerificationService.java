@@ -256,7 +256,7 @@ public class DomainVerificationService extends SystemService
             Map<String, Integer> hostToStateMap = new ArrayMap<>(pkgState.getStateMap());
 
             // TODO(b/159952358): Should the domain list be cached?
-            ArraySet<String> domains = mCollector.collectAutoVerifyDomains(pkg);
+            ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
             if (domains.isEmpty()) {
                 return null;
             }
@@ -354,7 +354,8 @@ public class DomainVerificationService extends SystemService
 
                     validDomains.clear();
 
-                    ArraySet<String> autoVerifyDomains = mCollector.collectAutoVerifyDomains(pkg);
+                    ArraySet<String> autoVerifyDomains =
+                            mCollector.collectValidAutoVerifyDomains(pkg);
                     if (domains == null) {
                         validDomains.addAll(autoVerifyDomains);
                     } else {
@@ -379,9 +380,9 @@ public class DomainVerificationService extends SystemService
 
                 AndroidPackage pkg = pkgSetting.getPkg();
                 if (domains == null) {
-                    domains = mCollector.collectAutoVerifyDomains(pkg);
+                    domains = mCollector.collectValidAutoVerifyDomains(pkg);
                 } else {
-                    domains.retainAll(mCollector.collectAutoVerifyDomains(pkg));
+                    domains.retainAll(mCollector.collectValidAutoVerifyDomains(pkg));
                 }
 
                 setDomainVerificationStatusInternal(pkgState, state, domains);
@@ -811,7 +812,8 @@ public class DomainVerificationService extends SystemService
             }
 
             ArrayMap<String, Integer> oldStateMap = oldPkgState.getStateMap();
-            ArraySet<String> newAutoVerifyDomains = mCollector.collectAutoVerifyDomains(newPkg);
+            ArraySet<String> newAutoVerifyDomains =
+                    mCollector.collectValidAutoVerifyDomains(newPkg);
             int newDomainsSize = newAutoVerifyDomains.size();
 
             for (int newDomainsIndex = 0; newDomainsIndex < newDomainsSize; newDomainsIndex++) {
@@ -840,7 +842,7 @@ public class DomainVerificationService extends SystemService
                     oldPkgState.getUserSelectionStates();
             int oldUserStatesSize = oldUserStates.size();
             if (oldUserStatesSize > 0) {
-                ArraySet<String> newWebDomains = mCollector.collectAutoVerifyDomains(newPkg);
+                ArraySet<String> newWebDomains = mCollector.collectValidAutoVerifyDomains(newPkg);
                 for (int oldUserStatesIndex = 0; oldUserStatesIndex < oldUserStatesSize;
                         oldUserStatesIndex++) {
                     int userId = oldUserStates.keyAt(oldUserStatesIndex);
@@ -893,7 +895,7 @@ public class DomainVerificationService extends SystemService
         }
 
         AndroidPackage pkg = newPkgSetting.getPkg();
-        ArraySet<String> domains = mCollector.collectAutoVerifyDomains(pkg);
+        ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
         boolean hasAutoVerifyDomains = !domains.isEmpty();
         boolean isPendingOrRestored = pkgState != null;
         if (isPendingOrRestored) {
@@ -1157,7 +1159,7 @@ public class DomainVerificationService extends SystemService
         }
         AndroidPackage pkg = pkgSetting.getPkg();
         ArraySet<String> declaredDomains = forAutoVerify
-                ? mCollector.collectAutoVerifyDomains(pkg)
+                ? mCollector.collectValidAutoVerifyDomains(pkg)
                 : mCollector.collectAllWebDomains(pkg);
 
         if (domains.retainAll(declaredDomains)) {
@@ -1289,7 +1291,7 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        applyImmutableState(pkgState, mCollector.collectAutoVerifyDomains(pkg));
+        applyImmutableState(pkgState, mCollector.collectValidAutoVerifyDomains(pkg));
     }
 
     @Override
@@ -1559,7 +1561,7 @@ public class DomainVerificationService extends SystemService
                 // To allow an instant app to immediately open domains after being installed by the
                 // user, auto approve them for any declared autoVerify domains.
                 if (pkgSetting.getInstantApp(userId)
-                        && mCollector.collectAutoVerifyDomains(pkg).contains(host)) {
+                        && mCollector.collectValidAutoVerifyDomains(pkg).contains(host)) {
                     return APPROVAL_LEVEL_INSTANT_APP;
                 }
             }
