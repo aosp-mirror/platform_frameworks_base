@@ -1319,7 +1319,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
                             ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
                             ident.getRoaming(), true /* metered */,
-                            true /* onDefaultNetwork */);
+                            true /* onDefaultNetwork */, ident.getOemManaged());
                     findOrCreateNetworkIdentitySet(mActiveIfaces, IFACE_VT).add(vtIdent);
                     findOrCreateNetworkIdentitySet(mActiveUidIfaces, IFACE_VT).add(vtIdent);
                 }

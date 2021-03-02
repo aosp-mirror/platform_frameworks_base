@@ -16,6 +16,8 @@
 
 package com.android.server.content;
 
+import static android.os.PowerWhitelistManager.REASON_SYNC_MANAGER;
+
 import static com.android.server.content.SyncLogger.logSafe;
 
 import android.accounts.Account;
@@ -1671,7 +1673,7 @@ public class SyncManager {
                         syncOperation.owningPackage,
                         mConstants.getKeyExemptionTempWhitelistDurationInSeconds() * 1000,
                         UserHandle.getUserId(syncOperation.owningUid),
-                        /* sync=*/ false, "sync by top app");
+                        /* sync=*/ false, REASON_SYNC_MANAGER, "sync by top app");
             }
         }
 

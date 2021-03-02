@@ -2316,13 +2316,14 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling user is running on foreground.
+     * Checks if the context user is running in the foreground.
      *
-     * @return whether the calling user is running on foreground.
+     * @return whether the context user is running in the foreground.
      */
+    @UserHandleAware
     public boolean isUserForeground() {
         try {
-            return mService.isUserForeground();
+            return mService.isUserForeground(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

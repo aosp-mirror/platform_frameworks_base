@@ -105,7 +105,6 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
     LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
                 SkMatrix::I());
-    layerUpdateQueue->clear();
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
@@ -113,8 +112,13 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         SkCanvas* profileCanvas = surface->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas);
         profiler->draw(profileRenderer);
-        profileCanvas->flush();
     }
+
+    {
+        ATRACE_NAME("flush commands");
+        surface->flushAndSubmit();
+    }
+    layerUpdateQueue->clear();
 
     // Log memory statistics
     if (CC_UNLIKELY(Properties::debugLevel != kDebugDisabled)) {

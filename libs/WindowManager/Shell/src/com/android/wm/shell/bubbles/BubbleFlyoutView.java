@@ -227,29 +227,30 @@ public class BubbleFlyoutView extends FrameLayout {
     /*
      * Fade animation for consecutive flyouts.
      */
-    void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, PointF stackPos) {
+    void animateUpdate(Bubble.FlyoutMessage flyoutMessage, float parentWidth, PointF stackPos,
+            boolean hideDot) {
         final Runnable afterFadeOut = () -> {
             updateFlyoutMessage(flyoutMessage, parentWidth);
             // Wait for TextViews to layout with updated height.
             post(() -> {
-                fade(true /* in */, stackPos, () -> {} /* after */);
+                fade(true /* in */, stackPos, hideDot, () -> {} /* after */);
             } /* after */ );
         };
-        fade(false /* in */, stackPos, afterFadeOut);
+        fade(false /* in */, stackPos, hideDot, afterFadeOut);
     }
 
     /*
      * Fade-out above or fade-in from below.
      */
-    private void fade(boolean in, PointF stackPos, Runnable afterFade) {
+    private void fade(boolean in, PointF stackPos, boolean hideDot, Runnable afterFade) {
         mFlyoutY = stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
 
         setAlpha(in ? 0f : 1f);
         setTranslationY(in ? mFlyoutY + FLYOUT_FADE_Y : mFlyoutY);
-        mRestingTranslationX = mArrowPointingLeft
-                ? stackPos.x + mBubbleSize + mFlyoutSpaceFromBubble
-                : stackPos.x - getWidth() - mFlyoutSpaceFromBubble;
+        updateFlyoutX(stackPos.x);
         setTranslationX(mRestingTranslationX);
+        updateDot(stackPos, hideDot);
+
         animate()
                 .alpha(in ? 1f : 0f)
                 .setDuration(in ? FLYOUT_FADE_IN_DURATION : FLYOUT_FADE_OUT_DURATION)
@@ -292,6 +293,33 @@ public class BubbleFlyoutView extends FrameLayout {
         mMessageText.setText(flyoutMessage.message);
     }
 
+    void updateFlyoutX(float stackX) {
+        // Calculate the translation required to position the flyout next to the bubble stack,
+        // with the desired padding.
+        mRestingTranslationX = mArrowPointingLeft
+                ? stackX + mBubbleSize + mFlyoutSpaceFromBubble
+                : stackX - getWidth() - mFlyoutSpaceFromBubble;
+    }
+
+    void updateDot(PointF stackPos, boolean hideDot) {
+        // Calculate the difference in size between the flyout and the 'dot' so that we can
+        // transform into the dot later.
+        final float newDotSize = hideDot ? 0f : mNewDotSize;
+        mFlyoutToDotWidthDelta = getWidth() - newDotSize;
+        mFlyoutToDotHeightDelta = getHeight() - newDotSize;
+
+        // Calculate the translation values needed to be in the correct 'new dot' position.
+        final float adjustmentForScaleAway = hideDot ? 0f : (mOriginalDotSize / 2f);
+        final float dotPositionX = stackPos.x + mDotCenter[0] - adjustmentForScaleAway;
+        final float dotPositionY = stackPos.y + mDotCenter[1] - adjustmentForScaleAway;
+
+        final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
+        final float distanceFromLayoutTopToDotCenterY = mFlyoutY - dotPositionY;
+
+        mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX;
+        mTranslationYWhenDot = -distanceFromLayoutTopToDotCenterY;
+    }
+
     /** Configures the flyout, collapsed into dot form. */
     void setupFlyoutStartingAsDot(
             Bubble.FlyoutMessage flyoutMessage,
@@ -327,29 +355,8 @@ public class BubbleFlyoutView extends FrameLayout {
             mFlyoutY =
                     stackPos.y + (mBubbleSize - mFlyoutTextContainer.getHeight()) / 2f;
             setTranslationY(mFlyoutY);
-
-            // Calculate the translation required to position the flyout next to the bubble stack,
-            // with the desired padding.
-            mRestingTranslationX = mArrowPointingLeft
-                    ? stackPos.x + mBubbleSize + mFlyoutSpaceFromBubble
-                    : stackPos.x - getWidth() - mFlyoutSpaceFromBubble;
-
-            // Calculate the difference in size between the flyout and the 'dot' so that we can
-            // transform into the dot later.
-            final float newDotSize = hideDot ? 0f : mNewDotSize;
-            mFlyoutToDotWidthDelta = getWidth() - newDotSize;
-            mFlyoutToDotHeightDelta = getHeight() - newDotSize;
-
-            // Calculate the translation values needed to be in the correct 'new dot' position.
-            final float adjustmentForScaleAway = hideDot ? 0f : (mOriginalDotSize / 2f);
-            final float dotPositionX = stackPos.x + mDotCenter[0] - adjustmentForScaleAway;
-            final float dotPositionY = stackPos.y + mDotCenter[1] - adjustmentForScaleAway;
-
-            final float distanceFromFlyoutLeftToDotCenterX = mRestingTranslationX - dotPositionX;
-            final float distanceFromLayoutTopToDotCenterY = mFlyoutY - dotPositionY;
-
-            mTranslationXWhenDot = -distanceFromFlyoutLeftToDotCenterX;
-            mTranslationYWhenDot = -distanceFromLayoutTopToDotCenterY;
+            updateFlyoutX(stackPos.x);
+            updateDot(stackPos, hideDot);
             if (onLayoutComplete != null) {
                 onLayoutComplete.run();
             }

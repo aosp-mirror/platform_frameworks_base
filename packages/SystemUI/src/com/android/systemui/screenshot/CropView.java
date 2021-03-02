@@ -140,6 +140,25 @@ public class CropView extends View {
     }
 
     /**
+     * Set the given boundary to the given value without animation.
+     */
+    public void setBoundaryTo(CropBoundary boundary, float value) {
+        switch (boundary) {
+            case TOP:
+                mTopCrop = value;
+                break;
+            case BOTTOM:
+                mBottomCrop = value;
+                break;
+            case NONE:
+                Log.w(TAG, "No boundary selected for animation");
+                break;
+        }
+
+        invalidate();
+    }
+
+    /**
      * Animate the given boundary to the given value.
      */
     public void animateBoundaryTo(CropBoundary boundary, float value) {

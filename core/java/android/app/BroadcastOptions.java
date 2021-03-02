@@ -144,23 +144,6 @@ public class BroadcastOptions {
      * Set a duration for which the system should temporary place an application on the
      * power allowlist when this broadcast is being delivered to it, specify the temp allowlist
      * type.
-     * @param type one of {@link TempAllowListType}
-     * @param duration the duration in milliseconds; 0 means to not place on allowlist.
-     * @deprecated use {@link #setTemporaryAppAllowlist(long, int, int,  String)} instead.
-     */
-    @Deprecated
-    @RequiresPermission(anyOf = {android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
-            android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
-            android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
-    public void setTemporaryAppWhitelistDuration(@TempAllowListType int type, long duration) {
-        setTemporaryAppAllowlist(duration, type,
-                PowerWhitelistManager.REASON_UNKNOWN, null);
-    }
-
-    /**
-     * Set a duration for which the system should temporary place an application on the
-     * power allowlist when this broadcast is being delivered to it, specify the temp allowlist
-     * type.
      * @param duration the duration in milliseconds; 0 means to not place on allowlist.
      * @param type one of {@link TempAllowListType}
      * @param reasonCode one of {@link ReasonCode}, use

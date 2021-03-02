@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PRO
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.devicepolicy.DevicePolicyManagerService.dumpResources;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -32,6 +33,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.R;
@@ -223,5 +225,40 @@ public class OverlayPackagesProvider {
                         + provisioningAction + " not supported.");
         }
         return new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(resId)));
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("OverlayPackagesProvider");
+        pw.increaseIndent();
+
+        dumpResources(pw, mContext, "required_apps_managed_device",
+                R.array.required_apps_managed_device);
+        dumpResources(pw, mContext, "required_apps_managed_user",
+                R.array.required_apps_managed_user);
+        dumpResources(pw, mContext, "required_apps_managed_profile",
+                R.array.required_apps_managed_profile);
+
+        dumpResources(pw, mContext, "disallowed_apps_managed_device",
+                R.array.disallowed_apps_managed_device);
+        dumpResources(pw, mContext, "disallowed_apps_managed_user",
+                R.array.disallowed_apps_managed_user);
+        dumpResources(pw, mContext, "disallowed_apps_managed_device",
+                R.array.disallowed_apps_managed_device);
+
+        dumpResources(pw, mContext, "vendor_required_apps_managed_device",
+                R.array.vendor_required_apps_managed_device);
+        dumpResources(pw, mContext, "vendor_required_apps_managed_user",
+                R.array.vendor_required_apps_managed_user);
+        dumpResources(pw, mContext, "vendor_required_apps_managed_profile",
+                R.array.vendor_required_apps_managed_profile);
+
+        dumpResources(pw, mContext, "vendor_disallowed_apps_managed_user",
+                R.array.vendor_disallowed_apps_managed_user);
+        dumpResources(pw, mContext, "vendor_disallowed_apps_managed_device",
+                R.array.vendor_disallowed_apps_managed_device);
+        dumpResources(pw, mContext, "vendor_disallowed_apps_managed_profile",
+                R.array.vendor_disallowed_apps_managed_profile);
+
+        pw.decreaseIndent();
     }
 }

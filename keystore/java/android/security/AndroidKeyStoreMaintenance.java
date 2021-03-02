@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.usermanager.IKeystoreUserManager;
+import android.system.keystore2.Domain;
 import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
@@ -39,7 +40,7 @@ public class AndroidKeyStoreMaintenance {
     }
 
     /**
-     * Informs keystore2 about adding a user
+     * Informs Keystore 2.0 about adding a user
      *
      * @param userId - Android user id of the user being added
      * @return 0 if successful or a {@code ResponseCode}
@@ -60,7 +61,7 @@ public class AndroidKeyStoreMaintenance {
     }
 
     /**
-     * Informs keystore2 about removing a usergit mer
+     * Informs Keystore 2.0 about removing a usergit mer
      *
      * @param userId - Android user id of the user being removed
      * @return 0 if successful or a {@code ResponseCode}
@@ -81,7 +82,7 @@ public class AndroidKeyStoreMaintenance {
     }
 
     /**
-     * Informs keystore2 about changing user's password
+     * Informs Keystore 2.0 about changing user's password
      *
      * @param userId   - Android user id of the user
      * @param password - a secret derived from the synthetic password provided by the
@@ -96,6 +97,24 @@ public class AndroidKeyStoreMaintenance {
             return 0;
         } catch (ServiceSpecificException e) {
             Log.e(TAG, "onUserPasswordChanged failed", e);
+            return e.errorCode;
+        } catch (Exception e) {
+            Log.e(TAG, "Can not connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
+    /**
+     * Informs Keystore 2.0 that an app was uninstalled and the corresponding namspace is to
+     * be cleared.
+     */
+    public static int clearNamespace(@Domain int domain, long namespace) {
+        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
+        try {
+            getService().clearNamespace(domain, namespace);
+            return 0;
+        } catch (ServiceSpecificException e) {
+            Log.e(TAG, "clearNamespace failed", e);
             return e.errorCode;
         } catch (Exception e) {
             Log.e(TAG, "Can not connect to keystore", e);

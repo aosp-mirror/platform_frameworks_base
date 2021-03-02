@@ -1128,7 +1128,7 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
             bool isHighPriority = message.isHighPriority();
             env->CallVoidMethod(
                     frontend,
-                    env->GetMethodID(clazz, "onPriorityReported", "(B)V"),
+                    env->GetMethodID(clazz, "onPriorityReported", "(Z)V"),
                     isHighPriority);
             break;
         }

@@ -795,6 +795,23 @@ public final class ContentCaptureManagerService extends
             new ContentCaptureManagerServiceShellCommand(ContentCaptureManagerService.this).exec(
                     this, in, out, err, args, callback, resultReceiver);
         }
+
+        @Override
+        public void resetTemporaryService(@UserIdInt int userId) {
+            ContentCaptureManagerService.this.resetTemporaryService(userId);
+        }
+
+        @Override
+        public void setTemporaryService(
+                @UserIdInt int userId, @NonNull String serviceName, int duration) {
+            ContentCaptureManagerService.this.setTemporaryService(
+                    userId, serviceName, duration);
+        }
+
+        @Override
+        public void setDefaultServiceEnabled(@UserIdInt int userId, boolean enabled) {
+            ContentCaptureManagerService.this.setDefaultServiceEnabled(userId, enabled);
+        }
     }
 
     private final class LocalService extends ContentCaptureManagerInternal {

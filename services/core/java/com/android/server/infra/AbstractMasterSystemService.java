@@ -1052,6 +1052,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
             if (verbose) Slog.v(mTag, "onChange(): uri=" + uri + ", userId=" + userId);
             final String property = uri.getLastPathSegment();
+            if (property == null) {
+                return;
+            }
             if (property.equals(getServiceSettingsProperty())
                     || property.equals(Settings.Secure.USER_SETUP_COMPLETE)) {
                 synchronized (mLock) {

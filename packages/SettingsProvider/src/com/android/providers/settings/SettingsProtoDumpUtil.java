@@ -551,9 +551,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                 GlobalSettingsProto.Development.FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS);
         dumpSetting(s, p,
-                Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
-                GlobalSettingsProto.Development.ENABLE_SIZECOMPAT_FREEFORM);
-        dumpSetting(s, p,
                 Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
                 GlobalSettingsProto.Development.ENABLE_NON_RESIZABLE_MULTI_WINDOW);
         p.end(developmentToken);

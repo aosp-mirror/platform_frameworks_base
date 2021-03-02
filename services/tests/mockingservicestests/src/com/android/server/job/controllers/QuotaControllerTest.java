@@ -1326,6 +1326,46 @@ public class QuotaControllerTest {
     }
 
     @Test
+    public void testGetMaxJobExecutionTimeLocked_Regular_Active() {
+        JobStatus job = createJobStatus("testGetMaxJobExecutionTimeLocked_Regular_Active", 0);
+        setDeviceConfigLong(QcConstants.KEY_ALLOWED_TIME_PER_PERIOD_MS, 10 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_WINDOW_SIZE_ACTIVE_MS, 10 * MINUTE_IN_MILLIS);
+        setDeviceConfigLong(QcConstants.KEY_MAX_EXECUTION_TIME_MS, 2 * HOUR_IN_MILLIS);
+        setDischarging();
+        setStandbyBucket(ACTIVE_INDEX, job);
+        setProcessState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY);
+
+        // ACTIVE apps (where allowed time = window size) should be capped at max execution limit.
+        synchronized (mQuotaController.mLock) {
+            assertEquals(2 * HOUR_IN_MILLIS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
+        }
+
+        // Make sure sessions are factored in properly.
+        mQuotaController.saveTimingSession(0, SOURCE_PACKAGE,
+                createTimingSession(sElapsedRealtimeClock.millis() - (6 * HOUR_IN_MILLIS),
+                        30 * MINUTE_IN_MILLIS, 1), false);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(90 * MINUTE_IN_MILLIS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
+        }
+
+        mQuotaController.saveTimingSession(0, SOURCE_PACKAGE,
+                createTimingSession(sElapsedRealtimeClock.millis() - (5 * HOUR_IN_MILLIS),
+                        30 * MINUTE_IN_MILLIS, 1), false);
+        mQuotaController.saveTimingSession(0, SOURCE_PACKAGE,
+                createTimingSession(sElapsedRealtimeClock.millis() - (4 * HOUR_IN_MILLIS),
+                        30 * MINUTE_IN_MILLIS, 1), false);
+        mQuotaController.saveTimingSession(0, SOURCE_PACKAGE,
+                createTimingSession(sElapsedRealtimeClock.millis() - (3 * HOUR_IN_MILLIS),
+                        25 * MINUTE_IN_MILLIS, 1), false);
+        synchronized (mQuotaController.mLock) {
+            assertEquals(5 * MINUTE_IN_MILLIS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
+        }
+    }
+
+    @Test
     public void testGetMaxJobExecutionTimeLocked_EJ() {
         final long timeUsedMs = 3 * MINUTE_IN_MILLIS;
         mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
