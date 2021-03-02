@@ -125,7 +125,7 @@ public class StartingSurfaceDrawerTests {
         final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, android.R.style.Theme);
-        mStartingSurfaceDrawer.addStartingWindow(windowInfo, mBinder);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).postAddWindow(
                 eq(taskId), eq(mBinder), any(), any(), any(), any());
@@ -143,7 +143,7 @@ public class StartingSurfaceDrawerTests {
         final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, 0);
-        mStartingSurfaceDrawer.addStartingWindow(windowInfo, mBinder);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).postAddWindow(
                 eq(taskId), eq(mBinder), any(), any(), any(), any());
