@@ -157,6 +157,9 @@ public class LongScreenshotActivity extends Activity {
                 });
             }
         }
+        mPreview.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                        updateCropLocation());
     }
 
     @Override
@@ -305,6 +308,27 @@ public class LongScreenshotActivity extends Activity {
         }
     }
 
+    private void updateCropLocation() {
+        Drawable drawable = mPreview.getDrawable();
+        if (drawable == null) {
+            return;
+        }
+
+        float imageRatio = drawable.getBounds().width() / (float) drawable.getBounds().height();
+        float viewRatio = mPreview.getWidth() / (float) mPreview.getHeight();
+
+        if (imageRatio > viewRatio) {
+            // Image is full width and height is constrained, compute extra padding to inform
+            // CropView
+            float imageHeight = mPreview.getHeight() * viewRatio / imageRatio;
+            int extraPadding = (int) (mPreview.getHeight() - imageHeight) / 2;
+            mCropView.setExtraPadding(extraPadding, extraPadding);
+        } else {
+            // Image is full height
+            mCropView.setExtraPadding(0, 0);
+        }
+    }
+
     private void doCapture() {
         mScrollCaptureController.start(mConnection,
                 new ScrollCaptureController.ScrollCaptureCallback() {
@@ -319,6 +343,7 @@ public class LongScreenshotActivity extends Activity {
                         Log.i(TAG, "Got tiles " + imageTileSet.getWidth() + " x "
                                 + imageTileSet.getHeight());
                         mPreview.setImageDrawable(imageTileSet.getDrawable());
+                        updateCropLocation();
                         mMagnifierView.setDrawable(imageTileSet.getDrawable(),
                                 imageTileSet.getWidth(), imageTileSet.getHeight());
                         mCropView.animateBoundaryTo(CropView.CropBoundary.BOTTOM, 0.5f);
