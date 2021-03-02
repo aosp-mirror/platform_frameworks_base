@@ -59,6 +59,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenrecord.RecordingController;
@@ -246,6 +247,7 @@ public class Dependency {
     @Inject Lazy<KeyguardUpdateMonitor> mKeyguardUpdateMonitor;
     @Inject Lazy<BatteryController> mBatteryController;
     @Inject Lazy<NightDisplayListener> mNightDisplayListener;
+    @Inject Lazy<ReduceBrightColorsController> mReduceBrightColorsController;
     @Inject Lazy<ManagedProfileController> mManagedProfileController;
     @Inject Lazy<NextAlarmController> mNextAlarmController;
     @Inject Lazy<DataSaverController> mDataSaverController;
@@ -392,6 +394,8 @@ public class Dependency {
         mProviders.put(BatteryController.class, mBatteryController::get);
 
         mProviders.put(NightDisplayListener.class, mNightDisplayListener::get);
+
+        mProviders.put(ReduceBrightColorsController.class, mReduceBrightColorsController::get);
 
         mProviders.put(ManagedProfileController.class, mManagedProfileController::get);
 

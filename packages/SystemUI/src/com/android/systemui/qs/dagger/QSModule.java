@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.dagger;
 
+import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
+
 import android.content.Context;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -25,12 +27,15 @@ import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.util.settings.SecureSettings;
+
+import javax.inject.Named;
 
 import dagger.Binds;
 import dagger.Module;
@@ -54,7 +59,9 @@ public interface QSModule {
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
             NightDisplayListener nightDisplayListener,
-            CastController castController) {
+            CastController castController,
+            ReduceBrightColorsController reduceBrightColorsController,
+            @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         AutoTileManager manager = new AutoTileManager(
                 context,
                 autoAddTrackerBuilder,
@@ -65,7 +72,9 @@ public interface QSModule {
                 dataSaverController,
                 managedProfileController,
                 nightDisplayListener,
-                castController
+                castController,
+                reduceBrightColorsController,
+                isReduceBrightColorsAvailable
         );
         manager.init();
         return manager;

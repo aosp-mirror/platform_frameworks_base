@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -47,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -66,6 +69,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Named;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -88,9 +93,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Mock private DataSaverController mDataSaverController;
     @Mock private ManagedProfileController mManagedProfileController;
     @Mock private NightDisplayListener mNightDisplayListener;
+    @Mock private ReduceBrightColorsController mReduceBrightColorsController;
     @Mock(answer = Answers.RETURNS_SELF)
     private AutoAddTracker.Builder mAutoAddTrackerBuilder;
     @Mock private Context mUserContext;
+    private final boolean mIsReduceBrightColorsAvailable = true;
 
     private AutoTileManager mAutoTileManager;
     private SecureSettings mSecureSettings;
@@ -130,7 +137,9 @@ public class AutoTileManagerTest extends SysuiTestCase {
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
             NightDisplayListener nightDisplayListener,
-            CastController castController) {
+            CastController castController,
+            ReduceBrightColorsController reduceBrightColorsController,
+            @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         return new AutoTileManager(context, autoAddTrackerBuilder, mQsTileHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
                 mSecureSettings,
@@ -138,13 +147,15 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 dataSaverController,
                 managedProfileController,
                 nightDisplayListener,
-                castController);
+                castController,
+                reduceBrightColorsController,
+                isReduceBrightColorsAvailable);
     }
 
     private AutoTileManager createAutoTileManager(Context context) {
         return createAutoTileManager(context, mAutoAddTrackerBuilder, mHotspotController,
                 mDataSaverController, mManagedProfileController, mNightDisplayListener,
-                mCastController);
+                mCastController, mReduceBrightColorsController, mIsReduceBrightColorsAvailable);
     }
 
     @Test
@@ -157,9 +168,11 @@ public class AutoTileManagerTest extends SysuiTestCase {
         ManagedProfileController mPC = mock(ManagedProfileController.class);
         NightDisplayListener nDS = mock(NightDisplayListener.class);
         CastController cC = mock(CastController.class);
+        ReduceBrightColorsController rBC = mock(ReduceBrightColorsController.class);
 
         AutoTileManager manager =
-                createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDS, cC);
+                createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDS, cC, rBC,
+                        true);
 
         verify(tracker, never()).initialize();
         verify(hC, never()).addCallback(any());
@@ -167,6 +180,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         verify(mPC, never()).addCallback(any());
         verify(nDS, never()).setCallback(any());
         verify(cC, never()).addCallback(any());
+        verify(rBC, never()).addCallback(any());
         assertNull(manager.getSecureSettingForKey(TEST_SETTING));
         assertNull(manager.getSecureSettingForKey(TEST_SETTING_COMPONENT));
     }
@@ -207,6 +221,10 @@ public class AutoTileManagerTest extends SysuiTestCase {
             inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNotNull());
         }
 
+        InOrder inOrderReduceBrightColors = inOrder(mReduceBrightColorsController);
+        inOrderReduceBrightColors.verify(mReduceBrightColorsController).removeCallback(any());
+        inOrderReduceBrightColors.verify(mReduceBrightColorsController).addCallback(any());
+
         InOrder inOrderCast = inOrder(mCastController);
         inOrderCast.verify(mCastController).removeCallback(any());
         inOrderCast.verify(mCastController).addCallback(any());
@@ -246,6 +264,10 @@ public class AutoTileManagerTest extends SysuiTestCase {
             inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNull());
             inOrderNightDisplay.verify(mNightDisplayListener).setCallback(isNotNull());
         }
+
+        InOrder inOrderReduceBrightColors = inOrder(mReduceBrightColorsController);
+        inOrderReduceBrightColors.verify(mReduceBrightColorsController).removeCallback(any());
+        inOrderReduceBrightColors.verify(mReduceBrightColorsController).addCallback(any());
 
         InOrder inOrderCast = inOrder(mCastController);
         inOrderCast.verify(mCastController).removeCallback(any());
@@ -313,6 +335,18 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mAutoTileManager.mNightDisplayCallback.onAutoModeChanged(
                 ColorDisplayManager.AUTO_MODE_DISABLED);
         verify(mQsTileHost, never()).addTile("night");
+    }
+
+    @Test
+    public void reduceBrightColorsTileAdded_whenActivated() {
+        mAutoTileManager.mReduceBrightColorsCallback.onActivated(true);
+        verify(mQsTileHost).addTile("reduce_brightness");
+    }
+
+    @Test
+    public void reduceBrightColorsTileNotAdded_whenDeactivated() {
+        mAutoTileManager.mReduceBrightColorsCallback.onActivated(false);
+        verify(mQsTileHost, never()).addTile("reduce_brightness");
     }
 
     private static List<CastDevice> buildFakeCastDevice(boolean isCasting) {
