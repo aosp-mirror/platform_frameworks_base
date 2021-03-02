@@ -256,6 +256,7 @@ applications that come with the platform
         <!-- Permissions required for reading DeviceConfig -->
         <permission name="android.permission.READ_DEVICE_CONFIG" />
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
+        <permission name="android.permission.MODIFY_QUIET_MODE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
