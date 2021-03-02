@@ -108,6 +108,8 @@ public class PowerWhitelistManager {
      * @hide
      */
     public static final int REASON_DENIED = -1;
+
+    /* Reason code range 0-9 are reserved for default reasons */
     /**
      * The default reason code if reason is unknown.
      */
@@ -116,6 +118,8 @@ public class PowerWhitelistManager {
      * Use REASON_OTHER if there is no better choice.
      */
     public static final int REASON_OTHER = 1;
+
+    /* Reason code range 10-49 are reserved for BG-FGS-launch allowed proc states */
     /** @hide */
     public static final int REASON_PROC_STATE_PERSISTENT = 10;
     /** @hide */
@@ -128,6 +132,8 @@ public class PowerWhitelistManager {
     public static final int REASON_PROC_STATE_FGS = 14;
     /** @hide */
     public static final int REASON_PROC_STATE_BFGS = 15;
+
+    /* Reason code range 50-99 are reserved for BG-FGS-launch allowed reasons */
     /** @hide */
     public static final int REASON_UID_VISIBLE = 50;
     /** @hide */
@@ -166,114 +172,126 @@ public class PowerWhitelistManager {
     public static final int REASON_EXEMPTED_PACKAGE = 64;
     /** @hide */
     public static final int REASON_ALLOWLISTED_PACKAGE  = 65;
-    /**
-     * If it's because of a role,
-     * @hide
-     */
+    /** @hide */
     public static final int REASON_APPOP = 66;
 
     /* BG-FGS-launch is allowed by temp-allowlist or system-allowlist.
-    Reason code for temp and system allowlist starts here.
-    */
+       Reason code for temp and system allowlist starts here.
+       Reason code range 100-199 are reserved for public reasons. */
+    /**
+     * Set temp-allowlist for location geofence purpose.
+     */
     public static final int REASON_GEOFENCING = 100;
+    /**
+     * Set temp-allowlist for server push messaging.
+     */
     public static final int REASON_PUSH_MESSAGING = 101;
-    public static final int REASON_ACTIVITY_RECOGNITION = 102;
+    /**
+     * Set temp-allowlist for server push messaging over the quota.
+     */
+    public static final int REASON_PUSH_MESSAGING_OVER_QUOTA = 102;
+    /**
+     * Set temp-allowlist for activity recognition.
+     */
+    public static final int REASON_ACTIVITY_RECOGNITION = 103;
 
+    /* Reason code range 200-299 are reserved for broadcast actions */
     /**
      * Broadcast ACTION_BOOT_COMPLETED.
      * @hide
      */
-    public static final int REASON_BOOT_COMPLETED = 103;
+    public static final int REASON_BOOT_COMPLETED = 200;
     /**
      * Broadcast ACTION_PRE_BOOT_COMPLETED.
      * @hide
      */
-    public static final int REASON_PRE_BOOT_COMPLETED = 104;
-
+    public static final int REASON_PRE_BOOT_COMPLETED = 201;
     /**
      * Broadcast ACTION_LOCKED_BOOT_COMPLETED.
      * @hide
      */
-    public static final int REASON_LOCKED_BOOT_COMPLETED = 105;
+    public static final int REASON_LOCKED_BOOT_COMPLETED = 202;
+
+    /* Reason code range 300-399 are reserved for other internal reasons */
     /**
      * Device idle system allowlist, including EXCEPT-IDLE
      * @hide
      */
-    public static final int REASON_SYSTEM_ALLOW_LISTED  = 106;
+    public static final int REASON_SYSTEM_ALLOW_LISTED  = 300;
     /** @hide */
-    public static final int REASON_ALARM_MANAGER_ALARM_CLOCK = 107;
+    public static final int REASON_ALARM_MANAGER_ALARM_CLOCK = 301;
     /**
      * AlarmManagerService.
      * @hide
      */
-    public static final int REASON_ALARM_MANAGER_WHILE_IDLE = 108;
+    public static final int REASON_ALARM_MANAGER_WHILE_IDLE = 302;
     /**
      * ActiveServices.
      * @hide
      */
-    public static final int REASON_SERVICE_LAUNCH = 109;
+    public static final int REASON_SERVICE_LAUNCH = 303;
     /**
      * KeyChainSystemService.
      * @hide
      */
-    public static final int REASON_KEY_CHAIN = 110;
+    public static final int REASON_KEY_CHAIN = 304;
     /**
      * PackageManagerService.
      * @hide
      */
-    public static final int REASON_PACKAGE_VERIFIER = 111;
+    public static final int REASON_PACKAGE_VERIFIER = 305;
     /**
      * SyncManager.
      * @hide
      */
-    public static final int REASON_SYNC_MANAGER = 112;
+    public static final int REASON_SYNC_MANAGER = 306;
     /**
      * DomainVerificationProxyV1.
      * @hide
      */
-    public static final int REASON_DOMAIN_VERIFICATION_V1 = 113;
+    public static final int REASON_DOMAIN_VERIFICATION_V1 = 307;
     /**
      * DomainVerificationProxyV2.
      * @hide
      */
-    public static final int REASON_DOMAIN_VERIFICATION_V2 = 114;
+    public static final int REASON_DOMAIN_VERIFICATION_V2 = 308;
     /** @hide */
-    public static final int REASON_VPN = 115;
+    public static final int REASON_VPN = 309;
     /**
      * NotificationManagerService.
      * @hide
      */
-    public static final int REASON_NOTIFICATION_SERVICE = 116;
+    public static final int REASON_NOTIFICATION_SERVICE = 310;
     /**
      * Broadcast ACTION_MY_PACKAGE_REPLACED.
      * @hide
      */
-    public static final int REASON_PACKAGE_REPLACED = 117;
+    public static final int REASON_PACKAGE_REPLACED = 311;
     /**
      * LocationProviderManager.
      * @hide
      */
-    public static final int REASON_LOCATION_PROVIDER = 118;
+    public static final int REASON_LOCATION_PROVIDER = 312;
     /**
      * MediaButtonReceiver.
      * @hide
      */
-    public static final int REASON_MEDIA_BUTTON = 119;
+    public static final int REASON_MEDIA_BUTTON = 313;
     /**
      * InboundSmsHandler.
      * @hide
      */
-    public static final int REASON_EVENT_SMS = 120;
+    public static final int REASON_EVENT_SMS = 314;
     /**
      * InboundSmsHandler.
      * @hide
      */
-    public static final int REASON_EVENT_MMS = 121;
+    public static final int REASON_EVENT_MMS = 315;
     /**
      * Shell app.
      * @hide
      */
-    public static final int REASON_SHELL = 122;
+    public static final int REASON_SHELL = 316;
 
     /**
      * The list of BG-FGS-Launch and temp-allowlist reason code.
@@ -310,6 +328,7 @@ public class PowerWhitelistManager {
             // temp and system allowlist reasons.
             REASON_GEOFENCING,
             REASON_PUSH_MESSAGING,
+            REASON_PUSH_MESSAGING_OVER_QUOTA,
             REASON_ACTIVITY_RECOGNITION,
             REASON_BOOT_COMPLETED,
             REASON_PRE_BOOT_COMPLETED,
@@ -589,6 +608,8 @@ public class PowerWhitelistManager {
                 return "GEOFENCING";
             case REASON_PUSH_MESSAGING:
                 return "PUSH_MESSAGING";
+            case REASON_PUSH_MESSAGING_OVER_QUOTA:
+                return "PUSH_MESSAGING_OVER_QUOTA";
             case REASON_ACTIVITY_RECOGNITION:
                 return "ACTIVITY_RECOGNITION";
             case REASON_BOOT_COMPLETED:
