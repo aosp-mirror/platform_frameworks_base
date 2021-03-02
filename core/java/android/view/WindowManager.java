@@ -82,6 +82,7 @@ import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -3238,9 +3239,9 @@ public interface WindowManager extends ViewManager {
          * The blur behind radius range starts at 0, which means no blur, and increases until 150
          * for the densest blur.
          *
-         * @see #FLAG_BLUR_BEHIND
+         * @see #setBlurBehindRadius
          */
-        public int blurBehindRadius = 0;
+        private int mBlurBehindRadius = 0;
 
         /**
          * The color mode requested by this window. The target display may
@@ -3534,6 +3535,40 @@ public interface WindowManager extends ViewManager {
             return mColorMode;
         }
 
+        /**
+         * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
+         * but instead of dimmed, the content behind the window will be blurred.
+         *
+         * The density of the blur is set by the blur radius. The radius defines the size
+         * of the neighbouring area, from which pixels will be averaged to form the final
+         * color for each pixel. The operation approximates a Gaussian blur.
+         * A radius of 0 means no blur. The higher the radius, the denser the blur.
+         *
+         * Note the difference with {@link android.view.Window#setBackgroundBlurRadius},
+         * which blurs only within the bounds of the window. Blur behind blurs the whole screen
+         * behind the window.
+         *
+         * Requires {@link #FLAG_BLUR_BEHIND} to be set.
+         *
+         * @param blurBehindRadius The blur radius to use for blur behind in pixels
+         *
+         * @see #FLAG_BLUR_BEHIND
+         * @see #getBlurBehindRadius
+         * @see Window#setBackgroundBlurRadius
+         */
+        public void setBlurBehindRadius(@IntRange(from = 0) int blurBehindRadius) {
+            mBlurBehindRadius = blurBehindRadius;
+        }
+
+        /**
+         * Returns the blur behind radius of the window.
+         *
+         * @see #setBlurBehindRadius
+         */
+        public int getBlurBehindRadius() {
+            return mBlurBehindRadius;
+        }
+
         /** @hide */
         @SystemApi
         public final void setUserActivityTimeout(long timeout) {
@@ -3629,7 +3664,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(mFitInsetsSides);
             out.writeBoolean(mFitInsetsIgnoringVisibility);
             out.writeBoolean(preferMinimalPostProcessing);
-            out.writeInt(blurBehindRadius);
+            out.writeInt(mBlurBehindRadius);
             if (providesInsetsTypes != null) {
                 out.writeInt(providesInsetsTypes.length);
                 out.writeIntArray(providesInsetsTypes);
@@ -3698,7 +3733,7 @@ public interface WindowManager extends ViewManager {
             mFitInsetsSides = in.readInt();
             mFitInsetsIgnoringVisibility = in.readBoolean();
             preferMinimalPostProcessing = in.readBoolean();
-            blurBehindRadius = in.readInt();
+            mBlurBehindRadius = in.readInt();
             int insetsTypesLength = in.readInt();
             if (insetsTypesLength > 0) {
                 providesInsetsTypes = new int[insetsTypesLength];
@@ -3752,7 +3787,7 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED = 1 << 28;
         /** {@hide} */
-        public static final int BACKGROUND_BLUR_RADIUS_CHANGED = 1 << 29;
+        public static final int BLUR_BEHIND_RADIUS_CHANGED = 1 << 29;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -3943,9 +3978,9 @@ public interface WindowManager extends ViewManager {
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
             }
 
-            if (blurBehindRadius != o.blurBehindRadius) {
-                blurBehindRadius = o.blurBehindRadius;
-                changes |= BACKGROUND_BLUR_RADIUS_CHANGED;
+            if (mBlurBehindRadius != o.mBlurBehindRadius) {
+                mBlurBehindRadius = o.mBlurBehindRadius;
+                changes |= BLUR_BEHIND_RADIUS_CHANGED;
             }
 
             // This can't change, it's only set at window creation time.
@@ -4111,9 +4146,9 @@ public interface WindowManager extends ViewManager {
                 sb.append(" preferMinimalPostProcessing=");
                 sb.append(preferMinimalPostProcessing);
             }
-            if (blurBehindRadius != 0) {
+            if (mBlurBehindRadius != 0) {
                 sb.append(" blurBehindRadius=");
-                sb.append(blurBehindRadius);
+                sb.append(mBlurBehindRadius);
             }
             sb.append(System.lineSeparator());
             sb.append(prefix).append("  fl=").append(

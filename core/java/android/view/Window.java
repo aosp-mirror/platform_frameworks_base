@@ -1716,13 +1716,14 @@ public abstract class Window {
      * For the blur region to be visible, the window has to be translucent. See
      * {@link android.R.styleable#Window_windowIsTranslucent}.
      *
-     * Note the difference with {@link android.view.WindowManager.LayoutParams#blurBehindRadius},
+     * Note the difference with {@link WindowManager.LayoutParams#setBlurBehindRadius},
      * which blurs the whole screen behind the window. Background blur blurs the screen behind
      * only within the bounds of the window.
      *
      * @param blurRadius The blur radius to use for window background blur in pixels
      *
      * @see android.R.styleable#Window_windowBackgroundBlurRadius
+     * @see WindowManager.LayoutParams#setBlurBehindRadius
      */
     public void setBackgroundBlurRadius(int blurRadius) {}
 
