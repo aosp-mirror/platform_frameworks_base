@@ -380,17 +380,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
         }
 
+        if (taskDisplayArea == null && source != null) {
+            final TaskDisplayArea sourceDisplayArea = source.getDisplayArea();
+            if (DEBUG) appendLog("display-area-from-source=" + sourceDisplayArea);
+            taskDisplayArea = sourceDisplayArea;
+        }
+
         Task rootTask = (taskDisplayArea == null && task != null)
                 ? task.getRootTask() : null;
         if (rootTask != null) {
             if (DEBUG) appendLog("display-from-task=" + rootTask.getDisplayId());
             taskDisplayArea = rootTask.getDisplayArea();
-        }
-
-        if (taskDisplayArea == null && source != null) {
-            final TaskDisplayArea sourceDisplayArea = source.getDisplayArea();
-            if (DEBUG) appendLog("display-area-from-source=" + sourceDisplayArea);
-            taskDisplayArea = sourceDisplayArea;
         }
 
         if (taskDisplayArea == null && options != null) {
