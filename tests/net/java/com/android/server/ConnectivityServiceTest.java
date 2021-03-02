@@ -1083,9 +1083,11 @@ public class ConnectivityServiceTest {
         }
     }
 
-    private Set<UidRange> uidRangesForUid(int uid) {
+    private Set<UidRange> uidRangesForUids(int... uids) {
         final ArraySet<UidRange> ranges = new ArraySet<>();
-        ranges.add(new UidRange(uid, uid));
+        for (final int uid : uids) {
+            ranges.add(new UidRange(uid, uid));
+        }
         return ranges;
     }
 
@@ -1215,13 +1217,13 @@ public class ConnectivityServiceTest {
 
         public void establishForMyUid(LinkProperties lp) throws Exception {
             final int uid = Process.myUid();
-            establish(lp, uid, uidRangesForUid(uid), true, true, false);
+            establish(lp, uid, uidRangesForUids(uid), true, true, false);
         }
 
         public void establishForMyUid(boolean validated, boolean hasInternet, boolean isStrictMode)
                 throws Exception {
             final int uid = Process.myUid();
-            establish(makeLinkProperties(), uid, uidRangesForUid(uid), validated, hasInternet,
+            establish(makeLinkProperties(), uid, uidRangesForUids(uid), validated, hasInternet,
                     isStrictMode);
         }
 
@@ -1329,7 +1331,7 @@ public class ConnectivityServiceTest {
 
     }
 
-    private void processBroadcastForVpn(Intent intent) {
+    private void processBroadcast(Intent intent) {
         mServiceContext.sendBroadcast(intent);
         HandlerUtils.waitForIdle(mVMSHandlerThread, TIMEOUT_MS);
         waitForIdle();
@@ -1420,6 +1422,7 @@ public class ConnectivityServiceTest {
     private static final int VPN_UID = UserHandle.getUid(PRIMARY_USER, 10043);
     private static final UserInfo PRIMARY_USER_INFO = new UserInfo(PRIMARY_USER, "",
             UserInfo.FLAG_PRIMARY);
+    private static final UserHandle PRIMARY_USER_HANDLE = new UserHandle(PRIMARY_USER);
 
     private static final int RESTRICTED_USER = 1;
     private static final UserInfo RESTRICTED_USER_INFO = new UserInfo(RESTRICTED_USER, "",
@@ -1437,6 +1440,8 @@ public class ConnectivityServiceTest {
         MockitoAnnotations.initMocks(this);
 
         when(mUserManager.getAliveUsers()).thenReturn(Arrays.asList(PRIMARY_USER_INFO));
+        when(mUserManager.getUserHandles(anyBoolean())).thenReturn(
+                Arrays.asList(PRIMARY_USER_HANDLE));
         when(mUserManager.getUserInfo(PRIMARY_USER)).thenReturn(PRIMARY_USER_INFO);
         // canHaveRestrictedProfile does not take a userId. It applies to the userId of the context
         // it was started from, i.e., PRIMARY_USER.
@@ -6386,7 +6391,7 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.assertNoCallback();
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
-        final Set<UidRange> ranges = uidRangesForUid(uid);
+        final Set<UidRange> ranges = uidRangesForUids(uid);
         mMockVpn.registerAgent(ranges);
         mMockVpn.setUnderlyingNetworks(new Network[0]);
 
@@ -6858,7 +6863,7 @@ public class ConnectivityServiceTest {
         final int uid = Process.myUid();
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
         assertNotNull("nc=" + nc, nc.getUids());
-        assertEquals(nc.getUids(), uidRangesForUid(uid));
+        assertEquals(nc.getUids(), uidRangesForUids(uid));
         assertVpnTransportInfo(nc, VpnManager.TYPE_VPN_SERVICE);
 
         // Set an underlying network and expect to see the VPN transports change.
@@ -6879,7 +6884,7 @@ public class ConnectivityServiceTest {
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
 
         // Send a USER_ADDED broadcast for it.
-        processBroadcastForVpn(addedIntent);
+        processBroadcast(addedIntent);
 
         // Expect that the VPN UID ranges contain both |uid| and the UID range for the newly-added
         // restricted user.
@@ -6904,7 +6909,7 @@ public class ConnectivityServiceTest {
         final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
         removedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(RESTRICTED_USER));
         removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
-        processBroadcastForVpn(removedIntent);
+        processBroadcast(removedIntent);
 
         // Expect that the VPN gains the UID range for the restricted user, and that the capability
         // change made just before that (i.e., loss of TRANSPORT_WIFI) is preserved.
@@ -6962,7 +6967,7 @@ public class ConnectivityServiceTest {
         final Intent addedIntent = new Intent(ACTION_USER_ADDED);
         addedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(RESTRICTED_USER));
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
-        processBroadcastForVpn(addedIntent);
+        processBroadcast(addedIntent);
         assertNull(mCm.getActiveNetworkForUid(uid));
         assertNull(mCm.getActiveNetworkForUid(restrictedUid));
 
@@ -6973,7 +6978,7 @@ public class ConnectivityServiceTest {
         final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
         removedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(RESTRICTED_USER));
         removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
-        processBroadcastForVpn(removedIntent);
+        processBroadcast(removedIntent);
         assertNull(mCm.getActiveNetworkForUid(uid));
         assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
 
@@ -7128,7 +7133,7 @@ public class ConnectivityServiceTest {
         assertFalse(mCm.isActiveNetworkMetered());
 
         // Connect VPN network.
-        mMockVpn.registerAgent(true /* isAlwaysMetered */, uidRangesForUid(Process.myUid()),
+        mMockVpn.registerAgent(true /* isAlwaysMetered */, uidRangesForUids(Process.myUid()),
                 new LinkProperties());
         mMockVpn.connect(true);
         waitForIdle();
@@ -7568,7 +7573,7 @@ public class ConnectivityServiceTest {
         final Intent addedIntent = new Intent(ACTION_USER_UNLOCKED);
         addedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        processBroadcastForVpn(addedIntent);
+        processBroadcast(addedIntent);
 
         // Lockdown VPN disables teardown and enables lockdown.
         assertFalse(mMockVpn.getEnableTeardown());
@@ -9287,7 +9292,7 @@ public class ConnectivityServiceTest {
 
     private void assertUidRangesUpdatedForMyUid(boolean add) throws Exception {
         final int uid = Process.myUid();
-        assertVpnUidRangesUpdated(add, uidRangesForUid(uid), uid);
+        assertVpnUidRangesUpdated(add, uidRangesForUids(uid), uid);
     }
 
     private void assertVpnUidRangesUpdated(boolean add, Set<UidRange> vpnRanges, int exemptUid)
@@ -9676,7 +9681,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testOemNetworkRequestFactoryCorrectlySetsUids()
+    public void testOemNetworkRequestFactoryMultiplePrefsCorrectlySetsUids()
             throws Exception {
         // Arrange PackageManager mocks
         final String testPackageName2 = "com.google.apps.dialer";
@@ -9704,6 +9709,46 @@ public class ConnectivityServiceTest {
         assertEquals(TEST_PACKAGE_UID, getNriFirstUidRange(nris.get(0)).stop);
         assertEquals(testPackageNameUid2, getNriFirstUidRange(nris.get(1)).start);
         assertEquals(testPackageNameUid2, getNriFirstUidRange(nris.get(1)).stop);
+    }
+
+    @Test
+    public void testOemNetworkRequestFactoryMultipleUsersCorrectlySetsUids()
+            throws Exception {
+        // Arrange users
+        final int secondUser = 10;
+        final UserHandle secondUserHandle = new UserHandle(secondUser);
+        when(mUserManager.getUserHandles(anyBoolean())).thenReturn(
+                Arrays.asList(PRIMARY_USER_HANDLE, secondUserHandle));
+
+        // Arrange PackageManager mocks
+        mockGetApplicationInfo(TEST_PACKAGE_NAME, TEST_PACKAGE_UID);
+
+        // Build OemNetworkPreferences object
+        final int testOemPref = OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
+                .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
+                .build();
+
+        // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
+        final List<ConnectivityService.NetworkRequestInfo> nris =
+                new ArrayList<>(
+                        mService.new OemNetworkRequestFactory().createNrisFromOemNetworkPreferences(
+                                pref));
+
+        // UIDs for all users and all managed packages should be present.
+        // Two users each with two packages.
+        final int expectedUidSize = 2;
+        final List<UidRange> uids =
+                new ArrayList<>(nris.get(0).mRequests.get(0).networkCapabilities.getUids());
+        assertEquals(expectedUidSize, uids.size());
+
+        // Sort by uid to access nris by index
+        uids.sort(Comparator.comparingInt(uid -> uid.start));
+        final int secondUserTestPackageUid = UserHandle.getUid(secondUser, TEST_PACKAGE_UID);
+        assertEquals(TEST_PACKAGE_UID, uids.get(0).start);
+        assertEquals(TEST_PACKAGE_UID, uids.get(0).stop);
+        assertEquals(secondUserTestPackageUid, uids.get(1).start);
+        assertEquals(secondUserTestPackageUid, uids.get(1).stop);
     }
 
     @Test
@@ -9911,7 +9956,7 @@ public class ConnectivityServiceTest {
         assertEquals(1, mService.mDefaultNetworkRequests.size());
 
         final UidRangeParcel[] uidRanges =
-                toUidRangeStableParcels(uidRangesForUid(testPackageUid));
+                toUidRangeStableParcels(uidRangesForUids(testPackageUid));
         setupSetOemNetworkPreferenceForPreferenceTest(
                 networkPrefToSetup, uidRanges, testPackageName);
     }
@@ -10141,8 +10186,25 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(defaultNetworkCallback);
     }
 
+    /**
+     * This method assumes that the same uidRanges input will be used to verify that dependencies
+     * are called as expected.
+     */
     private void verifySetOemNetworkPreferenceForPreference(
             @NonNull final UidRangeParcel[] uidRanges,
+            final int addUidRangesNetId,
+            final int addUidRangesTimes,
+            final int removeUidRangesNetId,
+            final int removeUidRangesTimes,
+            final boolean shouldDestroyNetwork) throws RemoteException {
+        verifySetOemNetworkPreferenceForPreference(uidRanges, uidRanges,
+                addUidRangesNetId, addUidRangesTimes, removeUidRangesNetId, removeUidRangesTimes,
+                shouldDestroyNetwork);
+    }
+
+    private void verifySetOemNetworkPreferenceForPreference(
+            @NonNull final UidRangeParcel[] addedUidRanges,
+            @NonNull final UidRangeParcel[] removedUidRanges,
             final int addUidRangesNetId,
             final int addUidRangesTimes,
             final int removeUidRangesNetId,
@@ -10154,10 +10216,11 @@ public class ConnectivityServiceTest {
         // Validate netd.
         verify(mMockNetd, times(addUidRangesTimes))
                 .networkAddUidRanges(
-                        (useAnyIdForAdd ? anyInt() : eq(addUidRangesNetId)), eq(uidRanges));
+                        (useAnyIdForAdd ? anyInt() : eq(addUidRangesNetId)), eq(addedUidRanges));
         verify(mMockNetd, times(removeUidRangesTimes))
                 .networkRemoveUidRanges(
-                        (useAnyIdForRemove ? anyInt() : eq(removeUidRangesNetId)), eq(uidRanges));
+                        (useAnyIdForRemove ? anyInt() : eq(removeUidRangesNetId)),
+                        eq(removedUidRanges));
         if (shouldDestroyNetwork) {
             verify(mMockNetd, times(1))
                     .networkDestroy((useAnyIdForRemove ? anyInt() : eq(removeUidRangesNetId)));
@@ -10175,7 +10238,7 @@ public class ConnectivityServiceTest {
         final int testPackageUid = 123;
         final String testPackageName = "com.google.apps.contacts";
         final UidRangeParcel[] uidRanges =
-                toUidRangeStableParcels(uidRangesForUid(testPackageUid));
+                toUidRangeStableParcels(uidRangesForUids(testPackageUid));
 
         // Validate the starting requests only includes the fallback request.
         assertEquals(1, mService.mDefaultNetworkRequests.size());
@@ -10204,9 +10267,8 @@ public class ConnectivityServiceTest {
                 OEM_NETWORK_PREFERENCE_OEM_PAID;
 
         // Arrange PackageManager mocks
-        final int testPackageNameUid = 123;
         final UidRangeParcel[] uidRanges =
-                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
         setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
 
         // Verify the starting state. No networks should be connected.
@@ -10271,9 +10333,8 @@ public class ConnectivityServiceTest {
                 OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
 
         // Arrange PackageManager mocks
-        final int testPackageNameUid = 123;
         final UidRangeParcel[] uidRanges =
-                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
         setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
 
         // Verify the starting state. This preference doesn't support using the fallback network
@@ -10334,9 +10395,8 @@ public class ConnectivityServiceTest {
                 OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
 
         // Arrange PackageManager mocks
-        final int testPackageNameUid = 123;
         final UidRangeParcel[] uidRanges =
-                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
         setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
 
         // Verify the starting state. This preference doesn't support using the fallback network
@@ -10387,9 +10447,8 @@ public class ConnectivityServiceTest {
                 OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
 
         // Arrange PackageManager mocks
-        final int testPackageNameUid = 123;
         final UidRangeParcel[] uidRanges =
-                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+                toUidRangeStableParcels(uidRangesForUids(TEST_PACKAGE_UID));
         setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
 
         // Verify the starting state. This preference doesn't support using the fallback network
@@ -10426,6 +10485,109 @@ public class ConnectivityServiceTest {
                 mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
                 mEthernetNetworkAgent.getNetwork().netId, 0 /* times */,
                 true /* shouldDestroyNetwork */);
+    }
+
+    @Test
+    public void testMultilayerForMultipleUsersEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
+
+        // Arrange users
+        final int secondUser = 10;
+        final UserHandle secondUserHandle = new UserHandle(secondUser);
+        when(mUserManager.getUserHandles(anyBoolean())).thenReturn(
+                Arrays.asList(PRIMARY_USER_HANDLE, secondUserHandle));
+
+        // Arrange PackageManager mocks
+        final int secondUserTestPackageUid = UserHandle.getUid(secondUser, TEST_PACKAGE_UID);
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(
+                        uidRangesForUids(TEST_PACKAGE_UID, secondUserTestPackageUid));
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+
+        // Verify the starting state. No networks should be connected.
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Test that we correctly add the expected values for multiple users.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Test that we correctly remove the expected values for multiple users.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
+    }
+
+    @Test
+    public void testMultilayerForBroadcastedUsersEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
+
+        // Arrange users
+        final int secondUser = 10;
+        final UserHandle secondUserHandle = new UserHandle(secondUser);
+        when(mUserManager.getUserHandles(anyBoolean())).thenReturn(
+                Arrays.asList(PRIMARY_USER_HANDLE));
+
+        // Arrange PackageManager mocks
+        final int secondUserTestPackageUid = UserHandle.getUid(secondUser, TEST_PACKAGE_UID);
+        final UidRangeParcel[] uidRangesSingleUser =
+                toUidRangeStableParcels(
+                        uidRangesForUids(TEST_PACKAGE_UID));
+        final UidRangeParcel[] uidRangesBothUsers =
+                toUidRangeStableParcels(
+                        uidRangesForUids(TEST_PACKAGE_UID, secondUserTestPackageUid));
+        setupSetOemNetworkPreferenceForPreferenceTest(
+                networkPref, uidRangesSingleUser, TEST_PACKAGE_NAME);
+
+        // Verify the starting state. No networks should be connected.
+        verifySetOemNetworkPreferenceForPreference(uidRangesSingleUser,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Test that we correctly add the expected values for multiple users.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRangesSingleUser,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Send a broadcast indicating a user was added.
+        when(mUserManager.getUserHandles(anyBoolean())).thenReturn(
+                Arrays.asList(PRIMARY_USER_HANDLE, secondUserHandle));
+        final Intent addedIntent = new Intent(ACTION_USER_ADDED);
+        addedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(secondUser));
+        processBroadcast(addedIntent);
+
+        // Test that we correctly add values for all users and remove for the single user.
+        verifySetOemNetworkPreferenceForPreference(uidRangesBothUsers, uidRangesSingleUser,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Send a broadcast indicating a user was removed.
+        when(mUserManager.getUserHandles(anyBoolean())).thenReturn(
+                Arrays.asList(PRIMARY_USER_HANDLE));
+        final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
+        removedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(secondUser));
+        processBroadcast(removedIntent);
+
+        // Test that we correctly add values for the single user and remove for the all users.
+        verifySetOemNetworkPreferenceForPreference(uidRangesSingleUser, uidRangesBothUsers,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
     }
 
     /**
