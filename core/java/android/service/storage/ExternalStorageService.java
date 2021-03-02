@@ -173,8 +173,13 @@ public abstract class ExternalStorageService extends Service {
      * Called when {@code packageName} is about to ANR. The {@link ExternalStorageService} can
      * show a progress dialog for the {@code reason}.
      *
+     * @param packageName the package name of the ANR'ing app
+     * @param uid the uid of the ANR'ing app
+     * @param tid the tid of the ANR'ing app
+     * @param reason the reason the app is ANR'ing
      */
-    public void onAnrDelayStarted(@NonNull String packageName, int uid, int tid, int reason) {
+    public void onAnrDelayStarted(@NonNull String packageName, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
         throw new UnsupportedOperationException("onAnrDelayStarted not implemented");
     }
 
