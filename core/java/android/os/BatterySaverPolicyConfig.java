@@ -247,6 +247,7 @@ public final class BatterySaverPolicyConfig implements Parcelable {
     /**
      * Get the SoundTrigger mode while in Battery Saver.
      */
+    @PowerManager.SoundTriggerPowerSaveMode
     public int getSoundTriggerMode() {
         return mSoundTriggerMode;
     }
