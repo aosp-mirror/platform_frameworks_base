@@ -26,13 +26,9 @@ java_test_host {
     srcs: ["src/**/*.java"],
     libs: ["tradefed", "compatibility-tradefed", "compatibility-host-util"],
     static_libs: [
-        "block_device_writer_jar",
         "frameworks-base-hostutils",
     ],
     test_suites: ["general-tests", "vts"],
-    target_required: [
-        "block_device_writer_module",
-    ],
     data: [
         ":NotoColorEmojiTtf",
         ":UpdatableSystemFontTestCertDer",
