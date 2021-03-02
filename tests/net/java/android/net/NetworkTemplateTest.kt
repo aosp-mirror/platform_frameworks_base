@@ -79,7 +79,7 @@ class NetworkTemplateTest {
             setCapability(NetworkCapabilities.NET_CAPABILITY_OEM_PRIVATE,
                     (oemManaged and OEM_PRIVATE) == OEM_PRIVATE)
         }
-        return NetworkStateSnapshot(lp, caps, mock(Network::class.java), subscriberId, type)
+        return NetworkStateSnapshot(mock(Network::class.java), caps, lp, subscriberId, type)
     }
 
     private fun NetworkTemplate.assertMatches(ident: NetworkIdentity) =
