@@ -200,7 +200,7 @@ public class NavigationModeController implements Dumpable {
         Log.d(TAG, "  assetPaths=");
         ApkAssets[] assets = context.getResources().getAssets().getApkAssets();
         for (ApkAssets a : assets) {
-            Log.d(TAG, "    " + a.getAssetPath());
+            Log.d(TAG, "    " + a.getDebugName());
         }
     }
 }
