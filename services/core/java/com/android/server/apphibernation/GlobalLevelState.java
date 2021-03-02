@@ -22,4 +22,12 @@ package com.android.server.apphibernation;
 final class GlobalLevelState {
     public String packageName;
     public boolean hibernated;
+
+    @Override
+    public String toString() {
+        return "GlobalLevelState{"
+                + "packageName='" + packageName + '\''
+                + ", hibernated=" + hibernated
+                + '}';
+    }
 }

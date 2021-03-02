@@ -40,6 +40,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      */
     @IntDef(flag = true, prefix = { "FLAG_BATTERY_USAGE_STATS_" }, value = {
             FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL,
+            FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BatteryUsageStatsFlags {}
@@ -52,6 +53,12 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      * @hide
      */
     public static final int FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL = 1;
+
+    /**
+     * Indicates that battery history should be included in the BatteryUsageStats.
+     * @hide
+     */
+    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY = 2;
 
     private final int mFlags;
     @NonNull
@@ -146,10 +153,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         }
 
         /**
-         * Sets flags to modify the behavior of {@link BatteryStatsManager#getBatteryUsageStats}.
+         * Requests that battery history be included in the BatteryUsageStats.
          */
-        public Builder setFlags(@BatteryUsageStatsFlags int flags) {
-            mFlags = flags;
+        public Builder includeBatteryHistory() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY;
             return this;
         }
 

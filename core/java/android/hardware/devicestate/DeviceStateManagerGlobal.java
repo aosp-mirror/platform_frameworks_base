@@ -19,7 +19,7 @@ package android.hardware.devicestate;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.devicestate.DeviceStateManager.DeviceStateListener;
+import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -31,12 +31,14 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 /**
  * Provides communication with the device state system service on behalf of applications.
  *
  * @see DeviceStateManager
+ *
  * @hide
  */
 @VisibleForTesting(visibility = Visibility.PACKAGE)
@@ -68,13 +70,13 @@ public final class DeviceStateManagerGlobal {
     private DeviceStateManagerCallback mCallback;
 
     @GuardedBy("mLock")
-    private final ArrayList<DeviceStateListenerWrapper> mListeners = new ArrayList<>();
+    private final ArrayList<DeviceStateCallbackWrapper> mCallbacks = new ArrayList<>();
     @GuardedBy("mLock")
     private final ArrayMap<IBinder, DeviceStateRequestWrapper> mRequests = new ArrayMap<>();
 
     @Nullable
     @GuardedBy("mLock")
-    private Integer mLastReceivedState;
+    private DeviceStateInfo mLastReceivedInfo;
 
     @VisibleForTesting
     public DeviceStateManagerGlobal(@NonNull IDeviceStateManager deviceStateManager) {
@@ -87,18 +89,31 @@ public final class DeviceStateManagerGlobal {
      * @see DeviceStateManager#getSupportedStates()
      */
     public int[] getSupportedStates() {
-        try {
-            return mDeviceStateManager.getSupportedDeviceStates();
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
+        synchronized (mLock) {
+            final DeviceStateInfo currentInfo;
+            if (mLastReceivedInfo != null) {
+                // If we have mLastReceivedInfo a callback is registered for this instance and it
+                // is receiving the most recent info from the server. Use that info here.
+                currentInfo = mLastReceivedInfo;
+            } else {
+                // If mLastReceivedInfo is null there is no registered callback so we manually
+                // fetch the current info.
+                try {
+                    currentInfo = mDeviceStateManager.getDeviceStateInfo();
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            }
+
+            return Arrays.copyOf(currentInfo.supportedStates, currentInfo.supportedStates.length);
         }
     }
 
     /**
      * Submits a {@link DeviceStateRequest request} to modify the device state.
      *
-     * @see DeviceStateManager#requestState(DeviceStateRequest,
-     * Executor, DeviceStateRequest.Callback)
+     * @see DeviceStateManager#requestState(DeviceStateRequest, Executor,
+     * DeviceStateRequest.Callback)
      * @see DeviceStateRequest
      */
     public void requestState(@NonNull DeviceStateRequest request,
@@ -157,49 +172,56 @@ public final class DeviceStateManagerGlobal {
     }
 
     /**
-     * Registers a listener to receive notifications about changes in device state.
+     * Registers a callback to receive notifications about changes in device state.
      *
-     * @see DeviceStateManager#addDeviceStateListener(Executor, DeviceStateListener)
+     * @see DeviceStateManager#registerCallback(Executor, DeviceStateCallback)
      */
     @VisibleForTesting(visibility = Visibility.PACKAGE)
-    public void registerDeviceStateListener(@NonNull DeviceStateListener listener,
+    public void registerDeviceStateCallback(@NonNull DeviceStateCallback callback,
             @NonNull Executor executor) {
-        Integer stateToReport;
-        DeviceStateListenerWrapper wrapper;
+        DeviceStateCallbackWrapper wrapper;
+        DeviceStateInfo currentInfo;
         synchronized (mLock) {
-            registerCallbackIfNeededLocked();
-
-            int index = findListenerLocked(listener);
+            int index = findCallbackLocked(callback);
             if (index != -1) {
-                // This listener is already registered.
+                // This callback is already registered.
                 return;
             }
 
-            wrapper = new DeviceStateListenerWrapper(listener, executor);
-            mListeners.add(wrapper);
-            stateToReport = mLastReceivedState;
+            registerCallbackIfNeededLocked();
+            if (mLastReceivedInfo == null) {
+                // Initialize the last received info with the current info if this is the first
+                // callback being registered.
+                try {
+                    mLastReceivedInfo = mDeviceStateManager.getDeviceStateInfo();
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            }
+
+            currentInfo = new DeviceStateInfo(mLastReceivedInfo);
+
+            wrapper = new DeviceStateCallbackWrapper(callback, executor);
+            mCallbacks.add(wrapper);
         }
 
-        if (stateToReport != null) {
-            // Notify the listener with the most recent device state from the server. If the state
-            // to report is null this is likely the first listener added and we're still waiting
-            // from the callback from the server.
-            wrapper.notifyDeviceStateChanged(stateToReport);
-        }
+        wrapper.notifySupportedStatesChanged(currentInfo.supportedStates);
+        wrapper.notifyBaseStateChanged(currentInfo.baseState);
+        wrapper.notifyStateChanged(currentInfo.currentState);
     }
 
     /**
-     * Unregisters a listener previously registered with
-     * {@link #registerDeviceStateListener(DeviceStateListener, Executor)}.
+     * Unregisters a callback previously registered with
+     * {@link #registerDeviceStateCallback(DeviceStateCallback, Executor)}}.
      *
-     * @see DeviceStateManager#addDeviceStateListener(Executor, DeviceStateListener)
+     * @see DeviceStateManager#unregisterCallback(DeviceStateCallback)
      */
     @VisibleForTesting(visibility = Visibility.PACKAGE)
-    public void unregisterDeviceStateListener(DeviceStateListener listener) {
+    public void unregisterDeviceStateCallback(@NonNull DeviceStateCallback callback) {
         synchronized (mLock) {
-            int indexToRemove = findListenerLocked(listener);
+            int indexToRemove = findCallbackLocked(callback);
             if (indexToRemove != -1) {
-                mListeners.remove(indexToRemove);
+                mCallbacks.remove(indexToRemove);
             }
         }
     }
@@ -210,14 +232,15 @@ public final class DeviceStateManagerGlobal {
             try {
                 mDeviceStateManager.registerCallback(mCallback);
             } catch (RemoteException ex) {
+                mCallback = null;
                 throw ex.rethrowFromSystemServer();
             }
         }
     }
 
-    private int findListenerLocked(DeviceStateListener listener) {
-        for (int i = 0; i < mListeners.size(); i++) {
-            if (mListeners.get(i).mDeviceStateListener.equals(listener)) {
+    private int findCallbackLocked(DeviceStateCallback callback) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            if (mCallbacks.get(i).mDeviceStateCallback.equals(callback)) {
                 return i;
             }
         }
@@ -234,16 +257,34 @@ public final class DeviceStateManagerGlobal {
         return null;
     }
 
-    /** Handles a call from the server that the device state has changed. */
-    private void handleDeviceStateChanged(int newDeviceState) {
-        ArrayList<DeviceStateListenerWrapper> listeners;
+    /** Handles a call from the server that the device state info has changed. */
+    private void handleDeviceStateInfoChanged(@NonNull DeviceStateInfo info) {
+        ArrayList<DeviceStateCallbackWrapper> callbacks;
+        DeviceStateInfo oldInfo;
         synchronized (mLock) {
-            mLastReceivedState = newDeviceState;
-            listeners = new ArrayList<>(mListeners);
+            oldInfo = mLastReceivedInfo;
+            mLastReceivedInfo = info;
+            callbacks = new ArrayList<>(mCallbacks);
         }
 
-        for (int i = 0; i < listeners.size(); i++) {
-            listeners.get(i).notifyDeviceStateChanged(newDeviceState);
+        final int diff = oldInfo == null ? 1 : info.diff(oldInfo);
+        if ((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0) {
+            for (int i = 0; i < callbacks.size(); i++) {
+                // Copy the array to prevent callbacks from modifying the internal state.
+                final int[] supportedStates = Arrays.copyOf(info.supportedStates,
+                        info.supportedStates.length);
+                callbacks.get(i).notifySupportedStatesChanged(supportedStates);
+            }
+        }
+        if ((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0) {
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).notifyBaseStateChanged(info.baseState);
+            }
+        }
+        if ((diff & DeviceStateInfo.CHANGED_CURRENT_STATE) > 0) {
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).notifyStateChanged(info.currentState);
+            }
         }
     }
 
@@ -291,8 +332,8 @@ public final class DeviceStateManagerGlobal {
 
     private final class DeviceStateManagerCallback extends IDeviceStateManagerCallback.Stub {
         @Override
-        public void onDeviceStateChanged(int deviceState) {
-            handleDeviceStateChanged(deviceState);
+        public void onDeviceStateInfoChanged(DeviceStateInfo info) {
+            handleDeviceStateInfoChanged(info);
         }
 
         @Override
@@ -311,17 +352,29 @@ public final class DeviceStateManagerGlobal {
         }
     }
 
-    private static final class DeviceStateListenerWrapper {
-        private final DeviceStateListener mDeviceStateListener;
+    private static final class DeviceStateCallbackWrapper {
+        @NonNull
+        private final DeviceStateCallback mDeviceStateCallback;
+        @NonNull
         private final Executor mExecutor;
 
-        DeviceStateListenerWrapper(DeviceStateListener listener, Executor executor) {
-            mDeviceStateListener = listener;
+        DeviceStateCallbackWrapper(@NonNull DeviceStateCallback callback,
+                @NonNull Executor executor) {
+            mDeviceStateCallback = callback;
             mExecutor = executor;
         }
 
-        void notifyDeviceStateChanged(int newDeviceState) {
-            mExecutor.execute(() -> mDeviceStateListener.onDeviceStateChanged(newDeviceState));
+        void notifySupportedStatesChanged(int[] newSupportedStates) {
+            mExecutor.execute(() ->
+                    mDeviceStateCallback.onSupportedStatesChanged(newSupportedStates));
+        }
+
+        void notifyBaseStateChanged(int newBaseState) {
+            mExecutor.execute(() -> mDeviceStateCallback.onBaseStateChanged(newBaseState));
+        }
+
+        void notifyStateChanged(int newDeviceState) {
+            mExecutor.execute(() -> mDeviceStateCallback.onStateChanged(newDeviceState));
         }
     }
 

@@ -564,6 +564,16 @@ package android.app.blob {
 
 }
 
+package android.app.contentsuggestions {
+
+  public final class ContentSuggestionsManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS) public void resetTemporaryService(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS) public void setDefaultServiceEnabled(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_SUGGESTIONS) public void setTemporaryService(int, @NonNull String, int);
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictor {
@@ -695,6 +705,10 @@ package android.content.pm {
     method public boolean isSystemApp();
     field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
     field public int privateFlags;
+  }
+
+  public class CrossProfileApps {
+    method public boolean canConfigureInteractAcrossProfiles(@NonNull String);
   }
 
   public class LauncherApps {
@@ -1007,17 +1021,19 @@ package android.hardware.camera2 {
 package android.hardware.devicestate {
 
   public final class DeviceStateManager {
-    method public void addDeviceStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateListener);
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void cancelRequest(@NonNull android.hardware.devicestate.DeviceStateRequest);
     method @NonNull public int[] getSupportedStates();
-    method public void removeDeviceStateListener(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateListener);
+    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
+    method public void unregisterCallback(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
     field public static final int MAXIMUM_DEVICE_STATE = 255; // 0xff
     field public static final int MINIMUM_DEVICE_STATE = 0; // 0x0
   }
 
-  public static interface DeviceStateManager.DeviceStateListener {
-    method public void onDeviceStateChanged(int);
+  public static interface DeviceStateManager.DeviceStateCallback {
+    method public default void onBaseStateChanged(int);
+    method public void onStateChanged(int);
+    method public default void onSupportedStatesChanged(@NonNull int[]);
   }
 
   public final class DeviceStateRequest {
@@ -2560,6 +2576,9 @@ package android.view.autofill {
 package android.view.contentcapture {
 
   public final class ContentCaptureManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE) public static void resetTemporaryService(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE) public static void setDefaultServiceEnabled(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CONTENT_CAPTURE) public static void setTemporaryService(int, @NonNull String, int);
     field public static final String DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY = "idle_flush_frequency";
     field public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
     field public static final String DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE = "log_history_size";
@@ -2648,10 +2667,6 @@ package android.view.inputmethod {
 
   public final class InlineSuggestionsResponse implements android.os.Parcelable {
     method @NonNull public static android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(@NonNull java.util.List<android.view.inputmethod.InlineSuggestion>);
-  }
-
-  public final class InputMethodInfo implements android.os.Parcelable {
-    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
   }
 
   public final class InputMethodManager {

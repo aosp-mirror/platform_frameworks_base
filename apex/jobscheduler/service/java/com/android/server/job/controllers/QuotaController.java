@@ -995,12 +995,18 @@ public final class QuotaController extends StateController {
         if (standbyBucket == NEVER_INDEX) {
             return 0;
         }
+
         List<TimingSession> sessions = mTimingSessions.get(userId, packageName);
+        final ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
         if (sessions == null || sessions.size() == 0) {
+            // Regular ACTIVE case. Since the bucket size equals the allowed time, the app jobs can
+            // essentially run until they reach the maximum limit.
+            if (stats.windowSizeMs == mAllowedTimePerPeriodMs) {
+                return mMaxExecutionTimeMs;
+            }
             return mAllowedTimePerPeriodMs;
         }
 
-        final ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
         final long startWindowElapsed = nowElapsed - stats.windowSizeMs;
         final long startMaxElapsed = nowElapsed - MAX_PERIOD_MS;
         final long allowedTimeRemainingMs = mAllowedTimePerPeriodMs - stats.executionTimeInWindowMs;

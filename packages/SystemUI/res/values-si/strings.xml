@@ -412,7 +412,7 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"හිරු නගින තෙක්"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>ට ක්‍රියාත්මකයි"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> තෙක්"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"දීප්තිය අඩු කරන්න"</string>
+    <string name="quick_settings_reduce_bright_colors_label" msgid="7537352080559075175">"දීප්තිය අඩු කරන්න"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC අබලයි"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC සබලයි"</string>
@@ -446,6 +446,8 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC භාවිත කිරීමට අගුලු හරින්න"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> සංවිධානයට අයිතිය"</string>
+    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"දුරකථනය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="voice_hint" msgid="7476017460191291417">"හඬ සහාය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="camera_hint" msgid="4519495795000658637">"කැමරාව සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
@@ -625,6 +627,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. කම්පනය කිරීමට සකස් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න."</string>
+    <string name="volume_ringer_change" msgid="3574969197796055532">"නාදකය වෙනස් කිරීමට තට්ටු කරන්න"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"නිහඬ කරන්න"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"නිශ්ශබ්දතාවය ඉවත් කරන්න"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"කම්පනය"</string>
@@ -1038,6 +1041,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"එක් කරන්න"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"යෝජනා කළේ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"පාලන යාවත්කාලීනයි"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"උපාංගය අගුලු දමා ඇත"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN හි අකුරු හෝ සංකේත අඩංගු වේ"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> සත්‍යාපනය කරන්න"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"වැරදි PIN එකකි"</string>

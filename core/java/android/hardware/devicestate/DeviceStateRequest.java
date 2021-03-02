@@ -116,7 +116,7 @@ public final class DeviceStateRequest {
          * requested state.
          * <p>
          * Guaranteed to be called after a call to
-         * {@link DeviceStateManager.DeviceStateListener#onDeviceStateChanged(int)} with a state
+         * {@link DeviceStateManager.DeviceStateCallback#onStateChanged(int)} with a state
          * matching the requested state.
          */
         default void onRequestActivated(@NonNull DeviceStateRequest request) {}
@@ -125,7 +125,7 @@ public final class DeviceStateRequest {
          * Called to indicate the request has been temporarily suspended.
          * <p>
          * Guaranteed to be called before a call to
-         * {@link DeviceStateManager.DeviceStateListener#onDeviceStateChanged(int)}.
+         * {@link DeviceStateManager.DeviceStateCallback#onStateChanged(int)}.
          */
         default void onRequestSuspended(@NonNull DeviceStateRequest request) {}
 
@@ -135,7 +135,7 @@ public final class DeviceStateRequest {
          * DeviceStateRequest.Callback)}.
          * <p>
          * Guaranteed to be called before a call to
-         * {@link DeviceStateManager.DeviceStateListener#onDeviceStateChanged(int)}.
+         * {@link DeviceStateManager.DeviceStateCallback#onStateChanged(int)}.
          * <p>
          * Note: A call to {@link #onRequestSuspended(DeviceStateRequest)} is not guaranteed to
          * occur before this method.

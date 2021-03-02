@@ -70,7 +70,6 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -132,7 +131,6 @@ import android.widget.TextView;
 import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
@@ -515,8 +513,6 @@ public class InputMethodService extends AbstractInputMethodService {
     private boolean mIsAutomotive;
     private Handler mHandler;
     private boolean mImeSurfaceScheduledForRemoval;
-    private Configuration mLastKnownConfig;
-    private int mHandledConfigChanges;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -592,14 +588,12 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public final void initializeInternal(@NonNull IBinder token, int displayId,
-                IInputMethodPrivilegedOperations privilegedOperations,
-                int configChanges) {
+                IInputMethodPrivilegedOperations privilegedOperations) {
             if (InputMethodPrivilegedOperationsRegistry.isRegistered(token)) {
                 Log.w(TAG, "The token has already registered, ignore this initialization.");
                 return;
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
-            mHandledConfigChanges = configChanges;
             mPrivOps.set(privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
             updateInputMethodDisplay(displayId);
@@ -827,9 +821,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
             }
             final boolean isVisible = isInputViewShown();
-            if (isVisible && getResources() != null) {
-                mLastKnownConfig = getResources().getConfiguration();
-            }
             final boolean visibilityChanged = isVisible != wasVisible;
             if (resultReceiver != null) {
                 resultReceiver.send(visibilityChanged
@@ -1437,37 +1428,10 @@ public class InputMethodService extends AbstractInputMethodService {
      * state: {@link #onStartInput} if input is active, and
      * {@link #onCreateInputView} and {@link #onStartInputView} and related
      * appropriate functions if the UI is displayed.
-     * <p>Starting with {@link Build.VERSION_CODES#S}, IMEs can opt into handling configuration
-     * changes themselves instead of being restarted with
-     * {@link android.R.styleable#InputMethod_configChanges}.
      */
     @Override public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (shouldImeRestartForConfig(newConfig)) {
-            resetStateForNewConfiguration();
-        }
-    }
-
-    /**
-     * @return {@code true} if {@link InputMethodService} needs to restart to handle
-     * .{@link #onConfigurationChanged(Configuration)}
-     */
-    @VisibleForTesting
-    boolean shouldImeRestartForConfig(@NonNull Configuration newConfig) {
-        if (mLastKnownConfig == null) {
-            return true;
-        }
-        // If the new config is the same as the config this Service is already running with,
-        // then don't bother calling resetStateForNewConfiguration.
-        int diff = mLastKnownConfig.diffPublicOnly(newConfig);
-        if (diff != 0) {
-            // remove attrs not-relevant to IME service.
-            diff &= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
-            diff &= ActivityInfo.CONFIG_KEYBOARD;
-            diff &= ActivityInfo.CONFIG_NAVIGATION;
-        }
-        int unhandledDiff = (diff & ~mHandledConfigChanges);
-        return unhandledDiff != 0;
+        resetStateForNewConfiguration();
     }
 
     private void resetStateForNewConfiguration() {
@@ -3217,17 +3181,7 @@ public class InputMethodService extends AbstractInputMethodService {
             requestHideSelf(InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
-
-    @VisibleForTesting
-    void setLastKnownConfig(@NonNull Configuration config) {
-        mLastKnownConfig = config;
-    }
-
-    @VisibleForTesting
-    void setHandledConfigChanges(int configChanges) {
-        mHandledConfigChanges = configChanges;
-    }
-
+    
     void startExtractingText(boolean inputChanged) {
         final ExtractEditText eet = mExtractEditText;
         if (eet != null && getCurrentInputStarted()

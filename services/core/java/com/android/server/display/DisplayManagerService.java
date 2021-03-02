@@ -532,7 +532,7 @@ public final class DisplayManagerService extends SystemService {
 
             DeviceStateManager deviceStateManager =
                     mContext.getSystemService(DeviceStateManager.class);
-            deviceStateManager.addDeviceStateListener(new HandlerExecutor(mHandler),
+            deviceStateManager.registerCallback(new HandlerExecutor(mHandler),
                     new DeviceStateListener());
 
             scheduleTraversalLocked(false);
@@ -2974,9 +2974,9 @@ public final class DisplayManagerService extends SystemService {
     /**
      * Listens to changes in device state and reports the state to LogicalDisplayMapper.
      */
-    class DeviceStateListener implements DeviceStateManager.DeviceStateListener {
+    class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
         @Override
-        public void onDeviceStateChanged(int deviceState) {
+        public void onStateChanged(int deviceState) {
             synchronized (mSyncRoot) {
                 mLogicalDisplayMapper.setDeviceStateLocked(deviceState);
             }
