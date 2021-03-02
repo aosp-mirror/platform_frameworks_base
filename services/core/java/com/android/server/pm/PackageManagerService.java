@@ -17985,7 +17985,9 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 makeDirRecursive(afterCodeFile.getParentFile(), 0775);
                 if (onIncremental) {
-                    mIncrementalManager.renameCodePath(beforeCodeFile, afterCodeFile);
+                    // Just link files here. The stage dir will be removed when the installation
+                    // session is completed.
+                    mIncrementalManager.linkCodePath(beforeCodeFile, afterCodeFile);
                 } else {
                     Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
                 }
@@ -17994,7 +17996,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
 
-            //TODO(b/136132412): enable selinux restorecon for incremental directories
             if (!onIncremental && !SELinux.restoreconRecursive(afterCodeFile)) {
                 Slog.w(TAG, "Failed to restorecon");
                 return false;
