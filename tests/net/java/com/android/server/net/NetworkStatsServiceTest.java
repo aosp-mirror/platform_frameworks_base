@@ -1579,7 +1579,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
         capabilities.setSSID(TEST_SSID);
-        return new NetworkStateSnapshot(prop, capabilities, WIFI_NETWORK, null, TYPE_WIFI);
+        return new NetworkStateSnapshot(WIFI_NETWORK, capabilities, prop, null, TYPE_WIFI);
     }
 
     private static NetworkStateSnapshot buildMobile3gState(String subscriberId) {
@@ -1594,7 +1594,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
         return new NetworkStateSnapshot(
-                prop, capabilities, MOBILE_NETWORK, subscriberId, TYPE_MOBILE);
+                MOBILE_NETWORK, capabilities, prop, subscriberId, TYPE_MOBILE);
     }
 
     private NetworkStats buildEmptyStats() {
@@ -1612,7 +1612,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
             capabilities.setCapability(nc, true);
         }
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        return new NetworkStateSnapshot(prop, capabilities, MOBILE_NETWORK, subscriberId,
+        return new NetworkStateSnapshot(MOBILE_NETWORK, capabilities, prop, subscriberId,
                 TYPE_MOBILE);
     }
 

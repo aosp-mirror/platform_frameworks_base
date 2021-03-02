@@ -187,8 +187,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     // TODO: Delete this function after NetworkPolicyManagerService finishes the migration.
     public static NetworkIdentity buildNetworkIdentity(Context context,
             NetworkState state, boolean defaultNetwork, @NetworkType int subType) {
-        final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.linkProperties,
-                state.networkCapabilities, state.network, state.subscriberId,
+        final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.network,
+                state.networkCapabilities, state.linkProperties, state.subscriberId,
                 state.legacyNetworkType);
         return buildNetworkIdentity(context, snapshot, defaultNetwork, subType);
     }
