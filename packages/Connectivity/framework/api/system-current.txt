@@ -308,6 +308,9 @@ package android.net {
     field public static final int ID_NONE = -1; // 0xffffffff
   }
 
+  public class NetworkReleasedException extends java.lang.Exception {
+  }
+
   public class NetworkRequest implements android.os.Parcelable {
     method @Nullable public String getRequestorPackageName();
     method public int getRequestorUid();
@@ -315,6 +318,47 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
+  }
+
+  public abstract class QosCallback {
+    ctor public QosCallback();
+    method public void onError(@NonNull android.net.QosCallbackException);
+    method public void onQosSessionAvailable(@NonNull android.net.QosSession, @NonNull android.net.QosSessionAttributes);
+    method public void onQosSessionLost(@NonNull android.net.QosSession);
+  }
+
+  public static class QosCallback.QosCallbackRegistrationException extends java.lang.RuntimeException {
+  }
+
+  public final class QosCallbackException extends java.lang.Exception {
+  }
+
+  public abstract class QosFilter {
+    method @NonNull public abstract android.net.Network getNetwork();
+    method public abstract boolean matchesLocalAddress(@NonNull java.net.InetAddress, int, int);
+  }
+
+  public final class QosSession implements android.os.Parcelable {
+    ctor public QosSession(int, int);
+    method public int describeContents();
+    method public int getSessionId();
+    method public int getSessionType();
+    method public long getUniqueId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSession> CREATOR;
+    field public static final int TYPE_EPS_BEARER = 1; // 0x1
+  }
+
+  public interface QosSessionAttributes {
+  }
+
+  public final class QosSocketInfo implements android.os.Parcelable {
+    ctor public QosSocketInfo(@NonNull android.net.Network, @NonNull java.net.Socket) throws java.io.IOException;
+    method public int describeContents();
+    method @NonNull public java.net.InetSocketAddress getLocalSocketAddress();
+    method @NonNull public android.net.Network getNetwork();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.QosSocketInfo> CREATOR;
   }
 
   public final class RouteInfo implements android.os.Parcelable {
@@ -329,6 +373,12 @@ package android.net {
 
   public abstract class SocketKeepalive implements java.lang.AutoCloseable {
     field public static final int SUCCESS = 0; // 0x0
+  }
+
+  public class SocketLocalAddressChangedException extends java.lang.Exception {
+  }
+
+  public class SocketNotBoundException extends java.lang.Exception {
   }
 
   public final class StaticIpConfiguration implements android.os.Parcelable {
