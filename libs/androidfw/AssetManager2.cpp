@@ -116,8 +116,10 @@ void AssetManager2::BuildDynamicRefTable() {
   package_groups_.clear();
   package_ids_.fill(0xff);
 
-  // A mapping from apk assets path to the runtime package id of its first loaded package.
-  std::unordered_map<std::string, uint8_t> apk_assets_package_ids;
+  // A mapping from path of apk assets that could be target packages of overlays to the runtime
+  // package id of its first loaded package. Overlays currently can only override resources in the
+  // first package in the target resource table.
+  std::unordered_map<std::string, uint8_t> target_assets_package_ids;
 
   // Overlay resources are not directly referenced by an application so their resource ids
   // can change throughout the application's lifetime. Assign overlay package ids last.
@@ -140,8 +142,8 @@ void AssetManager2::BuildDynamicRefTable() {
     if (auto loaded_idmap = apk_assets->GetLoadedIdmap(); loaded_idmap != nullptr) {
       // The target package must precede the overlay package in the apk assets paths in order
       // to take effect.
-      auto iter = apk_assets_package_ids.find(std::string(loaded_idmap->TargetApkPath()));
-      if (iter == apk_assets_package_ids.end()) {
+      auto iter = target_assets_package_ids.find(std::string(loaded_idmap->TargetApkPath()));
+      if (iter == target_assets_package_ids.end()) {
          LOG(INFO) << "failed to find target package for overlay "
                    << loaded_idmap->OverlayApkPath();
       } else {
@@ -205,7 +207,10 @@ void AssetManager2::BuildDynamicRefTable() {
             package_name, static_cast<uint8_t>(entry.package_id));
       }
 
-      apk_assets_package_ids.insert(std::make_pair(apk_assets->GetPath(), package_id));
+      if (auto apk_assets_path = apk_assets->GetPath()) {
+        // Overlay target ApkAssets must have been created using path based load apis.
+        target_assets_package_ids.insert(std::make_pair(std::string(*apk_assets_path), package_id));
+      }
     }
   }
 
@@ -227,7 +232,7 @@ void AssetManager2::DumpToLog() const {
 
   std::string list;
   for (const auto& apk_assets : apk_assets_) {
-    base::StringAppendF(&list, "%s,", apk_assets->GetPath().c_str());
+    base::StringAppendF(&list, "%s,", apk_assets->GetDebugName().c_str());
   }
   LOG(INFO) << "ApkAssets: " << list;
 
@@ -383,8 +388,8 @@ void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   }
 }
 
-std::set<std::string> AssetManager2::GetNonSystemOverlayPaths() const {
-  std::set<std::string> non_system_overlays;
+std::set<const ApkAssets*> AssetManager2::GetNonSystemOverlays() const {
+  std::set<const ApkAssets*> non_system_overlays;
   for (const PackageGroup& package_group : package_groups_) {
     bool found_system_package = false;
     for (const ConfiguredPackage& package : package_group.packages_) {
@@ -396,7 +401,7 @@ std::set<std::string> AssetManager2::GetNonSystemOverlayPaths() const {
 
     if (!found_system_package) {
       for (const ConfiguredOverlay& overlay : package_group.overlays_) {
-        non_system_overlays.insert(apk_assets_[overlay.cookie]->GetPath());
+        non_system_overlays.insert(apk_assets_[overlay.cookie]);
       }
     }
   }
@@ -408,7 +413,7 @@ base::expected<std::set<ResTable_config>, IOError> AssetManager2::GetResourceCon
     bool exclude_system, bool exclude_mipmap) const {
   ATRACE_NAME("AssetManager::GetResourceConfigurations");
   const auto non_system_overlays =
-      (exclude_system) ? GetNonSystemOverlayPaths() : std::set<std::string>();
+      (exclude_system) ? GetNonSystemOverlays() : std::set<const ApkAssets*>();
 
   std::set<ResTable_config> configurations;
   for (const PackageGroup& package_group : package_groups_) {
@@ -419,8 +424,8 @@ base::expected<std::set<ResTable_config>, IOError> AssetManager2::GetResourceCon
       }
 
       auto apk_assets = apk_assets_[package_group.cookies_[i]];
-      if (exclude_system && apk_assets->IsOverlay()
-          && non_system_overlays.find(apk_assets->GetPath()) == non_system_overlays.end()) {
+      if (exclude_system && apk_assets->IsOverlay() &&
+          non_system_overlays.find(apk_assets) == non_system_overlays.end()) {
         // Exclude overlays that target system resources.
         continue;
       }
@@ -439,7 +444,7 @@ std::set<std::string> AssetManager2::GetResourceLocales(bool exclude_system,
   ATRACE_NAME("AssetManager::GetResourceLocales");
   std::set<std::string> locales;
   const auto non_system_overlays =
-      (exclude_system) ? GetNonSystemOverlayPaths() : std::set<std::string>();
+      (exclude_system) ? GetNonSystemOverlays() : std::set<const ApkAssets*>();
 
   for (const PackageGroup& package_group : package_groups_) {
     for (size_t i = 0; i < package_group.packages_.size(); i++) {
@@ -449,8 +454,8 @@ std::set<std::string> AssetManager2::GetResourceLocales(bool exclude_system,
       }
 
       auto apk_assets = apk_assets_[package_group.cookies_[i]];
-      if (exclude_system && apk_assets->IsOverlay()
-          && non_system_overlays.find(apk_assets->GetPath()) == non_system_overlays.end()) {
+      if (exclude_system && apk_assets->IsOverlay() &&
+          non_system_overlays.find(apk_assets) == non_system_overlays.end()) {
         // Exclude overlays that target system resources.
         continue;
       }
@@ -491,7 +496,7 @@ std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) con
       AssetDir::FileInfo info;
       info.setFileName(String8(name.data(), name.size()));
       info.setFileType(type);
-      info.setSourceName(String8(apk_assets->GetPath().c_str()));
+      info.setSourceName(String8(apk_assets->GetDebugName().c_str()));
       files->add(info);
     };
 
@@ -846,7 +851,7 @@ std::string AssetManager2::GetLastResourceResolution() const {
     }
 
     log_stream << "\n\t" << prefix->second << ": " << *step.package_name << " ("
-               << apk_assets_[step.cookie]->GetPath() << ")";
+               << apk_assets_[step.cookie]->GetDebugName() << ")";
     if (!step.config_name.isEmpty()) {
       log_stream << " -" << step.config_name;
     }
@@ -1556,41 +1561,32 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& o) {
     std::map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
 
     // Determine which ApkAssets are loaded in both theme AssetManagers.
-    std::vector<const ApkAssets*> src_assets = o.asset_manager_->GetApkAssets();
+    const auto src_assets = o.asset_manager_->GetApkAssets();
     for (size_t i = 0; i < src_assets.size(); i++) {
       const ApkAssets* src_asset = src_assets[i];
 
-      std::vector<const ApkAssets*> dest_assets = asset_manager_->GetApkAssets();
+      const auto dest_assets = asset_manager_->GetApkAssets();
       for (size_t j = 0; j < dest_assets.size(); j++) {
         const ApkAssets* dest_asset = dest_assets[j];
-
-        // Map the runtime package of the source apk asset to the destination apk asset.
-        if (src_asset->GetPath() == dest_asset->GetPath()) {
-          const auto& src_packages = src_asset->GetLoadedArsc()->GetPackages();
-          const auto& dest_packages = dest_asset->GetLoadedArsc()->GetPackages();
-
-          SourceToDestinationRuntimePackageMap package_map;
-
-          // The source and destination package should have the same number of packages loaded in
-          // the same order.
-          const size_t N = src_packages.size();
-          CHECK(N == dest_packages.size())
-              << " LoadedArsc " << src_asset->GetPath() << " differs number of packages.";
-          for (size_t p = 0; p < N; p++) {
-            auto& src_package = src_packages[p];
-            auto& dest_package = dest_packages[p];
-            CHECK(src_package->GetPackageName() == dest_package->GetPackageName())
-                << " Package " << src_package->GetPackageName() << " differs in load order.";
-
-            int src_package_id = o.asset_manager_->GetAssignedPackageId(src_package.get());
-            int dest_package_id = asset_manager_->GetAssignedPackageId(dest_package.get());
-            package_map[src_package_id] = dest_package_id;
-          }
-
-          src_to_dest_asset_cookies.insert(std::make_pair(i, j));
-          src_asset_cookie_id_map.insert(std::make_pair(i, package_map));
-          break;
+        if (src_asset != dest_asset) {
+          // ResourcesManager caches and reuses ApkAssets when the same apk must be present in
+          // multiple AssetManagers. Two ApkAssets point to the same version of the same resources
+          // if they are the same instance.
+          continue;
         }
+
+        // Map the package ids of the asset in the source AssetManager to the package ids of the
+        // asset in th destination AssetManager.
+        SourceToDestinationRuntimePackageMap package_map;
+        for (const auto& loaded_package : src_asset->GetLoadedArsc()->GetPackages()) {
+          const int src_package_id = o.asset_manager_->GetAssignedPackageId(loaded_package.get());
+          const int dest_package_id = asset_manager_->GetAssignedPackageId(loaded_package.get());
+          package_map[src_package_id] = dest_package_id;
+        }
+
+        src_to_dest_asset_cookies.insert(std::make_pair(i, j));
+        src_asset_cookie_id_map.insert(std::make_pair(i, package_map));
+        break;
       }
     }
 
