@@ -1,10 +1,8 @@
 # Bug component: 137825
 
+include platform/frameworks/base:/core/java/android/permission/OWNERS
+
 toddke@android.com
 toddke@google.com
 patb@google.com
-svetoslavganov@android.com
-svetoslavganov@google.com
-zhanghai@google.com
-evanseverson@google.com
-ntmyren@google.com
+
