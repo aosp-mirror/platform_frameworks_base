@@ -171,6 +171,10 @@ package android.net {
     method @Nullable public byte[] getWatchlistConfigHash();
   }
 
+  public final class Proxy {
+    method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
+  }
+
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
     ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
