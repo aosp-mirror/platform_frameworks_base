@@ -65,7 +65,7 @@ class MagnificationGesturesObserver implements GesturesObserver.Listener {
          *                  the last event before timeout.
          *
          * @see MagnificationGestureMatcher#GESTURE_SWIPE
-         * @see MagnificationGestureMatcher#GESTURE_TWO_FINGER_DOWN
+         * @see MagnificationGestureMatcher#GESTURE_TWO_FINGERS_DOWN_OR_SWIPE
          */
         void onGestureCompleted(@GestureId int gestureId, long lastDownEventTime,
                 List<MotionEventInfo> delayedEventQueue, MotionEvent event);
