@@ -11919,7 +11919,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV4(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV6(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPcscfAddresses(@NonNull java.util.List<java.net.InetAddress>);
-    method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(int);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(@IntRange(from=android.telephony.data.DataCallResponse.PDU_SESSION_ID_NOT_SET, to=15) int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
