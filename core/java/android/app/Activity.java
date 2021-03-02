@@ -7119,6 +7119,9 @@ public class Activity extends ContextThemeWrapper
                 case "--contentcapture":
                     dumpContentCaptureManager(prefix, writer);
                     return;
+                case "--translation":
+                    dumpUiTranslation(prefix, writer);
+                    return;
             }
         }
         writer.print(prefix); writer.print("Local Activity ");
@@ -7159,6 +7162,7 @@ public class Activity extends ContextThemeWrapper
 
         dumpAutofillManager(prefix, writer);
         dumpContentCaptureManager(prefix, writer);
+        dumpUiTranslation(prefix, writer);
 
         ResourcesManager.getInstance().dump(prefix, writer);
     }
@@ -7180,6 +7184,14 @@ public class Activity extends ContextThemeWrapper
             cm.dump(prefix, writer);
         } else {
             writer.print(prefix); writer.println("No ContentCaptureManager");
+        }
+    }
+
+    void dumpUiTranslation(String prefix, PrintWriter writer) {
+        if (mUiTranslationController != null) {
+            mUiTranslationController.dump(prefix, writer);
+        } else {
+            writer.print(prefix); writer.println("No UiTranslationController");
         }
     }
 

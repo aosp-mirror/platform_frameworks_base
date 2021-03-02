@@ -483,6 +483,8 @@ applications that come with the platform
         <permission name="android.permission.SIGNAL_REBOOT_READINESS" />
         <!-- Permission required for CTS test - PeopleManagerTest -->
         <permission name="android.permission.READ_PEOPLE_DATA" />
+        <!-- Permission required for CTS test - UiTranslationManagerTest -->
+        <permission name="android.permission.MANAGE_UI_TRANSLATION" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
