@@ -198,7 +198,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
-import android.net.NetworkState;
+import android.net.NetworkStateSnapshot;
 import android.net.NetworkTestResultParcelable;
 import android.net.OemNetworkPreferences;
 import android.net.ProxyInfo;
@@ -5484,7 +5484,7 @@ public class ConnectivityServiceTest {
                 UnderlyingNetworkInfo[].class);
 
         verify(mStatsService, atLeastOnce()).forceUpdateIfaces(networksCaptor.capture(),
-                any(NetworkState[].class), eq(defaultIface), vpnInfosCaptor.capture());
+                any(NetworkStateSnapshot[].class), eq(defaultIface), vpnInfosCaptor.capture());
 
         assertSameElementsNoDuplicates(networksCaptor.getValue(), networks);
 
@@ -5554,9 +5554,8 @@ public class ConnectivityServiceTest {
         // Temp metered change shouldn't update ifaces
         mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED);
         waitForIdle();
-        verify(mStatsService, never())
-                .forceUpdateIfaces(eq(onlyCell), any(NetworkState[].class), eq(MOBILE_IFNAME),
-                        eq(new UnderlyingNetworkInfo[0]));
+        verify(mStatsService, never()).forceUpdateIfaces(eq(onlyCell), any(
+                NetworkStateSnapshot[].class), eq(MOBILE_IFNAME), eq(new UnderlyingNetworkInfo[0]));
         reset(mStatsService);
 
         // Roaming change should update ifaces
@@ -5638,7 +5637,7 @@ public class ConnectivityServiceTest {
         // Confirm that we never tell NetworkStatsService that cell is no longer the underlying
         // network for the VPN...
         verify(mStatsService, never()).forceUpdateIfaces(any(Network[].class),
-                any(NetworkState[].class), any() /* anyString() doesn't match null */,
+                any(NetworkStateSnapshot[].class), any() /* anyString() doesn't match null */,
                 argThat(infos -> infos[0].underlyingIfaces.size() == 1
                         && WIFI_IFNAME.equals(infos[0].underlyingIfaces.get(0))));
         verifyNoMoreInteractions(mStatsService);
@@ -5652,7 +5651,7 @@ public class ConnectivityServiceTest {
         mEthernetNetworkAgent.connect(false);
         waitForIdle();
         verify(mStatsService).forceUpdateIfaces(any(Network[].class),
-                any(NetworkState[].class), any() /* anyString() doesn't match null */,
+                any(NetworkStateSnapshot[].class), any() /* anyString() doesn't match null */,
                 argThat(vpnInfos -> vpnInfos[0].underlyingIfaces.size() == 1
                         && WIFI_IFNAME.equals(vpnInfos[0].underlyingIfaces.get(0))));
         mEthernetNetworkAgent.disconnect();
