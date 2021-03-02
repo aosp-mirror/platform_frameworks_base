@@ -538,9 +538,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
     private DisplayContent createNewDisplay(DisplayInfo info, @DisplayImePolicy int imePolicy) {
-        final DisplayContent display =
+        final DisplayContent dc =
                 new TestDisplayContent.Builder(mAtm, info).build();
-        final DisplayContent dc = display.mDisplayContent;
         // this display can show IME.
         dc.mWmService.mDisplayWindowSettings.setDisplayImePolicy(dc, imePolicy);
         return dc;
