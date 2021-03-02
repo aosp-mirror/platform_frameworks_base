@@ -7952,8 +7952,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final ArrayList<NetworkStateSnapshot> snapshots = new ArrayList<>();
             // TODO: Directly use NetworkStateSnapshot when feasible.
             for (final NetworkState state : getAllNetworkState()) {
-                final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.linkProperties,
-                        state.networkCapabilities, state.network, state.subscriberId,
+                final NetworkStateSnapshot snapshot = new NetworkStateSnapshot(state.network,
+                        state.networkCapabilities, state.linkProperties, state.subscriberId,
                         state.legacyNetworkType);
                 snapshots.add(snapshot);
             }
