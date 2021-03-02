@@ -22,6 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.om.OverlayableInfo;
 import android.content.res.loader.AssetsProvider;
 import android.content.res.loader.ResourcesProvider;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -344,7 +345,14 @@ public final class ApkAssets {
     @UnsupportedAppUsage
     public @NonNull String getAssetPath() {
         synchronized (this) {
-            return nativeGetAssetPath(mNativePtr);
+            return TextUtils.emptyIfNull(nativeGetAssetPath(mNativePtr));
+        }
+    }
+
+    /** @hide */
+    public @NonNull String getDebugName() {
+        synchronized (this) {
+            return nativeGetDebugName(mNativePtr);
         }
     }
 
@@ -422,7 +430,7 @@ public final class ApkAssets {
 
     @Override
     public String toString() {
-        return "ApkAssets{path=" + getAssetPath() + "}";
+        return "ApkAssets{path=" + getDebugName() + "}";
     }
 
     /**
@@ -450,6 +458,7 @@ public final class ApkAssets {
             @NonNull FileDescriptor fd, @NonNull String friendlyName, long offset, long length,
             @PropertyFlags int flags, @Nullable AssetsProvider asset) throws IOException;
     private static native @NonNull String nativeGetAssetPath(long ptr);
+    private static native @NonNull String nativeGetDebugName(long ptr);
     private static native long nativeGetStringBlock(long ptr);
     private static native boolean nativeIsUpToDate(long ptr);
     private static native long nativeOpenXml(long ptr, @NonNull String fileName) throws IOException;
