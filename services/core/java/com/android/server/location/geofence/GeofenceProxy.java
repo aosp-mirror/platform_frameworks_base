@@ -29,7 +29,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.server.ServiceWatcher;
+import com.android.server.servicewatcher.ServiceWatcher;
 
 import java.util.Objects;
 
