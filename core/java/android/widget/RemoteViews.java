@@ -705,6 +705,14 @@ public class RemoteViews implements Parcelable, Filter {
         public String getPackageName() {
             return mContextForResources.getPackageName();
         }
+
+        @Override
+        public boolean isRestricted() {
+            // Override isRestricted and direct to resource's implementation. The isRestricted is
+            // used for determining the risky resources loading, e.g. fonts, thus direct to context
+            // for resource.
+            return mContextForResources.isRestricted();
+        }
     }
 
     private class SetEmptyView extends Action {
