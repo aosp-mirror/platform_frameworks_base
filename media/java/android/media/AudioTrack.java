@@ -922,12 +922,21 @@ public class AudioTrack extends PlayerBase
         private final int mSyncId;
 
         /**
+         * A special content id for {@link #TunerConfiguration(int, int)}
+         * indicating audio is delivered
+         * from an {@code AudioTrack} write, not tunneled from the tuner stack.
+         */
+        public static final int CONTENT_ID_NONE = 0;
+
+        /**
          * Constructs a TunerConfiguration instance for use in {@link AudioTrack.Builder}
          *
          * @param contentId selects the audio stream to use.
          *     The contentId may be obtained from
-         *     {@link android.media.tv.tuner.filter.Filter#getId()}.
-         *     This is always a positive number.
+         *     {@link android.media.tv.tuner.filter.Filter#getId()},
+         *     such obtained id is always a positive number.
+         *     If audio is to be delivered through an {@code AudioTrack} write
+         *     then {@code CONTENT_ID_NONE} may be used.
          * @param syncId selects the clock to use for synchronization
          *     of audio with other streams such as video.
          *     The syncId may be obtained from
@@ -936,10 +945,10 @@ public class AudioTrack extends PlayerBase
          */
         @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
         public TunerConfiguration(
-                @IntRange(from = 1) int contentId, @IntRange(from = 1)int syncId) {
-            if (contentId < 1) {
+                @IntRange(from = 0) int contentId, @IntRange(from = 1)int syncId) {
+            if (contentId < 0) {
                 throw new IllegalArgumentException(
-                        "contentId " + contentId + " must be positive");
+                        "contentId " + contentId + " must be positive or CONTENT_ID_NONE");
             }
             if (syncId < 1) {
                 throw new IllegalArgumentException("syncId " + syncId + " must be positive");
