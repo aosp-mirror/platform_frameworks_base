@@ -1804,7 +1804,7 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("StartFontManagerService");
-            mSystemServiceManager.startService(FontManagerService.Lifecycle.class);
+            mSystemServiceManager.startService(new FontManagerService.Lifecycle(context, safeMode));
             t.traceEnd();
 
             t.traceBegin("StartTextServicesManager");
