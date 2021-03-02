@@ -715,6 +715,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Nullable
     private DevicePolicySafetyChecker mSafetyChecker;
 
+    @GuardedBy("getLockObject()")
+    private final ArrayList<Object> mPendingUserCreatedCallbackTokens = new ArrayList<>();
+
     public static final class Lifecycle extends SystemService {
         private BaseIDevicePolicyManager mService;
 
@@ -753,21 +756,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleStartUser(user.getUserIdentifier());
         }
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleUnlockUser(user.getUserIdentifier());
         }
 
         @Override
         public void onUserStopping(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleStopUser(user.getUserIdentifier());
         }
 
         @Override
         public void onUserUnlocked(@NonNull TargetUser user) {
+            if (user.isPreCreated()) return;
             mService.handleOnUserUnlocked(user.getUserIdentifier());
         }
     }
@@ -965,8 +972,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
 
         @Override
-        public void onUserCreated(UserInfo user) {
-            mHandler.post(() -> handleNewUserCreated(user));
+        public void onUserCreated(UserInfo user, Object token) {
+            mHandler.post(() -> handleNewUserCreated(user, token));
         }
     }
 
@@ -3151,11 +3158,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return;
         }
-        setActiveAdmin(adminReceiver, refreshing, userHandle, null);
-    }
-
-    private void setActiveAdmin(ComponentName adminReceiver, boolean refreshing, int userHandle,
-            Bundle onEnableData) {
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
         final CallerIdentity caller = getCallerIdentity();
@@ -3198,7 +3200,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
                 saveSettingsLocked(userHandle);
                 sendAdminCommandLocked(newAdmin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
-                        onEnableData, null);
+                        /* adminExtras= */ null, /* result= */ null);
             });
         }
     }
@@ -9190,13 +9192,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.println();
                 mStatLogger.dump(pw);
                 pw.println();
-
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
                 pw.println();
+
+                if (mPendingUserCreatedCallbackTokens.isEmpty()) {
+                    pw.println("no pending user created callback tokens");
+                } else {
+                    int size = mPendingUserCreatedCallbackTokens.size();
+                    pw.printf("%d pending user created callback token%s\n", size,
+                            (size == 1 ? "" : "s"));
+                }
+                pw.println();
+
                 mPolicyCache.dump(pw);
                 pw.println();
                 mStateCache.dump(pw);
+                pw.println();
             }
+            dumpResources(pw);
         }
     }
 
@@ -9208,6 +9221,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pw.printf("mIsAutomotive=%b\n", mIsAutomotive);
         pw.printf("mHasTelephonyFeature=%b\n", mHasTelephonyFeature);
         pw.printf("mSafetyChecker=%s\n", mSafetyChecker);
+        pw.decreaseIndent();
+    }
+
+    private void dumpResources(IndentingPrintWriter pw) {
+        mOverlayPackagesProvider.dump(pw);
+        pw.println();
+
+        pw.println("Other overlayable app resources");
+        pw.increaseIndent();
+        dumpResources(pw, mContext, "cross_profile_apps", R.array.cross_profile_apps);
+        dumpResources(pw, mContext, "vendor_cross_profile_apps", R.array.vendor_cross_profile_apps);
+        pw.decreaseIndent();
+        pw.println();
+    }
+
+    static void dumpResources(IndentingPrintWriter pw, Context context, String resName, int resId) {
+        String[] apps = context.getResources().getStringArray(resId);
+        if (apps == null || apps.length == 0) {
+            pw.printf("%s: empty\n", resName);
+            return;
+        }
+        pw.printf("%s: %d app%s\n", resName, apps.length, apps.length == 1 ? "" : "s");
+        pw.increaseIndent();
+        for (int i = 0; i < apps.length; i++) {
+            pw.printf("%d: %s\n", i, apps[i]);
+        }
         pw.decreaseIndent();
     }
 
@@ -9949,8 +9988,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 clearInitBundle = sendAdminCommandLocked(admin,
                         DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
                         initBundle == null ? null : new Bundle(initBundle),
-                        null /* result receiver */,
-                        true /* send in foreground */);
+                        /* result= */ null ,
+                        /* inForeground= */ true);
             }
             if (clearInitBundle) {
                 // If there's no admin or we've successfully called the admin, clear the init bundle
@@ -10023,9 +10062,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             UserHandle.myUserId(), ACTION_PROVISION_MANAGED_USER).toArray(
                             new String[0]);
                 }
+
+                Object token = new Object();
+                Slog.d(LOG_TAG, "Adding new pending token: " + token);
+                mPendingUserCreatedCallbackTokens.add(token);
                 try {
                     UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
-                            userType, userInfoFlags, disallowedPackages);
+                            userType, userInfoFlags, disallowedPackages, token);
                     if (userInfo != null) {
                         user = userInfo.getUserHandle();
                     }
@@ -10035,7 +10078,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
-        }
+        } // synchronized
+
         if (user == null) {
             if (targetSdkVersion >= Build.VERSION_CODES.P) {
                 throw new ServiceSpecificException(UserManager.USER_OPERATION_ERROR_UNKNOWN,
@@ -10057,14 +10101,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            if (!mInjector.userManagerIsHeadlessSystemUserMode()) {
-                manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
-                        /* showDisclaimer= */ true);
-            } else if (VERBOSE_LOG) {
-                Slog.v(LOG_TAG, "createAndManageUser(): skipping manageUserUnchecked() on user "
-                        + userHandle + " on headless system user as it will be called by "
-                                + "handleNewUserCreated()");
-            }
+            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
+                    /* showDisclaimer= */ true);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -10086,7 +10124,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void manageUserUnchecked(ComponentName admin, ComponentName profileOwner,
-            @UserIdInt int userId, PersistableBundle adminExtras, boolean showDisclaimer) {
+            @UserIdInt int userId, @Nullable PersistableBundle adminExtras,
+            boolean showDisclaimer) {
+        synchronized (getLockObject()) {
+            if (VERBOSE_LOG) {
+                Slog.v(LOG_TAG, "manageUserUnchecked(): admin=" + admin + ", po=" + profileOwner
+                        + ", userId=" + userId + ", hasAdminExtras=" + (adminExtras != null)
+                        + ", showDisclaimer=" + showDisclaimer);
+            }
+        }
         final String adminPkg = admin.getPackageName();
         try {
             // Install the profile owner if not present.
@@ -10116,23 +10162,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ? DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED
                     : DevicePolicyData.NEW_USER_DISCLAIMER_NOT_NEEDED;
             saveSettingsLocked(userId);
+
         }
     }
 
-    private void handleNewUserCreated(UserInfo user) {
-        if (VERBOSE_LOG) Slog.v(LOG_TAG, "handleNewUserCreated(): " + user.toFullString());
-
-        if (!mOwners.hasDeviceOwner() || !user.isFull() || user.isManagedProfile()) return;
+    private void handleNewUserCreated(UserInfo user, @Nullable Object token) {
+        if (VERBOSE_LOG) {
+            Slog.v(LOG_TAG, "handleNewUserCreated(): user=" + user.toFullString()
+                    + ", token=" + token);
+        }
 
         final int userId = user.id;
+        if (token != null) {
+            synchronized (getLockObject()) {
+                if (mPendingUserCreatedCallbackTokens.contains(token)) {
+                    // Ignore because it was triggered by createAndManageUser()
+                    Slog.d(LOG_TAG, "handleNewUserCreated(): ignoring for user " + userId
+                            + " due to token" + token);
+                    mPendingUserCreatedCallbackTokens.remove(token);
+                    return;
+                }
+            }
+        }
+
+        if (!mOwners.hasDeviceOwner() || !user.isFull() || user.isManagedProfile()) return;
 
         if (mInjector.userManagerIsHeadlessSystemUserMode()) {
             ComponentName admin = mOwners.getDeviceOwnerComponent();
             Slog.i(LOG_TAG, "Automatically setting profile owner (" + admin + ") on new user "
                     + userId);
             manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                    /* managedUser= */ userId, /* adminExtras= */ null,
-                    /* showDisclaimer= */ true);
+                    /* managedUser= */ userId, /* adminExtras= */ null, /* showDisclaimer= */ true);
         } else {
             Log.i(LOG_TAG, "User " + userId + " added on DO mode; setting ShowNewUserDisclaimer");
             setShowNewUserDisclaimer(userId, DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED);
@@ -10253,11 +10313,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final long id = mInjector.binderClearCallingIdentity();
         try {
             if (!mInjector.getActivityManagerInternal().canStartMoreUsers()) {
-                Log.w(LOG_TAG, "Cannot start more users in background");
+                Log.w(LOG_TAG, "Cannot start user " + userId + ", too many users in background");
                 return UserManager.USER_OPERATION_ERROR_MAX_RUNNING_USERS;
             }
 
             if (mInjector.getIActivityManager().startUserInBackground(userId)) {
+                Log.i(LOG_TAG, "Started used " + userId + " in background");
                 return UserManager.USER_OPERATION_SUCCESS;
             } else {
                 return UserManager.USER_OPERATION_ERROR_UNKNOWN;

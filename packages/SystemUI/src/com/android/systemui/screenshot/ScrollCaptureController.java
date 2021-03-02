@@ -18,7 +18,6 @@ package com.android.systemui.screenshot;
 
 import android.annotation.UiThread;
 import android.content.Context;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
@@ -27,11 +26,8 @@ import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
 import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
@@ -87,29 +83,6 @@ public class ScrollCaptureController {
         float maxPages = Settings.Secure.getFloat(mContext.getContentResolver(),
                 SETTING_KEY_MAX_PAGES, MAX_PAGES_DEFAULT);
         connection.start(this::startCapture, maxPages);
-    }
-
-    /**
-     * @param topCrop    [0,1) fraction of the top of the image to be cropped out.
-     * @param bottomCrop (0, 1] fraction to be cropped out, e.g. 0.7 will crop out the bottom 30%.
-     */
-    public void startExport(float topCrop, float bottomCrop, ExportCallback callback) {
-        Rect croppedPortion = new Rect(
-                0,
-                (int) (mImageTileSet.getHeight() * topCrop),
-                mImageTileSet.getWidth(),
-                (int) (mImageTileSet.getHeight() * bottomCrop));
-        ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
-                mBgExecutor, mRequestId, mImageTileSet.toBitmap(croppedPortion), mCaptureTime);
-        exportFuture.addListener(() -> {
-            try {
-                ImageExporter.Result result = exportFuture.get();
-                callback.onExportComplete(result.uri);
-            } catch (InterruptedException | ExecutionException e) {
-                Log.e(TAG, "failed to export", e);
-                callback.onError();
-            }
-        }, mUiExecutor);
     }
 
     private void onCaptureResult(CaptureResult result) {

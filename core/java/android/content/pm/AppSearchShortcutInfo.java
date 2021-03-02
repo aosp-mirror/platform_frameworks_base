@@ -28,7 +28,6 @@ import android.content.LocusId;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -53,17 +52,23 @@ public class AppSearchShortcutInfo extends GenericDocument {
     /** The name of the schema type for {@link ShortcutInfo} documents.*/
     public static final String SCHEMA_TYPE = "Shortcut";
 
-    public static final String KEY_PACKAGE_NAME = "packageName";
     public static final String KEY_ACTIVITY = "activity";
-    public static final String KEY_TITLE = "title";
-    public static final String KEY_TEXT = "text";
+    public static final String KEY_SHORT_LABEL = "shortLabel";
+    public static final String KEY_SHORT_LABEL_RES_ID = "shortLabelResId";
+    public static final String KEY_SHORT_LABEL_RES_NAME = "shortLabelResName";
+    public static final String KEY_LONG_LABEL = "longLabel";
+    public static final String KEY_LONG_LABEL_RES_ID = "longLabelResId";
+    public static final String KEY_LONG_LABEL_RES_NAME = "longLabelResName";
     public static final String KEY_DISABLED_MESSAGE = "disabledMessage";
+    public static final String KEY_DISABLED_MESSAGE_RES_ID = "disabledMessageResId";
+    public static final String KEY_DISABLED_MESSAGE_RES_NAME = "disabledMessageResName";
     public static final String KEY_CATEGORIES = "categories";
     public static final String KEY_INTENTS = "intents";
     public static final String KEY_INTENT_PERSISTABLE_EXTRAS = "intentPersistableExtras";
     public static final String KEY_PERSON = "person";
     public static final String KEY_LOCUS_ID = "locusId";
     public static final String KEY_RANK = "rank";
+    public static final String KEY_IMPLICIT_RANK = "implicitRank";
     public static final String KEY_EXTRAS = "extras";
     public static final String KEY_FLAGS = "flags";
     public static final String KEY_ICON_RES_ID = "iconResId";
@@ -73,31 +78,57 @@ public class AppSearchShortcutInfo extends GenericDocument {
     public static final String KEY_DISABLED_REASON = "disabledReason";
 
     public static final AppSearchSchema SCHEMA = new AppSearchSchema.Builder(SCHEMA_TYPE)
-            .addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_PACKAGE_NAME)
-                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED)
-                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
-                    .build()
-
-            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_ACTIVITY)
+            .addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_ACTIVITY)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS)
                     .build()
 
-            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_TITLE)
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_SHORT_LABEL)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                     .build()
 
-            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_TEXT)
+            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_SHORT_LABEL_RES_ID)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_SHORT_LABEL_RES_NAME)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_LONG_LABEL)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_LONG_LABEL_RES_ID)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_LONG_LABEL_RES_NAME)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
             ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_DISABLED_MESSAGE)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(
+                    KEY_DISABLED_MESSAGE_RES_ID)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(
+                    KEY_DISABLED_MESSAGE_RES_NAME)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE)
                     .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
@@ -132,6 +163,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
                     .build()
 
             ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_RANK)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .build()
+
+            ).addProperty(new AppSearchSchema.Int64PropertyConfig.Builder(KEY_IMPLICIT_RANK)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
                     .build()
 
@@ -183,13 +218,21 @@ public class AppSearchShortcutInfo extends GenericDocument {
         Objects.requireNonNull(shortcutInfo);
         return new Builder(shortcutInfo.getId())
                 .setActivity(shortcutInfo.getActivity())
-                .setPackageName(shortcutInfo.getPackage())
-                .setTitle(shortcutInfo.getShortLabel())
-                .setText(shortcutInfo.getLongLabel())
+                .setNamespace(shortcutInfo.getPackage())
+                .setShortLabel(shortcutInfo.getShortLabel())
+                .setShortLabelResId(shortcutInfo.getShortLabelResourceId())
+                .setShortLabelResName(shortcutInfo.getTitleResName())
+                .setLongLabel(shortcutInfo.getLongLabel())
+                .setLongLabelResId(shortcutInfo.getLongLabelResourceId())
+                .setLongLabelResName(shortcutInfo.getTextResName())
                 .setDisabledMessage(shortcutInfo.getDisabledMessage())
+                .setDisabledMessageResId(shortcutInfo.getDisabledMessageResourceId())
+                .setDisabledMessageResName(shortcutInfo.getDisabledMessageResName())
                 .setCategories(shortcutInfo.getCategories())
                 .setIntents(shortcutInfo.getIntents())
                 .setRank(shortcutInfo.getRank())
+                .setImplicitRank(shortcutInfo.getImplicitRank()
+                        | (shortcutInfo.isRankChanged() ? ShortcutInfo.RANK_CHANGED_BIT : 0))
                 .setExtras(shortcutInfo.getExtras())
                 .setCreationTimestampMillis(shortcutInfo.getLastChangedTimestamp())
                 .setFlags(shortcutInfo.getFlags())
@@ -207,17 +250,8 @@ public class AppSearchShortcutInfo extends GenericDocument {
      * @hide
      */
     @NonNull
-    public ShortcutInfo toShortcutInfo() {
-        return toShortcutInfo(UserHandle.myUserId());
-    }
-
-    /**
-     * @hide
-     * TODO: This should be @SystemApi when AppSearchShortcutInfo unhides.
-     */
-    @NonNull
-    public ShortcutInfo toShortcutInfo(@UserIdInt final int userId) {
-        final String packageName = getPropertyString(KEY_PACKAGE_NAME);
+    public ShortcutInfo toShortcutInfo(@UserIdInt int userId) {
+        final String packageName = getNamespace();
         final String activityString = getPropertyString(KEY_ACTIVITY);
         final ComponentName activity = activityString == null
                 ? null : ComponentName.unflattenFromString(activityString);
@@ -228,15 +262,24 @@ public class AppSearchShortcutInfo extends GenericDocument {
         // @hide and @UnsupportedAppUsage, we could migrate existing usage in platform with
         // LauncherApps#getShortcutIconDrawable instead.
         final Icon icon = null;
-        final String title = getPropertyString(KEY_TITLE);
-        final String text = getPropertyString(KEY_TEXT);
+        final String shortLabel = getPropertyString(KEY_SHORT_LABEL);
+        final int shortLabelResId = (int) getPropertyLong(KEY_SHORT_LABEL_RES_ID);
+        final String shortLabelResName = getPropertyString(KEY_SHORT_LABEL_RES_NAME);
+        final String longLabel = getPropertyString(KEY_LONG_LABEL);
+        final int longLabelResId = (int) getPropertyLong(KEY_LONG_LABEL_RES_ID);
+        final String longLabelResName = getPropertyString(KEY_LONG_LABEL_RES_NAME);
         final String disabledMessage = getPropertyString(KEY_DISABLED_MESSAGE);
+        final int disabledMessageResId = (int) getPropertyLong(KEY_DISABLED_MESSAGE_RES_ID);
+        final String disabledMessageResName = getPropertyString(KEY_DISABLED_MESSAGE_RES_NAME);
         final String[] categories = getPropertyStringArray(KEY_CATEGORIES);
         final Set<String> categoriesSet = categories == null
-                ? new ArraySet<>() : new ArraySet<>(Arrays.asList(categories));
+                ? null : new ArraySet<>(Arrays.asList(categories));
         final String[] intentsStrings = getPropertyStringArray(KEY_INTENTS);
         final Intent[] intents = intentsStrings == null
-                ? null : Arrays.stream(intentsStrings).map(uri -> {
+                ? new Intent[0] : Arrays.stream(intentsStrings).map(uri -> {
+                    if (TextUtils.isEmpty(uri)) {
+                        return new Intent(Intent.ACTION_VIEW);
+                    }
                     try {
                         return Intent.parseUri(uri, /* flags =*/ 0);
                     } catch (URISyntaxException e) {
@@ -251,15 +294,18 @@ public class AppSearchShortcutInfo extends GenericDocument {
         if (intents != null) {
             for (int i = 0; i < intents.length; i++) {
                 final Intent intent = intents[i];
-                if (intent != null) {
-                    intent.replaceExtras(intentExtrases[i].size() == 0 ? null : intentExtrases[i]);
+                if (intent == null || intentExtrases == null || intentExtrases.length <= i
+                        || intentExtrases[i] == null || intentExtrases[i].size() == 0) {
+                    continue;
                 }
+                intent.replaceExtras(intentExtrases[i]);
             }
         }
         final Person[] persons = parsePerson(getPropertyDocumentArray(KEY_PERSON));
         final String locusIdString = getPropertyString(KEY_LOCUS_ID);
         final LocusId locusId = locusIdString == null ? null : new LocusId(locusIdString);
         final int rank = (int) getPropertyLong(KEY_RANK);
+        final int implicitRank = (int) getPropertyLong(KEY_IMPLICIT_RANK);
         final byte[] extrasByte = getPropertyBytes(KEY_EXTRAS);
         final PersistableBundle extras = transformToPersistableBundle(extrasByte);
         final int flags = parseFlags(getPropertyLongArray(KEY_FLAGS));
@@ -268,12 +314,17 @@ public class AppSearchShortcutInfo extends GenericDocument {
         final String iconUri = getPropertyString(KEY_ICON_URI);
         final String bitmapPath = getPropertyString(KEY_BITMAP_PATH);
         final int disabledReason = (int) getPropertyLong(KEY_DISABLED_REASON);
-        return new ShortcutInfo(
-                userId, getUri(), packageName, activity, icon, title, 0, null,
-                text, 0, null, disabledMessage, 0, null,
-                categoriesSet, intents, rank, extras,
+        final ShortcutInfo si = new ShortcutInfo(
+                userId, getUri(), packageName, activity, icon, shortLabel, shortLabelResId,
+                shortLabelResName, longLabel, longLabelResId, longLabelResName, disabledMessage,
+                disabledMessageResId, disabledMessageResName, categoriesSet, intents, rank, extras,
                 getCreationTimestampMillis(), flags, iconResId, iconResName, bitmapPath, iconUri,
                 disabledReason, persons, locusId, 0);
+        si.setImplicitRank(implicitRank);
+        if ((implicitRank & ShortcutInfo.RANK_CHANGED_BIT) != 0) {
+            si.setRankChanged();
+        }
+        return si;
     }
 
     /** @hide */
@@ -310,9 +361,9 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         @NonNull
-        public Builder setTitle(@Nullable final CharSequence shortLabel) {
+        public Builder setShortLabel(@Nullable final CharSequence shortLabel) {
             if (!TextUtils.isEmpty(shortLabel)) {
-                setPropertyString(KEY_TITLE, Preconditions.checkStringNotEmpty(
+                setPropertyString(KEY_SHORT_LABEL, Preconditions.checkStringNotEmpty(
                         shortLabel, "shortLabel cannot be empty").toString());
             }
             return this;
@@ -322,13 +373,50 @@ public class AppSearchShortcutInfo extends GenericDocument {
          * @hide
          */
         @NonNull
-        public Builder setText(@Nullable final CharSequence longLabel) {
+        public Builder setShortLabelResId(@Nullable final int shortLabelResId) {
+            setPropertyLong(KEY_SHORT_LABEL_RES_ID, shortLabelResId);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Builder setShortLabelResName(@Nullable final String shortLabelResName) {
+            if (!TextUtils.isEmpty(shortLabelResName)) {
+                setPropertyString(KEY_SHORT_LABEL_RES_NAME, shortLabelResName);
+            }
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public Builder setLongLabel(@Nullable final CharSequence longLabel) {
             if (!TextUtils.isEmpty(longLabel)) {
-                setPropertyString(KEY_TEXT, Preconditions.checkStringNotEmpty(
+                setPropertyString(KEY_LONG_LABEL, Preconditions.checkStringNotEmpty(
                         longLabel, "longLabel cannot be empty").toString());
             }
             return this;
+        }
 
+        /**
+         * @hide
+         */
+        @NonNull
+        public Builder setLongLabelResId(@Nullable final int longLabelResId) {
+            setPropertyLong(KEY_LONG_LABEL_RES_ID, longLabelResId);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Builder setLongLabelResName(@Nullable final String longLabelResName) {
+            if (!TextUtils.isEmpty(longLabelResName)) {
+                setPropertyString(KEY_LONG_LABEL_RES_NAME, longLabelResName);
+            }
+            return this;
         }
 
         /**
@@ -339,6 +427,25 @@ public class AppSearchShortcutInfo extends GenericDocument {
             if (!TextUtils.isEmpty(disabledMessage)) {
                 setPropertyString(KEY_DISABLED_MESSAGE, Preconditions.checkStringNotEmpty(
                         disabledMessage, "disabledMessage cannot be empty").toString());
+            }
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public Builder setDisabledMessageResId(@Nullable final int disabledMessageResId) {
+            setPropertyLong(KEY_DISABLED_MESSAGE_RES_ID, disabledMessageResId);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Builder setDisabledMessageResName(@Nullable final String disabledMessageResName) {
+            if (!TextUtils.isEmpty(disabledMessageResName)) {
+                setPropertyString(KEY_DISABLED_MESSAGE_RES_NAME, disabledMessageResName);
             }
             return this;
         }
@@ -384,9 +491,8 @@ public class AppSearchShortcutInfo extends GenericDocument {
                 intentExtrases[i] = extras == null
                         ? new byte[0] : transformToByteArray(new PersistableBundle(extras));
             }
-
-            setPropertyString(KEY_INTENTS, Arrays.stream(intents).map(it ->
-                    it.toUri(0)).toArray(String[]::new));
+            setPropertyString(KEY_INTENTS, Arrays.stream(intents).map(it -> it.toUri(0))
+                    .toArray(String[]::new));
             setPropertyBytes(KEY_INTENT_PERSISTABLE_EXTRAS, intentExtrases);
             return this;
         }
@@ -410,10 +516,14 @@ public class AppSearchShortcutInfo extends GenericDocument {
             if (persons == null || persons.length == 0) {
                 return this;
             }
-            setPropertyDocument(KEY_PERSON,
-                    Arrays.stream(persons).map(person -> AppSearchPerson.instance(
-                            Objects.requireNonNull(person, "persons cannot contain null"))
-                    ).toArray(AppSearchPerson[]::new));
+            final GenericDocument[] documents = new GenericDocument[persons.length];
+            for (int i = 0; i < persons.length; i++) {
+                final Person person = persons[i];
+                if (person == null) continue;
+                final AppSearchPerson appSearchPerson = AppSearchPerson.instance(person);
+                documents[i] = appSearchPerson;
+            }
+            setPropertyDocument(KEY_PERSON, documents);
             return this;
         }
 
@@ -422,9 +532,17 @@ public class AppSearchShortcutInfo extends GenericDocument {
          */
         @NonNull
         public Builder setRank(final int rank) {
-            Preconditions.checkArgument((0 <= rank),
-                    "Rank cannot be negative or bigger than MAX_RANK");
+            Preconditions.checkArgument((0 <= rank), "Rank cannot be negative");
             setPropertyLong(KEY_RANK, rank);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public Builder setImplicitRank(final int rank) {
+            setPropertyLong(KEY_IMPLICIT_RANK, rank);
             return this;
         }
 
@@ -444,7 +562,7 @@ public class AppSearchShortcutInfo extends GenericDocument {
          */
         public Builder setPackageName(@Nullable final String packageName) {
             if (!TextUtils.isEmpty(packageName)) {
-                setPropertyString(KEY_PACKAGE_NAME, packageName);
+                setNamespace(packageName);
             }
             return this;
         }
@@ -579,7 +697,14 @@ public class AppSearchShortcutInfo extends GenericDocument {
 
     @NonNull
     private static Person[] parsePerson(@Nullable final GenericDocument[] persons) {
-        return persons == null ? new Person[0] : Arrays.stream(persons).map(it ->
-                ((AppSearchPerson) it).toPerson()).toArray(Person[]::new);
+        if (persons == null) return new Person[0];
+        final Person[] ret = new Person[persons.length];
+        for (int i = 0; i < persons.length; i++) {
+            final GenericDocument document = persons[i];
+            if (document == null) continue;
+            final AppSearchPerson person = new AppSearchPerson(document);
+            ret[i] = person.toPerson();
+        }
+        return ret;
     }
 }

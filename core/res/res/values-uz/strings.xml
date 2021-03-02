@@ -606,7 +606,7 @@
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Yuz tanilmadi. Qaytadan urining."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Yuz ifodasi oldingiday. Holatingizni oʻzgartiring."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Boshingizni asta buring."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Boshingizni asta buring."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Boshingizni asta qiyalang."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Boshingizni asta buring."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Yuzingizni berkitayotgan narsalarni olib tashlang."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Ekranning yuqori qismini, shuningdek, qora panelni ham tozalang"</string>
@@ -1667,7 +1667,7 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Rangni tuzatish"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="6222956501418407642">"Yorqinlikni pasaytirish"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="8978255324027479398">"Yorqinlikni pasaytirish"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> yoqildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> faolsizlantirildi."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmatidan foydalanish uchun ikkala ovoz balandligi tugmalarini uzoq bosib turing"</string>
@@ -2219,4 +2219,6 @@
     <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Davom etish uchun &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; qurilmangiz kamerasiga kirishi kerak."</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Yoqish"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorlar maxfiyligi"</string>
+    <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Ilova belgisi"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Ilova brendining rasmi"</string>
 </resources>

@@ -1426,8 +1426,13 @@ static void android_media_AudioTrack_setLogSessionId(JNIEnv *env, jobject thiz,
         jniThrowException(env, "java/lang/IllegalStateException",
                           "Unable to retrieve AudioTrack pointer for setLogSessionId()");
     }
+    if (jlogSessionId == nullptr) {
+        ALOGV("%s: logSessionId nullptr", __func__);
+        track->setLogSessionId(nullptr);
+        return;
+    }
     ScopedUtfChars logSessionId(env, jlogSessionId);
-    ALOGV("%s: logSessionId %s", __func__, logSessionId.c_str());
+    ALOGV("%s: logSessionId '%s'", __func__, logSessionId.c_str());
     track->setLogSessionId(logSessionId.c_str());
 }
 

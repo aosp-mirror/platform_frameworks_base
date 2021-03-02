@@ -19,15 +19,18 @@ package android.service.voice;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.CallSuper;
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioFormat;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -57,14 +60,21 @@ public abstract class HotwordDetectionService extends Service {
 
     private final IHotwordDetectionService mInterface = new IHotwordDetectionService.Stub() {
         @Override
-        public void detectFromDspSource(int sessionId, IDspHotwordDetectionCallback callback)
+        public void detectFromDspSource(
+                ParcelFileDescriptor audioStream,
+                AudioFormat audioFormat,
+                long timeoutMillis,
+                IDspHotwordDetectionCallback callback)
                 throws RemoteException {
             if (DBG) {
                 Log.d(TAG, "#detectFromDspSource");
             }
             mHandler.sendMessage(obtainMessage(HotwordDetectionService::onDetectFromDspSource,
                     HotwordDetectionService.this,
-                    sessionId, new DspHotwordDetectionCallback(callback)));
+                    audioStream,
+                    audioFormat,
+                    timeoutMillis,
+                    new DspHotwordDetectionCallback(callback)));
         }
     };
 
@@ -89,15 +99,24 @@ public abstract class HotwordDetectionService extends Service {
     /**
      * Detect the audio data generated from Dsp.
      *
-     * @param sessionId The session to use when attempting to capture more audio from the DSP
-     *                  hardware.
+     * <p>Note: the clients are supposed to call {@code close} on the input stream when they are
+     * done with the operation in order to free up resources.
+     *
+     * @param audioStream Stream containing audio bytes returned from DSP
+     * @param audioFormat Format of the supplied audio
+     * @param timeoutMillis Timeout in milliseconds for the operation to invoke the callback. If
+     *                      the application fails to abide by the timeout, system will close the
+     *                      microphone and cancel the operation.
      * @param callback Use {@link HotwordDetectionService#DspHotwordDetectionCallback} to return
      * the detected result.
      *
      * @hide
      */
     @SystemApi
-    public void onDetectFromDspSource(int sessionId,
+    public void onDetectFromDspSource(
+            @NonNull ParcelFileDescriptor audioStream,
+            @NonNull AudioFormat audioFormat,
+            @DurationMillisLong long timeoutMillis,
             @NonNull DspHotwordDetectionCallback callback) {
     }
 

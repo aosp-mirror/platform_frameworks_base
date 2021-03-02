@@ -22,25 +22,49 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.media.AudioAttributes;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.infra.ServiceConnector;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class that provides the communication with the HotwordDetectionService.
  */
 final class HotwordDetectionConnection {
-    static final String TAG = "HotwordDetectionConnection";
+    private static final String TAG = "HotwordDetectionConnection";
     // TODO (b/177502877): Set the Debug flag to false before shipping.
-    static final boolean DEBUG = true;
+    private static final boolean DEBUG = true;
+
+    // Number of bytes per sample of audio (which is a short).
+    private static final int BYTES_PER_SAMPLE = 2;
+    // TODO: These constants need to be refined.
+    private static final long VALIDATION_TIMEOUT_MILLIS = 3000;
+    private static final long VOICE_INTERACTION_TIMEOUT_TO_OPEN_MIC_MILLIS = 2000;
+    private static final int MAX_STREAMING_SECONDS = 10;
+
+    private final Executor mAudioCopyExecutor = Executors.newCachedThreadPool();
+    // TODO: This may need to be a Handler(looper)
+    private final ScheduledExecutorService mScheduledExecutorService =
+            Executors.newSingleThreadScheduledExecutor();
 
     final Object mLock;
     final ComponentName mDetectionComponentName;
@@ -93,42 +117,106 @@ final class HotwordDetectionConnection {
         }
     }
 
-    private void detectFromDspSource(int sessionId, IDspHotwordDetectionCallback callback) {
+    private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
+            IHotwordRecognitionStatusCallback externalCallback) {
         if (DEBUG) {
             Slog.d(TAG, "detectFromDspSource");
         }
+
+        AudioRecord record = createAudioRecord(recognitionEvent);
+
+        Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
+
+        if (clientPipe == null) {
+            // Error.
+            // Need to propagate as unknown error or something?
+            return;
+        }
+        ParcelFileDescriptor audioSink = clientPipe.second;
+        ParcelFileDescriptor clientRead = clientPipe.first;
+
+        record.startRecording();
+
+        mAudioCopyExecutor.execute(() -> {
+            try (OutputStream fos =
+                         new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {
+                byte[] buffer = new byte[1024];
+
+                while (true) {
+                    int bytesRead = record.read(buffer, 0, 1024);
+
+                    if (bytesRead < 0) {
+                        break;
+                    }
+
+                    fos.write(buffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed supplying audio data to validator", e);
+            }
+        });
+
+        Runnable cancellingJob = () -> {
+            record.stop();
+            bestEffortCloseFileDescriptor(audioSink);
+            // TODO: consider calling externalCallback.onRejected(ERROR_TIMEOUT).
+        };
+
+        ScheduledFuture<?> cancelingFuture =
+                mScheduledExecutorService.schedule(
+                        cancellingJob, VALIDATION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+
+        // TODO: consider making this a non-anonymous class.
+        IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
+            @Override
+            public void onDetected() throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onDetected");
+                }
+                bestEffortCloseFileDescriptor(audioSink);
+                cancelingFuture.cancel(true);
+
+                // Give 2 more seconds for the interactor to start consuming the mic. If it fails to
+                // do so under the given time, we'll force-close the mic to make sure resources are
+                // freed up.
+                // TODO: consider modelling these 2 seconds in the API.
+                mScheduledExecutorService.schedule(
+                        cancellingJob,
+                        VOICE_INTERACTION_TIMEOUT_TO_OPEN_MIC_MILLIS,
+                        TimeUnit.MILLISECONDS);
+
+                externalCallback.onKeyphraseDetected(recognitionEvent);
+            }
+
+            @Override
+            public void onRejected() throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onRejected");
+                }
+                cancelingFuture.cancel(true);
+                externalCallback.onRejected(
+                        AlwaysOnHotwordDetector.HOTWORD_DETECTION_FALSE_ALERT);
+            }
+        };
+
         mRemoteHotwordDetectionService.run(
-                service -> service.detectFromDspSource(sessionId, callback));
+                service -> service.detectFromDspSource(
+                        clientRead,
+                        recognitionEvent.getCaptureFormat(),
+                        VALIDATION_TIMEOUT_MILLIS,
+                        internalCallback));
+        bestEffortCloseFileDescriptor(clientRead);
     }
 
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {
         private SoundTrigger.KeyphraseRecognitionEvent mRecognitionEvent;
         private final HotwordDetectionConnection mHotwordDetectionConnection;
         private final IHotwordRecognitionStatusCallback mExternalCallback;
-        private final IDspHotwordDetectionCallback mInternalCallback;
 
         SoundTriggerCallback(IHotwordRecognitionStatusCallback callback,
                 HotwordDetectionConnection connection) {
             mHotwordDetectionConnection = connection;
             mExternalCallback = callback;
-            mInternalCallback = new IDspHotwordDetectionCallback.Stub() {
-                @Override
-                public void onDetected() throws RemoteException {
-                    if (DEBUG) {
-                        Slog.d(TAG, "onDetected");
-                    }
-                    mExternalCallback.onKeyphraseDetected(mRecognitionEvent);
-                }
-
-                @Override
-                public void onRejected() throws RemoteException {
-                    if (DEBUG) {
-                        Slog.d(TAG, "onRejected");
-                    }
-                    mExternalCallback.onRejected(
-                            AlwaysOnHotwordDetector.HOTWORD_DETECTION_FALSE_ALERT);
-                }
-            };
         }
 
         @Override
@@ -142,7 +230,7 @@ final class HotwordDetectionConnection {
             if (useHotwordDetectionService) {
                 mRecognitionEvent = recognitionEvent;
                 mHotwordDetectionConnection.detectFromDspSource(
-                        recognitionEvent.getCaptureSession(), mInternalCallback);
+                        recognitionEvent, mExternalCallback);
             } else {
                 mExternalCallback.onKeyphraseDetected(recognitionEvent);
             }
@@ -168,6 +256,48 @@ final class HotwordDetectionConnection {
         @Override
         public void onRecognitionResumed() throws RemoteException {
             mExternalCallback.onRecognitionResumed();
+        }
+    }
+
+    // TODO: figure out if we need to let the client configure some of the parameters.
+    private static AudioRecord createAudioRecord(
+            @NonNull SoundTrigger.KeyphraseRecognitionEvent recognitionEvent) {
+        int sampleRate = recognitionEvent.getCaptureFormat().getSampleRate();
+        return new AudioRecord(
+                new AudioAttributes.Builder()
+                        .setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD).build(),
+                recognitionEvent.getCaptureFormat(),
+                getBufferSizeInBytes(sampleRate, MAX_STREAMING_SECONDS),
+                recognitionEvent.getCaptureSession());
+    }
+
+    /**
+     * Returns the number of bytes required to store {@code bufferLengthSeconds} of audio sampled at
+     * {@code sampleRate} Hz, using the format returned by DSP audio capture.
+     */
+    private static int getBufferSizeInBytes(int sampleRate, int bufferLengthSeconds) {
+        return BYTES_PER_SAMPLE * sampleRate * bufferLengthSeconds;
+    }
+
+    private static Pair<ParcelFileDescriptor, ParcelFileDescriptor> createPipe() {
+        ParcelFileDescriptor[] fileDescriptors;
+        try {
+            fileDescriptors = ParcelFileDescriptor.createPipe();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to create audio stream pipe", e);
+            return null;
+        }
+
+        return Pair.create(fileDescriptors[0], fileDescriptors[1]);
+    }
+
+    private static void bestEffortCloseFileDescriptor(ParcelFileDescriptor fd) {
+        try {
+            fd.close();
+        } catch (IOException e) {
+            if (DEBUG) {
+                Slog.w(TAG, "Failed closing file descriptor", e);
+            }
         }
     }
 

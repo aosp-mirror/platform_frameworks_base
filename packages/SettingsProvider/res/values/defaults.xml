@@ -214,6 +214,10 @@
     <!-- Default for Settings.System.VIBRATE_WHEN_RINGING -->
     <bool name="def_vibrate_when_ringing">false</bool>
 
+    <!-- Default for Settings.Global.CELL_ON; see PhoneConstants.CELL_ON_FLAG.
+        0: cellular off; 1: cellular on. -->
+    <integer name="def_cell_on">1</integer>
+
     <!-- Default for Settings.Global.APPLY_RAMPING_RINGER -->
     <bool name="def_apply_ramping_ringer">false</bool>
 

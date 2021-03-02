@@ -28,6 +28,8 @@ import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import com.android.internal.os.AppFuseMount;
+import android.app.PendingIntent;
+
 
 /**
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
@@ -196,4 +198,7 @@ interface IStorageManager {
     void clearUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 88;
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
+    PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;
+    void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 92;
+    void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 93;
 }

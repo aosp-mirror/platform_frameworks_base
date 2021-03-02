@@ -43,6 +43,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeystoreResponse;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.system.keystore2.Domain;
 import android.util.Log;
 
 import com.android.internal.org.bouncycastle.asn1.ASN1InputStream;
@@ -466,6 +467,9 @@ public class KeyStore {
 
     public boolean clearUid(int uid) {
         try {
+            if (android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) {
+                return AndroidKeyStoreMaintenance.clearNamespace(Domain.APP, uid) == 0;
+            }
             return mBinder.clear_uid(uid) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);

@@ -91,7 +91,8 @@ public class NetworkUtils {
      * this socket will go directly to the underlying network, so its traffic will not be
      * forwarded through the VPN.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553,
+            publicAlternatives = "Use {@link android.net.VpnService#protect} instead.")
     public static native boolean protectFromVpn(FileDescriptor fd);
 
     /**
