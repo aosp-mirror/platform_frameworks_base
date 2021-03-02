@@ -280,7 +280,7 @@ class SizeCompatUILayout {
                 : stableBounds.right - taskBounds.left - mButtonSize;
         final int positionY = stableBounds.bottom - taskBounds.top - mButtonSize;
 
-        mSyncQueue.runInSync(t -> t.setPosition(leash, positionX, positionY));
+        updateSurfacePosition(leash, positionX, positionY);
     }
 
     void updateHintSurfacePosition() {
@@ -303,7 +303,16 @@ class SizeCompatUILayout {
         final int positionY =
                 stableBounds.bottom - taskBounds.top - mPopupOffsetY - mHint.getMeasuredHeight();
 
-        mSyncQueue.runInSync(t -> t.setPosition(leash, positionX, positionY));
+        updateSurfacePosition(leash, positionX, positionY);
+    }
+
+    private void updateSurfacePosition(SurfaceControl leash, int positionX, int positionY) {
+        mSyncQueue.runInSync(t -> {
+            t.setPosition(leash, positionX, positionY);
+            // The size compat UI should be the topmost child of the Task in case there can be more
+            // than one children.
+            t.setLayer(leash, Integer.MAX_VALUE);
+        });
     }
 
     int getDisplayId() {
