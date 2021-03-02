@@ -23,7 +23,6 @@ import android.net.ITetheringStatsProvider;
 import android.net.Network;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
-import android.net.UidRange;
 
 /**
  * @hide
