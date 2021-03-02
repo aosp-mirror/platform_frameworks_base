@@ -155,22 +155,21 @@ public final class IncrementalManager {
     }
 
     /**
-     * Set up an app's code path. The expected outcome of this method is:
+     * Link an app's files from the stage dir to the final installation location.
+     * The expected outcome of this method is:
      * 1) The actual apk directory under /data/incremental is bind-mounted to the parent directory
      * of {@code afterCodeFile}.
      * 2) All the files under {@code beforeCodeFile} will show up under {@code afterCodeFile}.
      *
      * @param beforeCodeFile Path that is currently bind-mounted and have APKs under it.
-     *                       Should no longer have any APKs after this method is called.
      *                       Example: /data/app/vmdl*tmp
      * @param afterCodeFile Path that should will have APKs after this method is called. Its parent
      *                      directory should be bind-mounted to a directory under /data/incremental.
      *                      Example: /data/app/~~[randomStringA]/[packageName]-[randomStringB]
      * @throws IllegalArgumentException
      * @throws IOException
-     * TODO(b/147371381): add unit tests
      */
-    public void renameCodePath(File beforeCodeFile, File afterCodeFile)
+    public void linkCodePath(File beforeCodeFile, File afterCodeFile)
             throws IllegalArgumentException, IOException {
         final File beforeCodeAbsolute = beforeCodeFile.getAbsoluteFile();
         final IncrementalStorage apkStorage = openStorage(beforeCodeAbsolute.toString());
@@ -188,7 +187,6 @@ public final class IncrementalManager {
         try {
             final String afterCodePathName = afterCodeFile.getName();
             linkFiles(apkStorage, beforeCodeAbsolute, "", linkedApkStorage, afterCodePathName);
-            apkStorage.unBind(beforeCodeAbsolute.toString());
         } catch (Exception e) {
             linkedApkStorage.unBind(targetStorageDir);
             throw e;
