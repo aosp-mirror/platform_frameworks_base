@@ -1551,24 +1551,33 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return state.networkInfo;
     }
 
+    /** Returns a NetworkInfo object for a network that doesn't exist. */
+    private NetworkInfo makeFakeNetworkInfo(int networkType, int uid) {
+        final NetworkInfo info = new NetworkInfo(networkType, 0 /* subtype */,
+                getNetworkTypeName(networkType), "" /* subtypeName */);
+        info.setIsAvailable(true);
+        // For compatibility with legacy code, return BLOCKED instead of DISCONNECTED when
+        // background data is restricted.
+        final NetworkCapabilities nc = new NetworkCapabilities();  // Metered.
+        final DetailedState state = isNetworkWithCapabilitiesBlocked(nc, uid, false)
+                ? DetailedState.BLOCKED
+                : DetailedState.DISCONNECTED;
+        info.setDetailedState(getLegacyLockdownState(state),
+                "" /* reason */, null /* extraInfo */);
+        return info;
+    }
+
     private NetworkInfo getFilteredNetworkInfo(int networkType, int uid) {
         if (!mLegacyTypeTracker.isTypeSupported(networkType)) {
             return null;
         }
         final NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
-        final NetworkInfo info;
-        final NetworkCapabilities nc;
-        if (nai != null) {
-            info = new NetworkInfo(nai.networkInfo);
-            info.setType(networkType);
-            nc = nai.networkCapabilities;
-        } else {
-            info = new NetworkInfo(networkType, 0, getNetworkTypeName(networkType), "");
-            info.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
-            info.setIsAvailable(true);
-            nc = new NetworkCapabilities();
+        if (nai == null) {
+            return makeFakeNetworkInfo(networkType, uid);
         }
-        filterNetworkInfo(info, nc, uid, false);
+        final NetworkInfo info = new NetworkInfo(nai.networkInfo);
+        info.setType(networkType);
+        filterNetworkInfo(info, nai.networkCapabilities, uid, false);
         return info;
     }
 
