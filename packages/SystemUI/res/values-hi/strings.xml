@@ -93,8 +93,8 @@
     <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रीनशॉट को स्क्रोल करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
-    <string name="screenshot_top_boundary" msgid="1500569103321300856">"स्क्रीनशाॉट की ऊपर की सीमा"</string>
-    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"स्क्रीनशॉट की नीचे की सीमा"</string>
+    <string name="screenshot_top_boundary" msgid="1500569103321300856">"स्क्रीनशॉट को ऊपर से काटने की सीमा"</string>
+    <string name="screenshot_bottom_boundary" msgid="5657242629526407311">"स्क्रीनशॉट को नीचे से काटने की सीमा"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
@@ -414,7 +414,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> पर चालू हाेगी"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> तक चालू रहेगी"</string>
-    <string name="quick_settings_reduce_bright_colors_label" msgid="4782053257950003419">"स्क्रीन की चमक कम करें"</string>
+    <!-- no translation found for quick_settings_reduce_bright_colors_label (7537352080559075175) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"एनएफ़सी"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC चालू है"</string>
@@ -448,6 +449,8 @@
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए स्क्रीन को अनलॉक करें"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> के पास है"</string>
+    <!-- no translation found for do_financed_disclosure_with_name (6723004643314467864) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"फ़ोन के लिए आइकॉन से स्वाइप करें"</string>
     <string name="voice_hint" msgid="7476017460191291417">"\'आवाज़ से डिवाइस का इस्तेमाल\' आइकॉन से स्वाइप करें"</string>
     <string name="camera_hint" msgid="4519495795000658637">"कैमरे के लिए आइकॉन से स्वाइप करें"</string>
@@ -546,7 +549,7 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"आपके संगठन ने आपकी वर्क प्रोफ़ाइल में एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"इस डिवाइस पर एक प्रमाणपत्र अनुमति इंस्टॉल की है. आपके सुरक्षित नेटवर्क ट्रैफ़िक की निगरानी या उसमें बदलाव किया जा सकता है."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपके व्यवस्थापक ने नेटवर्क लॉगिंग चालू किया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है."</string>
-    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"आपके एडमिन ने नेटवर्क लॉगिंग की सुविधा चालू कर दी है, जिससे आपकी वर्क प्रोफ़ाइल पर आने वाले ट्रैफ़िक की निगरानी की जाती है. हालांकि, इससे आपकी निजी प्रोफ़ाइल की निगरानी नहीं की जाती."</string>
+    <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"आपके एडमिन ने नेटवर्क लॉगिंग की सुविधा चालू कर दी है. इससे आपकी वर्क प्रोफ़ाइल पर आने वाले ट्रैफ़िक की निगरानी की जाती है. हालांकि, इससे आपकी निजी प्रोफ़ाइल की निगरानी नहीं की जाती."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"आप <xliff:g id="VPN_APP_0">%1$s</xliff:g> और <xliff:g id="VPN_APP_1">%2$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकते हैं."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"आपकी वर्क प्रोफ़ाइल <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
@@ -627,6 +630,8 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. कंपन (वाइब्रेशन) पर सेट करने के लिए छूएं."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. म्यूट करने के लिए टैप करें."</string>
+    <!-- no translation found for volume_ringer_change (3574969197796055532) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करें"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्यूट करें"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"वाइब्रेशन की सुविधा चालू करें"</string>
@@ -1040,6 +1045,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"जोड़ें"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> से मिला सुझाव"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"कंट्रोल अपडेट किए गए"</string>
+    <string name="controls_tile_locked" msgid="731547768182831938">"डिवाइस लॉक है"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"पिन में अक्षर या चिह्न शामिल होते हैं"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> की पुष्टि करें"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"गलत पिन"</string>

@@ -64,13 +64,13 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
 
     private void printState(PrintWriter pw) {
         DeviceState committedState = mService.getCommittedState();
-        Optional<DeviceState> baseState = mService.getBaseState();
+        DeviceState baseState = mService.getBaseState();
         Optional<DeviceState> overrideState = mService.getOverrideState();
 
         pw.println("Committed state: " + committedState);
         if (overrideState.isPresent()) {
             pw.println("----------------------");
-            pw.println("Base state: " + baseState.orElse(null));
+            pw.println("Base state: " + baseState);
             pw.println("Override state: " + overrideState.get());
         }
     }

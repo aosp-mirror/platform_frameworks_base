@@ -150,7 +150,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public RecoverableKeyStoreManager getRecoverableKeyStoreManager(KeyStore keyStore) {
+        public RecoverableKeyStoreManager getRecoverableKeyStoreManager() {
             return mRecoverableKeyStoreManager;
         }
 

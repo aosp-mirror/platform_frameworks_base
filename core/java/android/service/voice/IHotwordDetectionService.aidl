@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import android.media.AudioFormat;
+import android.os.ParcelFileDescriptor;
 import android.service.voice.IDspHotwordDetectionCallback;
 
 /**
@@ -24,5 +26,9 @@ import android.service.voice.IDspHotwordDetectionCallback;
  * @hide
  */
 oneway interface IHotwordDetectionService {
-    void detectFromDspSource(int sessionId, in IDspHotwordDetectionCallback callback);
+    void detectFromDspSource(
+    in ParcelFileDescriptor audioStream,
+    in AudioFormat audioFormat,
+    long timeoutMillis,
+    in IDspHotwordDetectionCallback callback);
 }

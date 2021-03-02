@@ -585,6 +585,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      */
     public void onEnabled(@NonNull Context context, @NonNull Intent intent) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onEnabled() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -600,6 +603,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public @Nullable CharSequence onDisableRequested(@NonNull Context context,
             @NonNull Intent intent) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onDisableRequested() on user "
+                    + context.getUserId());
+        }
         return null;
     }
 
@@ -612,6 +619,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      */
     public void onDisabled(@NonNull Context context, @NonNull Intent intent) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onDisabled() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -786,6 +796,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param intent The received intent as per {@link #onReceive}.
      */
     public void onProfileProvisioningComplete(@NonNull Context context, @NonNull Intent intent) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onProfileProvisioningComplete() on user "
+                    + context.getUserId());
+        }
     }
 
     /**
@@ -961,6 +975,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public void onUserAdded(@NonNull Context context, @NonNull Intent intent,
             @NonNull UserHandle addedUser) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onUserAdded() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -974,6 +991,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public void onUserRemoved(@NonNull Context context, @NonNull Intent intent,
             @NonNull UserHandle removedUser) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onUserRemoved() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -987,6 +1007,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public void onUserStarted(@NonNull Context context, @NonNull Intent intent,
             @NonNull UserHandle startedUser) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onUserStarted() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -1000,6 +1023,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public void onUserStopped(@NonNull Context context, @NonNull Intent intent,
             @NonNull UserHandle stoppedUser) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onUserStopped() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -1013,6 +1039,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public void onUserSwitched(@NonNull Context context, @NonNull Intent intent,
             @NonNull UserHandle switchedUser) {
+        if (LOCAL_LOGV) {
+            Log.v(TAG, getClass().getName() + ".onUserSwitched() on user " + context.getUserId());
+        }
     }
 
     /**
@@ -1104,7 +1133,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         String action = intent.getAction();
         if (LOCAL_LOGV) {
-            Log.v(TAG, "onReceive(): received " + action + " on user " + context.getUserId());
+            Log.v(TAG, getClass().getName() + ".onReceive(): received " + action + " on user "
+                    + context.getUserId());
         }
 
         if (ACTION_PASSWORD_CHANGED.equals(action)) {

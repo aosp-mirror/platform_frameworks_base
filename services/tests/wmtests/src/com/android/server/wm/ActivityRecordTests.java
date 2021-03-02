@@ -1965,17 +1965,17 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSizeCompatFreeform = false;
+        mAtm.mSupportsNonResizableMultiWindow = false;
         assertFalse(activity.supportsFreeform());
 
         // Force resizable
         mAtm.mForceResizableActivities = true;
-        mAtm.mSizeCompatFreeform = false;
+        mAtm.mSupportsNonResizableMultiWindow = false;
         assertTrue(activity.supportsFreeform());
 
         // Allow non-resizable
         mAtm.mForceResizableActivities = false;
-        mAtm.mSizeCompatFreeform = true;
+        mAtm.mSupportsNonResizableMultiWindow = true;
         assertTrue(activity.supportsFreeform());
     }
 

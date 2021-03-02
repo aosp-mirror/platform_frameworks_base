@@ -479,8 +479,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             return KeyStore.getInstance();
         }
 
-        public RecoverableKeyStoreManager getRecoverableKeyStoreManager(KeyStore keyStore) {
-            return RecoverableKeyStoreManager.getInstance(mContext, keyStore);
+        public RecoverableKeyStoreManager getRecoverableKeyStoreManager() {
+            return RecoverableKeyStoreManager.getInstance(mContext);
         }
 
         public IStorageManager getStorageManager() {
@@ -561,7 +561,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mInjector = injector;
         mContext = injector.getContext();
         mKeyStore = injector.getKeyStore();
-        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager(mKeyStore);
+        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager();
         mHandler = injector.getHandler(injector.getServiceThread());
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();

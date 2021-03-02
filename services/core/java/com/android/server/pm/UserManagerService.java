@@ -1526,11 +1526,18 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isUserForeground() {
-        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
+    public boolean isUserForeground(@UserIdInt int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to check if another user (" + userId
+                    + ") is running in the foreground");
+        }
+
         int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
         // TODO(b/179163496): should return true for profile users of the current user as well
-        return currentUser == callingUserId;
+        return currentUser == userId;
     }
 
     @Override
@@ -3316,7 +3323,7 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageOrCreateUsersPermission(flags);
         try {
             return createUserInternalUnchecked(name, userType, flags, userId,
-                    /* preCreate= */ false, disallowedPackages);
+                    /* preCreate= */ false, disallowedPackages, /* token= */ null);
         } catch (UserManager.CheckedUserOperationException e) {
             throw e.toServiceSpecificException();
         }
@@ -3349,7 +3356,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             return createUserInternalUnchecked(/* name= */ null, userType, flags,
                     /* parentId= */ UserHandle.USER_NULL, /* preCreate= */ true,
-                    /* disallowedPackages= */ null);
+                    /* disallowedPackages= */ null, /* token= */ null);
         } catch (UserManager.CheckedUserOperationException e) {
             throw e.toServiceSpecificException();
         }
@@ -3365,12 +3372,13 @@ public class UserManagerService extends IUserManager.Stub {
         enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
                 "Cannot add user");
         return createUserInternalUnchecked(name, userType, flags, parentId,
-                /* preCreate= */ false, disallowedPackages);
+                /* preCreate= */ false, disallowedPackages, /* token= */ null);
     }
 
     private UserInfo createUserInternalUnchecked(@Nullable String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
-            boolean preCreate, @Nullable String[] disallowedPackages)
+            boolean preCreate, @Nullable String[] disallowedPackages,
+            @Nullable Object token)
             throws UserManager.CheckedUserOperationException {
         final int nextProbableUserId = getNextAvailableId();
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
@@ -3379,7 +3387,7 @@ public class UserManagerService extends IUserManager.Stub {
         UserInfo newUser = null;
         try {
             newUser = createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
-                        preCreate, disallowedPackages, t);
+                        preCreate, disallowedPackages, t, token);
             return newUser;
         } finally {
             logUserCreateJourneyFinish(sessionId, nextProbableUserId, newUser != null);
@@ -3390,7 +3398,8 @@ public class UserManagerService extends IUserManager.Stub {
     private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
             boolean preCreate, @Nullable String[] disallowedPackages,
-            @NonNull TimingsTraceAndSlog t) throws UserManager.CheckedUserOperationException {
+            @NonNull TimingsTraceAndSlog t, @Nullable Object token)
+                    throws UserManager.CheckedUserOperationException {
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         if (userTypeDetails == null) {
             Slog.e(LOG_TAG, "Cannot create user of invalid user type: " + userType);
@@ -3416,7 +3425,8 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Try to use a pre-created user (if available).
         if (!preCreate && parentId < 0 && isUserTypeEligibleForPreCreation(userTypeDetails)) {
-            final UserInfo preCreatedUser = convertPreCreatedUserIfPossible(userType, flags, name);
+            final UserInfo preCreatedUser = convertPreCreatedUserIfPossible(userType, flags, name,
+                    token);
             if (preCreatedUser != null) {
                 return preCreatedUser;
             }
@@ -3595,7 +3605,7 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.w(LOG_TAG, "could not start pre-created user " + userId, e);
                 }
             } else {
-                dispatchUserAdded(userInfo);
+                dispatchUserAdded(userInfo, token);
             }
 
         } finally {
@@ -3695,7 +3705,7 @@ public class UserManagerService extends IUserManager.Stub {
      * @return the converted user, or {@code null} if no pre-created user could be converted.
      */
     private @Nullable UserInfo convertPreCreatedUserIfPossible(String userType,
-            @UserInfoFlag int flags, String name) {
+            @UserInfoFlag int flags, String name, @Nullable Object token) {
         final UserData preCreatedUserData;
         synchronized (mUsersLock) {
             preCreatedUserData = getPreCreatedUserLU(userType);
@@ -3733,7 +3743,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         updateUserIds();
         mPm.onNewUserCreated(preCreatedUser.id, /* convertedFromPreCreated= */ true);
-        dispatchUserAdded(preCreatedUser);
+        dispatchUserAdded(preCreatedUser, token);
         return preCreatedUser;
     }
 
@@ -3765,11 +3775,11 @@ public class UserManagerService extends IUserManager.Stub {
         return (now > EPOCH_PLUS_30_YEARS) ? now : 0;
     }
 
-    private void dispatchUserAdded(@NonNull UserInfo userInfo) {
+    private void dispatchUserAdded(@NonNull UserInfo userInfo, @Nullable Object token) {
         // Notify internal listeners first...
         synchronized (mUserLifecycleListeners) {
             for (int i = 0; i < mUserLifecycleListeners.size(); i++) {
-                mUserLifecycleListeners.get(i).onUserCreated(userInfo);
+                mUserLifecycleListeners.get(i).onUserCreated(userInfo, token);
             }
         }
 
@@ -5374,10 +5384,10 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public UserInfo createUserEvenWhenDisallowed(String name, @NonNull String userType,
-                @UserInfoFlag int flags, String[] disallowedPackages)
+                @UserInfoFlag int flags, String[] disallowedPackages, @Nullable Object token)
                 throws UserManager.CheckedUserOperationException {
             return createUserInternalUnchecked(name, userType, flags,
-                    UserHandle.USER_NULL, /* preCreated= */ false, disallowedPackages);
+                    UserHandle.USER_NULL, /* preCreated= */ false, disallowedPackages, token);
         }
 
         @Override

@@ -74,7 +74,7 @@ class DisplayFoldController {
         mHandler = handler;
 
         DeviceStateManager deviceStateManager = context.getSystemService(DeviceStateManager.class);
-        deviceStateManager.addDeviceStateListener(new HandlerExecutor(handler),
+        deviceStateManager.registerCallback(new HandlerExecutor(handler),
                 new DeviceStateListener(context));
     }
 
@@ -208,7 +208,7 @@ class DisplayFoldController {
      * matches the value in the {@link com.android.internal.R.integer.config_foldedDeviceState}
      * resource.
      */
-    private class DeviceStateListener implements DeviceStateManager.DeviceStateListener {
+    private class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
         private final int[] mFoldedDeviceStates;
 
         DeviceStateListener(Context context) {
@@ -217,7 +217,7 @@ class DisplayFoldController {
         }
 
         @Override
-        public void onDeviceStateChanged(int deviceState) {
+        public void onStateChanged(int deviceState) {
             boolean folded = false;
             for (int i = 0; i < mFoldedDeviceStates.length; i++) {
                 if (deviceState == mFoldedDeviceStates[i]) {

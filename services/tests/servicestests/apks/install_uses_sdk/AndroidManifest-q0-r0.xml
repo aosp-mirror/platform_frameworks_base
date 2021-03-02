@@ -17,8 +17,9 @@
         package="com.android.frameworks.servicestests.install_uses_sdk">
 
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="29">
-        <!-- This is invalid, because there is no minimum extension version specified -->
-        <extension-sdk android:sdkVersion="10000" />
+        <!-- This fails because 29 doesn't have an extension sdk -->
+        <extension-sdk android:sdkVersion="29" android:minExtensionVersion="0" />
+        <extension-sdk android:sdkVersion="30" android:minExtensionVersion="0" />
     </uses-sdk>
 
     <application>

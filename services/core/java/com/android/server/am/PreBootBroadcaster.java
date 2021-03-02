@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.PowerWhitelistManager.REASON_PRE_BOOT_COMPLETED;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -117,9 +119,9 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             duration = amInternal.getBootTimeTempAllowListDuration();
         }
         final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
-        bOptions.setTemporaryAppWhitelistDuration(
-                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                duration);
+        bOptions.setTemporaryAppAllowlist(duration,
+                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                REASON_PRE_BOOT_COMPLETED, "");
         synchronized (mService) {
             mService.broadcastIntentLocked(null, null, null, mIntent, null, this, 0, null, null,
                     null, AppOpsManager.OP_NONE, bOptions.toBundle(), true,
