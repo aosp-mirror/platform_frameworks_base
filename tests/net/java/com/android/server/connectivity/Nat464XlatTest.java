@@ -36,7 +36,6 @@ import android.net.LinkProperties;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkInfo;
 import android.os.Handler;
-import android.os.INetworkManagementService;
 import android.os.test.TestLooper;
 
 import androidx.test.filters.SmallTest;
@@ -67,7 +66,6 @@ public class Nat464XlatTest {
     @Mock ConnectivityService mConnectivity;
     @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
-    @Mock INetworkManagementService mNms;
     @Mock NetworkAgentInfo mNai;
 
     TestLooper mLooper;
@@ -75,7 +73,7 @@ public class Nat464XlatTest {
     NetworkAgentConfig mAgentConfig = new NetworkAgentConfig();
 
     Nat464Xlat makeNat464Xlat() {
-        return new Nat464Xlat(mNai, mNetd, mDnsResolver, mNms) {
+        return new Nat464Xlat(mNai, mNetd, mDnsResolver) {
             @Override protected int getNetId() {
                 return NETID;
             }
@@ -206,7 +204,6 @@ public class Nat464XlatTest {
         // Start clat.
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // Stacked interface up notification arrives.
@@ -225,7 +222,6 @@ public class Nat464XlatTest {
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
-        verify(mNms).unregisterObserver(eq(nat));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
@@ -235,7 +231,7 @@ public class Nat464XlatTest {
         nat.interfaceRemoved(STACKED_IFACE);
         mLooper.dispatchNext();
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     @Test
@@ -346,7 +342,6 @@ public class Nat464XlatTest {
 
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // Stacked interface up notification arrives.
@@ -365,7 +360,6 @@ public class Nat464XlatTest {
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
@@ -374,7 +368,7 @@ public class Nat464XlatTest {
         // ConnectivityService stops clat: no-op.
         nat.stop();
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     private void checkStopBeforeClatdStarts(boolean dueToDisconnect) throws Exception {
@@ -386,7 +380,6 @@ public class Nat464XlatTest {
 
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // ConnectivityService immediately stops clat (Network disconnects, IPv4 addr appears, ...)
@@ -394,7 +387,6 @@ public class Nat464XlatTest {
         nat.stop();
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
@@ -408,7 +400,7 @@ public class Nat464XlatTest {
 
         assertIdle(nat);
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     @Test
@@ -430,7 +422,6 @@ public class Nat464XlatTest {
 
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // ConnectivityService immediately stops clat (Network disconnects, IPv4 addr appears, ...)
@@ -438,11 +429,10 @@ public class Nat464XlatTest {
         nat.stop();
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
-        verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+        verifyNoMoreInteractions(mNetd, mConnectivity);
     }
 
     @Test
