@@ -276,7 +276,7 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
     private String buildHostsString(@NonNull AndroidPackage pkg) {
         // The collector itself handles the v1 vs v2 behavior, which is based on targetSdkVersion,
         // not the version of the verification agent on device.
-        ArraySet<String> domains = mCollector.collectAutoVerifyDomains(pkg);
+        ArraySet<String> domains = mCollector.collectValidAutoVerifyDomains(pkg);
 
         // v1 doesn't handle wildcard domains, so transform them here to the root
         StringBuilder builder = new StringBuilder();
