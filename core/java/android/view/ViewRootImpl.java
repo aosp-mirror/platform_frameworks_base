@@ -8601,7 +8601,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             final long gpuCompletedTime = data[FrameMetrics.Index.GPU_COMPLETED];
-            mReceiver.reportLatencyInfo(inputEventId, gpuCompletedTime, presentTime);
+            mReceiver.reportTimeline(inputEventId, gpuCompletedTime, presentTime);
         }
     }
     HardwareRendererObserver mHardwareRendererObserver;
