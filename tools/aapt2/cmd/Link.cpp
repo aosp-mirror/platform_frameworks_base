@@ -2263,6 +2263,16 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
+  if (shared_lib_ && options_.private_symbols) {
+    // If a shared library styleable in a public R.java uses a private attribute, attempting to
+    // reference the private attribute within the styleable array will cause a link error because
+    // the private attribute will not be emitted in the public R.java.
+    context.GetDiagnostics()->Error(DiagMessage()
+                                    << "--shared-lib cannot currently be used in combination with"
+                                    << " --private-symbols");
+    return 1;
+  }
+
   if (options_.merge_only && !static_lib_) {
     context.GetDiagnostics()->Error(
         DiagMessage() << "the --merge-only flag can be only used when building a static library");

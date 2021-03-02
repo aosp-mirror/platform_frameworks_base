@@ -370,11 +370,11 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = res_id;
-    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package);
   }
 
   if (s) {
     s->is_public = (type_spec_flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_dynamic = IsPackageDynamic(ResourceId(res_id).package_id(), real_name.package);
     return s;
   }
   return {};
@@ -417,11 +417,11 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
     s->id = id;
-    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package);
   }
 
   if (s) {
     s->is_public = (*flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_dynamic = IsPackageDynamic(ResourceId(id).package_id(), name.package);
     return s;
   }
   return {};
