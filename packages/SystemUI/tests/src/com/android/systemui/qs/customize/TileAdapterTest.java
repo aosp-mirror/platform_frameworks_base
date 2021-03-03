@@ -49,7 +49,7 @@ public class TileAdapterTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         TestableLooper.get(this).runWithLooper(() -> mTileAdapter =
-                new TileAdapter(mContext, mQSTileHost, new UiEventLoggerFake()));
+                new TileAdapter(mContext, mQSTileHost, new UiEventLoggerFake(), /* qsFlag */false));
     }
 
     @Test
