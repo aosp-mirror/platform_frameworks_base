@@ -8,6 +8,14 @@ package android.app {
 
 }
 
+package android.app.usage {
+
+  public class NetworkStatsManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyNetworkStatus(@NonNull java.util.List<android.net.Network>, @NonNull java.util.List<android.net.NetworkStateSnapshot>, @Nullable String, @NonNull java.util.List<android.net.UnderlyingNetworkInfo>);
+  }
+
+}
+
 package android.net {
 
   public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
